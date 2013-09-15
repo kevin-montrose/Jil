@@ -49,5 +49,23 @@ namespace Jil
                 func(x);
             }
         }
+
+        public static bool IsPrimitiveType(this Type t)
+        {
+            return
+                t == typeof(string) ||
+                t == typeof(char) ||
+                t == typeof(float) ||
+                t == typeof(double) ||
+                t == typeof(decimal) ||
+                t == typeof(byte) ||
+                t == typeof(sbyte) ||
+                t == typeof(short) ||
+                t == typeof(ushort) ||
+                t == typeof(int) ||
+                t == typeof(uint) ||
+                t == typeof(long) ||
+                t == typeof(ulong);
+        }
     }
 }

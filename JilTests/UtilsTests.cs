@@ -91,10 +91,8 @@ namespace JilTests
 
         [TestMethod]
         public void ExtractStringConstants()
-        {
-            var machine = StateMachine.FromCache(typeof(_ExtractStringConstants));
-            
-            var strs = Utils.ExtractStringConstants(machine);
+        {   
+            var strs = Utils.ExtractStringConstants(typeof(_ExtractStringConstants));
 
             Assert.IsNotNull(strs);
             Assert.AreEqual("AAABabAabquestion_idNext", strs.TotalString);

@@ -300,49 +300,46 @@ namespace Jil.Serialize
             return ret;
         }
 
-        private static IEnumerable<string> _ExtractStringConstants(State state, HashSet<long> alreadySeen = null)
+        private static IEnumerable<string> _ExtractStringConstants(Type type, HashSet<Type> alreadySeen = null)
         {
-            alreadySeen = alreadySeen ?? new HashSet<long>();
+            alreadySeen = alreadySeen ?? new HashSet<Type>();
 
-            if (alreadySeen.Contains(state.Id))
+            if (alreadySeen.Contains(type))
             {
                 yield break;
             }
 
-            alreadySeen.Add(state.Id);
-
-            var asStr = state as WriteConstantStringState;
-
-            if (asStr != null)
+            if (type.IsDictionaryType() || type.IsListType() || type.IsPrimitiveType())
             {
-                yield return asStr.String;
+                yield break;
             }
 
-            var asMulti = state as MultiStateState;
-            if (asMulti != null)
-            {
-                foreach (var inner in asMulti.InnerStates)
-                {
-                    foreach (var str in _ExtractStringConstants(inner, alreadySeen))
-                    {
-                        yield return str;
-                    }
-                }
-            }
+            alreadySeen.Add(type);
 
-            if (state.NextState != null)
+            foreach (var prop in type.GetProperties())
             {
-                foreach (var str in _ExtractStringConstants(state.NextState, alreadySeen))
+                yield return prop.Name;
+
+                foreach (var str in _ExtractStringConstants(prop.PropertyType, alreadySeen))
                 {
                     yield return str;
                 }
             }
 
+            foreach (var field in type.GetFields())
+            {
+                yield return field.Name;
+
+                foreach (var str in _ExtractStringConstants(field.FieldType, alreadySeen))
+                {
+                    yield return str;
+                }
+            }
         }
 
-        public static StringConstants ExtractStringConstants(State state)
+        public static StringConstants ExtractStringConstants(Type type)
         {
-            var strings = _ExtractStringConstants(state).ToList();
+            var strings = _ExtractStringConstants(type).ToList();
             var uniqueStrings = strings.Distinct().ToList();
 
             do
