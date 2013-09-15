@@ -12,14 +12,21 @@ namespace Jil.Serialize
 
         private Dictionary<string, int> Lookup;
 
-        public StringConstants(string totalString, Dictionary<string, int> lookup)
+        public StringConstants(List<string> allStrings)
         {
-            TotalString = totalString;
-            Lookup = lookup;
+            allStrings = allStrings.Distinct().ToList();
+
+            var uniqueStrs = allStrings.Where(s => !allStrings.Any(t => s != t && t.IndexOf(s) != -1)).ToList();
+
+            TotalString = string.Concat(uniqueStrs);
+
+            Lookup = allStrings.ToDictionary(s => s, s => TotalString.IndexOf(s));
         }
 
-        public int LookupString(string str)
+        public int? LookupString(string str)
         {
+            if (!Lookup.ContainsKey(str)) return null;
+
             return Lookup[str];
         }
     }

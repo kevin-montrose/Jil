@@ -337,29 +337,12 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringConstants ExtractStringConstants(Type type)
+        public static List<string> ExtractStringConstants(Type type)
         {
             var strings = _ExtractStringConstants(type).ToList();
             var uniqueStrings = strings.Distinct().ToList();
 
-            do
-            {
-                var overlappingSubstrings = uniqueStrings.Where(s => uniqueStrings.Any(t => t != s && t.IndexOf(s) != -1)).ToList();
-
-                if (overlappingSubstrings.Count == 0) break;
-
-                overlappingSubstrings.ForEach(s => uniqueStrings.Remove(s));
-            } while (true);
-
-            var joined = string.Concat(uniqueStrings);
-            var map = new Dictionary<string, int>();
-
-            foreach (var str in strings)
-            {
-                map[str] = joined.IndexOf(str);
-            }
-
-            return new StringConstants(joined, map);
+            return uniqueStrings;
         }
     }
 }

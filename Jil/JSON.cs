@@ -15,6 +15,8 @@ namespace Jil
             options = options ?? Options.None;
 
             if (options != Options.None) throw new NotImplementedException();
+
+            TypeCache<T>.Thunk(output, data);
         }
     }
 }
