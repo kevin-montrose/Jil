@@ -51,6 +51,7 @@
     <Compile Include="Serialize\StateMachineCache.cs" />
     <Compile Include="Serialize\States.cs" />
     <Compile Include="Serialize\StateMachine.cs" />
+    <Compile Include="Serialize\StringConstants.cs" />
     <Compile Include="Serialize\TypeCache.cs" />
   </ItemGroup>
   <ItemGroup>

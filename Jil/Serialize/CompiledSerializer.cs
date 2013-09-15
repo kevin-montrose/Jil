@@ -11,6 +11,8 @@ namespace Jil.Serialize
     {
         public static Action<object, Stream> Compile(StateMachine machine)
         {
+            var stringConstants = Utils.ExtractStringConstants(machine);
+
             throw new NotImplementedException();
         }
     }

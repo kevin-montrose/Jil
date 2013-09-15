@@ -16,7 +16,8 @@ namespace Jil.Serialize
 
             var actualMachine = StateMachine.BuildFor(typeof(T));
 
-            StateMachine.ReplaceWith(actualMachine);
+            StateMachine.TransitionTo(actualMachine);
+            StateMachine = actualMachine;
         }
     }
 }

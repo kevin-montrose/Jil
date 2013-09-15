@@ -299,5 +299,70 @@ namespace Jil.Serialize
 
             return ret;
         }
+
+        private static IEnumerable<string> _ExtractStringConstants(State state, HashSet<long> alreadySeen = null)
+        {
+            alreadySeen = alreadySeen ?? new HashSet<long>();
+
+            if (alreadySeen.Contains(state.Id))
+            {
+                yield break;
+            }
+
+            alreadySeen.Add(state.Id);
+
+            var asStr = state as WriteConstantStringState;
+
+            if (asStr != null)
+            {
+                yield return asStr.String;
+            }
+
+            var asMulti = state as MultiStateState;
+            if (asMulti != null)
+            {
+                foreach (var inner in asMulti.InnerStates)
+                {
+                    foreach (var str in _ExtractStringConstants(inner, alreadySeen))
+                    {
+                        yield return str;
+                    }
+                }
+            }
+
+            if (state.NextState != null)
+            {
+                foreach (var str in _ExtractStringConstants(state.NextState, alreadySeen))
+                {
+                    yield return str;
+                }
+            }
+
+        }
+
+        public static StringConstants ExtractStringConstants(State state)
+        {
+            var strings = _ExtractStringConstants(state).ToList();
+            var uniqueStrings = strings.Distinct().ToList();
+
+            do
+            {
+                var overlappingSubstrings = uniqueStrings.Where(s => uniqueStrings.Any(t => t != s && t.IndexOf(s) != -1)).ToList();
+
+                if (overlappingSubstrings.Count == 0) break;
+
+                overlappingSubstrings.ForEach(s => uniqueStrings.Remove(s));
+            } while (true);
+
+            var joined = string.Concat(uniqueStrings);
+            var map = new Dictionary<string, int>();
+
+            foreach (var str in strings)
+            {
+                map[str] = joined.IndexOf(str);
+            }
+
+            return new StringConstants(joined, map);
+        }
     }
 }

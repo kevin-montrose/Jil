@@ -74,5 +74,30 @@ namespace JilTests
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][0]);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
         }
+
+        class _ExtractStringConstants
+        {
+            public string A;
+            public string AA;
+            public string AAA;
+
+            public string Bab;
+            public string Aab;
+            public string _id;
+            public string question_id;
+
+            public _ExtractStringConstants Next;
+        }
+
+        [TestMethod]
+        public void ExtractStringConstants()
+        {
+            var machine = StateMachine.FromCache(typeof(_ExtractStringConstants));
+            
+            var strs = Utils.ExtractStringConstants(machine);
+
+            Assert.IsNotNull(strs);
+            Assert.AreEqual("AAABabAabquestion_idNext", strs.TotalString);
+        }
     }
 }

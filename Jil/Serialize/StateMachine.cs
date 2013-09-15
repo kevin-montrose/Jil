@@ -16,9 +16,9 @@ namespace Jil.Serialize
             TransitionTo(InitialState.Instance);
         }
 
-        public void ReplaceWith(StateMachine other)
+        public override string ToString()
         {
-            TransitionTo(other.NextState);
+            return "**MACHINE**";
         }
 
         public static StateMachine Empty()
@@ -28,18 +28,56 @@ namespace Jil.Serialize
 
         private static StateMachine BuildDictionaryFor(Type dictType)
         {
-            throw new NotImplementedException();
+            var dictI = dictType.GetDictionaryInterface();
+
+            var dictKey = dictI.GetGenericArguments()[0];
+            var dictVal = dictI.GetGenericArguments()[1];
+
+            if (dictKey != typeof(string))
+            {
+                throw new InvalidOperationException("JSON dictionaries must have strings as properties, found " + dictKey.FullName);
+            }
+
+            var ret = new StateMachine();
+            var start = StartObjectState.Instance;
+            ret.NextState.TransitionTo(start);
+
+            var delimitedPairs = DelimitedKeyValueListState.For(dictKey, dictVal);
+            start.TransitionTo(delimitedPairs);
+
+            var end = EndObjectState.Instance;
+            delimitedPairs.TransitionTo(end);
+
+            end.TransitionTo(TerminalState.Instance);
+
+            return ret;
         }
 
         private static StateMachine BuildListFor(Type listType)
         {
-            throw new NotImplementedException();
+            var listI = listType.GetListInterface();
+
+            var valType = listI.GetGenericArguments()[0];
+
+            var ret = new StateMachine();
+            var start = StartListState.Instance;
+            ret.NextState.TransitionTo(start);
+            
+            var delimitedList = DelimitedListState.For(valType);
+            start.TransitionTo(delimitedList);
+
+            var end = EndListState.Instance;
+            delimitedList.TransitionTo(end);
+
+            end.TransitionTo(TerminalState.Instance);
+
+            return ret;
         }
 
         private static StateMachine For(State singleState)
         {
             var ret = new StateMachine();
-            ret.TransitionTo(singleState);
+            ret.NextState.TransitionTo(singleState);
             singleState.TransitionTo(TerminalState.Instance);
 
             return ret;
@@ -112,7 +150,7 @@ namespace Jil.Serialize
             {
                 if (currentState != startObj)
                 {
-                    var comma = CommaObjectState.Instance;
+                    var comma = CommaDeliminatorState.Instance;
                     currentState.TransitionTo(comma);
                     currentState = comma;
                 }
@@ -203,6 +241,15 @@ namespace Jil.Serialize
             }
 
             return BuildObjectFor(type);   
+        }
+
+        public static StateMachine FromCache(Type t)
+        {
+            var smCache = typeof(StateMachineCache<>).MakeGenericType(t);
+
+            var ret = (StateMachine)smCache.GetField("StateMachine").GetValue(null);
+
+            return ret;
         }
     }
 }
