@@ -29,5 +29,25 @@ namespace JilTests
                 Assert.AreEqual("{\"Foo\":123}", res);
             }
         }
+
+        public class _Cyclical
+        {
+            public int Foo;
+
+            public _Cyclical Next;
+        }
+
+        [TestMethod]
+        public void Cyclical()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, str);
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"Next\":{\"Next\":null\"Foo\":456}\"Foo\":123}", res);
+            }
+        }
     }
 }

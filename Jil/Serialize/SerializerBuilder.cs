@@ -1,4 +1,4 @@
-﻿using Sigil.NonGeneric;
+﻿using Sigil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,13 +26,15 @@ namespace Jil.Serialize
             Module = Assembly.DefineDynamicModule("_Jil_DynamicModule");
         }
 
-        public static TypeBuilder Init(Type forType, out Emit emit)
+        public static TypeBuilder Init<T>(out Emit<Action<TextWriter, T>> emit)
         {
+            var forType = typeof(T);
+
             lock (Module)
             {
                 var ret = Module.DefineType("_Jil_" + forType.FullName, TypeAttributes.Sealed | TypeAttributes.Class);
 
-                emit = Emit.BuildStaticMethod(typeof(void), new[] { typeof(TextWriter), forType }, ret, SerializeMethod, MethodAttributes.Public);
+                emit = Emit<Action<TextWriter, T>>.BuildStaticMethod(ret, SerializeMethod, MethodAttributes.Public);
 
                 emit.DeclareLocal(typeof(TextWriter), WriterVariable);
                 emit.DeclareLocal(forType, ObjectVariable);
@@ -68,7 +70,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        private static void WriteString(Type toType, StringConstants strs, string str, Emit emit)
+        private static void WriteString<T>(Type toType, StringConstants strs, string str, Emit<Action<TextWriter, T>> emit)
         {
             var locInCache = strs.LookupString(str);
 
@@ -89,7 +91,7 @@ namespace Jil.Serialize
             emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new[] { typeof(char[]), typeof(int), typeof(int) }));
         }
 
-        private static void WriteMember(MemberInfo member, Emit emit)
+        private static void WriteMember<T>(MemberInfo member, Emit<Action<TextWriter, T>> emit)
         {
             var asField = member as FieldInfo;
             if (asField != null)
@@ -108,7 +110,7 @@ namespace Jil.Serialize
             throw new Exception("WriteMember got " + member + ", which makes no sense");
         }
 
-        private static void WriteField(FieldInfo field, Emit emit)
+        private static void WriteField<T>(FieldInfo field, Emit<Action<TextWriter, T>> emit)
         {
             emit.LoadLocal(WriterVariable);
             emit.LoadLocal(ObjectVariable);
@@ -117,7 +119,7 @@ namespace Jil.Serialize
             CallSerializer(field.FieldType, emit);
         }
 
-        private static void WriteProperty(PropertyInfo prop, Emit emit)
+        private static void WriteProperty<T>(PropertyInfo prop, Emit<Action<TextWriter, T>> emit)
         {
             emit.LoadLocal(WriterVariable);
 
@@ -135,30 +137,33 @@ namespace Jil.Serialize
             CallSerializer(prop.PropertyType, emit);
         }
 
-        private static void CallSerializer(Type memberType, Emit emit)
+        private static void CallSerializer<T>(Type memberType, Emit<Action<TextWriter, T>> emit)
         {
             // top of stack:
             // [memberType]
             // [TextWriter]
 
-            var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { memberType });
-            if (builtInMtd != null)
+            if (memberType.IsPrimitiveType())
             {
                 // For now, pass directly to TextWriter if we can
+
+                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { memberType });
 
                 emit.CallVirtual(builtInMtd);
                 return;
             }
 
-            var typeCacheType = typeof(TypeCache<>).MakeGenericType(memberType);
-            var serializerType = (Type)typeCacheType.GetField("Serializer").GetValue(null);
+            var invokeEmit = typeof(SerializerBuilder).GetMethod("InvokeCallWithEmit", BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(memberType, typeof(T));
 
-            var serializeMtd = serializerType.GetMethod(SerializeMethod);
-
-            emit.Call(serializeMtd);
+            invokeEmit.Invoke(null, new[] { emit });
         }
 
-        private static void BuildObject(Type forType, TypeBuilder intoType, Emit emit)
+        private static void InvokeCallWithEmit<MemberType, T>(Emit<Action<TextWriter, T>> emit)
+        {
+            emit.Call(TypeCache<MemberType>.SerializerEmit);
+        }
+
+        private static MethodInfo BuildObject<T>(Type forType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
@@ -230,37 +235,34 @@ namespace Jil.Serialize
 
             emit.Return();
 
-            string instrs;
-            emit.CreateMethod(out instrs);
+            return emit.CreateMethod();
         }
 
-        public static void BuildDictionary(Type dictType, TypeBuilder intoType, Emit emit)
+        public static MethodInfo BuildDictionary<T>(Type dictType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             throw new NotImplementedException();
         }
 
-        public static void BuildList(Type listType, TypeBuilder intoType, Emit emit)
+        public static MethodInfo BuildList<T>(Type listType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             throw new NotImplementedException();
         }
 
-        public static void Build(Type forType, TypeBuilder intoType, Emit emit)
+        public static MethodInfo Build<T>(Type forType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             if (forType.IsDictionaryType())
             {
-                BuildDictionary(forType, intoType, emit);
-                return;
+                return BuildDictionary(forType, intoType, emit);
             }
 
             if (forType.IsDictionaryType())
             {
-                BuildList(forType, intoType, emit);
-                return;
+                return BuildList(forType, intoType, emit);
             }
 
             if (forType.IsValueType) throw new NotImplementedException();
 
-            BuildObject(forType, intoType, emit);
+            return BuildObject(forType, intoType, emit);
         }
     }
 }
