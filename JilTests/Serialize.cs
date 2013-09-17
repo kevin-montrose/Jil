@@ -46,7 +46,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Next\":{\"Next\":null\"Foo\":456}\"Foo\":123}", res);
+                Assert.AreEqual("{\"Next\":{\"Next\":null,\"Foo\":456},\"Foo\":123}", res);
             }
         }
 
@@ -194,6 +194,64 @@ namespace JilTests
 
                     Assert.AreEqual("4.56", res);
                 }
+            }
+        }
+
+#pragma warning disable 0649
+        public class _StringsAndChars
+        {
+            public class _One
+            {
+                public string Single;
+            }
+            
+            public class _Two
+            {
+                public int _;
+                public string Trailing;
+            }
+
+            public class _Three
+            {
+                public string Leading;
+                public int _;
+            }
+
+            public _One One;
+            public _Two Two;
+            public _Three Three;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void StringsAndChars()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _StringsAndChars
+                    {
+                        One = new _StringsAndChars._One
+                        {
+                            Single = "Hello World"
+                        },
+                        Two = new _StringsAndChars._Two
+                        {
+                            _ = 123,
+                            Trailing = "Fizz Buzz"
+                        },
+                        Three = new _StringsAndChars._Three
+                        {
+                            Leading = "Foo Bar",
+                            _ = 456
+                        }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"Trailing\":\"Fizz Buzz\",\"_\":123},\"Three\":{\"Leading\":\"Foo Bar\",\"_\":456}}", res);
             }
         }
     }

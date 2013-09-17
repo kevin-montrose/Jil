@@ -74,6 +74,8 @@ namespace Jil.Serialize
         {
             var locInCache = strs.LookupString(str);
 
+            locInCache = null;
+
             if (locInCache == null)
             {
                 // If we didn't put it in the strings cache, use a string literal
@@ -235,6 +237,7 @@ namespace Jil.Serialize
                 if (firstPass)
                 {
                     keyString = "\"" + member.Name.JsonEscape() + "\":";
+                    firstPass = false;
                 }
                 else
                 {
