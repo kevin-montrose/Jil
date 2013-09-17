@@ -296,7 +296,18 @@ namespace Jil.Serialize
 
         private static MethodInfo BuildList<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
-            throw new NotImplementedException();
+            var listI = typeof(T).GetListInterface();
+
+            var valType = listI.GetGenericArguments()[0];
+
+            var serializer = typeof(ListSerializer).GetMethod("Serialize").MakeGenericMethod(valType);
+
+            emit.LoadArgument(0);
+            emit.LoadArgument(1);
+            emit.Call(serializer);
+            emit.Return();
+
+            return emit.CreateMethod();
         }
 
         private static MethodInfo WritePrimitiveType<T>(Emit<Action<TextWriter, T>> emit)
@@ -341,7 +352,7 @@ namespace Jil.Serialize
                 return BuildDictionary(intoType, emit);
             }
 
-            if (forType.IsDictionaryType())
+            if (forType.IsListType())
             {
                 return BuildList(intoType, emit);
             }

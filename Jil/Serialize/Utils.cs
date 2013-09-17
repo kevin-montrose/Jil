@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -279,7 +280,12 @@ namespace Jil.Serialize
 
             var getAddrs = emit.CreateDelegate();
 
-            var obj = Activator.CreateInstance(t);
+            var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).First();
+            var consParameters = cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray();
+
+            var obj = cons.Invoke(consParameters);
+
+            //var obj = Activator.CreateInstance(t);
 
             var addrs = getAddrs(obj);
 

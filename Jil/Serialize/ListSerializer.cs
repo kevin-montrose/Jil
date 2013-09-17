@@ -7,47 +7,44 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    public class DictionarySerializer
+    public class ListSerializer
     {
-        private static readonly string[] Spacer = new[] { "", ",\"" };
+        private static readonly string[] Spacer = new[] { "", "," };
 
-        public static void Serialize<T>(TextWriter writer, IDictionary<string, T> dict)
+        public static void Serialize<T>(TextWriter writer, IList<T> list)
         {
-            if (dict == null)
+            if (list == null)
             {
                 writer.Write("null");
                 return;
             }
 
-            var e = dict.GetEnumerator();
+            var e = list.GetEnumerator();
 
             if (e.MoveNext())
             {
-                writer.Write("{\"");
+                writer.Write("[");
             }
             else
             {
-                writer.Write("{}");
+                writer.Write("[]");
                 return;
             }
 
             int i = 0;
-            
+
             do
             {
                 writer.Write(Spacer[i]);
 
-                var kv = e.Current;
+                var val = e.Current;
 
-                writer.Write(kv.Key);
-                writer.Write("\":");
-
-                TypeCache<T>.Thunk(writer, kv.Value);
+                TypeCache<T>.Thunk(writer, val);
 
                 i = i | 1;
             } while (e.MoveNext());
 
-            writer.Write("}");
+            writer.Write("]");
         }
     }
 }

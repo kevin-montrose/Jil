@@ -141,5 +141,12 @@ namespace Jil
 
             return ret;
         }
+
+        public static object DefaultValue(this Type t)
+        {
+            if (!t.IsValueType) return null;
+
+            return Activator.CreateInstance(t);
+        }
     }
 }

@@ -263,14 +263,41 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, int>
                     {
-                        { "hello world", 123 }
+                        { "hello world", 123 },
+                        { "fizz buzz", 456 }
                     },
                     str
                 );
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"hello world\":123}", res);
+                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456}", res);
+            }
+        }
+
+        public class _List
+        {
+            public string Key;
+            public int Val;
+        }
+
+        [TestMethod]
+        public void List()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new []
+                    {
+                        new _List { Key = "whatever", Val = 123 },
+                        new _List { Key = "indeed", Val = 456 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("[{\"Key\":\"whatever\",\"Val\":123},{\"Key\":\"indeed\",\"Val\":456}]", res);
             }
         }
     }
