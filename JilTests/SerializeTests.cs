@@ -275,11 +275,13 @@ namespace JilTests
             }
         }
 
+#pragma warning disable 0649
         public class _List
         {
             public string Key;
             public int Val;
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void List()
@@ -298,6 +300,28 @@ namespace JilTests
                 var res = str.ToString();
 
                 Assert.AreEqual("[{\"Key\":\"whatever\",\"Val\":123},{\"Key\":\"indeed\",\"Val\":456}]", res);
+            }
+        }
+
+        public class _Properties
+        {
+            public int Foo { get; set; }
+            public string Bar { get; set; }
+        }
+
+        [TestMethod]
+        public void Properties()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _Properties { Foo = 123, Bar = "hello" },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"Bar\":\"hello\",\"Foo\":123}", res);
             }
         }
     }

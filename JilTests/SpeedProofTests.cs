@@ -173,7 +173,7 @@ namespace JilTests
             var rand = new Random(1160428);
 
             var toSerialize = new List<_ReorderMembers>();
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 5000; i++)
             {
                 toSerialize.Add(
                     new _ReorderMembers
