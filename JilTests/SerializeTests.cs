@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace JilTests
 {
     [TestClass]
-    public class Serialize
+    public class SerializeTests
     {
         public class _SimpleObject
         {

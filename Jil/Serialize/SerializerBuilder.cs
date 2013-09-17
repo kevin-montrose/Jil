@@ -12,10 +12,12 @@ namespace Jil.Serialize
 {
     static class SerializerBuilder
     {
-        public const string ObjectVariable = "obj";
-        public const string WriterVariable = "writer";
-        public const string StringConstantsField = "_StringsConstants";
-        public const string SerializeMethod = "Serialize";
+        public static bool ReorderMembers = true;
+
+        private const string ObjectVariable = "obj";
+        private const string WriterVariable = "writer";
+        private const string StringConstantsField = "_StringsConstants";
+        private const string SerializeMethod = "Serialize";
 
         private static AssemblyBuilder Assembly;
         private static ModuleBuilder Module;
@@ -26,13 +28,15 @@ namespace Jil.Serialize
             Module = Assembly.DefineDynamicModule("_Jil_DynamicModule");
         }
 
-        public static TypeBuilder Init<T>(out Emit<Action<TextWriter, T>> emit)
+        public static TypeBuilder Init<T>(out Emit<Action<TextWriter, T>> emit, string typeNameOverride = null)
         {
             var forType = typeof(T);
 
             lock (Module)
             {
-                var ret = Module.DefineType("_Jil_" + forType.FullName, TypeAttributes.Sealed | TypeAttributes.Class);
+                var typeName = typeNameOverride ?? "_Jil_" + forType.FullName;
+
+                var ret = Module.DefineType(typeName, TypeAttributes.Sealed | TypeAttributes.Class);
 
                 emit = Emit<Action<TextWriter, T>>.BuildStaticMethod(ret, SerializeMethod, MethodAttributes.Public, allowUnverifiableCode: true);
 
@@ -49,46 +53,11 @@ namespace Jil.Serialize
             }
         }
 
-        /// There are a ton of string constants when serializing most JSON.
-        /// So shove constants into an array we can suck data out of rather than
-        ///   having to de-string everywhere.
-        private static StringConstants AddStringsToType(TypeBuilder toType, List<string> typeStrings)
+        private static void WriteString<T>(Type toType, string str, Emit<Action<TextWriter, T>> emit)
         {
-            var jsonPropStrings = typeStrings.Select(s => ",\"" + s.JsonEscape() + "\":").ToList();
-
-            var consts = toType.DefineField(StringConstantsField, typeof(char[]), FieldAttributes.Static | FieldAttributes.Public);
-
-            var ret = new StringConstants(jsonPropStrings, consts);
-
-            var staticConst = toType.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
-            var il = staticConst.GetILGenerator();
-            il.Emit(OpCodes.Ldstr, ret.TotalString);
-            il.Emit(OpCodes.Call, typeof(string).GetMethod("ToCharArray", Type.EmptyTypes));
-            il.Emit(OpCodes.Stsfld, consts);
-            il.Emit(OpCodes.Ret);
-
-            return ret;
-        }
-
-        private static void WriteString<T>(Type toType, StringConstants strs, string str, Emit<Action<TextWriter, T>> emit)
-        {
-            var locInCache = strs.LookupString(str);
-
-            if (locInCache == null)
-            {
-                // If we didn't put it in the strings cache, use a string literal
-                emit.LoadLocal(WriterVariable);
-                emit.LoadConstant(str);
-                emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new[] { typeof(string) }));
-
-                return;
-            }
-
             emit.LoadLocal(WriterVariable);
-            emit.LoadField(strs.StoredInField);
-            emit.LoadConstant(locInCache.Value);
-            emit.LoadConstant(str.Length);
-            emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new[] { typeof(char[]), typeof(int), typeof(int) }));
+            emit.LoadConstant(str);
+            emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new[] { typeof(string) }));
         }
 
         private static void WriteMember<T>(MemberInfo member, Emit<Action<TextWriter, T>> emit)
@@ -184,46 +153,46 @@ namespace Jil.Serialize
             //   Broadly speaking, we access members in the order they are laid out in memory preferring
             //   fields over properties
             var writeOrder =
-                members.OrderBy(
-                     m =>
-                     {
-                         var asField = m as FieldInfo;
-                         if (asField != null)
+                !ReorderMembers ?
+                    members :
+                    members.OrderBy(
+                         m =>
                          {
-                             return fields[asField];
-                         }
-
-                         var asProp = m as PropertyInfo;
-                         if (asProp != null)
-                         {
-                             List<FieldInfo> usesFields;
-                             if (!props.TryGetValue(asProp, out usesFields))
+                             var asField = m as FieldInfo;
+                             if (asField != null)
                              {
-                                 return int.MaxValue;
+                                 return fields[asField];
                              }
 
-                             return usesFields.Select(f => fields[f]).Min();
-                         }
+                             var asProp = m as PropertyInfo;
+                             if (asProp != null)
+                             {
+                                 List<FieldInfo> usesFields;
+                                 if (!props.TryGetValue(asProp, out usesFields))
+                                 {
+                                     return int.MaxValue;
+                                 }
 
-                         return int.MaxValue;
-                     }
-                ).ThenBy(
-                    m => m is FieldInfo ? 0 : 1
-                ).ToList();
+                                 return usesFields.Select(f => fields[f]).Min();
+                             }
+
+                             return int.MaxValue;
+                         }
+                    ).ThenBy(
+                        m => m is FieldInfo ? 0 : 1
+                    ).ToList();
 
             var stringsNeeded = Utils.ExtractStringConstants(forType);
-
-            var strs = AddStringsToType(intoType, stringsNeeded);
 
             var notNull = emit.DefineLabel("not_null");
 
             emit.LoadLocal(ObjectVariable);
             emit.BranchIfTrue(notNull);
-            WriteString(intoType, strs, "null", emit);
+            WriteString(intoType, "null", emit);
             emit.Return();
 
             emit.MarkLabel(notNull);
-            WriteString(intoType, strs, "{", emit);
+            WriteString(intoType, "{", emit);
             
             var firstPass = true;
             var previousMemberWasStringy = false;
@@ -252,7 +221,7 @@ namespace Jil.Serialize
                     keyString = keyString + "\"";
                 }
 
-                WriteString(intoType, strs, keyString, emit);
+                WriteString(intoType, keyString, emit);
                 WriteMember(member, emit);
 
                 previousMemberWasStringy = isStringy;
@@ -260,11 +229,11 @@ namespace Jil.Serialize
 
             if (previousMemberWasStringy)
             {
-                WriteString(intoType, strs, "\"}", emit);
+                WriteString(intoType, "\"}", emit);
             }
             else
             {
-                WriteString(intoType, strs, "}", emit);
+                WriteString(intoType, "}", emit);
             }
 
             emit.Return();

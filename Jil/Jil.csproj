@@ -50,7 +50,6 @@
     <Compile Include="Serialize\DictionarySerializer.cs" />
     <Compile Include="Serialize\ListSerializer.cs" />
     <Compile Include="Serialize\SerializerBuilder.cs" />
-    <Compile Include="Serialize\StringConstants.cs" />
     <Compile Include="Serialize\TypeCache.cs" />
   </ItemGroup>
   <ItemGroup>
