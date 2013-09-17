@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,10 +10,11 @@ namespace Jil.Serialize
     class StringConstants
     {
         public string TotalString { get; private set; }
+        public FieldInfo StoredInField { get; private set; }
 
         private Dictionary<string, int> Lookup;
 
-        public StringConstants(List<string> allStrings)
+        public StringConstants(List<string> allStrings, FieldInfo storedInField)
         {
             allStrings = allStrings.Distinct().ToList();
 
@@ -21,6 +23,8 @@ namespace Jil.Serialize
             TotalString = string.Concat(uniqueStrs);
 
             Lookup = allStrings.ToDictionary(s => s, s => TotalString.IndexOf(s));
+
+            StoredInField = storedInField;
         }
 
         public int? LookupString(string str)

@@ -56,9 +56,9 @@ namespace Jil.Serialize
         {
             var jsonPropStrings = typeStrings.Select(s => ",\"" + s.JsonEscape() + "\":").ToList();
 
-            var ret = new StringConstants(jsonPropStrings);
-
             var consts = toType.DefineField(StringConstantsField, typeof(char[]), FieldAttributes.Static | FieldAttributes.Public);
+
+            var ret = new StringConstants(jsonPropStrings, consts);
 
             var staticConst = toType.DefineConstructor(MethodAttributes.Private | MethodAttributes.Static, CallingConventions.Standard, Type.EmptyTypes);
             var il = staticConst.GetILGenerator();
@@ -74,8 +74,6 @@ namespace Jil.Serialize
         {
             var locInCache = strs.LookupString(str);
 
-            locInCache = null;
-
             if (locInCache == null)
             {
                 // If we didn't put it in the strings cache, use a string literal
@@ -87,7 +85,7 @@ namespace Jil.Serialize
             }
 
             emit.LoadLocal(WriterVariable);
-            emit.LoadField(toType.GetField(StringConstantsField));
+            emit.LoadField(strs.StoredInField);
             emit.LoadConstant(locInCache.Value);
             emit.LoadConstant(str.Length);
             emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new[] { typeof(char[]), typeof(int), typeof(int) }));
@@ -214,8 +212,6 @@ namespace Jil.Serialize
                 ).ToList();
 
             var stringsNeeded = Utils.ExtractStringConstants(forType);
-
-            //var strs = new StringConstants(new List<string>());
 
             var strs = AddStringsToType(intoType, stringsNeeded);
 
