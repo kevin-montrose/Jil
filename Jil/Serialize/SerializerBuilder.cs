@@ -34,7 +34,7 @@ namespace Jil.Serialize
             {
                 var ret = Module.DefineType("_Jil_" + forType.FullName, TypeAttributes.Sealed | TypeAttributes.Class);
 
-                emit = Emit<Action<TextWriter, T>>.BuildStaticMethod(ret, SerializeMethod, MethodAttributes.Public);
+                emit = Emit<Action<TextWriter, T>>.BuildStaticMethod(ret, SerializeMethod, MethodAttributes.Public, allowUnverifiableCode: true);
 
                 emit.DeclareLocal(typeof(TextWriter), WriterVariable);
                 emit.DeclareLocal(forType, ObjectVariable);
@@ -274,7 +274,24 @@ namespace Jil.Serialize
 
         private static MethodInfo BuildDictionary<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
-            throw new NotImplementedException();
+            var dictI = typeof(T).GetDictionaryInterface();
+
+            var keyType = dictI.GetGenericArguments()[0];
+            var valType = dictI.GetGenericArguments()[1];
+
+            if (keyType != typeof(string))
+            {
+                throw new InvalidOperationException("JSON dictionaries must have strings as keys, found " + keyType);
+            }
+
+            var serializer = typeof(DictionarySerializer).GetMethod("Serialize").MakeGenericMethod(valType);
+
+            emit.LoadArgument(0);
+            emit.LoadArgument(1);
+            emit.Call(serializer);
+            emit.Return();
+            
+            return emit.CreateMethod();
         }
 
         private static MethodInfo BuildList<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
@@ -282,16 +299,15 @@ namespace Jil.Serialize
             throw new NotImplementedException();
         }
 
-        private static MethodInfo PrimitiveTypeProxy<T>(Emit<Action<TextWriter, T>> emit)
+        private static MethodInfo WritePrimitiveType<T>(Emit<Action<TextWriter, T>> emit)
         {
-            
             var isStringy = typeof(T).IsStringyType();
 
             if (isStringy)
             {
                 emit.LoadArgument(0);
                 emit.LoadConstant("\"");
-                emit.Call(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
+                emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
             }
 
             emit.LoadArgument(0);
@@ -303,7 +319,7 @@ namespace Jil.Serialize
             {
                 emit.LoadArgument(0);
                 emit.LoadConstant("\"");
-                emit.Call(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
+                emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
             }
 
             emit.Return();
@@ -317,7 +333,7 @@ namespace Jil.Serialize
 
             if (forType.IsPrimitiveType())
             {
-                return PrimitiveTypeProxy(emit);
+                return WritePrimitiveType(emit);
             }
 
             if (forType.IsDictionaryType())

@@ -254,5 +254,24 @@ namespace JilTests
                 Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"Trailing\":\"Fizz Buzz\",\"_\":123},\"Three\":{\"Leading\":\"Foo Bar\",\"_\":456}}", res);
             }
         }
+
+        [TestMethod]
+        public void Dictionary()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, int>
+                    {
+                        { "hello world", 123 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"hello world\":123}", res);
+            }
+        }
     }
 }
