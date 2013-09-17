@@ -8,6 +8,7 @@ namespace JilTests
     [TestClass]
     public class UtilsTests
     {
+#pragma warning disable 0649
         class _FieldOffsetsInMemory
         {
             public int Foo;
@@ -17,6 +18,7 @@ namespace JilTests
             public char Hello;
             public object[] World;
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void FieldOffsetsInMemory()
@@ -34,6 +36,7 @@ namespace JilTests
             Assert.IsTrue(offset.ContainsKey(get("World")));
         }
 
+#pragma warning disable 0649
         class _PropertyFieldUsage
         {
             private string _Foo;
@@ -60,6 +63,7 @@ namespace JilTests
                 }
             }
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void PropertyFieldUsage()

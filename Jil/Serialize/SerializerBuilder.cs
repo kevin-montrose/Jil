@@ -147,6 +147,14 @@ namespace Jil.Serialize
             {
                 // For now, pass directly to TextWriter if we can
 
+                var needsIntCoersion = memberType == typeof(byte) || memberType == typeof(sbyte) || memberType == typeof(short) || memberType == typeof(ushort);
+
+                if (needsIntCoersion)
+                {
+                    emit.Convert<int>();
+                    memberType = typeof(int);
+                }
+
                 var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { memberType });
 
                 emit.CallVirtual(builtInMtd);
@@ -163,8 +171,10 @@ namespace Jil.Serialize
             emit.Call(TypeCache<MemberType>.SerializerEmit);
         }
 
-        private static MethodInfo BuildObject<T>(Type forType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static MethodInfo BuildObject<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
+            var forType = typeof(T);
+
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
 
@@ -218,51 +228,112 @@ namespace Jil.Serialize
             WriteString(intoType, strs, "{", emit);
             
             var firstPass = true;
+            var previousMemberWasStringy = false;
             foreach (var member in writeOrder)
             {
+                string keyString;
                 if (firstPass)
                 {
-                    WriteString(intoType, strs, "\"" + member.Name.JsonEscape() + "\":", emit);
+                    keyString = "\"" + member.Name.JsonEscape() + "\":";
                 }
                 else
                 {
-                    WriteString(intoType, strs, ",\"" + member.Name.JsonEscape() + "\":", emit);
+                    keyString = ",\"" + member.Name.JsonEscape() + "\":";
                 }
+
+                if (previousMemberWasStringy)
+                {
+                    keyString = "\"" + keyString;
+                }
+
+                var isStringy = member.IsStringyType();
+
+                if (isStringy)
+                {
+                    keyString = keyString + "\"";
+                }
+
+                WriteString(intoType, strs, keyString, emit);
                 WriteMember(member, emit);
+
+                previousMemberWasStringy = isStringy;
             }
 
-            WriteString(intoType, strs, "}", emit);
+            if (previousMemberWasStringy)
+            {
+                WriteString(intoType, strs, "\"}", emit);
+            }
+            else
+            {
+                WriteString(intoType, strs, "}", emit);
+            }
 
             emit.Return();
 
             return emit.CreateMethod();
         }
 
-        public static MethodInfo BuildDictionary<T>(Type dictType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static MethodInfo BuildDictionary<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             throw new NotImplementedException();
         }
 
-        public static MethodInfo BuildList<T>(Type listType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static MethodInfo BuildList<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
         {
             throw new NotImplementedException();
         }
 
-        public static MethodInfo Build<T>(Type forType, TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static MethodInfo PrimitiveTypeProxy<T>(Emit<Action<TextWriter, T>> emit)
         {
-            if (forType.IsDictionaryType())
+            
+            var isStringy = typeof(T).IsStringyType();
+
+            if (isStringy)
             {
-                return BuildDictionary(forType, intoType, emit);
+                emit.LoadArgument(0);
+                emit.LoadConstant("\"");
+                emit.Call(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
+            }
+
+            emit.LoadArgument(0);
+            emit.LoadArgument(1);
+
+            CallSerializer(typeof(T), emit);
+
+            if (isStringy)
+            {
+                emit.LoadArgument(0);
+                emit.LoadConstant("\"");
+                emit.Call(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) }));
+            }
+
+            emit.Return();
+
+            return emit.CreateMethod();
+        }
+
+        public static MethodInfo Build<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        {
+            var forType = typeof(T);
+
+            if (forType.IsPrimitiveType())
+            {
+                return PrimitiveTypeProxy(emit);
             }
 
             if (forType.IsDictionaryType())
             {
-                return BuildList(forType, intoType, emit);
+                return BuildDictionary(intoType, emit);
+            }
+
+            if (forType.IsDictionaryType())
+            {
+                return BuildList(intoType, emit);
             }
 
             if (forType.IsValueType) throw new NotImplementedException();
 
-            return BuildObject(forType, intoType, emit);
+            return BuildObject(intoType, emit);
         }
     }
 }

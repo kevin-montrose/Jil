@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -66,6 +67,30 @@ namespace Jil
                 t == typeof(uint) ||
                 t == typeof(long) ||
                 t == typeof(ulong);
+        }
+
+        public static bool IsStringyType(this MemberInfo member)
+        {
+            var asField = member as FieldInfo;
+            if (asField != null)
+            {
+                return asField.FieldType.IsStringyType();
+            }
+
+            var asProperty = member as PropertyInfo;
+            if (asProperty != null)
+            {
+                return asProperty.PropertyType.IsStringyType();
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        public static bool IsStringyType(this Type t)
+        {
+            return
+                t == typeof(string) ||
+                t == typeof(char);
         }
 
         // From: http://www.ietf.org/rfc/rfc4627.txt?number=4627

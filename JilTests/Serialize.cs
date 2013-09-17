@@ -49,5 +49,152 @@ namespace JilTests
                 Assert.AreEqual("{\"Next\":{\"Next\":null\"Foo\":456}\"Foo\":123}", res);
             }
         }
+
+        [TestMethod]
+        public void Primitive()
+        {
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<byte>(123, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("123", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<sbyte>(-123, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("-123", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<short>(-1000, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("-1000", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ushort>(5000, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("5000", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<int>(-123, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("-123", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<uint>(123456789, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("123456789", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<long>(-5000000000, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("-5000000000", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ulong>(8000000000, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("8000000000", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<string>("hello world", str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("\"hello world\"", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<char>('c', str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("\"c\"", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<float>(1.234f, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("1.234", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<double>(1.1, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("1.1", res);
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<decimal>(4.56m, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("4.56", res);
+                }
+            }
+        }
     }
 }

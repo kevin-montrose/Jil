@@ -23,7 +23,7 @@ namespace Jil.Serialize
             Serializer = SerializerBuilder.Init(out SerializerEmit);
 
             // Build the *actual* serializer method
-            var serializeMethod = SerializerBuilder.Build(typeof(T), Serializer, SerializerEmit);
+            var serializeMethod = SerializerBuilder.Build(Serializer, SerializerEmit);
 
             // Build the thunk we'll call to actually serialize
             var type = Serializer.CreateType();
