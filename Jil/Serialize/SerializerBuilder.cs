@@ -19,41 +19,27 @@ namespace Jil.Serialize
         private const string StringConstantsField = "_StringsConstants";
         private const string SerializeMethod = "Serialize";
 
-        private static AssemblyBuilder Assembly;
-        private static ModuleBuilder Module;
-
-        static SerializerBuilder()
-        {
-            Assembly = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("_Jil_DynamicAssembly"), AssemblyBuilderAccess.Run);
-            Module = Assembly.DefineDynamicModule("_Jil_DynamicModule");
-        }
-
-        public static TypeBuilder Init<T>(out Emit<Action<TextWriter, T>> emit, string typeNameOverride = null)
+        public static Emit<Action<TextWriter, T>> Init<T>()
         {
             var forType = typeof(T);
 
-            lock (Module)
-            {
-                var typeName = typeNameOverride ?? "_Jil_" + forType.FullName;
+            var name = "_Jil_" + forType.FullName;
 
-                var ret = Module.DefineType(typeName, TypeAttributes.Sealed | TypeAttributes.Class);
+            var emit = Emit<Action<TextWriter, T>>.NewDynamicMethod(name);
 
-                emit = Emit<Action<TextWriter, T>>.BuildStaticMethod(ret, SerializeMethod, MethodAttributes.Public, allowUnverifiableCode: true);
+            emit.DeclareLocal(typeof(TextWriter), WriterVariable);
+            emit.DeclareLocal(forType, ObjectVariable);
 
-                emit.DeclareLocal(typeof(TextWriter), WriterVariable);
-                emit.DeclareLocal(forType, ObjectVariable);
+            emit.LoadArgument(0);
+            emit.StoreLocal(WriterVariable);
 
-                emit.LoadArgument(0);
-                emit.StoreLocal(WriterVariable);
+            emit.LoadArgument(1);
+            emit.StoreLocal(ObjectVariable);
 
-                emit.LoadArgument(1);
-                emit.StoreLocal(ObjectVariable);
-
-                return ret;
-            }
+            return emit;
         }
 
-        private static void WriteString<T>(Type toType, string str, Emit<Action<TextWriter, T>> emit)
+        private static void WriteString<T>(string str, Emit<Action<TextWriter, T>> emit)
         {
             emit.LoadLocal(WriterVariable);
             emit.LoadConstant(str);
@@ -140,7 +126,7 @@ namespace Jil.Serialize
             emit.Call(TypeCache<MemberType>.SerializerEmit);
         }
 
-        private static MethodInfo BuildObject<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static Action<TextWriter, T> BuildObject<T>(Emit<Action<TextWriter, T>> emit)
         {
             var forType = typeof(T);
 
@@ -188,11 +174,11 @@ namespace Jil.Serialize
 
             emit.LoadLocal(ObjectVariable);
             emit.BranchIfTrue(notNull);
-            WriteString(intoType, "null", emit);
+            WriteString("null", emit);
             emit.Return();
 
             emit.MarkLabel(notNull);
-            WriteString(intoType, "{", emit);
+            WriteString("{", emit);
             
             var firstPass = true;
             var previousMemberWasStringy = false;
@@ -221,7 +207,7 @@ namespace Jil.Serialize
                     keyString = keyString + "\"";
                 }
 
-                WriteString(intoType, keyString, emit);
+                WriteString(keyString, emit);
                 WriteMember(member, emit);
 
                 previousMemberWasStringy = isStringy;
@@ -229,19 +215,19 @@ namespace Jil.Serialize
 
             if (previousMemberWasStringy)
             {
-                WriteString(intoType, "\"}", emit);
+                WriteString("\"}", emit);
             }
             else
             {
-                WriteString(intoType, "}", emit);
+                WriteString("}", emit);
             }
 
             emit.Return();
 
-            return emit.CreateMethod();
+            return emit.CreateDelegate();
         }
 
-        private static MethodInfo BuildDictionary<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static Action<TextWriter, T> BuildDictionary<T>(Emit<Action<TextWriter, T>> emit)
         {
             var dictI = typeof(T).GetDictionaryInterface();
 
@@ -259,11 +245,11 @@ namespace Jil.Serialize
             emit.LoadArgument(1);
             emit.Call(serializer);
             emit.Return();
-            
-            return emit.CreateMethod();
+
+            return emit.CreateDelegate();
         }
 
-        private static MethodInfo BuildList<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        private static Action<TextWriter, T> BuildList<T>(Emit<Action<TextWriter, T>> emit)
         {
             var listI = typeof(T).GetListInterface();
 
@@ -276,10 +262,10 @@ namespace Jil.Serialize
             emit.Call(serializer);
             emit.Return();
 
-            return emit.CreateMethod();
+            return emit.CreateDelegate();
         }
 
-        private static MethodInfo WritePrimitiveType<T>(Emit<Action<TextWriter, T>> emit)
+        private static Action<TextWriter, T> WritePrimitiveType<T>(Emit<Action<TextWriter, T>> emit)
         {
             var isStringy = typeof(T).IsStringyType();
 
@@ -304,10 +290,10 @@ namespace Jil.Serialize
 
             emit.Return();
 
-            return emit.CreateMethod();
+            return emit.CreateDelegate();
         }
 
-        public static MethodInfo Build<T>(TypeBuilder intoType, Emit<Action<TextWriter, T>> emit)
+        public static Action<TextWriter, T> Build<T>(Emit<Action<TextWriter, T>> emit)
         {
             var forType = typeof(T);
 
@@ -318,17 +304,17 @@ namespace Jil.Serialize
 
             if (forType.IsDictionaryType())
             {
-                return BuildDictionary(intoType, emit);
+                return BuildDictionary(emit);
             }
 
             if (forType.IsListType())
             {
-                return BuildList(intoType, emit);
+                return BuildList(emit);
             }
 
             if (forType.IsValueType) throw new NotImplementedException();
 
-            return BuildObject(intoType, emit);
+            return BuildObject(emit);
         }
     }
 }

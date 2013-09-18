@@ -124,45 +124,19 @@ namespace JilTests
                 {
                     SerializerBuilder.ReorderMembers = true;
 
-                    Emit<Action<TextWriter, _ReorderMembers>> emit;
-                    var typeBuilder = SerializerBuilder.Init(out emit, "Reordered");
+                    var emit = SerializerBuilder.Init<_ReorderMembers>();
 
                     // Build the *actual* serializer method
-                    var serializeMethod = SerializerBuilder.Build(typeBuilder, emit);
-
-                    // Build the thunk we'll call to actually serialize
-                    var type = typeBuilder.CreateType();
-
-                    var finalSerailizeMethod = type.GetMethod(serializeMethod.Name);
-
-                    var thunkEmit = Emit<Action<TextWriter, _ReorderMembers>>.NewDynamicMethod("Reordered");
-
-                    thunkEmit.Jump(finalSerailizeMethod);
-                    thunkEmit.Return();
-
-                    memoryOrder = thunkEmit.CreateDelegate();
+                    memoryOrder = SerializerBuilder.Build(emit);
                 }
 
                 {
                     SerializerBuilder.ReorderMembers = false;
 
-                    Emit<Action<TextWriter, _ReorderMembers>> emit;
-                    var typeBuilder = SerializerBuilder.Init(out emit, "NormalOrder");
+                    var emit = SerializerBuilder.Init<_ReorderMembers>();
 
                     // Build the *actual* serializer method
-                    var serializeMethod = SerializerBuilder.Build(typeBuilder, emit);
-
-                    // Build the thunk we'll call to actually serialize
-                    var type = typeBuilder.CreateType();
-
-                    var finalSerailizeMethod = type.GetMethod(serializeMethod.Name);
-
-                    var thunkEmit = Emit<Action<TextWriter, _ReorderMembers>>.NewDynamicMethod("NormalOrder");
-
-                    thunkEmit.Jump(finalSerailizeMethod);
-                    thunkEmit.Return();
-
-                    normalOrder = thunkEmit.CreateDelegate();
+                    normalOrder = SerializerBuilder.Build(emit);
                 }
             }
             finally

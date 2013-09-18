@@ -20,22 +20,10 @@ namespace Jil.Serialize
         static TypeCache()
         {
             // Setup a bunch of proxies for recursing
-            Serializer = SerializerBuilder.Init(out SerializerEmit);
+            SerializerEmit = SerializerBuilder.Init<T>();
 
             // Build the *actual* serializer method
-            var serializeMethod = SerializerBuilder.Build(Serializer, SerializerEmit);
-
-            // Build the thunk we'll call to actually serialize
-            var type = Serializer.CreateType();
-
-            var finalSerailizeMethod = type.GetMethod(serializeMethod.Name);
-
-            var thunkEmit = Emit<Action<TextWriter, T>>.NewDynamicMethod("_Jil_" + typeof(T).FullName + "_Thunk");
-
-            thunkEmit.Jump(finalSerailizeMethod);
-            thunkEmit.Return();
-
-            Thunk = thunkEmit.CreateDelegate();
+            Thunk = SerializerBuilder.Build(SerializerEmit);
         }
     }
 }
