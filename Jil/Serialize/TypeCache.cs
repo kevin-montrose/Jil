@@ -12,10 +12,9 @@ namespace Jil.Serialize
 {
     static class TypeCache<T>
     {
-        public static Emit<Action<TextWriter, T>> SerializerEmit;
         public static readonly Action<TextWriter, T> Thunk;
 
-        private static readonly TypeBuilder Serializer;
+        private static Emit<Action<TextWriter, T>> SerializerEmit;
         
         static TypeCache()
         {

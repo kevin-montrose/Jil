@@ -123,7 +123,21 @@ namespace Jil.Serialize
 
         private static void InvokeCallWithEmit<MemberType, T>(Emit<Action<TextWriter, T>> emit)
         {
-            emit.Call(TypeCache<MemberType>.SerializerEmit);
+            using (var val = emit.DeclareLocal<MemberType>())
+            {
+                emit.StoreLocal(val);
+                emit.Pop();
+
+                var thunkField = typeof(TypeCache<MemberType>).GetField("Thunk");
+                var invoke = typeof(Action<TextWriter, MemberType>).GetMethod("Invoke");
+
+                emit.LoadField(thunkField);
+                emit.LoadLocal(WriterVariable);
+                emit.LoadLocal(val);
+                emit.Call(invoke);
+            }
+
+            //emit.Call(TypeCache<MemberType>.SerializerEmit);
         }
 
         private static Action<TextWriter, T> BuildObject<T>(Emit<Action<TextWriter, T>> emit)

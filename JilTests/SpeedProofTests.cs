@@ -165,7 +165,7 @@ namespace JilTests
             double reorderedTime, normalOrderTime;
             CompareTimes(toSerialize, memoryOrder, normalOrder, out reorderedTime, out normalOrderTime);
 
-            Assert.IsTrue(reorderedTime < normalOrderTime);
+            Assert.IsTrue(reorderedTime < normalOrderTime, "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime);
         }
     }
 
