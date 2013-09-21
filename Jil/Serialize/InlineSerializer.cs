@@ -331,17 +331,7 @@ namespace Jil.Serialize
 
             if (serializingType.IsPrimitiveType())
             {
-                var needsIntCoersion = serializingType == typeof(byte) || serializingType == typeof(sbyte) || serializingType == typeof(short) || serializingType == typeof(ushort);
-
-                if (needsIntCoersion)
-                {
-                    emit.Convert<int>();            // TextWriter int
-                    serializingType = typeof(int); 
-                }
-
-                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { serializingType });
-
-                emit.CallVirtual(builtInMtd);       // --empty--
+                WritePrimitive(serializingType, emit);
                 return;
             }
 
@@ -351,6 +341,21 @@ namespace Jil.Serialize
 
                 WriteObject(serializingType, emit, recursiveTypes, loc);
             }
+        }
+
+        static void WritePrimitive(Type primitiveType, Emit emit)
+        {
+            var needsIntCoersion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
+
+            if (needsIntCoersion)
+            {
+                emit.Convert<int>();            // TextWriter int
+                primitiveType = typeof(int);
+            }
+
+            var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
+
+            emit.CallVirtual(builtInMtd);       // --empty--
         }
 
         internal static void WriteObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
@@ -538,17 +543,7 @@ namespace Jil.Serialize
         {
             if (elementType.IsPrimitiveType())
             {
-                var needsIntCoersion = elementType == typeof(byte) || elementType == typeof(sbyte) || elementType == typeof(short) || elementType == typeof(ushort);
-
-                if (needsIntCoersion)
-                {
-                    emit.Convert<int>();            // TextWriter int
-                    elementType = typeof(int);
-                }
-
-                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { elementType });
-
-                emit.CallVirtual(builtInMtd);       // --empty--
+                WritePrimitive(elementType, emit);
                 return;
             }
 
@@ -735,17 +730,7 @@ namespace Jil.Serialize
 
             if (elementType.IsPrimitiveType())
             {
-                var needsIntCoersion = elementType == typeof(byte) || elementType == typeof(sbyte) || elementType == typeof(short) || elementType == typeof(ushort);
-
-                if (needsIntCoersion)
-                {
-                    emit.Convert<int>();            // TextWriter int
-                    elementType = typeof(int);
-                }
-
-                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { elementType });
-
-                emit.CallVirtual(builtInMtd);       // --empty--
+                WritePrimitive(elementType, emit);
                 return;
             }
 
