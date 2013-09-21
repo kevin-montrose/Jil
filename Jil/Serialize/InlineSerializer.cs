@@ -258,7 +258,19 @@ namespace Jil.Serialize
                 {
                     emit.StoreLocal(loc);
 
-                    BuildList(serializingType, emit, recursiveTypes, loc);
+                    if (serializingType.IsListType())
+                    {
+                        WriteList(serializingType, emit, recursiveTypes, loc);
+                        return;
+                    }
+
+                    if (serializingType.IsDictionaryType())
+                    {
+                        WriteDictionary(serializingType, emit, recursiveTypes, loc);
+                        return;
+                    }
+
+                    WriteList(serializingType, emit, recursiveTypes, loc);
                 }
 
                 return;
@@ -339,11 +351,11 @@ namespace Jil.Serialize
             {
                 emit.StoreLocal(loc);   // TextWriter;
 
-                BuildObject(serializingType, emit, recursiveTypes, loc);
+                WriteObject(serializingType, emit, recursiveTypes, loc);
             }
         }
 
-        internal static void BuildObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        internal static void WriteObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var writeOrder = OrderMembersForAccess(forType);
 
@@ -412,7 +424,7 @@ namespace Jil.Serialize
             emit.MarkLabel(end);
         }
 
-        static void BuildList(Type listType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        static void WriteList(Type listType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
@@ -562,7 +574,216 @@ namespace Jil.Serialize
             {
                 emit.StoreLocal(loc);
 
-                BuildObject(elementType, emit, recursiveTypes, loc);
+                if (elementType.IsListType())
+                {
+                    WriteList(elementType, emit, recursiveTypes, loc);
+                    return;
+                }
+
+                if (elementType.IsDictionaryType())
+                {
+                    WriteDictionary(elementType, emit, recursiveTypes, loc);
+                    return;
+                }
+
+                WriteObject(elementType, emit, recursiveTypes, loc);
+            }
+        }
+
+        static void WriteDictionary(Type dictType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        {
+            var elementType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
+
+            var kvType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+
+            var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
+            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
+            var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
+            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current").GetMethod;
+
+            var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
+
+            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive;
+
+            var notNull = emit.DefineLabel();
+
+            if (inLocal != null)
+            {
+                emit.LoadLocal(inLocal);
+            }
+            else
+            {
+                emit.LoadArgument(1);
+            }
+
+            var end = emit.DefineLabel();
+
+            emit.BranchIfTrue(notNull);
+            WriteString("null", emit);
+            emit.Branch(end);
+
+            emit.MarkLabel(notNull);
+            WriteString("{", emit);
+
+            var done = emit.DefineLabel();
+
+            using (var e = emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
+            using(var kvpLoc = emit.DeclareLocal(kvType))
+            {
+                if (inLocal != null)
+                {
+                    emit.LoadLocal(inLocal);
+                }
+                else
+                {
+                    emit.LoadArgument(1);
+                }
+
+                emit.CastClass(iDictionary);                  // IDictionary<,>
+                emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
+                emit.StoreLocal(e);                           // --empty--
+
+                // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
+                {
+                    emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                    emit.CallVirtual(enumeratorMoveNext);   // bool
+                    emit.BranchIfFalse(done);               // --empty--
+
+                    if (isRecursive)
+                    {
+                        var loc = recursiveTypes[elementType];
+
+                        emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                    }
+
+                    if (preloadTextWriter)
+                    {
+                        emit.LoadArgument(0);               // Action<>? TextWriter
+                    }
+
+                    emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                    emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? KeyValuePair<,>
+
+                    emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
+                    emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
+
+                    WriteKeyValue(elementType, emit, recursiveTypes);   // --empty--
+                }
+
+                var loop = emit.DefineLabel();
+
+                emit.MarkLabel(loop);
+
+                emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                emit.CallVirtual(enumeratorMoveNext);   // bool
+                emit.BranchIfFalse(done);               // --empty--
+
+                if (isRecursive)
+                {
+                    var loc = recursiveTypes[elementType];
+
+                    emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                }
+
+                if (preloadTextWriter)
+                {
+                    emit.LoadArgument(0);               // Action<>? TextWriter
+                }
+
+                emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? KeyValuePair<,>
+
+                emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
+                emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
+
+                WriteString(",", emit);
+
+                WriteKeyValue(elementType, emit, recursiveTypes);   // --empty--
+            }
+
+            emit.MarkLabel(done);
+
+            WriteString("}", emit);
+
+            emit.MarkLabel(end);
+        }
+
+        static void WriteKeyValue(Type elementType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes)
+        {
+            // top of the stack is a KeyValue<string, elementType>
+
+            var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+            var key = keyValuePair.GetProperty("Key").GetMethod;
+            var value = keyValuePair.GetProperty("Value").GetMethod;
+
+            WriteString("\"", emit);
+
+            emit.Duplicate();   // kvp kvp
+            emit.Call(key);     // kvp string
+
+            using (var str = emit.DeclareLocal<string>())
+            {
+                emit.StoreLocal(str);   // kvp
+                emit.LoadArgument(0);   // kvp TextWriter
+                emit.LoadLocal(str);    // kvp TextWriter string
+
+                emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) })); // kvp
+            }
+
+            WriteString("\":", emit);
+
+            emit.Call(value);   // elementType
+
+            if (elementType.IsPrimitiveType())
+            {
+                var needsIntCoersion = elementType == typeof(byte) || elementType == typeof(sbyte) || elementType == typeof(short) || elementType == typeof(ushort);
+
+                if (needsIntCoersion)
+                {
+                    emit.Convert<int>();            // TextWriter int
+                    elementType = typeof(int);
+                }
+
+                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { elementType });
+
+                emit.CallVirtual(builtInMtd);       // --empty--
+                return;
+            }
+
+            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            if (isRecursive)
+            {
+                // Stack is:
+                //  - serializingType
+                //  - TextWriter
+                //  - Action<TextWriter, serializingType>
+
+                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), elementType);
+                var invoke = recursiveAct.GetMethod("Invoke");
+
+                emit.Call(invoke);
+
+                return;
+            }
+
+            using (var loc = emit.DeclareLocal(elementType))
+            {
+                emit.StoreLocal(loc);
+
+                if (elementType.IsListType())
+                {
+                    WriteList(elementType, emit, recursiveTypes, loc);
+                    return;
+                }
+
+                if (elementType.IsDictionaryType())
+                {
+                    WriteList(elementType, emit, recursiveTypes, loc);
+                    return;
+                }
+
+                WriteObject(elementType, emit, recursiveTypes, loc);
             }
         }
 
@@ -594,7 +815,7 @@ namespace Jil.Serialize
 
             var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
 
-            BuildObject(typeof(ForType), emit, preloaded);
+            WriteObject(typeof(ForType), emit, preloaded);
             emit.Return();
 
             return emit.CreateDelegate<Action<TextWriter, ForType>>();
@@ -608,10 +829,24 @@ namespace Jil.Serialize
 
             var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
 
-            BuildList(typeof(ListType), emit, preloaded);
+            WriteList(typeof(ListType), emit, preloaded);
             emit.Return();
 
             return emit.CreateDelegate<Action<TextWriter, ListType>>();
+        }
+
+        static Action<TextWriter, DictType> BuildDictionaryWithNewDelegate<DictType>()
+        {
+            var recursiveTypes = FindRecursiveTypes(typeof(DictType));
+
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(DictType) });
+
+            var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
+
+            WriteDictionary(typeof(DictType), emit, preloaded);
+            emit.Return();
+
+            return emit.CreateDelegate<Action<TextWriter, DictType>>();
         }
 
         public static Action<TextWriter, ForType> Build<ForType>()
@@ -625,7 +860,7 @@ namespace Jil.Serialize
 
             if (forType.IsDictionaryType())
             {
-                throw new NotImplementedException();
+                return BuildDictionaryWithNewDelegate<ForType>();
             }
 
             if (forType.IsListType())
