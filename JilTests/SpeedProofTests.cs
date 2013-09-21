@@ -165,7 +165,67 @@ namespace JilTests
 
             Assert.IsTrue(reorderedTime < normalOrderTime, "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime);
         }
-    }
 
+        public class _SkipNumberFormatting
+        {
+            public byte A;
+            public sbyte B;
+            public short C;
+            public ushort D;
+            public int E;
+        }
+
+        [TestMethod]
+        public void SkipNumberFormatting()
+        {
+            Action<TextWriter, _SkipNumberFormatting> skipping;
+            Action<TextWriter, _SkipNumberFormatting> normal;
+
+            try
+            {
+                {
+                    InlineSerializer.SkipNumberFormatting = true;
+
+                    // Build the *actual* serializer method
+                    skipping = InlineSerializer.Build<_SkipNumberFormatting>();
+                }
+
+                {
+                    InlineSerializer.SkipNumberFormatting = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializer.Build<_SkipNumberFormatting>();
+                }
+            }
+            finally
+            {
+                InlineSerializer.SkipNumberFormatting = true;
+            }
+
+            var rand = new Random(141090045);
+
+            var toSerialize = new List<_SkipNumberFormatting>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _SkipNumberFormatting
+                    {
+                        A = (byte)rand.Next(101),
+                        B = (sbyte)rand.Next(101),
+                        C = (short)rand.Next(101),
+                        D = (ushort)rand.Next(101),
+                        E = rand.Next(101),
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double skippingTime, normalTime;
+            CompareTimes(toSerialize, skipping, normal, out skippingTime, out normalTime);
+
+            Assert.IsTrue(skippingTime < normalTime, "skippingTime = " + skippingTime + ", normalTime = " + normalTime);
+        }
+    }
 #endif
 }

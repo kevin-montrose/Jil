@@ -12,6 +12,7 @@ namespace Jil.Serialize
     class InlineSerializer
     {
         public static bool ReorderMembers = true;
+        public static bool SkipNumberFormatting = true;
 
         static Dictionary<char, string> CharacterEscapes = 
             new Dictionary<char, string>{
@@ -308,9 +309,40 @@ namespace Jil.Serialize
                 primitiveType = typeof(int);
             }
 
-            var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
+            if (primitiveType == typeof(int) && SkipNumberFormatting)
+            {
+                var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
+                var done = emit.DefineLabel();
 
-            emit.CallVirtual(builtInMtd);       // --empty--
+                emit.Duplicate();               // TextWriter int int
+
+                var labels = Enumerable.Range(0, 100).Select(l => emit.DefineLabel()).ToArray();
+
+                emit.Switch(labels);            // TextWriter int
+
+                // default case
+                emit.CallVirtual(writeInt);     // --empty--
+                emit.Branch(done);              // --empty--
+
+                for (var i = 0; i < labels.Length; i++)
+                {
+                    var label = labels[i];
+
+                    emit.MarkLabel(label);      // TextWriter int
+                    emit.Pop();                 // TextWriter
+                    emit.Pop();                 // --empty--
+                    WriteString("" + i, emit);  // --empty--
+                    emit.Branch(done);          // --empty--
+                }
+
+                emit.MarkLabel(done);           // --empty--
+            }
+            else
+            {
+                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
+
+                emit.CallVirtual(builtInMtd);       // --empty--
+            }
         }
 
         static void WriteEncodedChar(Emit emit)
