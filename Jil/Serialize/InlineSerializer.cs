@@ -13,6 +13,44 @@ namespace Jil.Serialize
     {
         public static bool ReorderMembers = true;
 
+        static Dictionary<char, string> CharacterEscapes = 
+            new Dictionary<char, string>{
+                { '\\',  @"\\" },
+                { '"', @"\""" },
+                { '\u0000', @"\u0000" },
+                { '\u0001', @"\u0001" },
+                { '\u0002', @"\u0002" },
+                { '\u0003', @"\u0003" },
+                { '\u0004', @"\u0004" },
+                { '\u0005', @"\u0005" },
+                { '\u0006', @"\u0006" },
+                { '\u0007', @"\u0007" },
+                { '\u0008', @"\u0008" },
+                { '\u0009', @"\u0009" },
+                { '\u000A', @"\u000A" },
+                { '\u000B', @"\u000B" },
+                { '\u000C', @"\u000C" },
+                { '\u000D', @"\u000D" },
+                { '\u000E', @"\u000E" },
+                { '\u000F', @"\u000F" },
+                { '\u0010', @"\u0010" },
+                { '\u0011', @"\u0011" },
+                { '\u0012', @"\u0012" },
+                { '\u0013', @"\u0013" },
+                { '\u0014', @"\u0014" },
+                { '\u0015', @"\u0015" },
+                { '\u0016', @"\u0016" },
+                { '\u0017', @"\u0017" },
+                { '\u0018', @"\u0018" },
+                { '\u0019', @"\u0019" },
+                { '\u001A', @"\u001A" },
+                { '\u001B', @"\u001B" },
+                { '\u001C', @"\u001C" },
+                { '\u001D', @"\u001D" },
+                { '\u001E', @"\u001E" },
+                { '\u001F', @"\u001F" }
+        };
+
         static Action<TextWriter, ForType> LookupPrimitiveType<ForType>()
         {
             var forType = typeof(ForType);
@@ -345,6 +383,13 @@ namespace Jil.Serialize
 
         static void WritePrimitive(Type primitiveType, Emit emit)
         {
+            if (primitiveType == typeof(char) || primitiveType == typeof(string))
+            {
+                WriteEncodedString(primitiveType, emit);
+
+                return;
+            }
+
             var needsIntCoersion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
 
             if (needsIntCoersion)
@@ -356,6 +401,87 @@ namespace Jil.Serialize
             var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
 
             emit.CallVirtual(builtInMtd);       // --empty--
+        }
+
+        static void WriteEncodedString(Type stringType, Emit emit)
+        {
+            // top of stack is:
+            //  - value
+            //  - TextWriter
+
+            if (stringType == typeof(char))
+            {
+                var writeChar = typeof(TextWriter).GetMethod("Write", new [] { typeof(char) });
+
+                var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
+
+                var needLabels = CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
+
+                var labels = new List<Tuple<Sigil.Label, string>>();
+
+                int? prev = null;
+                foreach(var pair in needLabels)
+                {
+                    if(prev != null && pair.Item1 - prev != 1) break;
+
+                    var label = emit.DefineLabel();
+
+                    labels.Add(Tuple.Create(label, pair.Item2));
+                }
+
+                var done = emit.DefineLabel();
+                var slash = emit.DefineLabel();
+                var quote = emit.DefineLabel();
+
+                emit.Duplicate();                               // TextWriter char char
+                emit.Convert<int>();
+                emit.LoadConstant(lowestCharNeedingEncoding);   // TextWriter char char int
+                emit.Subtract();                                // TextWriter char int
+
+                emit.Switch(labels.Select(s => s.Item1).ToArray()); // TextWriter char
+
+                // this is the fall-through (default) case
+
+                emit.Duplicate();               // TextWriter char char
+                emit.LoadConstant('\\');        // TextWriter char char \
+                emit.BranchIfEqual(slash);      // TextWriter char
+
+                emit.Duplicate();               // TextWriter char char
+                emit.LoadConstant('"');         // TextWriter char char "
+                emit.BranchIfEqual(quote);      // TextWriter clear
+
+                emit.CallVirtual(writeChar);    // --empty--
+                emit.Branch(done);              // --empty--
+
+                emit.MarkLabel(slash);          // TextWriter char
+                emit.Pop();                     // TextWriter
+                emit.Pop();                     // --empty--
+                WriteString(@"\\", emit);       // --empty--
+                emit.Branch(done);              // --empty--
+
+                emit.MarkLabel(quote);
+                emit.Pop();                     // TextWriter
+                emit.Pop();                     // --empty--
+                WriteString(@"\""", emit);      // --empty--
+                emit.Branch(done);              // --empty--
+
+                foreach (var label in labels)
+                {
+                    emit.MarkLabel(label.Item1);    // TextWriter char
+                    emit.Pop();                     // TextWriter
+                    emit.Pop();                     // --empty--
+                    WriteString(label.Item2, emit); // --empty-- 
+                    emit.Branch(done);              // --empty--
+                }
+
+                emit.MarkLabel(done);
+
+                return;
+            }
+
+            var writeString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
+
+            emit.CallVirtual(writeString);
         }
 
         internal static void WriteObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)

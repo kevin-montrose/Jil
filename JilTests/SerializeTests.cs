@@ -356,5 +356,218 @@ namespace JilTests
                 Assert.AreEqual("{\"WithList\":{\"List\":[1,2,3]}}", res);
             }
         }
+
+        class _CharacterEncoding
+        {
+            public char Char;
+        }
+
+        [TestMethod]
+        public void CharacterEncoding()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0000' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0000\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0001' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0001\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0002' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0002\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0003' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0003\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0004' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0004\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0005' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0005\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0006' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0006\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0007' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0007\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0008' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0008\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0009' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0009\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000A' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000A\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000B' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000B\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000C' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000C\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000D' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000D\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000E' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000E\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u000F' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u000F\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0010' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0010\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0011' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0011\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0012' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0012\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0013' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0013\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0014' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0014\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0015' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0015\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0016' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0016\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0017' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0017\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0018' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0018\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u0019' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u0019\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001A' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001A\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001B' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001B\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001C' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001C\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001D' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001D\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001E' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001E\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\u001F' }, str);
+                Assert.AreEqual("{\"Char\":\"\\u001F\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '\\' }, str);
+                Assert.AreEqual("{\"Char\":\"\\\\\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CharacterEncoding { Char = '"' }, str);
+                Assert.AreEqual("{\"Char\":\"\\\"\"}", str.ToString());
+            }
+        }
     }
 }
