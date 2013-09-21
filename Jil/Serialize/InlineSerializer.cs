@@ -126,9 +126,7 @@ namespace Jil.Serialize
 
             var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
 
-            // We want to access fields and properties such that we go "with the grain" in memory
-            //   Broadly speaking, we access members in the order they are laid out in memory preferring
-            //   fields over properties
+            // This order appears to be the "best" for access speed purposes
             var ret =
                 !ReorderMembers ?
                     members :
@@ -157,7 +155,7 @@ namespace Jil.Serialize
                          }
                     ).ThenBy(
                         m => m is FieldInfo ? 0 : 1
-                    ).ToList();
+                    ).Reverse();
 
             return ret.ToList();
         }

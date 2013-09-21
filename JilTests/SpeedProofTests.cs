@@ -122,32 +122,28 @@ namespace JilTests
             try
             {
                 {
-                    SerializerBuilder.ReorderMembers = true;
-
-                    var emit = SerializerBuilder.Init<_ReorderMembers>();
+                    InlineSerializer.ReorderMembers = true;
 
                     // Build the *actual* serializer method
-                    memoryOrder = SerializerBuilder.Build(emit);
+                    memoryOrder = InlineSerializer.Build<_ReorderMembers>();
                 }
 
                 {
-                    SerializerBuilder.ReorderMembers = false;
-
-                    var emit = SerializerBuilder.Init<_ReorderMembers>();
+                    InlineSerializer.ReorderMembers = false;
 
                     // Build the *actual* serializer method
-                    normalOrder = SerializerBuilder.Build(emit);
+                    normalOrder = InlineSerializer.Build<_ReorderMembers>();
                 }
             }
             finally
             {
-                SerializerBuilder.ReorderMembers = true;
+                InlineSerializer.ReorderMembers = true;
             }
 
             var rand = new Random(1160428);
 
             var toSerialize = new List<_ReorderMembers>();
-            for (var i = 0; i < 5000; i++)
+            for (var i = 0; i < 10000; i++)
             {
                 toSerialize.Add(
                     new _ReorderMembers
@@ -161,6 +157,8 @@ namespace JilTests
                     }
                 );
             }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
 
             double reorderedTime, normalOrderTime;
             CompareTimes(toSerialize, memoryOrder, normalOrder, out reorderedTime, out normalOrderTime);

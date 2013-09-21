@@ -14,25 +14,9 @@ namespace Jil.Serialize
     {
         public static readonly Action<TextWriter, T> Thunk;
 
-        //private static Emit<Action<TextWriter, T>> SerializerEmit;
-        
         static TypeCache()
         {
-            /*
-            // Setup a bunch of proxies for recursing
-            SerializerEmit = SerializerBuilder.Init<T>();
-
-            // Build the *actual* serializer method
-            Thunk = SerializerBuilder.Build(SerializerEmit);*/
-
-            try
-            {
-                Thunk = InlineSerializer.Build<T>();
-            }
-            catch (SigilVerificationException e)
-            {
-                throw;
-            }
+            Thunk = InlineSerializer.Build<T>();
         }
     }
 }

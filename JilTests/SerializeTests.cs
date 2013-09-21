@@ -46,7 +46,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Next\":{\"Next\":null,\"Foo\":456},\"Foo\":123}", res);
+                Assert.AreEqual("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
             }
         }
 
@@ -251,7 +251,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"Trailing\":\"Fizz Buzz\",\"_\":123},\"Three\":{\"Leading\":\"Foo Bar\",\"_\":456}}", res);
+                Assert.AreEqual("{\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"One\":{\"Single\":\"Hello World\"}}", res);
             }
         }
 
@@ -299,7 +299,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("[{\"Key\":\"whatever\",\"Val\":123},{\"Key\":\"indeed\",\"Val\":456}]", res);
+                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
             }
         }
 
@@ -321,7 +321,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Bar\":\"hello\",\"Foo\":123}", res);
+                Assert.AreEqual("{\"Foo\":123,\"Bar\":\"hello\"}", res);
             }
         }
 
