@@ -14,15 +14,18 @@ namespace Jil.Serialize
     {
         public static readonly Action<TextWriter, T> Thunk;
 
-        private static Emit<Action<TextWriter, T>> SerializerEmit;
+        //private static Emit<Action<TextWriter, T>> SerializerEmit;
         
         static TypeCache()
         {
+            /*
             // Setup a bunch of proxies for recursing
             SerializerEmit = SerializerBuilder.Init<T>();
 
             // Build the *actual* serializer method
-            Thunk = SerializerBuilder.Build(SerializerEmit);
+            Thunk = SerializerBuilder.Build(SerializerEmit);*/
+
+            Thunk = InlineSerializer.Build<T>();
         }
     }
 }
