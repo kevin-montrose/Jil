@@ -324,5 +324,37 @@ namespace JilTests
                 Assert.AreEqual("{\"Bar\":\"hello\",\"Foo\":123}", res);
             }
         }
+
+        public class _InnerLists
+        {
+            public class _WithList
+            {
+                public List<int> List;
+            }
+
+            public _WithList WithList;
+        }
+
+        [TestMethod]
+        public void InnerLists()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _InnerLists
+                    {
+                        WithList = new _InnerLists._WithList
+                        {
+                            List = new List<int> { 1, 2, 3 }
+                        }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"WithList\":{\"List\":[1,2,3]}}", res);
+            }
+        }
     }
 }

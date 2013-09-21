@@ -25,7 +25,14 @@ namespace Jil.Serialize
             // Build the *actual* serializer method
             Thunk = SerializerBuilder.Build(SerializerEmit);*/
 
-            Thunk = InlineSerializer.Build<T>();
+            try
+            {
+                Thunk = InlineSerializer.Build<T>();
+            }
+            catch (SigilVerificationException e)
+            {
+                throw;
+            }
         }
     }
 }

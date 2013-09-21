@@ -285,9 +285,12 @@ namespace Jil.Serialize
 
             var obj = cons.Invoke(consParameters);
 
-            //var obj = Activator.CreateInstance(t);
-
             var addrs = getAddrs(obj);
+
+            if (addrs.Length == 0)
+            {
+                return new Dictionary<FieldInfo, int>();
+            }
 
             var min = addrs.Min();
 
