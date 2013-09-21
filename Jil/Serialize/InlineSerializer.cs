@@ -244,16 +244,14 @@ namespace Jil.Serialize
 
                 var mtd = InlineSerializer_BuildObject;
 
-                mtd.Invoke(null, new object[] { serializingType, emit, loc });
+                mtd.Invoke(null, new object[] { serializingType, emit, recursiveTypes, loc });
             }
         }
 
         static MethodInfo InlineSerializer_BuildObject = typeof(InlineSerializer).GetMethod("BuildObject", BindingFlags.Static | BindingFlags.NonPublic);
-        internal static void BuildObject(Type forType, Emit emit, Sigil.Local inLocal = null)
+        internal static void BuildObject(Type forType, Emit emit, HashSet<Type> recursiveTypes, Sigil.Local inLocal = null)
         {
             var writeOrder = OrderMembersForAccess(forType);
-
-            var recursiveTypes = FindRecursiveTypes(forType);
 
             var stringsNeeded = Utils.ExtractStringConstants(forType);
 
@@ -318,6 +316,18 @@ namespace Jil.Serialize
             }
         }
 
+        static Action<TextWriter, ForType> BuildObjectWithNewDelegate<ForType>()
+        {
+            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
+
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            
+            BuildObject(typeof(ForType), emit, recursiveTypes);
+            emit.Return();
+
+            return emit.CreateDelegate<Action<TextWriter, ForType>>();
+        }
+
         public static Action<TextWriter, ForType> Build<ForType>()
         {
             var forType = typeof(ForType);
@@ -339,12 +349,7 @@ namespace Jil.Serialize
 
             if (forType.IsValueType) throw new NotImplementedException();
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
-            
-            BuildObject(typeof(ForType), emit);
-            emit.Return();
-
-            return emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return BuildObjectWithNewDelegate<ForType>();
         }
     }
 }
