@@ -411,18 +411,11 @@ namespace Jil.Serialize
             emit.CallVirtual(builtInMtd);       // --empty--
         }
 
-        public static char Probe(char c)
-        {
-            return c;
-        }
-
         static void WriteEncodedChar(Emit emit)
         {
             // top of stack is:
             //  - char
             //  - TextWriter
-
-            emit.Call(typeof(InlineSerializer).GetMethod("Probe"));
 
             var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
 
@@ -440,6 +433,8 @@ namespace Jil.Serialize
                 var label = emit.DefineLabel();
 
                 labels.Add(Tuple.Create(label, pair.Item2));
+                
+                prev = pair.Item1;
             }
 
             var done = emit.DefineLabel();
@@ -467,6 +462,7 @@ namespace Jil.Serialize
             emit.Branch(done);              // --empty--
 
             emit.MarkLabel(slash);          // TextWriter char
+
             emit.Pop();                     // TextWriter
             emit.Pop();                     // --empty--
             WriteString(@"\\", emit);       // --empty--
@@ -481,6 +477,7 @@ namespace Jil.Serialize
             foreach (var label in labels)
             {
                 emit.MarkLabel(label.Item1);    // TextWriter char
+
                 emit.Pop();                     // TextWriter
                 emit.Pop();                     // --empty--
                 WriteString(label.Item2, emit); // --empty-- 
