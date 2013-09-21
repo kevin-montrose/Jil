@@ -569,21 +569,5 @@ namespace JilTests
                 Assert.AreEqual("{\"Char\":\"\\\"\"}", str.ToString());
             }
         }
-
-        public class _Space
-        {
-            public char Space { get { return ' '; } }
-        }
-
-        [TestMethod]
-        public void Space()
-        {
-            using (var str = new StringWriter())
-            {
-                JSON.Serialize(new _Space(), str);
-                var res = str.ToString();
-                Assert.AreEqual("{\"Space\":\" \"}", res);
-            }
-        }
     }
 }
