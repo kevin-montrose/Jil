@@ -186,6 +186,8 @@ namespace Jil.Serialize
                                      return int.MaxValue;
                                  }
 
+                                 if (usesFields.Count == 0) return int.MaxValue;
+
                                  return usesFields.Select(f => fields[f]).Min();
                              }
 
@@ -409,11 +411,18 @@ namespace Jil.Serialize
             emit.CallVirtual(builtInMtd);       // --empty--
         }
 
+        public static char Probe(char c)
+        {
+            return c;
+        }
+
         static void WriteEncodedChar(Emit emit)
         {
             // top of stack is:
-            //  - value
+            //  - char
             //  - TextWriter
+
+            emit.Call(typeof(InlineSerializer).GetMethod("Probe"));
 
             var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
 
@@ -484,12 +493,48 @@ namespace Jil.Serialize
         static void WriteEncodedString(Emit emit)
         {
             // top of stack is:
-            //  - value
+            //  - string
             //  - TextWriter
 
-            var writeString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
+            var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
+            var strLength = typeof(string).GetProperty("Length").GetMethod;
+            var strCharsIx = typeof(string).GetProperty("Chars").GetMethod;
 
-            emit.CallVirtual(writeString);
+            var done = emit.DefineLabel();
+
+            using (var str = emit.DeclareLocal<string>())
+            using (var i = emit.DeclareLocal<int>())
+            {
+                var loop = emit.DefineLabel();
+
+                emit.LoadConstant(0);   // TextWriter string 0
+                emit.StoreLocal(i);     // TextWriter string
+                emit.StoreLocal(str);   // TextWriter
+                emit.Duplicate();       // TextWriter TextWriter
+
+                emit.MarkLabel(loop);               // TextWriter TextWriter
+                emit.LoadLocal(i);                  // TextWriter TextWriter i
+                emit.LoadLocal(str);                // TextWriter TextWriter i string
+                emit.Call(strLength);               // TextWriter TextWriter i str.Length
+                emit.BranchIfGreaterOrEqual(done);  // TextWriter TextWriter
+
+                emit.LoadLocal(str);    // TextWriter TextWriter string
+                emit.LoadLocal(i);      // TextWriter TextWriter string i
+                emit.Call(strCharsIx);  // TextWriter TextWriter char
+
+                WriteEncodedChar(emit); // TextWriter
+
+                emit.LoadLocal(i);      // TextWriter i
+                emit.LoadConstant(1);   // TextWriter i 1
+                emit.Add();             // TextWriter (i+1)
+                emit.StoreLocal(i);     // TextWriter
+                emit.Duplicate();       // TextWriter TextWriter
+                emit.Branch(loop);      // TextWriter TextWriter
+            }
+
+            emit.MarkLabel(done);       // TextWriter TextWriter
+            emit.Pop();
+            emit.Pop();
         }
 
         internal static void WriteObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
