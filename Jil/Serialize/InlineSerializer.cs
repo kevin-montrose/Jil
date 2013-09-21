@@ -316,12 +316,6 @@ namespace Jil.Serialize
             {
                 WriteString("}", emit);
             }
-
-            // Only emit return if we're at the "top" of the object graph
-            if (inLocal == null)
-            {
-                emit.Return();
-            }
         }
 
         public static Action<TextWriter, ForType> Build<ForType>()
@@ -346,8 +340,9 @@ namespace Jil.Serialize
             if (forType.IsValueType) throw new NotImplementedException();
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
-
+            
             BuildObject(typeof(ForType), emit);
+            emit.Return();
 
             return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
