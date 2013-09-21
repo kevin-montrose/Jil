@@ -179,9 +179,15 @@ namespace Jil.Serialize
 
             if (asField == null && asProp == null) throw new Exception("Wha?");
 
-            Type serializingType = null;
+            var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
-            emit.LoadArgument(0);   // TextWriter
+            var isRecursive = recursiveTypes.Contains(serializingType);
+
+            // Only put this on the stack if we'll need it
+            if (serializingType.IsPrimitiveType() || isRecursive)
+            {
+                emit.LoadArgument(0);   // TextWriter
+            }
 
             if (inLocal == null)
             {
@@ -194,15 +200,11 @@ namespace Jil.Serialize
 
             if (asField != null)
             {
-                serializingType = asField.FieldType;
-
                 emit.LoadField(asField);    // TextWriter field
             }
 
             if (asProp != null)
             {
-                serializingType = asProp.PropertyType;
-
                 var getMtd = asProp.GetMethod;
                 if(getMtd.IsVirtual)
                 {
@@ -239,7 +241,6 @@ namespace Jil.Serialize
             using (var loc = emit.DeclareLocal(serializingType))
             {
                 emit.StoreLocal(loc);   // TextWriter;
-                emit.Pop();             // --emit--
 
                 var mtd = InlineSerializer_BuildObject;
 
