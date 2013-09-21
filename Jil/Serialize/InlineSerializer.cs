@@ -51,104 +51,6 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
-        static Action<TextWriter, ForType> LookupPrimitiveType<ForType>()
-        {
-            var forType = typeof(ForType);
-
-            if (forType == typeof(byte))
-            {
-                Action<TextWriter, byte> ret = (writer, b) => { writer.Write(b); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(sbyte))
-            {
-                Action<TextWriter, sbyte> ret = (writer, s) => { writer.Write(s); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(short))
-            {
-                Action<TextWriter, short> ret = (writer, s) => { writer.Write(s); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(ushort))
-            {
-                Action<TextWriter, ushort> ret = (writer, u) => { writer.Write(u); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(int))
-            {
-                Action<TextWriter, int> ret = (writer, i) => { writer.Write(i); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(uint))
-            {
-                Action<TextWriter, uint> ret = (writer, u) => { writer.Write(u); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(long))
-            {
-                Action<TextWriter, long> ret = (writer, l) => { writer.Write(l); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(ulong))
-            {
-                Action<TextWriter, ulong> ret = (writer, u) => { writer.Write(u); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(float))
-            {
-                Action<TextWriter, float> ret = (writer, f) => { writer.Write(f); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(double))
-            {
-                Action<TextWriter, double> ret = (writer, d) => { writer.Write(d); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(decimal))
-            {
-                Action<TextWriter, decimal> ret = (writer, d) => { writer.Write(d); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(string))
-            {
-                Action<TextWriter, string> ret = (writer, s) => { writer.Write("\""); writer.Write(s.JsonEscape()); writer.Write("\""); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            if (forType == typeof(char))
-            {
-                Action<TextWriter, char> ret = (writer, c) => { writer.Write("\""); writer.Write(c.JsonEscape()); writer.Write("\""); };
-
-                return (Action<TextWriter, ForType>)(object)ret;
-            }
-
-            throw new NotImplementedException();
-        }
-
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
         static void WriteString(string str, Emit emit)
         {
@@ -1008,13 +910,40 @@ namespace Jil.Serialize
             return emit.CreateDelegate<Action<TextWriter, DictType>>();
         }
 
+        static Action<TextWriter, PrimitiveType> BuildPrimitiveWithNewDelegate<PrimitiveType>()
+        {
+            var primitiveType = typeof(PrimitiveType);
+            var isString = primitiveType == typeof(string) || primitiveType == typeof(char);
+
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(PrimitiveType) });
+
+            emit.LoadArgument(0);
+            emit.LoadArgument(1);
+
+            if (isString)
+            {
+                WriteString("\"", emit);
+            }
+
+            WritePrimitive(typeof(PrimitiveType), emit);
+
+            if (isString)
+            {
+                WriteString("\"", emit);
+            }
+
+            emit.Return();
+
+            return emit.CreateDelegate<Action<TextWriter, PrimitiveType>>();
+        }
+
         public static Action<TextWriter, ForType> Build<ForType>()
         {
             var forType = typeof(ForType);
 
             if (forType.IsPrimitiveType())
             {
-                return LookupPrimitiveType<ForType>();
+                return BuildPrimitiveWithNewDelegate<ForType>();
             }
 
             if (forType.IsDictionaryType())
