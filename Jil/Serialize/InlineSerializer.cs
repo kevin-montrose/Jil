@@ -383,10 +383,16 @@ namespace Jil.Serialize
 
         static void WritePrimitive(Type primitiveType, Emit emit)
         {
-            if (primitiveType == typeof(char) || primitiveType == typeof(string))
+            if (primitiveType == typeof(char))
             {
-                WriteEncodedString(primitiveType, emit);
+                WriteEncodedChar(emit);
 
+                return;
+            }
+
+            if (primitiveType == typeof(string))
+            {
+                WriteEncodedString(emit);
                 return;
             }
 
@@ -403,81 +409,83 @@ namespace Jil.Serialize
             emit.CallVirtual(builtInMtd);       // --empty--
         }
 
-        static void WriteEncodedString(Type stringType, Emit emit)
+        static void WriteEncodedChar(Emit emit)
         {
             // top of stack is:
             //  - value
             //  - TextWriter
 
-            if (stringType == typeof(char))
+            var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
+
+            var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
+
+            var needLabels = CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
+
+            var labels = new List<Tuple<Sigil.Label, string>>();
+
+            int? prev = null;
+            foreach (var pair in needLabels)
             {
-                var writeChar = typeof(TextWriter).GetMethod("Write", new [] { typeof(char) });
+                if (prev != null && pair.Item1 - prev != 1) break;
 
-                var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
+                var label = emit.DefineLabel();
 
-                var needLabels = CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
-
-                var labels = new List<Tuple<Sigil.Label, string>>();
-
-                int? prev = null;
-                foreach(var pair in needLabels)
-                {
-                    if(prev != null && pair.Item1 - prev != 1) break;
-
-                    var label = emit.DefineLabel();
-
-                    labels.Add(Tuple.Create(label, pair.Item2));
-                }
-
-                var done = emit.DefineLabel();
-                var slash = emit.DefineLabel();
-                var quote = emit.DefineLabel();
-
-                emit.Duplicate();                               // TextWriter char char
-                emit.Convert<int>();
-                emit.LoadConstant(lowestCharNeedingEncoding);   // TextWriter char char int
-                emit.Subtract();                                // TextWriter char int
-
-                emit.Switch(labels.Select(s => s.Item1).ToArray()); // TextWriter char
-
-                // this is the fall-through (default) case
-
-                emit.Duplicate();               // TextWriter char char
-                emit.LoadConstant('\\');        // TextWriter char char \
-                emit.BranchIfEqual(slash);      // TextWriter char
-
-                emit.Duplicate();               // TextWriter char char
-                emit.LoadConstant('"');         // TextWriter char char "
-                emit.BranchIfEqual(quote);      // TextWriter clear
-
-                emit.CallVirtual(writeChar);    // --empty--
-                emit.Branch(done);              // --empty--
-
-                emit.MarkLabel(slash);          // TextWriter char
-                emit.Pop();                     // TextWriter
-                emit.Pop();                     // --empty--
-                WriteString(@"\\", emit);       // --empty--
-                emit.Branch(done);              // --empty--
-
-                emit.MarkLabel(quote);
-                emit.Pop();                     // TextWriter
-                emit.Pop();                     // --empty--
-                WriteString(@"\""", emit);      // --empty--
-                emit.Branch(done);              // --empty--
-
-                foreach (var label in labels)
-                {
-                    emit.MarkLabel(label.Item1);    // TextWriter char
-                    emit.Pop();                     // TextWriter
-                    emit.Pop();                     // --empty--
-                    WriteString(label.Item2, emit); // --empty-- 
-                    emit.Branch(done);              // --empty--
-                }
-
-                emit.MarkLabel(done);
-
-                return;
+                labels.Add(Tuple.Create(label, pair.Item2));
             }
+
+            var done = emit.DefineLabel();
+            var slash = emit.DefineLabel();
+            var quote = emit.DefineLabel();
+
+            emit.Duplicate();                               // TextWriter char char
+            emit.Convert<int>();
+            emit.LoadConstant(lowestCharNeedingEncoding);   // TextWriter char char int
+            emit.Subtract();                                // TextWriter char int
+
+            emit.Switch(labels.Select(s => s.Item1).ToArray()); // TextWriter char
+
+            // this is the fall-through (default) case
+
+            emit.Duplicate();               // TextWriter char char
+            emit.LoadConstant('\\');        // TextWriter char char \
+            emit.BranchIfEqual(slash);      // TextWriter char
+
+            emit.Duplicate();               // TextWriter char char
+            emit.LoadConstant('"');         // TextWriter char char "
+            emit.BranchIfEqual(quote);      // TextWriter clear
+
+            emit.CallVirtual(writeChar);    // --empty--
+            emit.Branch(done);              // --empty--
+
+            emit.MarkLabel(slash);          // TextWriter char
+            emit.Pop();                     // TextWriter
+            emit.Pop();                     // --empty--
+            WriteString(@"\\", emit);       // --empty--
+            emit.Branch(done);              // --empty--
+
+            emit.MarkLabel(quote);
+            emit.Pop();                     // TextWriter
+            emit.Pop();                     // --empty--
+            WriteString(@"\""", emit);      // --empty--
+            emit.Branch(done);              // --empty--
+
+            foreach (var label in labels)
+            {
+                emit.MarkLabel(label.Item1);    // TextWriter char
+                emit.Pop();                     // TextWriter
+                emit.Pop();                     // --empty--
+                WriteString(label.Item2, emit); // --empty-- 
+                emit.Branch(done);              // --empty--
+            }
+
+            emit.MarkLabel(done);
+        }
+
+        static void WriteEncodedString(Emit emit)
+        {
+            // top of stack is:
+            //  - value
+            //  - TextWriter
 
             var writeString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
 
