@@ -58,6 +58,22 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
+        static void LoadProperty(PropertyInfo prop, Emit e)
+        {
+            // Top of stack:
+            //   - instance
+
+            var getMtd = prop.GetMethod;
+            if (getMtd.IsVirtual)
+            {
+                e.CallVirtual(getMtd);
+            }
+            else
+            {
+                e.Call(getMtd);
+            }
+        }
+
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
         static void WriteString(string str, Emit emit)
         {
@@ -195,15 +211,7 @@ namespace Jil.Serialize
 
                 if (asProp != null)
                 {
-                    var getMtd = asProp.GetMethod;
-                    if (getMtd.IsVirtual)
-                    {
-                        emit.CallVirtual(getMtd);
-                    }
-                    else
-                    {
-                        emit.Call(getMtd);
-                    }
+                    LoadProperty(asProp, emit);
                 }
 
                 using (var loc = emit.DeclareLocal(serializingType))
@@ -258,15 +266,7 @@ namespace Jil.Serialize
 
             if (asProp != null)
             {
-                var getMtd = asProp.GetMethod;
-                if(getMtd.IsVirtual)
-                {
-                    emit.CallVirtual(getMtd);   // TextWriter prop
-                }
-                else
-                {
-                    emit.Call(getMtd);          // TextWriter prop
-                }
+                LoadProperty(asProp, emit); // TextWriter prop
             }
 
             if (isRecursive)
@@ -310,8 +310,8 @@ namespace Jil.Serialize
             //  - nullable
             //  - TextWriter
 
-            var hasValue = nullableType.GetProperty("HasValue").GetMethod;
-            var value = nullableType.GetProperty("Value").GetMethod;
+            var hasValue = nullableType.GetProperty("HasValue");
+            var value = nullableType.GetProperty("Value");
             var underlyingType = nullableType.GetUnderlyingType();
             var done = emit.DefineLabel();
 
@@ -319,10 +319,10 @@ namespace Jil.Serialize
             {
                 var notNull = emit.DefineLabel();
 
-                emit.StoreLocal(loc);       // TextWriter
-                emit.LoadLocalAddress(loc); // TextWriter nullableType*
-                emit.Call(hasValue);        // TextWriter bool
-                emit.BranchIfTrue(notNull); // TextWriter
+                emit.StoreLocal(loc);           // TextWriter
+                emit.LoadLocalAddress(loc);     // TextWriter nullableType*
+                LoadProperty(hasValue, emit);   // TextWriter bool
+                emit.BranchIfTrue(notNull);     // TextWriter
 
                 emit.Pop();                 // --empty--
                 WriteString("null", emit);  // --empty--
@@ -330,7 +330,7 @@ namespace Jil.Serialize
 
                 emit.MarkLabel(notNull);    // TextWriter
                 emit.LoadLocalAddress(loc); // TextWriter nullableType*
-                emit.Call(value);           // TextWriter value
+                LoadProperty(value, emit);  // TextValue value
             }
 
             if (underlyingType.IsPrimitiveType())
@@ -395,7 +395,7 @@ namespace Jil.Serialize
             if (!SkipDateTimeMathMethods)
             {
                 var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
-                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
                 emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
@@ -414,7 +414,7 @@ namespace Jil.Serialize
                     emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
                 }
 
-                emit.Call(totalMs);                         // TextWriter double
+                LoadProperty(totalMs, emit);                // TextWriter double
                 emit.Convert<long>();                       // TextWriter int
 
                 WriteString("\"\\/Date(", emit);            // TextWriter int
@@ -424,9 +424,9 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = typeof(DateTime).GetProperty("Ticks").GetMethod;
+            var getTicks = typeof(DateTime).GetProperty("Ticks");
 
-            emit.Call(getTicks);                            // TextWriter long
+            LoadProperty(getTicks, emit);                   // TextWriter long
             emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
             emit.Subtract();                                // TextWriter long
             emit.LoadConstant(10000L);                      // TextWriter long 10000
@@ -758,8 +758,8 @@ namespace Jil.Serialize
             //  - TextWriter
 
             var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
-            var strLength = typeof(string).GetProperty("Length").GetMethod;
-            var strCharsIx = typeof(string).GetProperty("Chars").GetMethod;
+            var strLength = typeof(string).GetProperty("Length");
+            var strCharsIx = typeof(string).GetProperty("Chars");
 
             var done = emit.DefineLabel();
 
@@ -776,12 +776,12 @@ namespace Jil.Serialize
                 emit.MarkLabel(loop);               // TextWriter TextWriter
                 emit.LoadLocal(i);                  // TextWriter TextWriter i
                 emit.LoadLocal(str);                // TextWriter TextWriter i string
-                emit.Call(strLength);               // TextWriter TextWriter i str.Length
+                LoadProperty(strLength, emit);      // TextWriter TextWriter i str.Length
                 emit.BranchIfGreaterOrEqual(done);  // TextWriter TextWriter
 
-                emit.LoadLocal(str);    // TextWriter TextWriter string
-                emit.LoadLocal(i);      // TextWriter TextWriter string i
-                emit.Call(strCharsIx);  // TextWriter TextWriter char
+                emit.LoadLocal(str);            // TextWriter TextWriter string
+                emit.LoadLocal(i);              // TextWriter TextWriter string i
+                LoadProperty(strCharsIx, emit); // TextWriter TextWriter char
 
                 WriteEncodedChar(emit); // TextWriter
 
@@ -885,7 +885,7 @@ namespace Jil.Serialize
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
             var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
-            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current").GetMethod;
+            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
             var iList = typeof(IList<>).MakeGenericType(elementType);
 
@@ -948,7 +948,7 @@ namespace Jil.Serialize
                     }
 
                     emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                    emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? type
+                    LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? type
 
                     WriteElement(elementType, emit, recursiveTypes);   // --empty--
                 }
@@ -974,7 +974,7 @@ namespace Jil.Serialize
                 }
 
                 emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? type
+                LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? type
 
                 WriteString(",", emit);
 
@@ -1057,7 +1057,7 @@ namespace Jil.Serialize
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
             var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
-            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current").GetMethod;
+            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
             var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
 
@@ -1121,8 +1121,8 @@ namespace Jil.Serialize
                     }
 
                     emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                    emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? KeyValuePair<,>
-
+                    LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? KeyValuePair<,>
+                    
                     emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                     emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
 
@@ -1150,7 +1150,7 @@ namespace Jil.Serialize
                 }
 
                 emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                emit.CallVirtual(enumeratorCurrent);    // Action<>? TextWriter? KeyValuePair<,>
+                LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? KeyValuePair<,>
 
                 emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                 emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
@@ -1172,13 +1172,13 @@ namespace Jil.Serialize
             // top of the stack is a KeyValue<string, elementType>
 
             var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
-            var key = keyValuePair.GetProperty("Key").GetMethod;
-            var value = keyValuePair.GetProperty("Value").GetMethod;
+            var key = keyValuePair.GetProperty("Key");
+            var value = keyValuePair.GetProperty("Value");
 
             WriteString("\"", emit);
 
-            emit.Duplicate();   // kvp kvp
-            emit.Call(key);     // kvp string
+            emit.Duplicate();           // kvp kvp
+            LoadProperty(key, emit);    // kvp string
 
             using (var str = emit.DeclareLocal<string>())
             {
@@ -1191,7 +1191,7 @@ namespace Jil.Serialize
 
             WriteString("\":", emit);
 
-            emit.Call(value);   // elementType
+            LoadProperty(value, emit);  // elementType
 
             if (elementType.IsPrimitiveType())
             {
