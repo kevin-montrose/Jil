@@ -423,10 +423,10 @@ namespace JilTests
             }
             finally
             {
-                InlineSerializer.SkipDateTimeMathMethods = true;
+                InlineSerializer.SkipSimplePropertyAccess = true;
             }
 
-            var rand = new Random(66262484);
+            var rand = new Random(94093827);
 
             var toSerialize = new List<_SkipSimplePropertyAccess>();
             for (var i = 0; i < 10000; i++)
