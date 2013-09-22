@@ -834,7 +834,15 @@ namespace Jil.Serialize
 
         static void WriteDictionary(Type dictType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
-            var elementType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
+            var dictI = dictType.GetDictionaryInterface();
+
+            var keyType = dictI.GetGenericArguments()[0];
+            var elementType = dictI.GetGenericArguments()[1];
+
+            if (keyType != typeof(string))
+            {
+                throw new InvalidOperationException("JSON dictionaries must have strings as keys, found: " + keyType);
+            }
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
 

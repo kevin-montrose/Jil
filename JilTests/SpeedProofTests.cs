@@ -13,7 +13,6 @@ namespace JilTests
 {
     // These tests make *no sense* in debug
 #if !DEBUG
-
     [TestClass]
     public class SpeedProofTests
     {
