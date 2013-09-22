@@ -68,10 +68,15 @@ namespace Jil.Serialize
 
         static List<MemberInfo> OrderMembersForAccess(Type forType)
         {
+            var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
+
+            if (forType.IsValueType)
+            {
+                return members.ToList();
+            }
+
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
-
-            var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
 
             // This order appears to be the "best" for access speed purposes
             var ret =
@@ -162,7 +167,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        static void WriteMember(MemberInfo member, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        static void WriteMember(MemberInfo member, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, bool isValueType, Sigil.Local inLocal = null)
         {
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
@@ -349,6 +354,8 @@ namespace Jil.Serialize
                         }
                         else
                         {
+                            emit.Pop();
+
                             WriteObject(underlyingType, emit, recursiveTypes, loc);
                         }
                     }
@@ -782,6 +789,8 @@ namespace Jil.Serialize
 
             var notNull = emit.DefineLabel();
 
+            var isValueType = forType.IsValueType;
+
             if (inLocal != null)
             {
                 emit.LoadLocal(inLocal);
@@ -789,6 +798,15 @@ namespace Jil.Serialize
             else
             {
                 emit.LoadArgument(1);
+            }
+
+            if (isValueType)
+            {
+                using (var temp = emit.DeclareLocal(forType))
+                {
+                    emit.StoreLocal(temp);
+                    emit.LoadLocalAddress(temp);
+                }
             }
 
             var end = emit.DefineLabel();
@@ -828,7 +846,7 @@ namespace Jil.Serialize
                 }
 
                 WriteString(keyString, emit);
-                WriteMember(member, emit, recursiveTypes, inLocal);
+                WriteMember(member, emit, recursiveTypes, isValueType, inLocal);
 
                 previousMemberWasStringy = isStringy;
             }
@@ -1359,8 +1377,6 @@ namespace Jil.Serialize
             {
                 return BuildListWithNewDelegate<ForType>();
             }
-
-            if (forType.IsValueType) throw new NotImplementedException();
 
             return BuildObjectWithNewDelegate<ForType>();
         }

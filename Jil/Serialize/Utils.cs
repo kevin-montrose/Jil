@@ -260,7 +260,7 @@ namespace Jil.Serialize
             emit.NewArray(typeof(ulong));		// ulong[]
             emit.StoreLocal(retLoc);			// --empty--
 
-            for(var i = 0; i < fields.Length; i++)
+            for (var i = 0; i < fields.Length; i++)
             {
                 var field = fields[i];
 
@@ -268,7 +268,7 @@ namespace Jil.Serialize
                 emit.LoadConstant(i);			// ulong[] ulong
 
                 emit.LoadArgument(0);			// ulong[] ulong param#0
-                emit.CastClass(t);				// ulong[] ulong param#0
+                emit.CastClass(t);	            // ulong[] ulong param#0
 
                 emit.LoadFieldAddress(field);	// ulong[] ulong field&
                 emit.Convert<ulong>();			// ulong[] ulong ulong
@@ -281,10 +281,18 @@ namespace Jil.Serialize
 
             var getAddrs = emit.CreateDelegate();
 
-            var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).First();
-            var consParameters = cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray();
+            var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).FirstOrDefault();
+            var consParameters = cons != null ? cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray() : null;
 
-            var obj = cons.Invoke(consParameters);
+            object obj;
+            if (cons != null)
+            {
+                obj = cons.Invoke(consParameters);
+            }
+            else
+            {
+                obj = Activator.CreateInstance(t);
+            }
 
             var addrs = getAddrs(obj);
 

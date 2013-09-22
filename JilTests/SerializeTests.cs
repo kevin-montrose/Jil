@@ -738,5 +738,70 @@ namespace JilTests
                 Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
+
+        public struct _ValueTypes
+        {
+            public string A;
+            public char B;
+            public List<int> C;
+        }
+
+        [TestMethod]
+        public void ValueTypes()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } }, str);
+                Assert.AreEqual("{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new[] { new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, str);
+                Assert.AreEqual("[{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}]", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new Dictionary<string, _ValueTypes> { { "hello", new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, { "world", new _ValueTypes { A = "foo bar", B = 'D', C = new List<int> { 1, 3, 1, 8 } } } }, str);
+                Assert.AreEqual("{\"hello\":{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]},\"world\":{\"A\":\"foo bar\",\"B\":\"D\",\"C\":[1,3,1,8]}}", str.ToString());
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<_ValueTypes?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<_ValueTypes?>(new _ValueTypes { A = "bizz", B = '\0', C = null }, str);
+                    Assert.AreEqual("{\"A\":\"bizz\",\"B\":\"\\u0000\",\"C\":null}", str.ToString());
+                }
+            }
+        }
+
+        public struct _CyclicalValueTypes
+        {
+            public class _One
+            {
+                public _CyclicalValueTypes? Inner;
+            }
+
+            public _One A;
+            public long B;
+            public double C;
+        }
+
+        [TestMethod]
+        public void CyclicalValueTypes()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _CyclicalValueTypes { A = new _CyclicalValueTypes._One { Inner = new _CyclicalValueTypes { B = 123, C = 4.56 } }, B = long.MaxValue, C = 78.90 }, str);
+                Assert.AreEqual("", str.ToString());
+            }
+        }
     }
 }
