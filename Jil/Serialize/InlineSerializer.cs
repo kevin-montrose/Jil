@@ -306,6 +306,25 @@ namespace Jil.Serialize
                 return;
             }
 
+            if(primitiveType == typeof(bool))
+            {
+                var trueLabel = emit.DefineLabel();
+                var done = emit.DefineLabel();
+
+                emit.BranchIfTrue(trueLabel);   // TextWriter
+                emit.Pop();                     // --empty--
+                WriteString("false", emit);     // --empty--
+                emit.Branch(done);
+
+                emit.MarkLabel(trueLabel);      // TextWriter
+                emit.Pop();                     // --empty--
+                WriteString("true", emit);      // --empty--
+
+                emit.MarkLabel(done);
+
+                return;
+            }
+
             var needsIntCoersion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
 
             if (needsIntCoersion)

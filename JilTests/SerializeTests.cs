@@ -195,6 +195,17 @@ namespace JilTests
                     Assert.AreEqual("4.56", res);
                 }
             }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<bool>(true, str);
+
+                    var res = str.ToString();
+
+                    Assert.AreEqual("true", res);
+                }
+            }
         }
 
 #pragma warning disable 0649
