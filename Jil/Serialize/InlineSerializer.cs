@@ -236,7 +236,8 @@ namespace Jil.Serialize
             }
 
             // Only put this on the stack if we'll need it
-            if (serializingType.IsPrimitiveType() || isRecursive)
+            var preloadTextWriter = serializingType.IsPrimitiveType() || isRecursive || serializingType.IsNullableType();
+            if (preloadTextWriter)
             {
                 emit.LoadArgument(0);   // TextWriter
             }
