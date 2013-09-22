@@ -16,6 +16,7 @@ namespace Jil.Serialize
         public static bool SkipNumberFormatting = true;
         public static bool UseCustomIntegerToString = true;
         public static bool SkipDateTimeMathMethods = true;
+        public static bool SkipSimplePropertyAccess = true;
 
         static string CharBuffer = "char_buffer";
         const int CharBufferSize = 20;
@@ -58,20 +59,27 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
-        static void LoadProperty(PropertyInfo prop, Emit e)
+        static void LoadProperty(PropertyInfo prop, Emit emit)
         {
-            // Top of stack:
-            //   - instance
-
             var getMtd = prop.GetMethod;
-            if (getMtd.IsVirtual)
+
+            var backingField = Utils.GetSimplePropertyBackingField(getMtd);
+
+            if (!SkipSimplePropertyAccess || backingField == null)
             {
-                e.CallVirtual(getMtd);
+                if (getMtd.IsVirtual)
+                {
+                    emit.CallVirtual(getMtd);
+                }
+                else
+                {
+                    emit.Call(getMtd);
+                }
+
+                return;
             }
-            else
-            {
-                e.Call(getMtd);
-            }
+
+            emit.LoadField(backingField);
         }
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });

@@ -380,6 +380,85 @@ namespace JilTests
 
             Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
+
+        public class _SkipSimplePropertyAccess
+        {
+            public byte A { get; set; }
+            public sbyte B { get; set; }
+            public short C { get; set; }
+            public ushort D { get; set; }
+            public int E { get; set; }
+            public uint F { get; set; }
+            public long G { get; set; }
+            public ulong H { get; set; }
+            public float I { get; set; }
+            public double J { get; set; }
+            public decimal K { get; set; }
+            public DateTime L { get; set; }
+            public string M { get; set; }
+            public char N { get; set; }
+        }
+
+        [TestMethod]
+        public void SkipSimplePropertyAccess()
+        {
+            Action<TextWriter, _SkipSimplePropertyAccess> skipped;
+            Action<TextWriter, _SkipSimplePropertyAccess> normal;
+
+            try
+            {
+                {
+                    InlineSerializer.SkipSimplePropertyAccess = true;
+
+                    // Build the *actual* serializer method
+                    skipped = InlineSerializer.Build<_SkipSimplePropertyAccess>();
+                }
+
+                {
+                    InlineSerializer.SkipSimplePropertyAccess = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializer.Build<_SkipSimplePropertyAccess>();
+                }
+            }
+            finally
+            {
+                InlineSerializer.SkipDateTimeMathMethods = true;
+            }
+
+            var rand = new Random(66262484);
+
+            var toSerialize = new List<_SkipSimplePropertyAccess>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _SkipSimplePropertyAccess
+                    {
+                        A = (byte)rand.Next(byte.MaxValue),
+                        B = (sbyte)rand.Next(sbyte.MaxValue),
+                        C = (short)rand.Next(short.MaxValue),
+                        D = (ushort)rand.Next(ushort.MaxValue),
+                        E = rand.Next(int.MaxValue),
+                        F = (uint)rand.Next(),
+                        G = rand.Next(),
+                        H = (ulong)rand.Next(),
+                        I = (float)rand.NextDouble(),
+                        J = rand.NextDouble(),
+                        K = (decimal)rand.NextDouble(),
+                        L = _RandDateTime(rand),
+                        M = _RandString(rand),
+                        N = _RandChar(rand)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double skippedTime, normalTime;
+            CompareTimes(toSerialize, skipped, normal, out skippedTime, out normalTime);
+
+            Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
+        }
     }
 #endif
 }

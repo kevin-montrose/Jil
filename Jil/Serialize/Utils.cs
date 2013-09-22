@@ -104,8 +104,9 @@ namespace Jil.Serialize
             while (i < cil.Length)
             {
                 int? fieldHandle;
+                OpCode ignored;
                 var startsAt = i;
-                i += _ReadOp(cil, i, out fieldHandle);
+                i += _ReadOp(cil, i, out fieldHandle, out ignored);
 
                 if (fieldHandle.HasValue)
                 {
@@ -116,13 +117,12 @@ namespace Jil.Serialize
             return ret;
         }
 
-        private static int _ReadOp(byte[] cil, int ix, out int? fieldHandle)
+        private static int _ReadOp(byte[] cil, int ix, out int? fieldHandle, out OpCode opcode)
         {
 			const byte ContinueOpcode = 0xFE;
 
             int advance = 0;
 
-            OpCode opcode;
             byte first = cil[ix];
 
             if (first == ContinueOpcode)
@@ -318,49 +318,51 @@ namespace Jil.Serialize
             return ret;
         }
 
-        private static IEnumerable<string> _ExtractStringConstants(Type type, HashSet<Type> alreadySeen = null)
+        private static readonly IEnumerable<OpCode> LegalSimpleProperyOps = new[] { OpCodes.Nop, OpCodes.Ldarg_0, OpCodes.Ldfld, OpCodes.Ret };
+        public static FieldInfo GetSimplePropertyBackingField(MethodInfo getMtd)
         {
-            alreadySeen = alreadySeen ?? new HashSet<Type>();
+            var mtdBody = getMtd.GetMethodBody();
+            if (mtdBody == null) return null;
 
-            if (alreadySeen.Contains(type))
+            var cil = mtdBody.GetILAsByteArray();
+            if (cil == null) return null;
+
+            var fieldHandles = new List<int>();
+            var ops = new List<OpCode>();
+
+            int i = 0;
+            while (i < cil.Length)
             {
-                yield break;
-            }
+                int? fieldHandle;
+                OpCode op;
+                var startsAt = i;
+                i += _ReadOp(cil, i, out fieldHandle, out op);
 
-            if (type.IsDictionaryType() || type.IsListType() || type.IsPrimitiveType())
-            {
-                yield break;
-            }
+                ops.Add(op);
 
-            alreadySeen.Add(type);
-
-            foreach (var prop in type.GetProperties())
-            {
-                yield return prop.Name;
-
-                foreach (var str in _ExtractStringConstants(prop.PropertyType, alreadySeen))
+                if (fieldHandle.HasValue)
                 {
-                    yield return str;
+                    fieldHandles.Add(fieldHandle.Value);
                 }
             }
 
-            foreach (var field in type.GetFields())
+            if (fieldHandles.Count != 1) return null;
+            if (ops.Any(a => !LegalSimpleProperyOps.Contains(a))) return null;
+
+            Type[] genericTypeParameters = null;
+            Type[] genericMethodParameters = null;
+
+            if (getMtd.DeclaringType.IsGenericType)
             {
-                yield return field.Name;
-
-                foreach (var str in _ExtractStringConstants(field.FieldType, alreadySeen))
-                {
-                    yield return str;
-                }
+                genericTypeParameters = getMtd.DeclaringType.GenericTypeArguments;
             }
-        }
 
-        public static List<string> ExtractStringConstants(Type type)
-        {
-            var strings = _ExtractStringConstants(type).ToList();
-            var uniqueStrings = strings.Distinct().ToList();
+            if (getMtd.IsGenericMethod)
+            {
+                genericMethodParameters = getMtd.GetGenericArguments();
+            }
 
-            return uniqueStrings;
+            return getMtd.Module.ResolveField(fieldHandles[0], genericTypeParameters, genericMethodParameters);
         }
     }
 }
