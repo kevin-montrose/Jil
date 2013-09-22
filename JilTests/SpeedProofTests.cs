@@ -226,7 +226,7 @@ namespace JilTests
             Assert.IsTrue(skippingTime < normalTime, "skippingTime = " + skippingTime + ", normalTime = " + normalTime);
         }
 
-        public class _CustomNumberToString
+        public class _CustomIntegerToString
         {
             public byte A;
             public sbyte B;
@@ -239,39 +239,39 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void CustomNumberToString()
+        public void CustomIntegerToString()
         {
-            Action<TextWriter, _CustomNumberToString> custom;
-            Action<TextWriter, _CustomNumberToString> normal;
+            Action<TextWriter, _CustomIntegerToString> custom;
+            Action<TextWriter, _CustomIntegerToString> normal;
 
             try
             {
                 {
-                    InlineSerializer.UseCustomNumberToString = true;
+                    InlineSerializer.UseCustomIntegerToString = true;
 
                     // Build the *actual* serializer method
-                    custom = InlineSerializer.Build<_CustomNumberToString>();
+                    custom = InlineSerializer.Build<_CustomIntegerToString>();
                 }
 
                 {
-                    InlineSerializer.UseCustomNumberToString = false;
+                    InlineSerializer.UseCustomIntegerToString = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer.Build<_CustomNumberToString>();
+                    normal = InlineSerializer.Build<_CustomIntegerToString>();
                 }
             }
             finally
             {
-                InlineSerializer.UseCustomNumberToString = true;
+                InlineSerializer.UseCustomIntegerToString = true;
             }
 
             var rand = new Random(139426720);
 
-            var toSerialize = new List<_CustomNumberToString>();
+            var toSerialize = new List<_CustomIntegerToString>();
             for (var i = 0; i < 10000; i++)
             {
                 toSerialize.Add(
-                    new _CustomNumberToString
+                    new _CustomIntegerToString
                     {
                         A = (byte)(101 + rand.Next(155)),
                         B = (sbyte)(101 + rand.Next(27)),
@@ -281,6 +281,66 @@ namespace JilTests
                         F = (uint)(101 + rand.Next(int.MaxValue - 101)),
                         G = (long)(101 + rand.Next(int.MaxValue)),
                         H = (ulong)(101 + rand.Next(int.MaxValue))
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double customTime, normalTime;
+            CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
+
+            Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
+        }
+
+        public class _CustomDoubleToString
+        {
+            public double[] Doubles;
+        }
+
+        [TestMethod]
+        public void CustomDoubleToString()
+        {
+            Action<TextWriter, _CustomDoubleToString> custom;
+            Action<TextWriter, _CustomDoubleToString> normal;
+
+            try
+            {
+                {
+                    InlineSerializer.UseCustomDoubleToString = true;
+
+                    // Build the *actual* serializer method
+                    custom = InlineSerializer.Build<_CustomDoubleToString>();
+                }
+
+                {
+                    InlineSerializer.UseCustomDoubleToString = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializer.Build<_CustomDoubleToString>();
+                }
+            }
+            finally
+            {
+                InlineSerializer.UseCustomDoubleToString = true;
+            }
+
+            var rand = new Random(139426720);
+
+            var toSerialize = new List<_CustomDoubleToString>();
+            for (var i = 0; i < 1000; i++)
+            {
+                var arr = new double[rand.Next(10) + 5];
+
+                for (var j = 0; j < arr.Length; j++)
+                {
+                    arr[j] = rand.NextDouble() * rand.Next();
+                }
+
+                toSerialize.Add(
+                    new _CustomDoubleToString
+                    {
+                        Doubles = arr
                     }
                 );
             }

@@ -1,6 +1,7 @@
 ﻿using Sigil;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    class Utils
+    partial class Utils
     {
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;
@@ -352,6 +353,12 @@ namespace Jil.Serialize
             var uniqueStrings = strings.Distinct().ToList();
 
             return uniqueStrings;
+        }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static void FormatDouble(TextWriter writer, double d)
+        {
+            FastDoubleFormatter.FormatDoubleFast(d, 15, 15, writer);
         }
     }
 }

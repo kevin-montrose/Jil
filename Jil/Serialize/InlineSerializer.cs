@@ -14,7 +14,8 @@ namespace Jil.Serialize
     {
         public static bool ReorderMembers = true;
         public static bool SkipNumberFormatting = true;
-        public static bool UseCustomNumberToString = true;
+        public static bool UseCustomIntegerToString = true;
+        public static bool UseCustomDoubleToString = true;
 
         static string CharBuffer = "char_buffer";
         const int CharBufferSize = 20;
@@ -327,7 +328,7 @@ namespace Jil.Serialize
 
                 // default case
 
-                if (UseCustomNumberToString)
+                if (UseCustomIntegerToString)
                 {
                     emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
                     emit.Call(InlineSerializer_CustomWriteInt); // --empty--
@@ -357,7 +358,14 @@ namespace Jil.Serialize
 
             var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
 
-            if (UseCustomNumberToString)
+            if (primitiveType == typeof(double) && UseCustomDoubleToString)
+            {
+                var doubleMtd = typeof(Utils).GetMethod("FormatDouble");
+                emit.Call(doubleMtd);
+                return;
+            }
+
+            if (UseCustomIntegerToString)
             {
                 if (primitiveType == typeof(uint))
                 {
@@ -384,11 +392,10 @@ namespace Jil.Serialize
                 }
 
                 emit.CallVirtual(builtInMtd);       // --empty--
+                return;
             }
-            else
-            {
-                emit.CallVirtual(builtInMtd);       // --empty--
-            }
+
+            emit.CallVirtual(builtInMtd);       // --empty--
         }
 
         static MethodInfo InlineSerializer_CustomWriteInt = typeof(InlineSerializer).GetMethod("CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1056,7 +1063,7 @@ namespace Jil.Serialize
 
         static void AddCharBuffer(Emit emit)
         {
-            if (UseCustomNumberToString)
+            if (UseCustomIntegerToString)
             {
                 emit.DeclareLocal<char[]>(CharBuffer);
                 emit.LoadConstant(CharBufferSize);
