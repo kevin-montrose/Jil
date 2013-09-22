@@ -226,6 +226,73 @@ namespace JilTests
 
             Assert.IsTrue(skippingTime < normalTime, "skippingTime = " + skippingTime + ", normalTime = " + normalTime);
         }
+
+        public class _CustomNumberToString
+        {
+            public byte A;
+            public sbyte B;
+            public short C;
+            public ushort D;
+            public int E;
+            public uint F;
+            public long G;
+            public ulong H;
+        }
+
+        [TestMethod]
+        public void CustomNumberToString()
+        {
+            Action<TextWriter, _CustomNumberToString> custom;
+            Action<TextWriter, _CustomNumberToString> normal;
+
+            try
+            {
+                {
+                    InlineSerializer.UseCustomNumberToString = true;
+
+                    // Build the *actual* serializer method
+                    custom = InlineSerializer.Build<_CustomNumberToString>();
+                }
+
+                {
+                    InlineSerializer.UseCustomNumberToString = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializer.Build<_CustomNumberToString>();
+                }
+            }
+            finally
+            {
+                InlineSerializer.UseCustomNumberToString = true;
+            }
+
+            var rand = new Random(139426720);
+
+            var toSerialize = new List<_CustomNumberToString>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _CustomNumberToString
+                    {
+                        A = (byte)(101 + rand.Next(155)),
+                        B = (sbyte)(101 + rand.Next(27)),
+                        C = (short)(101 + rand.Next(1000)),
+                        D = (ushort)(101 + rand.Next(1000)),
+                        E = 101 + rand.Next(int.MaxValue - 101),
+                        F = (uint)(101 + rand.Next(int.MaxValue - 101)),
+                        G = (long)(101 + rand.Next(int.MaxValue)),
+                        H = (ulong)(101 + rand.Next(int.MaxValue))
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double customTime, normalTime;
+            CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
+
+            Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
+        }
     }
 #endif
 }

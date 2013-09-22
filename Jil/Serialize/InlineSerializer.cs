@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,6 +14,10 @@ namespace Jil.Serialize
     {
         public static bool ReorderMembers = true;
         public static bool SkipNumberFormatting = true;
+        public static bool UseCustomNumberToString = true;
+
+        static string CharBuffer = "char_buffer";
+        const int CharBufferSize = 20;
 
         static Dictionary<char, string> CharacterEscapes = 
             new Dictionary<char, string>{
@@ -321,7 +326,17 @@ namespace Jil.Serialize
                 emit.Switch(labels);            // TextWriter int
 
                 // default case
-                emit.CallVirtual(writeInt);     // --empty--
+                
+                if (UseCustomNumberToString)
+                {
+                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.Call(InlineSerializer_CustomWriteInt); // --empty--
+                }
+                else
+                {
+                    emit.CallVirtual(writeInt);     // --empty--
+                }
+
                 emit.Branch(done);              // --empty--
 
                 for (var i = 0; i < labels.Length; i++)
@@ -341,8 +356,132 @@ namespace Jil.Serialize
             {
                 var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
 
-                emit.CallVirtual(builtInMtd);       // --empty--
+                if (primitiveType == typeof(uint) && UseCustomNumberToString)
+                {
+                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.Call(InlineSerializer_CustomWriteUInt); // --empty--
+                }
+                else
+                {
+                    if (primitiveType == typeof(long) && UseCustomNumberToString)
+                    {
+                        emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                        emit.Call(InlineSerializer_CustomWriteLong); // --empty--
+                    }
+                    else
+                    {
+                        if (primitiveType == typeof(ulong) && UseCustomNumberToString)
+                        {
+                            emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                            emit.Call(InlineSerializer_CustomWriteULong); // --empty--
+                        }
+                        else
+                        {
+                            emit.CallVirtual(builtInMtd);       // --empty--
+                        }
+                    }
+                }
             }
+        }
+
+        static MethodInfo InlineSerializer_CustomWriteInt = typeof(InlineSerializer).GetMethod("CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CustomWriteInt(TextWriter writer, int number, char[] buffer)
+        {
+            var ptr = CharBufferSize - 1;
+
+            var copy = number;
+            if (copy < 0)
+            {
+                copy = -copy;
+            }
+
+            do
+            {
+                var ix = copy % 10;
+                copy /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (copy != 0);
+
+            if (number < 0)
+            {
+                buffer[ptr] = '-';
+                ptr--;
+            }
+
+            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
+        }
+
+        static MethodInfo InlineSerializer_CustomWriteUInt = typeof(InlineSerializer).GetMethod("CustomWriteUInt", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CustomWriteUInt(TextWriter writer, uint number, char[] buffer)
+        {
+            var ptr = CharBufferSize - 1;
+
+            var copy = number;
+            
+            do
+            {
+                var ix = copy % 10;
+                copy /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (copy != 0);
+
+            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
+        }
+
+        static MethodInfo InlineSerializer_CustomWriteLong = typeof(InlineSerializer).GetMethod("CustomWriteLong", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CustomWriteLong(TextWriter writer, long number, char[] buffer)
+        {
+            var ptr = CharBufferSize - 1;
+
+            var copy = number;
+            if (copy < 0)
+            {
+                copy = -copy;
+            }
+
+            do
+            {
+                var ix = copy % 10;
+                copy /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (copy != 0);
+
+            if (number < 0)
+            {
+                buffer[ptr] = '-';
+                ptr--;
+            }
+
+            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
+        }
+
+        static MethodInfo InlineSerializer_CustomWriteULong = typeof(InlineSerializer).GetMethod("CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
+        {
+            var ptr = CharBufferSize - 1;
+
+            var copy = number;
+
+            do
+            {
+                var ix = copy % 10;
+                copy /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (copy != 0);
+
+            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
         static void WriteEncodedChar(Emit emit)
@@ -900,11 +1039,24 @@ namespace Jil.Serialize
             return ret;
         }
 
+        static void AddCharBuffer(Emit emit)
+        {
+            if (UseCustomNumberToString)
+            {
+                emit.DeclareLocal<char[]>(CharBuffer);
+                emit.LoadConstant(CharBufferSize);
+                emit.NewArray<char>();
+                emit.StoreLocal(CharBuffer);
+            }
+        }
+
         static Action<TextWriter, ForType> BuildObjectWithNewDelegate<ForType>()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+
+            AddCharBuffer(emit);
 
             var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
 
@@ -920,6 +1072,8 @@ namespace Jil.Serialize
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ListType) });
 
+            AddCharBuffer(emit);
+
             var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
 
             WriteList(typeof(ListType), emit, preloaded);
@@ -933,6 +1087,8 @@ namespace Jil.Serialize
             var recursiveTypes = FindRecursiveTypes(typeof(DictType));
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(DictType) });
+
+            AddCharBuffer(emit);
 
             var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
 
@@ -948,6 +1104,8 @@ namespace Jil.Serialize
             var isString = primitiveType == typeof(string) || primitiveType == typeof(char);
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(PrimitiveType) });
+
+            AddCharBuffer(emit);
 
             emit.LoadArgument(0);
             emit.LoadArgument(1);
