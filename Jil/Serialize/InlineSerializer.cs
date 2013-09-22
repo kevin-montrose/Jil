@@ -326,7 +326,7 @@ namespace Jil.Serialize
                 emit.Switch(labels);            // TextWriter int
 
                 // default case
-                
+
                 if (UseCustomNumberToString)
                 {
                     emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
@@ -351,36 +351,43 @@ namespace Jil.Serialize
                 }
 
                 emit.MarkLabel(done);           // --empty--
-            }
-            else
-            {
-                var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
 
-                if (primitiveType == typeof(uint) && UseCustomNumberToString)
+                return;
+            }
+
+            var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
+
+            if (UseCustomNumberToString)
+            {
+                if (primitiveType == typeof(uint))
                 {
                     emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
                     emit.Call(InlineSerializer_CustomWriteUInt); // --empty--
+
+                    return;
                 }
-                else
+
+                if (primitiveType == typeof(long))
                 {
-                    if (primitiveType == typeof(long) && UseCustomNumberToString)
-                    {
-                        emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                        emit.Call(InlineSerializer_CustomWriteLong); // --empty--
-                    }
-                    else
-                    {
-                        if (primitiveType == typeof(ulong) && UseCustomNumberToString)
-                        {
-                            emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                            emit.Call(InlineSerializer_CustomWriteULong); // --empty--
-                        }
-                        else
-                        {
-                            emit.CallVirtual(builtInMtd);       // --empty--
-                        }
-                    }
+                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.Call(InlineSerializer_CustomWriteLong); // --empty--
+
+                    return;
                 }
+
+                if (primitiveType == typeof(ulong))
+                {
+                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.Call(InlineSerializer_CustomWriteULong); // --empty--
+
+                    return;
+                }
+
+                emit.CallVirtual(builtInMtd);       // --empty--
+            }
+            else
+            {
+                emit.CallVirtual(builtInMtd);       // --empty--
             }
         }
 
