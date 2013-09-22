@@ -43,10 +43,22 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, str);
-
                 var res = str.ToString();
-
                 Assert.AreEqual("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new[] { new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, new _Cyclical { Foo = 456 } }, str);
+                var res = str.ToString();
+                Assert.AreEqual("[{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},{\"Foo\":456,\"Next\":null}]", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, {"world", new _Cyclical { Foo = 456 } } }, str);
+                var res = str.ToString();
+                Assert.AreEqual("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
             }
         }
 
