@@ -643,7 +643,7 @@ namespace Jil.Serialize
 
             do
             {
-                var ix = copy % 10;
+                var ix = (int)(copy % 10);
                 copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
