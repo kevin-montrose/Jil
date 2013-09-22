@@ -606,5 +606,137 @@ namespace JilTests
                 Assert.AreEqual("\"hello\\b\\f\\r\\n\\tworld\"", str.ToString());
             }
         }
+
+        [TestMethod]
+        public void NullablePrimitives()
+        {
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<byte?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<byte?>(123, str);
+                    Assert.AreEqual("123", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<sbyte?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<sbyte?>(-123, str);
+                    Assert.AreEqual("-123", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<short?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<short?>(-1024, str);
+                    Assert.AreEqual("-1024", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ushort?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ushort?>(2048, str);
+                    Assert.AreEqual("2048", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<int?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<int?>(-1234567, str);
+                    Assert.AreEqual("-1234567", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<uint?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<uint?>(123456789, str);
+                    Assert.AreEqual("123456789", str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<long?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<long?>(long.MinValue, str);
+                    Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                }
+            }
+
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ulong?>(null, str);
+                    Assert.AreEqual("null", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize<ulong?>(ulong.MaxValue, str);
+                    Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                }
+            }
+        }
+
+        [TestMethod]
+        public void NullableMembers()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new List<int?> { 0, null, 1, null, 2, null, 3 }, str);
+                Assert.AreEqual("[0,null,1,null,2,null,3]", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new Dictionary<string, double?> { { "hello", null }, {"world", 3.21}}, str);
+                Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
+            }
+        }
     }
 }

@@ -9,6 +9,18 @@ namespace Jil
 {
     internal static class ExtensionMethods
     {
+        public static bool IsNullableType(this Type t)
+        {
+            var underlying = GetUnderlyingType(t);
+
+            return underlying != null;
+        }
+
+        public static Type GetUnderlyingType(this Type t)
+        {
+            return Nullable.GetUnderlyingType(t);
+        }
+
         public static bool IsListType(this Type t)
         {
             try
