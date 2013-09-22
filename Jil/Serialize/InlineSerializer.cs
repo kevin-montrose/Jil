@@ -291,6 +291,32 @@ namespace Jil.Serialize
             }
         }
 
+        static void WriteDateTime(Emit emit)
+        {
+            // top of stack:
+            //   - DateTime
+            //   - TextWriter
+
+            var subtractMtd = typeof(DateTime).GetMethod("Subtract", new [] { typeof(DateTime) });
+            var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+
+            emit.LoadConstant(1970);                    // TextWriter DateTime 1970
+            emit.LoadConstant(1);                       // TextWriter DateTime 1970 1
+            emit.LoadConstant(1);                       // TextWriter DateTime 1970 1 1
+            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0
+            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0 0
+            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0 0 0 
+            emit.LoadConstant((int)DateTimeKind.Utc);   // TextWriter DateTime 1970 1 1 0 0 0 Utc
+            emit.NewObject<DateTime, int, int, int, int, int, int, DateTimeKind>(); // TextWriter DateTime DateTime
+            emit.Call(subtractMtd);                     // TextWriter TimeSpan
+            emit.Call(totalMs);                         // TextWriter double
+            emit.Convert<long>();                        // TextWriter int
+
+            WriteString("\"\\/Date(", emit);            // TextWriter int
+            WritePrimitive(typeof(long), emit);         // --empty--
+            WriteString(")\\/", emit);                  // --empty--
+        }
+
         static void WritePrimitive(Type primitiveType, Emit emit)
         {
             if (primitiveType == typeof(char))
@@ -303,6 +329,12 @@ namespace Jil.Serialize
             if (primitiveType == typeof(string))
             {
                 WriteEncodedString(emit);
+                return;
+            }
+
+            if (primitiveType == typeof(DateTime))
+            {
+                WriteDateTime(emit);
                 return;
             }
 

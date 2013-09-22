@@ -585,6 +585,12 @@ namespace JilTests
                 JSON.Serialize("hello\b\f\r\n\tworld", str);
                 Assert.AreEqual("\"hello\\b\\f\\r\\n\\tworld\"", str.ToString());
             }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new DateTime(1999, 1, 2, 3, 4, 5, 6, DateTimeKind.Utc), str);
+                Assert.AreEqual("\\/Date(915246245006)\\/", str.ToString());
+            }
         }
     }
 }
