@@ -79,51 +79,5 @@ namespace JilTests
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][0]);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
         }
-
-        [TestMethod]
-        public void FastDouble()
-        {
-            for (var i = 0.1; i <= 1.0; i += 0.1)
-            {
-                for (var j = 1; j <= 10000; j++)
-                {
-                    var tryD = i * j;
-
-                    using (var str = new StringWriter())
-                    {
-                        Utils.FormatDouble(str, tryD);
-
-                        var asStr = str.ToString();
-
-                        Assert.AreEqual(tryD.ToString(), double.Parse(asStr).ToString());
-                    }
-                }
-            }
-
-            for (var i = ushort.MinValue; i < ushort.MaxValue; i++)
-            {
-                for (ushort j = 1; j < (ushort)Math.Sqrt(i); j++)
-                {
-                    double trial = i;
-                    trial /= (double)j;
-
-                    using (var a = new StringWriter())
-                    {
-                        Utils.FormatDouble(a, trial);
-                        var aStr = a.ToString();
-                        Assert.AreEqual(trial.ToString(), double.Parse(aStr).ToString());
-                    }
-
-                    trial = -trial;
-
-                    using (var b = new StringWriter())
-                    {
-                        Utils.FormatDouble(b, trial);
-                        var bStr = b.ToString();
-                        Assert.AreEqual(trial.ToString(), double.Parse(bStr).ToString());
-                    }
-                }
-            }
-        }
     }
 }

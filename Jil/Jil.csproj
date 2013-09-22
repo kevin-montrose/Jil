@@ -47,9 +47,6 @@
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Serialize\Utils.FastDoubleFormatter.cs">
-      <DependentUpon>Utils.cs</DependentUpon>
-    </Compile>
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\TypeCache.cs" />
   </ItemGroup>

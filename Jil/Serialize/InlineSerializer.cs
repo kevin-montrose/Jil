@@ -15,7 +15,6 @@ namespace Jil.Serialize
         public static bool ReorderMembers = true;
         public static bool SkipNumberFormatting = true;
         public static bool UseCustomIntegerToString = true;
-        public static bool UseCustomDoubleToString = true;
 
         static string CharBuffer = "char_buffer";
         const int CharBufferSize = 20;
@@ -357,13 +356,6 @@ namespace Jil.Serialize
             }
 
             var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
-
-            if (primitiveType == typeof(double) && UseCustomDoubleToString)
-            {
-                var doubleMtd = typeof(Utils).GetMethod("FormatDouble");
-                emit.Call(doubleMtd);
-                return;
-            }
 
             if (UseCustomIntegerToString)
             {

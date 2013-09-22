@@ -354,11 +354,5 @@ namespace Jil.Serialize
 
             return uniqueStrings;
         }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static void FormatDouble(TextWriter writer, double d)
-        {
-            FastDoubleFormatter.FormatDoubleFast(d, 15, 15, writer);
-        }
     }
 }
