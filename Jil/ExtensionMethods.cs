@@ -67,7 +67,8 @@ namespace Jil
                 t == typeof(uint) ||
                 t == typeof(long) ||
                 t == typeof(ulong) ||
-                t == typeof(bool);
+                t == typeof(bool) ||
+                t == typeof(DateTime);
         }
 
         public static bool IsStringyType(this MemberInfo member)

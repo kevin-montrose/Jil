@@ -15,6 +15,7 @@ namespace Jil.Serialize
         public static bool ReorderMembers = true;
         public static bool SkipNumberFormatting = true;
         public static bool UseCustomIntegerToString = true;
+        public static bool SkipDateTimeMathMethods = true;
 
         static string CharBuffer = "char_buffer";
         const int CharBufferSize = 20;
@@ -297,24 +298,55 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            var subtractMtd = typeof(DateTime).GetMethod("Subtract", new [] { typeof(DateTime) });
-            var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+            using (var loc = emit.DeclareLocal<DateTime>())
+            {
+                emit.StoreLocal(loc);       // TextWriter
+                emit.LoadLocalAddress(loc); // TextWriter DateTime*
+            }
 
-            emit.LoadConstant(1970);                    // TextWriter DateTime 1970
-            emit.LoadConstant(1);                       // TextWriter DateTime 1970 1
-            emit.LoadConstant(1);                       // TextWriter DateTime 1970 1 1
-            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0
-            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0 0
-            emit.LoadConstant(0);                       // TextWriter DateTime 1970 1 1 0 0 0 
-            emit.LoadConstant((int)DateTimeKind.Utc);   // TextWriter DateTime 1970 1 1 0 0 0 Utc
-            emit.NewObject<DateTime, int, int, int, int, int, int, DateTimeKind>(); // TextWriter DateTime DateTime
-            emit.Call(subtractMtd);                     // TextWriter TimeSpan
-            emit.Call(totalMs);                         // TextWriter double
-            emit.Convert<long>();                        // TextWriter int
+            if (!SkipDateTimeMathMethods)
+            {
+                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+
+                emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
+                emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
+                emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1 1
+                emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0
+                emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0
+                emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0 0 
+                emit.LoadConstant((int)DateTimeKind.Utc);   // TextWriter DateTime* 1970 1 1 0 0 0 Utc
+                emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
+                emit.Call(subtractMtd);                     // TextWriter TimeSpan
+
+                using (var loc = emit.DeclareLocal<TimeSpan>())
+                {
+                    emit.StoreLocal(loc);                   // TextWriter
+                    emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
+                }
+
+                emit.Call(totalMs);                         // TextWriter double
+                emit.Convert<long>();                       // TextWriter int
+
+                WriteString("\"\\/Date(", emit);            // TextWriter int
+                WritePrimitive(typeof(long), emit);         // --empty--
+                WriteString(")\\/\"", emit);                  // --empty--
+
+                return;
+            }
+
+            var getTicks = typeof(DateTime).GetProperty("Ticks").GetMethod;
+
+            emit.Call(getTicks);                            // TextWriter long
+            emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
+            emit.Subtract();                                // TextWriter long
+            emit.LoadConstant(10000L);                      // TextWriter long 10000
+            emit.Divide();                                  // TextWriter long
 
             WriteString("\"\\/Date(", emit);            // TextWriter int
             WritePrimitive(typeof(long), emit);         // --empty--
-            WriteString(")\\/", emit);                  // --empty--
+            WriteString(")\\/\"", emit);                  // --empty--
         }
 
         static void WritePrimitive(Type primitiveType, Emit emit)

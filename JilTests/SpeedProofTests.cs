@@ -40,10 +40,38 @@ namespace JilTests
             return new string(ret);
         }
 
-        private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T> a, Action<TextWriter, T> b, out double aTimeMS, out double bTimeMS)
+        private static DateTime _RandDateTime(Random rand)
+        {
+            var year = 1 + rand.Next(3000);
+            var month = 1 + rand.Next(12);
+            var day = 1 + rand.Next(28);
+            var hour = rand.Next(24);
+            var minute = rand.Next(60);
+            var second = rand.Next(60);
+
+            return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+        }
+
+        private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T> a, Action<TextWriter, T> b, out double aTimeMS, out double bTimeMS, bool checkCorrectness = true)
         {
             var aTimer = new Stopwatch();
             var bTimer = new Stopwatch();
+
+            // Some of our optimizations change the produced string, so we can conditionally suppress this
+            if (checkCorrectness)
+            {
+                foreach (var item in toSerialize)
+                {
+                    using (var aStr = new StringWriter())
+                    using (var bStr = new StringWriter())
+                    {
+                        a(aStr, item);
+                        b(bStr, item);
+
+                        Assert.AreEqual(aStr.ToString(), bStr.ToString());
+                    }
+                }
+            }
 
             Action timeA =
                 () =>
@@ -160,7 +188,7 @@ namespace JilTests
             toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
 
             double reorderedTime, normalOrderTime;
-            CompareTimes(toSerialize, memoryOrder, normalOrder, out reorderedTime, out normalOrderTime);
+            CompareTimes(toSerialize, memoryOrder, normalOrder, out reorderedTime, out normalOrderTime, checkCorrectness: false);
 
             Assert.IsTrue(reorderedTime < normalOrderTime, "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime);
         }
@@ -291,6 +319,66 @@ namespace JilTests
             CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
 
             Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
+        }
+
+        public class _SkipDateTimeMathMethods
+        {
+            public DateTime[] Dates;
+        }
+
+        [TestMethod]
+        public void SkipDateTimeMathMethods()
+        {
+            Action<TextWriter, _SkipDateTimeMathMethods> skipped;
+            Action<TextWriter, _SkipDateTimeMathMethods> normal;
+
+            try
+            {
+                {
+                    InlineSerializer.SkipDateTimeMathMethods = true;
+
+                    // Build the *actual* serializer method
+                    skipped = InlineSerializer.Build<_SkipDateTimeMathMethods>();
+                }
+
+                {
+                    InlineSerializer.SkipDateTimeMathMethods = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializer.Build<_SkipDateTimeMathMethods>();
+                }
+            }
+            finally
+            {
+                InlineSerializer.SkipDateTimeMathMethods = true;
+            }
+
+            var rand = new Random(66262484);
+
+            var toSerialize = new List<_SkipDateTimeMathMethods>();
+            for (var i = 0; i < 1000; i++)
+            {
+                var numDates = new DateTime[5 + rand.Next(10)];
+
+                for (var j = 0; j < numDates.Length; j++)
+                {
+                    numDates[j] = _RandDateTime(rand);
+                }
+
+                toSerialize.Add(
+                    new _SkipDateTimeMathMethods
+                    {
+                        Dates = numDates
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double skippedTime, normalTime;
+            CompareTimes(toSerialize, skipped, normal, out skippedTime, out normalTime);
+
+            Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
     }
 #endif
