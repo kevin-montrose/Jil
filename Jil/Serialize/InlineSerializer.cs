@@ -341,23 +341,37 @@ namespace Jil.Serialize
             {
                 using (var loc = emit.DeclareLocal(underlyingType))
                 {
-                    emit.StoreLocal(loc);
+                    emit.StoreLocal(loc);   // TextWriter
 
-                    if (underlyingType.IsListType())
+                    if (recursiveTypes.ContainsKey(underlyingType))
                     {
-                        WriteList(underlyingType, emit, recursiveTypes, loc);
+                        var act = typeof(Action<,>).MakeGenericType(typeof(TextWriter), underlyingType);
+                        var invoke = act.GetMethod("Invoke");
+
+                        emit.Pop();                                     // --empty--
+                        emit.LoadLocal(recursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
+                        emit.LoadArgument(0);                           // Action<,> TextWriter
+                        emit.LoadLocal(loc);                            // Action<,> TextWriter value
+                        emit.Call(invoke);                              // --empty--
                     }
                     else
                     {
-                        if (underlyingType.IsDictionaryType())
+                        if (underlyingType.IsListType())
                         {
                             WriteList(underlyingType, emit, recursiveTypes, loc);
                         }
                         else
                         {
-                            emit.Pop();
+                            if (underlyingType.IsDictionaryType())
+                            {
+                                WriteList(underlyingType, emit, recursiveTypes, loc);
+                            }
+                            else
+                            {
+                                emit.Pop();
 
-                            WriteObject(underlyingType, emit, recursiveTypes, loc);
+                                WriteObject(underlyingType, emit, recursiveTypes, loc);
+                            }
                         }
                     }
                 }
