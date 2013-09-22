@@ -416,19 +416,19 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0008' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0008\"}", str.ToString());
+                Assert.AreEqual("{\"Char\":\"\\b\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0009' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0009\"}", str.ToString());
+                Assert.AreEqual("{\"Char\":\"\\t\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000A' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000A\"}", str.ToString());
+                Assert.AreEqual("{\"Char\":\"\\n\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
@@ -440,13 +440,13 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000C' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000C\"}", str.ToString());
+                Assert.AreEqual("{\"Char\":\"\\f\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000D' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000D\"}", str.ToString());
+                Assert.AreEqual("{\"Char\":\"\\r\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
@@ -567,6 +567,12 @@ namespace JilTests
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '"' }, str);
                 Assert.AreEqual("{\"Char\":\"\\\"\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize("hello\b\f\r\n\tworld", str);
+                Assert.AreEqual("\"hello\\b\\f\\r\\n\\tworld\"", str.ToString());
             }
         }
     }
