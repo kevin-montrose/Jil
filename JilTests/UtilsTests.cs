@@ -80,6 +80,7 @@ namespace JilTests
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
         }
 
+#pragma warning disable 0649
         public class _GetSimplePropertyBackingField
         {
             public int Foo { get; set; }
@@ -87,6 +88,7 @@ namespace JilTests
             private double _Bar;
             public double Bar { get { return _Bar; } }
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void GetSimplePropertyBackingField()
@@ -96,6 +98,54 @@ namespace JilTests
 
             var bar = Utils.GetSimplePropertyBackingField(typeof(_GetSimplePropertyBackingField).GetProperty("Bar").GetMethod);
             Assert.IsNotNull(bar);
+        }
+
+        [TestMethod]
+        public void FastDouble()
+        {
+            {
+                bool negative, nan, infinity;
+                long mantissa, exponent;
+                Utils.ExtractMantissaAndExponent(123.321, out negative, out mantissa, out exponent, out infinity, out nan);
+
+                Assert.IsFalse(negative);
+                Assert.AreEqual(4338971950366851, mantissa);
+                Assert.AreEqual(-45, exponent);
+            }
+
+            {
+                bool negative, nan, infinity;
+                long mantissa, exponent;
+                Utils.ExtractMantissaAndExponent(-123.321, out negative, out mantissa, out exponent, out infinity, out nan);
+
+                Assert.IsTrue(negative);
+                Assert.AreEqual(4338971950366851, mantissa);
+                Assert.AreEqual(-45, exponent);
+            }
+
+            {
+                bool negative, nan, infinity;
+                long mantissa, exponent;
+                Utils.ExtractMantissaAndExponent(double.NaN, out negative, out mantissa, out exponent, out infinity, out nan);
+
+                Assert.IsTrue(nan);
+            }
+
+            {
+                bool negative, nan, infinity;
+                long mantissa, exponent;
+                Utils.ExtractMantissaAndExponent(double.NegativeInfinity, out negative, out mantissa, out exponent, out infinity, out nan);
+
+                Assert.IsTrue(infinity);
+            }
+
+            {
+                bool negative, nan, infinity;
+                long mantissa, exponent;
+                Utils.ExtractMantissaAndExponent(double.PositiveInfinity, out negative, out mantissa, out exponent, out infinity, out nan);
+
+                Assert.IsTrue(infinity);
+            }
         }
     }
 }

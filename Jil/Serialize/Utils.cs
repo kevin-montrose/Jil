@@ -364,5 +364,43 @@ namespace Jil.Serialize
 
             return getMtd.Module.ResolveField(fieldHandles[0], genericTypeParameters, genericMethodParameters);
         }
+
+        // Adapted from: http://stackoverflow.com/a/390072/80572
+        public static void ExtractMantissaAndExponent(double number, out bool isNegative, out long mantissa, out long exponent, out bool isInfinity, out bool isNan)
+        {
+            var l = BitConverter.DoubleToInt64Bits(number);
+
+            isInfinity = (l & 0x7FFFFFFFFFFFFFFFL) == 0x7ff0000000000000L;
+            isNan = (l & 0x7FFFFFFFFFFFFFFFL) > 0x7ff0000000000000L;
+
+            if (isInfinity || isNan)
+            {
+                isNegative = false;
+                mantissa = exponent = 0;
+                return;
+            }
+
+            isNegative = l < 0;
+
+            mantissa = l & 0x000FFFFFFFFFFFFFL;
+            exponent = (int)((l >> 52) & 0x7FFL);
+
+            if (exponent == 0)
+            {
+                exponent = 1;
+            }
+            else
+            {
+                mantissa |= (1L << 52);
+            }
+
+            exponent -= 1075;
+
+            while ((mantissa & 1) == 0)
+            {
+                mantissa >>= 1;
+                exponent++;
+            }
+        }
     }
 }
