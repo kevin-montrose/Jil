@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Jil.Serialize;
 using System.Reflection;
 using System.IO;
+using System.Linq;
 
 namespace JilTests
 {
@@ -101,51 +102,15 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void FastDouble()
+        public void V8FastDouble()
         {
-            {
-                bool negative, nan, infinity;
-                long mantissa, exponent;
-                Utils.ExtractMantissaAndExponent(123.321, out negative, out mantissa, out exponent, out infinity, out nan);
+            var buffer = Enumerable.Range(0, 30).Select(c => (char)'0').ToList();
 
-                Assert.IsFalse(negative);
-                Assert.AreEqual(4338971950366851, mantissa);
-                Assert.AreEqual(-45, exponent);
-            }
-
-            {
-                bool negative, nan, infinity;
-                long mantissa, exponent;
-                Utils.ExtractMantissaAndExponent(-123.321, out negative, out mantissa, out exponent, out infinity, out nan);
-
-                Assert.IsTrue(negative);
-                Assert.AreEqual(4338971950366851, mantissa);
-                Assert.AreEqual(-45, exponent);
-            }
-
-            {
-                bool negative, nan, infinity;
-                long mantissa, exponent;
-                Utils.ExtractMantissaAndExponent(double.NaN, out negative, out mantissa, out exponent, out infinity, out nan);
-
-                Assert.IsTrue(nan);
-            }
-
-            {
-                bool negative, nan, infinity;
-                long mantissa, exponent;
-                Utils.ExtractMantissaAndExponent(double.NegativeInfinity, out negative, out mantissa, out exponent, out infinity, out nan);
-
-                Assert.IsTrue(infinity);
-            }
-
-            {
-                bool negative, nan, infinity;
-                long mantissa, exponent;
-                Utils.ExtractMantissaAndExponent(double.PositiveInfinity, out negative, out mantissa, out exponent, out infinity, out nan);
-
-                Assert.IsTrue(infinity);
-            }
+            bool b;
+            int len, p;
+            Utils.DoubleToAscii(100.0, 10, buffer, buffer.Count, out b, out len, out p);
+            Utils.DoubleToAscii(123.4, 10, buffer, buffer.Count, out b, out len, out p);
+            Utils.DoubleToAscii(.01234, 10, buffer, buffer.Count, out b, out len, out p);
         }
     }
 }
