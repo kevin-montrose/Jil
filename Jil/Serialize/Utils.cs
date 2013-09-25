@@ -394,8 +394,14 @@ namespace Jil.Serialize
             (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
             OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          */
-        public static void DoubleToAscii(TextWriter writer, double v, char[] buffer)
+        public static bool DoubleToAscii(TextWriter writer, double v, char[] buffer)
         {
+            if (v == 0)
+            {
+                writer.Write('0');
+                return true;
+            }
+
             var buffer_length = buffer.Length;
             bool sign;
             int length, point;
@@ -408,15 +414,6 @@ namespace Jil.Serialize
             else
             {
                 sign = false;
-            }
-
-            if (v == 0)
-            {
-                buffer[0] = '0';
-                buffer[1] = '\0';
-                length = 1;
-                point = 1;
-                return;
             }
 
             bool fast_worked =  FastDtoa(v, 0, buffer, out length, out point);
@@ -436,7 +433,7 @@ namespace Jil.Serialize
                         writer.Write('.');
                     }
 
-                    if (point < 0)
+                    if (point <= 0)
                     {
                         writer.Write('0');
                         writer.Write('.');
@@ -461,10 +458,12 @@ namespace Jil.Serialize
                     }
                 }
 
-                return;
+                return true;
             }
 
-            throw new NotImplementedException();
+            // We failed, do it the slow way
+            writer.Write(v.ToString());
+            return false;
         }
 
         static bool FastDtoa(double v, int requested_digits, char[] buffer, out int length, out int decimal_point)

@@ -104,7 +104,7 @@ namespace JilTests
         [TestMethod]
         public void V8FastDouble()
         {
-            var buffer = new char[30];
+            var buffer = new char[18];
 
             using (var str = new StringWriter())
             {
@@ -126,6 +126,45 @@ namespace JilTests
                 Utils.DoubleToAscii(str, 0.0101, buffer);
                 Assert.AreEqual("0.0101", str.ToString());
             }
+            using (var str = new StringWriter())
+            {
+                Utils.DoubleToAscii(str, -123.456789, buffer);
+                Assert.AreEqual("-123.456789", str.ToString());
+            }
+
+            Func<double, string, bool> closeEnough =
+                (actual, asStr) =>
+                {
+                    var reparsed = double.Parse(asStr);
+
+                    return reparsed.ToString() == actual.ToString();
+                };
+
+            int failures = 0;
+            int total = 0;
+
+            for (double i = 0; i < 100; i += 0.1)
+            {
+                for (double j = 1; j < 100; j += 0.321)
+                {
+                    var m = i * j;
+                    using (var str = new StringWriter())
+                    {
+                        if (!Utils.DoubleToAscii(str, m, buffer))
+                        {
+                            failures++;
+                        }
+                        Assert.IsTrue(closeEnough(m, str.ToString()), m + " != " + str.ToString());
+
+                        total++;
+                    }
+                }
+            }
+
+            double ratio = (((double)failures) / (double)total) * 100.0;
+
+            // Expected rate of failure
+            Assert.IsTrue(ratio <= 0.5);
         }
     }
 }
