@@ -394,8 +394,12 @@ namespace Jil.Serialize
             (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
             OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          */
-        public static void DoubleToAscii(double v, int requested_digits, List<char> vector, int buffer_length, out bool sign, out int length, out int point)
+        public static void DoubleToAscii(TextWriter writer, double v, char[] buffer)
         {
+            var buffer_length = buffer.Length;
+            bool sign;
+            int length, point;
+
             if (new Double(v).Sign() < 0)
             {
                 sign = true;
@@ -408,20 +412,62 @@ namespace Jil.Serialize
 
             if (v == 0)
             {
-                vector[0] = '0';
-                vector[1] = '\0';
+                buffer[0] = '0';
+                buffer[1] = '\0';
                 length = 1;
                 point = 1;
                 return;
             }
 
-            bool fast_worked =  FastDtoa(v, 0, vector, out length, out point);
-            if (fast_worked) return;
+            bool fast_worked =  FastDtoa(v, 0, buffer, out length, out point);
+            if (fast_worked)
+            {
+                if (sign)
+                {
+                    writer.Write('-');
+                }
+
+                
+                if (point < length)
+                {
+                    if (point > 0)
+                    {
+                        writer.Write(buffer, 0, point);
+                        writer.Write('.');
+                    }
+
+                    if (point < 0)
+                    {
+                        writer.Write('0');
+                        writer.Write('.');
+
+                        while (point < 0)
+                        {
+                            writer.Write('0');
+                            point++;
+                        }
+                    }
+
+                    
+                    writer.Write(buffer, point, length - point);
+                }
+                else
+                {
+                    writer.Write(buffer, 0, length);
+                    while (point > length)
+                    {
+                        writer.Write('0');
+                        point--;
+                    }
+                }
+
+                return;
+            }
 
             throw new NotImplementedException();
         }
 
-        static bool FastDtoa(double v, int requested_digits, List<char> buffer, out int length, out int decimal_point)
+        static bool FastDtoa(double v, int requested_digits, char[] buffer, out int length, out int decimal_point)
         {
             bool result = false;
             int decimal_exponent = 0;
@@ -886,7 +932,7 @@ namespace Jil.Serialize
             found_exponent = cached_power.decimal_exponent;
         }
 
-        static bool Grisu3(double v, List<char> buffer, out int length, out int decimal_exponent)
+        static bool Grisu3(double v, char[] buffer, out int length, out int decimal_exponent)
         {
             DiyFp w = new Double(v).AsNormalizedDiyFp();
 
@@ -929,7 +975,7 @@ namespace Jil.Serialize
             exponent_plus_one = exponent_plus_one_guess;
         }
 
-        static bool RoundWeed(List<char> buffer, int length, ulong distance_too_high_w, ulong unsafe_interval, ulong rest, ulong ten_kappa, ulong unit)
+        static bool RoundWeed(char[] buffer, int length, ulong distance_too_high_w, ulong unsafe_interval, ulong rest, ulong ten_kappa, ulong unit)
         {
             ulong small_distance = distance_too_high_w - unit;
             ulong big_distance = distance_too_high_w + unit;
@@ -951,7 +997,7 @@ namespace Jil.Serialize
             return (2 * unit <= rest) && (rest <= unsafe_interval - 4 * unit);
         }
 
-        static bool DigitGen(DiyFp low, DiyFp w, DiyFp high, List<char> buffer, out int length, out int kappa)
+        static bool DigitGen(DiyFp low, DiyFp w, DiyFp high, char[] buffer, out int length, out int kappa)
         {
             ulong unit = 1;
             DiyFp too_low = new DiyFp(low.f() - unit, low.e());

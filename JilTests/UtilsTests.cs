@@ -104,13 +104,28 @@ namespace JilTests
         [TestMethod]
         public void V8FastDouble()
         {
-            var buffer = Enumerable.Range(0, 30).Select(c => (char)'0').ToList();
+            var buffer = new char[30];
 
-            bool b;
-            int len, p;
-            Utils.DoubleToAscii(100.0, 10, buffer, buffer.Count, out b, out len, out p);
-            Utils.DoubleToAscii(123.4, 10, buffer, buffer.Count, out b, out len, out p);
-            Utils.DoubleToAscii(.01234, 10, buffer, buffer.Count, out b, out len, out p);
+            using (var str = new StringWriter())
+            {
+                Utils.DoubleToAscii(str, 100.0, buffer);
+                Assert.AreEqual("100", str.ToString());
+            }
+            using (var str = new StringWriter())
+            {
+                Utils.DoubleToAscii(str, 123, buffer);
+                Assert.AreEqual("123", str.ToString());
+            }
+            using (var str = new StringWriter())
+            {
+                Utils.DoubleToAscii(str, 1.23, buffer);
+                Assert.AreEqual("1.23", str.ToString());
+            }
+            using (var str = new StringWriter())
+            {
+                Utils.DoubleToAscii(str, 0.0101, buffer);
+                Assert.AreEqual("0.0101", str.ToString());
+            }
         }
     }
 }
