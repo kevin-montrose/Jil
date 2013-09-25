@@ -394,6 +394,7 @@ namespace Jil.Serialize
             (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
             OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
          */
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool DoubleToAscii(TextWriter writer, double v, char[] buffer)
         {
             if (v == 0)
@@ -435,8 +436,7 @@ namespace Jil.Serialize
 
                     if (point <= 0)
                     {
-                        writer.Write('0');
-                        writer.Write('.');
+                        writer.Write("0.");
 
                         while (point < 0)
                         {
@@ -466,6 +466,7 @@ namespace Jil.Serialize
             return false;
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static bool FastDtoa(double v, int requested_digits, char[] buffer, out int length, out int decimal_point)
         {
             bool result = false;
@@ -485,21 +486,21 @@ namespace Jil.Serialize
         struct DiyFp
         {
             const ulong kUint64MSB = 0x8000000000000000;
-            ulong f_;
-            int e_;
+            public ulong f;
+            public int e;
 
             public const int kSignificandSize = 64;
 
-            public DiyFp(ulong f, int e)
+            public DiyFp(ulong pf, int pe)
             {
-                f_ = f;
-                e_ = e;
+                f = pf;
+                e = pe;
             }
 
 
             void Subtract(ref DiyFp other)
             {
-                f_ -= other.f_;
+                f -= other.f;
             }
 
 
@@ -513,10 +514,10 @@ namespace Jil.Serialize
             void Multiply(ref DiyFp other)
             {
                 const ulong kM32 = 0xFFFFFFFFU;
-                ulong a = f_ >> 32;
-                ulong b = f_ & kM32;
-                ulong c = other.f_ >> 32;
-                ulong d = other.f_ & kM32;
+                ulong a = f >> 32;
+                ulong b = f & kM32;
+                ulong c = other.f >> 32;
+                ulong d = other.f & kM32;
                 ulong ac = a * c;
                 ulong bc = b * c;
                 ulong ad = a * d;
@@ -524,10 +525,11 @@ namespace Jil.Serialize
                 ulong tmp = (bd >> 32) + (ad & kM32) + (bc & kM32);
                 tmp += 1U << 31;
                 ulong result_f = ac + (ad >> 32) + (bc >> 32) + (tmp >> 32);
-                e_ += other.e_ + 64;
-                f_ = result_f;
+                e += other.e + 64;
+                f = result_f;
             }
 
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static DiyFp Times(ref DiyFp a, ref DiyFp b)
             {
                 DiyFp result = a;
@@ -537,8 +539,8 @@ namespace Jil.Serialize
 
             public void Normalize()
             {
-                ulong f = f_;
-                int e = e_;
+                ulong f = this.f;
+                int e = this.e;
 
                 const ulong k10MSBits = 0xFFC0000000000000;
                 while ((f & k10MSBits) == 0)
@@ -551,8 +553,8 @@ namespace Jil.Serialize
                     f <<= 1;
                     e--;
                 }
-                f_ = f;
-                e_ = e;
+                this.f = f;
+                this.e = e;
             }
 
             public static DiyFp Normalize(ref DiyFp a)
@@ -561,14 +563,6 @@ namespace Jil.Serialize
                 result.Normalize();
                 return result;
             }
-
-            public ulong f() { return f_; }
-            public int e() { return e_; }
-
-            public void set_f(ulong new_value) { f_ = new_value; }
-            public void set_e(int new_value) { e_ = new_value; }
-
-
         }
 
         struct Double
@@ -617,7 +611,6 @@ namespace Jil.Serialize
                 if (d64_ == kInfinity) return new Double(kInfinity).value();
                 if (Sign() < 0 && Significand() == 0)
                 {
-                    // -0.0
                     return 0.0;
                 }
                 if (Sign() < 0)
@@ -707,19 +700,19 @@ namespace Jil.Serialize
             public void NormalizedBoundaries(out DiyFp out_m_minus, out DiyFp out_m_plus)
             {
                 DiyFp v = this.AsDiyFp();
-                var temp = new DiyFp((v.f() << 1) + 1, v.e() - 1);
+                var temp = new DiyFp((v.f << 1) + 1, v.e - 1);
                 DiyFp m_plus = DiyFp.Normalize(ref temp);
                 DiyFp m_minus;
                 if (LowerBoundaryIsCloser())
                 {
-                    m_minus = new DiyFp((v.f() << 2) - 1, v.e() - 2);
+                    m_minus = new DiyFp((v.f << 2) - 1, v.e - 2);
                 }
                 else
                 {
-                    m_minus = new DiyFp((v.f() << 1) - 1, v.e() - 1);
+                    m_minus = new DiyFp((v.f << 1) - 1, v.e - 1);
                 }
-                m_minus.set_f(m_minus.f() << (m_minus.e() - m_plus.e()));
-                m_minus.set_e(m_plus.e());
+                m_minus.f = m_minus.f << (m_minus.e - m_plus.e);
+                m_minus.e = m_plus.e;
                 out_m_plus = m_plus;
                 out_m_minus = m_minus;
             }
@@ -760,8 +753,8 @@ namespace Jil.Serialize
 
             static ulong DiyFpToUint64(DiyFp diy_fp)
             {
-                ulong significand = diy_fp.f();
-                int exponent = diy_fp.e();
+                ulong significand = diy_fp.f;
+                int exponent = diy_fp.e;
                 while (significand > kHiddenBit + kSignificandMask)
                 {
                     significand >>= 1;
@@ -797,7 +790,7 @@ namespace Jil.Serialize
         const int kMinimalTargetExponent = -60;
         const int kMaximalTargetExponent = -32;
 
-        struct CachedPower
+        class CachedPower
         {
             public ulong significand;
             public short binary_exponent;
@@ -909,6 +902,7 @@ namespace Jil.Serialize
         const int kMinDecimalExponent = -348;
         const int kMaxDecimalExponent = 340;
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static void GetCachedPowerForBinaryExponentRange(int min_exponent, int max_exponent, out DiyFp power, out int decimal_exponent)
         {
             int kQ = DiyFp.kSignificandSize;
@@ -921,7 +915,6 @@ namespace Jil.Serialize
             power = new DiyFp(cached_power.significand, cached_power.binary_exponent);
         }
 
-
         static void GetCachedPowerForDecimalExponent(int requested_exponent, out DiyFp power, out int found_exponent)
         {
             int index =
@@ -931,6 +924,7 @@ namespace Jil.Serialize
             found_exponent = cached_power.decimal_exponent;
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static bool Grisu3(double v, char[] buffer, out int length, out int decimal_exponent)
         {
             DiyFp w = new Double(v).AsNormalizedDiyFp();
@@ -941,9 +935,9 @@ namespace Jil.Serialize
             DiyFp ten_mk;
             int mk;
             int ten_mk_minimal_binary_exponent =
-               kMinimalTargetExponent - (w.e() + DiyFp.kSignificandSize);
+               kMinimalTargetExponent - (w.e + DiyFp.kSignificandSize);
             int ten_mk_maximal_binary_exponent =
-               kMaximalTargetExponent - (w.e() + DiyFp.kSignificandSize);
+               kMaximalTargetExponent - (w.e + DiyFp.kSignificandSize);
             GetCachedPowerForBinaryExponentRange(
                 ten_mk_minimal_binary_exponent,
                 ten_mk_maximal_binary_exponent,
@@ -962,6 +956,7 @@ namespace Jil.Serialize
 
         static readonly uint[] kSmallPowersOfTen = new uint[] { 0, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000 };
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static void BiggestPowerTen(uint number, int number_bits, out uint power, out int exponent_plus_one)
         {
             int exponent_plus_one_guess = ((number_bits + 1) * 1233 >> 12);
@@ -974,6 +969,7 @@ namespace Jil.Serialize
             exponent_plus_one = exponent_plus_one_guess;
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static bool RoundWeed(char[] buffer, int length, ulong distance_too_high_w, ulong unsafe_interval, ulong rest, ulong ten_kappa, ulong unit)
         {
             ulong small_distance = distance_too_high_w - unit;
@@ -996,18 +992,19 @@ namespace Jil.Serialize
             return (2 * unit <= rest) && (rest <= unsafe_interval - 4 * unit);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static bool DigitGen(DiyFp low, DiyFp w, DiyFp high, char[] buffer, out int length, out int kappa)
         {
             ulong unit = 1;
-            DiyFp too_low = new DiyFp(low.f() - unit, low.e());
-            DiyFp too_high = new DiyFp(high.f() + unit, high.e());
+            DiyFp too_low = new DiyFp(low.f - unit, low.e);
+            DiyFp too_high = new DiyFp(high.f + unit, high.e);
             DiyFp unsafe_interval = DiyFp.Minus(ref too_high, ref too_low);
-            DiyFp one = new DiyFp(((ulong)1) << -w.e(), w.e());
-            uint integrals = (uint)(too_high.f() >> -one.e());
-            ulong fractionals = too_high.f() & (one.f() - 1);
+            DiyFp one = new DiyFp(((ulong)1) << -w.e, w.e);
+            uint integrals = (uint)(too_high.f >> -one.e);
+            ulong fractionals = too_high.f & (one.f - 1);
             uint divisor;
             int divisor_exponent_plus_one;
-            BiggestPowerTen(integrals, DiyFp.kSignificandSize - (-one.e()), out divisor, out divisor_exponent_plus_one);
+            BiggestPowerTen(integrals, DiyFp.kSignificandSize - (-one.e), out divisor, out divisor_exponent_plus_one);
             kappa = divisor_exponent_plus_one;
             length = 0;
 
@@ -1019,12 +1016,12 @@ namespace Jil.Serialize
                 integrals %= divisor;
                 (kappa)--;
                 ulong rest =
-                    (((ulong)integrals) << -one.e()) + fractionals;
-                if (rest < unsafe_interval.f())
+                    (((ulong)integrals) << -one.e) + fractionals;
+                if (rest < unsafe_interval.f)
                 {
-                    return RoundWeed(buffer, length, DiyFp.Minus(ref too_high, ref w).f(),
-                                     unsafe_interval.f(), rest,
-                                     ((ulong)divisor) << -one.e(), unit);
+                    return RoundWeed(buffer, length, DiyFp.Minus(ref too_high, ref w).f,
+                                     unsafe_interval.f, rest,
+                                     ((ulong)divisor) << -one.e, unit);
                 }
                 divisor /= 10;
             }
@@ -1033,17 +1030,17 @@ namespace Jil.Serialize
             {
                 fractionals *= 10;
                 unit *= 10;
-                unsafe_interval.set_f(unsafe_interval.f() * 10);
+                unsafe_interval.f = unsafe_interval.f * 10;
                 // Integer division by one.
-                int digit = (int)(fractionals >> -one.e());
+                int digit = (int)(fractionals >> -one.e);
                 buffer[length] = (char)('0' + digit);
                 (length)++;
-                fractionals &= one.f() - 1;  // Modulo by one.
+                fractionals &= one.f - 1;  // Modulo by one.
                 (kappa)--;
-                if (fractionals < unsafe_interval.f())
+                if (fractionals < unsafe_interval.f)
                 {
-                    return RoundWeed(buffer, length, DiyFp.Minus(ref too_high, ref w).f() * unit,
-                                     unsafe_interval.f(), fractionals, one.f(), unit);
+                    return RoundWeed(buffer, length, DiyFp.Minus(ref too_high, ref w).f * unit,
+                                     unsafe_interval.f, fractionals, one.f, unit);
                 }
             }
         }

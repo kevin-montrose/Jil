@@ -17,6 +17,7 @@ namespace Jil.Serialize
         public static bool UseCustomIntegerToString = true;
         public static bool SkipDateTimeMathMethods = true;
         public static bool SkipSimplePropertyAccess = true;
+        public static bool UseCustomDoubleToString = true;
 
         static string CharBuffer = "char_buffer";
         const int CharBufferSize = 20;
@@ -493,6 +494,19 @@ namespace Jil.Serialize
                 primitiveType = typeof(int);
             }
 
+            if (primitiveType == typeof(float))
+            {
+                emit.Convert<double>();         // TextWriter double
+                primitiveType = typeof(double);
+            }
+
+            // sorry, but you're not surviving on the client anyway, sooooo...
+            if (primitiveType == typeof(decimal))
+            {
+                emit.Call(typeof(decimal).GetMethod("ToDouble"));
+                primitiveType = typeof(double); // TextWriter double
+            }
+
             if (primitiveType == typeof(int) && SkipNumberFormatting)
             {
                 var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
@@ -536,11 +550,21 @@ namespace Jil.Serialize
 
             var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
 
-            if (UseCustomIntegerToString)
+            var isIntegerType = primitiveType == typeof(int) || primitiveType == typeof(uint) || primitiveType == typeof(long) || primitiveType == typeof(ulong);
+
+            if (isIntegerType && UseCustomIntegerToString)
             {
+                if (primitiveType == typeof(int))
+                {
+                    emit.LoadLocal(CharBuffer);          // TextWriter int char[]
+                    emit.Call(InlineSerializer_CustomWriteInt); // --empty--
+
+                    return;
+                }
+
                 if (primitiveType == typeof(uint))
                 {
-                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.LoadLocal(CharBuffer);          // TextWriter int char[]
                     emit.Call(InlineSerializer_CustomWriteUInt); // --empty--
 
                     return;
@@ -548,7 +572,7 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(long))
                 {
-                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.LoadLocal(CharBuffer);          // TextWriter int char[]
                     emit.Call(InlineSerializer_CustomWriteLong); // --empty--
 
                     return;
@@ -556,13 +580,20 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(ulong))
                 {
-                    emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
+                    emit.LoadLocal(CharBuffer);          // TextWriter int char[]
                     emit.Call(InlineSerializer_CustomWriteULong); // --empty--
 
                     return;
                 }
+            }
 
-                emit.CallVirtual(builtInMtd);       // --empty--
+            if (primitiveType == typeof(double) && UseCustomDoubleToString)
+            {
+                var utilCall = typeof(Utils).GetMethod("DoubleToAscii");
+
+                emit.LoadLocal(CharBuffer); // TextWriter double char[]
+                emit.Call(utilCall);        // bool
+                emit.Pop();                 // --empty--
                 return;
             }
 
@@ -1271,7 +1302,7 @@ namespace Jil.Serialize
 
         static void AddCharBuffer(Emit emit)
         {
-            if (UseCustomIntegerToString)
+            if (UseCustomIntegerToString || UseCustomDoubleToString)
             {
                 emit.DeclareLocal<char[]>(CharBuffer);
                 emit.LoadConstant(CharBufferSize);
