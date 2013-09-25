@@ -182,7 +182,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("1.23399996757507", res);
+                    Assert.AreEqual("1.234", res);
                 }
             }
 
