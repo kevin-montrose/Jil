@@ -80,15 +80,5 @@ namespace JilTests
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][0]);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
         }
-
-#pragma warning disable 0649
-        public class _GetSimplePropertyBackingField
-        {
-            public int Foo { get; set; }
-            
-            private double _Bar;
-            public double Bar { get { return _Bar; } }
-        }
-#pragma warning restore 0649
     }
 }
