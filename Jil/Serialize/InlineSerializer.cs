@@ -967,12 +967,15 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);        // obj(*?)
             WriteString("{");               // obj(*?)
 
-            using (var hasWritten = Emit.DeclareLocal<bool>())
+            using (var isFirst = Emit.DeclareLocal<bool>())
             {
+                Emit.LoadConstant(true);        // obj(*?) true
+                Emit.StoreLocal(isFirst);       // obj(*?) true
+
                 foreach (var member in writeOrder)
                 {
                     Emit.Duplicate();                                                   // obj(*?) obj(*?)
-                    WriteMemberIfNonNull(member, recursiveTypes, inLocal, hasWritten);  // obj(*?)
+                    WriteMemberIfNonNull(member, recursiveTypes, inLocal, isFirst);  // obj(*?)
                 }
             }
 
@@ -982,7 +985,7 @@ namespace Jil.Serialize
             Emit.Pop();             // --empty--
         }
 
-        void WriteMemberIfNonNull(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal, Sigil.Local hasWritten)
+        void WriteMemberIfNonNull(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal, Sigil.Local isFirst)
         {
             // Top of stack:
             //  - obj(*?)
@@ -1028,17 +1031,17 @@ namespace Jil.Serialize
                 Emit.Pop();                     // --empty--
             }
 
-            Emit.LoadLocal(hasWritten);         // bool
-            Emit.BranchIfFalse(writeValue);     // --empty--
-
-            Emit.LoadConstant(true);            // true
-            Emit.StoreLocal(hasWritten);        // --empty--
+            Emit.LoadLocal(isFirst);        // bool
+            Emit.BranchIfTrue(writeValue);  // --empty--
 
             var isStringy = member.IsStringyType();
 
             WriteString(",");
 
             Emit.MarkLabel(writeValue);                             // --empty--
+
+            Emit.LoadConstant(false);       // false
+            Emit.StoreLocal(isFirst);       // --empty--
 
             if (isStringy)
             {

@@ -133,11 +133,11 @@ namespace JilTests
         public class _ReorderMembers
         {
             public int Foo;
-            public string Bar;
+            //public string Bar;
             public double Fizz;
             public decimal Buzz;
             public char Hello;
-            public string[] World;
+            //public string[] World;
         }
 
         [TestMethod]
@@ -175,12 +175,12 @@ namespace JilTests
                 toSerialize.Add(
                     new _ReorderMembers
                     {
-                        Bar = _RandString(rand),
+                        //Bar = _RandString(rand),
                         Buzz = ((decimal)rand.NextDouble()) * decimal.MaxValue,
                         Fizz = rand.NextDouble() * double.MaxValue,
                         Foo = rand.Next(int.MaxValue),
                         Hello = _RandChar(rand),
-                        World = Enumerable.Range(0, rand.Next(100)).Select(s => _RandString(rand)).ToArray()
+                        //World = Enumerable.Range(0, rand.Next(100)).Select(s => _RandString(rand)).ToArray()
                     }
                 );
             }

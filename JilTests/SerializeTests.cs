@@ -844,7 +844,7 @@ namespace JilTests
                     Options.ExcludeNulls
                 );
 
-                Assert.AreEqual("", str.ToString());
+                Assert.AreEqual("{\"C\":123,\"F\":{\"D\":456,\"E\":{\"C\":999},\"B\":\"world\"},\"A\":\"hello\"}", str.ToString());
             }
         }
     }
