@@ -31,7 +31,7 @@ namespace Jil
 
         private static void ExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            if (opts.ShouldPrettyPrint.GetValueOrDefault())
             {
                 PrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;

@@ -58,13 +58,15 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
+        private readonly Type RecusionLookupType;
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
 
         private Emit Emit;
 
-        internal InlineSerializer(bool pretty, bool excludeNulls)
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls)
         {
+            RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
         }
@@ -192,8 +194,10 @@ namespace Jil.Serialize
             return ret;
         }
 
-        void WriteMember(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, bool isValueType, Sigil.Local inLocal = null)
+        void WriteMember(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
+            // Stack is empty
+
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
 
@@ -334,7 +338,10 @@ namespace Jil.Serialize
                 Emit.BranchIfTrue(notNull);     // TextWriter
 
                 Emit.Pop();                 // --empty--
-                WriteString("null");        // --empty--
+                if (!ExcludeNulls)
+                {
+                    WriteString("null");        // --empty--
+                }
                 Emit.Branch(done);          // --empty--
 
                 Emit.MarkLabel(notNull);    // TextWriter
@@ -777,7 +784,22 @@ namespace Jil.Serialize
             var strLength = typeof(string).GetProperty("Length");
             var strCharsIx = typeof(string).GetProperty("Chars");
 
+            var notNull = Emit.DefineLabel();
             var done = Emit.DefineLabel();
+
+            Emit.Duplicate();           // TextWriter string string
+            Emit.BranchIfTrue(notNull); // TextWriter string
+
+            if (!ExcludeNulls)
+            {
+                WriteString("null");        // TextWriter string
+            }
+
+            Emit.Pop();                 // TextWriter
+            Emit.Duplicate();           // TextWriter TextWriter
+            Emit.Branch(done);          // TextWriter TextWriter
+
+            Emit.MarkLabel(notNull);
 
             using (var str = Emit.DeclareLocal<string>())
             using (var i = Emit.DeclareLocal<int>())
@@ -814,7 +836,7 @@ namespace Jil.Serialize
             Emit.Pop();
         }
 
-        void WriteObject(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteObjectWithNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var writeOrder = OrderMembersForAccess(forType);
 
@@ -824,30 +846,34 @@ namespace Jil.Serialize
 
             if (inLocal != null)
             {
-                Emit.LoadLocal(inLocal);
+                Emit.LoadLocal(inLocal);    // obj
             }
             else
             {
-                Emit.LoadArgument(1);
+                Emit.LoadArgument(1);       // obj
             }
 
             if (isValueType)
             {
                 using (var temp = Emit.DeclareLocal(forType))
                 {
-                    Emit.StoreLocal(temp);
-                    Emit.LoadLocalAddress(temp);
+                    Emit.StoreLocal(temp);          // --empty--
+                    Emit.LoadLocalAddress(temp);    // obj*
                 }
             }
 
             var end = Emit.DefineLabel();
 
-            Emit.BranchIfTrue(notNull);
-            WriteString("null");
-            Emit.Branch(end);
+            Emit.BranchIfTrue(notNull);             // --empty--
+            
+            // No ExcludeNulls checks since this code is never run
+            //   if that's set
+            WriteString("null");                    // --empty--
+            
+            Emit.Branch(end);                       // --empty--
 
-            Emit.MarkLabel(notNull);
-            WriteString("{");
+            Emit.MarkLabel(notNull);                // --empty--
+            WriteString("{");                       // --empty--
 
             var firstPass = true;
             var previousMemberWasStringy = false;
@@ -876,19 +902,158 @@ namespace Jil.Serialize
                     keyString = keyString + "\"";
                 }
 
-                WriteString(keyString);
-                WriteMember(member, recursiveTypes, isValueType, inLocal);
+                WriteString(keyString);                         // --empty--
+                WriteMember(member, recursiveTypes, inLocal);   // --empty--
 
                 previousMemberWasStringy = isStringy;
             }
 
             if (previousMemberWasStringy)
             {
-                WriteString("\"}");
+                WriteString("\"}");                             // --empty--
             }
             else
             {
-                WriteString("}");
+                WriteString("}");                               // --empty--
+            }
+
+            Emit.MarkLabel(end);
+        }
+
+        void WriteObject(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        {
+            if (!ExcludeNulls)
+            {
+                WriteObjectWithNulls(forType, recursiveTypes, inLocal);
+            }
+            else
+            {
+                WriteObjectWithoutNulls(forType, recursiveTypes, inLocal);
+            }
+        }
+
+        void WriteObjectWithoutNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        {
+            var writeOrder = OrderMembersForAccess(forType);
+
+            var notNull = Emit.DefineLabel();
+
+            var isValueType = forType.IsValueType;
+
+            if (inLocal != null)
+            {
+                Emit.LoadLocal(inLocal);                        // obj
+            }
+            else
+            {
+                Emit.LoadArgument(1);                           // obj
+            }
+
+            if (isValueType)
+            {
+                using (var temp = Emit.DeclareLocal(forType))
+                {
+                    Emit.StoreLocal(temp);                      // --empty--
+                    Emit.LoadLocalAddress(temp);                // obj*
+                }
+            }
+
+            var end = Emit.DefineLabel();
+
+            Emit.Duplicate();               // obj(*?) obj(*?)
+            Emit.BranchIfTrue(notNull);     // obj(*?)
+            Emit.Branch(end);               // obj(*?)
+
+            Emit.MarkLabel(notNull);        // obj(*?)
+            WriteString("{");               // obj(*?)
+
+            using (var hasWritten = Emit.DeclareLocal<bool>())
+            {
+                foreach (var member in writeOrder)
+                {
+                    Emit.Duplicate();                                                   // obj(*?) obj(*?)
+                    WriteMemberIfNonNull(member, recursiveTypes, inLocal, hasWritten);  // obj(*?)
+                }
+            }
+
+            WriteString("}");       // obj(*?)
+
+            Emit.MarkLabel(end);    // obj(*?)
+            Emit.Pop();             // --empty--
+        }
+
+        void WriteMemberIfNonNull(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal, Sigil.Local hasWritten)
+        {
+            // Top of stack:
+            //  - obj(*?)
+
+            var asField = member as FieldInfo;
+            var asProp = member as PropertyInfo;
+
+            if (asField == null && asProp == null) throw new Exception("Wha?");
+
+            var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
+
+            var end = Emit.DefineLabel();
+            var writeValue = Emit.DefineLabel();
+
+            var canBeNull = serializingType.IsNullableType() || !serializingType.IsValueType;
+            if (canBeNull)
+            {
+                if (asField != null)
+                {
+                    Emit.LoadField(asField);    // value
+                }
+                else
+                {
+                    LoadProperty(asProp);       // value
+                }
+
+                if (serializingType.IsValueType)
+                {
+                    using (var temp = Emit.DeclareLocal(serializingType))
+                    {
+                        Emit.StoreLocal(temp);          // --empty--
+                        Emit.LoadLocalAddress(temp);    // value*
+                    }
+
+                    var hasValue = serializingType.GetProperty("HasValue").GetMethod;
+                    Emit.Call(hasValue);        // bool
+                }
+
+                Emit.BranchIfFalse(end);        // --empty--
+            }
+            else
+            {
+                Emit.Pop();                     // --empty--
+            }
+
+            Emit.LoadLocal(hasWritten);         // bool
+            Emit.BranchIfFalse(writeValue);     // --empty--
+
+            Emit.LoadConstant(true);            // true
+            Emit.StoreLocal(hasWritten);        // --empty--
+
+            var isStringy = member.IsStringyType();
+
+            WriteString(",");
+
+            Emit.MarkLabel(writeValue);                             // --empty--
+
+            if (isStringy)
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\":\"");   // --empty--
+            }
+            else
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+            }
+
+            WriteMember(member, recursiveTypes, inLocal);           // --empty--
+
+            if (isStringy)
+            {
+                WriteString("\"");
             }
 
             Emit.MarkLabel(end);
@@ -922,7 +1087,10 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);
-            WriteString("null");
+            if (!ExcludeNulls)
+            {
+                WriteString("null");
+            }
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
@@ -1094,7 +1262,10 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);
-            WriteString("null");
+            if (!ExcludeNulls)
+            {
+                WriteString("null");
+            }
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
@@ -1263,7 +1434,7 @@ namespace Jil.Serialize
 
             foreach (var type in recursiveTypes)
             {
-                var cacheType = typeof(NoneTypeCache<>).MakeGenericType(type);
+                var cacheType = RecusionLookupType.MakeGenericType(type);
                 var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
                 var loc = Emit.DeclareLocal(thunk.FieldType);
@@ -1415,9 +1586,11 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType> Build<BuildForType>(bool pretty = false, bool excludeNulls = false)
+        public static Action<TextWriter, BuildForType> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false)
         {
-            var obj = new InlineSerializer<BuildForType>(pretty, excludeNulls);
+            typeCacheType = typeCacheType ?? typeof(NoneTypeCache<>);
+
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls);
 
             return obj.Build();
         }

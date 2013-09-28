@@ -16,7 +16,7 @@ namespace Jil.Serialize
 
         static NoneTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(pretty: false, excludeNulls: false);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NoneTypeCache<>), pretty: false, excludeNulls: false);
         }
     }
 
@@ -26,7 +26,7 @@ namespace Jil.Serialize
 
         static PrettyPrintTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(pretty: true, excludeNulls: false);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(PrettyPrintTypeCache<>), pretty: true, excludeNulls: false);
         }
     }
 
@@ -36,7 +36,7 @@ namespace Jil.Serialize
 
         static ExcludeNullsTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(pretty: false, excludeNulls: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ExcludeNullsTypeCache<>), pretty: false, excludeNulls: true);
         }
     }
 
@@ -46,7 +46,7 @@ namespace Jil.Serialize
 
         static PrettyPrintExcludeNullsTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(pretty: true, excludeNulls: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(PrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true);
         }
     }
 }

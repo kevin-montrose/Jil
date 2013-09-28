@@ -803,5 +803,49 @@ namespace JilTests
                 Assert.AreEqual("{\"A\":{\"Inner\":{\"A\":null,\"B\":123,\"C\":4.56}},\"B\":9223372036854775807,\"C\":78.9}", str.ToString());
             }
         }
+
+        public class _ExcludeNulls
+        {
+            public string A;
+            public string B;
+            public int? C;
+            public int? D;
+            public _ExcludeNulls E;
+            public _ExcludeNulls F;
+        }
+
+        [TestMethod]
+        public void ExcludeNulls()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _ExcludeNulls
+                    {
+                        A = "hello",
+                        B = null,
+                        C = 123,
+                        D = null,
+                        E = null,
+                        F = new _ExcludeNulls
+                        {
+                            A = null,
+                            B = "world",
+                            C = null,
+                            D = 456,
+                            E = new _ExcludeNulls
+                            {
+                                C = 999
+                            },
+                            F = null
+                        }
+                    },
+                    str,
+                    Options.ExcludeNulls
+                );
+
+                Assert.AreEqual("", str.ToString());
+            }
+        }
     }
 }
