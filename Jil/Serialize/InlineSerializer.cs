@@ -299,13 +299,13 @@ namespace Jil.Serialize
 
             if (serializingType.IsPrimitiveType())
             {
-                WritePrimitive(serializingType);
+                WritePrimitive(serializingType, quotesNeedHandling: false);
                 return;
             }
 
             if (serializingType.IsNullableType())
             {
-                WriteNullable(serializingType, recursiveTypes);
+                WriteNullable(serializingType, recursiveTypes, quotesNeedHandling: false);
                 return;
             }
 
@@ -317,7 +317,7 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteNullable(Type nullableType, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteNullable(Type nullableType, Dictionary<Type, Sigil.Local> recursiveTypes, bool quotesNeedHandling)
         {
             // Top of stack is
             //  - nullable
@@ -351,7 +351,7 @@ namespace Jil.Serialize
 
             if (underlyingType.IsPrimitiveType())
             {
-                WritePrimitive(underlyingType);
+                WritePrimitive(underlyingType, quotesNeedHandling);
             }
             else
             {
@@ -434,7 +434,7 @@ namespace Jil.Serialize
                 Emit.Convert<long>();                       // TextWriter int
 
                 WriteString("\"\\/Date(");                  // TextWriter int
-                WritePrimitive(typeof(long));               // --empty--
+                WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
                 WriteString(")\\/\"");                      // --empty--
 
                 return;
@@ -449,22 +449,22 @@ namespace Jil.Serialize
             Emit.Divide();                                  // TextWriter long
 
             WriteString("\"\\/Date(");                  // TextWriter int
-            WritePrimitive(typeof(long));               // --empty--
+            WritePrimitive(typeof(long), quotesNeedHandling: true);               // --empty--
             WriteString(")\\/\"");                      // --empty--
         }
 
-        void WritePrimitive(Type primitiveType)
+        void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
         {
             if (primitiveType == typeof(char))
             {
-                WriteEncodedChar();
+                WriteEncodedChar(quotesNeedHandling);
 
                 return;
             }
 
             if (primitiveType == typeof(string))
             {
-                WriteEncodedString();
+                WriteEncodedString(quotesNeedHandling);
                 return;
             }
 
@@ -698,7 +698,7 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
-        void WriteEncodedChar()
+        void WriteEncodedChar(bool quotesNeedHandling)
         {
             // top of stack is:
             //  - char
@@ -722,6 +722,11 @@ namespace Jil.Serialize
                 labels.Add(Tuple.Create(label, pair.Item2));
                 
                 prev = pair.Item1;
+            }
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");
             }
 
             var done = Emit.DefineLabel();
@@ -772,9 +777,14 @@ namespace Jil.Serialize
             }
 
             Emit.MarkLabel(done);
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");
+            }
         }
 
-        void WriteEncodedString()
+        void WriteEncodedString(bool quotesNeedHandling)
         {
             // top of stack is:
             //  - string
@@ -802,6 +812,11 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(notNull);
 
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");
+            }
+
             using (var str = Emit.DeclareLocal<string>())
             using (var i = Emit.DeclareLocal<int>())
             {
@@ -822,7 +837,7 @@ namespace Jil.Serialize
                 Emit.LoadLocal(i);              // TextWriter TextWriter string i
                 LoadProperty(strCharsIx);       // TextWriter TextWriter char
 
-                WriteEncodedChar(); // TextWriter
+                WriteEncodedChar(false);        // TextWriter
 
                 Emit.LoadLocal(i);      // TextWriter i
                 Emit.LoadConstant(1);   // TextWriter i 1
@@ -835,6 +850,11 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);       // TextWriter TextWriter
             Emit.Pop();                 // TextWriter
             Emit.Pop();                 // --empty--
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");
+            }
 
             Emit.MarkLabel(doneNull);   // --empty--
         }
@@ -1184,13 +1204,13 @@ namespace Jil.Serialize
         {
             if (elementType.IsPrimitiveType())
             {
-                WritePrimitive(elementType);
+                WritePrimitive(elementType, quotesNeedHandling: true);
                 return;
             }
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes);
+                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
                 return;
             }
 
@@ -1556,7 +1576,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(0);   // kvp TextWriter
                 Emit.LoadLocal(str);    // kvp TextWriter string
 
-                WriteEncodedString();   // kvp
+                WriteEncodedString(quotesNeedHandling: false);   // kvp
             }
 
             WriteString("\":");         // kvp
@@ -1565,7 +1585,7 @@ namespace Jil.Serialize
 
             if (elementType.IsPrimitiveType())
             {
-                WritePrimitive(elementType);
+                WritePrimitive(elementType, quotesNeedHandling: true);
 
                 Emit.MarkLabel(done);
 
@@ -1574,7 +1594,7 @@ namespace Jil.Serialize
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes);
+                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
 
                 Emit.MarkLabel(done);
 
@@ -1655,13 +1675,13 @@ namespace Jil.Serialize
 
             if (elementType.IsPrimitiveType())
             {
-                WritePrimitive(elementType);
+                WritePrimitive(elementType, quotesNeedHandling: true);
                 return;
             }
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes);
+                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
                 return;
             }
 
@@ -1783,7 +1803,6 @@ namespace Jil.Serialize
         Action<TextWriter, ForType> BuildPrimitiveWithNewDelegate()
         {
             var primitiveType = typeof(ForType);
-            var isString = primitiveType == typeof(string) || primitiveType == typeof(char);
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
@@ -1792,17 +1811,7 @@ namespace Jil.Serialize
             Emit.LoadArgument(0);
             Emit.LoadArgument(1);
 
-            if (isString)
-            {
-                WriteString("\"");
-            }
-
-            WritePrimitive(typeof(ForType));
-
-            if (isString)
-            {
-                WriteString("\"");
-            }
+            WritePrimitive(typeof(ForType), quotesNeedHandling: true);
 
             Emit.Return();
 
@@ -1822,7 +1831,7 @@ namespace Jil.Serialize
             Emit.LoadArgument(0);
             Emit.LoadArgument(1);
 
-            WriteNullable(typeof(ForType), preloaded);
+            WriteNullable(typeof(ForType), preloaded, quotesNeedHandling: true);
             
             Emit.Return();
 

@@ -861,7 +861,7 @@ namespace JilTests
                     Options.ExcludeNulls
                 );
 
-                Assert.AreEqual("", str.ToString());
+                Assert.AreEqual("{\"hello\":\"world\",\"fizz\":\"buzz\"}", str.ToString());
             }
         }
     }
