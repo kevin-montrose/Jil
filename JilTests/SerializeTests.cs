@@ -44,21 +44,21 @@ namespace JilTests
             {
                 JSON.Serialize(new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
+                Assert.AreEqual("{\"Next\":{\"Next\":null,\"Foo\":456},\"Foo\":123}", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new[] { new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, new _Cyclical { Foo = 456 } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("[{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},{\"Foo\":456,\"Next\":null}]", res);
+                Assert.AreEqual("[{\"Next\":{\"Next\":null,\"Foo\":456},\"Foo\":123},{\"Next\":null,\"Foo\":456}]", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, {"world", new _Cyclical { Foo = 456 } } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
+                Assert.AreEqual("{\"hello\":{\"Next\":{\"Next\":null,\"Foo\":456},\"Foo\":123},\"world\":{\"Next\":null,\"Foo\":456}}", res);
             }
         }
 
@@ -282,7 +282,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"One\":{\"Single\":\"Hello World\"}}", res);
+                Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"Trailing\":\"Fizz Buzz\",\"_\":123},\"Three\":{\"Leading\":\"Foo Bar\",\"_\":456}}", res);
             }
         }
 
@@ -330,7 +330,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
+                Assert.AreEqual("[{\"Key\":\"whatever\",\"Val\":123},{\"Key\":\"indeed\",\"Val\":456}]", res);
             }
         }
 
@@ -352,7 +352,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Foo\":123,\"Bar\":\"hello\"}", res);
+                Assert.AreEqual("{\"Bar\":\"hello\",\"Foo\":123}", res);
             }
         }
 
@@ -844,7 +844,7 @@ namespace JilTests
                     Options.ExcludeNulls
                 );
 
-                Assert.AreEqual("{\"C\":123,\"F\":{\"D\":456,\"E\":{\"C\":999},\"B\":\"world\"},\"A\":\"hello\"}", str.ToString());
+                Assert.AreEqual("{\"A\":\"hello\",\"F\":{\"B\":\"world\",\"E\":{\"C\":999},\"D\":456},\"C\":123}", str.ToString());
             }
         }
     }

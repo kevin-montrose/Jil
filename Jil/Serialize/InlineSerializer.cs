@@ -136,7 +136,7 @@ namespace Jil.Serialize
                          }
                     ).ThenBy(
                         m => m is FieldInfo ? 0 : 1
-                    ).Reverse();
+                    );
 
             return ret.ToList();
         }
@@ -786,6 +786,7 @@ namespace Jil.Serialize
 
             var notNull = Emit.DefineLabel();
             var done = Emit.DefineLabel();
+            var doneNull = Emit.DefineLabel();
 
             Emit.Duplicate();           // TextWriter string string
             Emit.BranchIfTrue(notNull); // TextWriter string
@@ -796,8 +797,8 @@ namespace Jil.Serialize
             }
 
             Emit.Pop();                 // TextWriter
-            Emit.Duplicate();           // TextWriter TextWriter
-            Emit.Branch(done);          // TextWriter TextWriter
+            Emit.Pop();                 // --empty--
+            Emit.Branch(doneNull);      // --empty--
 
             Emit.MarkLabel(notNull);
 
@@ -832,8 +833,10 @@ namespace Jil.Serialize
             }
 
             Emit.MarkLabel(done);       // TextWriter TextWriter
-            Emit.Pop();
-            Emit.Pop();
+            Emit.Pop();                 // TextWriter
+            Emit.Pop();                 // --empty--
+
+            Emit.MarkLabel(doneNull);   // --empty--
         }
 
         void WriteObjectWithNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
