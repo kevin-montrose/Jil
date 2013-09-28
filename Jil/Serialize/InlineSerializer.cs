@@ -1232,6 +1232,133 @@ namespace Jil.Serialize
 
         void WriteDictionary(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
+            if (!ExcludeNulls)
+            {
+                WriteDictionaryWithNulls(dictType, recursiveTypes, inLocal);
+            }
+            else
+            {
+                WriteDictionaryWithoutNulls(dictType, recursiveTypes, inLocal);
+            }
+        }
+
+        void WriteDictionaryWithoutNulls(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal)
+        {
+            var dictI = dictType.GetDictionaryInterface();
+
+            var keyType = dictI.GetGenericArguments()[0];
+            var elementType = dictI.GetGenericArguments()[1];
+
+            if (keyType != typeof(string))
+            {
+                throw new InvalidOperationException("JSON dictionaries must have strings as keys, found: " + keyType);
+            }
+
+            var kvType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+
+            var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
+            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
+            var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
+            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
+
+            var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
+
+            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
+
+            var notNull = Emit.DefineLabel();
+
+            if (inLocal != null)
+            {
+                Emit.LoadLocal(inLocal);
+            }
+            else
+            {
+                Emit.LoadArgument(1);
+            }
+
+            var end = Emit.DefineLabel();
+
+            Emit.BranchIfTrue(notNull);
+            if (!ExcludeNulls)
+            {
+                WriteString("null");
+            }
+            Emit.Branch(end);
+
+            Emit.MarkLabel(notNull);
+            WriteString("{");
+
+            var done = Emit.DefineLabel();
+
+            int onTheStack = 0;
+
+            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
+            using (var isFirst = Emit.DeclareLocal<bool>())
+            using (var kvpLoc = Emit.DeclareLocal(kvType))
+            {
+                Emit.LoadConstant(true);                    // true
+                Emit.StoreLocal(isFirst);                   // --empty--
+
+                if (inLocal != null)
+                {
+                    Emit.LoadLocal(inLocal);                // object
+                }
+                else
+                {
+                    Emit.LoadArgument(1);                   // object
+                }
+
+                Emit.CastClass(iDictionary);                  // IDictionary<,>
+                Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
+                Emit.StoreLocal(e);                           // --empty--
+
+                var loop = Emit.DefineLabel();
+
+                Emit.MarkLabel(loop);                   // --empty--
+
+                Emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                Emit.CallVirtual(enumeratorMoveNext);   // bool
+                Emit.BranchIfFalse(done);               // --empty--
+
+                if (isRecursive)
+                {
+                    onTheStack++;
+
+                    var loc = recursiveTypes[elementType];
+
+                    Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                }
+
+                if (preloadTextWriter)
+                {
+                    onTheStack++;
+
+                    Emit.LoadArgument(0);               // Action<>? TextWriter
+                }
+
+                Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
+
+                Emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
+                Emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
+
+                onTheStack++;
+
+                WriteKeyValueIfNotNull(onTheStack, elementType, recursiveTypes, isFirst);   // --empty--
+
+                Emit.Branch(loop);                      // --empty--
+            }
+
+            Emit.MarkLabel(done);
+
+            WriteString("}");
+
+            Emit.MarkLabel(end);
+        }
+
+        void WriteDictionaryWithNulls(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal)
+        {
             var dictI = dictType.GetDictionaryInterface();
 
             var keyType = dictI.GetGenericArguments()[0];
@@ -1324,7 +1451,7 @@ namespace Jil.Serialize
 
                 var loop = Emit.DefineLabel();
 
-                Emit.MarkLabel(loop);
+                Emit.MarkLabel(loop);                   // --empty--
 
                 Emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
                 Emit.CallVirtual(enumeratorMoveNext);   // bool
@@ -1351,6 +1478,8 @@ namespace Jil.Serialize
                 WriteString(",");
 
                 WriteKeyValue(elementType, recursiveTypes);   // --empty--
+
+                Emit.Branch(loop);                          // --empty--
             }
 
             Emit.MarkLabel(done);
@@ -1358,6 +1487,144 @@ namespace Jil.Serialize
             WriteString("}");
 
             Emit.MarkLabel(end);
+        }
+
+        void WriteKeyValueIfNotNull(int ontheStack, Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local isFirst)
+        {
+            // top of the stack is a 
+            //   - KeyValue<string, elementType>
+            //   - TextWriter?
+            //   - Action<,>?
+
+            var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+            var key = keyValuePair.GetProperty("Key");
+            var value = keyValuePair.GetProperty("Value");
+
+            var done = Emit.DefineLabel();
+            var doWrite = Emit.DefineLabel();
+
+            var canBeNull = elementType.IsNullableType() || !elementType.IsValueType;
+
+            if (canBeNull)
+            {
+                Emit.Duplicate();       // kvp kvp
+                LoadProperty(value);    // kvp value
+
+                if (elementType.IsNullableType())
+                {
+                    using (var temp = Emit.DeclareLocal(elementType))
+                    {
+                        Emit.StoreLocal(temp);          // kvp
+                        Emit.LoadLocalAddress(temp);    // kvp value*
+                    }
+
+                    var hasValue = elementType.GetProperty("HasValue").GetMethod;
+
+                    Emit.Call(hasValue);                // kvp bool
+                }
+
+                Emit.BranchIfTrue(doWrite);             // kvp
+                for (var i = 0; i < ontheStack; i++)
+                {
+                    Emit.Pop();
+                }
+                Emit.Branch(done);                      // --empty--
+
+                Emit.MarkLabel(doWrite);                // kvp
+            }
+
+            var skipComma = Emit.DefineLabel();
+
+            Emit.LoadLocal(isFirst);                // kvp bool
+            Emit.BranchIfTrue(skipComma);           // kvp
+
+            WriteString(",");                       // kvp
+
+            Emit.MarkLabel(skipComma);              // kvp
+
+            Emit.LoadConstant(false);               // kvp false
+            Emit.StoreLocal(isFirst);               // kvp
+
+            WriteString("\"");                      // kvp
+
+            Emit.Duplicate();       // kvp kvp
+            LoadProperty(key);      // kvp string
+
+            using (var str = Emit.DeclareLocal<string>())
+            {
+                Emit.StoreLocal(str);   // kvp
+                Emit.LoadArgument(0);   // kvp TextWriter
+                Emit.LoadLocal(str);    // kvp TextWriter string
+
+                WriteEncodedString();   // kvp
+            }
+
+            WriteString("\":");         // kvp
+
+            LoadProperty(value);        // elementType
+
+            if (elementType.IsPrimitiveType())
+            {
+                WritePrimitive(elementType);
+
+                Emit.MarkLabel(done);
+
+                return;
+            }
+
+            if (elementType.IsNullableType())
+            {
+                WriteNullable(elementType, recursiveTypes);
+
+                Emit.MarkLabel(done);
+
+                return;
+            }
+
+            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            if (isRecursive)
+            {
+                // Stack is:
+                //  - serializingType
+                //  - TextWriter
+                //  - Action<TextWriter, serializingType>
+
+                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), elementType);
+                var invoke = recursiveAct.GetMethod("Invoke");
+
+                Emit.Call(invoke);
+
+                Emit.MarkLabel(done);
+
+                return;
+            }
+
+            using (var loc = Emit.DeclareLocal(elementType))
+            {
+                Emit.StoreLocal(loc);
+
+                if (elementType.IsListType())
+                {
+                    WriteList(elementType, recursiveTypes, loc);
+
+                    Emit.MarkLabel(done);
+
+                    return;
+                }
+
+                if (elementType.IsDictionaryType())
+                {
+                    WriteList(elementType, recursiveTypes, loc);
+
+                    Emit.MarkLabel(done);
+
+                    return;
+                }
+
+                WriteObject(elementType, recursiveTypes, loc);
+            }
+
+            Emit.MarkLabel(done);
         }
 
         void WriteKeyValue(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)

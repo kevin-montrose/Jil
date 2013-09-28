@@ -295,14 +295,15 @@ namespace JilTests
                     new Dictionary<string, int>
                     {
                         { "hello world", 123 },
-                        { "fizz buzz", 456 }
+                        { "fizz buzz", 456 },
+                        { "indeed", 789 }
                     },
                     str
                 );
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456}", res);
+                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
             }
         }
 
@@ -845,6 +846,22 @@ namespace JilTests
                 );
 
                 Assert.AreEqual("{\"A\":\"hello\",\"F\":{\"B\":\"world\",\"E\":{\"C\":999},\"D\":456},\"C\":123}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, string>
+                    {
+                        { "hello", "world" },
+                        { "foo", null },
+                        { "fizz", "buzz" }
+                    },
+                    str,
+                    Options.ExcludeNulls
+                );
+
+                Assert.AreEqual("", str.ToString());
             }
         }
     }
