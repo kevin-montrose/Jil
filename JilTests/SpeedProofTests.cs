@@ -152,14 +152,14 @@ namespace JilTests
                     InlineSerializer<_ReorderMembers>.ReorderMembers = true;
 
                     // Build the *actual* serializer method
-                    memoryOrder = InlineSerializer<_ReorderMembers>.Build<_ReorderMembers>();
+                    memoryOrder = InlineSerializerHelper.Build<_ReorderMembers>();
                 }
 
                 {
                     InlineSerializer<_ReorderMembers>.ReorderMembers = false;
 
                     // Build the *actual* serializer method
-                    normalOrder = InlineSerializer<_ReorderMembers>.Build<_ReorderMembers>();
+                    normalOrder = InlineSerializerHelper.Build<_ReorderMembers>();
                 }
             }
             finally
@@ -214,14 +214,14 @@ namespace JilTests
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipping = InlineSerializer<_SkipNumberFormatting>.Build<_SkipNumberFormatting>();
+                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>();
                 }
 
                 {
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer<_SkipNumberFormatting>.Build<_SkipNumberFormatting>();
+                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>();
                 }
             }
             finally
@@ -278,14 +278,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = true;
 
                     // Build the *actual* serializer method
-                    custom = InlineSerializer<_UseCustomIntegerToString>.Build<_UseCustomIntegerToString>();
+                    custom = InlineSerializerHelper.Build<_UseCustomIntegerToString>();
                 }
 
                 {
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer<_UseCustomIntegerToString>.Build<_UseCustomIntegerToString>();
+                    normal = InlineSerializerHelper.Build<_UseCustomIntegerToString>();
                 }
             }
             finally
@@ -338,14 +338,14 @@ namespace JilTests
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializer<_SkipDateTimeMathMethods>.Build<_SkipDateTimeMathMethods>();
+                    skipped = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>();
                 }
 
                 {
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer<_SkipDateTimeMathMethods>.Build<_SkipDateTimeMathMethods>();
+                    normal = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>();
                 }
             }
             finally
