@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    class InlineSerializer
+    class InlineSerializer<ForType>
     {
         public static bool ReorderMembers = true;
         public static bool SkipNumberFormatting = true;
@@ -58,7 +58,18 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
-        static void LoadProperty(PropertyInfo prop, Emit emit)
+        private readonly bool ExcludeNulls;
+        private readonly bool PrettyPrint;
+
+        private Emit emit;
+
+        private InlineSerializer(bool pretty, bool excludeNulls)
+        {
+            PrettyPrint = pretty;
+            ExcludeNulls = excludeNulls;
+        }
+
+        void LoadProperty(PropertyInfo prop)
         {
             var getMtd = prop.GetMethod;
 
@@ -73,7 +84,7 @@ namespace Jil.Serialize
         }
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
-        static void WriteString(string str, Emit emit)
+        void WriteString(string str)
         {
             emit.LoadArgument(0);
             emit.LoadConstant(str);
@@ -181,7 +192,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        static void WriteMember(MemberInfo member, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, bool isValueType, Sigil.Local inLocal = null)
+        void WriteMember(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, bool isValueType, Sigil.Local inLocal = null)
         {
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
@@ -209,7 +220,7 @@ namespace Jil.Serialize
 
                 if (asProp != null)
                 {
-                    LoadProperty(asProp, emit);
+                    LoadProperty(asProp);
                 }
 
                 using (var loc = emit.DeclareLocal(serializingType))
@@ -218,17 +229,17 @@ namespace Jil.Serialize
 
                     if (serializingType.IsListType())
                     {
-                        WriteList(serializingType, emit, recursiveTypes, loc);
+                        WriteList(serializingType, recursiveTypes, loc);
                         return;
                     }
 
                     if (serializingType.IsDictionaryType())
                     {
-                        WriteDictionary(serializingType, emit, recursiveTypes, loc);
+                        WriteDictionary(serializingType, recursiveTypes, loc);
                         return;
                     }
 
-                    WriteList(serializingType, emit, recursiveTypes, loc);
+                    WriteList(serializingType, recursiveTypes, loc);
                 }
 
                 return;
@@ -264,7 +275,7 @@ namespace Jil.Serialize
 
             if (asProp != null)
             {
-                LoadProperty(asProp, emit); // TextWriter prop
+                LoadProperty(asProp);       // TextWriter prop
             }
 
             if (isRecursive)
@@ -284,13 +295,13 @@ namespace Jil.Serialize
 
             if (serializingType.IsPrimitiveType())
             {
-                WritePrimitive(serializingType, emit);
+                WritePrimitive(serializingType);
                 return;
             }
 
             if (serializingType.IsNullableType())
             {
-                WriteNullable(serializingType, emit, recursiveTypes);
+                WriteNullable(serializingType, recursiveTypes);
                 return;
             }
 
@@ -298,11 +309,11 @@ namespace Jil.Serialize
             {
                 emit.StoreLocal(loc);   // TextWriter;
 
-                WriteObject(serializingType, emit, recursiveTypes, loc);
+                WriteObject(serializingType, recursiveTypes, loc);
             }
         }
 
-        static void WriteNullable(Type nullableType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteNullable(Type nullableType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
             // Top of stack is
             //  - nullable
@@ -319,21 +330,21 @@ namespace Jil.Serialize
 
                 emit.StoreLocal(loc);           // TextWriter
                 emit.LoadLocalAddress(loc);     // TextWriter nullableType*
-                LoadProperty(hasValue, emit);   // TextWriter bool
+                LoadProperty(hasValue);         // TextWriter bool
                 emit.BranchIfTrue(notNull);     // TextWriter
 
                 emit.Pop();                 // --empty--
-                WriteString("null", emit);  // --empty--
+                WriteString("null");        // --empty--
                 emit.Branch(done);          // --empty--
 
                 emit.MarkLabel(notNull);    // TextWriter
                 emit.LoadLocalAddress(loc); // TextWriter nullableType*
-                LoadProperty(value, emit);  // TextValue value
+                LoadProperty(value);        // TextValue value
             }
 
             if (underlyingType.IsPrimitiveType())
             {
-                WritePrimitive(underlyingType, emit);
+                WritePrimitive(underlyingType);
             }
             else
             {
@@ -356,19 +367,19 @@ namespace Jil.Serialize
                     {
                         if (underlyingType.IsListType())
                         {
-                            WriteList(underlyingType, emit, recursiveTypes, loc);
+                            WriteList(underlyingType, recursiveTypes, loc);
                         }
                         else
                         {
                             if (underlyingType.IsDictionaryType())
                             {
-                                WriteList(underlyingType, emit, recursiveTypes, loc);
+                                WriteList(underlyingType, recursiveTypes, loc);
                             }
                             else
                             {
                                 emit.Pop();
 
-                                WriteObject(underlyingType, emit, recursiveTypes, loc);
+                                WriteObject(underlyingType, recursiveTypes, loc);
                             }
                         }
                     }
@@ -378,7 +389,7 @@ namespace Jil.Serialize
             emit.MarkLabel(done);
         }
 
-        static void WriteDateTime(Emit emit)
+        void WriteDateTime()
         {
             // top of stack:
             //   - DateTime
@@ -412,47 +423,47 @@ namespace Jil.Serialize
                     emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
                 }
 
-                LoadProperty(totalMs, emit);                // TextWriter double
+                LoadProperty(totalMs);                      // TextWriter double
                 emit.Convert<long>();                       // TextWriter int
 
-                WriteString("\"\\/Date(", emit);            // TextWriter int
-                WritePrimitive(typeof(long), emit);         // --empty--
-                WriteString(")\\/\"", emit);                  // --empty--
+                WriteString("\"\\/Date(");                  // TextWriter int
+                WritePrimitive(typeof(long));               // --empty--
+                WriteString(")\\/\"");                      // --empty--
 
                 return;
             }
 
             var getTicks = typeof(DateTime).GetProperty("Ticks");
 
-            LoadProperty(getTicks, emit);                   // TextWriter long
+            LoadProperty(getTicks);                         // TextWriter long
             emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
             emit.Subtract();                                // TextWriter long
             emit.LoadConstant(10000L);                      // TextWriter long 10000
             emit.Divide();                                  // TextWriter long
 
-            WriteString("\"\\/Date(", emit);            // TextWriter int
-            WritePrimitive(typeof(long), emit);         // --empty--
-            WriteString(")\\/\"", emit);                  // --empty--
+            WriteString("\"\\/Date(");                  // TextWriter int
+            WritePrimitive(typeof(long));               // --empty--
+            WriteString(")\\/\"");                      // --empty--
         }
 
-        static void WritePrimitive(Type primitiveType, Emit emit)
+        void WritePrimitive(Type primitiveType)
         {
             if (primitiveType == typeof(char))
             {
-                WriteEncodedChar(emit);
+                WriteEncodedChar();
 
                 return;
             }
 
             if (primitiveType == typeof(string))
             {
-                WriteEncodedString(emit);
+                WriteEncodedString();
                 return;
             }
 
             if (primitiveType == typeof(DateTime))
             {
-                WriteDateTime(emit);
+                WriteDateTime();
                 return;
             }
 
@@ -463,12 +474,12 @@ namespace Jil.Serialize
 
                 emit.BranchIfTrue(trueLabel);   // TextWriter
                 emit.Pop();                     // --empty--
-                WriteString("false", emit);     // --empty--
+                WriteString("false");           // --empty--
                 emit.Branch(done);
 
                 emit.MarkLabel(trueLabel);      // TextWriter
                 emit.Pop();                     // --empty--
-                WriteString("true", emit);      // --empty--
+                WriteString("true");            // --empty--
 
                 emit.MarkLabel(done);
 
@@ -515,7 +526,7 @@ namespace Jil.Serialize
                     emit.MarkLabel(label);      // TextWriter int
                     emit.Pop();                 // TextWriter
                     emit.Pop();                 // --empty--
-                    WriteString("" + i, emit);  // --empty--
+                    WriteString("" + i);        // --empty--
                     emit.Branch(done);          // --empty--
                 }
 
@@ -566,7 +577,7 @@ namespace Jil.Serialize
             emit.CallVirtual(builtInMtd);       // --empty--
         }
 
-        static MethodInfo InlineSerializer_CustomWriteInt = typeof(InlineSerializer).GetMethod("CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo InlineSerializer_CustomWriteInt = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CustomWriteInt(TextWriter writer, int number, char[] buffer)
         {
@@ -603,7 +614,7 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
-        static MethodInfo InlineSerializer_CustomWriteUInt = typeof(InlineSerializer).GetMethod("CustomWriteUInt", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo InlineSerializer_CustomWriteUInt = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteUInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CustomWriteUInt(TextWriter writer, uint number, char[] buffer)
         {
@@ -623,7 +634,7 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
-        static MethodInfo InlineSerializer_CustomWriteLong = typeof(InlineSerializer).GetMethod("CustomWriteLong", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo InlineSerializer_CustomWriteLong = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteLong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CustomWriteLong(TextWriter writer, long number, char[] buffer)
         {
@@ -660,7 +671,7 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
-        static MethodInfo InlineSerializer_CustomWriteULong = typeof(InlineSerializer).GetMethod("CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo InlineSerializer_CustomWriteULong = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
         {
@@ -680,7 +691,7 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
-        static void WriteEncodedChar(Emit emit)
+        void WriteEncodedChar()
         {
             // top of stack is:
             //  - char
@@ -734,13 +745,13 @@ namespace Jil.Serialize
 
             emit.Pop();                     // TextWriter
             emit.Pop();                     // --empty--
-            WriteString(@"\\", emit);       // --empty--
+            WriteString(@"\\");             // --empty--
             emit.Branch(done);              // --empty--
 
             emit.MarkLabel(quote);
             emit.Pop();                     // TextWriter
             emit.Pop();                     // --empty--
-            WriteString(@"\""", emit);      // --empty--
+            WriteString(@"\""");            // --empty--
             emit.Branch(done);              // --empty--
 
             foreach (var label in labels)
@@ -749,14 +760,14 @@ namespace Jil.Serialize
 
                 emit.Pop();                     // TextWriter
                 emit.Pop();                     // --empty--
-                WriteString(label.Item2, emit); // --empty-- 
+                WriteString(label.Item2);       // --empty-- 
                 emit.Branch(done);              // --empty--
             }
 
             emit.MarkLabel(done);
         }
 
-        static void WriteEncodedString(Emit emit)
+        void WriteEncodedString()
         {
             // top of stack is:
             //  - string
@@ -781,14 +792,14 @@ namespace Jil.Serialize
                 emit.MarkLabel(loop);               // TextWriter TextWriter
                 emit.LoadLocal(i);                  // TextWriter TextWriter i
                 emit.LoadLocal(str);                // TextWriter TextWriter i string
-                LoadProperty(strLength, emit);      // TextWriter TextWriter i str.Length
+                LoadProperty(strLength);            // TextWriter TextWriter i str.Length
                 emit.BranchIfGreaterOrEqual(done);  // TextWriter TextWriter
 
                 emit.LoadLocal(str);            // TextWriter TextWriter string
                 emit.LoadLocal(i);              // TextWriter TextWriter string i
-                LoadProperty(strCharsIx, emit); // TextWriter TextWriter char
+                LoadProperty(strCharsIx);       // TextWriter TextWriter char
 
-                WriteEncodedChar(emit); // TextWriter
+                WriteEncodedChar(); // TextWriter
 
                 emit.LoadLocal(i);      // TextWriter i
                 emit.LoadConstant(1);   // TextWriter i 1
@@ -803,7 +814,7 @@ namespace Jil.Serialize
             emit.Pop();
         }
 
-        internal static void WriteObject(Type forType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteObject(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var writeOrder = OrderMembersForAccess(forType);
 
@@ -832,11 +843,11 @@ namespace Jil.Serialize
             var end = emit.DefineLabel();
 
             emit.BranchIfTrue(notNull);
-            WriteString("null", emit);
+            WriteString("null");
             emit.Branch(end);
 
             emit.MarkLabel(notNull);
-            WriteString("{", emit);
+            WriteString("{");
 
             var firstPass = true;
             var previousMemberWasStringy = false;
@@ -865,25 +876,25 @@ namespace Jil.Serialize
                     keyString = keyString + "\"";
                 }
 
-                WriteString(keyString, emit);
-                WriteMember(member, emit, recursiveTypes, isValueType, inLocal);
+                WriteString(keyString);
+                WriteMember(member, recursiveTypes, isValueType, inLocal);
 
                 previousMemberWasStringy = isStringy;
             }
 
             if (previousMemberWasStringy)
             {
-                WriteString("\"}", emit);
+                WriteString("\"}");
             }
             else
             {
-                WriteString("}", emit);
+                WriteString("}");
             }
 
             emit.MarkLabel(end);
         }
 
-        static void WriteList(Type listType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteList(Type listType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
@@ -911,11 +922,11 @@ namespace Jil.Serialize
             var end = emit.DefineLabel();
 
             emit.BranchIfTrue(notNull);
-            WriteString("null", emit);
+            WriteString("null");
             emit.Branch(end);
 
             emit.MarkLabel(notNull);
-            WriteString("[", emit);
+            WriteString("[");
 
             var done = emit.DefineLabel();
 
@@ -953,9 +964,9 @@ namespace Jil.Serialize
                     }
 
                     emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                    LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? type
+                    LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
 
-                    WriteElement(elementType, emit, recursiveTypes);   // --empty--
+                    WriteElement(elementType, recursiveTypes);   // --empty--
                 }
 
                 var loop = emit.DefineLabel();
@@ -979,33 +990,33 @@ namespace Jil.Serialize
                 }
 
                 emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? type
+                LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
 
-                WriteString(",", emit);
+                WriteString(",");
 
-                WriteElement(elementType, emit, recursiveTypes);   // --empty--
+                WriteElement(elementType, recursiveTypes);   // --empty--
 
                 emit.Branch(loop);
             }
 
             emit.MarkLabel(done);
 
-            WriteString("]", emit);
+            WriteString("]");
 
             emit.MarkLabel(end);
         }
 
-        static void WriteElement(Type elementType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteElement(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
             if (elementType.IsPrimitiveType())
             {
-                WritePrimitive(elementType, emit);
+                WritePrimitive(elementType);
                 return;
             }
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, emit, recursiveTypes);
+                WriteNullable(elementType, recursiveTypes);
                 return;
             }
 
@@ -1031,21 +1042,21 @@ namespace Jil.Serialize
 
                 if (elementType.IsListType())
                 {
-                    WriteList(elementType, emit, recursiveTypes, loc);
+                    WriteList(elementType, recursiveTypes, loc);
                     return;
                 }
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteDictionary(elementType, emit, recursiveTypes, loc);
+                    WriteDictionary(elementType, recursiveTypes, loc);
                     return;
                 }
 
-                WriteObject(elementType, emit, recursiveTypes, loc);
+                WriteObject(elementType, recursiveTypes, loc);
             }
         }
 
-        static void WriteDictionary(Type dictType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteDictionary(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
             var dictI = dictType.GetDictionaryInterface();
 
@@ -1083,11 +1094,11 @@ namespace Jil.Serialize
             var end = emit.DefineLabel();
 
             emit.BranchIfTrue(notNull);
-            WriteString("null", emit);
+            WriteString("null");
             emit.Branch(end);
 
             emit.MarkLabel(notNull);
-            WriteString("{", emit);
+            WriteString("{");
 
             var done = emit.DefineLabel();
 
@@ -1126,12 +1137,12 @@ namespace Jil.Serialize
                     }
 
                     emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                    LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? KeyValuePair<,>
+                    LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
                     
                     emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                     emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
 
-                    WriteKeyValue(elementType, emit, recursiveTypes);   // --empty--
+                    WriteKeyValue(elementType, recursiveTypes);   // --empty--
                 }
 
                 var loop = emit.DefineLabel();
@@ -1155,24 +1166,24 @@ namespace Jil.Serialize
                 }
 
                 emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                LoadProperty(enumeratorCurrent, emit);  // Action<>? TextWriter? KeyValuePair<,>
+                LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
 
                 emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                 emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
 
-                WriteString(",", emit);
+                WriteString(",");
 
-                WriteKeyValue(elementType, emit, recursiveTypes);   // --empty--
+                WriteKeyValue(elementType, recursiveTypes);   // --empty--
             }
 
             emit.MarkLabel(done);
 
-            WriteString("}", emit);
+            WriteString("}");
 
             emit.MarkLabel(end);
         }
 
-        static void WriteKeyValue(Type elementType, Emit emit, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteKeyValue(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
             // top of the stack is a KeyValue<string, elementType>
 
@@ -1180,10 +1191,10 @@ namespace Jil.Serialize
             var key = keyValuePair.GetProperty("Key");
             var value = keyValuePair.GetProperty("Value");
 
-            WriteString("\"", emit);
+            WriteString("\"");
 
             emit.Duplicate();           // kvp kvp
-            LoadProperty(key, emit);    // kvp string
+            LoadProperty(key);    // kvp string
 
             using (var str = emit.DeclareLocal<string>())
             {
@@ -1194,19 +1205,19 @@ namespace Jil.Serialize
                 emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) })); // kvp
             }
 
-            WriteString("\":", emit);
+            WriteString("\":");
 
-            LoadProperty(value, emit);  // elementType
+            LoadProperty(value);        // elementType
 
             if (elementType.IsPrimitiveType())
             {
-                WritePrimitive(elementType, emit);
+                WritePrimitive(elementType);
                 return;
             }
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, emit, recursiveTypes);
+                WriteNullable(elementType, recursiveTypes);
                 return;
             }
 
@@ -1232,21 +1243,21 @@ namespace Jil.Serialize
 
                 if (elementType.IsListType())
                 {
-                    WriteList(elementType, emit, recursiveTypes, loc);
+                    WriteList(elementType, recursiveTypes, loc);
                     return;
                 }
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteList(elementType, emit, recursiveTypes, loc);
+                    WriteList(elementType, recursiveTypes, loc);
                     return;
                 }
 
-                WriteObject(elementType, emit, recursiveTypes, loc);
+                WriteObject(elementType, recursiveTypes, loc);
             }
         }
 
-        static Dictionary<Type, Sigil.Local> PreloadRecursiveTypes(HashSet<Type> recursiveTypes, Emit emit)
+        Dictionary<Type, Sigil.Local> PreloadRecursiveTypes(HashSet<Type> recursiveTypes)
         {
             var ret = new Dictionary<Type, Sigil.Local>();
 
@@ -1266,7 +1277,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        static void AddCharBuffer(Emit emit)
+        void AddCharBuffer()
         {
             if (UseCustomIntegerToString)
             {
@@ -1277,128 +1288,135 @@ namespace Jil.Serialize
             }
         }
 
-        static Action<TextWriter, ForType> BuildObjectWithNewDelegate<ForType>()
+        Action<TextWriter, ForType> BuildObjectWithNewDelegate()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
-            AddCharBuffer(emit);
+            AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
+            var preloaded = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteObject(typeof(ForType), emit, preloaded);
+            WriteObject(typeof(ForType), preloaded);
             emit.Return();
 
             return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
 
-        static Action<TextWriter, ListType> BuildListWithNewDelegate<ListType>()
+        Action<TextWriter, ForType> BuildListWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(ListType));
+            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ListType) });
+            emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
-            AddCharBuffer(emit);
+            AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
+            var preloaded = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteList(typeof(ListType), emit, preloaded);
+            WriteList(typeof(ForType), preloaded);
             emit.Return();
 
-            return emit.CreateDelegate<Action<TextWriter, ListType>>();
+            return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
 
-        static Action<TextWriter, DictType> BuildDictionaryWithNewDelegate<DictType>()
+        Action<TextWriter, ForType> BuildDictionaryWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(DictType));
+            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(DictType) });
+            emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
-            AddCharBuffer(emit);
+            AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
+            var preloaded = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteDictionary(typeof(DictType), emit, preloaded);
+            WriteDictionary(typeof(ForType), preloaded);
             emit.Return();
 
-            return emit.CreateDelegate<Action<TextWriter, DictType>>();
+            return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
 
-        static Action<TextWriter, PrimitiveType> BuildPrimitiveWithNewDelegate<PrimitiveType>()
+        Action<TextWriter, ForType> BuildPrimitiveWithNewDelegate()
         {
-            var primitiveType = typeof(PrimitiveType);
+            var primitiveType = typeof(ForType);
             var isString = primitiveType == typeof(string) || primitiveType == typeof(char);
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(PrimitiveType) });
+            emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
-            AddCharBuffer(emit);
+            AddCharBuffer();
 
             emit.LoadArgument(0);
             emit.LoadArgument(1);
 
             if (isString)
             {
-                WriteString("\"", emit);
+                WriteString("\"");
             }
 
-            WritePrimitive(typeof(PrimitiveType), emit);
+            WritePrimitive(typeof(ForType));
 
             if (isString)
             {
-                WriteString("\"", emit);
+                WriteString("\"");
             }
 
             emit.Return();
 
-            return emit.CreateDelegate<Action<TextWriter, PrimitiveType>>();
+            return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
 
-        static Action<TextWriter, NullableType> BuildNullableWithNewDelegate<NullableType>()
+        Action<TextWriter, ForType> BuildNullableWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(NullableType));
+            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(NullableType) });
+            emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
 
-            AddCharBuffer(emit);
+            AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes, emit);
+            var preloaded = PreloadRecursiveTypes(recursiveTypes);
 
             emit.LoadArgument(0);
             emit.LoadArgument(1);
 
-            WriteNullable(typeof(NullableType), emit, preloaded);
+            WriteNullable(typeof(ForType), preloaded);
             
             emit.Return();
 
-            return emit.CreateDelegate<Action<TextWriter, NullableType>>();
+            return emit.CreateDelegate<Action<TextWriter, ForType>>();
         }
 
-        public static Action<TextWriter, ForType> Build<ForType>(bool pretty = false, bool excludeNulls = false)
+        private Action<TextWriter, ForType> Build()
         {
             var forType = typeof(ForType);
 
             if (forType.IsNullableType())
             {
-                return BuildNullableWithNewDelegate<ForType>();
+                return BuildNullableWithNewDelegate();
             }
 
             if (forType.IsPrimitiveType())
             {
-                return BuildPrimitiveWithNewDelegate<ForType>();
+                return BuildPrimitiveWithNewDelegate();
             }
 
             if (forType.IsDictionaryType())
             {
-                return BuildDictionaryWithNewDelegate<ForType>();
+                return BuildDictionaryWithNewDelegate();
             }
 
             if (forType.IsListType())
             {
-                return BuildListWithNewDelegate<ForType>();
+                return BuildListWithNewDelegate();
             }
 
-            return BuildObjectWithNewDelegate<ForType>();
+            return BuildObjectWithNewDelegate();
+        }
+
+        public static Action<TextWriter, BuildForType> Build<BuildForType>(bool pretty = false, bool excludeNulls = false)
+        {
+            var obj = new InlineSerializer<BuildForType>(pretty, excludeNulls);
+
+            return obj.Build();
         }
     }
 }

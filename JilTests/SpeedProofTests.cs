@@ -149,22 +149,22 @@ namespace JilTests
             try
             {
                 {
-                    InlineSerializer.ReorderMembers = true;
+                    InlineSerializer<_ReorderMembers>.ReorderMembers = true;
 
                     // Build the *actual* serializer method
-                    memoryOrder = InlineSerializer.Build<_ReorderMembers>();
+                    memoryOrder = InlineSerializer<_ReorderMembers>.Build<_ReorderMembers>();
                 }
 
                 {
-                    InlineSerializer.ReorderMembers = false;
+                    InlineSerializer<_ReorderMembers>.ReorderMembers = false;
 
                     // Build the *actual* serializer method
-                    normalOrder = InlineSerializer.Build<_ReorderMembers>();
+                    normalOrder = InlineSerializer<_ReorderMembers>.Build<_ReorderMembers>();
                 }
             }
             finally
             {
-                InlineSerializer.ReorderMembers = true;
+                InlineSerializer<_ReorderMembers>.ReorderMembers = true;
             }
 
             var rand = new Random(1160428);
@@ -211,22 +211,22 @@ namespace JilTests
             try
             {
                 {
-                    InlineSerializer.SkipNumberFormatting = true;
+                    InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipping = InlineSerializer.Build<_SkipNumberFormatting>();
+                    skipping = InlineSerializer<_SkipNumberFormatting>.Build<_SkipNumberFormatting>();
                 }
 
                 {
-                    InlineSerializer.SkipNumberFormatting = false;
+                    InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer.Build<_SkipNumberFormatting>();
+                    normal = InlineSerializer<_SkipNumberFormatting>.Build<_SkipNumberFormatting>();
                 }
             }
             finally
             {
-                InlineSerializer.SkipNumberFormatting = true;
+                InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
             }
 
             var rand = new Random(141090045);
@@ -275,22 +275,22 @@ namespace JilTests
             try
             {
                 {
-                    InlineSerializer.UseCustomIntegerToString = true;
+                    InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = true;
 
                     // Build the *actual* serializer method
-                    custom = InlineSerializer.Build<_UseCustomIntegerToString>();
+                    custom = InlineSerializer<_UseCustomIntegerToString>.Build<_UseCustomIntegerToString>();
                 }
 
                 {
-                    InlineSerializer.UseCustomIntegerToString = false;
+                    InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer.Build<_UseCustomIntegerToString>();
+                    normal = InlineSerializer<_UseCustomIntegerToString>.Build<_UseCustomIntegerToString>();
                 }
             }
             finally
             {
-                InlineSerializer.UseCustomIntegerToString = true;
+                InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = true;
             }
 
             var rand = new Random(139426720);
@@ -335,22 +335,22 @@ namespace JilTests
             try
             {
                 {
-                    InlineSerializer.SkipDateTimeMathMethods = true;
+                    InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializer.Build<_SkipDateTimeMathMethods>();
+                    skipped = InlineSerializer<_SkipDateTimeMathMethods>.Build<_SkipDateTimeMathMethods>();
                 }
 
                 {
-                    InlineSerializer.SkipDateTimeMathMethods = false;
+                    InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializer.Build<_SkipDateTimeMathMethods>();
+                    normal = InlineSerializer<_SkipDateTimeMathMethods>.Build<_SkipDateTimeMathMethods>();
                 }
             }
             finally
             {
-                InlineSerializer.SkipDateTimeMathMethods = true;
+                InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = true;
             }
 
             var rand = new Random(66262484);
