@@ -14,9 +14,46 @@ namespace Jil
         {
             options = options ?? Options.None;
 
-            if (options != Options.None) throw new NotImplementedException();
+            if (options.ShouldPrettyPrint.GetValueOrDefault())
+            {
+                PrettyPrintSerialize(data, output, options);
+                return;
+            }
 
-            TypeCache<T>.Thunk(output, data);
+            if (options.ShouldExcludeNulls.GetValueOrDefault())
+            {
+                ExcludeNullsSerialize(data, output, options);
+                return;
+            }
+
+            NoneTypeCache<T>.Thunk(output, data);
+        }
+
+        private static void ExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
+        {
+            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            {
+                PrettyPrintExcludeNullsSerialize(data, output, opts);
+                return;
+            }
+
+            ExcludeNullsTypeCache<T>.Thunk(output, data);
+        }
+
+        private static void PrettyPrintSerialize<T>(T data, TextWriter output, Options opts)
+        {
+            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            {
+                PrettyPrintExcludeNullsSerialize(data, output, opts);
+                return;
+            }
+
+            PrettyPrintTypeCache<T>.Thunk(output, data);
+        }
+
+        private static void PrettyPrintExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
+        {
+            PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data);
         }
     }
 }

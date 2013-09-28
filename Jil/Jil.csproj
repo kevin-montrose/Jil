@@ -48,7 +48,7 @@
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Serialize\InlineSerializer.cs" />
-    <Compile Include="Serialize\TypeCache.cs" />
+    <Compile Include="Serialize\TypeCaches.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Serialize\Utils.cs" />

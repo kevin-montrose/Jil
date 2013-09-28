@@ -1252,7 +1252,7 @@ namespace Jil.Serialize
 
             foreach (var type in recursiveTypes)
             {
-                var cacheType = typeof(TypeCache<>).MakeGenericType(type);
+                var cacheType = typeof(NoneTypeCache<>).MakeGenericType(type);
                 var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
                 var loc = emit.DeclareLocal(thunk.FieldType);
@@ -1374,7 +1374,7 @@ namespace Jil.Serialize
             return emit.CreateDelegate<Action<TextWriter, NullableType>>();
         }
 
-        public static Action<TextWriter, ForType> Build<ForType>()
+        public static Action<TextWriter, ForType> Build<ForType>(bool pretty = false, bool excludeNulls = false)
         {
             var forType = typeof(ForType);
 

@@ -8,15 +8,15 @@ namespace Jil
     public sealed class Options
     {
         public static readonly Options None = new Options();
-        public static readonly Options Pretty = new Options(indent: 2);
         public static readonly Options ExcludeNulls = new Options(excludeNulls: true);
+        public static readonly Options PrettyPrint = new Options(pretty: true);
 
-        internal int? Indent { get; set; }
+        internal bool? ShouldPrettyPrint { get; set; }
         internal bool? ShouldExcludeNulls { get; set; }
 
-        public Options(int? indent = null, bool? excludeNulls = null)
+        private Options(bool? pretty = null, bool? excludeNulls = null)
         {
-            Indent = indent;
+            ShouldPrettyPrint = pretty;
             ShouldExcludeNulls = excludeNulls;
         }
     }
