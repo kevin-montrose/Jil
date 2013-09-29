@@ -107,7 +107,7 @@ namespace Jil.Serialize
             // default case
             using (var count = Emit.DeclareLocal<int>())
             {
-                WriteString("\r\n");
+                WriteString("\n");
 
                 var loop = Emit.DefineLabel();
 
@@ -128,7 +128,7 @@ namespace Jil.Serialize
 
             for (var i = 0; i < labels.Length; i++)
             {
-                var breakAndIndent = "\r\n" + string.Concat(Enumerable.Range(0, i).Select(_ => " "));
+                var breakAndIndent = "\n" + string.Concat(Enumerable.Range(0, i).Select(_ => " "));
 
                 Emit.MarkLabel(labels[i]);      // --empty--
                 WriteString(breakAndIndent);    // --empty--
@@ -362,13 +362,13 @@ namespace Jil.Serialize
 
             if (serializingType.IsPrimitiveType())
             {
-                WritePrimitive(serializingType, quotesNeedHandling: false);
+                WritePrimitive(serializingType, quotesNeedHandling: true);
                 return;
             }
 
             if (serializingType.IsNullableType())
             {
-                WriteNullable(serializingType, recursiveTypes, quotesNeedHandling: false);
+                WriteNullable(serializingType, recursiveTypes, quotesNeedHandling: true);
                 return;
             }
 
@@ -952,11 +952,11 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);             // --empty--
-            
+
             // No ExcludeNulls checks since this code is never run
             //   if that's set
             WriteString("null");                    // --empty--
-            
+
             Emit.Branch(end);                       // --empty--
 
             Emit.MarkLabel(notNull);                // --empty--
@@ -968,70 +968,48 @@ namespace Jil.Serialize
             }
 
             var firstPass = true;
-            var previousMemberWasStringy = false;
             foreach (var member in writeOrder)
             {
-                string keyString;
-                if (firstPass)
+                if (!PrettyPrint)
                 {
-                    keyString = "\"" + member.Name.JsonEscape() + "\":";
-                    firstPass = false;
+                    string keyString;
+                    if (firstPass)
+                    {
+                        keyString = "\"" + member.Name.JsonEscape() + "\":";
+                        firstPass = false;
+                    }
+                    else
+                    {
+                        keyString = ",\"" + member.Name.JsonEscape() + "\":";
+                    }
+
+                    WriteString(keyString);                         // --empty--
+                    WriteMember(member, recursiveTypes, inLocal);   // --empty--
                 }
                 else
                 {
-                    keyString = ",\"" + member.Name.JsonEscape() + "\":";
-                }
+                    if (!firstPass)
+                    {
+                        WriteString(",");
+                    }
 
-                if (previousMemberWasStringy)
-                {
-                    keyString = "\"" + keyString;
-                }
-
-                var isStringy = member.IsStringyType();
-
-                if (isStringy)
-                {
-                    keyString = keyString + "\"";
-                }
-
-                if (PrettyPrint)
-                {
                     LineBreakAndIndent();
+
+                    firstPass = false;
+
+                    WriteString("\"" + member.Name.JsonEscape() + "\": ");
+
+                    WriteMember(member, recursiveTypes, inLocal);
                 }
-
-                WriteString(keyString);                         // --empty--
-                WriteMember(member, recursiveTypes, inLocal);   // --empty--
-
-                previousMemberWasStringy = isStringy;
             }
 
             if (PrettyPrint)
             {
                 DecreaseIndent();
+                LineBreakAndIndent();
             }
 
-            if (previousMemberWasStringy)
-            {
-                if (!PrettyPrint)
-                {
-                    WriteString("\"}");                             // --empty--
-                }
-                else
-                {
-                    WriteString("\"");
-                    LineBreakAndIndent();
-                    WriteString("}");
-                }
-            }
-            else
-            {
-                if (PrettyPrint)
-                {
-                    LineBreakAndIndent();
-                }
-
-                WriteString("}");                               // --empty--
-            }
+            WriteString("}");                               // --empty--
 
             Emit.MarkLabel(end);
         }
@@ -1161,11 +1139,9 @@ namespace Jil.Serialize
             Emit.LoadLocal(isFirst);        // bool
             Emit.BranchIfTrue(writeValue);  // --empty--
 
-            var isStringy = member.IsStringyType();
-
             WriteString(",");
 
-            Emit.MarkLabel(writeValue);                             // --empty--
+            Emit.MarkLabel(writeValue);     // --empty--
 
             Emit.LoadConstant(false);       // false
             Emit.StoreLocal(isFirst);       // --empty--
@@ -1175,21 +1151,9 @@ namespace Jil.Serialize
                 LineBreakAndIndent();
             }
 
-            if (isStringy)
-            {
-                WriteString("\"" + member.Name.JsonEscape() + "\":\"");   // --empty--
-            }
-            else
-            {
-                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
-            }
+            WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
 
             WriteMember(member, recursiveTypes, inLocal);           // --empty--
-
-            if (isStringy)
-            {
-                WriteString("\"");
-            }
 
             Emit.MarkLabel(end);
         }

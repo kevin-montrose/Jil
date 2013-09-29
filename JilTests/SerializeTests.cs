@@ -907,7 +907,39 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("", res);
+                Assert.AreEqual("{\n \"A\": \"hello\",\n \"B\": null,\n \"E\": null,\n \"F\": {\n  \"A\": null,\n  \"B\": \"world\",\n  \"E\": {\n   \"A\": null,\n   \"B\": null,\n   \"E\": null,\n   \"F\": null,\n   \"C\": 999,\n   \"D\": null\n  },\n  \"F\": null,\n  \"C\": null,\n  \"D\": 456\n },\n \"C\": 123,\n \"D\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _PrettyPrint
+                    {
+                        A = "hello",
+                        B = null,
+                        C = 123,
+                        D = null,
+                        E = null,
+                        F = new _PrettyPrint
+                        {
+                            A = null,
+                            B = "world",
+                            C = null,
+                            D = 456,
+                            E = new _PrettyPrint
+                            {
+                                C = 999
+                            },
+                            F = null
+                        }
+                    },
+                    str,
+                    Options.PrettyPrintExcludeNulls
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\n \"A\":\"hello\",\n \"F\":{\n  \"B\":\"world\",\n  \"E\":{\n   \"C\":999\n  },\n  \"D\":456\n },\n \"C\":123\n}", res);
             }
         }
     }
