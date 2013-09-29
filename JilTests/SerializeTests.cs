@@ -941,6 +941,42 @@ namespace JilTests
 
                 Assert.AreEqual("{\n \"A\":\"hello\",\n \"F\":{\n  \"B\":\"world\",\n  \"E\":{\n   \"C\":999\n  },\n  \"D\":456\n },\n \"C\":123\n}", res);
             }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, int?>
+                    {
+                        {"hello world", 31415926 },
+                        {"fizz buzz", null },
+                        {"foo bar", 1318 }
+                    },
+                    str,
+                    Options.PrettyPrint
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\n \"hello world\": 31415926,\n \"fizz buzz\": null,\n \"foo bar\": 1318\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, int?>
+                    {
+                        {"hello world", 31415926 },
+                        {"fizz buzz", null },
+                        {"foo bar", 1318 }
+                    },
+                    str,
+                    Options.PrettyPrintExcludeNulls
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\n \"hello world\": 31415926,\n \"foo bar\": 1318\n}", res);
+            }
         }
     }
 }

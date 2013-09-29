@@ -1681,7 +1681,14 @@ namespace Jil.Serialize
                 WriteEncodedString(quotesNeedHandling: false);   // kvp
             }
 
-            WriteString("\":");         // kvp
+            if (PrettyPrint)
+            {
+                WriteString("\": ");
+            }
+            else
+            {
+                WriteString("\":");         // kvp
+            }
 
             LoadProperty(value);        // elementType
 
@@ -1779,7 +1786,14 @@ namespace Jil.Serialize
                 Emit.CallVirtual(TextWriter_WriteString);   // kvp
             }
 
-            WriteString("\":");         // kvp
+            if (PrettyPrint)
+            {
+                WriteString("\": ");        // kvp
+            }
+            else
+            {
+                WriteString("\":");         // kvp
+            }
 
             LoadProperty(value);        // elementType
 
