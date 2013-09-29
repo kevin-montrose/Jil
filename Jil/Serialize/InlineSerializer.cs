@@ -95,7 +95,47 @@ namespace Jil.Serialize
 
         void LineBreakAndIndent()
         {
-            WriteString("\n ");
+            const int precalcLimit = 10;
+
+            var done = Emit.DefineLabel();
+
+            var labels = Enumerable.Range(0, precalcLimit).Select(i => Emit.DefineLabel()).ToArray();
+
+            Emit.LoadArgument(2);   // int
+            Emit.Switch(labels);    // --empty--
+
+            // default case
+            using (var count = Emit.DeclareLocal<int>())
+            {
+                WriteString("\r\n");
+
+                var loop = Emit.DefineLabel();
+
+                Emit.LoadArgument(2);       // int
+                Emit.StoreLocal(count);     // --empty--
+
+                Emit.MarkLabel(loop);
+                Emit.LoadLocal(count);      // int
+                Emit.BranchIfFalse(done);   // --empty--
+
+                WriteString(" ");           // --empty--
+                Emit.LoadLocal(count);      // int
+                Emit.LoadConstant(-1);      // int -1
+                Emit.Add();                 // (int-1)
+                Emit.StoreLocal(count);     // --empty-
+                Emit.Branch(loop);
+            }
+
+            for (var i = 0; i < labels.Length; i++)
+            {
+                var breakAndIndent = "\r\n" + string.Concat(Enumerable.Range(0, i).Select(_ => " "));
+
+                Emit.MarkLabel(labels[i]);      // --empty--
+                WriteString(breakAndIndent);    // --empty--
+                Emit.Branch(done);              // --empty--
+            }
+
+            Emit.MarkLabel(done);               // --empty--
         }
 
         void IncreaseIndent()

@@ -864,5 +864,51 @@ namespace JilTests
                 Assert.AreEqual("{\"hello\":\"world\",\"fizz\":\"buzz\"}", str.ToString());
             }
         }
+
+        public class _PrettyPrint
+        {
+            public string A;
+            public string B;
+            public int? C;
+            public int? D;
+            public _PrettyPrint E;
+            public _PrettyPrint F;
+        }
+
+        [TestMethod]
+        public void PrettyPrint()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _PrettyPrint
+                    {
+                        A = "hello",
+                        B = null,
+                        C = 123,
+                        D = null,
+                        E = null,
+                        F = new _PrettyPrint
+                        {
+                            A = null,
+                            B = "world",
+                            C = null,
+                            D = 456,
+                            E = new _PrettyPrint
+                            {
+                                C = 999
+                            },
+                            F = null
+                        }
+                    },
+                    str,
+                    Options.PrettyPrint
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("", res);
+            }
+        }
     }
 }
