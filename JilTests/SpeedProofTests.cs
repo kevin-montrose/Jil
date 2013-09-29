@@ -52,7 +52,7 @@ namespace JilTests
             return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
         }
 
-        private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T> a, Action<TextWriter, T> b, out double aTimeMS, out double bTimeMS, bool checkCorrectness = true)
+        private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T, int> a, Action<TextWriter, T, int> b, out double aTimeMS, out double bTimeMS, bool checkCorrectness = true)
         {
             var aTimer = new Stopwatch();
             var bTimer = new Stopwatch();
@@ -65,8 +65,8 @@ namespace JilTests
                     using (var aStr = new StringWriter())
                     using (var bStr = new StringWriter())
                     {
-                        a(aStr, item);
-                        b(bStr, item);
+                        a(aStr, item, 0);
+                        b(bStr, item, 0);
 
                         Assert.AreEqual(aStr.ToString(), bStr.ToString());
                     }
@@ -81,7 +81,7 @@ namespace JilTests
                     {
                         using (var str = new StringWriter())
                         {
-                            a(str, toSerialize[i]);
+                            a(str, toSerialize[i], 0);
                         }
                     }
                     aTimer.Stop();
@@ -95,7 +95,7 @@ namespace JilTests
                     {
                         using (var str = new StringWriter())
                         {
-                            b(str, toSerialize[i]);
+                            b(str, toSerialize[i], 0);
                         }
                     }
                     bTimer.Stop();
@@ -143,8 +143,8 @@ namespace JilTests
         [TestMethod]
         public void ReorderMembers()
         {
-            Action<TextWriter, _ReorderMembers> memoryOrder;
-            Action<TextWriter, _ReorderMembers> normalOrder;
+            Action<TextWriter, _ReorderMembers, int> memoryOrder;
+            Action<TextWriter, _ReorderMembers, int> normalOrder;
 
             try
             {
@@ -205,8 +205,8 @@ namespace JilTests
         [TestMethod]
         public void SkipNumberFormatting()
         {
-            Action<TextWriter, _SkipNumberFormatting> skipping;
-            Action<TextWriter, _SkipNumberFormatting> normal;
+            Action<TextWriter, _SkipNumberFormatting, int> skipping;
+            Action<TextWriter, _SkipNumberFormatting, int> normal;
 
             try
             {
@@ -269,8 +269,8 @@ namespace JilTests
         [TestMethod]
         public void UseCustomIntegerToString()
         {
-            Action<TextWriter, _UseCustomIntegerToString> custom;
-            Action<TextWriter, _UseCustomIntegerToString> normal;
+            Action<TextWriter, _UseCustomIntegerToString, int> custom;
+            Action<TextWriter, _UseCustomIntegerToString, int> normal;
 
             try
             {
@@ -329,8 +329,8 @@ namespace JilTests
         [TestMethod]
         public void SkipDateTimeMathMethods()
         {
-            Action<TextWriter, _SkipDateTimeMathMethods> skipped;
-            Action<TextWriter, _SkipDateTimeMathMethods> normal;
+            Action<TextWriter, _SkipDateTimeMathMethods, int> skipped;
+            Action<TextWriter, _SkipDateTimeMathMethods, int> normal;
 
             try
             {

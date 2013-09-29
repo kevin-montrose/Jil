@@ -26,7 +26,7 @@ namespace Jil
                 return;
             }
 
-            NoneTypeCache<T>.Thunk(output, data);
+            NoneTypeCache<T>.Thunk(output, data, 0);
         }
 
         private static void ExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
@@ -37,7 +37,7 @@ namespace Jil
                 return;
             }
 
-            ExcludeNullsTypeCache<T>.Thunk(output, data);
+            ExcludeNullsTypeCache<T>.Thunk(output, data, 0);
         }
 
         private static void PrettyPrintSerialize<T>(T data, TextWriter output, Options opts)
@@ -48,12 +48,12 @@ namespace Jil
                 return;
             }
 
-            PrettyPrintTypeCache<T>.Thunk(output, data);
+            PrettyPrintTypeCache<T>.Thunk(output, data, 0);
         }
 
         private static void PrettyPrintExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data);
+            PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
         }
     }
 }

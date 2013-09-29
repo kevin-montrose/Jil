@@ -93,6 +93,27 @@ namespace Jil.Serialize
             Emit.CallVirtual(TextWriter_WriteString);
         }
 
+        void LineBreakAndIndent()
+        {
+            WriteString("\n ");
+        }
+
+        void IncreaseIndent()
+        {
+            Emit.LoadArgument(2);   // indent
+            Emit.LoadConstant(1);   // indent 1
+            Emit.Add();             // (indent+1)
+            Emit.StoreArgument(2);  // --empty--
+        }
+
+        void DecreaseIndent()
+        {
+            Emit.LoadArgument(2);   // indent
+            Emit.LoadConstant(-1);   // indent -1
+            Emit.Add();             // (indent-1)
+            Emit.StoreArgument(2);  // --empty--
+        }
+
         static List<MemberInfo> OrderMembersForAccess(Type forType)
         {
             var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
@@ -289,7 +310,9 @@ namespace Jil.Serialize
                 //  - TextWriter
                 //  - Action<TextWriter, serializingType>
 
-                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), serializingType);
+                Emit.LoadArgument(2);   // Action<> TextWriter serializingType int
+
+                var recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), serializingType, typeof(int));
                 var invoke = recursiveAct.GetMethod("Invoke");
 
                 Emit.Call(invoke);
@@ -361,13 +384,14 @@ namespace Jil.Serialize
 
                     if (recursiveTypes.ContainsKey(underlyingType))
                     {
-                        var act = typeof(Action<,>).MakeGenericType(typeof(TextWriter), underlyingType);
+                        var act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
                         var invoke = act.GetMethod("Invoke");
 
                         Emit.Pop();                                     // --empty--
                         Emit.LoadLocal(recursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
                         Emit.LoadArgument(0);                           // Action<,> TextWriter
                         Emit.LoadLocal(loc);                            // Action<,> TextWriter value
+                        Emit.LoadArgument(2);                           // Action<,> TextWriter value int
                         Emit.Call(invoke);                              // --empty--
                     }
                     else
@@ -898,6 +922,11 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);                // --empty--
             WriteString("{");                       // --empty--
 
+            if (PrettyPrint)
+            {
+                IncreaseIndent();
+            }
+
             var firstPass = true;
             var previousMemberWasStringy = false;
             foreach (var member in writeOrder)
@@ -925,18 +954,42 @@ namespace Jil.Serialize
                     keyString = keyString + "\"";
                 }
 
+                if (PrettyPrint)
+                {
+                    LineBreakAndIndent();
+                }
+
                 WriteString(keyString);                         // --empty--
                 WriteMember(member, recursiveTypes, inLocal);   // --empty--
 
                 previousMemberWasStringy = isStringy;
             }
 
+            if (PrettyPrint)
+            {
+                DecreaseIndent();
+            }
+
             if (previousMemberWasStringy)
             {
-                WriteString("\"}");                             // --empty--
+                if (!PrettyPrint)
+                {
+                    WriteString("\"}");                             // --empty--
+                }
+                else
+                {
+                    WriteString("\"");
+                    LineBreakAndIndent();
+                    WriteString("}");
+                }
             }
             else
             {
+                if (PrettyPrint)
+                {
+                    LineBreakAndIndent();
+                }
+
                 WriteString("}");                               // --empty--
             }
 
@@ -990,6 +1043,11 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);        // obj(*?)
             WriteString("{");               // obj(*?)
 
+            if (PrettyPrint)
+            {
+                IncreaseIndent();
+            }
+
             using (var isFirst = Emit.DeclareLocal<bool>())
             {
                 Emit.LoadConstant(true);        // obj(*?) true
@@ -1000,6 +1058,12 @@ namespace Jil.Serialize
                     Emit.Duplicate();                                                   // obj(*?) obj(*?)
                     WriteMemberIfNonNull(member, recursiveTypes, inLocal, isFirst);  // obj(*?)
                 }
+            }
+
+            if (PrettyPrint)
+            {
+                DecreaseIndent();
+                LineBreakAndIndent();
             }
 
             WriteString("}");       // obj(*?)
@@ -1065,6 +1129,11 @@ namespace Jil.Serialize
 
             Emit.LoadConstant(false);       // false
             Emit.StoreLocal(isFirst);       // --empty--
+
+            if (PrettyPrint)
+            {
+                LineBreakAndIndent();
+            }
 
             if (isStringy)
             {
@@ -1222,8 +1291,10 @@ namespace Jil.Serialize
                 //  - TextWriter
                 //  - Action<TextWriter, serializingType>
 
-                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), elementType);
+                var recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), elementType, typeof(int));
                 var invoke = recursiveAct.GetMethod("Invoke");
+
+                Emit.LoadArgument(2);
 
                 Emit.Call(invoke);
 
@@ -1309,6 +1380,11 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);
             WriteString("{");
 
+            if (PrettyPrint)
+            {
+                IncreaseIndent();
+            }
+
             var done = Emit.DefineLabel();
 
             int onTheStack = 0;
@@ -1372,6 +1448,12 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);
 
+            if (PrettyPrint)
+            {
+                DecreaseIndent();
+                LineBreakAndIndent();
+            }
+
             WriteString("}");
 
             Emit.MarkLabel(end);
@@ -1423,6 +1505,11 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(notNull);
             WriteString("{");
+
+            if (PrettyPrint)
+            {
+                IncreaseIndent();
+            }
 
             var done = Emit.DefineLabel();
 
@@ -1504,6 +1591,12 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);
 
+            if (PrettyPrint)
+            {
+                DecreaseIndent();
+                LineBreakAndIndent();
+            }
+
             WriteString("}");
 
             Emit.MarkLabel(end);
@@ -1565,6 +1658,11 @@ namespace Jil.Serialize
             Emit.LoadConstant(false);               // kvp false
             Emit.StoreLocal(isFirst);               // kvp
 
+            if (PrettyPrint)
+            {
+                LineBreakAndIndent();
+            }
+
             WriteString("\"");                      // kvp
 
             Emit.Duplicate();       // kvp kvp
@@ -1609,8 +1707,10 @@ namespace Jil.Serialize
                 //  - TextWriter
                 //  - Action<TextWriter, serializingType>
 
-                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), elementType);
+                var recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), elementType, typeof(int));
                 var invoke = recursiveAct.GetMethod("Invoke");
+
+                Emit.LoadArgument(2);
 
                 Emit.Call(invoke);
 
@@ -1655,6 +1755,11 @@ namespace Jil.Serialize
             var key = keyValuePair.GetProperty("Key");
             var value = keyValuePair.GetProperty("Value");
 
+            if (PrettyPrint)
+            {
+                LineBreakAndIndent();
+            }
+
             WriteString("\"");
 
             Emit.Duplicate();           // kvp kvp
@@ -1666,10 +1771,11 @@ namespace Jil.Serialize
                 Emit.LoadArgument(0);   // kvp TextWriter
                 Emit.LoadLocal(str);    // kvp TextWriter string
 
-                Emit.CallVirtual(typeof(TextWriter).GetMethod("Write", new [] { typeof(string) })); // kvp
+                //WriteEncodedString(false); // kvp
+                Emit.CallVirtual(TextWriter_WriteString);   // kvp
             }
 
-            WriteString("\":");
+            WriteString("\":");         // kvp
 
             LoadProperty(value);        // elementType
 
@@ -1693,8 +1799,10 @@ namespace Jil.Serialize
                 //  - TextWriter
                 //  - Action<TextWriter, serializingType>
 
-                var recursiveAct = typeof(Action<,>).MakeGenericType(typeof(TextWriter), elementType);
+                var recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), elementType, typeof(int));
                 var invoke = recursiveAct.GetMethod("Invoke");
+
+                Emit.LoadArgument(2);
 
                 Emit.Call(invoke);
 
@@ -1752,11 +1860,11 @@ namespace Jil.Serialize
             }
         }
 
-        Action<TextWriter, ForType> BuildObjectWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
             AddCharBuffer();
 
@@ -1765,14 +1873,14 @@ namespace Jil.Serialize
             WriteObject(typeof(ForType), preloaded);
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType> BuildListWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildListWithNewDelegate()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
             AddCharBuffer();
 
@@ -1781,14 +1889,14 @@ namespace Jil.Serialize
             WriteList(typeof(ForType), preloaded);
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType> BuildDictionaryWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
             AddCharBuffer();
 
@@ -1797,14 +1905,14 @@ namespace Jil.Serialize
             WriteDictionary(typeof(ForType), preloaded);
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType> BuildPrimitiveWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate()
         {
             var primitiveType = typeof(ForType);
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
             AddCharBuffer();
 
@@ -1815,14 +1923,14 @@ namespace Jil.Serialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType> BuildNullableWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildNullableWithNewDelegate()
         {
             var recursiveTypes = FindRecursiveTypes(typeof(ForType));
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
             AddCharBuffer();
 
@@ -1835,10 +1943,10 @@ namespace Jil.Serialize
             
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        internal Action<TextWriter, ForType> Build()
+        internal Action<TextWriter, ForType, int> Build()
         {
             var forType = typeof(ForType);
 
@@ -1868,7 +1976,7 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false)
         {
             typeCacheType = typeCacheType ?? typeof(NoneTypeCache<>);
 

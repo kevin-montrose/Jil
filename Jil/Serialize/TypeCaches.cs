@@ -12,7 +12,7 @@ namespace Jil.Serialize
 {
     static class NoneTypeCache<T>
     {
-        public static readonly Action<TextWriter, T> Thunk;
+        public static readonly Action<TextWriter, T, int> Thunk;
 
         static NoneTypeCache()
         {
@@ -22,7 +22,7 @@ namespace Jil.Serialize
 
     static class PrettyPrintTypeCache<T>
     {
-        public static readonly Action<TextWriter, T> Thunk;
+        public static readonly Action<TextWriter, T, int> Thunk;
 
         static PrettyPrintTypeCache()
         {
@@ -32,7 +32,7 @@ namespace Jil.Serialize
 
     static class ExcludeNullsTypeCache<T>
     {
-        public static readonly Action<TextWriter, T> Thunk;
+        public static readonly Action<TextWriter, T, int> Thunk;
 
         static ExcludeNullsTypeCache()
         {
@@ -42,7 +42,7 @@ namespace Jil.Serialize
 
     static class PrettyPrintExcludeNullsTypeCache<T>
     {
-        public static readonly Action<TextWriter, T> Thunk;
+        public static readonly Action<TextWriter, T, int> Thunk;
 
         static PrettyPrintExcludeNullsTypeCache()
         {
