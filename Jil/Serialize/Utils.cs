@@ -44,29 +44,7 @@ namespace Jil.Serialize
             TwoByteOps = twoByte.ToDictionary(d => (int)(d.Value & 0xFF), d => d);
         }
 
-        private static Dictionary<Type, Dictionary<PropertyInfo, List<FieldInfo>>> PropertyFieldUsageCached = new Dictionary<Type, Dictionary<PropertyInfo, List<FieldInfo>>>();
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
-        {
-            lock (PropertyFieldUsageCached)
-            {
-                Dictionary<PropertyInfo, List<FieldInfo>> cached;
-                if (PropertyFieldUsageCached.TryGetValue(t, out cached))
-                {
-                    return cached;
-                }
-            }
-
-            var ret = _GetPropertyFieldUsage(t);
-
-            lock (PropertyFieldUsageCached)
-            {
-                PropertyFieldUsageCached[t] = ret;
-            }
-
-            return ret;
-        }
-
-        private static Dictionary<PropertyInfo, List<FieldInfo>> _GetPropertyFieldUsage(Type t)
         {
             if (t.IsValueType)
             {
@@ -221,29 +199,7 @@ namespace Jil.Serialize
             }
         }
 
-        private static Dictionary<Type, Dictionary<FieldInfo, int>> FieldOffsetsInMemoryFieldCache = new Dictionary<Type, Dictionary<FieldInfo, int>>();
         public static Dictionary<FieldInfo, int> FieldOffsetsInMemory(Type t)
-        {
-            lock (FieldOffsetsInMemoryFieldCache)
-            {
-                Dictionary<FieldInfo, int> cached;
-                if (FieldOffsetsInMemoryFieldCache.TryGetValue(t, out cached))
-                {
-                    return cached;
-                }
-            }
-
-            var ret = _GetFieldOffsetsInMemory(t);
-
-            lock (FieldOffsetsInMemoryFieldCache)
-            {
-                FieldOffsetsInMemoryFieldCache[t] = ret;
-            }
-
-            return ret;
-        }
-
-        private static Dictionary<FieldInfo, int> _GetFieldOffsetsInMemory(Type t)
         {
             if (t.IsValueType)
             {
