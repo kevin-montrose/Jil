@@ -9,6 +9,15 @@ namespace Jil
 {
     internal static class ExtensionMethods
     {
+        public static Type ReturnType(this MemberInfo m)
+        {
+            var asField = m as FieldInfo;
+            var asProp = m as PropertyInfo;
+
+            return
+                asField != null ? asField.FieldType : asProp.PropertyType;
+        }
+
         public static bool IsNullableType(this Type t)
         {
             var underlying = GetUnderlyingType(t);

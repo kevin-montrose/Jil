@@ -154,7 +154,7 @@ namespace Jil.Serialize
             Emit.StoreArgument(2);  // --empty--
         }
 
-        static List<MemberInfo> OrderMembersForAccess(Type forType)
+        static List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
             var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
 
@@ -167,7 +167,7 @@ namespace Jil.Serialize
             var ret =
                 !ReorderMembers ?
                     members :
-                    Utils.IdealMemberOrderForWriting(forType, members);
+                    Utils.IdealMemberOrderForWriting(forType, recursiveTypes.Keys, members);
 
             return ret.ToList();
         }
@@ -895,7 +895,7 @@ namespace Jil.Serialize
 
         void WriteObjectWithNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
-            var writeOrder = OrderMembersForAccess(forType);
+            var writeOrder = OrderMembersForAccess(forType, recursiveTypes);
 
             var notNull = Emit.DefineLabel();
 
@@ -998,7 +998,7 @@ namespace Jil.Serialize
 
         void WriteObjectWithoutNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
         {
-            var writeOrder = OrderMembersForAccess(forType);
+            var writeOrder = OrderMembersForAccess(forType, recursiveTypes);
 
             var notNull = Emit.DefineLabel();
 

@@ -44,40 +44,58 @@ namespace Jil.Serialize
             TwoByteOps = twoByte.ToDictionary(d => (int)(d.Value & 0xFF), d => d);
         }
 
-        public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<MemberInfo> members)
+        public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
 
-            return
-                members.OrderBy(
-                    m =>
+            var simpleTypes = members.Where(m => m.ReturnType().IsValueType && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
+            var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
+            var recursive = members.Where(m => recursiveTypes.Contains(m.ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
+            var everythingElse = members.Where(m => !simpleTypes.Contains(m) && !otherPrimitive.Contains(m) && !recursive.Contains(m)).ToList();
+
+            Func<MemberInfo, int> byAccessOrder =
+                m =>
+                {
+                    var asField = m as FieldInfo;
+                    if (asField != null)
                     {
-                        var asField = m as FieldInfo;
-                        if (asField != null)
-                        {
-                            return fields[asField];
-                        }
-
-                        var asProp = m as PropertyInfo;
-                        if (asProp != null)
-                        {
-                            List<FieldInfo> usesFields;
-                            if (!props.TryGetValue(asProp, out usesFields))
-                            {
-                                return int.MaxValue;
-                            }
-
-                            if (usesFields.Count == 0) return int.MaxValue;
-
-                            return usesFields.Select(f => fields[f]).Min();
-                        }
-
-                        return int.MaxValue;
+                        return fields[asField];
                     }
-                ).ThenBy(
-                    m => m is FieldInfo ? 0 : 1
-                ).ToList();
+
+                    var asProp = m as PropertyInfo;
+                    if (asProp != null)
+                    {
+                        List<FieldInfo> usesFields;
+                        if (!props.TryGetValue(asProp, out usesFields))
+                        {
+                            return int.MaxValue;
+                        }
+
+                        if (usesFields.Count == 0) return int.MaxValue;
+
+                        return usesFields.Select(f => fields[f]).Min();
+                    }
+
+                    return int.MaxValue;
+                };
+
+            Func<MemberInfo, int> fieldsFirst = m => m is FieldInfo ? 0 : 1;
+
+            var ret =
+                (simpleTypes.OrderBy(byAccessOrder).ThenBy(fieldsFirst))
+                .Concat(
+                    otherPrimitive.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
+                )
+                .Concat(
+                    everythingElse.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
+                )
+                .Concat(
+                    recursive.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
+                )
+                .ToList();
+
+            return ret;
         }
 
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
