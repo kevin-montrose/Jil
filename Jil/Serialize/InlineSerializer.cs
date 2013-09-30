@@ -163,41 +163,11 @@ namespace Jil.Serialize
                 return members.ToList();
             }
 
-            var fields = Utils.FieldOffsetsInMemory(forType);
-            var props = Utils.PropertyFieldUsage(forType);
-
             // This order appears to be the "best" for access speed purposes
             var ret =
                 !ReorderMembers ?
                     members :
-                    members.OrderBy(
-                         m =>
-                         {
-                             var asField = m as FieldInfo;
-                             if (asField != null)
-                             {
-                                 return fields[asField];
-                             }
-
-                             var asProp = m as PropertyInfo;
-                             if (asProp != null)
-                             {
-                                 List<FieldInfo> usesFields;
-                                 if (!props.TryGetValue(asProp, out usesFields))
-                                 {
-                                     return int.MaxValue;
-                                 }
-
-                                 if (usesFields.Count == 0) return int.MaxValue;
-
-                                 return usesFields.Select(f => fields[f]).Min();
-                             }
-
-                             return int.MaxValue;
-                         }
-                    ).ThenBy(
-                        m => m is FieldInfo ? 0 : 1
-                    );
+                    Utils.IdealMemberOrderForWriting(forType, members);
 
             return ret.ToList();
         }

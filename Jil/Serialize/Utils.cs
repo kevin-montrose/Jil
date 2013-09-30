@@ -44,6 +44,42 @@ namespace Jil.Serialize
             TwoByteOps = twoByte.ToDictionary(d => (int)(d.Value & 0xFF), d => d);
         }
 
+        public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<MemberInfo> members)
+        {
+            var fields = Utils.FieldOffsetsInMemory(forType);
+            var props = Utils.PropertyFieldUsage(forType);
+
+            return
+                members.OrderBy(
+                    m =>
+                    {
+                        var asField = m as FieldInfo;
+                        if (asField != null)
+                        {
+                            return fields[asField];
+                        }
+
+                        var asProp = m as PropertyInfo;
+                        if (asProp != null)
+                        {
+                            List<FieldInfo> usesFields;
+                            if (!props.TryGetValue(asProp, out usesFields))
+                            {
+                                return int.MaxValue;
+                            }
+
+                            if (usesFields.Count == 0) return int.MaxValue;
+
+                            return usesFields.Select(f => fields[f]).Min();
+                        }
+
+                        return int.MaxValue;
+                    }
+                ).ThenBy(
+                    m => m is FieldInfo ? 0 : 1
+                ).ToList();
+        }
+
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
             if (t.IsValueType)
