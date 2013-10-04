@@ -978,5 +978,26 @@ namespace JilTests
                 Assert.AreEqual("{\n \"hello world\": 31415926,\n \"foo bar\": 1318\n}", res);
             }
         }
+
+        [TestMethod]
+        public void DictionaryEncoding()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, string>
+                    {
+                        { "hello\nworld", "fizz\0buzz" },
+                        { "\r\t\f\n", "\0\0\0\0\0\0\0\0\0\0" },
+                        { "\0", "\b\b\b\b\b" }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual(@"{""hello\nworld"":""fizz\0buzz"",""\r\t\f\n"":""\0\0\0\0\0\0\0\0\0\0"",""\0"":""\b\b\b\b\b""}", res);
+            }
+        }
     }
 }
