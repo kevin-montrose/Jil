@@ -996,7 +996,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual(@"{""hello\nworld"":""fizz\0buzz"",""\r\t\f\n"":""\0\0\0\0\0\0\0\0\0\0"",""\0"":""\b\b\b\b\b""}", res);
+                Assert.AreEqual(@"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}", res);
             }
         }
     }
