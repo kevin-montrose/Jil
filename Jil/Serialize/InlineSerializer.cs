@@ -18,7 +18,7 @@ namespace Jil.Serialize
         public static bool SkipDateTimeMathMethods = true;
 
         static string CharBuffer = "char_buffer";
-        const int CharBufferSize = 20;
+        internal const int CharBufferSize = 20;
 
         static Dictionary<char, string> CharacterEscapes = 
             new Dictionary<char, string>{
@@ -500,14 +500,12 @@ namespace Jil.Serialize
             {
                 if (quotesNeedHandling)
                 {
-                    Emit.Call(InlineSerializer_WriteEncodedStringWithQuotesInline);
+                    Emit.Call(GetWriteEncodedStringWithQuotesMethod());
                 }
                 else
                 {
-                    Emit.Call(InlineSerializer_WriteEncodedStringInline);
+                    Emit.Call(GetWriteEncodedStringMethod());
                 }
-
-                //WriteEncodedString(quotesNeedHandling);
                 
                 return;
             }
@@ -561,7 +559,7 @@ namespace Jil.Serialize
                 if (UseCustomIntegerToString)
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                    Emit.Call(InlineSerializer_CustomWriteInt); // --empty--
+                    Emit.Call(Methods.InlineSerializer_CustomWriteInt); // --empty--
                 }
                 else
                 {
@@ -595,7 +593,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(int))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(InlineSerializer_CustomWriteInt); // --empty--
+                    Emit.Call(Methods.InlineSerializer_CustomWriteInt); // --empty--
 
                     return;
                 }
@@ -603,7 +601,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(uint))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(InlineSerializer_CustomWriteUInt); // --empty--
+                    Emit.Call(Methods.InlineSerializer_CustomWriteUInt); // --empty--
 
                     return;
                 }
@@ -611,7 +609,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(long))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(InlineSerializer_CustomWriteLong); // --empty--
+                    Emit.Call(Methods.InlineSerializer_CustomWriteLong); // --empty--
 
                     return;
                 }
@@ -619,127 +617,13 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(ulong))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(InlineSerializer_CustomWriteULong); // --empty--
+                    Emit.Call(Methods.InlineSerializer_CustomWriteULong); // --empty--
 
                     return;
                 }
             }
 
             Emit.CallVirtual(builtInMtd);       // --empty--
-        }
-
-        static MethodInfo InlineSerializer_CustomWriteInt = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CustomWriteInt(TextWriter writer, int number, char[] buffer)
-        {
-            // Gotta special case this, we can't negate it
-            if (number == int.MinValue)
-            {
-                writer.Write("-2147483648");
-                return;
-            }
-
-            var ptr = CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
-            {
-                copy = -copy;
-            }
-
-            do
-            {
-                var ix = copy % 10;
-                copy /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
-
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
-
-            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
-        }
-
-        static MethodInfo InlineSerializer_CustomWriteUInt = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteUInt", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CustomWriteUInt(TextWriter writer, uint number, char[] buffer)
-        {
-            var ptr = CharBufferSize - 1;
-
-            var copy = number;
-            
-            do
-            {
-                var ix = copy % 10;
-                copy /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
-
-            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
-        }
-
-        static MethodInfo InlineSerializer_CustomWriteLong = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteLong", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CustomWriteLong(TextWriter writer, long number, char[] buffer)
-        {
-            // Gotta special case this, we can't negate it
-            if (number == long.MinValue)
-            {
-                writer.Write("-9223372036854775808");
-                return;
-            }
-
-            var ptr = CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
-            {
-                copy = -copy;
-            }
-
-            do
-            {
-                var ix = (int)(copy % 10);
-                copy /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
-
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
-
-            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
-        }
-
-        static MethodInfo InlineSerializer_CustomWriteULong = typeof(InlineSerializer<ForType>).GetMethod("CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
-        {
-            var ptr = CharBufferSize - 1;
-
-            var copy = number;
-
-            do
-            {
-                var ix = (int)(copy % 10);
-                copy /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
-
-            writer.Write(buffer, ptr + 1, CharBufferSize - 1 - ptr);
         }
 
         void WriteEncodedChar(bool quotesNeedHandling)
@@ -826,81 +710,6 @@ namespace Jil.Serialize
             {
                 WriteString("\"");
             }
-        }
-
-        void WriteEncodedString(bool quotesNeedHandling)
-        {
-            // top of stack is:
-            //  - string
-            //  - TextWriter
-
-            var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
-            var strLength = typeof(string).GetProperty("Length");
-            var strCharsIx = typeof(string).GetProperty("Chars");
-
-            var notNull = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
-            var doneNull = Emit.DefineLabel();
-
-            Emit.Duplicate();           // TextWriter string string
-            Emit.BranchIfTrue(notNull); // TextWriter string
-
-            if (!ExcludeNulls)
-            {
-                WriteString("null");        // TextWriter string
-            }
-
-            Emit.Pop();                 // TextWriter
-            Emit.Pop();                 // --empty--
-            Emit.Branch(doneNull);      // --empty--
-
-            Emit.MarkLabel(notNull);
-
-            if (quotesNeedHandling)
-            {
-                WriteString("\"");
-            }
-
-            using (var str = Emit.DeclareLocal<string>())
-            using (var i = Emit.DeclareLocal<int>())
-            {
-                var loop = Emit.DefineLabel();
-
-                Emit.LoadConstant(0);   // TextWriter string 0
-                Emit.StoreLocal(i);     // TextWriter string
-                Emit.StoreLocal(str);   // TextWriter
-                Emit.Duplicate();       // TextWriter TextWriter
-
-                Emit.MarkLabel(loop);               // TextWriter TextWriter
-                Emit.LoadLocal(i);                  // TextWriter TextWriter i
-                Emit.LoadLocal(str);                // TextWriter TextWriter i string
-                LoadProperty(strLength);            // TextWriter TextWriter i str.Length
-                Emit.BranchIfGreaterOrEqual(done);  // TextWriter TextWriter
-
-                Emit.LoadLocal(str);            // TextWriter TextWriter string
-                Emit.LoadLocal(i);              // TextWriter TextWriter string i
-                LoadProperty(strCharsIx);       // TextWriter TextWriter char
-
-                WriteEncodedChar(false);        // TextWriter
-
-                Emit.LoadLocal(i);      // TextWriter i
-                Emit.LoadConstant(1);   // TextWriter i 1
-                Emit.Add();             // TextWriter (i+1)
-                Emit.StoreLocal(i);     // TextWriter
-                Emit.Duplicate();       // TextWriter TextWriter
-                Emit.Branch(loop);      // TextWriter TextWriter
-            }
-
-            Emit.MarkLabel(done);       // TextWriter TextWriter
-            Emit.Pop();                 // TextWriter
-            Emit.Pop();                 // --empty--
-
-            if (quotesNeedHandling)
-            {
-                WriteString("\"");
-            }
-
-            Emit.MarkLabel(doneNull);   // --empty--
         }
 
         void WriteObjectWithNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
@@ -1658,7 +1467,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(0);   // kvp TextWriter
                 Emit.LoadLocal(str);    // kvp TextWriter string
 
-                Emit.Call(InlineSerializer_WriteEncodedStringInline);   // kvp
+                Emit.Call(GetWriteEncodedStringMethod());   // kvp
             }
 
             if (PrettyPrint)
@@ -1738,125 +1547,22 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);
         }
 
-        static MethodInfo InlineSerializer_WriteEncodedStringWithQuotesInline = typeof(InlineSerializer<ForType>).GetMethod("WriteEncodedStringWithQuotesInline", BindingFlags.NonPublic | BindingFlags.Static);
-        static void WriteEncodedStringWithQuotesInline(TextWriter writer, string str)
+        public MethodInfo GetWriteEncodedStringWithQuotesMethod()
         {
-            writer.Write("\"");
-
-            for (var i = 0; i < str.Length; i++)
-            {
-                var c = str[i];
-                if (c == '\\')
-                {
-                    writer.Write(@"\\");
-                    continue;
-                }
-
-                if (c == '"')
-                {
-                    writer.Write("\"");
-                    continue;
-                }
-
-                // This is converted into an IL switch, so don't fret about lookup times
-                switch (c)
-                {
-                    case '\u0000': writer.Write(@"\u0000"); continue;
-                    case '\u0001': writer.Write(@"\u0001"); continue;
-                    case '\u0002': writer.Write(@"\u0002"); continue;
-                    case '\u0003': writer.Write(@"\u0003"); continue;
-                    case '\u0004': writer.Write(@"\u0004"); continue;
-                    case '\u0005': writer.Write(@"\u0005"); continue;
-                    case '\u0006': writer.Write(@"\u0006"); continue;
-                    case '\u0007': writer.Write(@"\u0007"); continue;
-                    case '\u0008': writer.Write(@"\b"); continue;
-                    case '\u0009': writer.Write(@"\t"); continue;
-                    case '\u000A': writer.Write(@"\n"); continue;
-                    case '\u000B': writer.Write(@"\u000B"); continue;
-                    case '\u000C': writer.Write(@"\f"); continue;
-                    case '\u000D': writer.Write(@"\r"); continue;
-                    case '\u000E': writer.Write(@"\u000E"); continue;
-                    case '\u000F': writer.Write(@"\u000F"); continue;
-                    case '\u0010': writer.Write(@"\u0010"); continue;
-                    case '\u0011': writer.Write(@"\u0011"); continue;
-                    case '\u0012': writer.Write(@"\u0012"); continue;
-                    case '\u0013': writer.Write(@"\u0013"); continue;
-                    case '\u0014': writer.Write(@"\u0014"); continue;
-                    case '\u0015': writer.Write(@"\u0015"); continue;
-                    case '\u0016': writer.Write(@"\u0016"); continue;
-                    case '\u0017': writer.Write(@"\u0017"); continue;
-                    case '\u0018': writer.Write(@"\u0018"); continue;
-                    case '\u0019': writer.Write(@"\u0019"); continue;
-                    case '\u001A': writer.Write(@"\u001A"); continue;
-                    case '\u001B': writer.Write(@"\u001B"); continue;
-                    case '\u001C': writer.Write(@"\u001C"); continue;
-                    case '\u001D': writer.Write(@"\u001D"); continue;
-                    case '\u001E': writer.Write(@"\u001E"); continue;
-                    case '\u001F': writer.Write(@"\u001F"); continue;
-                    default: writer.Write(c); continue;
-                }
-            }
-
-            writer.Write("\"");
+            return
+                ExcludeNulls ?
+                    Methods.InlineSerializer_WriteEncodedStringWithQuotesInline :
+                    Methods.InlineSerializer_WriteEncodedStringWithQuotesInline;
         }
 
-        static MethodInfo InlineSerializer_WriteEncodedStringInline = typeof(InlineSerializer<ForType>).GetMethod("WriteEncodedStringInline", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void WriteEncodedStringInline(TextWriter writer, string str)
+        
+
+        MethodInfo GetWriteEncodedStringMethod()
         {
-            for (var i = 0; i < str.Length; i++)
-            {
-                var c = str[i];
-                if (c == '\\')
-                {
-                    writer.Write(@"\\");
-                    continue;
-                }
-
-                if (c == '"')
-                {
-                    writer.Write("\"");
-                    continue;
-                }
-
-                // This is converted into an IL switch, so don't fret about lookup times
-                switch (c)
-                {
-                    case '\u0000': writer.Write(@"\u0000"); continue;
-                    case '\u0001': writer.Write(@"\u0001"); continue;
-                    case '\u0002': writer.Write(@"\u0002"); continue;
-                    case '\u0003': writer.Write(@"\u0003"); continue;
-                    case '\u0004': writer.Write(@"\u0004"); continue;
-                    case '\u0005': writer.Write(@"\u0005"); continue;
-                    case '\u0006': writer.Write(@"\u0006"); continue;
-                    case '\u0007': writer.Write(@"\u0007"); continue;
-                    case '\u0008': writer.Write(@"\b"); continue;
-                    case '\u0009': writer.Write(@"\t"); continue;
-                    case '\u000A': writer.Write(@"\n"); continue;
-                    case '\u000B': writer.Write(@"\u000B"); continue;
-                    case '\u000C': writer.Write(@"\f"); continue;
-                    case '\u000D': writer.Write(@"\r"); continue;
-                    case '\u000E': writer.Write(@"\u000E"); continue;
-                    case '\u000F': writer.Write(@"\u000F"); continue;
-                    case '\u0010': writer.Write(@"\u0010"); continue;
-                    case '\u0011': writer.Write(@"\u0011"); continue;
-                    case '\u0012': writer.Write(@"\u0012"); continue;
-                    case '\u0013': writer.Write(@"\u0013"); continue;
-                    case '\u0014': writer.Write(@"\u0014"); continue;
-                    case '\u0015': writer.Write(@"\u0015"); continue;
-                    case '\u0016': writer.Write(@"\u0016"); continue;
-                    case '\u0017': writer.Write(@"\u0017"); continue;
-                    case '\u0018': writer.Write(@"\u0018"); continue;
-                    case '\u0019': writer.Write(@"\u0019"); continue;
-                    case '\u001A': writer.Write(@"\u001A"); continue;
-                    case '\u001B': writer.Write(@"\u001B"); continue;
-                    case '\u001C': writer.Write(@"\u001C"); continue;
-                    case '\u001D': writer.Write(@"\u001D"); continue;
-                    case '\u001E': writer.Write(@"\u001E"); continue;
-                    case '\u001F': writer.Write(@"\u001F"); continue;
-                    default: writer.Write(c); continue;
-                }
-            }
+            return
+                ExcludeNulls ?
+                    Methods.InlineSerializer_WriteEncodedStringInline :
+                    Methods.InlineSerializer_WriteEncodedStringInline;
         }
 
         void WriteKeyValue(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
@@ -1883,7 +1589,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(0);   // kvp TextWriter
                 Emit.LoadLocal(str);    // kvp TextWriter string
 
-                Emit.Call(InlineSerializer_WriteEncodedStringInline); // kvp
+                Emit.Call(GetWriteEncodedStringMethod()); // kvp
             }
 
             if (PrettyPrint)
