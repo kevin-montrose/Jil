@@ -559,7 +559,7 @@ namespace Jil.Serialize
                 if (UseCustomIntegerToString)
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                    Emit.Call(Methods.InlineSerializer_CustomWriteInt); // --empty--
+                    Emit.Call(Methods.CustomWriteInt); // --empty--
                 }
                 else
                 {
@@ -593,7 +593,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(int))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.InlineSerializer_CustomWriteInt); // --empty--
+                    Emit.Call(Methods.CustomWriteInt); // --empty--
 
                     return;
                 }
@@ -601,7 +601,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(uint))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.InlineSerializer_CustomWriteUInt); // --empty--
+                    Emit.Call(Methods.CustomWriteUInt); // --empty--
 
                     return;
                 }
@@ -609,7 +609,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(long))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.InlineSerializer_CustomWriteLong); // --empty--
+                    Emit.Call(Methods.CustomWriteLong); // --empty--
 
                     return;
                 }
@@ -617,7 +617,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(ulong))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.InlineSerializer_CustomWriteULong); // --empty--
+                    Emit.Call(Methods.CustomWriteULong); // --empty--
 
                     return;
                 }
@@ -1551,8 +1551,8 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    Methods.InlineSerializer_WriteEncodedStringWithQuotesInline :
-                    Methods.InlineSerializer_WriteEncodedStringWithQuotesInline;
+                    Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
+                    Methods.WriteEncodedStringWithQuotesWithNullsInline;
         }
 
         
@@ -1561,8 +1561,8 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    Methods.InlineSerializer_WriteEncodedStringInline :
-                    Methods.InlineSerializer_WriteEncodedStringInline;
+                    Methods.WriteEncodedStringWithoutNullsInline :
+                    Methods.WriteEncodedStringWithNullsInline;
         }
 
         void WriteKeyValue(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
