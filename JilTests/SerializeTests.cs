@@ -845,7 +845,9 @@ namespace JilTests
                     Options.ExcludeNulls
                 );
 
-                Assert.AreEqual("{\"A\":\"hello\",\"C\":123,\"F\":{\"B\":\"world\",\"D\":456,\"E\":{\"C\":999}}}", str.ToString());
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"F\":{\"E\":{\"C\":999},\"B\":\"world\",\"D\":456},\"A\":\"hello\",\"C\":123}", res);
             }
 
             using (var str = new StringWriter())
@@ -861,7 +863,9 @@ namespace JilTests
                     Options.ExcludeNulls
                 );
 
-                Assert.AreEqual("{\"hello\":\"world\",\"fizz\":\"buzz\"}", str.ToString());
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"hello\":\"world\",\"fizz\":\"buzz\"}", res);
             }
         }
 
@@ -907,7 +911,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\n \"A\": \"hello\",\n \"B\": null,\n \"C\": 123,\n \"D\": null,\n \"E\": null,\n \"F\": {\n  \"A\": null,\n  \"B\": \"world\",\n  \"C\": null,\n  \"D\": 456,\n  \"E\": {\n   \"A\": null,\n   \"B\": null,\n   \"C\": 999,\n   \"D\": null,\n   \"E\": null,\n   \"F\": null\n  },\n  \"F\": null\n }\n}", res);
+                Assert.AreEqual("{\n \"F\": {\n  \"F\": null,\n  \"E\": {\n   \"F\": null,\n   \"E\": null,\n   \"A\": null,\n   \"B\": null,\n   \"C\": 999,\n   \"D\": null\n  },\n  \"A\": null,\n  \"B\": \"world\",\n  \"C\": null,\n  \"D\": 456\n },\n \"E\": null,\n \"A\": \"hello\",\n \"B\": null,\n \"C\": 123,\n \"D\": null\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -939,7 +943,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\n \"A\":\"hello\",\n \"C\":123,\n \"F\":{\n  \"B\":\"world\",\n  \"D\":456,\n  \"E\":{\n   \"C\":999\n  }\n }\n}", res);
+                Assert.AreEqual("{\n \"F\":{\n  \"E\":{\n   \"C\":999\n  },\n  \"B\":\"world\",\n  \"D\":456\n },\n \"A\":\"hello\",\n \"C\":123\n}", res);
             }
 
             using (var str = new StringWriter())
