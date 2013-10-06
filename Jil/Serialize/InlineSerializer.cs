@@ -16,6 +16,7 @@ namespace Jil.Serialize
         public static bool SkipNumberFormatting = true;
         public static bool UseCustomIntegerToString = true;
         public static bool SkipDateTimeMathMethods = true;
+        public static bool UseCustomISODateFormatting = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 20;
@@ -609,6 +610,27 @@ namespace Jil.Serialize
 
         void WriteISO8601StyleDateTime()
         {
+            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+
+            if (!UseCustomISODateFormatting)
+            {
+                var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
+
+                Emit.Call(toUniversalTime);                         // TextWriter DateTime
+
+                using (var loc = Emit.DeclareLocal<DateTime>())
+                {
+                    Emit.StoreLocal(loc);       // TextWriter
+                    Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+
+                }
+
+                Emit.LoadConstant("\"yyyy-MM-ddTHH:mm:ssZ\"");      // TextWriter DateTime* string
+                Emit.Call(toString);                                // TextWriter string
+                Emit.Call(TextWriter_WriteString);                  // --empty--
+                return;
+            }
+
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
                 Emit.StoreLocal(loc);       // TextWriter
@@ -616,7 +638,6 @@ namespace Jil.Serialize
                 Emit.LoadLocalAddress(loc); // DateTime*
             }
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
             var year = typeof(DateTime).GetProperty("Year").GetMethod;
             var month = typeof(DateTime).GetProperty("Month").GetMethod;
             var day = typeof(DateTime).GetProperty("Day").GetMethod;

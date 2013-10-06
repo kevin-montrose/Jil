@@ -383,6 +383,66 @@ namespace JilTests
 
             Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
+
+        public class _UseCustomISODateFormatting
+        {
+            public List<DateTime> Dates;
+        }
+
+        [TestMethod]
+        public void UseCustomISODateFormatting()
+        {
+            Action<TextWriter, _UseCustomISODateFormatting, int> skipped;
+            Action<TextWriter, _UseCustomISODateFormatting, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = true;
+
+                    // Build the *actual* serializer method
+                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>();
+                }
+
+                {
+                    InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = true;
+            }
+
+            var rand = new Random(39432715);
+
+            var toSerialize = new List<_UseCustomISODateFormatting>();
+            for (var i = 0; i < 1000; i++)
+            {
+                var numDates = new DateTime[5 + rand.Next(10)];
+
+                for (var j = 0; j < numDates.Length; j++)
+                {
+                    numDates[j] = _RandDateTime(rand);
+                }
+
+                toSerialize.Add(
+                    new _UseCustomISODateFormatting
+                    {
+                        Dates = numDates.ToList()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double skippedTime, normalTime;
+            CompareTimes(toSerialize, skipped, normal, out skippedTime, out normalTime);
+
+            Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
+        }
     }
 #endif
 }
