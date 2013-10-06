@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DateTimeFormat.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />

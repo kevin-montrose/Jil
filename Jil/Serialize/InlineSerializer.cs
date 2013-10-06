@@ -61,14 +61,16 @@ namespace Jil.Serialize
         private readonly Type RecusionLookupType;
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
+        private readonly DateTimeFormat DateFormat;
 
         private Emit Emit;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls)
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, DateTimeFormat dateFormat)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
+            DateFormat = dateFormat;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -1800,11 +1802,11 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
         {
-            typeCacheType = typeCacheType ?? typeof(NoneTypeCache<>);
+            typeCacheType = typeCacheType ?? typeof(DefaultTypeCache<>);
 
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls);
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, dateFormat);
 
             return obj.Build();
         }
