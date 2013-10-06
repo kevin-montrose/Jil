@@ -401,14 +401,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>();
+                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(dateFormat: Jil.DateTimeFormat.ISO8601);
                 }
 
                 {
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>();
+                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(dateFormat: Jil.DateTimeFormat.ISO8601);
                 }
             }
             finally

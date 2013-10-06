@@ -620,16 +620,21 @@ namespace Jil.Serialize
             {
                 var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
 
+                using (var loc = Emit.DeclareLocal<DateTime>())
+                {
+                    Emit.StoreLocal(loc);                           // TextWriter
+                    Emit.LoadLocalAddress(loc);                     // TextWriter DateTime*
+                }
+
                 Emit.Call(toUniversalTime);                         // TextWriter DateTime
 
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
                     Emit.StoreLocal(loc);       // TextWriter
                     Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-
                 }
 
-                Emit.LoadConstant("\"yyyy-MM-ddTHH:mm:ssZ\"");      // TextWriter DateTime* string
+                Emit.LoadConstant("\\\"yyyy-MM-ddTHH:mm:ssZ\\\"");      // TextWriter DateTime* string
                 Emit.Call(toString);                                // TextWriter string
                 Emit.Call(TextWriter_WriteString);                  // --empty--
                 return;

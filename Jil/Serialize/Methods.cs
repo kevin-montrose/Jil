@@ -17,88 +17,86 @@ namespace Jil.Serialize
         {
             // "yyyy-mm-ddThh:mm:ssZ"
             // 0123456789ABCDEFGHIJKL
+            //
+            // Yes, DateTime.Max is in fact guaranteed to have a 4 digit year (and no more)
 
             buffer[0] = '"';
 
             dt = dt.ToUniversalTime();
 
-            var val = dt.Year;
+            int ix, val;
             
-            // DateTime.MaxValue is at most four digits
-            var ptr = 4;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
+            // Year
+            val = dt.Year;
+            ix = val % 10;
+            val /= 10;
+            buffer[4] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[3] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[2] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[1] = (char)('0' + ix);
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 1);
-
+            // delimiter
             buffer[5] = '-';
 
+            // Month
             val = dt.Month;
-            ptr = 7;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
+            ix = val % 10;
+            val /= 10;
+            buffer[7] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[6] = (char)('0' + ix);
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 6);
-
+            // Delimiter
             buffer[8] = '-';
 
+            // Day
             val = dt.Day;
-            ptr = 10;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
+            ix = val % 10;
+            val /= 10;
+            buffer[10] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[9] = (char)('0' + ix);
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 9);
-
+            // Delimiter
             buffer[11] = 'T';
 
             val = dt.Hour;
-            ptr = 13;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
+            ix = val % 10;
+            val /= 10;
+            buffer[13] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[12] = (char)('0' + ix);
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 12);
-
+            // Delimiter
             buffer[14] = ':';
 
             val = dt.Minute;
-            ptr = 16;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
+            ix = val % 10;
+            val /= 10;
+            buffer[16] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[15] = (char)('0' + ix);
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 15);
-
+            // Delimiter
             buffer[17] = ':';
 
             val = dt.Second;
-            ptr = 19;
-            do
-            {
-                var ix = val % 10;
-                val /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (ptr >= 18);
+            ix = val % 10;
+            val /= 10;
+            buffer[19] = (char)('0' + ix);
+            ix = val % 10;
+            val /= 10;
+            buffer[18] = (char)('0' + ix);
 
             buffer[20] = 'Z';
             buffer[21] = '"';
