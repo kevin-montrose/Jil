@@ -432,7 +432,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);
         }
 
-        void WriteDateTime()
+        void WriteNewtonsoftStyleDateTime()
         {
             // top of stack:
             //   - DateTime
@@ -484,9 +484,138 @@ namespace Jil.Serialize
             Emit.LoadConstant(10000L);                      // TextWriter long 10000
             Emit.Divide();                                  // TextWriter long
 
-            WriteString("\"\\/Date(");                  // TextWriter int
-            WritePrimitive(typeof(long), quotesNeedHandling: true);               // --empty--
-            WriteString(")\\/\"");                      // --empty--
+            WriteString("\"\\/Date(");                              // TextWriter int
+            WritePrimitive(typeof(long), quotesNeedHandling: false);// --empty--
+            WriteString(")\\/\"");                                  // --empty--
+        }
+
+        void WriteMillisecondsStyleDateTime()
+        {
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(loc);       // TextWriter
+                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+            }
+
+            if (!SkipDateTimeMathMethods)
+            {
+                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
+                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+
+                Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
+                Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
+                Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1 1
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0 0 
+                Emit.LoadConstant((int)DateTimeKind.Utc);   // TextWriter DateTime* 1970 1 1 0 0 0 Utc
+                Emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
+                Emit.Call(subtractMtd);                     // TextWriter TimeSpan
+
+                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(loc);                   // TextWriter
+                    Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
+                }
+
+                LoadProperty(totalMs);                      // TextWriter double
+                Emit.Convert<long>();                       // TextWriter int
+
+                WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
+
+                return;
+            }
+
+            var getTicks = typeof(DateTime).GetProperty("Ticks");
+
+            LoadProperty(getTicks);                         // TextWriter long
+            Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
+            Emit.Subtract();                                // TextWriter long
+            Emit.LoadConstant(10000L);                      // TextWriter long 10000
+            Emit.Divide();                                  // TextWriter long
+
+            WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
+        }
+
+        void WriteSecondsStyleDateTime()
+        {
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(loc);       // TextWriter
+                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+            }
+
+            if (!SkipDateTimeMathMethods)
+            {
+                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+
+                var totalS = typeof(TimeSpan).GetProperty("TotalSeconds");
+                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+
+                Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
+                Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
+                Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1 1
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0
+                Emit.LoadConstant(0);                       // TextWriter DateTime* 1970 1 1 0 0 0 
+                Emit.LoadConstant((int)DateTimeKind.Utc);   // TextWriter DateTime* 1970 1 1 0 0 0 Utc
+                Emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
+                Emit.Call(subtractMtd);                     // TextWriter TimeSpan
+
+                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(loc);                   // TextWriter
+                    Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
+                }
+
+                LoadProperty(totalS);                      // TextWriter double
+                Emit.Convert<long>();                       // TextWriter int
+
+                WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
+
+                return;
+            }
+
+            var getTicks = typeof(DateTime).GetProperty("Ticks");
+
+            LoadProperty(getTicks);                         // TextWriter long
+            Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
+            Emit.Subtract();                                // TextWriter long
+            Emit.LoadConstant(10000000L);                   // TextWriter long 10000000
+            Emit.Divide();                                  // TextWriter long
+
+            WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
+        }
+
+        void WriteDateTime()
+        {
+            // top of stack:
+            //   - DateTime
+            //   - TextWriter
+
+            if (DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+            {
+                WriteNewtonsoftStyleDateTime();
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch)
+            {
+                WriteMillisecondsStyleDateTime();
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch)
+            {
+                WriteSecondsStyleDateTime();
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.ISO8601)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)

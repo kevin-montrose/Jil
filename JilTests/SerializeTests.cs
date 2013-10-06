@@ -1003,5 +1003,57 @@ namespace JilTests
                 Assert.AreEqual(@"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}", res);
             }
         }
+
+        [TestMethod]
+        public void DateTimeFormats()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1),
+                    str,
+                    Options.Default
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1),
+                    str,
+                    Options.MillisecondsSinceUnixEpoch
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("315532800000", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1),
+                    str,
+                    Options.SecondsSinceUnixEpoch
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("315532800", res);
+            }
+
+            /*using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1),
+                    str,
+                    Options.ISO8601
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("", res);
+            }*/
+        }
     }
 }
