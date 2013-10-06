@@ -190,7 +190,10 @@ namespace JilTests
             double reorderedTime, normalOrderTime;
             CompareTimes(toSerialize, memoryOrder, normalOrder, out reorderedTime, out normalOrderTime, checkCorrectness: false);
 
-            Assert.IsTrue(reorderedTime < normalOrderTime, "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime);
+            var msg = "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime;
+
+            Assert.IsTrue(reorderedTime < normalOrderTime, msg);
+            Console.WriteLine(msg);
         }
 
         public class _SkipNumberFormatting

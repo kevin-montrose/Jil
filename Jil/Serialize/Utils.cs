@@ -44,6 +44,9 @@ namespace Jil.Serialize
             TwoByteOps = twoByte.ToDictionary(d => (int)(d.Value & 0xFF), d => d);
         }
 
+        //internal static int[] MemberOrdering = new int[] { 1, 2, 3, 4 };
+        internal static int[] MemberOrdering = new int[] { 3, 1, -4, 2 };
+
         public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
@@ -82,18 +85,50 @@ namespace Jil.Serialize
 
             Func<MemberInfo, int> fieldsFirst = m => m is FieldInfo ? 0 : 1;
 
-            var ret =
-                (simpleTypes.OrderBy(byAccessOrder).ThenBy(fieldsFirst))
-                .Concat(
-                    otherPrimitive.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
-                )
-                .Concat(
-                    everythingElse.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
-                )
-                .Concat(
-                    recursive.OrderBy(byAccessOrder).ThenBy(fieldsFirst)
-                )
-                .ToList();
+            var ret = new List<MemberInfo>();
+
+            foreach (var ix in MemberOrdering)
+            {
+                var asc = ix > 0;
+                var i = Math.Abs(ix);
+
+                switch (i)
+                {
+                    case 1:
+                        ret.AddRange(
+                            asc ?
+                                simpleTypes.OrderBy(byAccessOrder).ThenBy(fieldsFirst) :
+                                simpleTypes.OrderByDescending(byAccessOrder).ThenByDescending(fieldsFirst)
+                        );
+                        break;
+
+                    case 2:
+                        ret.AddRange(
+                            asc ?
+                                otherPrimitive.OrderBy(byAccessOrder).ThenBy(fieldsFirst) :
+                                otherPrimitive.OrderByDescending(byAccessOrder).ThenByDescending(fieldsFirst)
+                        );
+                        break;
+
+                    case 3:
+                        ret.AddRange(
+                            asc ?
+                                everythingElse.OrderBy(byAccessOrder).ThenBy(fieldsFirst) :
+                                everythingElse.OrderByDescending(byAccessOrder).ThenByDescending(fieldsFirst)
+                        );
+                        break;
+
+                    case 4:
+                        ret.AddRange(
+                            asc ?
+                                recursive.OrderBy(byAccessOrder).ThenBy(fieldsFirst) :
+                                recursive.OrderByDescending(byAccessOrder).ThenByDescending(fieldsFirst)
+                        );
+                        break;
+
+                    default: throw new Exception();
+                }
+            }
 
             return ret;
         }
