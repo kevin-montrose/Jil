@@ -19,7 +19,7 @@ namespace Jil.Serialize
         public static bool UseCustomISODateFormatting = true;
 
         static string CharBuffer = "char_buffer";
-        internal const int CharBufferSize = 20;
+        internal const int CharBufferSize = 22;
         internal const int RecursionLimit = 50;
 
         static Dictionary<char, string> CharacterEscapes = 
@@ -610,6 +610,10 @@ namespace Jil.Serialize
 
         void WriteISO8601StyleDateTime()
         {
+            // top of stack is
+            //  - DateTime
+            //  - TextWriter
+
             var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
 
             if (!UseCustomISODateFormatting)
@@ -631,7 +635,10 @@ namespace Jil.Serialize
                 return;
             }
 
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            Emit.LoadLocal(CharBuffer);                     // TextWriter DateTime char[]
+            Emit.Call(Methods.CustomISO8601ToString);       // --empty--
+
+            /*using (var loc = Emit.DeclareLocal<DateTime>())
             {
                 Emit.StoreLocal(loc);       // TextWriter
                 Emit.Pop();                 // --empty--
@@ -700,7 +707,7 @@ namespace Jil.Serialize
                 Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
 
                 WriteString("Z\"");
-            }
+            }*/
         }
 
         void WriteDateTime()

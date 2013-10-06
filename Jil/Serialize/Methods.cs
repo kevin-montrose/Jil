@@ -11,6 +11,101 @@ namespace Jil.Serialize
 {
     static class Methods
     {
+        internal static readonly MethodInfo CustomISO8601ToString = typeof(Methods).GetMethod("_CustomISO8601ToString", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomISO8601ToString(TextWriter writer, DateTime dt, char[] buffer)
+        {
+            // "yyyy-mm-ddThh:mm:ssZ"
+            // 0123456789ABCDEFGHIJKL
+
+            buffer[0] = '"';
+
+            dt = dt.ToUniversalTime();
+
+            var val = dt.Year;
+            
+            // DateTime.MaxValue is at most four digits
+            var ptr = 4;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 1);
+
+            buffer[5] = '-';
+
+            val = dt.Month;
+            ptr = 7;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 6);
+
+            buffer[8] = '-';
+
+            val = dt.Day;
+            ptr = 10;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 9);
+
+            buffer[11] = 'T';
+
+            val = dt.Hour;
+            ptr = 13;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 12);
+
+            buffer[14] = ':';
+
+            val = dt.Minute;
+            ptr = 16;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 15);
+
+            buffer[17] = ':';
+
+            val = dt.Second;
+            ptr = 19;
+            do
+            {
+                var ix = val % 10;
+                val /= 10;
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (ptr >= 18);
+
+            buffer[20] = 'Z';
+            buffer[21] = '"';
+
+            writer.Write(buffer, 0, 22);
+        }
+
         internal static readonly MethodInfo CustomWriteIntYear = typeof(Methods).GetMethod("_CustomWriteIntYear", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteIntYear(TextWriter writer, int number, char[] buffer)
