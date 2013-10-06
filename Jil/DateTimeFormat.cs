@@ -26,14 +26,14 @@ namespace Jil
         /// </summary>
         SecondsSinceUnixEpoch = 2,
         /// <summary>
-        /// DateTimes will be formatted as "yyyy-MM-ddThh:mm:ss+tttt" where
+        /// DateTimes will be formatted as "yyyy-MM-ddThh:mm:ssZ" where
         /// yyyy is the year, MM is the month (starting at 01), dd is the day (starting at 01),
         /// hh is the hour (starting at 00, continuing to 24), mm is the minute (start at 00),
-        /// ss is the second (starting at 00) and +tttt is the timezone offset (note it can be negative).
+        /// and ss is the second (starting at 00).
         /// 
         /// Examples:
-        ///     2011-07-14T19:43:37+0100
-        ///     2012-01-02T03:04:05-0600
+        ///     2011-07-14T19:43:37Z
+        ///     2012-01-02T03:04:05Z
         /// </summary>
         ISO8601 = 3
     }

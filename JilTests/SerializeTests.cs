@@ -1043,7 +1043,7 @@ namespace JilTests
                 Assert.AreEqual("315532800", res);
             }
 
-            /*using (var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 JSON.Serialize(
                     new DateTime(1980, 1, 1),
@@ -1052,8 +1052,8 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("", res);
-            }*/
+                Assert.AreEqual("\"1980-01-01T05:00:00Z\"", res);
+            }
         }
     }
 }

@@ -588,6 +588,81 @@ namespace Jil.Serialize
             WritePrimitive(typeof(long), quotesNeedHandling: false);               // --empty--
         }
 
+        void WriteISO8601StyleDateTime()
+        {
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(loc);       // TextWriter
+                Emit.Pop();                 // --empty--
+                Emit.LoadLocalAddress(loc); // DateTime*
+            }
+
+            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+            var year = typeof(DateTime).GetProperty("Year").GetMethod;
+            var month = typeof(DateTime).GetProperty("Month").GetMethod;
+            var day = typeof(DateTime).GetProperty("Day").GetMethod;
+            var hour = typeof(DateTime).GetProperty("Hour").GetMethod;
+            var min = typeof(DateTime).GetProperty("Minute").GetMethod;
+            var sec = typeof(DateTime).GetProperty("Second").GetMethod;
+
+            Emit.Call(toUniversalTime); // DateTime
+
+            using (var dt = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(dt);        // --empty--
+
+                WriteString("\"");          // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(year);                    // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntYear); // --empty--
+
+                WriteString("-");           // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(month);                   // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
+
+                WriteString("-");           // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(day);                     // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
+
+                WriteString("T");           // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(hour);                    // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
+
+                WriteString(":");           // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(min);                     // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
+
+                WriteString(":");           // --empty--
+
+                Emit.LoadArgument(0);               // TextWriter
+                Emit.LoadLocalAddress(dt);          // TextWriter DateTime*
+                Emit.Call(sec);                     // TextWriter int
+                Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                Emit.Call(Methods.CustomWriteIntMonthDay); // --empty--
+
+                WriteString("Z\"");
+            }
+        }
+
         void WriteDateTime()
         {
             // top of stack:
@@ -614,8 +689,11 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.ISO8601)
             {
-                throw new NotImplementedException();
+                WriteISO8601StyleDateTime();
+                return;
             }
+
+            throw new InvalidOperationException("Unexpected DateFormat: " + DateFormat);
         }
 
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
