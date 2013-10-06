@@ -1055,5 +1055,36 @@ namespace JilTests
                 Assert.AreEqual("\"1980-01-01T05:00:00Z\"", res);
             }
         }
+
+        [TestMethod]
+        public void ISODateTimes()
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var rand = new Random(8337586);
+
+            for (var i = 0; i < 10000; i++)
+            {
+                var rndDt = epoch;
+                switch (rand.Next(6))
+                {
+                    case 0: rndDt += TimeSpan.FromDays(rand.Next(ushort.MaxValue)); break;
+                    case 1: rndDt += TimeSpan.FromHours(rand.Next(ushort.MaxValue)); break;
+                    case 2: rndDt += TimeSpan.FromSeconds(rand.Next()); break;
+                    case 3: rndDt -= TimeSpan.FromDays(rand.Next(ushort.MaxValue)); break;
+                    case 4: rndDt -= TimeSpan.FromHours(rand.Next(ushort.MaxValue)); break;
+                    case 5: rndDt -= TimeSpan.FromSeconds(rand.Next()); break;
+                }
+
+                var expected = "\"" + rndDt.ToString("yyyy-MM-ddTHH:mm:ssZ") + "\"";
+                string actual;
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(rndDt, str, Options.ISO8601);
+                    actual = str.ToString();
+                }
+
+                Assert.AreEqual(expected, actual);
+            }
+        }
     }
 }
