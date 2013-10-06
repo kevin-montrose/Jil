@@ -1114,5 +1114,52 @@ namespace JilTests
                 }
             }
         }
+
+        public class _ConditionalSerialization
+        {
+            public string Val { get; set; }
+
+            internal bool ShouldSerializeVal()
+            {
+                return Val != null && (Val.Length % 2) == 0;
+            }
+
+            public static _ConditionalSerialization Random(Random rand)
+            {
+                return
+                    new _ConditionalSerialization
+                    {
+                        Val = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        [TestMethod]
+        public void ConditionalSerialization()
+        {
+            var rand = new Random();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                using (var str = new StringWriter())
+                {
+                    var obj = _ConditionalSerialization.Random(rand);
+
+                    JSON.Serialize(obj, str, Options.ExcludeNulls);
+
+                    var res = str.ToString();
+
+                    if (obj.ShouldSerializeVal() && !res.Contains("\"Val\":"))
+                    {
+                        Assert.Fail(res);
+                    }
+
+                    if (!obj.ShouldSerializeVal() && res.Contains("\"Val\":"))
+                    {
+                        Assert.Fail(res);
+                    }
+                }
+            }
+        }
     }
 }

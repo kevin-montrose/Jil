@@ -27,7 +27,7 @@ namespace JilTests
             return ret;
         }
 
-        private static string _RandString(Random rand)
+        public static string _RandString(Random rand)
         {
             var len = rand.Next(20);
             var ret = new char[len];

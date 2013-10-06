@@ -1043,7 +1043,7 @@ namespace Jil.Serialize
                 foreach (var member in writeOrder)
                 {
                     Emit.Duplicate();                                                   // obj(*?) obj(*?)
-                    WriteMemberIfNonNull(member, inLocal, isFirst);  // obj(*?)
+                    WriteMemberIfNonNull(forType, member, inLocal, isFirst);  // obj(*?)
                 }
             }
 
@@ -1055,7 +1055,7 @@ namespace Jil.Serialize
             Emit.Pop();             // --empty--
         }
 
-        void WriteMemberIfNonNull(MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
+        void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
         {
             // Top of stack:
             //  - obj(*?)
@@ -1069,6 +1069,33 @@ namespace Jil.Serialize
 
             var end = Emit.DefineLabel();
             var writeValue = Emit.DefineLabel();
+
+            if (asProp != null)
+            {
+                var shouldSerialize = asProp.ShouldSerializeMethod(onType);
+                if (shouldSerialize != null)
+                {
+                    var canSerialize = Emit.DefineLabel();
+
+                    Emit.Duplicate();                   // obj(*?) obj(*?)
+
+                    if (shouldSerialize.IsVirtual)
+                    {
+                        Emit.CallVirtual(shouldSerialize);  // obj(*?) bool
+                    }
+                    else
+                    {
+                        Emit.Call(shouldSerialize);         // obj(*?) bool
+                    }
+
+                    Emit.BranchIfTrue(canSerialize);    // obj(*?)
+
+                    Emit.Pop();                         // --empty--
+                    Emit.Branch(end);                   // --empty--
+
+                    Emit.MarkLabel(canSerialize);       // obj(*?)
+                }
+            }
 
             var canBeNull = serializingType.IsNullableType() || !serializingType.IsValueType;
             if (canBeNull)

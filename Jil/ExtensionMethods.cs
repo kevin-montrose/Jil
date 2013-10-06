@@ -9,6 +9,19 @@ namespace Jil
 {
     internal static class ExtensionMethods
     {
+        public static MethodInfo ShouldSerializeMethod(this PropertyInfo prop, Type serializingType)
+        {
+            var mtdName = "ShouldSerialize" + prop.Name;
+
+            var ret =
+                serializingType
+                    .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Where(m => m.Name == mtdName && m.ReturnType == typeof(bool) && m.GetParameters().Length == 0)
+                    .SingleOrDefault();
+
+            return ret;
+        }
+
         public static Type ReturnType(this MemberInfo m)
         {
             var asField = m as FieldInfo;
