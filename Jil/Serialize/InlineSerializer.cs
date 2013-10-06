@@ -144,18 +144,35 @@ namespace Jil.Serialize
 
         void IncreaseIndent()
         {
-            Emit.LoadArgument(2);   // indent
-            Emit.LoadConstant(1);   // indent 1
-            Emit.Add();             // (indent+1)
-            Emit.StoreArgument(2);  // --empty--
+            // We only need to track this if
+            //   - we're pretty printing
+            //   - or infinite recursion is possible
+            if (PrettyPrint || RecursiveTypes.Count != 0)
+            {
+                Emit.LoadArgument(2);   // indent
+                Emit.LoadConstant(1);   // indent 1
+                Emit.Add();             // (indent+1)
+                Emit.StoreArgument(2);  // --empty--
+            }
         }
 
         void DecreaseIndent()
         {
-            Emit.LoadArgument(2);   // indent
-            Emit.LoadConstant(-1);   // indent -1
-            Emit.Add();             // (indent-1)
-            Emit.StoreArgument(2);  // --empty--
+            // We only need to track this if
+            //   - we're pretty printing
+            //   - or infinite recursion is possible
+            if (PrettyPrint || RecursiveTypes.Count != 0)
+            {
+                Emit.LoadArgument(2);   // indent
+                Emit.LoadConstant(-1);   // indent -1
+                Emit.Add();             // (indent-1)
+                Emit.StoreArgument(2);  // --empty--
+            }
+
+            if (PrettyPrint)
+            {
+                LineBreakAndIndent();
+            }
         }
 
         static List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
@@ -962,10 +979,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);                // --empty--
             WriteString("{");                       // --empty--
 
-            if (PrettyPrint)
-            {
-                IncreaseIndent();
-            }
+            IncreaseIndent();
 
             var firstPass = true;
             foreach (var member in writeOrder)
@@ -1003,11 +1017,7 @@ namespace Jil.Serialize
                 }
             }
 
-            if (PrettyPrint)
-            {
-                DecreaseIndent();
-                LineBreakAndIndent();
-            }
+            DecreaseIndent();
 
             WriteString("}");                               // --empty--
 
@@ -1061,10 +1071,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);        // obj(*?)
             WriteString("{");               // obj(*?)
 
-            if (PrettyPrint)
-            {
-                IncreaseIndent();
-            }
+            IncreaseIndent();           
 
             using (var isFirst = Emit.DeclareLocal<bool>())
             {
@@ -1078,11 +1085,7 @@ namespace Jil.Serialize
                 }
             }
 
-            if (PrettyPrint)
-            {
-                DecreaseIndent();
-                LineBreakAndIndent();
-            }
+            DecreaseIndent();
 
             WriteString("}");       // obj(*?)
 
@@ -1384,10 +1387,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);
             WriteString("{");
 
-            if (PrettyPrint)
-            {
-                IncreaseIndent();
-            }
+            IncreaseIndent();
 
             var done = Emit.DefineLabel();
 
@@ -1452,11 +1452,7 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);
 
-            if (PrettyPrint)
-            {
-                DecreaseIndent();
-                LineBreakAndIndent();
-            }
+            DecreaseIndent();
 
             WriteString("}");
 
@@ -1510,10 +1506,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);
             WriteString("{");
 
-            if (PrettyPrint)
-            {
-                IncreaseIndent();
-            }
+            IncreaseIndent();
 
             var done = Emit.DefineLabel();
 
@@ -1595,11 +1588,7 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);
 
-            if (PrettyPrint)
-            {
-                DecreaseIndent();
-                LineBreakAndIndent();
-            }
+            DecreaseIndent();
 
             WriteString("}");
 
@@ -1915,10 +1904,6 @@ namespace Jil.Serialize
                 Emit.Throw();                                       // --empty--
 
                 Emit.MarkLabel(goOn);               // --empty--
-                Emit.LoadArgument(2);               // int
-                Emit.LoadConstant(1);               // int 1
-                Emit.Add();                         // (int+1)
-                Emit.StoreArgument(2);              // --empty--
             }
 
             AddCharBuffer();
