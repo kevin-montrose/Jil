@@ -19,6 +19,7 @@ namespace Jil.Serialize
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 20;
+        internal const int RecursionLimit = 50;
 
         static Dictionary<char, string> CharacterEscapes = 
             new Dictionary<char, string>{
@@ -62,6 +63,7 @@ namespace Jil.Serialize
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
         private readonly DateTimeFormat DateFormat;
+        private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
         private Emit Emit;
 
@@ -227,7 +229,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        void WriteMember(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteMember(MemberInfo member, Sigil.Local inLocal = null)
         {
             // Stack is empty
 
@@ -266,27 +268,27 @@ namespace Jil.Serialize
 
                     if (serializingType.IsListType())
                     {
-                        WriteList(serializingType, recursiveTypes, loc);
+                        WriteList(serializingType, loc);
                         return;
                     }
 
                     if (serializingType.IsDictionaryType())
                     {
-                        WriteDictionary(serializingType, recursiveTypes, loc);
+                        WriteDictionary(serializingType, loc);
                         return;
                     }
 
-                    WriteList(serializingType, recursiveTypes, loc);
+                    WriteList(serializingType, loc);
                 }
 
                 return;
             }
 
-            var isRecursive = recursiveTypes.ContainsKey(serializingType);
+            var isRecursive = RecursiveTypes.ContainsKey(serializingType);
 
             if (isRecursive)
             {
-                Emit.LoadLocal(recursiveTypes[serializingType]);    // Action<TextWriter, serializingType>
+                Emit.LoadLocal(RecursiveTypes[serializingType]);    // Action<TextWriter, serializingType>
             }
 
             // Only put this on the stack if we'll need it
@@ -340,7 +342,7 @@ namespace Jil.Serialize
 
             if (serializingType.IsNullableType())
             {
-                WriteNullable(serializingType, recursiveTypes, quotesNeedHandling: true);
+                WriteNullable(serializingType, quotesNeedHandling: true);
                 return;
             }
 
@@ -348,11 +350,11 @@ namespace Jil.Serialize
             {
                 Emit.StoreLocal(loc);   // TextWriter;
 
-                WriteObject(serializingType, recursiveTypes, loc);
+                WriteObject(serializingType, loc);
             }
         }
 
-        void WriteNullable(Type nullableType, Dictionary<Type, Sigil.Local> recursiveTypes, bool quotesNeedHandling)
+        void WriteNullable(Type nullableType, bool quotesNeedHandling)
         {
             // Top of stack is
             //  - nullable
@@ -394,13 +396,13 @@ namespace Jil.Serialize
                 {
                     Emit.StoreLocal(loc);   // TextWriter
 
-                    if (recursiveTypes.ContainsKey(underlyingType))
+                    if (RecursiveTypes.ContainsKey(underlyingType))
                     {
                         var act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
                         var invoke = act.GetMethod("Invoke");
 
                         Emit.Pop();                                     // --empty--
-                        Emit.LoadLocal(recursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
+                        Emit.LoadLocal(RecursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
                         Emit.LoadArgument(0);                           // Action<,> TextWriter
                         Emit.LoadLocal(loc);                            // Action<,> TextWriter value
                         Emit.LoadArgument(2);                           // Action<,> TextWriter value int
@@ -410,19 +412,19 @@ namespace Jil.Serialize
                     {
                         if (underlyingType.IsListType())
                         {
-                            WriteList(underlyingType, recursiveTypes, loc);
+                            WriteList(underlyingType, loc);
                         }
                         else
                         {
                             if (underlyingType.IsDictionaryType())
                             {
-                                WriteList(underlyingType, recursiveTypes, loc);
+                                WriteList(underlyingType, loc);
                             }
                             else
                             {
                                 Emit.Pop();
 
-                                WriteObject(underlyingType, recursiveTypes, loc);
+                                WriteObject(underlyingType, loc);
                             }
                         }
                     }
@@ -921,9 +923,9 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteObjectWithNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteObjectWithNulls(Type forType, Sigil.Local inLocal = null)
         {
-            var writeOrder = OrderMembersForAccess(forType, recursiveTypes);
+            var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
             var notNull = Emit.DefineLabel();
 
@@ -982,7 +984,7 @@ namespace Jil.Serialize
                     }
 
                     WriteString(keyString);                         // --empty--
-                    WriteMember(member, recursiveTypes, inLocal);   // --empty--
+                    WriteMember(member, inLocal);   // --empty--
                 }
                 else
                 {
@@ -997,7 +999,7 @@ namespace Jil.Serialize
 
                     WriteString("\"" + member.Name.JsonEscape() + "\": ");
 
-                    WriteMember(member, recursiveTypes, inLocal);
+                    WriteMember(member, inLocal);
                 }
             }
 
@@ -1012,21 +1014,21 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteObject(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteObject(Type forType, Sigil.Local inLocal = null)
         {
             if (!ExcludeNulls)
             {
-                WriteObjectWithNulls(forType, recursiveTypes, inLocal);
+                WriteObjectWithNulls(forType, inLocal);
             }
             else
             {
-                WriteObjectWithoutNulls(forType, recursiveTypes, inLocal);
+                WriteObjectWithoutNulls(forType, inLocal);
             }
         }
 
-        void WriteObjectWithoutNulls(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal = null)
         {
-            var writeOrder = OrderMembersForAccess(forType, recursiveTypes);
+            var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
             var notNull = Emit.DefineLabel();
 
@@ -1072,7 +1074,7 @@ namespace Jil.Serialize
                 foreach (var member in writeOrder)
                 {
                     Emit.Duplicate();                                                   // obj(*?) obj(*?)
-                    WriteMemberIfNonNull(member, recursiveTypes, inLocal, isFirst);  // obj(*?)
+                    WriteMemberIfNonNull(member, inLocal, isFirst);  // obj(*?)
                 }
             }
 
@@ -1088,7 +1090,7 @@ namespace Jil.Serialize
             Emit.Pop();             // --empty--
         }
 
-        void WriteMemberIfNonNull(MemberInfo member, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal, Sigil.Local isFirst)
+        void WriteMemberIfNonNull(MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
         {
             // Top of stack:
             //  - obj(*?)
@@ -1151,12 +1153,12 @@ namespace Jil.Serialize
 
             WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
 
-            WriteMember(member, recursiveTypes, inLocal);           // --empty--
+            WriteMember(member, inLocal);           // --empty--
 
             Emit.MarkLabel(end);
         }
 
-        void WriteList(Type listType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteList(Type listType, Sigil.Local inLocal = null)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
@@ -1167,7 +1169,7 @@ namespace Jil.Serialize
 
             var iList = typeof(IList<>).MakeGenericType(elementType);
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
             var notNull = Emit.DefineLabel();
@@ -1218,7 +1220,7 @@ namespace Jil.Serialize
 
                     if (isRecursive)
                     {
-                        var loc = recursiveTypes[elementType];
+                        var loc = RecursiveTypes[elementType];
 
                         Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
                     }
@@ -1231,7 +1233,7 @@ namespace Jil.Serialize
                     Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
                     LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
 
-                    WriteElement(elementType, recursiveTypes);   // --empty--
+                    WriteElement(elementType);   // --empty--
                 }
 
                 var loop = Emit.DefineLabel();
@@ -1244,7 +1246,7 @@ namespace Jil.Serialize
 
                 if (isRecursive)
                 {
-                    var loc = recursiveTypes[elementType];
+                    var loc = RecursiveTypes[elementType];
 
                     Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
                 }
@@ -1259,7 +1261,7 @@ namespace Jil.Serialize
 
                 WriteString(",");
 
-                WriteElement(elementType, recursiveTypes);   // --empty--
+                WriteElement(elementType);   // --empty--
 
                 Emit.Branch(loop);
             }
@@ -1271,7 +1273,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteElement(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteElement(Type elementType)
         {
             if (elementType.IsPrimitiveType())
             {
@@ -1281,11 +1283,11 @@ namespace Jil.Serialize
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
+                WriteNullable(elementType, quotesNeedHandling: true);
                 return;
             }
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
                 // Stack is:
@@ -1309,33 +1311,33 @@ namespace Jil.Serialize
 
                 if (elementType.IsListType())
                 {
-                    WriteList(elementType, recursiveTypes, loc);
+                    WriteList(elementType, loc);
                     return;
                 }
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteDictionary(elementType, recursiveTypes, loc);
+                    WriteDictionary(elementType, loc);
                     return;
                 }
 
-                WriteObject(elementType, recursiveTypes, loc);
+                WriteObject(elementType, loc);
             }
         }
 
-        void WriteDictionary(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal = null)
+        void WriteDictionary(Type dictType, Sigil.Local inLocal = null)
         {
             if (!ExcludeNulls)
             {
-                WriteDictionaryWithNulls(dictType, recursiveTypes, inLocal);
+                WriteDictionaryWithNulls(dictType, inLocal);
             }
             else
             {
-                WriteDictionaryWithoutNulls(dictType, recursiveTypes, inLocal);
+                WriteDictionaryWithoutNulls(dictType, inLocal);
             }
         }
 
-        void WriteDictionaryWithoutNulls(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal)
+        void WriteDictionaryWithoutNulls(Type dictType, Sigil.Local inLocal)
         {
             var dictI = dictType.GetDictionaryInterface();
 
@@ -1356,7 +1358,7 @@ namespace Jil.Serialize
 
             var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
             var notNull = Emit.DefineLabel();
@@ -1423,7 +1425,7 @@ namespace Jil.Serialize
                 {
                     onTheStack++;
 
-                    var loc = recursiveTypes[elementType];
+                    var loc = RecursiveTypes[elementType];
 
                     Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
                 }
@@ -1443,7 +1445,7 @@ namespace Jil.Serialize
 
                 onTheStack++;
 
-                WriteKeyValueIfNotNull(onTheStack, elementType, recursiveTypes, isFirst);   // --empty--
+                WriteKeyValueIfNotNull(onTheStack, elementType, isFirst);   // --empty--
 
                 Emit.Branch(loop);                      // --empty--
             }
@@ -1461,7 +1463,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteDictionaryWithNulls(Type dictType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local inLocal)
+        void WriteDictionaryWithNulls(Type dictType, Sigil.Local inLocal)
         {
             var dictI = dictType.GetDictionaryInterface();
 
@@ -1482,7 +1484,7 @@ namespace Jil.Serialize
 
             var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
             var notNull = Emit.DefineLabel();
@@ -1539,7 +1541,7 @@ namespace Jil.Serialize
 
                     if (isRecursive)
                     {
-                        var loc = recursiveTypes[elementType];
+                        var loc = RecursiveTypes[elementType];
 
                         Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
                     }
@@ -1555,7 +1557,7 @@ namespace Jil.Serialize
                     Emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                     Emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
 
-                    WriteKeyValue(elementType, recursiveTypes);   // --empty--
+                    WriteKeyValue(elementType);   // --empty--
                 }
 
                 var loop = Emit.DefineLabel();
@@ -1568,7 +1570,7 @@ namespace Jil.Serialize
 
                 if (isRecursive)
                 {
-                    var loc = recursiveTypes[elementType];
+                    var loc = RecursiveTypes[elementType];
 
                     Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
                 }
@@ -1586,7 +1588,7 @@ namespace Jil.Serialize
 
                 WriteString(",");
 
-                WriteKeyValue(elementType, recursiveTypes);   // --empty--
+                WriteKeyValue(elementType);   // --empty--
 
                 Emit.Branch(loop);                          // --empty--
             }
@@ -1604,7 +1606,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteKeyValueIfNotNull(int ontheStack, Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes, Sigil.Local isFirst)
+        void WriteKeyValueIfNotNull(int ontheStack, Type elementType, Sigil.Local isFirst)
         {
             // top of the stack is a 
             //   - KeyValue<string, elementType>
@@ -1701,14 +1703,14 @@ namespace Jil.Serialize
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
+                WriteNullable(elementType, quotesNeedHandling: true);
 
                 Emit.MarkLabel(done);
 
                 return;
             }
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
                 // Stack is:
@@ -1734,7 +1736,7 @@ namespace Jil.Serialize
 
                 if (elementType.IsListType())
                 {
-                    WriteList(elementType, recursiveTypes, loc);
+                    WriteList(elementType, loc);
 
                     Emit.MarkLabel(done);
 
@@ -1743,14 +1745,14 @@ namespace Jil.Serialize
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteList(elementType, recursiveTypes, loc);
+                    WriteList(elementType, loc);
 
                     Emit.MarkLabel(done);
 
                     return;
                 }
 
-                WriteObject(elementType, recursiveTypes, loc);
+                WriteObject(elementType, loc);
             }
 
             Emit.MarkLabel(done);
@@ -1774,7 +1776,7 @@ namespace Jil.Serialize
                     Methods.WriteEncodedStringWithNullsInline;
         }
 
-        void WriteKeyValue(Type elementType, Dictionary<Type, Sigil.Local> recursiveTypes)
+        void WriteKeyValue(Type elementType)
         {
             // top of the stack is a KeyValue<string, elementType>
 
@@ -1820,11 +1822,11 @@ namespace Jil.Serialize
 
             if (elementType.IsNullableType())
             {
-                WriteNullable(elementType, recursiveTypes, quotesNeedHandling: true);
+                WriteNullable(elementType, quotesNeedHandling: true);
                 return;
             }
 
-            var isRecursive = recursiveTypes.ContainsKey(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
                 // Stack is:
@@ -1848,17 +1850,17 @@ namespace Jil.Serialize
 
                 if (elementType.IsListType())
                 {
-                    WriteList(elementType, recursiveTypes, loc);
+                    WriteList(elementType, loc);
                     return;
                 }
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteList(elementType, recursiveTypes, loc);
+                    WriteList(elementType, loc);
                     return;
                 }
 
-                WriteObject(elementType, recursiveTypes, loc);
+                WriteObject(elementType, loc);
             }
         }
 
@@ -1899,11 +1901,31 @@ namespace Jil.Serialize
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
+            // dirty trick here, we can prove that overflowing is *impossible* if there are no recursive types
+            //   If that's the case, don't even bother with the check or the increment
+            if (recursiveTypes.Count != 0)
+            {
+                var goOn = Emit.DefineLabel();
+
+                Emit.LoadArgument(2);               // int
+                Emit.LoadConstant(RecursionLimit);  // int int
+                Emit.BranchIfLess(goOn);            // --empty--
+
+                Emit.NewObject(typeof(InfiniteRecursionException)); // infiniteRecursionException
+                Emit.Throw();                                       // --empty--
+
+                Emit.MarkLabel(goOn);               // --empty--
+                Emit.LoadArgument(2);               // int
+                Emit.LoadConstant(1);               // int 1
+                Emit.Add();                         // (int+1)
+                Emit.StoreArgument(2);              // --empty--
+            }
+
             AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes);
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteObject(typeof(ForType), preloaded);
+            WriteObject(typeof(ForType));
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
@@ -1917,9 +1939,9 @@ namespace Jil.Serialize
 
             AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes);
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteList(typeof(ForType), preloaded);
+            WriteList(typeof(ForType));
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
@@ -1933,9 +1955,9 @@ namespace Jil.Serialize
 
             AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes);
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
-            WriteDictionary(typeof(ForType), preloaded);
+            WriteDictionary(typeof(ForType));
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
@@ -1967,12 +1989,12 @@ namespace Jil.Serialize
 
             AddCharBuffer();
 
-            var preloaded = PreloadRecursiveTypes(recursiveTypes);
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
             Emit.LoadArgument(0);
             Emit.LoadArgument(1);
 
-            WriteNullable(typeof(ForType), preloaded, quotesNeedHandling: true);
+            WriteNullable(typeof(ForType), quotesNeedHandling: true);
             
             Emit.Return();
 

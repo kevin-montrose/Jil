@@ -1086,5 +1086,33 @@ namespace JilTests
                 Assert.AreEqual(expected, actual);
             }
         }
+
+        public class _InfiniteRecursion
+        {
+            public int A;
+            public _InfiniteRecursion Next;
+        }
+
+        [TestMethod]
+        public void InfiniteRecursion()
+        {
+            using(var str = new StringWriter())
+            {
+                var root = new _InfiniteRecursion { A = 123 };
+                root.Next = root;
+
+                try
+                {
+                    JSON.Serialize(root, str);
+                    Assert.Fail();
+                }
+                catch (InfiniteRecursionException)
+                {
+                    // check that it failed at the right time...
+                    var failed = str.ToString();
+                    Assert.AreEqual("{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":", failed);
+                }
+            }
+        }
     }
 }
