@@ -1,6 +1,5 @@
 ﻿using Jil.Serialize;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sigil;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

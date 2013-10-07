@@ -32,7 +32,7 @@
   <ItemGroup>
     <Reference Include="Sigil, Version=3.1.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Sigil\Sigil\bin\Release\Sigil.dll</HintPath>
+      <HintPath>lib\Sigil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,6 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Serialize\Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="lib\Sigil.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
