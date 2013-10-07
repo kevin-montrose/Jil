@@ -2007,7 +2007,7 @@ namespace Jil.Serialize
     {
         public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
         {
-            typeCacheType = typeCacheType ?? typeof(DefaultTypeCache<>);
+            typeCacheType = typeCacheType ?? typeof(NewtonSoftStyleTypeCache<>);
 
             var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, dateFormat);
 

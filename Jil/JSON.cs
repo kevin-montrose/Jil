@@ -14,18 +14,6 @@ namespace Jil
         {
             options = options ?? Options.Default;
 
-            if (options.ShouldPrettyPrint.GetValueOrDefault())
-            {
-                PrettyPrintSerialize(data, output, options);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls.GetValueOrDefault())
-            {
-                ExcludeNullsSerialize(data, output, options);
-                return;
-            }
-
             if (options.UseDateTimeFormat.HasValue)
             {
                 switch (options.UseDateTimeFormat.Value)
@@ -38,7 +26,19 @@ namespace Jil
                 }
             }
 
-            DefaultTypeCache<T>.Thunk(output, data, 0);
+            if (options.ShouldPrettyPrint.GetValueOrDefault())
+            {
+                NewtonsoftStylePrettyPrintSerialize(data, output, options);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls.GetValueOrDefault())
+            {
+                NewtonsoftStyleExcludeNullsSerialize(data, output, options);
+                return;
+            }
+
+            NewtonSoftStyleTypeCache<T>.Thunk(output, data, 0);
         }
 
         private static void SecondsSerialize<T>(T data, TextWriter output, Options opts)
@@ -173,31 +173,31 @@ namespace Jil
             ISO8601PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
         }
 
-        private static void ExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
+        private static void NewtonsoftStyleExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
             if (opts.ShouldPrettyPrint.GetValueOrDefault())
             {
-                PrettyPrintExcludeNullsSerialize(data, output, opts);
+                NewtonsoftStylePrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;
             }
 
-            ExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+            NewtonsoftStyleExcludeNullsTypeCache<T>.Thunk(output, data, 0);
         }
 
-        private static void PrettyPrintSerialize<T>(T data, TextWriter output, Options opts)
+        private static void NewtonsoftStylePrettyPrintSerialize<T>(T data, TextWriter output, Options opts)
         {
             if (opts.ShouldExcludeNulls.GetValueOrDefault())
             {
-                PrettyPrintExcludeNullsSerialize(data, output, opts);
+                NewtonsoftStylePrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;
             }
 
-            PrettyPrintTypeCache<T>.Thunk(output, data, 0);
+            NewtonsoftStylePrettyPrintTypeCache<T>.Thunk(output, data, 0);
         }
 
-        private static void PrettyPrintExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
+        private static void NewtonsoftStylePrettyPrintExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+            NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
         }
     }
 }

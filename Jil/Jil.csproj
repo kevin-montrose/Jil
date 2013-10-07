@@ -44,7 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DateTimeFormat.cs" />
-    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Serialize\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />

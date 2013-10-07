@@ -10,43 +10,43 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    static class DefaultTypeCache<T>
+    static class NewtonSoftStyleTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
 
-        static DefaultTypeCache()
+        static NewtonSoftStyleTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(DefaultTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonSoftStyleTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         }
     }
 
-    static class PrettyPrintTypeCache<T>
+    static class NewtonsoftStylePrettyPrintTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
 
-        static PrettyPrintTypeCache()
+        static NewtonsoftStylePrettyPrintTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(PrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         }
     }
 
-    static class ExcludeNullsTypeCache<T>
+    static class NewtonsoftStyleExcludeNullsTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
 
-        static ExcludeNullsTypeCache()
+        static NewtonsoftStyleExcludeNullsTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(ExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         }
     }
 
-    static class PrettyPrintExcludeNullsTypeCache<T>
+    static class NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
 
-        static PrettyPrintExcludeNullsTypeCache()
+        static NewtonsoftStylePrettyPrintExcludeNullsTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(PrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         }
     }
 

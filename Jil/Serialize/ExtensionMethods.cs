@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jil
+namespace Jil.Serialize
 {
     internal static class ExtensionMethods
     {

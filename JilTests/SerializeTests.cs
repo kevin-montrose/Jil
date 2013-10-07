@@ -1087,6 +1087,26 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void AllOptions()
+        {
+            using(var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null
+                    },
+                    str,
+                    Options.Default
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("", res);
+            }
+        }
+
         public class _InfiniteRecursion
         {
             public int A;
