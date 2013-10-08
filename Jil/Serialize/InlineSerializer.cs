@@ -905,7 +905,20 @@ namespace Jil.Serialize
         void WriteObjectWithNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
+            var hasConditionalSerialization = writeOrder.OfType<PropertyInfo>().Any(p => p.ShouldSerializeMethod(forType) != null);
 
+            if (hasConditionalSerialization)
+            {
+                WriteObjectWithNullsWithConditionalSerialization(forType, inLocal, writeOrder);
+            }
+            else
+            {
+                WriteObjectWithNullsWithoutConditionalSerialization(forType, inLocal, writeOrder);
+            }
+        }
+
+        void WriteObjectWithNullsWithoutConditionalSerialization(Type forType, Sigil.Local inLocal, List<MemberInfo> writeOrder)
+        {
             var notNull = Emit.DefineLabel();
 
             var isValueType = forType.IsValueType;
@@ -998,6 +1011,83 @@ namespace Jil.Serialize
             }
         }
 
+        void WriteObjectWithNullsWithConditionalSerialization(Type forType, Sigil.Local inLocal, List<MemberInfo> writeOrder)
+        {
+            var notNull = Emit.DefineLabel();
+
+            var isValueType = forType.IsValueType;
+
+            if (inLocal != null)
+            {
+                Emit.LoadLocal(inLocal);    // obj
+            }
+            else
+            {
+                Emit.LoadArgument(1);       // obj
+            }
+
+            if (isValueType)
+            {
+                using (var temp = Emit.DeclareLocal(forType))
+                {
+                    Emit.StoreLocal(temp);          // --empty--
+                    Emit.LoadLocalAddress(temp);    // obj*
+                }
+            }
+
+            var end = Emit.DefineLabel();
+
+            Emit.BranchIfTrue(notNull);             // --empty--
+
+            // No ExcludeNulls checks since this code is never run
+            //   if that's set
+            WriteString("null");                    // --empty--
+
+            Emit.Branch(end);                       // --empty--
+
+            Emit.MarkLabel(notNull);                // --empty--
+            WriteString("{");                       // --empty--
+
+            IncreaseIndent();
+
+            if (inLocal != null)
+            {
+                Emit.LoadLocal(inLocal);    // obj
+            }
+            else
+            {
+                Emit.LoadArgument(1);       // obj
+            }
+
+            if (isValueType)
+            {
+                using (var temp = Emit.DeclareLocal(forType))
+                {
+                    Emit.StoreLocal(temp);          // --empty--
+                    Emit.LoadLocalAddress(temp);    // obj*
+                }
+            }
+
+            using (var isFirst = Emit.DeclareLocal<bool>())
+            {
+                Emit.LoadConstant(true);                        // obj(*?) true
+                Emit.StoreLocal(isFirst);                       // obj(*?)
+                foreach (var member in writeOrder)
+                {
+                    Emit.Duplicate();                                               // obj(*?) obj(*?)
+                    WriteMemberConditionally(forType, member, inLocal, isFirst);    // obj(*?)
+                }
+            }
+
+            Emit.Pop();                                     // --empty--
+
+            DecreaseIndent();                               // --empty--
+
+            WriteString("}");                               // --empty--
+
+            Emit.MarkLabel(end);                            // --empty--
+        }
+
         void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
@@ -1042,7 +1132,7 @@ namespace Jil.Serialize
 
                 foreach (var member in writeOrder)
                 {
-                    Emit.Duplicate();                                                   // obj(*?) obj(*?)
+                    Emit.Duplicate();                                         // obj(*?) obj(*?)
                     WriteMemberIfNonNull(forType, member, inLocal, isFirst);  // obj(*?)
                 }
             }
@@ -1126,6 +1216,79 @@ namespace Jil.Serialize
             else
             {
                 Emit.Pop();                     // --empty--
+            }
+
+            Emit.LoadLocal(isFirst);        // bool
+            Emit.BranchIfTrue(writeValue);  // --empty--
+
+            WriteString(",");
+
+            Emit.MarkLabel(writeValue);     // --empty--
+
+            Emit.LoadConstant(false);       // false
+            Emit.StoreLocal(isFirst);       // --empty--
+
+            if (PrettyPrint)
+            {
+                LineBreakAndIndent();
+            }
+
+            if (PrettyPrint)
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\": ");   // --empty--
+            }
+            else
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+            }
+
+            WriteMember(member, inLocal);           // --empty--
+
+            Emit.MarkLabel(end);
+        }
+
+        void WriteMemberConditionally(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
+        {
+            // top of stack
+            //  - obj(*?)
+
+            var asField = member as FieldInfo;
+            var asProp = member as PropertyInfo;
+
+            if (asField == null && asProp == null) throw new Exception("Wha?");
+
+            var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
+
+            var end = Emit.DefineLabel();
+            var writeValue = Emit.DefineLabel();
+
+            if (asProp != null)
+            {
+                var shouldSerialize = asProp.ShouldSerializeMethod(onType);
+                if (shouldSerialize != null)
+                {
+                    var canSerialize = Emit.DefineLabel();
+
+                    Emit.Duplicate();                   // obj(*?) obj(*?)
+
+                    if (shouldSerialize.IsVirtual)
+                    {
+                        Emit.CallVirtual(shouldSerialize);  // obj(*?) bool
+                    }
+                    else
+                    {
+                        Emit.Call(shouldSerialize);         // obj(*?) bool
+                    }
+
+                    Emit.BranchIfTrue(canSerialize);    // obj(*?)
+
+                    Emit.Pop();                         // --empty--
+                    Emit.Branch(end);                   // --empty--
+
+                    Emit.MarkLabel(canSerialize);       // obj(*?)
+                }
+
+                Emit.Pop();                         // --empty--
             }
 
             Emit.LoadLocal(isFirst);        // bool

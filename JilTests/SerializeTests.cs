@@ -1375,21 +1375,46 @@ namespace JilTests
             }
         }
 
-        public class _ConditionalSerialization
+        public class _ConditionalSerialization1
         {
             public string Val { get; set; }
+
+            public string AlwaysNull { get; set; }
+
+            public int AlwaysHasValue { get { return 4; } }
 
             internal bool ShouldSerializeVal()
             {
                 return Val != null && (Val.Length % 2) == 0;
             }
 
-            public static _ConditionalSerialization Random(Random rand)
+            public static _ConditionalSerialization1 Random(Random rand)
             {
                 return
-                    new _ConditionalSerialization
+                    new _ConditionalSerialization1
                     {
                         Val = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public class _ConditionalSerialization2
+        {
+            public string Foo { get; set; }
+
+            public string AlwaysNull { get; set; }
+
+            internal bool ShouldSerializeFoo()
+            {
+                return Foo == null || (Foo.Length % 2) == 1;
+            }
+
+            public static _ConditionalSerialization2 Random(Random rand)
+            {
+                return
+                    new _ConditionalSerialization2
+                    {
+                        Foo = SpeedProofTests._RandString(rand)
                     };
             }
         }
@@ -1403,11 +1428,21 @@ namespace JilTests
             {
                 using (var str = new StringWriter())
                 {
-                    var obj = _ConditionalSerialization.Random(rand);
+                    var obj = _ConditionalSerialization1.Random(rand);
 
                     JSON.Serialize(obj, str, Options.ExcludeNulls);
 
                     var res = str.ToString();
+
+                    if (res.Contains("\"AlwaysNull\""))
+                    {
+                        Assert.Fail(res);
+                    }
+
+                    if (!res.Contains("\"AlwaysHasValue\":4"))
+                    {
+                        Assert.Fail(res);
+                    }
 
                     if (obj.ShouldSerializeVal() && !res.Contains("\"Val\":"))
                     {
@@ -1415,6 +1450,33 @@ namespace JilTests
                     }
 
                     if (!obj.ShouldSerializeVal() && res.Contains("\"Val\":"))
+                    {
+                        Assert.Fail(res);
+                    }
+                }
+            }
+
+            for (var j = 0; j < 1000; j++)
+            {
+                using (var str = new StringWriter())
+                {
+                    var obj = _ConditionalSerialization2.Random(rand);
+
+                    JSON.Serialize(obj, str, Options.Default);
+
+                    var res = str.ToString();
+
+                    if (!res.Contains("\"AlwaysNull\":null"))
+                    {
+                        Assert.Fail(res);
+                    }
+
+                    if (obj.ShouldSerializeFoo() && !res.Contains("\"Foo\":"))
+                    {
+                        Assert.Fail(res);
+                    }
+
+                    if (!obj.ShouldSerializeFoo() && res.Contains("\"Foo\":"))
                     {
                         Assert.Fail(res);
                     }
