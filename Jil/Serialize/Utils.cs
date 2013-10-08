@@ -159,7 +159,16 @@ namespace Jil.Serialize
 
                 var fieldHandles = _GetFieldHandles(il);
 
-                var fieldInfos = fieldHandles.Select(f => module.ResolveField(f)).ToList();
+                var fieldInfos = 
+                    fieldHandles
+                        .Select(
+                            f => 
+                                {
+                                    var genArgs = t.GetGenericArguments();
+
+                                    return module.ResolveField(f, genArgs, null);
+                                }
+                        ).ToList();
 
                 ret[prop] = fieldInfos;
             }

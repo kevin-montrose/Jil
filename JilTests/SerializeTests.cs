@@ -1103,7 +1103,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("", res);
+                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null}", res);
             }
         }
 
