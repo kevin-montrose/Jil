@@ -71,7 +71,7 @@ namespace Jil
 
         private static void SecondsSerializeExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            if (opts.ShouldPrettyPrint.GetValueOrDefault())
             {
                 SecondsPrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;
@@ -115,7 +115,7 @@ namespace Jil
 
         private static void MillisecondsSerializeExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            if (opts.ShouldPrettyPrint.GetValueOrDefault())
             {
                 MillisecondsPrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;
@@ -159,7 +159,7 @@ namespace Jil
 
         private static void ISO8601SerializeExcludeNullsSerialize<T>(T data, TextWriter output, Options opts)
         {
-            if (opts.ShouldExcludeNulls.GetValueOrDefault())
+            if (opts.ShouldPrettyPrint.GetValueOrDefault())
             {
                 ISO8601PrettyPrintExcludeNullsSerialize(data, output, opts);
                 return;
