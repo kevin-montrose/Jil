@@ -902,7 +902,7 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteObjectWithNulls(Type forType, Sigil.Local inLocal = null)
+        void WriteObjectWithNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
@@ -998,7 +998,7 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal = null)
+        void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
