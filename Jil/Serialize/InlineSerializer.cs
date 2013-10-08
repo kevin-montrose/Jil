@@ -1143,7 +1143,14 @@ namespace Jil.Serialize
                 LineBreakAndIndent();
             }
 
-            WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+            if (PrettyPrint)
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\": ");   // --empty--
+            }
+            else
+            {
+                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+            }
 
             WriteMember(member, inLocal);           // --empty--
 

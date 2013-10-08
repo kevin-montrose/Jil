@@ -1105,6 +1105,54 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null}", res);
             }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null
+                    },
+                    str,
+                    Options.ExcludeNulls
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null
+                    },
+                    str,
+                    Options.PrettyPrint
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null
+                    },
+                    str,
+                    Options.PrettyPrintExcludeNulls
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\"\n}", res);
+            }
         }
 
         public class _InfiniteRecursion
