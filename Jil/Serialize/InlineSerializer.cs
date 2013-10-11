@@ -366,7 +366,7 @@ namespace Jil.Serialize
 
             if (serializingType.IsEnum)
             {
-                WriteEnum(serializingType);
+                WriteEnum(serializingType, popTextWriter: false);
                 return;
             }
 
@@ -418,7 +418,7 @@ namespace Jil.Serialize
             {
                 if (underlyingType.IsEnum)
                 {
-                    WriteEnum(underlyingType);
+                    WriteEnum(underlyingType, popTextWriter: true);
                 }
                 else
                 {
@@ -1465,7 +1465,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnum(elementType);
+                WriteEnum(elementType, popTextWriter: false);
                 return;
             }
 
@@ -1880,7 +1880,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnum(elementType);
+                WriteEnum(elementType, popTextWriter: false);
                 return;
             }
 
@@ -2002,7 +2002,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnum(elementType);
+                WriteEnum(elementType, popTextWriter: false);
                 return;
             }
 
@@ -2064,11 +2064,11 @@ namespace Jil.Serialize
             return true;
         }
 
-        void WriteContiguousEnumeration(Type enumType, Dictionary<ulong, object> values)
+        void WriteContiguousEnumeration(Type enumType, Dictionary<ulong, object> values, bool popTextWriter)
         {
             // top of stack
             //   - enum
-            //   - TextWriter
+            //   - TextWriter?
 
             var done = Emit.DefineLabel();
 
@@ -2077,11 +2077,11 @@ namespace Jil.Serialize
 
             var labels = Enumerable.Range(0, (int)(max - min + 1)).Select(_ => Emit.DefineLabel()).ToArray();
 
-            Emit.Convert<ulong>();      // TextWriter ulong
-            Emit.LoadConstant(min);     // TextWriter ulong ulong
-            Emit.Subtract();            // TextWriter ulong
-            Emit.Convert<int>();        // TextWriter int
-            Emit.Switch(labels);        // TextWriter
+            Emit.Convert<ulong>();      // TextWriter? ulong
+            Emit.LoadConstant(min);     // TextWriter? ulong ulong
+            Emit.Subtract();            // TextWriter? ulong
+            Emit.Convert<int>();        // TextWriter? int
+            Emit.Switch(labels);        // TextWriter?
 
             // default (ie. no match)
             Emit.LoadConstant("Unexpected value for enumeration " + enumType.FullName);
@@ -2095,21 +2095,25 @@ namespace Jil.Serialize
                 var asStr = Enum.GetName(enumType, val);
                 var escapedString = "\"" + asStr.JsonEscape() + "\"";
 
-                Emit.MarkLabel(label);      // TextWriter
-                WriteString(escapedString); // TextWriter
-                Emit.Branch(done);          // TextWriter
+                Emit.MarkLabel(label);      // TextWriter?
+                WriteString(escapedString); // TextWriter?
+                Emit.Branch(done);          // TextWriter?
             }
 
-            Emit.MarkLabel(done);           // TextWriter
-            Emit.Pop();                     // --empty--
+            Emit.MarkLabel(done);           // TextWriter?
+            
+            if (popTextWriter)
+            {
+                Emit.Pop();
+            }
         }
 
-        void WriteDiscontiguousEnumeration(Type enumType, Dictionary<ulong, object> values)
+        void WriteDiscontiguousEnumeration(Type enumType, Dictionary<ulong, object> values, bool popTextWriter)
         {
             throw new NotImplementedException();
         }
 
-        void WriteEnum(Type enumType)
+        void WriteEnum(Type enumType, bool popTextWriter)
         {
             var allValues = Enum.GetValues(enumType);
             var underlying = Enum.GetUnderlyingType(enumType);
@@ -2152,11 +2156,11 @@ namespace Jil.Serialize
 
             if (ValuesAreContiguous(distinctValues))
             {
-                WriteContiguousEnumeration(enumType, distinctValues);
+                WriteContiguousEnumeration(enumType, distinctValues, popTextWriter);
             }
             else
             {
-                WriteDiscontiguousEnumeration(enumType, distinctValues);
+                WriteDiscontiguousEnumeration(enumType, distinctValues, popTextWriter);
             }
         }
 
@@ -2297,10 +2301,9 @@ namespace Jil.Serialize
         {
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
-            Emit.LoadArgument(0);
             Emit.LoadArgument(1);
 
-            WriteEnum(typeof(ForType));
+            WriteEnum(typeof(ForType), popTextWriter: false);
 
             Emit.Return();
 

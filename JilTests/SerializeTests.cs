@@ -1536,5 +1536,55 @@ namespace JilTests
                 Assert.AreEqual("null", str.ToString());
             }
         }
+
+        enum _EnumMembers : long
+        {
+            Foo = 1,
+            Bar = 2,
+            World = 3,
+            Fizz = 4
+        }
+
+        [TestMethod]
+        public void EnumMembers()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = _EnumMembers.Bar,
+                        B = (_EnumMembers?)null
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":\"Bar\",\"B\":null}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<string, _EnumMembers?>
+                    {
+                        {"A",  _EnumMembers.Bar },
+                        {"B", (_EnumMembers?)null }
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":\"Bar\",\"B\":null}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new [] { _EnumMembers.Bar, _EnumMembers.World, _EnumMembers.Fizz, _EnumMembers.Foo, _EnumMembers.Fizz },
+                    str
+                );
+
+                Assert.AreEqual("[\"Bar\",\"World\",\"Fizz\",\"Foo\",\"Fizz\"]", str.ToString());
+            }
+        }
     }
 }
