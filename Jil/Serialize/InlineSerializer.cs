@@ -364,6 +364,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (serializingType.IsEnum)
+            {
+                WriteEnum(serializingType);
+                return;
+            }
+
             using (var loc = Emit.DeclareLocal(serializingType))
             {
                 Emit.StoreLocal(loc);   // TextWriter;
@@ -410,39 +416,47 @@ namespace Jil.Serialize
             }
             else
             {
-                using (var loc = Emit.DeclareLocal(underlyingType))
+                if (underlyingType.IsEnum)
                 {
-                    Emit.StoreLocal(loc);   // TextWriter
+                    WriteEnum(underlyingType);
+                }
+                else
+                {
 
-                    if (RecursiveTypes.ContainsKey(underlyingType))
+                    using (var loc = Emit.DeclareLocal(underlyingType))
                     {
-                        var act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
-                        var invoke = act.GetMethod("Invoke");
+                        Emit.StoreLocal(loc);   // TextWriter
 
-                        Emit.Pop();                                     // --empty--
-                        Emit.LoadLocal(RecursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
-                        Emit.LoadArgument(0);                           // Action<,> TextWriter
-                        Emit.LoadLocal(loc);                            // Action<,> TextWriter value
-                        Emit.LoadArgument(2);                           // Action<,> TextWriter value int
-                        Emit.Call(invoke);                              // --empty--
-                    }
-                    else
-                    {
-                        if (underlyingType.IsListType())
+                        if (RecursiveTypes.ContainsKey(underlyingType))
                         {
-                            WriteList(underlyingType, loc);
+                            var act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
+                            var invoke = act.GetMethod("Invoke");
+
+                            Emit.Pop();                                     // --empty--
+                            Emit.LoadLocal(RecursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
+                            Emit.LoadArgument(0);                           // Action<,> TextWriter
+                            Emit.LoadLocal(loc);                            // Action<,> TextWriter value
+                            Emit.LoadArgument(2);                           // Action<,> TextWriter value int
+                            Emit.Call(invoke);                              // --empty--
                         }
                         else
                         {
-                            if (underlyingType.IsDictionaryType())
+                            if (underlyingType.IsListType())
                             {
                                 WriteList(underlyingType, loc);
                             }
                             else
                             {
-                                Emit.Pop();
+                                if (underlyingType.IsDictionaryType())
+                                {
+                                    WriteList(underlyingType, loc);
+                                }
+                                else
+                                {
+                                    Emit.Pop();
 
-                                WriteObject(underlyingType, loc);
+                                    WriteObject(underlyingType, loc);
+                                }
                             }
                         }
                     }
@@ -1449,6 +1463,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (elementType.IsEnum)
+            {
+                WriteEnum(elementType);
+                return;
+            }
+
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
@@ -1858,6 +1878,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (elementType.IsEnum)
+            {
+                WriteEnum(elementType);
+                return;
+            }
+
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
@@ -1974,6 +2000,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (elementType.IsEnum)
+            {
+                WriteEnum(elementType);
+                return;
+            }
+
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             if (isRecursive)
             {
@@ -2009,6 +2041,122 @@ namespace Jil.Serialize
                 }
 
                 WriteObject(elementType, loc);
+            }
+        }
+
+        bool ValuesAreContiguous(Dictionary<ulong, object> values)
+        {
+            var min = values.Keys.Min();
+            var max = values.Keys.Max();
+
+            ulong i = 0;
+
+            while ((min + i) != max)
+            {
+                if (!values.ContainsKey(min + i))
+                {
+                    return false;
+                }
+
+                i++;
+            }
+
+            return true;
+        }
+
+        void WriteContiguousEnumeration(Type enumType, Dictionary<ulong, object> values)
+        {
+            // top of stack
+            //   - enum
+            //   - TextWriter
+
+            var done = Emit.DefineLabel();
+
+            var min = values.Keys.Min();
+            var max = values.Keys.Max();
+
+            var labels = Enumerable.Range(0, (int)(max - min + 1)).Select(_ => Emit.DefineLabel()).ToArray();
+
+            Emit.Convert<ulong>();      // TextWriter ulong
+            Emit.LoadConstant(min);     // TextWriter ulong ulong
+            Emit.Subtract();            // TextWriter ulong
+            Emit.Convert<int>();        // TextWriter int
+            Emit.Switch(labels);        // TextWriter
+
+            // default (ie. no match)
+            Emit.LoadConstant("Unexpected value for enumeration " + enumType.FullName);
+            Emit.NewObject(typeof(InvalidOperationException), typeof(string));
+            Emit.Throw();
+
+            for (ulong i = 0; i < (ulong)labels.Length; i++)
+            {
+                var val = values[min + i];
+                var label = labels[(int)i];
+                var asStr = Enum.GetName(enumType, val);
+                var escapedString = "\"" + asStr.JsonEscape() + "\"";
+
+                Emit.MarkLabel(label);      // TextWriter
+                WriteString(escapedString); // TextWriter
+                Emit.Branch(done);          // TextWriter
+            }
+
+            Emit.MarkLabel(done);           // TextWriter
+            Emit.Pop();                     // --empty--
+        }
+
+        void WriteDiscontiguousEnumeration(Type enumType, Dictionary<ulong, object> values)
+        {
+            throw new NotImplementedException();
+        }
+
+        void WriteEnum(Type enumType)
+        {
+            var allValues = Enum.GetValues(enumType);
+            var underlying = Enum.GetUnderlyingType(enumType);
+
+            IEnumerable<Tuple<object, ulong>> asUlongs = null;
+            if(underlying == typeof(byte))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(byte)v));
+            }
+            if(underlying == typeof(sbyte))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(sbyte)v));
+            }
+            if(underlying == typeof(short))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(short)v));
+            }
+            if(underlying == typeof(ushort))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(ushort)v));
+            }
+            if(underlying == typeof(int))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(int)v));
+            }
+            if(underlying == typeof(uint))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(uint)v));
+            }
+            if(underlying == typeof(long))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(long)v));
+            }
+            if(underlying == typeof(ulong))
+            {
+                asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)v));
+            }
+
+            var distinctValues = asUlongs.GroupBy(g => g.Item2).ToDictionary(g => g.Key, g => g.First().Item1);
+
+            if (ValuesAreContiguous(distinctValues))
+            {
+                WriteContiguousEnumeration(enumType, distinctValues);
+            }
+            else
+            {
+                WriteDiscontiguousEnumeration(enumType, distinctValues);
             }
         }
 
@@ -2145,6 +2293,20 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
+        Action<TextWriter, ForType, int> BuildEnumWithNewDelegate()
+        {
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+
+            Emit.LoadArgument(0);
+            Emit.LoadArgument(1);
+
+            WriteEnum(typeof(ForType));
+
+            Emit.Return();
+
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+        }
+
         internal Action<TextWriter, ForType, int> Build()
         {
             var forType = typeof(ForType);
@@ -2167,6 +2329,11 @@ namespace Jil.Serialize
             if (forType.IsListType())
             {
                 return BuildListWithNewDelegate();
+            }
+
+            if (forType.IsEnum)
+            {
+                return BuildEnumWithNewDelegate();
             }
 
             return BuildObjectWithNewDelegate();

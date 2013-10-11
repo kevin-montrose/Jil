@@ -1483,5 +1483,58 @@ namespace JilTests
                 }
             }
         }
+
+        enum _Enums
+        {
+            A = 1,
+            B = 2,
+            C = 3
+        }
+
+        [TestMethod]
+        public void Enums()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums.A, str);
+                Assert.AreEqual("\"A\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums.B, str);
+                Assert.AreEqual("\"B\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums.C, str);
+                Assert.AreEqual("\"C\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums?>(_Enums.A, str);
+                Assert.AreEqual("\"A\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums?>(_Enums.B, str);
+                Assert.AreEqual("\"B\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums?>(_Enums.C, str);
+                Assert.AreEqual("\"C\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums?>(null, str);
+                Assert.AreEqual("null", str.ToString());
+            }
+        }
     }
 }
