@@ -422,7 +422,6 @@ namespace Jil.Serialize
                 }
                 else
                 {
-
                     using (var loc = Emit.DeclareLocal(underlyingType))
                     {
                         Emit.StoreLocal(loc);   // TextWriter
@@ -2108,9 +2107,95 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteDiscontiguousEnumeration(Type enumType, Dictionary<ulong, object> values, bool popTextWriter)
+        void LoadConstantOfType(object val, Type type)
         {
-            throw new NotImplementedException();
+            if (type == typeof(byte))
+            {
+                Emit.LoadConstant((byte)val);
+                return;
+            }
+            if (type == typeof(sbyte))
+            {
+                Emit.LoadConstant((sbyte)val);
+                return;
+            }
+            if (type == typeof(short))
+            {
+                Emit.LoadConstant((short)val);
+                return;
+            }
+            if (type == typeof(ushort))
+            {
+                Emit.LoadConstant((ushort)val);
+                return;
+            }
+            if (type == typeof(int))
+            {
+                Emit.LoadConstant((int)val);
+                return;
+            }
+            if (type == typeof(uint))
+            {
+                Emit.LoadConstant((uint)val);
+                return;
+            }
+            if (type == typeof(long))
+            {
+                Emit.LoadConstant((long)val);
+                return;
+            }
+            if (type == typeof(ulong))
+            {
+                Emit.LoadConstant((ulong)val);
+                return;
+            }
+
+            throw new Exception("Unexpected type: " + type);
+        }
+        
+        void WriteDiscontiguousEnumeration(Type enumType, bool popTextWriter)
+        {
+            // top of stack
+            //   - enum
+            //   - TextWriter?
+
+            var underlyingType = Enum.GetUnderlyingType(enumType);
+
+            var done = Emit.DefineLabel();
+
+            Emit.Convert(underlyingType);   // TextWriter? val
+
+            foreach (var val in Enum.GetValues(enumType).Cast<object>())
+            {
+                var name = Enum.GetName(enumType, val);
+
+                var escapeStr = "\"" + name.JsonEscape() + "\"";
+
+                var next = Emit.DefineLabel();
+
+                Emit.Duplicate();                       // TextWriter? val val
+                LoadConstantOfType(val, underlyingType);// TextWriter? val val val
+                Emit.UnsignedBranchIfNotEqual(next);    // TextWriter? val
+
+                WriteString(escapeStr);                 // TextWriter? val
+                Emit.Branch(done);                      // TextWriter? val
+
+                Emit.MarkLabel(next);                   // TextWriter? val
+            }
+
+            // TextWriter? val
+            Emit.Pop();                                                                     // TextWriter?
+            Emit.LoadConstant("Unexpected value for enumeration " + enumType.FullName);     // string
+            Emit.NewObject(typeof(InvalidOperationException), typeof(string));              // InvalidOperationException
+            Emit.Throw();                                                                   // --empty--
+
+            Emit.MarkLabel(done);   // TextWriter? val
+            Emit.Pop();             // TextWriter?
+
+            if (popTextWriter)
+            {
+                Emit.Pop();         // --empty--
+            }
         }
 
         void WriteEnum(Type enumType, bool popTextWriter)
@@ -2160,7 +2245,7 @@ namespace Jil.Serialize
             }
             else
             {
-                WriteDiscontiguousEnumeration(enumType, distinctValues, popTextWriter);
+                WriteDiscontiguousEnumeration(enumType, popTextWriter);
             }
         }
 

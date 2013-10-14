@@ -1491,6 +1491,14 @@ namespace JilTests
             C = 3
         }
 
+        enum _Enums2 : sbyte
+        {
+            A = -1,
+            B = 22,
+            C = -104,
+            D = 66
+        }
+
         [TestMethod]
         public void Enums()
         {
@@ -1533,6 +1541,48 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums?>(null, str);
+                Assert.AreEqual("null", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums2.A, str);
+                Assert.AreEqual("\"A\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums2.B, str);
+                Assert.AreEqual("\"B\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(_Enums2.C, str);
+                Assert.AreEqual("\"C\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums2?>(_Enums2.A, str);
+                Assert.AreEqual("\"A\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums2?>(_Enums2.B, str);
+                Assert.AreEqual("\"B\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums2?>(_Enums2.C, str);
+                Assert.AreEqual("\"C\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<_Enums2?>(null, str);
                 Assert.AreEqual("null", str.ToString());
             }
         }
