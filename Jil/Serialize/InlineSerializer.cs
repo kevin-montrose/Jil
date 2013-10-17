@@ -1525,19 +1525,22 @@ namespace Jil.Serialize
             var keyType = dictI.GetGenericArguments()[0];
             var elementType = dictI.GetGenericArguments()[1];
 
-            if (keyType != typeof(string))
+            var keyIsString = keyType == typeof(string);
+            var keyIsEnum = keyType.IsEnum;
+
+            if (!(keyIsString || keyIsEnum))
             {
-                throw new InvalidOperationException("JSON dictionaries must have strings as keys, found: " + keyType);
+                throw new InvalidOperationException("JSON dictionaries must have string or enums as keys, found: " + keyType);
             }
 
-            var kvType = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+            var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
             var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
-            var iDictionary = typeof(IDictionary<,>).MakeGenericType(typeof(string), elementType);
+            var iDictionary = typeof(IDictionary<,>).MakeGenericType(keyType, elementType);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -1623,7 +1626,7 @@ namespace Jil.Serialize
 
                 onTheStack++;
 
-                WriteKeyValueIfNotNull(onTheStack, elementType, isFirst);   // --empty--
+                WriteKeyValueIfNotNull(onTheStack, keyType, elementType, isFirst);   // --empty--
 
                 Emit.Branch(loop);                      // --empty--
             }
@@ -1776,16 +1779,18 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteKeyValueIfNotNull(int ontheStack, Type elementType, Sigil.Local isFirst)
+        void WriteKeyValueIfNotNull(int ontheStack, Type keyType, Type elementType, Sigil.Local isFirst)
         {
             // top of the stack is a 
-            //   - KeyValue<string, elementType>
+            //   - KeyValue<keyType, elementType>
             //   - TextWriter?
             //   - Action<,>?
 
-            var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(typeof(string), elementType);
+            var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
             var key = keyValuePair.GetProperty("Key");
             var value = keyValuePair.GetProperty("Value");
+
+            var keyIsString = keyType == typeof(string);
 
             var done = Emit.DefineLabel();
             var doWrite = Emit.DefineLabel();
@@ -1837,27 +1842,46 @@ namespace Jil.Serialize
                 LineBreakAndIndent();
             }
 
-            WriteString("\"");                      // kvp
-
-            Emit.Duplicate();       // kvp kvp
-            LoadProperty(key);      // kvp string
-
-            using (var str = Emit.DeclareLocal<string>())
+            if (keyIsString)
             {
-                Emit.StoreLocal(str);   // kvp
-                Emit.LoadArgument(0);   // kvp TextWriter
-                Emit.LoadLocal(str);    // kvp TextWriter string
+                WriteString("\"");                      // kvp
 
-                Emit.Call(GetWriteEncodedStringMethod());   // kvp
-            }
+                Emit.Duplicate();       // kvp kvp
+                LoadProperty(key);      // kvp string
 
-            if (PrettyPrint)
-            {
-                WriteString("\": ");
+                using (var str = Emit.DeclareLocal<string>())
+                {
+                    Emit.StoreLocal(str);   // kvp
+                    Emit.LoadArgument(0);   // kvp TextWriter
+                    Emit.LoadLocal(str);    // kvp TextWriter string
+
+                    Emit.Call(GetWriteEncodedStringMethod());   // kvp
+                }
+
+                if (PrettyPrint)
+                {
+                    WriteString("\": ");
+                }
+                else
+                {
+                    WriteString("\":");         // kvp
+                }
             }
             else
             {
-                WriteString("\":");         // kvp
+                Emit.Duplicate();       // kvp kvp
+                LoadProperty(key);      // kvp enum
+
+                WriteEnum(keyType, popTextWriter: false);
+
+                if (PrettyPrint)
+                {
+                    WriteString(": ");
+                }
+                else
+                {
+                    WriteString(":");         // kvp
+                }
             }
 
             LoadProperty(value);        // elementType

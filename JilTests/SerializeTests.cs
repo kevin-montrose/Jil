@@ -1676,11 +1676,47 @@ namespace JilTests
                         { _EnumDictionaryKeys.D, "buzz" },
                     },
                     str,
-                    Options.ISO8601PrettyPrint
+                    Options.PrettyPrint
                 );
 
                 var res = str.ToString();
                 Assert.AreEqual("{\n \"A\": \"hello\",\n \"B\": \"world\",\n \"C\": \"fizz\",\n \"D\": \"buzz\"\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<_EnumDictionaryKeys, string>
+                    {
+                        { _EnumDictionaryKeys.A, "hello" },
+                        { _EnumDictionaryKeys.B, null },
+                        { _EnumDictionaryKeys.C, "fizz" },
+                        { _EnumDictionaryKeys.D, null },
+                    },
+                    str,
+                    Options.ExcludeNulls
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"hello\",\"C\":\"fizz\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<_EnumDictionaryKeys, string>
+                    {
+                        { _EnumDictionaryKeys.A, null },
+                        { _EnumDictionaryKeys.B, "world" },
+                        { _EnumDictionaryKeys.C, null },
+                        { _EnumDictionaryKeys.D, "buzz" },
+                    },
+                    str,
+                    Options.PrettyPrintExcludeNulls
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"B\": \"world\",\n \"D\": \"buzz\"\n}", res);
             }
         }
     }
