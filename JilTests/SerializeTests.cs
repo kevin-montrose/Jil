@@ -1636,5 +1636,52 @@ namespace JilTests
                 Assert.AreEqual("[\"Bar\",\"World\",\"Fizz\",\"Foo\",\"Fizz\"]", str.ToString());
             }
         }
+
+        enum _EnumDictionaryKeys
+        {
+            A = 3,
+            B = 4,
+            C = 11,
+            D = 28
+        }
+
+        [TestMethod]
+        public void EnumDictionaryKeys()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<_EnumDictionaryKeys, string>
+                    {
+                        { _EnumDictionaryKeys.A, "hello" },
+                        { _EnumDictionaryKeys.B, "world" },
+                        { _EnumDictionaryKeys.C, "fizz" },
+                        { _EnumDictionaryKeys.D, "buzz" },
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"hello\",\"B\":\"world\",\"C\":\"fizz\",\"D\":\"buzz\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new Dictionary<_EnumDictionaryKeys, string>
+                    {
+                        { _EnumDictionaryKeys.A, "hello" },
+                        { _EnumDictionaryKeys.B, "world" },
+                        { _EnumDictionaryKeys.C, "fizz" },
+                        { _EnumDictionaryKeys.D, "buzz" },
+                    },
+                    str,
+                    Options.ISO8601PrettyPrint
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"hello\",\n \"B\": \"world\",\n \"C\": \"fizz\",\n \"D\": \"buzz\"\n}", res);
+            }
+        }
     }
 }
