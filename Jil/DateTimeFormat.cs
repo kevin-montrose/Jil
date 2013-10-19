@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Jil
 {
+    /// <summary>
+    /// Specifies the format of DateTime's produced or expected by Jil.
+    /// </summary>
     public enum DateTimeFormat : byte
     {
         /// <summary>
@@ -17,7 +20,7 @@ namespace Jil
         /// DateTimes will be formatted as ##...##, where ##...## is the number
         /// of milliseconds since the unix epoch (January 1st, 1970 UTC).
         /// 
-        /// This is format can be passed directly to javascripts Date constructor.
+        /// This is format can be passed directly to JavaZcript's Date constructor.
         /// </summary>
         MillisecondsSinceUnixEpoch = 1,
         /// <summary>

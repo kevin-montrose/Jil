@@ -8,8 +8,17 @@ using System.Threading.Tasks;
 
 namespace Jil
 {
+    /// <summary>
+    /// Fast JSON serializer.
+    /// </summary>
     public sealed class JSON
     {
+        /// <summary>
+        /// Serializes the given data to the provider TextWriter.
+        /// 
+        /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+        /// the produced JSON.  If omitted, Options.Default is used.
+        /// </summary>
         public static void Serialize<T>(T data, TextWriter output, Options options = null)
         {
             options = options ?? Options.Default;

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Jil
 {
+    /// <summary>
+    /// Configuration options for Jil serialization, passed to the JSON.Serialize method.
+    /// </summary>
     public sealed class Options
     {
         public static readonly Options Default = new Options();
@@ -27,9 +30,9 @@ namespace Jil
         public static readonly Options SecondsSinceUnixEpochPrettyPrint = new Options(pretty: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNulls = new Options(pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
 
-        internal bool? ShouldPrettyPrint { get; set; }
-        internal bool? ShouldExcludeNulls { get; set; }
-        internal DateTimeFormat? UseDateTimeFormat { get; set; }
+        internal bool? ShouldPrettyPrint { get; private set; }
+        internal bool? ShouldExcludeNulls { get; private set; }
+        internal DateTimeFormat? UseDateTimeFormat { get; private set; }
 
         private Options(bool pretty = false, bool excludeNulls = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
         {
