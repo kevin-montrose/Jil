@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F4EB088A-3962-4444-8935-7D5B1C197019}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Benchmark</RootNamespace>
+    <AssemblyName>Benchmark</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="SimpleSpeedTester">
+      <HintPath>..\packages\SimpleSpeedTester.1.0.4252.40228\lib\SimpleSpeedTester.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\AccessToken.cs" />
+    <Compile Include="Models\AccountMerge.cs" />
+    <Compile Include="Models\Answer.cs" />
+    <Compile Include="Models\Badge.cs" />
+    <Compile Include="Models\Comment.cs" />
+    <Compile Include="Models\Error.cs" />
+    <Compile Include="Models\Event.cs" />
+    <Compile Include="Models\FlagOption.cs" />
+    <Compile Include="Models\InboxItem.cs" />
+    <Compile Include="Models\Info.cs" />
+    <Compile Include="Models\NetworkUser.cs" />
+    <Compile Include="Models\Notification.cs" />
+    <Compile Include="Models\Post.cs" />
+    <Compile Include="Models\Privilege.cs" />
+    <Compile Include="Models\Question.cs" />
+    <Compile Include="Models\QuestionTimeline.cs" />
+    <Compile Include="Models\Reputation.cs" />
+    <Compile Include="Models\ReputationHistory.cs" />
+    <Compile Include="Models\Revision.cs" />
+    <Compile Include="Models\SearchExcerpt.cs" />
+    <Compile Include="Models\ShallowUser.cs" />
+    <Compile Include="Models\SuggestedEdit.cs" />
+    <Compile Include="Models\Tag.cs" />
+    <Compile Include="Models\TagScore.cs" />
+    <Compile Include="Models\TagSynonym.cs" />
+    <Compile Include="Models\TagWiki.cs" />
+    <Compile Include="Models\TopTag.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\UserTimeline.cs" />
+    <Compile Include="Models\WritePermission.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
