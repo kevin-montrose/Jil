@@ -351,21 +351,21 @@ namespace Benchmark
                         var sD = getter(serviceStack);
                         var jD = getter(jil);
 
-                        if (nD < sD && nD < jD)
-                        {
-                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms");
-                            return;
-                        }
-
-                        if (sD < nD && sD < jD)
-                        {
-                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms");
-                            return;
-                        }
-
-                        if (jD < nD && jD < sD)
+                        if (jD <= nD && jD <= sD)
                         {
                             Console.WriteLine("Jil @" + jD + "ms");
+                            return;
+                        }
+
+                        if (sD <= nD && sD <= jD)
+                        {
+                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms]");
+                            return;
+                        }
+
+                        if (nD <= sD && nD <= jD)
+                        {
+                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms]");
                             return;
                         }
                     };
@@ -393,7 +393,21 @@ namespace Benchmark
             Console.WriteLine();
             Console.WriteLine();
 
+            TextWriter oldOut = null;
+            if (args.Length == 1)
+            {
+                oldOut = Console.Out;
+                Console.SetOut(new StreamWriter(File.Create(args[0])));
+            }
+
             Report(results);
+
+            if (oldOut != null)
+            {
+                Console.SetOut(oldOut);
+            }
+
+            Console.WriteLine("== Finished ==");
 
             Console.ReadKey();
         }
