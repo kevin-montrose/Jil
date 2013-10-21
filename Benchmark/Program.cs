@@ -353,7 +353,11 @@ namespace Benchmark
 
                         if (jD <= nD && jD <= sD)
                         {
-                            Console.WriteLine("Jil @" + jD + "ms");
+                            var nextBest = Math.Min(nD, sD);
+
+                            var percentFaster = Math.Round((nextBest - jD) / nextBest * 100.0);
+
+                            Console.WriteLine("Jil @" + jD + "ms [" + percentFaster + "% faster than next best]");
                             return;
                         }
 
@@ -404,6 +408,9 @@ namespace Benchmark
 
             if (oldOut != null)
             {
+                Console.Out.Flush();
+                Console.Out.Close();
+                Console.Out.Dispose();
                 Console.SetOut(oldOut);
             }
 
