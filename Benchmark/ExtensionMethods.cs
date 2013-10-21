@@ -245,5 +245,20 @@ namespace Benchmark
 
             return retObj;
         }
+
+        public static double Median(this IEnumerable<double> e)
+        {
+            var inOrder = e.OrderBy(_ => _).ToList();
+
+            if (inOrder.Count % 2 == 1)
+            {
+                return inOrder[inOrder.Count / 2 + 1];
+            }
+
+            var a = inOrder[inOrder.Count / 2];
+            var b = inOrder[inOrder.Count / 2 + 1];
+
+            return (a + b) / 2.0;
+        }
     }
 }

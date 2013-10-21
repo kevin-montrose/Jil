@@ -14,7 +14,8 @@ namespace Benchmark
 {
     class Program
     {
-        static Random Rand = new Random(135581624);
+        // "Nothing up my sleeves" number, first 9 digits of PI
+        static Random Rand = new Random(314159265);
 
         static List<Type> GetModels()
         {
@@ -175,12 +176,12 @@ namespace Benchmark
 
         static List<Result> DoSpeedTestsFor(Type model)
         {
-            var typeName = model.Name;
-
             var ret = new List<Result>();
 
             // single objects
             {
+                var typeName = model.Name;
+
                 var serialize = _DoSpeedTest.MakeGenericMethod(model);
 
                 var newtonsoftSerializer = GetNewtonsoftSerializer(model);
@@ -215,6 +216,8 @@ namespace Benchmark
 
             // lists
             {
+                var typeName = "List<" + model.Name + ">";
+
                 var asList = typeof(List<>).MakeGenericType(model);
 
                 var serialize = _DoSpeedTest.MakeGenericMethod(asList);
@@ -251,6 +254,8 @@ namespace Benchmark
 
             // dictionaries
             {
+                var typeName = "Dictionary<string, " + model.Name + ">";
+
                 var asDict = typeof(Dictionary<,>).MakeGenericType(typeof(string), model);
 
                 var serialize = _DoSpeedTest.MakeGenericMethod(asDict);
@@ -288,6 +293,91 @@ namespace Benchmark
             return ret;
         }
 
+        static void Report(List<Result> results)
+        {
+            // remove outliers (high and low)
+            var woOutliers =
+                results
+                    .GroupBy(g => new { g.TypeName, g.Serializer })
+                    .SelectMany(
+                        g =>
+                        {
+                            var inOrder = g.OrderBy(_ => _.Ellapsed).ToList();
+
+                            var notSkipped = inOrder.Skip(1).Take(inOrder.Count - 2);
+
+                            return notSkipped;
+                        }
+                    ).ToList();
+
+            // min / max / average / median
+            var stats =
+                woOutliers
+                    .GroupBy(g => new { g.TypeName, g.Serializer })
+                    .Select(
+                        g =>
+                        {
+                            var min = g.Select(_ => _.Ellapsed.TotalMilliseconds).Min();
+                            var max = g.Select(_ => _.Ellapsed.TotalMilliseconds).Max();
+                            var avg = g.Select(_ => _.Ellapsed.TotalMilliseconds).Average();
+                            var med = g.Select(_ => _.Ellapsed.TotalMilliseconds).Median();
+
+                            return
+                                new
+                                {
+                                    g.Key.TypeName,
+                                    g.Key.Serializer,
+                                    Min = min,
+                                    Max = max,
+                                    Average = avg,
+                                    Median = med
+                                };
+                        }
+                    ).ToList();
+
+            var allTypes = stats.Select(s => s.TypeName).Distinct().OrderBy(o => o).ToList();
+
+            foreach (var type in allTypes)
+            {
+                var newtonsoft = stats.Single(s => s.TypeName == type && s.Serializer == "Json.NET");
+                var serviceStack = stats.Single(s => s.TypeName == type && s.Serializer == "ServiceStack.Text");
+                var jil = stats.Single(s => s.TypeName == type && s.Serializer == "Jil");
+
+                Action<string, Func<dynamic, double>> print =
+                    (name, getter) =>
+                    {
+                        Console.Write("\t" + name + ": ");
+                        var nD = getter(newtonsoft);
+                        var sD = getter(serviceStack);
+                        var jD = getter(jil);
+
+                        if (nD < sD && nD < jD)
+                        {
+                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms");
+                            return;
+                        }
+
+                        if (sD < nD && sD < jD)
+                        {
+                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms");
+                            return;
+                        }
+
+                        if (jD < nD && jD < sD)
+                        {
+                            Console.WriteLine("Jil @" + jD + "ms");
+                            return;
+                        }
+                    };
+
+                Console.WriteLine(type);
+                print("Min", d => d.Min);
+                print("Max", d => d.Max);
+                print("Avg", d => d.Average);
+                print("Med", d => d.Median);
+            }
+        }
+
         static void Main(string[] args)
         {
             var models = GetModels();
@@ -299,6 +389,11 @@ namespace Benchmark
                 Console.WriteLine("* " + model.Name);
                 results.AddRange(DoSpeedTestsFor(model));
             }
+
+            Console.WriteLine();
+            Console.WriteLine();
+
+            Report(results);
 
             Console.ReadKey();
         }
