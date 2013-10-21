@@ -37,8 +37,8 @@ namespace Benchmark
                 t :
                 t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
-        
-        public static object RandomValue(this Type t, Random rand)
+
+        public static object RandomValue(this Type t, Random rand, int depth = 0)
         {
             if (t.IsPrimitive)
             {
@@ -128,8 +128,8 @@ namespace Benchmark
 
                     while
                         (
-                            char.IsHighSurrogate(asChar) || 
-                            char.IsLowSurrogate(asChar) || 
+                            char.IsHighSurrogate(asChar) ||
+                            char.IsLowSurrogate(asChar) ||
                             char.IsSurrogate(asChar) ||
                             !(char.IsLetterOrDigit(asChar) || char.IsPunctuation(asChar) || char.IsWhiteSpace(asChar))
                         )
@@ -160,7 +160,7 @@ namespace Benchmark
                 var c = new char[len];
                 for (var i = 0; i < c.Length; i++)
                 {
-                    c[i] = (char)typeof(char).RandomValue(rand);
+                    c[i] = (char)typeof(char).RandomValue(rand, depth + 1);
                 }
 
                 return new string(c);
@@ -190,7 +190,7 @@ namespace Benchmark
                 }
 
                 var underlying = Nullable.GetUnderlyingType(t);
-                var val = underlying.RandomValue(rand);
+                var val = underlying.RandomValue(rand, depth + 1);
 
                 var cons = t.GetConstructor(new[] { underlying });
 
@@ -205,9 +205,9 @@ namespace Benchmark
                 return allValues.GetValue(ix);
             }
 
-            if(t.IsList())
+            if (t.IsList())
             {
-                if(rand.Next(2) == 0)
+                if (rand.Next(2) == 0 || depth >= 10)
                 {
                     return null;
                 }
@@ -223,11 +223,16 @@ namespace Benchmark
                 var len = rand.Next(20);
                 for (var i = 0; i < len; i++)
                 {
-                    var elem = valType.RandomValue(rand);
+                    var elem = valType.RandomValue(rand, depth + 1);
                     add.Invoke(ret, new object[] { elem });
                 }
 
                 return ret;
+            }
+
+            if (rand.Next(2) == 0 || depth >= 10)
+            {
+                return null;
             }
 
             var retObj = Activator.CreateInstance(t);
@@ -235,7 +240,7 @@ namespace Benchmark
             {
                 var propType = p.PropertyType;
 
-                p.SetValue(retObj, propType.RandomValue(rand));
+                p.SetValue(retObj, propType.RandomValue(rand, depth + 1));
             }
 
             return retObj;

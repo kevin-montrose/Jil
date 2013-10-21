@@ -18,7 +18,14 @@ namespace Benchmark
 
         static List<Type> GetModels()
         {
-            return new List<Type> { typeof(Benchmark.Models.Answer) };
+            var ret =
+                Assembly
+                    .GetExecutingAssembly()
+                    .GetTypes()
+                    .Where(t => t.Namespace == "Benchmark.Models" && !t.IsEnum)
+                    .ToList();
+
+            return ret;
         }
 
         static object MakeSingleObject(Type t)
@@ -75,13 +82,17 @@ namespace Benchmark
 
             var testGroup = new TestGroup(niceTypeName + " - " + serializerName);
 
-            var serializationTestSummary =
+            Console.Write("\t" + serializerName + "... ");
+
+            var result =
                 testGroup
                     .Plan("Serialization", () => data = serializeFunc(obj), TestRuns)
                     .GetResult();
 
+            Console.WriteLine(result.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
+
             return
-                serializationTestSummary.Outcomes.Select(
+                result.Outcomes.Select(
                     o =>
                         new Result
                         {
@@ -105,6 +116,8 @@ namespace Benchmark
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
+            ret.DynamicInvoke(new object[] { null });
+
             return ret;
         }
 
@@ -120,6 +133,8 @@ namespace Benchmark
 
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
             var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { null });
 
             return ret;
         }
@@ -141,6 +156,8 @@ namespace Benchmark
 
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
             var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { null });
 
             return ret;
         }
@@ -279,8 +296,11 @@ namespace Benchmark
 
             foreach (var model in models)
             {
+                Console.WriteLine("* " + model.Name);
                 results.AddRange(DoSpeedTestsFor(model));
             }
+
+            Console.ReadKey();
         }
     }
 }
