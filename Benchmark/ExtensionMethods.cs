@@ -112,7 +112,33 @@ namespace Benchmark
 
                 if (t == typeof(char))
                 {
-                    return (char)('A' + rand.Next('Z' - 'A' + 1));
+                    // add a bias towards English-y text, it's more realistic
+                    int range;
+                    if (rand.Next(2) == 0)
+                    {
+                        range = 0xFFFF + 1;
+                    }
+                    else
+                    {
+                        range = 'z' + 1;
+                    }
+
+                    var ci = rand.Next(range);
+                    var asChar = (char)ci;
+
+                    while
+                        (
+                            char.IsHighSurrogate(asChar) || 
+                            char.IsLowSurrogate(asChar) || 
+                            char.IsSurrogate(asChar) ||
+                            !(char.IsLetterOrDigit(asChar) || char.IsPunctuation(asChar) || char.IsWhiteSpace(asChar))
+                        )
+                    {
+                        ci = rand.Next(range);
+                        asChar = (char)ci;
+                    }
+
+                    return asChar;
                 }
 
                 if (t == typeof(bool))

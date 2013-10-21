@@ -66,11 +66,6 @@ namespace Benchmark
             return ret;
         }
 
-        static void AssertEquality(object original, object copy)
-        {
-
-        }
-
         static MethodInfo _DoSpeedTest = typeof(Program).GetMethod("DoSpeedTest", BindingFlags.Static | BindingFlags.NonPublic);
         static List<Result> DoSpeedTest<T>(string serializerName, string niceTypeName, Func<T, string> serializeFunc, T obj)
         {
@@ -84,12 +79,6 @@ namespace Benchmark
                 testGroup
                     .Plan("Serialization", () => data = serializeFunc(obj), TestRuns)
                     .GetResult();
-
-            var newtonsoftCopyObj = JsonConvert.DeserializeObject<T>(data);
-            AssertEquality(obj, newtonsoftCopyObj);
-
-            var serviceStackCopyObj = ServiceStack.Text.JsonSerializer.DeserializeFromString<T>(data);
-            AssertEquality(obj, serviceStackCopyObj);
 
             return
                 serializationTestSummary.Outcomes.Select(
