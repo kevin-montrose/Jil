@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 
 namespace JilTests
 {
-    // These tests make *no sense* in debug
-#if !DEBUG
     [TestClass]
     public class SpeedProofTests
     {
@@ -128,6 +126,9 @@ namespace JilTests
             aTimeMS = aTimer.ElapsedMilliseconds;
             bTimeMS = bTimer.ElapsedMilliseconds;
         }
+
+        // These tests make *no sense* in debug
+#if !DEBUG
 
         public class _ReorderMembers
         {
@@ -442,6 +443,6 @@ namespace JilTests
 
             Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
-    }
 #endif
+    }
 }
