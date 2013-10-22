@@ -443,6 +443,63 @@ namespace JilTests
 
             Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
+
+        class _UseFastLists
+        {
+            public List<int> A { get; set; }
+            public int[] B { get; set; }
+            public IList<string> C { get; set; }
+        }
+
+        [TestMethod]
+        public void UseFastLists()
+        {
+            Action<TextWriter, _UseFastLists, int> fast;
+            Action<TextWriter, _UseFastLists, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseFastLists>.UseFastLists = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineSerializerHelper.Build<_UseFastLists>();
+                }
+
+                {
+                    InlineSerializer<_UseCustomISODateFormatting>.UseFastLists = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseFastLists>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseCustomISODateFormatting>.UseFastLists = true;
+            }
+
+            var rand = new Random(2323284);
+
+            var toSerialize = new List<_UseFastLists>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _UseFastLists
+                    {
+                        A = Enumerable.Range(0, 5 + rand.Next(10)).Select(_ => rand.Next()).ToList(),
+                        B = Enumerable.Range(0, 10 + rand.Next(5)).Select(_ => rand.Next()).ToArray(),
+                        C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandString(rand)).ToList().AsReadOnly()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

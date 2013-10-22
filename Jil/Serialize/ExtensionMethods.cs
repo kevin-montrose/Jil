@@ -62,6 +62,14 @@ namespace Jil.Serialize
                 t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
+        public static Type GetCollectionInterface(this Type t)
+        {
+            return
+                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>)) ?
+                t :
+                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+        }
+
         public static bool IsDictionaryType(this Type t)
         {
             return
