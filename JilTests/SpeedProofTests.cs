@@ -467,7 +467,7 @@ namespace JilTests
                 }
 
                 {
-                    InlineSerializer<_UseCustomISODateFormatting>.UseFastLists = false;
+                    InlineSerializer<_UseFastLists>.UseFastLists = false;
 
                     // Build the *actual* serializer method
                     normal = InlineSerializerHelper.Build<_UseFastLists>();
@@ -475,7 +475,7 @@ namespace JilTests
             }
             finally
             {
-                InlineSerializer<_UseCustomISODateFormatting>.UseFastLists = true;
+                InlineSerializer<_UseFastLists>.UseFastLists = true;
             }
 
             var rand = new Random(2323284);
@@ -489,6 +489,63 @@ namespace JilTests
                         A = Enumerable.Range(0, 5 + rand.Next(10)).Select(_ => rand.Next()).ToList(),
                         B = Enumerable.Range(0, 10 + rand.Next(5)).Select(_ => rand.Next()).ToArray(),
                         C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandString(rand)).ToList().AsReadOnly()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
+
+        class _UseFastArrays
+        {
+            public int[] A { get; set; }
+            public double[] B { get; set; }
+            public string[] C { get; set; }
+        }
+
+        [TestMethod]
+        public void UseFastArrays()
+        {
+            Action<TextWriter, _UseFastArrays, int> fast;
+            Action<TextWriter, _UseFastArrays, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseFastArrays>.UseFastArrays = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineSerializerHelper.Build<_UseFastArrays>();
+                }
+
+                {
+                    InlineSerializer<_UseFastArrays>.UseFastArrays = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseFastArrays>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseFastArrays>.UseFastArrays = true;
+            }
+
+            var rand = new Random(2323284);
+
+            var toSerialize = new List<_UseFastArrays>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _UseFastArrays
+                    {
+                        A = Enumerable.Range(0, 5 + rand.Next(10)).Select(_ => rand.Next()).ToArray(),
+                        B = Enumerable.Range(0, 10 + rand.Next(5)).Select(_ => rand.NextDouble()).ToArray(),
+                        C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandString(rand)).ToArray()
                     }
                 );
             }

@@ -18,6 +18,7 @@ namespace Jil.Serialize
         public static bool SkipDateTimeMathMethods = true;
         public static bool UseCustomISODateFormatting = true;
         public static bool UseFastLists = true;
+        public static bool UseFastArrays = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 22;
@@ -1458,8 +1459,136 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);    // --empty--
         }
 
+        void WriteArrayFast(Type listType, Sigil.Local inLocal = null)
+        {
+            Action loadArray =
+                delegate
+                {
+                    if (inLocal != null)
+                    {
+                        Emit.LoadLocal(inLocal);
+                    }
+                    else
+                    {
+                        Emit.LoadArgument(1);
+                    }
+                };
+
+            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var countMtd = listType.GetProperty("Length").GetMethod;
+
+            var iList = typeof(IList<>).MakeGenericType(elementType);
+
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
+            var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
+
+            var notNull = Emit.DefineLabel();
+
+            loadArray();                         // type[]
+
+            var end = Emit.DefineLabel();
+
+            Emit.BranchIfTrue(notNull);         // --empty--
+            if (!ExcludeNulls)
+            {
+                WriteString("null");            // --empty--
+            }
+            Emit.Branch(end);                   // --empty--
+
+            Emit.MarkLabel(notNull);            // --empty--
+            WriteString("[");                   // --empty--
+
+            var done = Emit.DefineLabel();
+
+            using (var e = Emit.DeclareLocal<int>())
+            {
+                loadArray();                                // type[]
+                Emit.CallVirtual(countMtd);                 // int
+                Emit.StoreLocal(e);                         // --empty--
+
+                // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
+                {
+                    Emit.LoadConstant(1);                   // 1
+                    loadArray();                            // 1 type[]
+                    Emit.CallVirtual(countMtd);             // 1 int
+                    Emit.BranchIfGreater(done);             // --empty--
+
+                    if (isRecursive)
+                    {
+                        var loc = RecursiveTypes[elementType];
+
+                        Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                    }
+
+                    if (preloadTextWriter)
+                    {
+                        Emit.LoadArgument(0);               // Action<>? TextWriter
+                    }
+
+                    loadArray();                            // Action<>? TextWriter type[]
+                    Emit.LoadConstant(0);                   // Action<>? TextWriter type[] 0
+                    Emit.LoadElement(elementType);          // Action<>? TextWriter type
+
+                    WriteElement(elementType);               // --empty--
+                }
+
+                using (var i = Emit.DeclareLocal<int>())
+                {
+                    Emit.LoadConstant(1);                   // 1
+                    Emit.StoreLocal(i);                     // --empty--
+
+                    var loop = Emit.DefineLabel();
+
+                    Emit.MarkLabel(loop);                   // --empty--
+
+                    Emit.LoadLocal(e);                      // length
+                    Emit.LoadLocal(i);                      // length i
+                    Emit.BranchIfEqual(done);               // --empty--
+
+                    if (isRecursive)
+                    {
+                        var loc = RecursiveTypes[elementType];
+
+                        Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                    }
+
+                    if (preloadTextWriter)
+                    {
+                        Emit.LoadArgument(0);               // Action<>? TextWriter
+                    }
+
+                    loadArray();                            // Action<>? TextWriter? type[]
+                    Emit.LoadLocal(i);                      // Action<>? TextWriter? type[] i
+                    Emit.LoadElement(elementType);
+
+                    WriteString(",");                       // Action<>? TextWriter? type
+
+                    WriteElement(elementType);              // --empty--
+
+                    Emit.LoadLocal(i);                      // i
+                    Emit.LoadConstant(1);                   // i 1
+                    Emit.Add();                             // i+1
+                    Emit.StoreLocal(i);                     // --empty--
+
+                    Emit.Branch(loop);                      // --empty--
+                }
+            }
+
+            Emit.MarkLabel(done);   // --empty--
+
+            WriteString("]");       // --empty--
+
+            Emit.MarkLabel(end);    // --empty--
+        }
+
         void WriteList(Type listType, Sigil.Local inLocal = null)
         {
+            if (listType.IsArray && UseFastArrays)
+            {
+                WriteArrayFast(listType, inLocal);
+                return;
+            }
+
             if (UseFastLists)
             {
                 WriteListFast(listType, inLocal);
