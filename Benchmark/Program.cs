@@ -163,15 +163,59 @@ namespace Benchmark
             return ret;
         }
 
+        static MethodInfo _ProtobufSerialize = typeof(Program).GetMethod("ProtobufSerialize", BindingFlags.NonPublic | BindingFlags.Static);
+        static string ProtobufSerialize<T>(T obj)
+        {
+            using (var mem = new MemoryStream())
+            {
+                ProtoBuf.Serializer.Serialize<T>(mem, obj);
+
+                return "";
+            }
+        }
+
+        static object GetProtobufSerializer(Type forType)
+        {
+            var mtd = _ProtobufSerialize.MakeGenericMethod(forType);
+
+            var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { null });
+
+            return ret;
+        }
+
         static int[][] Permutations = 
             new int[][] 
             {
-                new [] {0, 1, 2},
-                new [] {0, 2, 1},
-                new [] {1, 0, 2},
-                new [] {1, 2, 0},
-                new [] {2, 0, 1},
-                new [] {2, 1, 0}
+                new [] {0, 1, 2, 3},
+                new [] {0, 1, 3, 2},
+                new [] {0, 2, 1, 3},
+                new [] {0, 2, 3, 1},
+                new [] {0, 3, 1, 2},
+                new [] {0, 3, 2, 1},
+                
+                new [] {1, 0, 2, 3},
+                new [] {1, 0, 3, 2},
+                new [] {1, 2, 0, 3},
+                new [] {1, 2, 3, 0},
+                new [] {1, 3, 0, 2},
+                new [] {1, 3, 2, 0},
+
+                new [] {2, 0, 1, 3},
+                new [] {2, 0, 3, 1},
+                new [] {2, 1, 0, 3},
+                new [] {2, 1, 3, 0},
+                new [] {2, 3, 0, 1},
+                new [] {2, 3, 1, 0},
+
+                new [] {3, 0, 1, 2},
+                new [] {3, 0, 2, 1},
+                new [] {3, 1, 0, 2},
+                new [] {3, 1, 2, 0},
+                new [] {3, 2, 0, 1},
+                new [] {3, 2, 1, 0}
             };
 
         static List<Result> DoSpeedTestsFor(Type model)
@@ -187,6 +231,7 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(model);
                 var serviceStackSerializer = GetServiceStackSerializer(model);
                 var jilSerializer = GetJilSerializer(model);
+                var protoSerializer = GetProtobufSerializer(model);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -204,6 +249,7 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
                             case 2: name = "Jil"; serializer = jilSerializer; break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -225,6 +271,7 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asList);
                 var serviceStackSerializer = GetServiceStackSerializer(asList);
                 var jilSerializer = GetJilSerializer(asList);
+                var protoSerializer = GetProtobufSerializer(asList);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -242,6 +289,7 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
                             case 2: name = "Jil"; serializer = jilSerializer; break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -263,6 +311,7 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asDict);
                 var serviceStackSerializer = GetServiceStackSerializer(asDict);
                 var jilSerializer = GetJilSerializer(asDict);
+                var protoSerializer = GetProtobufSerializer(asDict);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -280,6 +329,7 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
                             case 2: name = "Jil"; serializer = jilSerializer; break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -342,6 +392,7 @@ namespace Benchmark
                 var newtonsoft = stats.Single(s => s.TypeName == type && s.Serializer == "Json.NET");
                 var serviceStack = stats.Single(s => s.TypeName == type && s.Serializer == "ServiceStack.Text");
                 var jil = stats.Single(s => s.TypeName == type && s.Serializer == "Jil");
+                var proto = stats.Single(s => s.TypeName == type && s.Serializer == "Protobuf-net");
 
                 Action<string, Func<dynamic, double>> print =
                     (name, getter) =>
@@ -351,25 +402,39 @@ namespace Benchmark
                         var sD = getter(serviceStack);
                         var jD = getter(jil);
 
+                        var pD = getter(proto);
+
+                        var jilVsProtobuf = jD / pD;
+
+                        string tail;
+                        if (jD < pD)
+                        {
+                            tail = (pD / jD) + "x faster than Protobuf-net]";
+                        }
+                        else
+                        {
+                            tail = (jD / pD) + "x slower than Protobuf-net]";
+                        }
+
                         if (jD <= nD && jD <= sD)
                         {
                             var nextBest = Math.Min(nD, sD);
 
-                            var percentFaster = Math.Round((nextBest - jD) / nextBest * 100.0);
+                            var timesFaster = nextBest / jD;
 
-                            Console.WriteLine("Jil @" + jD + "ms [" + percentFaster + "% faster than next best]");
+                            Console.WriteLine("Jil @" + jD + "ms [" + timesFaster + "x faster than next best; "+tail);
                             return;
                         }
 
                         if (sD <= nD && sD <= jD)
                         {
-                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms]");
+                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms; " + tail);
                             return;
                         }
 
                         if (nD <= sD && nD <= jD)
                         {
-                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms]");
+                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms; " + tail);
                             return;
                         }
                     };

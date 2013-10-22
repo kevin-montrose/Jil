@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Benchmark.Models
 {
+    [ProtoContract]
     class ReputationHistory
     {
         public enum ReputationHistoryType : byte
@@ -45,10 +47,15 @@ namespace Benchmark.Models
             user_deleted = 23
         }
 
+        [ProtoMember(1)]
         public int? user_id { get; set; }
+        [ProtoMember(2)]
         public DateTime? creation_date { get; set; }
+        [ProtoMember(3)]
         public int? post_id { get; set; }
+        [ProtoMember(4)]
         public int? reputation_change { get; set; }
+        [ProtoMember(5)]
         public ReputationHistoryType? reputation_history_type { get; set; }
     }
 }

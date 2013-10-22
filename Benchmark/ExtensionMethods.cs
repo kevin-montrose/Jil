@@ -151,11 +151,6 @@ namespace Benchmark
 
             if (t == typeof(string))
             {
-                if (rand.Next(2) == 0)
-                {
-                    return null;
-                }
-
                 var len = rand.Next(500);
                 var c = new char[len];
                 for (var i = 0; i < c.Length; i++)
@@ -230,14 +225,11 @@ namespace Benchmark
                 return ret;
             }
 
-            if (rand.Next(2) == 0 || depth >= 10)
-            {
-                return null;
-            }
-
             var retObj = Activator.CreateInstance(t);
             foreach (var p in t.GetProperties())
             {
+                if (rand.Next(2) == 0) continue;
+
                 var propType = p.PropertyType;
 
                 p.SetValue(retObj, propType.RandomValue(rand, depth + 1));
