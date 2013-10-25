@@ -2053,6 +2053,7 @@ namespace Jil.Serialize
             var value = keyValuePair.GetProperty("Value");
 
             var keyIsString = keyType == typeof(string);
+            var keyIsNumber = keyType.IsIntegerNumberType();
 
             var done = Emit.DefineLabel();
             var doWrite = Emit.DefineLabel();
@@ -2131,18 +2132,46 @@ namespace Jil.Serialize
             }
             else
             {
-                Emit.Duplicate();       // kvp kvp
-                LoadProperty(key);      // kvp enum
-
-                WriteEnum(keyType, popTextWriter: false);
-
-                if (PrettyPrint)
+                if (keyIsNumber)
                 {
-                    WriteString(": ");
+                    WriteString("\"");          // kvp
+
+                    Emit.Duplicate();           // kvp kvp
+                    LoadProperty(key);          // kvp number
+                    using (var loc = Emit.DeclareLocal(keyType))
+                    {
+                        Emit.StoreLocal(loc);   // kvp
+                        Emit.LoadArgument(0);   // kvp TextWriter
+                        Emit.LoadLocal(loc);    // kvp TextWriter number
+
+                    }
+
+                    WritePrimitive(keyType, quotesNeedHandling: false); // kvp
+
+                    if (PrettyPrint)
+                    {
+                        WriteString("\": ");        // kvp
+                    }
+                    else
+                    {
+                        WriteString("\":");         // kvp
+                    }
                 }
                 else
                 {
-                    WriteString(":");         // kvp
+                    Emit.Duplicate();       // kvp kvp
+                    LoadProperty(key);      // kvp enum
+
+                    WriteEnum(keyType, popTextWriter: false);
+
+                    if (PrettyPrint)
+                    {
+                        WriteString(": ");
+                    }
+                    else
+                    {
+                        WriteString(":");         // kvp
+                    }
                 }
             }
 

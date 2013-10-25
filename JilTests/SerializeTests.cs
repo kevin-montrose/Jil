@@ -4664,5 +4664,177 @@ namespace JilTests
                 }
             }
         }
+
+        [TestMethod]
+        public void IntegerDictionaryKeysWithoutNulls()
+        {
+            // byte
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<byte, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { byte.MinValue, "foo" },
+                            { byte.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"255\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // sbyte
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<sbyte, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { sbyte.MinValue, "foo" },
+                            { sbyte.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-128\":\"foo\",\"127\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // short
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<short, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { short.MinValue, "foo" },
+                            { short.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-32768\":\"foo\",\"32767\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // ushort
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<ushort, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { ushort.MinValue, "foo" },
+                            { ushort.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"65535\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // int
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<int, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { int.MinValue, "foo" },
+                            { int.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-2147483648\":\"foo\",\"2147483647\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // uint
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<uint, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { uint.MinValue, "foo" },
+                            { uint.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"4294967295\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // long
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<long, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { long.MinValue, "foo" },
+                            { long.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-9223372036854775808\":\"foo\",\"9223372036854775807\":\"bar\"}", str.ToString());
+                }
+            }
+
+            // ulong
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new Dictionary<ulong, string>
+                        {
+                            { 1, "hello" },
+                            { 2, "world" },
+                            { 3, null },
+                            { ulong.MinValue, "foo" },
+                            { ulong.MaxValue, "bar" }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"18446744073709551615\":\"bar\"}", str.ToString());
+                }
+            }
+        }
     }
 }
