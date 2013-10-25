@@ -47,7 +47,15 @@ namespace Benchmark
         {
             var asList = typeof(List<>).MakeGenericType(t);
 
-            return asList.RandomValue(Rand);
+            var ret = asList.RandomValue(Rand);
+
+            // top level can't be null
+            if (ret == null)
+            {
+                return MakeListObject(t);
+            }
+
+            return ret;
         }
 
         static object MakeDictionaryObject(Type t)
@@ -343,8 +351,12 @@ namespace Benchmark
             return ret;
         }
 
-        static void Report(List<Result> results)
+        static void Report(List<Result> results, out List<string> jilMinFailures, out List<string> jilMedFailures, out List<string> jilMinBeatPB, out int distinctTypeCount)
         {
+            jilMinFailures = new List<string>();
+            jilMedFailures = new List<string>();
+            jilMinBeatPB = new List<string>();
+
             // remove outliers (high and low)
             var woOutliers =
                 results
@@ -386,6 +398,7 @@ namespace Benchmark
                     ).ToList();
 
             var allTypes = stats.Select(s => s.TypeName).Distinct().OrderBy(o => o).ToList();
+            distinctTypeCount = 0;
 
             foreach (var type in allTypes)
             {
@@ -393,6 +406,31 @@ namespace Benchmark
                 var serviceStack = stats.Single(s => s.TypeName == type && s.Serializer == "ServiceStack.Text");
                 var jil = stats.Single(s => s.TypeName == type && s.Serializer == "Jil");
                 var proto = stats.Single(s => s.TypeName == type && s.Serializer == "Protobuf-net");
+
+                if (jil.Min == 0 || jil.Median == 0 || jil.Average == 0 || jil.Max == 0)
+                {
+                    Console.WriteLine(type);
+                    Console.WriteLine("\t***INCONCLUSIVE, Jil elapsed time was 0ms***");
+                    continue;
+                }
+
+                // don't count types if they were inclusive
+                distinctTypeCount++;
+
+                if (!(jil.Min <= newtonsoft.Min && jil.Min <= serviceStack.Min))
+                {
+                    jilMinFailures.Add(type);
+                }
+
+                if (!(jil.Median <= newtonsoft.Median && jil.Median <= serviceStack.Median))
+                {
+                    jilMedFailures.Add(type);
+                }
+
+                if (jil.Min <= proto.Min)
+                {
+                    jilMinBeatPB.Add(type);
+                }
 
                 Action<string, Func<dynamic, double>> print =
                     (name, getter) =>
@@ -469,7 +507,22 @@ namespace Benchmark
                 Console.SetOut(new StreamWriter(File.Create(args[0])));
             }
 
-            Report(results);
+            List<string> minFailures, medianFailures, beatProtobuf;
+            int typeCount;
+            Report(results, out minFailures, out medianFailures, out beatProtobuf, out typeCount);
+
+            Console.WriteLine();
+
+            Console.WriteLine("Jil wasn't the absolute fastest {0} times (out of {1} total types considered)", minFailures.Count, typeCount);
+            minFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
+            Console.WriteLine();
+
+            Console.WriteLine("Jil wasn't the median fastest {0} times (out of {1} total types considered)", medianFailures.Count, typeCount);
+            medianFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
+            Console.WriteLine();
+
+            Console.WriteLine("Jil beat protobuf-net (somehow) {0} times (out of {1} total types considered)", beatProtobuf.Count, typeCount);
+            beatProtobuf.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
 
             if (oldOut != null)
             {

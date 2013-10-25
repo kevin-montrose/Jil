@@ -8,6 +8,14 @@ namespace Benchmark
 {
     static class ExtensionMethods
     {
+        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> a)
+        {
+            foreach (var e in enumerable)
+            {
+                a(e);
+            }
+        }
+
         public static IEnumerable<T> Random<T>(this IEnumerable<T> enumerable, Random rand)
         {
             return
