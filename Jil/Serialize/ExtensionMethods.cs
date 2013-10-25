@@ -234,5 +234,18 @@ namespace Jil.Serialize
 
             return Activator.CreateInstance(t);
         }
+
+        public static bool IsIntegerNumberType(this Type t)
+        {
+            return
+                t == typeof(byte) ||
+                t == typeof(sbyte) ||
+                t == typeof(short) ||
+                t == typeof(ushort) ||
+                t == typeof(int) ||
+                t == typeof(uint) ||
+                t == typeof(long) ||
+                t == typeof(ulong);
+        }
     }
 }

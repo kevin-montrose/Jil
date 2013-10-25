@@ -1787,10 +1787,11 @@ namespace Jil.Serialize
 
             var keyIsString = keyType == typeof(string);
             var keyIsEnum = keyType.IsEnum;
+            var keysAreIntegers = keyType.IsIntegerNumberType();
 
-            if (!(keyIsString || keyIsEnum))
+            if (!(keyIsString || keyIsEnum || keysAreIntegers))
             {
-                throw new InvalidOperationException("JSON dictionaries must have string or enums as keys, found: " + keyType);
+                throw new InvalidOperationException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
             }
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
@@ -1909,10 +1910,11 @@ namespace Jil.Serialize
 
             var keysAreStrings = keyType == typeof(string);
             var keysAreEnums = keyType.IsEnum;
+            var keysAreIntegers = keyType.IsIntegerNumberType();
 
-            if (!(keysAreStrings || keysAreEnums))
+            if (!(keysAreStrings || keysAreEnums || keysAreIntegers))
             {
-                throw new InvalidOperationException("JSON dictionaries must have strings or enums as keys, found: " + keyType);
+                throw new InvalidOperationException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
             }
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
@@ -2241,6 +2243,7 @@ namespace Jil.Serialize
             // top of the stack is a KeyValue<keyType, elementType>
 
             var keyIsString = keyType == typeof(string);
+            var keyIsNumber = keyType.IsIntegerNumberType();
 
             var keyValuePair = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
             var key = keyValuePair.GetProperty("Key");
@@ -2278,18 +2281,46 @@ namespace Jil.Serialize
             }
             else
             {
-                Emit.Duplicate();           // kvp kvp
-                LoadProperty(key);          // kvp enum
-
-                WriteEnum(keyType, popTextWriter: false);   // kvp
-
-                if (PrettyPrint)
+                if (keyIsNumber)
                 {
-                    WriteString(": ");        // kvp
+                    WriteString("\"");
+
+                    Emit.Duplicate();           // kvp kvp
+                    LoadProperty(key);          // kvp number
+                    using (var loc = Emit.DeclareLocal(keyType))
+                    {
+                        Emit.StoreLocal(loc);   // kvp
+                        Emit.LoadArgument(0);   // kvp TextWriter
+                        Emit.LoadLocal(loc);    // kvp TextWriter number
+
+                    }
+
+                    WritePrimitive(keyType, quotesNeedHandling: false); // kvp
+
+                    if (PrettyPrint)
+                    {
+                        WriteString("\": ");        // kvp
+                    }
+                    else
+                    {
+                        WriteString("\":");         // kvp
+                    }
                 }
                 else
                 {
-                    WriteString(":");         // kvp
+                    Emit.Duplicate();           // kvp kvp
+                    LoadProperty(key);          // kvp enum
+
+                    WriteEnum(keyType, popTextWriter: false);   // kvp
+
+                    if (PrettyPrint)
+                    {
+                        WriteString(": ");        // kvp
+                    }
+                    else
+                    {
+                        WriteString(":");         // kvp
+                    }
                 }
             }
 
