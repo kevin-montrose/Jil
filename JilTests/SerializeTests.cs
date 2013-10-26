@@ -4840,47 +4840,144 @@ namespace JilTests
         [TestMethod]
         public void Guids()
         {
-            using (var str = new StringWriter())
+            // defaults
             {
-                var guid = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD");
+                using (var str = new StringWriter())
+                {
+                    var guid = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD");
 
-                JSON.Serialize(guid, str);
+                    JSON.Serialize(guid, str);
 
-                Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var guidLists = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") };
+
+                    JSON.Serialize(guidLists, str);
+
+                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var guidDict = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } };
+
+                    JSON.Serialize(guidDict, str);
+
+                    Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new
+                        {
+                            A = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"),
+                            B = (Guid?)null,
+                            C = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") },
+                            D = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } }
+                        },
+                        str
+                    );
+
+                    Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"B\":null}", str.ToString());
+                }
             }
 
-            using (var str = new StringWriter())
+            // exclude nulls
             {
-                var guidLists = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") };
+                using (var str = new StringWriter())
+                {
+                    var guid = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD");
 
-                JSON.Serialize(guidLists, str);
+                    JSON.Serialize(guid, str, Options.ExcludeNulls);
 
-                Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var guidLists = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") };
+
+                    JSON.Serialize(guidLists, str, Options.ExcludeNulls);
+
+                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var guidDict = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } };
+
+                    JSON.Serialize(guidDict, str, Options.ExcludeNulls);
+
+                    Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new
+                        {
+                            A = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"),
+                            B = (Guid?)null,
+                            C = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") },
+                            D = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } }
+                        },
+                        str,
+                        Options.ExcludeNulls
+                    );
+
+                    Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"}", str.ToString());
+                }
             }
 
-            using (var str = new StringWriter())
+            // pretty print
             {
-                var guidDict = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } };
+                using (var str = new StringWriter())
+                {
+                    var guid = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD");
 
-                JSON.Serialize(guidDict, str);
+                    JSON.Serialize(guid, str, Options.PrettyPrint);
 
-                Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
-            }
+                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                }
 
-            using (var str = new StringWriter())
-            {
-                JSON.Serialize(
-                    new
-                    {
-                        A = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"),
-                        B = (Guid?)null,
-                        C = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") },
-                        D = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } }
-                    }, 
-                    str
-                );
+                using (var str = new StringWriter())
+                {
+                    var guidLists = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") };
 
-                Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"B\":null}", str.ToString());
+                    JSON.Serialize(guidLists, str, Options.PrettyPrint);
+
+                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var guidDict = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } };
+
+                    JSON.Serialize(guidDict, str, Options.PrettyPrint);
+
+                    Assert.AreEqual("{\n \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n}", str.ToString());
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(
+                        new
+                        {
+                            A = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"),
+                            B = (Guid?)null,
+                            C = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") },
+                            D = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } }
+                        },
+                        str,
+                        Options.PrettyPrint
+                    );
+
+                    Assert.AreEqual("{\n \"C\": [\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\n \"D\": {\n  \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n  \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n },\n \"A\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"B\": null\n}", str.ToString());
+                }
             }
         }
     }

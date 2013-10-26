@@ -1474,7 +1474,14 @@ namespace Jil.Serialize
                     Emit.LoadLocal(i);                      // Action<>? TextWriter? IList<> i
                     Emit.CallVirtual(accessorMtd);          // Action<>? TextWriter? type
 
-                    WriteString(",");                       // Action<>? TextWriter? type
+                    if (PrettyPrint)
+                    {
+                        WriteString(", ");                      // Action<>? TextWriter? type
+                    }
+                    else
+                    {
+                        WriteString(",");                       // Action<>? TextWriter? type
+                    }
 
                     WriteElement(elementType);              // --empty--
 
@@ -1596,7 +1603,14 @@ namespace Jil.Serialize
                     Emit.LoadLocal(i);                      // Action<>? TextWriter? type[] i
                     Emit.LoadElement(elementType);
 
-                    WriteString(",");                       // Action<>? TextWriter? type
+                    if (PrettyPrint)
+                    {
+                        WriteString(", ");                   // Action<>? TextWriter? type
+                    }
+                    else
+                    {
+                        WriteString(",");                   // Action<>? TextWriter? type
+                    }
 
                     WriteElement(elementType);              // --empty--
 
@@ -1729,7 +1743,14 @@ namespace Jil.Serialize
                 Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
                 LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
 
-                WriteString(",");
+                if (PrettyPrint)
+                {
+                    WriteString(", ");
+                }
+                else
+                {
+                    WriteString(",");
+                }
 
                 WriteElement(elementType);   // --empty--
 
