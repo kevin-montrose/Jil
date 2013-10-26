@@ -19,6 +19,7 @@ namespace Jil.Serialize
         public static bool UseCustomISODateFormatting = true;
         public static bool UseFastLists = true;
         public static bool UseFastArrays = true;
+        public static bool UseFastGuids = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 22;
@@ -837,11 +838,34 @@ namespace Jil.Serialize
             Emit.CallVirtual(builtInMtd);       // --empty--
         }
 
+        void WriteGuidFast(bool quotesNeedHandling)
+        {
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");          // TextWriter Guid
+            }
+
+            Emit.LoadLocal(CharBuffer);     // TextWriter Guid char[]
+
+            Emit.Call(Methods.WriteGuid);   // --empty--
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");          // --empty--
+            }
+        }
+
         void WriteGuid(bool quotesNeedHandling)
         {
             // top of stack is:
             //  - Guid
             //  - TextWriter
+
+            if (UseFastGuids)
+            {
+                WriteGuidFast(quotesNeedHandling);
+                return;
+            }
 
             if (quotesNeedHandling)
             {
