@@ -35,11 +35,11 @@ The following types (and any user defined types composed of them) are supported:
   - Booleans
   - Integer numbers (int, long, byte, etc.)
   - Floating point numbers (float, double, and decimal)
-  - DateTime
+  - DateTimes
     * See Configuration for further details
   - Nullable types
   - Enumerations
-  - Guid
+  - Guids
     * Only the ["D" format](http://msdn.microsoft.com/en-us/library/97af8hh4.aspx)
   - IList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
