@@ -110,7 +110,8 @@ namespace Jil.Serialize
                 t == typeof(long) ||
                 t == typeof(ulong) ||
                 t == typeof(bool) ||
-                t == typeof(DateTime);
+                t == typeof(DateTime) ||
+                t == typeof(Guid);
         }
 
         public static bool IsStringyType(this MemberInfo member)

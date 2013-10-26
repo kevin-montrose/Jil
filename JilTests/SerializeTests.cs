@@ -4836,5 +4836,52 @@ namespace JilTests
                 }
             }
         }
+
+        [TestMethod]
+        public void Guids()
+        {
+            using (var str = new StringWriter())
+            {
+                var guid = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD");
+
+                JSON.Serialize(guid, str);
+
+                Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                var guidLists = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") };
+
+                JSON.Serialize(guidLists, str);
+
+                Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                var guidDict = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } };
+
+                JSON.Serialize(guidDict, str);
+
+                Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"),
+                        B = (Guid?)null,
+                        C = new List<Guid> { new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCC"), new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") },
+                        D = new Dictionary<string, Guid> { { "hello", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCD") }, { "world", new Guid("DE01D5B0-069B-47EE-BFF2-8A1C10A32FCB") } }
+                    }, 
+                    str
+                );
+
+                Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"B\":null}", str.ToString());
+            }
+        }
     }
 }

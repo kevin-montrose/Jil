@@ -260,8 +260,8 @@ namespace Jil.Serialize
 
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
-            // It's a list, go and build that code
-            if (serializingType.IsListType())
+            // It's a list or dictionary, go and build that code
+            if (serializingType.IsListType() || serializingType.IsDictionaryType())
             {
                 if (inLocal != null)
                 {
@@ -721,6 +721,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (primitiveType == typeof(Guid))
+            {
+                WriteGuid(quotesNeedHandling);
+                return;
+            }
+
             if(primitiveType == typeof(bool))
             {
                 var trueLabel = Emit.DefineLabel();
@@ -829,6 +835,35 @@ namespace Jil.Serialize
             }
 
             Emit.CallVirtual(builtInMtd);       // --empty--
+        }
+
+        void WriteGuid(bool quotesNeedHandling)
+        {
+            // top of stack is:
+            //  - Guid
+            //  - TextWriter
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");      // TextWriter Guid
+            }
+
+            using (var loc = Emit.DeclareLocal<Guid>())
+            {
+                Emit.StoreLocal(loc);       // TextWriter
+                Emit.LoadLocalAddress(loc); // TextWriter Guid*
+            }
+
+            var toString = typeof(Guid).GetMethod("ToString", Type.EmptyTypes);
+
+            // non-virtual, since we're calling the correct method directly
+            Emit.Call(toString);                // TextWriter string
+            Emit.Call(TextWriter_WriteString);  // --empty--
+
+            if (quotesNeedHandling)
+            {
+                WriteString("\"");
+            }
         }
 
         void WriteEncodedChar(bool quotesNeedHandling)

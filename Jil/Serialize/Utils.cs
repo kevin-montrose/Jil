@@ -147,7 +147,7 @@ namespace Jil.Serialize
 
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
-            var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null);
+            var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
 
             var module = t.Module;
 
