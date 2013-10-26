@@ -23,6 +23,8 @@ The first time Jil is used to serialize a given configuration and type pair, it 
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" serialization.
 
+Note, at this time Jil **does not** include a JSON _deserializer_.
+
 ## Supported Types
 
 Jil will only serialize types that can be reasonably represented as [JSON](http://json.org).
@@ -37,6 +39,8 @@ The following types (and any user defined types composed of them) are supported:
     * See Configuration for further details
   - Nullable types
   - Enumerations
+  - Guid
+    * Only the ["D" format](http://msdn.microsoft.com/en-us/library/97af8hh4.aspx)
   - IList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
@@ -45,11 +49,11 @@ declaration order).
 
 ## Configuration
 
-Jil's `JSON.Serialize` method takes an optional `Options` object which controls:
+Jil's `JSON.Serialize` method takes an optional `Options` parameter which controls:
 
   - The format of serialized DateTimes, one of
     * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string, ie. "\/Date(##...##)\/"
-	* MillisecondsSinceUnixEpoch, a number, which can be passed directly to JavaScript's Date() constructor
+	* MillisecondsSinceUnixEpoch, a number, which can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 	* SecondsSinceUnixEpoch, a number, commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
 	* ISO8601, a string, ie. "2011-07-14T19:43:37Z"
   - Whether or not to exclude null values when serializing dictionaries, and object members
