@@ -450,7 +450,7 @@ namespace Benchmark
                     jilMedFailures.Add(type);
                 }
 
-                if (jil.Min <= proto.Min)
+                if (jil.Min < proto.Min)
                 {
                     jilMinBeatPB.Add(type);
                 }
