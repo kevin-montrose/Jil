@@ -381,7 +381,7 @@ namespace Jil.Serialize
 
                 if (c == '"')
                 {
-                    writer.Write("\"");
+                    writer.Write("\\\"");
                     continue;
                 }
 
@@ -446,7 +446,7 @@ namespace Jil.Serialize
 
                 if (c == '"')
                 {
-                    writer.Write("\"");
+                    writer.Write("\\\"");
                     continue;
                 }
 
