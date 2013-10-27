@@ -2,6 +2,9 @@
 
 A fast JSON serializer, built on [Sigil](https://github.com/kevin-montrose/Sigil) with a number of somewhat crazy optimization tricks.
 
+While *usable* in it's current state, Jil is far from finished.  It should be treated as a Work In Progress, don't use it for anything
+serious just yet...
+
 ## Usage
 
 ```
