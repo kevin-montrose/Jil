@@ -13,6 +13,25 @@ namespace Benchmark
 
     static class ExtensionMethods
     {
+        public static bool TrueEqualsDictionary<K, V>(this Dictionary<K, V> a, Dictionary<K, V> b)
+            where V : class, IGenericEquality<V>
+        {
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
+            if (object.ReferenceEquals(a, null)) return false;
+            if (object.ReferenceEquals(b, null)) return false;
+
+            if (a.Count != b.Count) return false;
+
+            foreach (var kv in a)
+            {
+                V bv;
+                if (!b.TryGetValue(kv.Key, out bv)) return false;
+                if (!kv.Value.TrueEquals(bv)) return false;
+            }
+
+            return true;
+        }
+
         public static bool TrueEqualsString(this string a, string b)
         {
             return a == b;
@@ -117,6 +136,21 @@ namespace Benchmark
                 t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
+        public static bool IsDictionary(this Type t)
+        {
+            return
+                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ||
+                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+        }
+
+        public static Type GetDictionaryInterface(this Type t)
+        {
+            return
+                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ?
+                t :
+                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+        }
+
         public static object RandomValue(this Type t, Random rand, int depth = 0)
         {
             if (t.IsPrimitive)
@@ -193,7 +227,7 @@ namespace Benchmark
                 {
                     // add a bias towards English-y text, it's more realistic
                     int range;
-                    if (rand.Next(2) == 0)
+                    if (rand.Next(10) == 0)
                     {
                         range = 0xFFFF + 1;
                     }

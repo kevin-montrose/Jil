@@ -87,6 +87,26 @@ namespace Benchmark
             return ret;
         }
 
+        static MethodInfo _CheckEqualityDictionary = typeof(Program).GetMethod("CheckEqualityDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+        static void CheckEqualityDictionary<T>(Dictionary<string, T> a, Dictionary<string, T> b)
+            where T : class, IGenericEquality<T>
+        {
+            if (!a.TrueEqualsDictionary(b))
+            {
+                throw new Exception("Jil produced JSON couldn't be deserialized");
+            }
+        }
+
+        static MethodInfo _CheckEqualityList = typeof(Program).GetMethod("CheckEqualityList", BindingFlags.Static | BindingFlags.NonPublic);
+        static void CheckEqualityList<T>(List<T> a, List<T> b)
+            where T : class, IGenericEquality<T>
+        {
+            if (!a.TrueEqualsList(b))
+            {
+                throw new Exception("Jil produced JSON couldn't be deserialized");
+            }
+        }
+
         static MethodInfo _CheckEquality = typeof(Program).GetMethod("CheckEquality", BindingFlags.Static | BindingFlags.NonPublic);
         static void CheckEquality<T>(T a, T b)
             where T : class, IGenericEquality<T>
@@ -119,13 +139,40 @@ namespace Benchmark
 #if DEBUG
             if (serializerName == "Jil")
             {
-                var equalCheckable = obj as IGenericEquality<T>;
-
-                if (equalCheckable != null)
+                var equalCheckable = obj is IGenericEquality<T>;
+                if (equalCheckable)
                 {
                     var copy = JsonConvert.DeserializeObject<T>(data);
 
-                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { equalCheckable, copy });
+                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, copy });
+                }
+                else
+                {
+
+                    var equalCheckableList = typeof(T).IsList();
+                    if (equalCheckableList)
+                    {
+                        var copy = JsonConvert.DeserializeObject<T>(data);
+
+                        var checkMethod = _CheckEqualityList.MakeGenericMethod(typeof(T).GetListInterface().GetGenericArguments()[0]);
+                        checkMethod.Invoke(null, new object[] { obj, copy });
+                    }
+                    else
+                    {
+
+                        var equalCheckableDict = typeof(T).IsDictionary();
+                        if (equalCheckableDict)
+                        {
+                            var copy = JsonConvert.DeserializeObject<T>(data);
+
+                            var checkMethod = _CheckEqualityDictionary.MakeGenericMethod(typeof(T).GetDictionaryInterface().GetGenericArguments()[1]);
+                            checkMethod.Invoke(null, new object[] { obj, copy });
+                        }
+                        else
+                        {
+                            throw new Exception("Couldn't correctness-check Jil's serialization of a type: " + typeof(T));
+                        }
+                    }
                 }
             }
 #endif
@@ -587,55 +634,53 @@ namespace Benchmark
 
         static void Main(string[] args)
         {
-            /*ResetRand();
-
-            var models = GetModels();
-
-            var results = new List<Result>();
-
-            foreach (var model in models)
+            if (args.Length != 0)
             {
-                Console.WriteLine("* " + model.Name);
-                results.AddRange(DoSpeedTestsFor(model));
-            }
+                ResetRand();
 
-            Console.WriteLine();
-            Console.WriteLine();
+                var models = GetModels();
 
-            TextWriter oldOut = null;
-            if (args.Length == 1)
-            {
-                oldOut = Console.Out;
+                var results = new List<Result>();
+
+                foreach (var model in models)
+                {
+                    Console.WriteLine("* " + model.Name);
+                    results.AddRange(DoSpeedTestsFor(model));
+                }
+
+                Console.WriteLine();
+                Console.WriteLine();
+
+                var oldOut = Console.Out;
                 Console.SetOut(new StreamWriter(File.Create(args[0])));
-            }
 
-            List<string> minFailures, medianFailures, beatProtobuf;
-            int typeCount;
-            Report(results, out minFailures, out medianFailures, out beatProtobuf, out typeCount);
+                List<string> minFailures, medianFailures, beatProtobuf;
+                int typeCount;
+                Report(results, out minFailures, out medianFailures, out beatProtobuf, out typeCount);
 
-            Console.WriteLine();
+                Console.WriteLine();
 
-            Console.WriteLine("Jil wasn't the absolute fastest {0} times (out of {1} total types considered)", minFailures.Count, typeCount);
-            minFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
-            Console.WriteLine();
+                Console.WriteLine("Jil wasn't the absolute fastest {0} times (out of {1} total types considered)", minFailures.Count, typeCount);
+                minFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
+                Console.WriteLine();
 
-            Console.WriteLine("Jil wasn't the median fastest {0} times (out of {1} total types considered)", medianFailures.Count, typeCount);
-            medianFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
-            Console.WriteLine();
+                Console.WriteLine("Jil wasn't the median fastest {0} times (out of {1} total types considered)", medianFailures.Count, typeCount);
+                medianFailures.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
+                Console.WriteLine();
 
-            Console.WriteLine("Jil beat protobuf-net (somehow) {0} times (out of {1} total types considered)", beatProtobuf.Count, typeCount);
-            beatProtobuf.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
+                Console.WriteLine("Jil beat protobuf-net (somehow) {0} times (out of {1} total types considered)", beatProtobuf.Count, typeCount);
+                beatProtobuf.OrderBy(_ => _).ForEach(f => Console.WriteLine("\t" + f));
 
-            if (oldOut != null)
-            {
                 Console.Out.Flush();
                 Console.Out.Close();
                 Console.Out.Dispose();
                 Console.SetOut(oldOut);
-            }*/
-
-            Console.WriteLine("== Quick Graph " + DateTime.UtcNow + " ==");
-            DoQuickGraph();
+            }
+            else
+            {
+                Console.WriteLine("== Quick Graph " + DateTime.UtcNow + " ==");
+                DoQuickGraph();
+            }
 
             Console.WriteLine("== Finished ==");
 
