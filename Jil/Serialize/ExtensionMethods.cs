@@ -248,5 +248,56 @@ namespace Jil.Serialize
                 t == typeof(long) ||
                 t == typeof(ulong);
         }
+
+        public static List<Type> InvolvedTypes(this Type t)
+        {
+            var ret = new List<Type>();
+
+            var pending = new Stack<Type>();
+            pending.Push(t);
+
+            while (pending.Count > 0)
+            {
+                var cur = pending.Pop();
+                if (!ret.Contains(cur))
+                {
+                    ret.Add(cur);
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (cur.IsNullableType())
+                {
+                    var inner = Nullable.GetUnderlyingType(cur);
+                    pending.Push(inner);
+                    continue;
+                }
+
+                if (cur.IsListType())
+                {
+                    var elem = cur.GetListInterface().GetGenericArguments()[0];
+                    pending.Push(elem);
+                    continue;
+                }
+
+                if (cur.IsDictionaryType())
+                {
+                    var key = cur.GetDictionaryInterface().GetGenericArguments()[0];
+                    var val = cur.GetDictionaryInterface().GetGenericArguments()[1];
+
+                    pending.Push(key);
+                    pending.Push(val);
+
+                    continue;
+                }
+
+                cur.GetFields().ForEach(f => pending.Push(f.FieldType));
+                cur.GetProperties().Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Length == 0).ForEach(p => pending.Push(p.PropertyType));
+            }
+
+            return ret;
+        }
     }
 }

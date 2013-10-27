@@ -2717,15 +2717,27 @@ namespace Jil.Serialize
             return ret;
         }
 
-        void AddCharBuffer()
+        void AddCharBuffer(Type serializingType)
         {
-            if (UseCustomIntegerToString)
+            // Don't tax the naive implementations by allocating a buffer they don't use
+            if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting)) return;
+
+            var allTypes = serializingType.InvolvedTypes();
+
+            var hasGuids = allTypes.Any(t => t == typeof(Guid));
+            var hasDateTime = allTypes.Any(t => t == typeof(DateTime));
+            var hasInteger = allTypes.Any(t => t.IsIntegerNumberType());
+
+            // Not going to use a buffer?  Don't allocate it
+            if (!hasGuids && !hasDateTime && !hasInteger)
             {
-                Emit.DeclareLocal<char[]>(CharBuffer);
-                Emit.LoadConstant(CharBufferSize);
-                Emit.NewArray<char>();
-                Emit.StoreLocal(CharBuffer);
+                return;
             }
+
+            Emit.DeclareLocal<char[]>(CharBuffer);
+            Emit.LoadConstant(CharBufferSize);
+            Emit.NewArray<char>();
+            Emit.StoreLocal(CharBuffer);
         }
 
         Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
@@ -2750,7 +2762,7 @@ namespace Jil.Serialize
                 Emit.MarkLabel(goOn);               // --empty--
             }
 
-            AddCharBuffer();
+            AddCharBuffer(typeof(ForType));
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -2766,7 +2778,7 @@ namespace Jil.Serialize
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
-            AddCharBuffer();
+            AddCharBuffer(typeof(ForType));
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -2782,7 +2794,7 @@ namespace Jil.Serialize
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
-            AddCharBuffer();
+            AddCharBuffer(typeof(ForType));
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -2798,7 +2810,7 @@ namespace Jil.Serialize
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
-            AddCharBuffer();
+            AddCharBuffer(typeof(ForType));
 
             Emit.LoadArgument(0);
             Emit.LoadArgument(1);
@@ -2816,7 +2828,7 @@ namespace Jil.Serialize
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
-            AddCharBuffer();
+            AddCharBuffer(typeof(ForType));
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
