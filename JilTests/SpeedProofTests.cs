@@ -13,6 +13,14 @@ namespace JilTests
     [TestClass]
     public class SpeedProofTests
     {
+        private static Guid _RandGuid(Random rand)
+        {
+            var bytes = new byte[16];
+            rand.NextBytes(bytes);
+
+            return new Guid(bytes);
+        }
+
         private static char _RandChar(Random rand)
         {
             var lower = rand.Next(2) == 0;
@@ -26,7 +34,7 @@ namespace JilTests
 
         public static string _RandString(Random rand)
         {
-            var len = rand.Next(20);
+            var len = 1 + rand.Next(20);
             var ret = new char[len];
 
             for (var i = 0; i < len; i++)
@@ -546,6 +554,65 @@ namespace JilTests
                         A = Enumerable.Range(0, 5 + rand.Next(10)).Select(_ => rand.Next()).ToArray(),
                         B = Enumerable.Range(0, 10 + rand.Next(5)).Select(_ => rand.NextDouble()).ToArray(),
                         C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandString(rand)).ToArray()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
+
+        class _UseFastGuids
+        {
+            public Guid A;
+            public Guid? B;
+            public List<Guid> C;
+            public Dictionary<string, Guid> D;
+        }
+
+        [TestMethod]
+        public void UseFastGuids()
+        {
+            Action<TextWriter, _UseFastGuids, int> fast;
+            Action<TextWriter, _UseFastGuids, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseFastGuids>.UseFastGuids = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineSerializerHelper.Build<_UseFastGuids>();
+                }
+
+                {
+                    InlineSerializer<_UseFastGuids>.UseFastGuids = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseFastGuids>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseFastGuids>.UseFastGuids = true;
+            }
+
+            var rand = new Random(70490340);
+
+            var toSerialize = new List<_UseFastGuids>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _UseFastGuids
+                    {
+                        A = _RandGuid(rand),
+                        B = rand.Next(2) == 0 ? null : (Guid?)_RandGuid(rand),
+                        C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandGuid(rand)).ToList(),
+                        D = Enumerable.Range(0, 5 + rand.Next(5)).ToDictionary(d => _RandString(rand) + _RandString(rand), d => _RandGuid(rand))
                     }
                 );
             }
