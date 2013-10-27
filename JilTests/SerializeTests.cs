@@ -4980,5 +4980,15 @@ namespace JilTests
                 }
             }
         }
+
+        [TestMethod]
+        public void StringEscapes()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize("\"sup\b\t\f\n\r\0\"", str);
+                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\"", str.ToString());
+            }
+        }
     }
 }
