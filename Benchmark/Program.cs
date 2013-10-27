@@ -15,7 +15,12 @@ namespace Benchmark
     class Program
     {
         // "Nothing up my sleeves" number, first 9 digits of PI
-        static Random Rand = new Random(314159265);
+        static Random Rand;
+
+        static void ResetRand()
+        {
+            Rand = new Random(314159265);
+        }
 
         static List<Type> GetModels()
         {
@@ -111,6 +116,7 @@ namespace Benchmark
 
             Console.WriteLine(result.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
 
+#if DEBUG
             if (serializerName == "Jil")
             {
                 var equalCheckable = obj as IGenericEquality<T>;
@@ -122,6 +128,7 @@ namespace Benchmark
                     _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { equalCheckable, copy });
                 }
             }
+#endif
 
             return
                 result.Outcomes.Select(
@@ -249,11 +256,21 @@ namespace Benchmark
                 new [] {3, 2, 1, 0}
             };
 
-        static List<Result> DoSpeedTestsFor(Type model)
+        [Flags]
+        enum SpeedTestMode
+        {
+            Single = 1,
+            List = 2,
+            Dictionary = 4,
+            All = Single | List | Dictionary
+        }
+
+        static List<Result> DoSpeedTestsFor(Type model, SpeedTestMode mode = SpeedTestMode.All)
         {
             var ret = new List<Result>();
 
             // single objects
+            if(mode.HasFlag(SpeedTestMode.Single))
             {
                 var typeName = model.Name;
 
@@ -292,6 +309,7 @@ namespace Benchmark
             }
 
             // lists
+            if (mode.HasFlag(SpeedTestMode.List))
             {
                 var typeName = "List<" + model.Name + ">";
 
@@ -332,6 +350,7 @@ namespace Benchmark
             }
 
             // dictionaries
+            if (mode.HasFlag(SpeedTestMode.Dictionary))
             {
                 var typeName = "Dictionary<string, " + model.Name + ">";
 
@@ -508,8 +527,68 @@ namespace Benchmark
             }
         }
 
+        static void QuickGraph(List<Result> results)
+        {
+            Console.WriteLine();
+
+            var typeName = results.Select(r => r.TypeName).Distinct().Single();
+
+            Console.WriteLine(typeName + ":");
+
+            var medianTimes = results.GroupBy(g => g.Serializer).ToDictionary(g => g.Key, g => g.Select(r => r.Ellapsed.TotalMilliseconds).Median());
+
+            foreach (var kv in medianTimes.OrderBy(r => r.Key))
+            {
+                Console.WriteLine("\t" + kv.Key + ": " + kv.Value);
+            }
+        }
+
+        static void DoQuickGraph()
+        {
+            const int runCount = 10;
+
+            ResetRand();
+            var question = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Single)).ToList();
+            
+            ResetRand();
+            var answer = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Single)).ToList();
+
+            ResetRand();
+            var user = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Single)).ToList();
+
+            ResetRand();
+            var questionList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.List)).ToList();
+
+            ResetRand();
+            var answerList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.List)).ToList();
+
+            ResetRand();
+            var userList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.List)).ToList();
+
+            ResetRand();
+            var questionDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Dictionary)).ToList();
+
+            ResetRand();
+            var answerDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Dictionary)).ToList();
+
+            ResetRand();
+            var userDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Dictionary)).ToList();
+
+            QuickGraph(question);
+            QuickGraph(answer);
+            QuickGraph(user);
+            QuickGraph(questionList);
+            QuickGraph(answerList);
+            QuickGraph(userList);
+            QuickGraph(questionDict);
+            QuickGraph(answerDict);
+            QuickGraph(userDict);
+        }
+
         static void Main(string[] args)
         {
+            /*ResetRand();
+
             var models = GetModels();
 
             var results = new List<Result>();
@@ -553,7 +632,10 @@ namespace Benchmark
                 Console.Out.Close();
                 Console.Out.Dispose();
                 Console.SetOut(oldOut);
-            }
+            }*/
+
+            Console.WriteLine("== Quick Graph " + DateTime.UtcNow + " ==");
+            DoQuickGraph();
 
             Console.WriteLine("== Finished ==");
 
