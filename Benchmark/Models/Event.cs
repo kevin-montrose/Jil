@@ -17,7 +17,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class Event
+    class Event : IGenericEquality<Event>
     {
         [ProtoMember(1)]
         public EventType? event_type { get; set; }
@@ -29,5 +29,15 @@ namespace Benchmark.Models
         public string link { get; set; }
         [ProtoMember(5)]
         public string excerpt { get; set; }
+
+        public bool Equals(Event obj)
+        {
+            return
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.event_id.TrueEquals(obj.event_id) &&
+                this.event_type.TrueEquals(obj.event_type) &&
+                this.excerpt.TrueEqualsString(obj.excerpt) &&
+                this.link.TrueEqualsString(obj.link);
+        }
     }
 }

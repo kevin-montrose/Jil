@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Privilege
+    class Privilege : IGenericEquality<Privilege>
     {
         [ProtoMember(1)]
         public string short_description { get; set; }
@@ -16,5 +16,13 @@ namespace Benchmark.Models
         public string description { get; set; }
         [ProtoMember(3)]
         public int? reputation { get; set; }
+
+        public bool Equals(Privilege obj)
+        {
+            return
+                this.description.TrueEqualsString(obj.description) &&
+                this.reputation.TrueEquals(obj.reputation) &&
+                this.short_description.TrueEqualsString(obj.short_description);
+        }
     }
 }

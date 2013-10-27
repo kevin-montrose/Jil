@@ -82,8 +82,19 @@ namespace Benchmark
             return ret;
         }
 
+        static MethodInfo _CheckEquality = typeof(Program).GetMethod("CheckEquality", BindingFlags.Static | BindingFlags.NonPublic);
+        static void CheckEquality<T>(T a, T b)
+            where T : class, IGenericEquality<T>
+        {
+            if (!a.TrueEquals(b))
+            {
+                throw new Exception("Jil produced JSON couldn't be deserialized");
+            }
+        }
+
         static MethodInfo _DoSpeedTest = typeof(Program).GetMethod("DoSpeedTest", BindingFlags.Static | BindingFlags.NonPublic);
         static List<Result> DoSpeedTest<T>(string serializerName, string niceTypeName, Func<T, string> serializeFunc, T obj)
+            where T : class
         {
             const int TestRuns = 5;
 
@@ -99,6 +110,18 @@ namespace Benchmark
                     .GetResult();
 
             Console.WriteLine(result.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
+
+            if (serializerName == "Jil")
+            {
+                var equalCheckable = obj as IGenericEquality<T>;
+
+                if (equalCheckable != null)
+                {
+                    var copy = JsonConvert.DeserializeObject<T>(data);
+
+                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { equalCheckable, copy });
+                }
+            }
 
             return
                 result.Outcomes.Select(
@@ -153,7 +176,7 @@ namespace Benchmark
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize<T>(obj, str);
+                JSON.Serialize<T>(obj, str, Options.ISO8601);
 
                 return str.ToString();
             }

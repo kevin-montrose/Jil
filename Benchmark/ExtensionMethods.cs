@@ -6,8 +6,79 @@ using System.Threading.Tasks;
 
 namespace Benchmark
 {
+    interface IGenericEquality<T>
+    {
+        bool Equals(T obj);
+    }
+
     static class ExtensionMethods
     {
+        public static bool TrueEqualsString(this string a, string b)
+        {
+            return a == b;
+        }
+
+        public static bool TrueEqualsString(this IEnumerable<string> a, IEnumerable<string> b)
+        {
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
+            if (object.ReferenceEquals(a, null)) return false;
+            if (object.ReferenceEquals(b, null)) return false;
+
+            if (a.Count() != b.Count()) return false;
+
+            using (var e1 = a.GetEnumerator())
+            using (var e2 = b.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    if (!e1.Current.TrueEqualsString(e2.Current)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool TrueEqualsList<T>(this IEnumerable<T> a, IEnumerable<T> b)
+            where T : class, IGenericEquality<T>
+        {
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
+            if (object.ReferenceEquals(a, null)) return false;
+            if (object.ReferenceEquals(b, null)) return false;
+
+            if (a.Count() != b.Count()) return false;
+
+            using (var e1 = a.GetEnumerator())
+            using (var e2 = b.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    if (!e1.Current.TrueEquals(e2.Current)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool TrueEquals<T>(this T? a, T? b)
+            where T : struct
+        {
+            if (!a.HasValue && !b.HasValue) return true;
+            if (!a.HasValue) return false;
+            if (!b.HasValue) return false;
+
+            return a.Value.Equals(b.Value);
+        }
+
+        public static bool TrueEquals<T>(this T a, T b)
+            where T : class, IGenericEquality<T>
+        {
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
+            if (object.ReferenceEquals(a, null)) return false;
+            if (object.ReferenceEquals(b, null)) return false;
+
+            return a.Equals(b);
+        }
+
         public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> a)
         {
             foreach (var e in enumerable)
@@ -171,7 +242,7 @@ namespace Benchmark
 
             if (t == typeof(DateTime))
             {
-                var epoch = new DateTime(1970, 1, 1, 0, 0, 0);
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
                 var bytes = new byte[4];
                 rand.NextBytes(bytes);

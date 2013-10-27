@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class SuggestedEdit
+    class SuggestedEdit : IGenericEquality<SuggestedEdit>
     {
         [ProtoMember(1)]
         public int? suggested_edit_id { get; set; }
@@ -32,5 +32,21 @@ namespace Benchmark.Models
         public DateTime? rejection_date { get; set; }
         [ProtoMember(11)]
         public ShallowUser proposing_user { get; set; }
+
+        public bool Equals(SuggestedEdit obj)
+        {
+            return
+                this.approval_date.TrueEquals(obj.approval_date) &&
+                this.body.TrueEqualsString(obj.body) &&
+                this.comment.TrueEqualsString(obj.comment) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.post_type.TrueEquals(obj.post_type) &&
+                this.proposing_user.TrueEquals(obj.proposing_user) &&
+                this.rejection_date.TrueEquals(obj.rejection_date) &&
+                this.suggested_edit_id.TrueEquals(obj.suggested_edit_id) &&
+                this.tags.TrueEqualsString(obj.tags) &&
+                this.title.TrueEqualsString(obj.title);
+        }
     }
 }

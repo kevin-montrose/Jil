@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Tag
+    class Tag : IGenericEquality<Tag>
     {
         [ProtoMember(1)]
         public string name { get; set; }
@@ -26,5 +26,18 @@ namespace Benchmark.Models
         public DateTime? last_activity_date { get; set; }
         [ProtoMember(8)]
         public List<string> synonyms { get; set; }
+
+        public bool Equals(Tag obj)
+        {
+            return
+                this.count.TrueEquals(obj.count) &&
+                this.has_synonyms.TrueEquals(obj.has_synonyms) &&
+                this.is_moderator_only.TrueEquals(obj.is_moderator_only) &&
+                this.is_required.TrueEquals(obj.is_required) &&
+                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
+                this.name.TrueEqualsString(obj.name) &&
+                this.synonyms.TrueEqualsString(obj.synonyms) &&
+                this.user_id.TrueEquals(obj.user_id);
+        }
     }
 }

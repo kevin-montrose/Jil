@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Post
+    class Post : IGenericEquality<Post>
     {
         [ProtoMember(1)]
         public int? post_id { get; set; }
@@ -46,5 +46,28 @@ namespace Benchmark.Models
         public string body_markdown { get; set; }
         [ProtoMember(18)]
         public string share_link { get; set; }
+
+        public bool Equals(Post obj)
+        {
+            return
+                this.body.TrueEqualsString(obj.body) &&
+                this.body_markdown.TrueEqualsString(obj.body_markdown) &&
+                this.comment_count.TrueEquals(obj.comment_count) &&
+                this.comments.TrueEqualsList(obj.comments) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
+                this.downvoted.TrueEquals(obj.downvoted) &&
+                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
+                this.last_edit_date.TrueEquals(obj.last_edit_date) &&
+                this.last_editor.TrueEquals(obj.last_editor) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.owner.TrueEquals(obj.owner) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.post_type.TrueEquals(obj.post_type) &&
+                this.score.TrueEquals(obj.score) &&
+                this.share_link.TrueEqualsString(obj.share_link) &&
+                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
+                this.upvoted.TrueEquals(obj.upvoted);
+        }
     }
 }

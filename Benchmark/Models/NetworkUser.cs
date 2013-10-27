@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class NetworkUser
+    class NetworkUser : IGenericEquality<NetworkUser>
     {
         [ProtoMember(1)]
         public string site_name { get; set; }
@@ -32,5 +32,21 @@ namespace Benchmark.Models
         public int? answer_count { get; set; }
         [ProtoMember(11)]
         public int? question_count { get; set; }
+
+        public bool Equals(NetworkUser obj)
+        {
+            return
+                this.account_id.TrueEquals(obj.account_id) &&
+                this.answer_count.TrueEquals(obj.answer_count) &&
+                this.badge_counts.TrueEquals(obj.badge_counts) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.last_access_date.TrueEquals(obj.last_access_date) &&
+                this.question_count.TrueEquals(obj.question_count) &&
+                this.reputation.TrueEquals(obj.reputation) &&
+                this.site_name.TrueEqualsString(obj.site_name) &&
+                this.site_url.TrueEqualsString(obj.site_url) &&
+                this.user_id.TrueEquals(obj.user_id) &&
+                this.user_type.TrueEquals(obj.user_type);
+        }
     }
 }

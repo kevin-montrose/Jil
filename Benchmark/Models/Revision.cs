@@ -14,7 +14,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class Revision
+    class Revision : IGenericEquality<Revision>
     {
         [ProtoMember(1)]
         public string revision_guid { get; set; }
@@ -48,5 +48,26 @@ namespace Benchmark.Models
         public bool? set_community_wiki { get; set; }
         [ProtoMember(16)]
         public ShallowUser user { get; set; }
+
+        public bool Equals(Revision obj)
+        {
+            return
+                this.body.TrueEqualsString(obj.body) &&
+                this.comment.TrueEqualsString(obj.comment) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.is_rollback.TrueEquals(obj.is_rollback) &&
+                this.last_body.TrueEqualsString(obj.last_body) &&
+                this.last_tags.TrueEqualsString(obj.last_tags) &&
+                this.last_title.TrueEqualsString(obj.last_title) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.post_type.TrueEquals(obj.post_type) &&
+                this.revision_guid.TrueEqualsString(obj.revision_guid) &&
+                this.revision_number.TrueEquals(obj.revision_number) &&
+                this.revision_type.TrueEquals(obj.revision_type) &&
+                this.set_community_wiki.TrueEquals(obj.set_community_wiki) &&
+                this.tags.TrueEqualsString(obj.tags) &&
+                this.title.TrueEqualsString(obj.title) &&
+                this.user.TrueEquals(obj.user);
+        }
     }
 }

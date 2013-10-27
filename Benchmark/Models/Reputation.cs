@@ -19,7 +19,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class Reputation
+    class Reputation : IGenericEquality<Reputation>
     {
         [ProtoMember(1)]
         public int? user_id { get; set; }
@@ -37,5 +37,18 @@ namespace Benchmark.Models
         public int? reputation_change { get; set; }
         [ProtoMember(8)]
         public DateTime? on_date { get; set; }
+
+        public bool Equals(Reputation obj)
+        {
+            return
+                this.link.TrueEqualsString(obj.link) &&
+                this.on_date.TrueEquals(obj.on_date) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.post_type.TrueEquals(obj.post_type) &&
+                this.reputation_change.TrueEquals(obj.reputation_change) &&
+                this.title.TrueEqualsString(obj.title) &&
+                this.user_id.TrueEquals(obj.user_id) &&
+                this.vote_type.TrueEquals(obj.vote_type);
+        }
     }
 }

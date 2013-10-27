@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class ReputationHistory
+    class ReputationHistory : IGenericEquality<ReputationHistory>
     {
         public enum ReputationHistoryType : byte
         {
@@ -57,5 +57,15 @@ namespace Benchmark.Models
         public int? reputation_change { get; set; }
         [ProtoMember(5)]
         public ReputationHistoryType? reputation_history_type { get; set; }
+
+        public bool Equals(ReputationHistory obj)
+        {
+            return
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.reputation_change.TrueEquals(obj.reputation_change) &&
+                this.reputation_history_type.TrueEquals(obj.reputation_history_type) &&
+                this.user_id.TrueEquals(obj.user_id);
+        }
     }
 }

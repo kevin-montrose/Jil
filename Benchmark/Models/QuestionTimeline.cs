@@ -20,7 +20,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class QuestionTimeline
+    class QuestionTimeline : IGenericEquality<QuestionTimeline>
     {
         [ProtoMember(1)]
         public QuestionTimelineAction? timeline_type { get; set; }
@@ -42,5 +42,20 @@ namespace Benchmark.Models
         public ShallowUser user { get; set; }
         [ProtoMember(10)]
         public ShallowUser owner { get; set; }
+
+        public bool Equals(QuestionTimeline obj)
+        {
+            return
+                this.comment_id.TrueEquals(obj.comment_id) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
+                this.owner.TrueEquals(obj.owner) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.question_id.TrueEquals(obj.question_id) &&
+                this.revision_guid.TrueEqualsString(obj.revision_guid) &&
+                this.timeline_type.TrueEquals(obj.timeline_type) &&
+                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
+                this.user.TrueEquals(obj.user);
+        }
     }
 }

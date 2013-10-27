@@ -14,7 +14,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class Comment
+    class Comment : IGenericEquality<Comment>
     {
         [ProtoMember(1)]
         public int? comment_id { get; set; }
@@ -40,5 +40,22 @@ namespace Benchmark.Models
         public string body_markdown { get; set; }
         [ProtoMember(12)]
         public bool? upvoted { get; set; }
+
+        public bool Equals(Comment obj)
+        {
+            return
+                this.body.TrueEqualsString(obj.body) &&
+                this.body_markdown.TrueEqualsString(obj.body_markdown) &&
+                this.comment_id.TrueEquals(obj.comment_id) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.edited.TrueEquals(obj.edited) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.owner.TrueEquals(obj.owner) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.post_type.TrueEquals(obj.post_type) &&
+                this.reply_to_user.TrueEquals(obj.reply_to_user) &&
+                this.score.TrueEquals(obj.score) &&
+                this.upvoted.TrueEquals(obj.upvoted);
+        }
     }
 }

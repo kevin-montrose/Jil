@@ -27,7 +27,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class Notification
+    class Notification : IGenericEquality<Notification>
     {
         [ProtoMember(1)]
         public NotificationType? notification_type { get; set; }
@@ -41,5 +41,15 @@ namespace Benchmark.Models
         public int? post_id { get; set; }
         [ProtoMember(6)]
         public bool? is_unread { get; set; }
+
+        public bool Equals(Notification obj)
+        {
+            return
+                this.body.TrueEqualsString(obj.body) &&
+                this.site.TrueEquals(obj.site) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.post_id.TrueEquals(obj.post_id) &&
+                this.is_unread.TrueEquals(obj.is_unread);
+        }
     }
 }

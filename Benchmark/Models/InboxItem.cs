@@ -20,7 +20,7 @@ namespace Benchmark.Models
     }
 
     [ProtoContract]
-    class InboxItem
+    class InboxItem : IGenericEquality<InboxItem>
     {
         [ProtoMember(1)]
         public InboxItemType? item_type { get; set; }
@@ -42,5 +42,20 @@ namespace Benchmark.Models
         public string body { get; set; }
         [ProtoMember(10)]
         public string link { get; set; }
+
+        public bool Equals(InboxItem obj)
+        {
+            return
+                this.answer_id.TrueEquals(obj.answer_id) &&
+                this.body.TrueEqualsString(obj.body) &&
+                this.comment_id.TrueEquals(obj.comment_id) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.is_unread.TrueEquals(obj.is_unread) &&
+                this.item_type.TrueEquals(obj.item_type) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.question_id.TrueEquals(obj.question_id) &&
+                this.site.TrueEquals(obj.site) &&
+                this.title.TrueEqualsString(obj.title);
+        }
     }
 }

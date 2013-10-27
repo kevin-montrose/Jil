@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Question
+    class Question : IGenericEquality<Question>
     {
         [ProtoContract]
-        public class ClosedDetails
+        public class ClosedDetails : IGenericEquality<ClosedDetails>
         {
             [ProtoContract]
-            public class OriginalQuestion
+            public class OriginalQuestion : IGenericEquality<OriginalQuestion>
             {
                 [ProtoMember(1)]
                 public int? question_id { get; set; }
@@ -24,6 +24,15 @@ namespace Benchmark.Models
                 public int? answer_count { get; set; }
                 [ProtoMember(4)]
                 public int? accepted_answer_id { get; set; }
+
+                public bool Equals(OriginalQuestion obj)
+                {
+                    return
+                        this.accepted_answer_id.TrueEquals(obj.accepted_answer_id) &&
+                        this.answer_count.TrueEquals(obj.answer_count) &&
+                        this.question_id.TrueEquals(obj.question_id) &&
+                        this.title.TrueEqualsString(obj.title);
+                }
             }
 
             [ProtoMember(1)]
@@ -36,10 +45,20 @@ namespace Benchmark.Models
             public List<ShallowUser> by_users { get; set; }
             [ProtoMember(5)]
             public List<OriginalQuestion> original_questions { get; set; }
+
+            public bool Equals(ClosedDetails obj)
+            {
+                return
+                    this.by_users.TrueEqualsList(obj.by_users) &&
+                    this.description.TrueEqualsString(obj.description) &&
+                    this.on_hold.TrueEquals(obj.on_hold) &&
+                    this.original_questions.TrueEqualsList(obj.original_questions) &&
+                    this.reason.TrueEqualsString(obj.reason);
+            }
         }
 
         [ProtoContract]
-        public class Notice
+        public class Notice : IGenericEquality<Notice>
         {
             [ProtoMember(1)]
             public string body { get; set; }
@@ -47,10 +66,18 @@ namespace Benchmark.Models
             public DateTime? creation_date { get; set; }
             [ProtoMember(3)]
             public int? owner_user_id { get; set; }
+
+            public bool Equals(Notice obj)
+            {
+                return
+                    this.body.TrueEqualsString(obj.body) &&
+                    this.creation_date.TrueEquals(obj.creation_date) &&
+                    this.owner_user_id.TrueEquals(obj.owner_user_id);
+            }
         }
 
         [ProtoContract]
-        public class MigrationInfo
+        public class MigrationInfo : IGenericEquality<MigrationInfo>
         {
             [ProtoMember(1)]
             public int? question_id { get; set; }
@@ -58,6 +85,14 @@ namespace Benchmark.Models
             public Info.Site other_site { get; set; }
             [ProtoMember(3)]
             public DateTime? on_date { get; set; }
+
+            public bool Equals(MigrationInfo obj)
+            {
+                return
+                    this.on_date.TrueEquals(obj.on_date) &&
+                    this.other_site.TrueEquals(obj.other_site) &&
+                    this.question_id.TrueEquals(obj.question_id);
+            }
         }
 
         [ProtoMember(1)]
@@ -140,5 +175,50 @@ namespace Benchmark.Models
         public ClosedDetails closed_details { get; set; }
         [ProtoMember(40)]
         public string share_link { get; set; }
+
+        public bool Equals(Question obj)
+        {
+            return
+                this.accepted_answer_id.TrueEquals(obj.accepted_answer_id) &&
+                this.answer_count.TrueEquals(obj.answer_count) &&
+                this.answers.TrueEqualsList(obj.answers) &&
+                this.body.TrueEqualsString(obj.body) &&
+                this.body_markdown.TrueEqualsString(obj.body_markdown) &&
+                this.bounty_amount.TrueEquals(obj.bounty_amount) &&
+                this.bounty_closes_date.TrueEquals(obj.bounty_closes_date) &&
+                this.close_vote_count.TrueEquals(obj.close_vote_count) &&
+                this.closed_date.TrueEquals(obj.closed_date) &&
+                this.closed_details.TrueEquals(obj.closed_details) &&
+                this.closed_reason.TrueEqualsString(obj.closed_reason) &&
+                this.comment_count.TrueEquals(obj.comment_count) &&
+                this.comments.TrueEqualsList(obj.comments) &&
+                this.community_owned_date.TrueEquals(obj.community_owned_date) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.delete_vote_count.TrueEquals(obj.delete_vote_count) &&
+                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
+                this.downvoted.TrueEquals(obj.downvoted) &&
+                this.favorite_count.TrueEquals(obj.favorite_count) &&
+                this.favorited.TrueEquals(obj.favorited) &&
+                this.is_answered.TrueEquals(obj.is_answered) &&
+                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
+                this.last_edit_date.TrueEquals(obj.last_edit_date) &&
+                this.last_editor.TrueEquals(obj.last_editor) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.locked_date.TrueEquals(obj.locked_date) &&
+                this.migrated_from.TrueEquals(obj.migrated_from) &&
+                this.migrated_to.TrueEquals(obj.migrated_to) &&
+                this.notice.TrueEquals(obj.notice) &&
+                this.owner.TrueEquals(obj.owner) &&
+                this.protected_date.TrueEquals(obj.protected_date) &&
+                this.question_id.TrueEquals(obj.question_id) &&
+                this.reopen_vote_count.TrueEquals(obj.reopen_vote_count) &&
+                this.score.TrueEquals(obj.score) &&
+                this.share_link.TrueEqualsString(obj.share_link) &&
+                this.tags.TrueEqualsString(obj.tags) &&
+                this.title.TrueEqualsString(obj.title) &&
+                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
+                this.upvoted.TrueEquals(obj.upvoted) &&
+                this.view_count.TrueEquals(obj.view_count);
+        }
     }
 }

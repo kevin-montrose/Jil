@@ -16,7 +16,7 @@ namespace Benchmark.Models
     }
     
     [ProtoContract]
-    class ShallowUser
+    class ShallowUser : IGenericEquality<ShallowUser>
     {
         [ProtoMember(1)]
         public int? user_id { get; set; }
@@ -34,5 +34,18 @@ namespace Benchmark.Models
         public int? accept_rate { get; set; }
         [ProtoMember(8)]
         public User.BadgeCount badge_counts { get; set; }
+
+        public bool Equals(ShallowUser obj)
+        {
+            return
+                this.accept_rate.TrueEquals(obj.accept_rate) &&
+                this.badge_counts.TrueEquals(obj.badge_counts) &&
+                this.display_name.TrueEqualsString(obj.display_name) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.profile_image.TrueEqualsString(obj.profile_image) &&
+                this.reputation.TrueEquals(obj.reputation) &&
+                this.user_id.TrueEquals(obj.user_id) &&
+                this.user_type.TrueEquals(obj.user_type);
+        }
     }
 }

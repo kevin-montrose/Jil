@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class TagScore
+    class TagScore : IGenericEquality<TagScore>
     {
         [ProtoMember(1)]
         public ShallowUser user { get; set; }
@@ -16,5 +16,13 @@ namespace Benchmark.Models
         public int? score { get; set; }
         [ProtoMember(3)]
         public int? post_count { get; set; }
+
+        public bool Equals(TagScore obj)
+        {
+            return
+                this.post_count.TrueEquals(obj.post_count) &&
+                this.score.TrueEquals(obj.score) &&
+                this.user.TrueEquals(obj.user);
+        }
     }
 }

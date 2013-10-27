@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Answer
+    class Answer : IGenericEquality<Answer>
     {
         [ProtoMember(1)]
         public int? question_id { get; set; }
@@ -58,5 +58,34 @@ namespace Benchmark.Models
         public string body_markdown { get; set; }
         [ProtoMember(24)]
         public string share_link { get; set; }
+
+        public bool Equals(Answer obj)
+        {
+            return
+                this.accepted.TrueEquals(obj.accepted) &&
+                this.answer_id.TrueEquals(obj.answer_id) &&
+                this.body.TrueEqualsString(obj.body) &&
+                this.body_markdown.TrueEqualsString(obj.body_markdown) &&
+                this.comment_count.TrueEquals(obj.comment_count) &&
+                this.comments.TrueEqualsList(obj.comments) &&
+                this.community_owned_date.TrueEquals(obj.community_owned_date) &&
+                this.creation_date.TrueEquals(obj.creation_date) &&
+                this.down_vote_count.TrueEquals(obj.down_vote_count) &&
+                this.downvoted.TrueEquals(obj.downvoted) &&
+                this.is_accepted.TrueEquals(obj.is_accepted) &&
+                this.last_activity_date.TrueEquals(obj.last_activity_date) &&
+                this.last_edit_date.TrueEquals(obj.last_edit_date) &&
+                this.last_editor.TrueEquals(obj.last_editor) &&
+                this.link.TrueEqualsString(obj.link) &&
+                this.locked_date.TrueEquals(obj.locked_date) &&
+                this.owner.TrueEquals(obj.owner) &&
+                this.question_id.TrueEquals(obj.question_id) &&
+                this.score.TrueEquals(obj.score) &&
+                this.share_link.TrueEqualsString(obj.share_link) &&
+                this.tags.TrueEqualsString(obj.tags) &&
+                this.title.TrueEqualsString(obj.title) &&
+                this.up_vote_count.TrueEquals(obj.up_vote_count) &&
+                this.upvoted.TrueEquals(obj.upvoted);
+        }
     }
 }

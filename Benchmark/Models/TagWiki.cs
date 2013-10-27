@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class TagWiki
+    class TagWiki : IGenericEquality<TagWiki>
     {
         [ProtoMember(1)]
         public string tag_name { get; set; }
@@ -24,5 +24,17 @@ namespace Benchmark.Models
         public ShallowUser last_body_editor { get; set; }
         [ProtoMember(7)]
         public ShallowUser last_excerpt_editor { get; set; }
+
+        public bool Equals(TagWiki obj)
+        {
+            return
+                this.body.TrueEqualsString(obj.body) &&
+                this.body_last_edit_date.TrueEquals(obj.body_last_edit_date) &&
+                this.excerpt.TrueEqualsString(obj.excerpt) &&
+                this.excerpt_last_edit_date.TrueEquals(obj.excerpt_last_edit_date) &&
+                this.last_body_editor.TrueEquals(obj.last_body_editor) &&
+                this.last_excerpt_editor.TrueEquals(obj.last_excerpt_editor) &&
+                this.tag_name.TrueEqualsString(obj.tag_name);
+        }
     }
 }
