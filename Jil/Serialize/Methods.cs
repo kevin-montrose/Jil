@@ -281,125 +281,117 @@ namespace Jil.Serialize
             //
             // Guid is guaranteed to be a 36 character string
 
+            // get all the dashes in place
+            buffer[8] = '-';
+            buffer[13] = '-';
+            buffer[18] = '-';
+            buffer[23] = '-';
+
             // ToByteArray() returns the bytes in a different order than you might expect
-            // For: 35 91 8b c9 19 6d 40 ea 97 79 88 9d 79 b7 53 f0 
-            // Get: C9 8B 91 35 6D 19 EA 40 97 79 88 9D 79 B7 53 F0 
-            // Ix:   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+            // For: 35 91 8b c9 - 19 6d - 40 ea  - 97 79  - 88 9d 79 b7 53 f0 
+            // Get: C9 8B 91 35   6D 19   EA 40    97 79    88 9D 79 B7 53 F0 
+            // Ix:   0  1  2  3    4  5    6  7     8  9    10 11 12 13 14 15
+            //
+            // And then we have to account for dashes
             //
             // So the map is like so:
-            // bytes[0] -> chars[3]
-            // bytes[1] -> chars[2]
-            // bytes[2] -> chars[1]
-            // bytes[3] -> chars[0]
-            // bytes[4] -> chars[5]
-            // bytes[5] -> chars[4]
-            // bytes[6] -> chars[7]
-            // bytes[7] -> chars[6]
-            // bytes[8] -> chars[8]
-            // bytes[9] -> chars[9]
-            // bytes[10] -> chars[10]
-            // bytes[11] -> chars[11]
-            // bytes[12] -> chars[12]
-            // bytes[13] -> chars[13]
-            // bytes[14] -> chars[14]
-            // bytes[15] -> chars[15]
+            // bytes[0]  -> chars[3]  -> buffer[ 6, 7]
+            // bytes[1]  -> chars[2]  -> buffer[ 4, 5]
+            // bytes[2]  -> chars[1]  -> buffer[ 2, 3]
+            // bytes[3]  -> chars[0]  -> buffer[ 0, 1]
+            // bytes[4]  -> chars[5]  -> buffer[10,11] -> [11,12]
+            // bytes[5]  -> chars[4]  -> buffer[ 8, 9] -> [ 9,10]
+            // bytes[6]  -> chars[7]  -> buffer[14,15] -> [15,16] -> [16,17]
+            // bytes[7]  -> chars[6]  -> buffer[12,13] -> [13,14] -> [14,15]
+            // bytes[8]  -> chars[8]  -> buffer[16,17] -> [17,18] -> [18,19] -> [19,20]
+            // bytes[9]  -> chars[9]  -> buffer[18,19] -> [19,20] -> [20,21] -> [21,22]
+            // bytes[10] -> chars[10] -> buffer[20,21] -> [21,22] -> [22,23] -> [23,24] -> [24,25]
+            // bytes[11] -> chars[11] -> buffer[22,23] -> [23,24] -> [24,25] -> [25,26] -> [26,27]
+            // bytes[12] -> chars[12] -> buffer[24,25] -> [25,26] -> [26,27] -> [27,28] -> [28,29]
+            // bytes[13] -> chars[13] -> buffer[26,27] -> [27,28] -> [28,29] -> [29,30] -> [30,31]
+            // bytes[14] -> chars[14] -> buffer[28,29] -> [29,30] -> [30,31] -> [31,32] -> [32,33]
+            // bytes[15] -> chars[15] -> buffer[30,31] -> [31,32] -> [32,33] -> [33,34] -> [34,35]
             var bytes = guid.ToByteArray();
 
             // bytes[0] -> chars[3]
             var b = bytes[0] * 2;
-            var c = 3 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[6] = WriteGuidLookup[b];
+            buffer[7] = WriteGuidLookup[b + 1];
 
             // bytes[1] -> chars[2]
             b = bytes[1] * 2;
-            c = 2 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[4] = WriteGuidLookup[b];
+            buffer[5] = WriteGuidLookup[b + 1];
 
             // bytes[2] -> chars[1]
             b = bytes[2] * 2;
-            c = 1 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[2] = WriteGuidLookup[b];
+            buffer[3] = WriteGuidLookup[b + 1];
 
             // bytes[3] -> chars[0]
             b = bytes[3] * 2;
-            c = 0 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[0] = WriteGuidLookup[b];
+            buffer[1] = WriteGuidLookup[b + 1];
 
             // bytes[4] -> chars[5]
             b = bytes[4] * 2;
-            c = 5 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[11] = WriteGuidLookup[b];
+            buffer[12] = WriteGuidLookup[b + 1];
 
             // bytes[5] -> chars[4]
             b = bytes[5] * 2;
-            c = 4 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[9] = WriteGuidLookup[b];
+            buffer[10] = WriteGuidLookup[b + 1];
 
             // bytes[6] -> chars[7]
             b = bytes[6] * 2;
-            c = 7 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[16] = WriteGuidLookup[b];
+            buffer[17] = WriteGuidLookup[b + 1];
 
             // bytes[7] -> chars[6]
             b = bytes[7] * 2;
-            c = 6 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[14] = WriteGuidLookup[b];
+            buffer[15] = WriteGuidLookup[b + 1];
 
             // bytes[8] -> chars[8]
             b = bytes[8] * 2;
-            c = 8 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[19] = WriteGuidLookup[b];
+            buffer[20] = WriteGuidLookup[b + 1];
 
             // bytes[9] -> chars[9]
             b = bytes[9] * 2;
-            c = 9 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[21] = WriteGuidLookup[b];
+            buffer[22] = WriteGuidLookup[b + 1];
 
             // bytes[10] -> chars[10]
             b = bytes[10] * 2;
-            c = 10 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[24] = WriteGuidLookup[b];
+            buffer[25] = WriteGuidLookup[b + 1];
 
             // bytes[11] -> chars[11]
             b = bytes[11] * 2;
-            c = 11 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[26] = WriteGuidLookup[b];
+            buffer[27] = WriteGuidLookup[b + 1];
 
             // bytes[12] -> chars[12]
             b = bytes[12] * 2;
-            c = 12 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[28] = WriteGuidLookup[b];
+            buffer[29] = WriteGuidLookup[b + 1];
 
             // bytes[13] -> chars[13]
             b = bytes[13] * 2;
-            c = 13 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[30] = WriteGuidLookup[b];
+            buffer[31] = WriteGuidLookup[b + 1];
 
             // bytes[14] -> chars[14]
             b = bytes[14] * 2;
-            c = 14 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[32] = WriteGuidLookup[b];
+            buffer[33] = WriteGuidLookup[b + 1];
 
             // bytes[15] -> chars[15]
             b = bytes[15] * 2;
-            c = 15 * 2;
-            buffer[c] = WriteGuidLookup[b];
-            buffer[c + 1] = WriteGuidLookup[b + 1];
+            buffer[34] = WriteGuidLookup[b];
+            buffer[35] = WriteGuidLookup[b + 1];
 
             writer.Write(buffer, 0, 36);
         }

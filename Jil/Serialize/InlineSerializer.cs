@@ -22,7 +22,7 @@ namespace Jil.Serialize
         public static bool UseFastGuids = true;
 
         static string CharBuffer = "char_buffer";
-        internal const int CharBufferSize = 22;
+        internal const int CharBufferSize = 36;
         internal const int RecursionLimit = 50;
 
         static Dictionary<char, string> CharacterEscapes = 
