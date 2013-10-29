@@ -79,14 +79,18 @@ Numbers can found in [this Google Document](https://docs.google.com/spreadsheet/
 
 This benchmark was run on a machine with the following specs:
 
- - Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)
- - System Manufacturer: Apple Inc.
- - System Model: MacBookPro8,2
- - Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz
- - Memory: 8192MB RAM
-   - DDR3
-   - Dual Channel
-   - 665.2 MHZ
+<ul>
+ <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
+ <li>System Manufacturer: Apple Inc.</li>
+ <li>System Model: MacBookPro8,2</li>
+ <li>Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz</li>
+ <li>Memory: 8192MB RAM</li>
+ <ul>
+  <li>DDR3</li>
+  <li>Dual Channel</li>
+  <li>665.2 MHZ</li>
+ </ul>
+</ul>
 
 As with all benchmarks, take these with a grain of salt.
 
