@@ -67,9 +67,28 @@ Jil's `JSON.Serialize` method takes an optional `Options` parameter which contro
 Jil aims to be the fastest general purpose JSON serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
 in the pursuit of speed.
 
-For comparison, here's how Jil stacks up against other popular .NET serializers.
+For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark).
 
-=== TODO: Add the actual benchmarks ===
+<img src="https://i.imgur.com/DBpzOyt.png" />
+
+<img src="https://i.imgur.com/nUb74Mv.png" />
+
+<img src="https://i.imgur.com/3zGueX0.png" />
+
+Numbers can found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdENqWE5QTVhsSjZUMV9MQVg1SV9TNnc&usp=sharing).
+
+This benchmark was run on a machine with the following specs:
+
+ - Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)
+ - System Manufacturer: Apple Inc.
+ - System Model: MacBookPro8,2
+ - Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz
+ - Memory: 8192MB RAM
+   - DDR3
+   - Dual Channel
+   - 665.2 MHZ
+
+As with all benchmarks, take these with a grain of salt.
 
 ## Tricks
 
