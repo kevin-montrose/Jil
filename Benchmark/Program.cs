@@ -121,7 +121,7 @@ namespace Benchmark
         static List<Result> DoSpeedTest<T>(string serializerName, string niceTypeName, Func<T, string> serializeFunc, T obj)
             where T : class
         {
-            const int TestRuns = 5;
+            const int TestRuns = 100;
 
             string data = null;
 
@@ -594,34 +594,71 @@ namespace Benchmark
         {
             const int runCount = 10;
 
-            ResetRand();
-            var question = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Single)).ToList();
-            
-            ResetRand();
-            var answer = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Single)).ToList();
+            List<Result> question, answer, user, questionList, answerList, userList, questionDict, answerDict, userDict;
 
-            ResetRand();
-            var user = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Single)).ToList();
+            Console.WriteLine("Running...");
+            var oldOut = Console.Out;
+            using (var ignored = new StringWriter())
+            {
+                Console.SetOut(ignored);
 
-            ResetRand();
-            var questionList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.List)).ToList();
+                ResetRand();
+                question = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Single)).ToList();
 
-            ResetRand();
-            var answerList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.List)).ToList();
+                ResetRand();
+                answer = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Single)).ToList();
 
-            ResetRand();
-            var userList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.List)).ToList();
+                ResetRand();
+                user = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Single)).ToList();
 
-            ResetRand();
-            var questionDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Dictionary)).ToList();
+                ResetRand();
+                questionList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.List)).ToList();
 
-            ResetRand();
-            var answerDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Dictionary)).ToList();
+                ResetRand();
+                answerList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.List)).ToList();
 
-            ResetRand();
-            var userDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Dictionary)).ToList();
+                ResetRand();
+                userList = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.List)).ToList();
 
-            QuickGraph(question);
+                ResetRand();
+                questionDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Question), SpeedTestMode.Dictionary)).ToList();
+
+                ResetRand();
+                answerDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.Answer), SpeedTestMode.Dictionary)).ToList();
+
+                ResetRand();
+                userDict = Enumerable.Range(0, runCount).SelectMany(_ => DoSpeedTestsFor(typeof(Benchmark.Models.User), SpeedTestMode.Dictionary)).ToList();
+            }
+            Console.SetOut(oldOut);
+
+            Func<List<Result>, double> jil = r => r.Where(w => w.Serializer == "Jil").Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, double> jsonNet = r => r.Where(w => w.Serializer == "Json.NET").Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, double> protobufNet = r => r.Where(w => w.Serializer == "Protobuf-net").Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, double> serviceStackText = r => r.Where(w => w.Serializer == "ServiceStack.Text").Select(x => x.Ellapsed.TotalMilliseconds).Median();
+
+            Console.WriteLine("Single:");
+            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user), jsonNet(user), protobufNet(user), serviceStackText(user));
+            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer), jsonNet(answer), protobufNet(answer), serviceStackText(answer));
+            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question), jsonNet(question), protobufNet(question), serviceStackText(question));
+
+            Console.WriteLine();
+
+            Console.WriteLine("Lists:");
+            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList), jsonNet(userList), protobufNet(userList), serviceStackText(userList));
+            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList), jsonNet(answerList), protobufNet(answerList), serviceStackText(answerList));
+            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList), jsonNet(questionList), protobufNet(questionList), serviceStackText(questionList));
+
+            Console.WriteLine();
+
+            Console.WriteLine("Dictionaries of strings to:");
+            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict), jsonNet(userDict), protobufNet(userDict), serviceStackText(userDict));
+            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict), jsonNet(answerDict), protobufNet(answerDict), serviceStackText(answerDict));
+            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict), jsonNet(questionDict), protobufNet(questionDict), serviceStackText(questionDict));
+
+            /*QuickGraph(question);
             QuickGraph(answer);
             QuickGraph(user);
             QuickGraph(questionList);
@@ -629,7 +666,7 @@ namespace Benchmark
             QuickGraph(userList);
             QuickGraph(questionDict);
             QuickGraph(answerDict);
-            QuickGraph(userDict);
+            QuickGraph(userDict);*/
         }
 
         static void Main(string[] args)
