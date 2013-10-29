@@ -67,7 +67,14 @@ Jil's `JSON.Serialize` method takes an optional `Options` parameter which contro
 Jil aims to be the fastest general purpose JSON serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
 in the pursuit of speed.
 
-For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark).
+For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark):
+
+ - [Json.NET](http://james.newtonking.com/json) - JSON library included with ASP.NET MVC
+ - [ServiceStack.Text](https://github.com/ServiceStack/ServiceStack.Text) - JSON, CSV, and JSV library; a part of the [ServiceStack framework](https://github.com/ServiceStack/ServiceStack)
+ - [protobuf-net](https://code.google.com/p/protobuf-net/) - binary serializer for Google's [Protocol Buffers](https://code.google.com/p/protobuf/)
+   * __does not__ serialize JSON, included as a baseline
+
+All three libraries are in use at [Stack Exchange](https://stackexchange.com/) in various production roles.
 
 <img src="https://i.imgur.com/DBpzOyt.png" />
 
@@ -76,6 +83,10 @@ For comparison, here's how Jil stacks up against other popular .NET serializers 
 <img src="https://i.imgur.com/3zGueX0.png" />
 
 Numbers can found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdENqWE5QTVhsSjZUMV9MQVg1SV9TNnc&usp=sharing).
+
+The Question, Answer, and User types are taken from the [Stack Exchange API](http://api.stackexchange.com/).
+
+Data for each type is randomly generated from a fixed seed.  Random text is biased towards ASCII<sup>*</sup>, but includes all unicode.
 
 This benchmark was run on a machine with the following specs:
 
@@ -93,6 +104,8 @@ This benchmark was run on a machine with the following specs:
 </ul>
 
 As with all benchmarks, take these with a grain of salt.
+
+<sub>*This is meant to simulate typical content from the Stack Exchange API.</sub>
 
 ## Tricks
 
