@@ -119,8 +119,11 @@ Using Sigil also makes hacking on Jil much more productive, as debuging IL gener
 
 ### Trade Memory For Speed
 
-Jil's internal serializers are (in the absense of recusrive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
+Jil's internal serializers are (in the absense of recursive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
 .NET's JIT more context when generating machine code.
+
+The serializers Jil create also do no Options checking at serialization time, Options are baked in at first use.  This means
+that Jil may create up to 32 different serializers for a single type (though in practice, many fewer).
 
 ### Optimizing Member Access Order
 
