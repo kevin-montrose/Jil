@@ -67,10 +67,132 @@ Jil's `JSON.Serialize` method takes an optional `Options` parameter which contro
 Jil aims to be the fastest general purpose JSON serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
 in the pursuit of speed.
 
-For comparison, here's how Jil stacks up against other popular .NET serializers.
+For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark):
 
-=== TODO: Add the actual benchmarks ===
+ - [Json.NET](http://james.newtonking.com/json) - JSON library included with ASP.NET MVC
+ - [ServiceStack.Text](https://github.com/ServiceStack/ServiceStack.Text) - JSON, CSV, and JSV library; a part of the [ServiceStack framework](https://github.com/ServiceStack/ServiceStack)
+ - [protobuf-net](https://code.google.com/p/protobuf-net/) - binary serializer for Google's [Protocol Buffers](https://code.google.com/p/protobuf/)
+   * __does not__ serialize JSON, included as a baseline
+
+All three libraries are in use at [Stack Exchange](https://stackexchange.com/) in various production roles.
+
+<img src="https://i.imgur.com/DBpzOyt.png" />
+
+<img src="https://i.imgur.com/nUb74Mv.png" />
+
+<img src="https://i.imgur.com/3zGueX0.png" />
+
+Numbers can found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdENqWE5QTVhsSjZUMV9MQVg1SV9TNnc&usp=sharing).
+
+The Question, Answer, and User types are taken from the [Stack Exchange API](http://api.stackexchange.com/).
+
+Data for each type is randomly generated from a fixed seed.  Random text is biased towards ASCII<sup>*</sup>, but includes all unicode.
+
+This benchmark was run on a machine with the following specs:
+
+<ul>
+ <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
+ <li>System Manufacturer: Apple Inc.</li>
+ <li>System Model: MacBookPro8,2</li>
+ <li>Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz</li>
+ <li>Memory: 8192MB RAM</li>
+ <ul>
+  <li>DDR3</li>
+  <li>Dual Channel</li>
+  <li>665.2 MHZ</li>
+ </ul>
+</ul>
+
+As with all benchmarks, take these with a grain of salt.
+
+<sub>*This is meant to simulate typical content from the Stack Exchange API.</sub>
 
 ## Tricks
 
-=== TODO: Write up Jil's crazy optimizations ===
+Jil has a lot of tricks to make it fast.  These may be interesting, even if Jil itself is too limitted for your use.
+
+### Sigil
+
+Jil does a lot of IL generation to produce tight, focus code.  While possible with [ILGenerator](http://msdn.microsoft.com/en-us/library/system.reflection.emit.ilgenerator.aspx), Jil instead uses the [Sigil library](https://github.com/kevin-montrose/Sigil).
+Sigil automatically does a lot of the busy work you'd normally have to do manually to produce ideal IL.
+Using Sigil also makes hacking on Jil much more productive, as debuging IL generation without it is pretty slow going.
+
+### Trade Memory For Speed
+
+Jil's internal serializers are (in the absense of recusrive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
+.NET's JIT more context when generating machine code.
+
+### Optimizing Member Access Order
+
+Perhaps the [most arcane code in Jil](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Utils.cs#L52) determines the preferred order to access members, so the CPU doesn't stall waiting for values from memory.
+
+Members are divided up into 4 groups:
+<ul>
+  <li>Simple
+    <ul>
+      <li>primitive ValueTypes such as int, double, etc.</li>
+    </ul>
+  </li>
+  <li>Nullable Types</li>
+  <li>Recursive Types</li>
+  <li>Everything Else</li>
+</ul>
+
+Members within each group are ordered by the offset of the fields backing them (properties are decompiled to determine fields they use).
+
+### Don't Allocate If You Can Avoid It
+
+.NET's GC is excellent, but no-GC is still faster than any-GC.
+
+Jil tries to avoid allocating any reference types, with following exceptions:
+
+ - [a 36-length char\[\]](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L2720) if any integer numbers, DateTimes, or GUIDs are being serialized
+ - one byte[] per GUID being serialized, as a consequence of using [Guid.ToByteArray](http://msdn.microsoft.com/en-us/library/system.guid.tobytearray.aspx)
+
+### Escaping Tricks
+
+JSON has escaping rules for `\`, `"`, and control characters.  These can be kind be time consuming to deal, Jil avoids as much as possible in two ways.
+
+First, all known key names are once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L1063).
+Known keys are member names and enumeration values.
+
+Second, rather than lookup encoded characters in a dictionary or a long series of branches Jil does explicit checks for `"` and `\` and turns the rest into
+a subtraction and jump table lookup.  This comes out to ~three branches (with mostly consistently taken paths, good for branch prediction in theory) per character.
+
+This works because control characters in .NET strings (bascally UTF-16, but might as well be ASCII for this trick) are sequential, being [0,31].
+
+### Custom Number Formatting
+
+While number formatting in .NET is pretty fast, it has a lot of baggage to handle custom number formatting.
+
+Since JSON has a strict definition of a number, a Write() implementation without configuration is noticeably faster.
+To go the extra mile, Jil contains [separate implementations for `int`, `uint`, `ulong`, and `long`](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L495).
+
+Jil __does not__ include custom `decimal`, `double`, or `single` Write() implementations, as despite my best efforts I haven't been able to beat the one's built into .NET.
+
+### Custom Date Formatting
+
+Similarly to numbers, each of Jil's date formats has a custom Write() implementation.
+
+ - [ISO8601](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L142) can be unrolled into a smaller number of `/` and `%` instructions
+ - [Newtonsoft-style](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L471) is a subtraction and division, then fed into the custom `long` writing code
+ - [Milliseconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L528) is essentially the same
+ - [Seconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L577) just has a different divisor
+ 
+### Custom Guid Formatting
+
+Noticing a pattern?
+
+Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L18) (which is one of the reason's Jil only supports the D format).
+
+Fun fact about this method, I tested a more branch heavy version (which removed the byte lookup) which turned out to be considerably slower than the built-in method due to [branch prediction failures](http://stackoverflow.com/a/11227902/80572).
+Type 4 Guids being random makes for something quite close to the worst case for branch prediciton.
+
+### Different Code For Arrays
+
+Although arrays implement `IList<T>` the JIT generates much better code if you give it array-ish IL to chew on, so Jil does so.
+
+### Special Casing Enumerations With Sequential Values
+
+Many enums end up having sequential values, Jil will exploit this if possible and generate a subtraction and jump table lookup.
+Non-sequential enumerations are handled with a long series of branches.
