@@ -1345,6 +1345,279 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\"\n}", res);
             }
+
+            // JSONP
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.JSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.ExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"C\":\"hello\\u2028\\u2029world\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.PrettyPrintJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.PrettyPrintExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.MillisecondsSinceUnixEpochJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":-23215049511000,\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.MillisecondsSinceUnixEpochExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":-23215049511000,\"C\":\"hello\\u2028\\u2029world\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.MillisecondsSinceUnixEpochPrettyPrintJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.MillisecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.SecondsSinceUnixEpochJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":-23215049511,\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.SecondsSinceUnixEpochExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":-23215049511,\"C\":\"hello\\u2028\\u2029world\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.SecondsSinceUnixEpochPrettyPrintJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": -23215049511,\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": -23215049511,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.ISO8601JSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.ISO8601ExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"C\":\"hello\\u2028\\u2029world\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.ISO8601PrettyPrintJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new
+                    {
+                        A = new DateTime(1234, 5, 6, 7, 8, 9, DateTimeKind.Utc),
+                        B = (DateTime?)null,
+                        C = "hello\u2028\u2029world"
+                    },
+                    str,
+                    Options.ISO8601PrettyPrintExcludeNullsJSONP
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+            }
         }
 
         public class _InfiniteRecursion
@@ -4988,6 +5261,20 @@ namespace JilTests
             {
                 JSON.Serialize("\"sup\b\t\f\n\r\0\"", str);
                 Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\"", str.ToString());
+            }
+
+            // Don't waste time in JSON-mode
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize("\"sup\b\t\f\n\r\0\"\u2028\u2029", str);
+                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\u2028\u2029\"", str.ToString());
+            }
+
+            // But if this is JSONP, we have to spend some time encoding
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize("\"sup\b\t\f\n\r\0\"\u2028\u2029", str, Options.JSONP);
+                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\\u2028\\u2029\"", str.ToString());
             }
         }
     }

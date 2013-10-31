@@ -26,95 +26,214 @@ namespace Jil
             switch (options.UseDateTimeFormat)
             {
                 case DateTimeFormat.ISO8601:
-                    if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                    {
-                        ISO8601PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldExcludeNulls)
-                    {
-                        ISO8601ExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldPrettyPrint)
-                    {
-                        ISO8601PrettyPrintTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    ISO8601TypeCache<T>.Thunk(output, data, 0);
+                    ISO8601(data, output, options);
                     return;
 
                 case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                    {
-                        MillisecondsPrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldExcludeNulls)
-                    {
-                        MillisecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldPrettyPrint)
-                    {
-                        MillisecondsPrettyPrintTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    MillisecondsTypeCache<T>.Thunk(output, data, 0);
+                    Milliseconds<T>(data, output, options);
                     return;
 
                 case DateTimeFormat.SecondsSinceUnixEpoch:
-                    if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                    {
-                        SecondsPrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldExcludeNulls)
-                    {
-                        SecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldPrettyPrint)
-                    {
-                        SecondsPrettyPrintTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    SecondsTypeCache<T>.Thunk(output, data, 0);
+                    Seconds<T>(data, output, options);
                     return;
 
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                    {
-                        NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldExcludeNulls)
-                    {
-                        NewtonsoftStyleExcludeNullsTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    if (options.ShouldPrettyPrint)
-                    {
-                        NewtonsoftStylePrettyPrintTypeCache<T>.Thunk(output, data, 0);
-                        return;
-                    }
-
-                    NewtonSoftStyleTypeCache<T>.Thunk(output, data, 0);
+                    NewtonsoftStyle<T>(data, output, options);
                     return;
 
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
             }
+        }
+
+        static void NewtonsoftStyle<T>(T data, TextWriter output, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                NewtonsoftStyleExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                NewtonsoftStylePrettyPrintJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                NewtonsoftStyleExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                NewtonsoftStylePrettyPrintTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+
+            if (options.IsJSONP)
+            {
+                NewtonsoftStyleJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            NewtonsoftStyleTypeCache<T>.Thunk(output, data, 0);
+        }
+
+        static void Milliseconds<T>(T data, TextWriter output, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                MillisecondsExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                MillisecondsPrettyPrintJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                MillisecondsPrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                MillisecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                MillisecondsPrettyPrintTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+
+            if (options.IsJSONP)
+            {
+                MillisecondsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            MillisecondsTypeCache<T>.Thunk(output, data, 0);
+        }
+
+        static void Seconds<T>(T data, TextWriter output, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                SecondsExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                SecondsPrettyPrintJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                SecondsPrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                SecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                SecondsPrettyPrintTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+
+            if (options.IsJSONP)
+            {
+                SecondsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            SecondsTypeCache<T>.Thunk(output, data, 0);
+        }
+
+        static void ISO8601<T>(T data, TextWriter output, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                ISO8601ExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                ISO8601PrettyPrintJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                ISO8601PrettyPrintExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                ISO8601ExcludeNullsTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                ISO8601PrettyPrintTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP)
+            {
+                ISO8601JSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            ISO8601TypeCache<T>.Thunk(output, data, 0);
         }
     }
 }

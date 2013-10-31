@@ -10,13 +10,53 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    static class NewtonSoftStyleTypeCache<T>
+    static class NewtonsoftStyleTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
 
-        static NewtonSoftStyleTypeCache()
+        static NewtonsoftStyleTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonSoftStyleTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class NewtonsoftStyleJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class NewtonsoftStyleExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class NewtonsoftStylePrettyPrintJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         }
     }
 
@@ -47,6 +87,16 @@ namespace Jil.Serialize
         static NewtonsoftStylePrettyPrintExcludeNullsTypeCache()
         {
             Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class ISO8601JSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static ISO8601JSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601JSONPTypeCache<>), dateFormat: DateTimeFormat.ISO8601, jsonp: true);
         }
     }
 
@@ -90,6 +140,36 @@ namespace Jil.Serialize
         }
     }
 
+    static class ISO8601PrettyPrintJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static ISO8601PrettyPrintJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintJSONPTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601);
+        }
+    }
+
+    static class ISO8601ExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static ISO8601ExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601ExcludeNullsJSONPTypeCache<>), jsonp: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601);
+        }
+    }
+
+    static class ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static ISO8601PrettyPrintExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, jsonp: true);
+        }
+    }
+
     static class SecondsTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
@@ -130,6 +210,46 @@ namespace Jil.Serialize
         }
     }
 
+    static class SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static SecondsPrettyPrintExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
+        }
+    }
+
+    static class SecondsExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static SecondsExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
+        }
+    }
+
+    static class SecondsPrettyPrintJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static SecondsPrettyPrintJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
+        }
+    }
+
+    static class SecondsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static SecondsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
+        }
+    }
+
     static class MillisecondsTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;
@@ -167,6 +287,46 @@ namespace Jil.Serialize
         static MillisecondsPrettyPrintExcludeNullsTypeCache()
         {
             Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static MillisecondsPrettyPrintExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class MillisecondsExcludeNullsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static MillisecondsExcludeNullsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class MillisecondsPrettyPrintJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static MillisecondsPrettyPrintJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
+        }
+    }
+
+    static class MillisecondsJSONPTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static MillisecondsJSONPTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
         }
     }
 }

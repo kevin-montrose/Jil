@@ -2929,7 +2929,7 @@ namespace Jil.Serialize
     {
         public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
         {
-            typeCacheType = typeCacheType ?? typeof(NewtonSoftStyleTypeCache<>);
+            typeCacheType = typeCacheType ?? typeof(NewtonsoftStyleTypeCache<>);
 
             var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat);
 
