@@ -66,16 +66,18 @@ namespace Jil.Serialize
         private readonly Type RecusionLookupType;
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
+        private readonly bool JSONP;
         private readonly DateTimeFormat DateFormat;
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
         private Emit Emit;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, DateTimeFormat dateFormat)
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
+            JSONP = jsonp;
             DateFormat = dateFormat;
         }
 
@@ -925,6 +927,10 @@ namespace Jil.Serialize
             var slash = Emit.DefineLabel();
             var quote = Emit.DefineLabel();
 
+            // Only used in JSONP case, don't pre-init
+            Sigil.Label lineSeparator = null;
+            Sigil.Label paragraphSeparator = null;
+
             Emit.Duplicate();                               // TextWriter char char
             Emit.Convert<int>();
             Emit.LoadConstant(lowestCharNeedingEncoding);   // TextWriter char char int
@@ -940,23 +946,54 @@ namespace Jil.Serialize
 
             Emit.Duplicate();               // TextWriter char char
             Emit.LoadConstant('"');         // TextWriter char char "
-            Emit.BranchIfEqual(quote);      // TextWriter clear
+            Emit.BranchIfEqual(quote);      // TextWriter char
+
+            // Curse you line terminators
+            if (JSONP)
+            {
+                lineSeparator = Emit.DefineLabel();
+                paragraphSeparator = Emit.DefineLabel();
+
+                // line separator, valid JSON not valid javascript
+                Emit.Duplicate();                   // TextWriter char char
+                Emit.LoadConstant('\u2028');        // TextWriter char char \u2028
+                Emit.BranchIfEqual(lineSeparator);  // TextWriter char
+
+                // paragraph separator, valid JSON not valid javascript
+                Emit.Duplicate();                       // TextWriter char char
+                Emit.LoadConstant('\u2029');            // TextWriter char char \u2029
+                Emit.BranchIfEqual(paragraphSeparator); // TextWriter char
+            }
 
             Emit.CallVirtual(writeChar);    // --empty--
             Emit.Branch(done);              // --empty--
 
             Emit.MarkLabel(slash);          // TextWriter char
-
             Emit.Pop();                     // TextWriter
             Emit.Pop();                     // --empty--
             WriteString(@"\\");             // --empty--
             Emit.Branch(done);              // --empty--
 
-            Emit.MarkLabel(quote);
+            Emit.MarkLabel(quote);          // TextWriter char
             Emit.Pop();                     // TextWriter
             Emit.Pop();                     // --empty--
             WriteString(@"\""");            // --empty--
             Emit.Branch(done);              // --empty--
+
+            if (JSONP)
+            {
+                Emit.MarkLabel(lineSeparator);  // TextWriter char
+                Emit.Pop();                     // TextWriter
+                Emit.Pop();                     // --empty--
+                WriteString(@"\u2028");         // --empty--
+                Emit.Branch(done);              // --empty--
+
+                Emit.MarkLabel(paragraphSeparator); // TextWriter char
+                Emit.Pop();                         // TextWriter
+                Emit.Pop();                         // --empty--
+                WriteString(@"\u2029");             // --empty--
+                Emit.Branch(done);                  // --empty--
+            }
 
             foreach (var label in labels)
             {
@@ -1038,12 +1075,12 @@ namespace Jil.Serialize
                     string keyString;
                     if (firstPass)
                     {
-                        keyString = "\"" + member.Name.JsonEscape() + "\":";
+                        keyString = "\"" + member.Name.JsonEscape(JSONP) + "\":";
                         firstPass = false;
                     }
                     else
                     {
-                        keyString = ",\"" + member.Name.JsonEscape() + "\":";
+                        keyString = ",\"" + member.Name.JsonEscape(JSONP) + "\":";
                     }
 
                     WriteString(keyString);                         // --empty--
@@ -1060,7 +1097,7 @@ namespace Jil.Serialize
 
                     firstPass = false;
 
-                    WriteString("\"" + member.Name.JsonEscape() + "\": ");
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");
 
                     WriteMember(member, inLocal);
                 }
@@ -1309,11 +1346,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                WriteString("\"" + member.Name.JsonEscape() + "\": ");   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");   // --empty--
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");   // --empty--
             }
 
             WriteMember(member, inLocal);           // --empty--
@@ -1382,11 +1419,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                WriteString("\"" + member.Name.JsonEscape() + "\": ");   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");   // --empty--
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape() + "\":");   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");   // --empty--
             }
 
             WriteMember(member, inLocal);           // --empty--
@@ -2333,8 +2370,8 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
-                    Methods.WriteEncodedStringWithQuotesWithNullsInline;
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithNullsInline;
         }
 
         
@@ -2343,8 +2380,8 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    Methods.WriteEncodedStringWithoutNullsInline :
-                    Methods.WriteEncodedStringWithNullsInline;
+                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithoutNullsInline :
+                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONP : Methods.WriteEncodedStringWithNullsInline;
         }
 
         void WriteKeyValue(Type keyType, Type elementType)
@@ -2540,7 +2577,7 @@ namespace Jil.Serialize
                 var val = values[min + i];
                 var label = labels[(int)i];
                 var asStr = Enum.GetName(enumType, val);
-                var escapedString = "\"" + asStr.JsonEscape() + "\"";
+                var escapedString = "\"" + asStr.JsonEscape(JSONP) + "\"";
 
                 Emit.MarkLabel(label);      // TextWriter?
                 WriteString(escapedString); // TextWriter?
@@ -2617,7 +2654,7 @@ namespace Jil.Serialize
             {
                 var name = Enum.GetName(enumType, val);
 
-                var escapeStr = "\"" + name.JsonEscape() + "\"";
+                var escapeStr = "\"" + name.JsonEscape(JSONP) + "\"";
 
                 var next = Emit.DefineLabel();
 
@@ -2890,11 +2927,11 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
         {
             typeCacheType = typeCacheType ?? typeof(NewtonSoftStyleTypeCache<>);
 
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, dateFormat);
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat);
 
             return obj.Build();
         }

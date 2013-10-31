@@ -138,50 +138,8 @@ namespace Jil.Serialize
                 t == typeof(char);
         }
 
-        public static string JsonEscape(this char c)
-        {
-            switch (c)
-            {
-                case '\\': return @"\\";
-                case '"': return @"\""";
-                case '\u0000': return @"\u0000";
-                case '\u0001': return @"\u0001";
-                case '\u0002': return @"\u0002";
-                case '\u0003': return @"\u0003";
-                case '\u0004': return @"\u0004";
-                case '\u0005': return @"\u0005";
-                case '\u0006': return @"\u0006";
-                case '\u0007': return @"\u0007";
-                case '\u0008': return @"\u0008";
-                case '\u0009': return @"\u0009";
-                case '\u000A': return @"\u000A";
-                case '\u000B': return @"\u000B";
-                case '\u000C': return @"\u000C";
-                case '\u000D': return @"\u000D";
-                case '\u000E': return @"\u000E";
-                case '\u000F': return @"\u000F";
-                case '\u0010': return @"\u0010";
-                case '\u0011': return @"\u0011";
-                case '\u0012': return @"\u0012";
-                case '\u0013': return @"\u0013";
-                case '\u0014': return @"\u0014";
-                case '\u0015': return @"\u0015";
-                case '\u0016': return @"\u0016";
-                case '\u0017': return @"\u0017";
-                case '\u0018': return @"\u0018";
-                case '\u0019': return @"\u0019";
-                case '\u001A': return @"\u001A";
-                case '\u001B': return @"\u001B";
-                case '\u001C': return @"\u001C";
-                case '\u001D': return @"\u001D";
-                case '\u001E': return @"\u001E";
-                case '\u001F': return @"\u001F";
-                default: return c.ToString();
-            }
-        }
-
         // From: http://www.ietf.org/rfc/rfc4627.txt?number=4627
-        public static string JsonEscape(this string str)
+        public static string JsonEscape(this string str, bool jsonp)
         {
             var ret = "";
             foreach (var c in str)
@@ -222,6 +180,29 @@ namespace Jil.Serialize
                     case '\u001D': ret += @"\u001D"; break;
                     case '\u001E': ret += @"\u001E"; break;
                     case '\u001F': ret += @"\u001F"; break;
+
+                    case '\u2028':
+                        if(jsonp)
+                        {
+                            ret += @"\u2028";
+                        }
+                        else
+                        {
+                            goto default;
+                        }
+                        break;
+
+                    case '\u2029':
+                        if(jsonp)
+                        {
+                            ret += @"\u2029";
+                        }
+                        else
+                        {
+                            goto default;
+                        }
+                        break;
+
                     default: ret += c; break;
                 }
             }

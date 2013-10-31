@@ -39,8 +39,8 @@ namespace Jil
         {
             ShouldPrettyPrint = pretty;
             ShouldExcludeNulls = excludeNulls;
-            UseDateTimeFormat = dateFormat;
             JSONP = jsonp;
+            UseDateTimeFormat = dateFormat;
         }
 
         public override string ToString()
