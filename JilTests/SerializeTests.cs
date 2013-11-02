@@ -5277,5 +5277,44 @@ namespace JilTests
                 Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\\u2028\\u2029\"", str.ToString());
             }
         }
+
+        struct _SerializeDynamicStruct
+        {
+            public int A;
+            public bool B;
+        }
+
+        [TestMethod]
+        public void SerializeDynamic()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.SerializeDynamic(
+                    new
+                    {
+                        A = 1,
+                        B = (int?)null,
+                        C = "hello world"
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":1,\"C\":\"hello world\",\"B\":null}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.SerializeDynamic(
+                    new _SerializeDynamicStruct
+                    {
+                        A = 1,
+                        B = false
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":1,\"B\":false}", str.ToString());
+            }
+        }
     }
 }

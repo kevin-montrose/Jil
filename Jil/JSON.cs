@@ -1,5 +1,6 @@
 ﻿using Jil.Serialize;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,8 +14,47 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
+        private static Hashtable SerializeDynamicLookup = new Hashtable();
+
         /// <summary>
-        /// Serializes the given data to the provider TextWriter.
+        /// Serializes the given data to the provided TextWriter.
+        /// 
+        /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+        /// the produced JSON.  If omitted, Options.Default is used.
+        /// 
+        /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
+        /// This is not as fast as calling Serialize with a known type.
+        /// </summary>
+        public static void SerializeDynamic(object data, TextWriter output, Options options = null)
+        {
+            // Can't infer the type if we don't even have an object
+            if (data == null)
+            {
+                if (!(options ?? Options.Default).ShouldExcludeNulls)
+                {
+                    output.Write("null");
+                }
+
+                return;
+            }
+
+            var type = data.GetType();
+            var invoke = (Action<object, TextWriter, Options>)SerializeDynamicLookup[type];
+            if (invoke == null)
+            {
+                invoke = (Action<object, TextWriter, Options>)typeof(SerializeDynamicThunk<>).MakeGenericType(type).GetField("Thunk", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).GetValue(null);
+
+                lock (SerializeDynamicLookup)
+                {
+                    SerializeDynamicLookup[type] = invoke;
+                }
+            }
+
+            invoke(data, output, options);
+        }
+
+        /// <summary>
+        /// Serializes the given data to the provided TextWriter.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
         /// the produced JSON.  If omitted, Options.Default is used.
