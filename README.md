@@ -61,6 +61,7 @@ Jil's `JSON.Serialize` method takes an optional `Options` parameter which contro
 	* ISO8601, a string, ie. "2011-07-14T19:43:37Z"
   - Whether or not to exclude null values when serializing dictionaries, and object members
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
+  - Whether or not the JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
 
 ## Benchmarks
 
@@ -154,7 +155,7 @@ Jil tries to avoid allocating any reference types, with following exceptions:
 
 ### Escaping Tricks
 
-JSON has escaping rules for `\`, `"`, and control characters.  These can be kind be time consuming to deal, Jil avoids as much as possible in two ways.
+JSON has escaping rules for `\`, `"`, and control characters.  These can be kind be time consuming to deal with, Jil avoids as much as possible in two ways.
 
 First, all known key names are once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L1063).
 Known keys are member names and enumeration values.
@@ -163,6 +164,9 @@ Second, rather than lookup encoded characters in a dictionary or a long series o
 a subtraction and jump table lookup.  This comes out to ~three branches (with mostly consistently taken paths, good for branch prediction in theory) per character.
 
 This works because control characters in .NET strings (bascally UTF-16, but might as well be ASCII for this trick) are sequential, being [0,31].
+
+JSONP also requires escaping of line separator (\u2028) and paragraph separator (\u2029) characters.  When configured to serialize JSONP,
+Jil escapes them in the same manner as `\` and `"`.
 
 ### Custom Number Formatting
 
