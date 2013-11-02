@@ -144,6 +144,8 @@ Members are divided up into 4 groups:
 
 Members within each group are ordered by the offset of the fields backing them (properties are decompiled to determine fields they use).
 
+This is a fairly naïve implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
+
 ### Don't Allocate If You Can Avoid It
 
 .NET's GC is excellent, but no-GC is still faster than any-GC.
@@ -176,6 +178,7 @@ Since JSON has a strict definition of a number, a Write() implementation without
 To go the extra mile, Jil contains [separate implementations for `int`, `uint`, `ulong`, and `long`](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L495).
 
 Jil __does not__ include custom `decimal`, `double`, or `single` Write() implementations, as despite my best efforts I haven't been able to beat the one's built into .NET.
+If you think you're up to the challenge, I'd be really interested in seeing code that *is* faster than the included implementations.
 
 ### Custom Date Formatting
 
@@ -203,3 +206,4 @@ Although arrays implement `IList<T>` the JIT generates much better code if you g
 
 Many enums end up having sequential values, Jil will exploit this if possible and generate a subtraction and jump table lookup.
 Non-sequential enumerations are handled with a long series of branches.
+

@@ -5316,5 +5316,90 @@ namespace JilTests
                 Assert.AreEqual("{\"A\":1,\"B\":false}", str.ToString());
             }
         }
+
+        class _LotsOfStrings
+        {
+            public string A;
+            public string B;
+            public string C;
+            public string D;
+            public string E;
+            public string F;
+            public string G;
+            public string H;
+            public string I;
+            public string J;
+            public string K;
+        }
+
+        [TestMethod]
+        public void LotsOfStrings()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _LotsOfStrings { },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":null,\"B\":null,\"C\":null,\"D\":null,\"E\":null,\"F\":null,\"G\":null,\"H\":null,\"I\":null,\"J\":null,\"K\":null}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _LotsOfStrings 
+                    {
+                        A = "hello",
+                        C = "world",
+                        E = "fizz",
+                        G = "buzz",
+                        I = "foo",
+                        K = "bar"
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":\"hello\",\"B\":null,\"C\":\"world\",\"D\":null,\"E\":\"fizz\",\"F\":null,\"G\":\"buzz\",\"H\":null,\"I\":\"foo\",\"J\":null,\"K\":\"bar\"}", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _LotsOfStrings
+                    {
+                        A = "hello",
+                        B = "world",
+                        D = "fizz",
+                        E = "buzz",
+                        G = "foo",
+                        H = "bar",
+                        J = "syn",
+                        K = "ack"
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":\"hello\",\"B\":\"world\",\"C\":null,\"D\":\"fizz\",\"E\":\"buzz\",\"F\":null,\"G\":\"foo\",\"H\":\"bar\",\"I\":null,\"J\":\"syn\",\"K\":\"ack\"}", str.ToString());
+            }
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _LotsOfStrings
+                    {
+                        B = "hello",
+                        C = "world",
+                        E = "fizz",
+                        F = "buzz",
+                        H = "foo",
+                        I = "bar",
+                        K = "syn"
+                    },
+                    str
+                );
+
+                Assert.AreEqual("{\"A\":null,\"B\":\"hello\",\"C\":\"world\",\"D\":null,\"E\":\"fizz\",\"F\":\"buzz\",\"G\":null,\"H\":\"foo\",\"I\":\"bar\",\"J\":null,\"K\":\"syn\"}", str.ToString());
+            }
+        }
     }
 }
