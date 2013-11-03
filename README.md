@@ -28,6 +28,10 @@ The first time Jil is used to serialize a given configuration and type pair, it 
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" serialization.
 
+The suggested way to use Jil is with the generic `JSON.Serialize` method, however a slightly slower `JSON.SerializeDynamic` method
+is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branhches
+when compared to `Serialize`, and the first invocation for a given type will do a small amount of additiona code generation.
+
 Note, at this time Jil **does not** include a JSON _deserializer_.
 
 ## Supported Types
