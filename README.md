@@ -150,7 +150,7 @@ Members are divided up into 4 groups:
 
 Members within each group are ordered by the offset of the fields backing them (properties are decompiled to determine fields they use).
 
-This is a fairly na�ve implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
+This is a fairly naive implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
 
 ### Don't Allocate If You Can Avoid It
 
