@@ -5,7 +5,7 @@ A fast JSON serializer, built on [Sigil](https://github.com/kevin-montrose/Sigil
 While *usable* in it's current state, Jil is far from finished.  It should be treated as a Work In Progress, don't use it for anything
 serious just yet...
 
-[Preliminary releases are availabe on Nuget](https://www.nuget.org/packages/Jil/) in addition to this repository.
+[Preliminary releases are available on Nuget](https://www.nuget.org/packages/Jil/) in addition to this repository.
 
 ## Usage
 
