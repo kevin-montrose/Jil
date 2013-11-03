@@ -5,6 +5,8 @@ A fast JSON serializer, built on [Sigil](https://github.com/kevin-montrose/Sigil
 While *usable* in it's current state, Jil is far from finished.  It should be treated as a Work In Progress, don't use it for anything
 serious just yet...
 
+[Preliminary releases are availabe on Nuget](https://www.nuget.org/packages/Jil/) in addition to this repository.
+
 ## Usage
 
 ```
@@ -144,7 +146,7 @@ Members are divided up into 4 groups:
 
 Members within each group are ordered by the offset of the fields backing them (properties are decompiled to determine fields they use).
 
-This is a fairly naïve implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
+This is a fairly naï¿½ve implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
 
 ### Don't Allocate If You Can Avoid It
 
