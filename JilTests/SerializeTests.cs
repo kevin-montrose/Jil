@@ -22,7 +22,7 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _SimpleObject { Foo = 123 }, str);
+                JSON.Serialize(new _SimpleObject {Foo = 123}, str);
 
                 var res = str.ToString();
 
@@ -42,23 +42,31 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, str);
+                JSON.Serialize(new _Cyclical {Foo = 123, Next = new _Cyclical {Foo = 456}}, str);
                 var res = str.ToString();
                 Assert.AreEqual("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new[] { new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, new _Cyclical { Foo = 456 } }, str);
+                JSON.Serialize(
+                    new[] {new _Cyclical {Foo = 123, Next = new _Cyclical {Foo = 456}}, new _Cyclical {Foo = 456}}, str);
                 var res = str.ToString();
                 Assert.AreEqual("[{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},{\"Foo\":456,\"Next\":null}]", res);
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, {"world", new _Cyclical { Foo = 456 } } }, str);
+                JSON.Serialize(
+                    new Dictionary<string, _Cyclical>
+                    {
+                        {"hello", new _Cyclical {Foo = 123, Next = new _Cyclical {Foo = 456}}},
+                        {"world", new _Cyclical {Foo = 456}}
+                    }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
+                Assert.AreEqual(
+                    "{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}",
+                    res);
             }
         }
 
@@ -235,7 +243,7 @@ namespace JilTests
             {
                 public string Single;
             }
-            
+
             public class _Two
             {
                 public int _;
@@ -278,11 +286,13 @@ namespace JilTests
                         }
                     },
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"}}", res);
+                Assert.AreEqual(
+                    "{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"}}",
+                    res);
             }
         }
 
@@ -294,12 +304,12 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, int>
                     {
-                        { "hello world", 123 },
-                        { "fizz buzz", 456 },
-                        { "indeed", 789 }
+                        {"hello world", 123},
+                        {"fizz buzz", 456},
+                        {"indeed", 789}
                     },
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -321,13 +331,13 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new []
+                    new[]
                     {
-                        new _List { Key = "whatever", Val = 123 },
-                        new _List { Key = "indeed", Val = 456 }
+                        new _List {Key = "whatever", Val = 123},
+                        new _List {Key = "indeed", Val = 456}
                     },
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -347,9 +357,9 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new _Properties { Foo = 123, Bar = "hello" },
+                    new _Properties {Foo = 123, Bar = "hello"},
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -377,11 +387,11 @@ namespace JilTests
                     {
                         WithList = new _InnerLists._WithList
                         {
-                            List = new List<int> { 1, 2, 3 }
+                            List = new List<int> {1, 2, 3}
                         }
                     },
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -389,7 +399,7 @@ namespace JilTests
             }
         }
 
-        class _CharacterEncoding
+        private class _CharacterEncoding
         {
             public char Char;
         }
@@ -399,205 +409,205 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0000' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0000'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0000\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0001' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0001'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0001\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0002' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0002'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0002\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0003' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0003'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0003\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0004' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0004'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0004\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0005' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0005'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0005\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0006' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0006'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0006\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0007' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0007'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0007\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0008' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0008'}, str);
                 Assert.AreEqual("{\"Char\":\"\\b\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0009' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0009'}, str);
                 Assert.AreEqual("{\"Char\":\"\\t\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000A' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000A'}, str);
                 Assert.AreEqual("{\"Char\":\"\\n\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000B' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000B'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u000B\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000C' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000C'}, str);
                 Assert.AreEqual("{\"Char\":\"\\f\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000D' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000D'}, str);
                 Assert.AreEqual("{\"Char\":\"\\r\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000E' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000E'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u000E\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u000F' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u000F'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u000F\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0010' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0010'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0010\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0011' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0011'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0011\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0012' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0012'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0012\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0013' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0013'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0013\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0014' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0014'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0014\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0015' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0015'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0015\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0016' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0016'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0016\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0017' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0017'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0017\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0018' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0018'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0018\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u0019' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u0019'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u0019\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001A' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001A'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001A\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001B' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001B'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001B\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001C' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001C'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001C\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001D' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001D'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001D\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001E' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001E'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001E\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\u001F' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\u001F'}, str);
                 Assert.AreEqual("{\"Char\":\"\\u001F\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '\\' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '\\'}, str);
                 Assert.AreEqual("{\"Char\":\"\\\\\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CharacterEncoding { Char = '"' }, str);
+                JSON.Serialize(new _CharacterEncoding {Char = '"'}, str);
                 Assert.AreEqual("{\"Char\":\"\\\"\"}", str.ToString());
             }
 
@@ -729,13 +739,13 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new List<int?> { 0, null, 1, null, 2, null, 3 }, str);
+                JSON.Serialize(new List<int?> {0, null, 1, null, 2, null, 3}, str);
                 Assert.AreEqual("[0,null,1,null,2,null,3]", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new Dictionary<string, double?> { { "hello", null }, {"world", 3.21}}, str);
+                JSON.Serialize(new Dictionary<string, double?> {{"hello", null}, {"world", 3.21}}, str);
                 Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
@@ -752,20 +762,28 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } }, str);
+                JSON.Serialize(new _ValueTypes {A = "hello world", B = 'C', C = new List<int> {3, 1, 4, 1, 5, 9}}, str);
                 Assert.AreEqual("{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new[] { new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, str);
+                JSON.Serialize(
+                    new[] {new _ValueTypes {A = "hello world", B = 'C', C = new List<int> {3, 1, 4, 1, 5, 9}}}, str);
                 Assert.AreEqual("[{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}]", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new Dictionary<string, _ValueTypes> { { "hello", new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, { "world", new _ValueTypes { A = "foo bar", B = 'D', C = new List<int> { 1, 3, 1, 8 } } } }, str);
-                Assert.AreEqual("{\"hello\":{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]},\"world\":{\"A\":\"foo bar\",\"B\":\"D\",\"C\":[1,3,1,8]}}", str.ToString());
+                JSON.Serialize(
+                    new Dictionary<string, _ValueTypes>
+                    {
+                        {"hello", new _ValueTypes {A = "hello world", B = 'C', C = new List<int> {3, 1, 4, 1, 5, 9}}},
+                        {"world", new _ValueTypes {A = "foo bar", B = 'D', C = new List<int> {1, 3, 1, 8}}}
+                    }, str);
+                Assert.AreEqual(
+                    "{\"hello\":{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]},\"world\":{\"A\":\"foo bar\",\"B\":\"D\",\"C\":[1,3,1,8]}}",
+                    str.ToString());
             }
 
             {
@@ -777,7 +795,7 @@ namespace JilTests
 
                 using (var str = new StringWriter())
                 {
-                    JSON.Serialize<_ValueTypes?>(new _ValueTypes { A = "bizz", B = '\0', C = null }, str);
+                    JSON.Serialize<_ValueTypes?>(new _ValueTypes {A = "bizz", B = '\0', C = null}, str);
                     Assert.AreEqual("{\"A\":\"bizz\",\"B\":\"\\u0000\",\"C\":null}", str.ToString());
                 }
             }
@@ -800,8 +818,16 @@ namespace JilTests
         {
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new _CyclicalValueTypes { A = new _CyclicalValueTypes._One { Inner = new _CyclicalValueTypes { B = 123, C = 4.56 } }, B = long.MaxValue, C = 78.90 }, str);
-                Assert.AreEqual("{\"A\":{\"Inner\":{\"A\":null,\"B\":123,\"C\":4.56}},\"B\":9223372036854775807,\"C\":78.9}", str.ToString());
+                JSON.Serialize(
+                    new _CyclicalValueTypes
+                    {
+                        A = new _CyclicalValueTypes._One {Inner = new _CyclicalValueTypes {B = 123, C = 4.56}},
+                        B = long.MaxValue,
+                        C = 78.90
+                    }, str);
+                Assert.AreEqual(
+                    "{\"A\":{\"Inner\":{\"A\":null,\"B\":123,\"C\":4.56}},\"B\":9223372036854775807,\"C\":78.9}",
+                    str.ToString());
             }
         }
 
@@ -843,7 +869,7 @@ namespace JilTests
                     },
                     str,
                     Options.ExcludeNulls
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -855,13 +881,13 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, string>
                     {
-                        { "hello", "world" },
-                        { "foo", null },
-                        { "fizz", "buzz" }
+                        {"hello", "world"},
+                        {"foo", null},
+                        {"fizz", "buzz"}
                     },
                     str,
                     Options.ExcludeNulls
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -907,11 +933,13 @@ namespace JilTests
                     },
                     str,
                     Options.PrettyPrint
-                );
+                    );
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\n \"F\": {\n  \"F\": null,\n  \"E\": {\n   \"F\": null,\n   \"E\": null,\n   \"A\": null,\n   \"B\": null,\n   \"C\": 999,\n   \"D\": null\n  },\n  \"A\": null,\n  \"B\": \"world\",\n  \"C\": null,\n  \"D\": 456\n },\n \"E\": null,\n \"A\": \"hello\",\n \"B\": null,\n \"C\": 123,\n \"D\": null\n}", res);
+                Assert.AreEqual(
+                    "{\n \"F\": {\n  \"F\": null,\n  \"E\": {\n   \"F\": null,\n   \"E\": null,\n   \"A\": null,\n   \"B\": null,\n   \"C\": 999,\n   \"D\": null\n  },\n  \"A\": null,\n  \"B\": \"world\",\n  \"C\": null,\n  \"D\": 456\n },\n \"E\": null,\n \"A\": \"hello\",\n \"B\": null,\n \"C\": 123,\n \"D\": null\n}",
+                    res);
             }
 
             using (var str = new StringWriter())
@@ -939,11 +967,13 @@ namespace JilTests
                     },
                     str,
                     Options.PrettyPrintExcludeNulls
-                );
+                    );
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"B\": \"world\",\n  \"D\": 456\n },\n \"A\": \"hello\",\n \"C\": 123\n}", res);
+                Assert.AreEqual(
+                    "{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"B\": \"world\",\n  \"D\": 456\n },\n \"A\": \"hello\",\n \"C\": 123\n}",
+                    res);
             }
 
             using (var str = new StringWriter())
@@ -951,13 +981,13 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, int?>
                     {
-                        {"hello world", 31415926 },
-                        {"fizz buzz", null },
-                        {"foo bar", 1318 }
+                        {"hello world", 31415926},
+                        {"fizz buzz", null},
+                        {"foo bar", 1318}
                     },
                     str,
                     Options.PrettyPrint
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -969,13 +999,13 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, int?>
                     {
-                        {"hello world", 31415926 },
-                        {"fizz buzz", null },
-                        {"foo bar", 1318 }
+                        {"hello world", 31415926},
+                        {"fizz buzz", null},
+                        {"foo bar", 1318}
                     },
                     str,
                     Options.PrettyPrintExcludeNulls
-                );
+                    );
 
                 var res = str.ToString();
 
@@ -991,21 +1021,23 @@ namespace JilTests
                 JSON.Serialize(
                     new Dictionary<string, string>
                     {
-                        { "hello\nworld", "fizz\0buzz" },
-                        { "\r\t\f\n", "\0\0\0\0\0\0\0\0\0\0" },
-                        { "\0", "\b\b\b\b\b" }
+                        {"hello\nworld", "fizz\0buzz"},
+                        {"\r\t\f\n", "\0\0\0\0\0\0\0\0\0\0"},
+                        {"\0", "\b\b\b\b\b"}
                     },
                     str
-                );
+                    );
 
                 var res = str.ToString();
 
-                Assert.AreEqual(@"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}", res);
+                Assert.AreEqual(
+                    @"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}",
+                    res);
             }
         }
 
         [TestMethod]
-        public void DateTimeFormats()
+        public void DateTimeFormats_Default()
         {
             using (var str = new StringWriter())
             {
@@ -1013,46 +1045,65 @@ namespace JilTests
                     new DateTime(1980, 1, 1),
                     str,
                     Options.Default
-                );
+                    );
 
                 var res = str.ToString();
                 Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_MillisecondsSinceUnixEpoch()
+        {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
                     new DateTime(1980, 1, 1),
                     str,
                     Options.MillisecondsSinceUnixEpoch
-                );
+                    );
 
                 var res = str.ToString();
                 Assert.AreEqual("315532800000", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_SecondsSinceUnixEpoch()
+        {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
                     new DateTime(1980, 1, 1),
                     str,
                     Options.SecondsSinceUnixEpoch
-                );
+                    );
 
                 var res = str.ToString();
                 Assert.AreEqual("315532800", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_ISO8601()
+        {
             using (var str = new StringWriter())
             {
+                var date = new DateTime(1980, 1, 1);
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    date,
                     str,
                     Options.ISO8601
-                );
+                    );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"1980-01-01T05:00:00Z\"", res);
+
+                // since ISO8601 with Z at the end is in UTC time, the expected hours here should be an offset from midnight 
+                // on 1980-01-01 UTC. So in order for the test to pass for everyone, we need to modify our expected time based 
+                // on timezone of local computer that is running the test
+                var expectedDate = TimeZoneInfo.ConvertTimeToUtc(date);
+                var expectedString = string.Format("\"{0:yyyy-MM-ddTHH:mm:ssZ}\"", expectedDate);
+                Assert.AreEqual(expectedString, res);
             }
         }
 
