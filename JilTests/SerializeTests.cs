@@ -30,6 +30,17 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void SimpleObject_ToString()
+        {
+            using (var str = new StringWriter())
+            {
+                var res = JSON.Serialize(new _SimpleObject { Foo = 123 });
+
+                Assert.AreEqual("{\"Foo\":123}", res);
+            }
+        }
+
         public class _Cyclical
         {
             public int Foo;

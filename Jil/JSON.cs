@@ -85,6 +85,21 @@ namespace Jil
             }
         }
 
+        /// <summary>
+        /// Serializes the given data, returning the output as a string.
+        /// 
+        /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+        /// the produced JSON.  If omitted, Options.Default is used.
+        /// </summary>
+        public static string Serialize<T>(T data, Options options = null)
+        {
+            using (var str = new StringWriter())
+            {
+                Serialize(data, str, options);
+                return str.ToString();
+            }
+        }
+
         static void NewtonsoftStyle<T>(T data, TextWriter output, Options options)
         {
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
