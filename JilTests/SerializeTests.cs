@@ -1013,7 +1013,7 @@ namespace JilTests
                     new DateTime(1980, 1, 1),
                     str,
                     Options.Default
-                    );
+                );
 
                 var res = str.ToString();
                 Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
@@ -1029,7 +1029,7 @@ namespace JilTests
                     new DateTime(1980, 1, 1),
                     str,
                     Options.MillisecondsSinceUnixEpoch
-                    );
+                );
 
                 var res = str.ToString();
                 Assert.AreEqual("315532800000", res);
@@ -1045,7 +1045,7 @@ namespace JilTests
                     new DateTime(1980, 1, 1),
                     str,
                     Options.SecondsSinceUnixEpoch
-                    );
+                );
 
                 var res = str.ToString();
                 Assert.AreEqual("315532800", res);
@@ -1062,7 +1062,7 @@ namespace JilTests
                     date,
                     str,
                     Options.ISO8601
-                    );
+                );
 
                 var res = str.ToString();
 
