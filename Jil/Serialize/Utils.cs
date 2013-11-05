@@ -157,12 +157,6 @@ namespace Jil.Serialize
 
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
-            if (t.IsValueType)
-            {
-                // We'll deal with value types in a bit...
-                throw new NotImplementedException();
-            }
-
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
             var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
@@ -171,24 +165,28 @@ namespace Jil.Serialize
 
             foreach (var prop in props)
             {
-                var getMtd = prop.GetMethod;
-                var mtdBody = getMtd.GetMethodBody();
-                var il = mtdBody.GetILAsByteArray();
+                try
+                {
+                    var getMtd = prop.GetMethod;
+                    var mtdBody = getMtd.GetMethodBody();
+                    var il = mtdBody.GetILAsByteArray();
 
-                var fieldHandles = _GetFieldHandles(il);
+                    var fieldHandles = _GetFieldHandles(il);
 
-                var fieldInfos = 
-                    fieldHandles
-                        .Select(
-                            f => 
+                    var fieldInfos =
+                        fieldHandles
+                            .Select(
+                                f =>
                                 {
                                     var genArgs = t.GetGenericArguments();
 
                                     return module.ResolveField(f, genArgs, null);
                                 }
-                        ).ToList();
+                            ).ToList();
 
-                ret[prop] = fieldInfos;
+                    ret[prop] = fieldInfos;
+                }
+                catch { /* Anything that goes wrong in here, we can't really do anything about; just continue with less knowledge */ }
             }
 
             return ret;
