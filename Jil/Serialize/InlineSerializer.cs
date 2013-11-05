@@ -183,7 +183,11 @@ namespace Jil.Serialize
 
         static List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
-            var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
+            var props = forType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null);
+            var fields = forType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
+
+            //var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
+            var members = props.Cast<MemberInfo>().Concat(fields);
 
             if (forType.IsValueType)
             {
