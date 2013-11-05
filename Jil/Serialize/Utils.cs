@@ -67,7 +67,13 @@ namespace Jil.Serialize
                     var asField = m as FieldInfo;
                     if (asField != null)
                     {
-                        return fields[asField];
+                        int fieldAddr;
+                        if (fields.TryGetValue(asField, out fieldAddr))
+                        {
+                            return fieldAddr;
+                        }
+
+                        return int.MaxValue;
                     }
 
                     var asProp = m as PropertyInfo;
@@ -81,7 +87,19 @@ namespace Jil.Serialize
 
                         if (usesFields.Count == 0) return int.MaxValue;
 
-                        return usesFields.Select(f => fields[f]).Min();
+                        return
+                            usesFields.Select(
+                                f =>
+                                {
+                                    int fieldAdd;
+                                    if (fields.TryGetValue(f, out fieldAdd))
+                                    {
+                                        return fieldAdd;
+                                    }
+
+                                    return int.MaxValue;
+                                }
+                           ).Min();
                     }
 
                     return int.MaxValue;
