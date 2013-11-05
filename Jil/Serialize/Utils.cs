@@ -321,77 +321,81 @@ namespace Jil.Serialize
 
         public static Dictionary<FieldInfo, int> FieldOffsetsInMemory(Type t)
         {
-            if (t.IsValueType)
+            try
             {
-                // We'll deal with value types in a bit...
-                throw new NotImplementedException();
-            }
+                var fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
 
-            var fields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+                var emit = Emit<Func<object, ulong[]>>.NewDynamicMethod("_GetOffsetsInMemory" + t.FullName);
+                var retLoc = emit.DeclareLocal<ulong[]>("ret");
 
-            var emit = Emit<Func<object, ulong[]>>.NewDynamicMethod("_GetOffsetsInMemory" + t.FullName);
-            var retLoc = emit.DeclareLocal<ulong[]>("ret");
+                emit.LoadConstant(fields.Length);	// ulong
+                emit.NewArray(typeof(ulong));		// ulong[]
+                emit.StoreLocal(retLoc);			// --empty--
 
-            emit.LoadConstant(fields.Length);	// ulong
-            emit.NewArray(typeof(ulong));		// ulong[]
-            emit.StoreLocal(retLoc);			// --empty--
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    var field = fields[i];
 
-            for (var i = 0; i < fields.Length; i++)
-            {
-                var field = fields[i];
+                    emit.LoadLocal(retLoc);			// ulong[]
+                    emit.LoadConstant(i);			// ulong[] ulong
+
+                    emit.LoadArgument(0);			// ulong[] ulong param#0
+                    emit.CastClass(t);	            // ulong[] ulong param#0
+
+                    emit.LoadFieldAddress(field);	// ulong[] ulong field&
+                    emit.Convert<ulong>();			// ulong[] ulong ulong
+
+                    emit.StoreElement<ulong>();		// --empty--
+                }
 
                 emit.LoadLocal(retLoc);			// ulong[]
-                emit.LoadConstant(i);			// ulong[] ulong
+                emit.Return();					// --empty--
 
-                emit.LoadArgument(0);			// ulong[] ulong param#0
-                emit.CastClass(t);	            // ulong[] ulong param#0
+                var getAddrs = emit.CreateDelegate();
 
-                emit.LoadFieldAddress(field);	// ulong[] ulong field&
-                emit.Convert<ulong>();			// ulong[] ulong ulong
+                var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).FirstOrDefault();
+                var consParameters = cons != null ? cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray() : null;
 
-                emit.StoreElement<ulong>();		// --empty--
+                object obj;
+                if (cons != null)
+                {
+                    obj = cons.Invoke(consParameters);
+                }
+                else
+                {
+                    obj = Activator.CreateInstance(t);
+                }
+
+                var addrs = getAddrs(obj);
+
+                if (addrs.Length == 0)
+                {
+                    return new Dictionary<FieldInfo, int>();
+                }
+
+                var min = addrs.Min();
+
+                var ret = new Dictionary<FieldInfo, int>();
+
+                for (var i = 0; i < fields.Length; i++)
+                {
+                    var field = fields[i];
+
+                    var addr = addrs[i];
+                    var offset = addr - min;
+
+                    ret[field] = (int)offset;
+                }
+
+                return ret;
             }
-
-            emit.LoadLocal(retLoc);			// ulong[]
-            emit.Return();					// --empty--
-
-            var getAddrs = emit.CreateDelegate();
-
-            var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).FirstOrDefault();
-            var consParameters = cons != null ? cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray() : null;
-
-            object obj;
-            if (cons != null)
+            catch
             {
-                obj = cons.Invoke(consParameters);
-            }
-            else
-            {
-                obj = Activator.CreateInstance(t);
-            }
-
-            var addrs = getAddrs(obj);
-
-            if (addrs.Length == 0)
-            {
+                // A lot can go wrong during this, and the common response is just to bail
+                // This catch is much simpler than trying (and probably failing) to enumerate
+                //    all the exceptional cases
                 return new Dictionary<FieldInfo, int>();
             }
-
-            var min = addrs.Min();
-
-            var ret = new Dictionary<FieldInfo, int>();
-
-            for (var i = 0; i < fields.Length; i++)
-            {
-                var field = fields[i];
-
-                var addr = addrs[i];
-                var offset = addr - min;
-
-                ret[field] = (int)offset;
-            }
-
-            return ret;
         }
     }
 }
