@@ -53,7 +53,7 @@ The following types (and any user defined types composed of them) are supported:
   - IList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
-Jil serializes all public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
+Jil serializes all public fields and properties declared by the type being serialized (inherited members are ignored); the order in which they are serialized is not defined (it is unlikely to be in
 declaration order).
 
 ## Configuration
