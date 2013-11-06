@@ -1021,7 +1021,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     str,
                     Options.Default
                 );
@@ -1033,7 +1033,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     str,
                     Options.MillisecondsSinceUnixEpoch
                 );
@@ -1045,7 +1045,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     str,
                     Options.SecondsSinceUnixEpoch
                 );
@@ -1057,13 +1057,13 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                     str,
                     Options.ISO8601
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"1980-01-01T05:00:00Z\"", res);
+                Assert.AreEqual("\"1980-01-01T00:00:00Z\"", res);
             }
         }
 
