@@ -1005,7 +1005,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void DateTimeFormats()
+        public void DateTimeFormats_Default()
         {
             using (var str = new StringWriter())
             {
@@ -1018,7 +1018,11 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_MillisecondsSinceUnixEpoch()
+        {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
@@ -1030,7 +1034,11 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("315532800000", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_SecondsSinceUnixEpoch()
+        {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
@@ -1042,17 +1050,28 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("315532800", res);
             }
+        }
 
+        [TestMethod]
+        public void DateTimeFormats_ISO8601()
+        {
             using (var str = new StringWriter())
             {
+                var date = new DateTime(1980, 1, 1);
                 JSON.Serialize(
-                    new DateTime(1980, 1, 1),
+                    date,
                     str,
                     Options.ISO8601
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"1980-01-01T05:00:00Z\"", res);
+
+                // since ISO8601 with Z at the end is in UTC time, the expected hours here should be an offset from midnight 
+                // on 1980-01-01 UTC. So in order for the test to pass for everyone, we need to modify our expected time based 
+                // on timezone of local computer that is running the test
+                var expectedDate = TimeZoneInfo.ConvertTimeToUtc(date);
+                var expectedString = string.Format("\"{0:yyyy-MM-ddTHH:mm:ssZ}\"", expectedDate);
+                Assert.AreEqual(expectedString, res);
             }
         }
 
