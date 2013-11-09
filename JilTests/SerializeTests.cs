@@ -31,11 +31,11 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void SimpleObject_ToString()
+        public void SerializeToString()
         {
             using (var str = new StringWriter())
             {
-                var res = JSON.Serialize(new _SimpleObject { Foo = 123 });
+                var res = JSON.Serialize(new { Foo = 123 });
 
                 Assert.AreEqual("{\"Foo\":123}", res);
             }
