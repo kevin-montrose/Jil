@@ -5328,6 +5328,35 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void SerializeDynamicToString()
+        {
+            {
+                var str = JSON.SerializeDynamic(
+                    new
+                    {
+                        A = 1,
+                        B = (int?)null,
+                        C = "hello world"
+                    }
+                );
+
+                Assert.AreEqual("{\"A\":1,\"C\":\"hello world\",\"B\":null}", str);
+            }
+
+            {
+                var str = JSON.SerializeDynamic(
+                    new _SerializeDynamicStruct
+                    {
+                        A = 1,
+                        B = false
+                    }
+                );
+
+                Assert.AreEqual("{\"A\":1,\"B\":false}", str);
+            }
+        }
+
         class _LotsOfStrings
         {
             public string A;
