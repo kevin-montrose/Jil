@@ -5401,5 +5401,54 @@ namespace JilTests
                 Assert.AreEqual("{\"A\":null,\"B\":\"hello\",\"C\":\"world\",\"D\":null,\"E\":\"fizz\",\"F\":\"buzz\",\"G\":null,\"H\":\"foo\",\"I\":\"bar\",\"J\":null,\"K\":\"syn\"}", str.ToString());
             }
         }
+
+        // Type fairly similar to one in the Stack Exchange API that gave Jil some trouble
+        class _Inherited<T> : System.Web.Mvc.ContentResult
+            where T : class
+        {
+            public int? total { get; set; }
+            public int? page_size { get; set; }
+            public int? page { get; set; }
+            public string type { get; set; }
+            public List<T> items { get; set; }
+
+            public int? quota_remaining { get; set; }
+            public int? quota_max { get; set; }
+            public int? backoff { get; set; }
+
+            public int? error_id { get; set; }
+            public string error_name { get; set; }
+            public string error_message { get; set; }
+
+            public bool? has_more { get; set; }
+        }
+
+        [TestMethod]
+        public void Inherited()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _Inherited<string>
+                    {
+                        total = 1,
+                        page_size = 2,
+                        page = 3,
+                        type = "foo",
+                        items = new List<string> { "bar", "bizz", "buzz", "baz" },
+                        quota_remaining = 4,
+                        quota_max = 5,
+                        backoff = 6,
+                        error_id = 7,
+                        error_message = "you don goofed",
+                        has_more = true
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true}", res);
+            }
+        }
     }
 }
