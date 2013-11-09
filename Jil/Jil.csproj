@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DateTimeFormat.cs" />
+    <Compile Include="Serialize\CapacityEstimator.cs" />
     <Compile Include="Serialize\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JSON.cs" />
@@ -54,6 +55,7 @@
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\Methods.cs" />
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
+    <Compile Include="Serialize\SerializingAction.cs" />
     <Compile Include="Serialize\TypeCaches.cs" />
   </ItemGroup>
   <ItemGroup>
