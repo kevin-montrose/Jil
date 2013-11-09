@@ -50,24 +50,27 @@ namespace Jil
         internal bool ShouldExcludeNulls { get; private set; }
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
         internal bool IsJSONP { get; private set; }
+        internal bool ShouldIncludeInherited { get; private set; }
 
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
             UseDateTimeFormat = dateFormat;
+            ShouldIncludeInherited = includeInherited;
         }
 
         public override string ToString()
         {
             return
                 string.Format(
-                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3} }}",
+                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4} }}",
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,
-                    JSONP
+                    JSONP,
+                    ShouldIncludeInherited
                 );
         }
     }

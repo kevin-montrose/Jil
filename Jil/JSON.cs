@@ -87,9 +87,39 @@ namespace Jil
 
         static void NewtonsoftStyle<T>(T data, TextWriter output, Options options)
         {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
                 NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStyleExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -111,6 +141,18 @@ namespace Jil
                 return;
             }
 
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStylePrettyPrintInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                NewtonsoftStyleJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls)
             {
                 NewtonsoftStyleExcludeNullsTypeCache<T>.Thunk(output, data, 0);
@@ -123,10 +165,15 @@ namespace Jil
                 return;
             }
 
-
             if (options.IsJSONP)
             {
                 NewtonsoftStyleJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                NewtonsoftStyleInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 

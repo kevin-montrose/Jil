@@ -40,6 +40,86 @@ namespace Jil.Serialize
         }
     }
 
+    static class NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<>), excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintJSONPInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStyleExcludeNullsInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleExcludeNullsInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsInheritedTypeCache<>), excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStylePrettyPrintInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStylePrettyPrintInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStyleJSONPInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleJSONPInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPInheritedTypeCache<>), jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
+    static class NewtonsoftStyleInheritedTypeCache<T>
+    {
+        public static readonly Action<TextWriter, T, int> Thunk;
+
+        static NewtonsoftStyleInheritedTypeCache()
+        {
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleInheritedTypeCache<>), dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        }
+    }
+
     static class NewtonsoftStyleExcludeNullsJSONPTypeCache<T>
     {
         public static readonly Action<TextWriter, T, int> Thunk;

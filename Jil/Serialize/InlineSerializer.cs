@@ -68,17 +68,20 @@ namespace Jil.Serialize
         private readonly bool PrettyPrint;
         private readonly bool JSONP;
         private readonly DateTimeFormat DateFormat;
+        private readonly bool IncludeInherited;
+        
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
         private Emit Emit;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat)
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
             JSONP = jsonp;
             DateFormat = dateFormat;
+            IncludeInherited = includeInherited;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -181,12 +184,18 @@ namespace Jil.Serialize
             }
         }
 
-        static List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
+        List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
-            var props = forType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance).Where(p => p.GetMethod != null);
-            var fields = forType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
+            var flags = BindingFlags.Public | BindingFlags.Instance;
 
-            //var members = forType.GetProperties().Where(p => p.GetMethod != null).Cast<MemberInfo>().Concat(forType.GetFields());
+            if (!IncludeInherited)
+            {
+                flags |= BindingFlags.DeclaredOnly;
+            }
+
+            var props = forType.GetProperties(flags).Where(p => p.GetMethod != null);
+            var fields = forType.GetFields(flags);
+
             var members = props.Cast<MemberInfo>().Concat(fields);
 
             if (forType.IsValueType)
@@ -2946,11 +2955,11 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType = null, bool pretty = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false)
         {
             typeCacheType = typeCacheType ?? typeof(NewtonsoftStyleTypeCache<>);
 
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat);
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited);
 
             return obj.Build();
         }

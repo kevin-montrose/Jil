@@ -5426,11 +5426,11 @@ namespace JilTests
         [TestMethod]
         public void Inherited()
         {
-            using (var str = new StringWriter())
-            {
-                JSON.Serialize(
-                    new _Inherited<string>
+            var obj =
+                new _Inherited<string>
                     {
+                        ContentEncoding = Encoding.UTF8,
+
                         total = 1,
                         page_size = 2,
                         page = 3,
@@ -5442,12 +5442,29 @@ namespace JilTests
                         error_id = 7,
                         error_message = "you don goofed",
                         has_more = true
-                    },
+                    };
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    obj,
                     str
                 );
 
                 var res = str.ToString();
                 Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    obj,
+                    str,
+                    new Options(includeInherited: true)
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true,\"Content\":null,\"ContentType\":null}", res);
             }
         }
     }
