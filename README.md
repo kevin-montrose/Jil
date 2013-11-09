@@ -53,7 +53,7 @@ The following types (and any user defined types composed of them) are supported:
   - IList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
-Jil serializes all public fields and properties declared by the type being serialized (inherited members are ignored); the order in which they are serialized is not defined (it is unlikely to be in
+Jil serializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
 declaration order).
 
 ## Configuration
@@ -68,6 +68,7 @@ Jil's `JSON.Serialize` method takes an optional `Options` parameter which contro
   - Whether or not to exclude null values when serializing dictionaries, and object members
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
+  - Whether or not to include inherited members when serializing
 
 ## Benchmarks
 
