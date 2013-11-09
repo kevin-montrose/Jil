@@ -197,9 +197,39 @@ namespace Jil
 
         static void Milliseconds<T>(T data, TextWriter output, Options options)
         {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
                 MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                MillisecondsExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                MillisecondsPrettyPrintJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                MillisecondsExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -221,6 +251,18 @@ namespace Jil
                 return;
             }
 
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                MillisecondsPrettyPrintInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                MillisecondsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls)
             {
                 MillisecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
@@ -233,10 +275,15 @@ namespace Jil
                 return;
             }
 
-
             if (options.IsJSONP)
             {
                 MillisecondsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                MillisecondsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -245,9 +292,39 @@ namespace Jil
 
         static void Seconds<T>(T data, TextWriter output, Options options)
         {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
                 SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                SecondsExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                SecondsPrettyPrintJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                SecondsPrettyPrintExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                SecondsExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -269,6 +346,18 @@ namespace Jil
                 return;
             }
 
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                SecondsPrettyPrintInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                SecondsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls)
             {
                 SecondsExcludeNullsTypeCache<T>.Thunk(output, data, 0);
@@ -281,10 +370,15 @@ namespace Jil
                 return;
             }
 
-
             if (options.IsJSONP)
             {
                 SecondsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                SecondsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -293,9 +387,39 @@ namespace Jil
 
         static void ISO8601<T>(T data, TextWriter output, Options options)
         {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
                 ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                ISO8601ExcludeNullsJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                ISO8601PrettyPrintJSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                ISO8601PrettyPrintExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                ISO8601ExcludeNullsInheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
@@ -317,6 +441,18 @@ namespace Jil
                 return;
             }
 
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                ISO8601PrettyPrintInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                ISO8601JSONPInheritedTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
             if (options.ShouldExcludeNulls)
             {
                 ISO8601ExcludeNullsTypeCache<T>.Thunk(output, data, 0);
@@ -332,6 +468,12 @@ namespace Jil
             if (options.IsJSONP)
             {
                 ISO8601JSONPTypeCache<T>.Thunk(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                ISO8601InheritedTypeCache<T>.Thunk(output, data, 0);
                 return;
             }
 
