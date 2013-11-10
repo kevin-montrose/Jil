@@ -78,13 +78,18 @@ namespace Jil.Serialize
 
         static Hashtable Cache = new Hashtable();
 
-        public static int Get<T>(Options opts)
+        public static int Get(Type type, Options opts)
         {
-            var key = CapacityKey.For(typeof(T), opts);
+            var key = CapacityKey.For(type, opts);
 
             var ret = Cache[key] ?? DefaultCapacity;
 
             return (int)ret;
+        }
+
+        public static int Get<T>(Options opts)
+        {
+            return Get(typeof(T), opts);
         }
 
         public static void Set<T>(Options opts, int rawEstimate)
