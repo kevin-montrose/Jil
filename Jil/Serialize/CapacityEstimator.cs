@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,114 +11,267 @@ namespace Jil.Serialize
     {
         internal const int ListMultiplier = 10;
         internal const int DictionaryMultiplier = 10;
-        internal const int StringEstimate = 20;
-        internal const int CharacterEstimate = 1;
-        internal const int IntEstimate = 3;
-        internal const int BoolEstimate = 5;
-        internal const int GuidEstimate = 36;
-        internal const int DoubleEstimate = 3;
 
-        public static int For(List<SerializingAction> actions)
+        const int StringEstimate = 20;
+        const int CharacterEstimate = 1;
+        const int IntEstimate = 3;
+        const int BoolEstimate = 5;
+        const int GuidEstimate = 36;
+        const int DoubleEstimate = 4;
+        const int ISO8601Estimate = 20;
+        const int SecondsSinceUnixEpochEstimate = 10;
+        const int MillisecondsSinceUnixEpochEstimate = 13;
+        const int NewtonsoftStyleMillisecondsSinceUnixEpochEstimate = 23;
+        const int RecursiveEstimate = 4;
+
+        static int ForPrimitive(Type primType, Options opts)
         {
+            if (primType.IsIntegerNumberType())
+            {
+                return IntEstimate;
+            }
+
+            if (primType.IsFloatingPointNumberType())
+            {
+                return DoubleEstimate;
+            }
+
+            if (primType == typeof(string))
+            {
+                return StringEstimate + 2; // for quotes
+            }
+
+            if (primType == typeof(char))
+            {
+                return CharacterEstimate + 2; // for quotes
+            }
+
+            if (primType == typeof(bool))
+            {
+                return BoolEstimate;
+            }
+
+            if (primType == typeof(Guid))
+            {
+                return GuidEstimate + 2; // for quotes
+            }
+
+            if (primType == typeof(DateTime))
+            {
+                switch (opts.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.ISO8601: return ISO8601Estimate + 2; // for quotes
+                    case DateTimeFormat.SecondsSinceUnixEpoch: return SecondsSinceUnixEpochEstimate;
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch: return MillisecondsSinceUnixEpochEstimate;
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: return NewtonsoftStyleMillisecondsSinceUnixEpochEstimate + 2; // for quotes
+                    default: throw new Exception("Unexpected DateTimeFormat: " + opts.UseDateTimeFormat);
+                }
+            }
+
+            throw new Exception("Unexpected primitive type: " + primType);
+        }
+
+        static int ForEnum(Type enumType, Options opts)
+        {
+            var longest = Enum.GetNames(enumType).OrderByDescending(_ => _).First();
+
+            var asJson = longest.JsonEscape(opts.IsJSONP);
+
+            return asJson.Length + 2;   // for quotes
+        }
+
+        static int LineBreakAndIndent(Options opts, int depth)
+        {
+            if (opts.ShouldPrettyPrint)
+            {
+                return 1 + depth;   // line-break & indent
+            }
+
+            return 0;
+        }
+
+        static int ForObject(Type objType, Options opts, int depth, HashSet<Type> seenTypes)
+        {
+            if (seenTypes.Contains(objType))
+            {
+                return RecursiveEstimate;
+            }
+
+            seenTypes.Add(objType);
+
+            var flags = BindingFlags.Public | BindingFlags.Instance;
+
+            if (!opts.ShouldIncludeInherited)
+            {
+                flags |= BindingFlags.DeclaredOnly;
+            }
+
+            var props = objType.GetProperties(flags).Where(p => p.GetMethod != null);
+            var fields = objType.GetFields(flags);
+
+            var members = props.Cast<MemberInfo>().Concat(fields).ToList();;
+
             var ret = 0;
 
-            for (var i = 0; i < actions.Count; i++)
+            for (var i = 0; i < members.Count; i++)
             {
-                var act = actions[i];
-                if (act is ListStartAction)
+                if (i == 0)
                 {
-                    var end = Find<ListStartAction, ListEndAction>(actions, i + 1);
-                    var listActs = actions.Skip(i + 1).Take(end - i - 1).ToList();
-                    // '{' + '}' + (',' x (ListMultiplied - 1))
-                    var extra = 2 + (ListMultiplier - 1);
-                    var singleElement = For(listActs);
-                    ret += singleElement * ListMultiplier + extra;
-                    i = end;
-                    continue;
+                    ret += 1;   // {
+                    ret += LineBreakAndIndent(opts, depth);
+                }
+                else
+                {
+                    ret += 1;   // ,
                 }
 
-                if (act is DictionaryStartAction)
+                var member = members[i];
+                var memberType = member.ReturnType();
+
+                var memberLen = member.Name.JsonEscape(opts.IsJSONP).Length;
+                memberLen += 2; // quotes
+
+                if (opts.ShouldPrettyPrint)
                 {
-                    var end = Find<DictionaryStartAction, DictionaryEndAction>(actions, i + 1);
-                    var dictActs = actions.Skip(i + 1).Take(end - i - 1).ToList();
-                    // '{' + '}' + (',' x (DictionaryMultiplier - 1)
-                    var extra = 2 + (DictionaryMultiplier - 1);
-                    var singleElement = For(dictActs);
-                    ret += singleElement * DictionaryMultiplier + extra;
-                    i = end;
-                    continue;
+                    memberLen += 2; // colon-space
+                }
+                else
+                {
+                    memberLen += 1; // colon
                 }
 
-                ret += For(act);
+                memberLen += For(memberType, opts, depth, seenTypes);
+
+                ret += memberLen;
+
+                if (i == members.Count - 1)
+                {
+                    ret += LineBreakAndIndent(opts, depth - 1);
+                    ret += 1;   // }
+                }
+                else
+                {
+                    ret += LineBreakAndIndent(opts, depth);
+                }
             }
 
             return ret;
         }
 
-        static int For(SerializingAction act)
+        static int ForList(Type listType, Options opts, int depth, HashSet<Type> seenTypes)
         {
-            var asStr = act as WriteStringAction;
-            if (asStr != null)
+            var ret = 0;
+            ret += 1;   // [
+
+            var elemType = listType.GetListInterface().GetGenericArguments()[0];
+            var elemLen = For(elemType, opts, depth, seenTypes);
+
+            ret += elemLen * ListMultiplier;
+
+            if (opts.ShouldPrettyPrint)
             {
-                return asStr.String.Length;
+                ret += (ListMultiplier - 1) * 2;    // comma-space
+            }
+            else
+            {
+                ret += (ListMultiplier - 1);        // comma
             }
 
-            if (act is WriteEncodedStringAction)
-            {
-                return StringEstimate;
-            }
+            ret += 1;   // ]
 
-            if (act is WriteCharAction)
-            {
-                return CharacterEstimate;
-            }
-
-            if (act is WriteIntAction)
-            {
-                return IntEstimate;
-            }
-
-            if (act is WriteBoolAction)
-            {
-                return BoolEstimate;
-            }
-
-            if (act is WriteGuidAction)
-            {
-                return GuidEstimate;
-            }
-
-            if (act is WriteDoubleAction)
-            {
-                return DoubleEstimate;
-            }
-
-            throw new Exception("Unexpected SerializingAction: " + act);
+            return ret;
         }
 
-        static int Find<StartAct, EndAct>(List<SerializingAction> actions, int i)
-            where StartAct : SerializingAction
-            where EndAct : SerializingAction
+        static int ForDictionary(Type dictType, Options opts, int depth, HashSet<Type> seenTypes)
         {
-            var pending = 0;
-            for (; i < actions.Count; i++)
+            var ret = 0;
+
+            var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
+            var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
+
+            var keyLen = For(keyType, opts, depth, seenTypes);
+
+            if (keyType != typeof(char) && keyType != typeof(string))
             {
-                var act = actions[i];
-                if (act is StartAct)
+                keyLen += 2;    // quotes
+            }
+
+            var valLen = For(valType, opts, depth, seenTypes);
+
+            foreach (var i in Enumerable.Range(0, DictionaryMultiplier))
+            {
+                if (i == 0)
                 {
-                    pending++;
-                    continue;
+                    ret += 1;   // {
+                    ret += LineBreakAndIndent(opts, depth);
+                }
+                else
+                {
+                    ret += 1;   // ,
                 }
 
-                if (act is EndAct)
+                var memberLen = keyLen;
+
+                if (opts.ShouldPrettyPrint)
                 {
-                    if (pending == 0) return i;
-                    pending--;
-                    continue;
+                    memberLen += 2; // colon-space
+                }
+                else
+                {
+                    memberLen += 1; // colon
+                }
+
+                memberLen += valLen;
+
+                ret += memberLen;
+
+                if (i == DictionaryMultiplier - 1)
+                {
+                    ret += LineBreakAndIndent(opts, depth - 1);
+                    ret += 1;   // }
+                }
+                else
+                {
+                    ret += LineBreakAndIndent(opts, depth);
                 }
             }
 
-            throw new Exception("No closing SerializingAction found, couldn't estimate capacity");
+            return ret;
+        }
+
+        public static int For(Type forType, Options opts, int depth, HashSet<Type> seenTypes = null)
+        {
+            seenTypes = seenTypes ?? new HashSet<Type>();
+
+            if (forType.IsNullableType())
+            {
+                // Assume the nullable typically has a value
+                var inner = Nullable.GetUnderlyingType(forType);
+
+                return For(inner, opts, depth, seenTypes);
+            }
+
+            if (forType.IsPrimitiveType())
+            {
+                return ForPrimitive(forType, opts);
+            }
+
+            if (forType.IsDictionaryType())
+            {
+                return ForDictionary(forType, opts, depth + 1, seenTypes);
+            }
+
+            if (forType.IsListType())
+            {
+                return ForList(forType, opts, depth, seenTypes);
+            }
+
+            if (forType.IsEnum)
+            {
+                return ForEnum(forType, opts);
+            }
+
+            return ForObject(forType, opts, depth + 1, seenTypes);
         }
     }
 }

@@ -74,8 +74,6 @@ namespace Jil.Serialize
 
         private Emit Emit;
 
-        public List<SerializingAction> Actions = new List<SerializingAction>();
-
         internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
         {
             RecusionLookupType = recusionLookupType;
@@ -101,13 +99,8 @@ namespace Jil.Serialize
         }
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
-        void WriteString(string str, bool trackForEstimate = false)
+        void WriteString(string str)
         {
-            if (trackForEstimate)
-            {
-                Actions.Add(WriteStringAction.For(str));
-            }
-
             Emit.LoadArgument(0);
             Emit.LoadConstant(str);
             Emit.CallVirtual(TextWriter_WriteString);
@@ -532,9 +525,9 @@ namespace Jil.Serialize
                 LoadProperty(totalMs);                      // TextWriter double
                 Emit.Convert<long>();                       // TextWriter int
 
-                WriteString("\"\\/Date(", trackForEstimate: true);          // TextWriter int
+                WriteString("\"\\/Date(");                                  // TextWriter int
                 WritePrimitive(typeof(long), quotesNeedHandling: false);    // --empty--
-                WriteString(")\\/\"", trackForEstimate: true);              // --empty--
+                WriteString(")\\/\"");                                      // --empty--
 
                 return;
             }
@@ -547,9 +540,9 @@ namespace Jil.Serialize
             Emit.LoadConstant(10000L);                      // TextWriter long 10000
             Emit.Divide();                                  // TextWriter long
 
-            WriteString("\"\\/Date(", trackForEstimate: true);          // TextWriter int
+            WriteString("\"\\/Date(");                                  // TextWriter int
             WritePrimitive(typeof(long), quotesNeedHandling: false);    // --empty--
-            WriteString(")\\/\"", trackForEstimate: true);              // --empty--
+            WriteString(")\\/\"");                                      // --empty--
         }
 
         void WriteMillisecondsStyleDateTime()
@@ -741,8 +734,6 @@ namespace Jil.Serialize
 
             if (primitiveType == typeof(string))
             {
-                Actions.Add(new WriteEncodedStringAction());
-
                 if (quotesNeedHandling)
                 {
                     Emit.Call(GetWriteEncodedStringWithQuotesMethod());
@@ -772,8 +763,6 @@ namespace Jil.Serialize
                 var trueLabel = Emit.DefineLabel();
                 var done = Emit.DefineLabel();
 
-                Actions.Add(new WriteBoolAction());
-
                 Emit.BranchIfTrue(trueLabel);   // TextWriter
                 Emit.Pop();                     // --empty--
                 WriteString("false");           // --empty--
@@ -800,8 +789,6 @@ namespace Jil.Serialize
             {
                 var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
                 var done = Emit.DefineLabel();
-
-                Actions.Add(new WriteIntAction());
 
                 Emit.Duplicate();               // TextWriter int int
 
@@ -845,8 +832,6 @@ namespace Jil.Serialize
 
             if (isIntegerType && UseCustomIntegerToString)
             {
-                Actions.Add(new WriteIntAction());
-
                 if (primitiveType == typeof(int))
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
@@ -880,8 +865,6 @@ namespace Jil.Serialize
                 }
             }
 
-            Actions.Add(new WriteDoubleAction());
-
             Emit.CallVirtual(builtInMtd);       // --empty--
         }
 
@@ -891,8 +874,6 @@ namespace Jil.Serialize
             {
                 WriteString("\"");          // TextWriter Guid
             }
-
-            Actions.Add(new WriteCharAction());
 
             Emit.LoadLocal(CharBuffer);     // TextWriter Guid char[]
 
@@ -920,8 +901,6 @@ namespace Jil.Serialize
             {
                 WriteString("\"");      // TextWriter Guid
             }
-
-            Actions.Add(new WriteGuidAction());
 
             using (var loc = Emit.DeclareLocal<Guid>())
             {
@@ -969,10 +948,8 @@ namespace Jil.Serialize
 
             if (quotesNeedHandling)
             {
-                WriteString("\"", trackForEstimate: true);
+                WriteString("\"");
             }
-
-            Actions.Add(new WriteCharAction());
 
             var done = Emit.DefineLabel();
             var slash = Emit.DefineLabel();
@@ -1060,7 +1037,7 @@ namespace Jil.Serialize
 
             if (quotesNeedHandling)
             {
-                WriteString("\"", trackForEstimate: true);
+                WriteString("\"");
             }
         }
 
@@ -1114,7 +1091,7 @@ namespace Jil.Serialize
             Emit.Branch(end);                       // --empty--
 
             Emit.MarkLabel(notNull);                    // --empty--
-            WriteString("{", trackForEstimate: true);   // --empty--
+            WriteString("{");                           // --empty--
 
             IncreaseIndent();
 
@@ -1134,21 +1111,21 @@ namespace Jil.Serialize
                         keyString = ",\"" + member.Name.JsonEscape(JSONP) + "\":";
                     }
 
-                    WriteString(keyString, trackForEstimate: true); // --empty--
-                    WriteMember(member, inLocal);                   // --empty--
+                    WriteString(keyString);         // --empty--
+                    WriteMember(member, inLocal);   // --empty--
                 }
                 else
                 {
                     if (!firstPass)
                     {
-                        WriteString(",", trackForEstimate: true);
+                        WriteString(",");
                     }
 
                     LineBreakAndIndent();
 
                     firstPass = false;
 
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ", trackForEstimate: true);
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");
 
                     WriteMember(member, inLocal);
                 }
@@ -1156,7 +1133,7 @@ namespace Jil.Serialize
 
             DecreaseIndent();
 
-            WriteString("}", trackForEstimate: true);       // --empty--
+            WriteString("}");       // --empty--
 
             Emit.MarkLabel(end);
         }
@@ -1207,8 +1184,8 @@ namespace Jil.Serialize
 
             Emit.Branch(end);                       // --empty--
 
-            Emit.MarkLabel(notNull);                    // --empty--
-            WriteString("{", trackForEstimate: true);   // --empty--
+            Emit.MarkLabel(notNull);    // --empty--
+            WriteString("{");           // --empty--
 
             IncreaseIndent();
 
@@ -1245,7 +1222,7 @@ namespace Jil.Serialize
 
             DecreaseIndent();                               // --empty--
 
-            WriteString("}", trackForEstimate: true);       // --empty--
+            WriteString("}");                               // --empty--
 
             Emit.MarkLabel(end);                            // --empty--
         }
@@ -1283,7 +1260,7 @@ namespace Jil.Serialize
             Emit.Branch(end);               // obj(*?)
 
             Emit.MarkLabel(notNull);                    // obj(*?)
-            WriteString("{", trackForEstimate: true);   // obj(*?)
+            WriteString("{");                           // obj(*?)
 
             IncreaseIndent();           
 
@@ -1301,7 +1278,7 @@ namespace Jil.Serialize
 
             DecreaseIndent();
 
-            WriteString("}", trackForEstimate: true);   // obj(*?)
+            WriteString("}");       // obj(*?)
 
             Emit.MarkLabel(end);    // obj(*?)
             Emit.Pop();             // --empty--
@@ -1383,7 +1360,7 @@ namespace Jil.Serialize
             Emit.LoadLocal(isFirst);        // bool
             Emit.BranchIfTrue(writeValue);  // --empty--
 
-            WriteString(",", trackForEstimate: true);
+            WriteString(",");
 
             Emit.MarkLabel(writeValue);     // --empty--
 
@@ -1397,11 +1374,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ", trackForEstimate: true);   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":", trackForEstimate: true);   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
             }
 
             WriteMember(member, inLocal);           // --empty--
@@ -1456,7 +1433,7 @@ namespace Jil.Serialize
             Emit.LoadLocal(isFirst);        // bool
             Emit.BranchIfTrue(writeValue);  // --empty--
 
-            WriteString(",", trackForEstimate: true);
+            WriteString(",");
 
             Emit.MarkLabel(writeValue);     // --empty--
 
@@ -1470,11 +1447,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ", trackForEstimate: true);   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":", trackForEstimate: true);   // --empty--
+                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
             }
 
             WriteMember(member, inLocal);           // --empty--
@@ -1744,36 +1721,57 @@ namespace Jil.Serialize
 
         void WriteList(Type listType, Sigil.Local inLocal = null)
         {
-            try
+            if (listType.IsArray && UseFastArrays)
             {
-                Actions.Add(new ListStartAction());
+                WriteArrayFast(listType, inLocal);
+                return;
+            }
 
-                if (listType.IsArray && UseFastArrays)
-                {
-                    WriteArrayFast(listType, inLocal);
-                    return;
-                }
+            if (UseFastLists)
+            {
+                WriteListFast(listType, inLocal);
+                return;
+            }
 
-                if (UseFastLists)
-                {
-                    WriteListFast(listType, inLocal);
-                    return;
-                }
+            var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
-                var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
+            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
+            var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
+            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
-                var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
-                var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
-                var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
-                var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
+            var iList = typeof(IList<>).MakeGenericType(elementType);
 
-                var iList = typeof(IList<>).MakeGenericType(elementType);
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
+            var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
-                var isRecursive = RecursiveTypes.ContainsKey(elementType);
-                var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
+            var notNull = Emit.DefineLabel();
 
-                var notNull = Emit.DefineLabel();
+            if (inLocal != null)
+            {
+                Emit.LoadLocal(inLocal);
+            }
+            else
+            {
+                Emit.LoadArgument(1);
+            }
 
+            var end = Emit.DefineLabel();
+
+            Emit.BranchIfTrue(notNull);
+            if (!ExcludeNulls)
+            {
+                WriteString("null");
+            }
+            Emit.Branch(end);
+
+            Emit.MarkLabel(notNull);
+            WriteString("[");
+
+            var done = Emit.DefineLabel();
+
+            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
+            {
                 if (inLocal != null)
                 {
                     Emit.LoadLocal(inLocal);
@@ -1783,63 +1781,12 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);
                 }
 
-                var end = Emit.DefineLabel();
+                Emit.CastClass(iList);                        // IList<>
+                Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<>
+                Emit.StoreLocal(e);                           // --empty--
 
-                Emit.BranchIfTrue(notNull);
-                if (!ExcludeNulls)
+                // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {
-                    WriteString("null");
-                }
-                Emit.Branch(end);
-
-                Emit.MarkLabel(notNull);
-                WriteString("[");
-
-                var done = Emit.DefineLabel();
-
-                using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
-                {
-                    if (inLocal != null)
-                    {
-                        Emit.LoadLocal(inLocal);
-                    }
-                    else
-                    {
-                        Emit.LoadArgument(1);
-                    }
-
-                    Emit.CastClass(iList);                        // IList<>
-                    Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<>
-                    Emit.StoreLocal(e);                           // --empty--
-
-                    // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
-                    {
-                        Emit.LoadLocal(e);                      // IEnumerator<>
-                        Emit.CallVirtual(enumeratorMoveNext);   // bool
-                        Emit.BranchIfFalse(done);               // --empty--
-
-                        if (isRecursive)
-                        {
-                            var loc = RecursiveTypes[elementType];
-
-                            Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
-                        }
-
-                        if (preloadTextWriter)
-                        {
-                            Emit.LoadArgument(0);               // Action<>? TextWriter
-                        }
-
-                        Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
-                        LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
-
-                        WriteElement(elementType);   // --empty--
-                    }
-
-                    var loop = Emit.DefineLabel();
-
-                    Emit.MarkLabel(loop);
-
                     Emit.LoadLocal(e);                      // IEnumerator<>
                     Emit.CallVirtual(enumeratorMoveNext);   // bool
                     Emit.BranchIfFalse(done);               // --empty--
@@ -1859,30 +1806,51 @@ namespace Jil.Serialize
                     Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
                     LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
 
-                    if (PrettyPrint)
-                    {
-                        WriteString(", ");
-                    }
-                    else
-                    {
-                        WriteString(",");
-                    }
-
                     WriteElement(elementType);   // --empty--
-
-                    Emit.Branch(loop);
                 }
 
-                Emit.MarkLabel(done);
+                var loop = Emit.DefineLabel();
 
-                WriteString("]");
+                Emit.MarkLabel(loop);
 
-                Emit.MarkLabel(end);
+                Emit.LoadLocal(e);                      // IEnumerator<>
+                Emit.CallVirtual(enumeratorMoveNext);   // bool
+                Emit.BranchIfFalse(done);               // --empty--
+
+                if (isRecursive)
+                {
+                    var loc = RecursiveTypes[elementType];
+
+                    Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                }
+
+                if (preloadTextWriter)
+                {
+                    Emit.LoadArgument(0);               // Action<>? TextWriter
+                }
+
+                Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? type
+
+                if (PrettyPrint)
+                {
+                    WriteString(", ");
+                }
+                else
+                {
+                    WriteString(",");
+                }
+
+                WriteElement(elementType);   // --empty--
+
+                Emit.Branch(loop);
             }
-            finally
-            {
-                Actions.Add(new ListEndAction());
-            }
+
+            Emit.MarkLabel(done);
+
+            WriteString("]");
+
+            Emit.MarkLabel(end);
         }
 
         void WriteElement(Type elementType)
@@ -1945,22 +1913,13 @@ namespace Jil.Serialize
 
         void WriteDictionary(Type dictType, Sigil.Local inLocal = null)
         {
-            try
+            if (!ExcludeNulls)
             {
-                Actions.Add(new DictionaryStartAction());
-
-                if (!ExcludeNulls)
-                {
-                    WriteDictionaryWithNulls(dictType, inLocal);
-                }
-                else
-                {
-                    WriteDictionaryWithoutNulls(dictType, inLocal);
-                }
+                WriteDictionaryWithNulls(dictType, inLocal);
             }
-            finally
+            else
             {
-                Actions.Add(new DictionaryEndAction());
+                WriteDictionaryWithoutNulls(dictType, inLocal);
             }
         }
 
@@ -2013,7 +1972,7 @@ namespace Jil.Serialize
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
-            WriteString("{", trackForEstimate: true);
+            WriteString("{");
 
             IncreaseIndent();
 
@@ -2082,7 +2041,7 @@ namespace Jil.Serialize
 
             DecreaseIndent();
 
-            WriteString("}", trackForEstimate: true);
+            WriteString("}");
 
             Emit.MarkLabel(end);
         }
@@ -3004,9 +2963,11 @@ namespace Jil.Serialize
 
             var ret = obj.Build();
 
-            var estimatedInitialCapacity = CapacityEstimator.For(obj.Actions);
+            var opts = new Options(pretty, excludeNulls, jsonp, dateFormat, includeInherited);
 
-            CapacityCache.Set<BuildForType>(new Options(pretty, excludeNulls, jsonp, dateFormat, includeInherited), estimatedInitialCapacity);
+            var estimatedInitialCapacity = CapacityEstimator.For(typeof(BuildForType), opts, 0);
+
+            CapacityCache.Set<BuildForType>(opts, estimatedInitialCapacity);
 
             return ret;
         }

@@ -92,7 +92,7 @@ namespace JilTests
             }
         }
 
-        class _CapacityEstimator1
+        class _CapacityEstimator
         {
             public int Hello { get; set; }
             public double World { get; set; }
@@ -107,25 +107,78 @@ namespace JilTests
                 Assert.AreEqual(16, cap);
                 var str = CapacityEstimatorToString(serialize, 123);
                 Assert.IsTrue(str.Length <= cap);
-                Assert.IsTrue(str.Length < 16 || str.Length > cap / 2); // special case, as 2
+                Assert.IsTrue(str.Length < 16 || str.Length > cap / 2); // special case
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(int), Jil.Options.Default, 0));
             }
 
             {
-                var serialize = InlineSerializerHelper.Build<_CapacityEstimator1>();
-                var cap = CapacityCache.Get<_CapacityEstimator1>(Jil.Options.Default);
+                var serialize = InlineSerializerHelper.Build<_CapacityEstimator>();
+                var cap = CapacityCache.Get<_CapacityEstimator>(Jil.Options.Default);
                 Assert.AreEqual(32, cap);
-                var str = CapacityEstimatorToString(serialize, new _CapacityEstimator1 { Hello = 456, World = 10.2 });
+                var str = CapacityEstimatorToString(serialize, new _CapacityEstimator { Hello = 456, World = 10.2 });
                 Assert.IsTrue(str.Length <= cap);
                 Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(_CapacityEstimator), Jil.Options.Default, 0));
             }
 
             {
                 var serialize = InlineSerializerHelper.Build<List<int>>();
                 var cap = CapacityCache.Get<List<int>>(Jil.Options.Default);
-                Assert.AreEqual(128, cap);
-                var str = CapacityEstimatorToString(serialize, new List<int> { 123, 456, 789, 012, 345, 678, 901, 234, 567, 890 });
+                Assert.AreEqual(64, cap);
+                var str = CapacityEstimatorToString(serialize, new List<int> { 123, 456, 789, -12, 345, 678, 901, 234, 567, 890 });
                 Assert.IsTrue(str.Length <= cap);
                 Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(List<int>), Jil.Options.Default, 0));
+            }
+
+            {
+                var serialize = InlineSerializerHelper.Build<List<Guid>>();
+                var cap = CapacityCache.Get<List<Guid>>(Jil.Options.Default);
+                Assert.AreEqual(512, cap);
+                var str = CapacityEstimatorToString(serialize, Enumerable.Range(0, Jil.Serialize.CapacityEstimator.ListMultiplier).Select(_ => Guid.NewGuid()).ToList());
+                Assert.IsTrue(str.Length <= cap);
+                Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(List<Guid>), Jil.Options.Default, 0));
+            }
+
+            {
+                var serialize = InlineSerializerHelper.Build<List<DateTime>>();
+                var cap = CapacityCache.Get<List<DateTime>>(Jil.Options.Default);
+                Assert.AreEqual(512, cap);
+                var str = CapacityEstimatorToString(serialize, Enumerable.Range(0, Jil.Serialize.CapacityEstimator.ListMultiplier).Select(_ => DateTime.UtcNow).ToList());
+                Assert.IsTrue(str.Length <= cap);
+                Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(List<DateTime>), Jil.Options.Default, 0));
+            }
+
+            {
+                var serialize = InlineSerializerHelper.Build<Dictionary<int, int>>();
+                var cap = CapacityCache.Get<Dictionary<int, int>>(Jil.Options.Default);
+                Assert.AreEqual(128, cap);
+                var str = CapacityEstimatorToString(serialize, Enumerable.Range(0, Jil.Serialize.CapacityEstimator.DictionaryMultiplier).ToDictionary(_ => 100 + _, _ => 100 + _));
+                Assert.IsTrue(str.Length <= cap);
+                Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(Dictionary<int, int>), Jil.Options.Default, 0));
+            }
+
+            {
+                var serialize = InlineSerializerHelper.Build<Dictionary<string, int>>();
+                var cap = CapacityCache.Get<Dictionary<string, int>>(Jil.Options.Default);
+                Assert.AreEqual(512, cap);
+                var str = CapacityEstimatorToString(serialize, Enumerable.Range(0, Jil.Serialize.CapacityEstimator.DictionaryMultiplier).ToDictionary(_ => "1234567890123456789" + _.ToString("X"), _ => 100 + _));
+                Assert.IsTrue(str.Length <= cap);
+                Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(Dictionary<string, int>), Jil.Options.Default, 0));
+            }
+
+            {
+                var serialize = InlineSerializerHelper.Build<Dictionary<string, _CapacityEstimator>>();
+                var cap = CapacityCache.Get<Dictionary<string, _CapacityEstimator>>(Jil.Options.Default);
+                Assert.AreEqual(512, cap);
+                var str = CapacityEstimatorToString(serialize, Enumerable.Range(0, Jil.Serialize.CapacityEstimator.DictionaryMultiplier).ToDictionary(_ => "1234567890123456789" + _.ToString("X"), _ => new _CapacityEstimator { Hello = 456, World = 10.2 }));
+                Assert.IsTrue(str.Length <= cap);
+                Assert.IsTrue(str.Length > cap / 2);
+                Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(Dictionary<string, _CapacityEstimator>), Jil.Options.Default, 0));
             }
         }
     }
