@@ -636,20 +636,20 @@ namespace JilTests
         [TestMethod]
         public void UseAutoSizedStringWriter()
         {
+            var fastOptions = new Jil.Options(estimateOutputSize: true);
+
             Action<TextWriter, _UseAutoSizedStringWriter, int> fast =
                 (str, model, ignored) =>
                 {
-                    Jil.JSON.UseAutoSizedStringWriter = true;
-                    Jil.JSON.Serialize(model);
-                    Jil.JSON.UseAutoSizedStringWriter = true;
+                    Jil.JSON.Serialize(model, fastOptions);
                 };
+
+            var normalOptions = new Jil.Options(estimateOutputSize: false);
 
             Action<TextWriter, _UseAutoSizedStringWriter, int> normal =
                 (str, model, ignored) =>
                 {
-                    Jil.JSON.UseAutoSizedStringWriter = false;
-                    Jil.JSON.Serialize(model);
-                    Jil.JSON.UseAutoSizedStringWriter = true;
+                    Jil.JSON.Serialize(model, normalOptions);
                 };
 
             var rand = new Random(70490340);
@@ -660,9 +660,9 @@ namespace JilTests
                 toSerialize.Add(
                     new _UseAutoSizedStringWriter
                     {
-                        A = rand.Next(999),
-                        B = rand.Next(999),
-                        C = Enumerable.Range(5, rand.Next(5) + 5).Select(_ => rand.Next()).ToList(),
+                        A = rand.Next(1000),
+                        B = rand.Next(1000),
+                        C = Enumerable.Range(5, rand.Next(5) + 5).Select(_ => rand.Next(1000)).ToList(),
                         D = Enumerable.Range(5, rand.Next(5) + 5).ToDictionary(_ => _, _ => _RandGuid(rand))
                     }
                 );
