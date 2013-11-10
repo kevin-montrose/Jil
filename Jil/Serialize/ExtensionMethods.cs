@@ -230,6 +230,14 @@ namespace Jil.Serialize
                 t == typeof(ulong);
         }
 
+        public static bool IsFloatingPointNumberType(this Type t)
+        {
+            return
+                t == typeof(float) ||
+                t == typeof(double) ||
+                t == typeof(decimal);
+        }
+
         public static List<Type> InvolvedTypes(this Type t)
         {
             var ret = new List<Type>();
