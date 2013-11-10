@@ -662,8 +662,8 @@ namespace JilTests
                     {
                         A = rand.Next(999),
                         B = rand.Next(999),
-                        C = Enumerable.Range(5, rand.Next(10) + 5).Select(_ => rand.Next()).ToList(),
-                        //D = Enumerable.Range(5, rand.Next(10) + 5).ToDictionary(_ => _, _ => _RandGuid(rand))
+                        C = Enumerable.Range(5, rand.Next(5) + 5).Select(_ => rand.Next()).ToList(),
+                        D = Enumerable.Range(5, rand.Next(5) + 5).ToDictionary(_ => _, _ => _RandGuid(rand))
                     }
                 );
             }
