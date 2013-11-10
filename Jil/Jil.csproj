@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DateTimeFormat.cs" />
+    <Compile Include="Serialize\CapacityCache.cs" />
     <Compile Include="Serialize\CapacityEstimator.cs" />
     <Compile Include="Serialize\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
