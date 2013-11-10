@@ -880,6 +880,8 @@ namespace Jil.Serialize
                 }
             }
 
+            Actions.Add(new WriteDoubleAction());
+
             Emit.CallVirtual(builtInMtd);       // --empty--
         }
 
@@ -1517,8 +1519,8 @@ namespace Jil.Serialize
             }
             Emit.Branch(end);                   // --empty--
 
-            Emit.MarkLabel(notNull);                    // --empty--
-            WriteString("[", trackForEstimate: true);   // --empty--
+            Emit.MarkLabel(notNull);            // --empty--
+            WriteString("[");                   // --empty--
 
             var done = Emit.DefineLabel();
 
@@ -1586,11 +1588,11 @@ namespace Jil.Serialize
 
                     if (PrettyPrint)
                     {
-                        WriteString(", ", trackForEstimate: true);  // Action<>? TextWriter? type
+                        WriteString(", ");                  // Action<>? TextWriter? type
                     }
                     else
                     {
-                        WriteString(",", trackForEstimate: true);   // Action<>? TextWriter? type
+                        WriteString(",");                   // Action<>? TextWriter? type
                     }
 
                     WriteElement(elementType);              // --empty--
@@ -1606,7 +1608,7 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);   // --empty--
 
-            WriteString("]", trackForEstimate: true);   // --empty--
+            WriteString("]");       // --empty--
 
             Emit.MarkLabel(end);    // --empty--
         }
@@ -1647,8 +1649,8 @@ namespace Jil.Serialize
             }
             Emit.Branch(end);                   // --empty--
 
-            Emit.MarkLabel(notNull);                    // --empty--
-            WriteString("[", trackForEstimate: true);   // --empty--
+            Emit.MarkLabel(notNull);            // --empty--
+            WriteString("[");                   // --empty--
 
             var done = Emit.DefineLabel();
 
@@ -1715,11 +1717,11 @@ namespace Jil.Serialize
 
                     if (PrettyPrint)
                     {
-                        WriteString(", ", trackForEstimate: true);  // Action<>? TextWriter? type
+                        WriteString(", ");                  // Action<>? TextWriter? type
                     }
                     else
                     {
-                        WriteString(",", trackForEstimate: true);   // Action<>? TextWriter? type
+                        WriteString(",");                   // Action<>? TextWriter? type
                     }
 
                     WriteElement(elementType);              // --empty--
@@ -1735,7 +1737,7 @@ namespace Jil.Serialize
 
             Emit.MarkLabel(done);   // --empty--
 
-            WriteString("]", trackForEstimate: true);   // --empty--
+            WriteString("]");       // --empty--
 
             Emit.MarkLabel(end);    // --empty--
         }
@@ -1791,7 +1793,7 @@ namespace Jil.Serialize
                 Emit.Branch(end);
 
                 Emit.MarkLabel(notNull);
-                WriteString("[", trackForEstimate: true);
+                WriteString("[");
 
                 var done = Emit.DefineLabel();
 
@@ -1859,11 +1861,11 @@ namespace Jil.Serialize
 
                     if (PrettyPrint)
                     {
-                        WriteString(", ", trackForEstimate: true);
+                        WriteString(", ");
                     }
                     else
                     {
-                        WriteString(",", trackForEstimate: true);
+                        WriteString(",");
                     }
 
                     WriteElement(elementType);   // --empty--
@@ -1873,7 +1875,7 @@ namespace Jil.Serialize
 
                 Emit.MarkLabel(done);
 
-                WriteString("]", trackForEstimate: true);
+                WriteString("]");
 
                 Emit.MarkLabel(end);
             }

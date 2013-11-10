@@ -8,13 +8,14 @@ namespace Jil.Serialize
 {
     class CapacityEstimator
     {
-        const int ListMultiplier = 10;
-        const int DictionaryMultiplier = 10;
-        const int StringEstimate = 20;
-        const int CharacterEstimate = 1;
-        const int IntEstimate = 3;
-        const int BoolEstimate = 5;
-        const int GuidEstimate = 36;
+        internal const int ListMultiplier = 10;
+        internal const int DictionaryMultiplier = 10;
+        internal const int StringEstimate = 20;
+        internal const int CharacterEstimate = 1;
+        internal const int IntEstimate = 3;
+        internal const int BoolEstimate = 5;
+        internal const int GuidEstimate = 36;
+        internal const int DoubleEstimate = 3;
 
         public static int For(List<SerializingAction> actions)
         {
@@ -27,7 +28,10 @@ namespace Jil.Serialize
                 {
                     var end = Find<ListStartAction, ListEndAction>(actions, i + 1);
                     var listActs = actions.Skip(i + 1).Take(end - i - 1).ToList();
-                    ret += For(listActs) * ListMultiplier;
+                    // '{' + '}' + (',' x (ListMultiplied - 1))
+                    var extra = 2 + (ListMultiplier - 1);
+                    var singleElement = For(listActs);
+                    ret += singleElement * ListMultiplier + extra;
                     i = end;
                     continue;
                 }
@@ -36,7 +40,10 @@ namespace Jil.Serialize
                 {
                     var end = Find<DictionaryStartAction, DictionaryEndAction>(actions, i + 1);
                     var dictActs = actions.Skip(i + 1).Take(end - i - 1).ToList();
-                    ret += For(dictActs) * DictionaryMultiplier;
+                    // '{' + '}' + (',' x (DictionaryMultiplier - 1)
+                    var extra = 2 + (DictionaryMultiplier - 1);
+                    var singleElement = For(dictActs);
+                    ret += singleElement * DictionaryMultiplier + extra;
                     i = end;
                     continue;
                 }
@@ -78,6 +85,11 @@ namespace Jil.Serialize
             if (act is WriteGuidAction)
             {
                 return GuidEstimate;
+            }
+
+            if (act is WriteDoubleAction)
+            {
+                return DoubleEstimate;
             }
 
             throw new Exception("Unexpected SerializingAction: " + act);
