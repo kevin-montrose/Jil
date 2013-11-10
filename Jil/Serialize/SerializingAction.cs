@@ -34,4 +34,5 @@ namespace Jil.Serialize
     class WriteIntAction : SerializingAction { }
     class WriteBoolAction : SerializingAction { }
     class WriteGuidAction : SerializingAction { }
+    class WriteDoubleAction : SerializingAction { }
 }
