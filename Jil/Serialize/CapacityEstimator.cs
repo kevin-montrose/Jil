@@ -8,8 +8,8 @@ namespace Jil.Serialize
 {
     class CapacityEstimator
     {
-        const int ListMultiplier = 3;
-        const int DictionaryMultiplier = 3;
+        const int ListMultiplier = 10;
+        const int DictionaryMultiplier = 10;
         const int StringEstimate = 20;
         const int CharacterEstimate = 1;
         const int IntEstimate = 3;
