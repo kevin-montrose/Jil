@@ -3004,6 +3004,8 @@ namespace Jil.Serialize
 
             var estimatedInitialCapacity = CapacityEstimator.For(obj.Actions);
 
+            CapacityCache.Set<BuildForType>(new Options(pretty, excludeNulls, jsonp, dateFormat, includeInherited), estimatedInitialCapacity);
+
             return ret;
         }
     }

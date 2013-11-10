@@ -14,6 +14,8 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
+        internal static bool UseAutoSizedStringWriter = true;
+
         private static Hashtable SerializeDynamicLookup = new Hashtable();
 
         /// <summary>
@@ -117,10 +119,23 @@ namespace Jil
         /// </summary>
         public static string Serialize<T>(T data, Options options = null)
         {
-            using (var str = new StringWriter())
+            if (UseAutoSizedStringWriter)
             {
-                Serialize(data, str, options);
-                return str.ToString();
+                options = options ?? Options.Default;
+
+                using (var str = new StringWriter(new StringBuilder(CapacityCache.Get<T>(options))))
+                {
+                    Serialize(data, str, options);
+                    return str.ToString();
+                }
+            }
+            else
+            {
+                using (var str = new StringWriter())
+                {
+                    Serialize(data, str, options);
+                    return str.ToString();
+                }
             }
         }
 
