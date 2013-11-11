@@ -96,7 +96,16 @@ The Question, Answer, and User types are taken from the [Stack Exchange API](htt
 
 Data for each type is randomly generated from a fixed seed.  Random text is biased towards ASCII<sup>*</sup>, but includes all unicode.
 
-This benchmark was run on a machine with the following specs:
+To sanity check these results, [a serializer benchmark from theburningmonk](http://theburningmonk.com/benchmarks/) was forked to include Jil.
+[Source available on Github](https://github.com/kevin-montrose/SimpleSpeedTester).
+
+<img src="http://i.imgur.com/Cqxr2cg.png" />
+
+Numbers can be found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdHRpNUdTeTY3cm9LT0pzUHktNTU0SHc&usp=sharing).
+Note that times are in milliseconds in this benchmark, and in _nanoseconds_ in the preceeding one.  Also be aware that the following serializers
+in theburningmonk benchmark are **not** JSON serializers: protobuf-net, MongoDB Driver BSON, and Json.Net BSON.
+
+These benchmarks were run on a machine with the following specs:
 
 <ul>
  <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
