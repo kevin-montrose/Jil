@@ -141,7 +141,7 @@ namespace Jil.Serialize
 
             for (var i = 0; i < labels.Length; i++)
             {
-                var breakAndIndent = "\n" + string.Concat(Enumerable.Range(0, i).Select(_ => " "));
+                var breakAndIndent = "\n" + new string(' ', i);
 
                 Emit.MarkLabel(labels[i]);      // --empty--
                 WriteString(breakAndIndent);    // --empty--
