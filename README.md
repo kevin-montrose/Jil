@@ -144,7 +144,7 @@ that Jil may create up to 32 different serializers for a single type (though in 
 
 ### Optimizing Member Access Order
 
-Perhaps the [most arcane code in Jil](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Utils.cs#L52) determines the preferred order to access members, so the CPU doesn't stall waiting for values from memory.
+Perhaps the [most arcane code in Jil](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Utils.cs#L52) determines the preferred order to access members, so the CPU doesn't stall waiting for values from memory.
 
 Members are divided up into 4 groups:
 <ul>
@@ -168,14 +168,14 @@ This is a fairly naive implementation of this idea, there's almost more that cou
 
 Jil tries to avoid allocating any reference types, with following exceptions:
 
- - [a 36-length char\[\]](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L2720) if any integer numbers, DateTimes, or GUIDs are being serialized
+ - [a 36-length char\[\]](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L2785) if any integer numbers, DateTimes, or GUIDs are being serialized
  - one byte[] per GUID being serialized, as a consequence of using [Guid.ToByteArray](http://msdn.microsoft.com/en-us/library/system.guid.tobytearray.aspx)
 
 ### Escaping Tricks
 
 JSON has escaping rules for `\`, `"`, and control characters.  These can be kind be time consuming to deal with, Jil avoids as much as possible in two ways.
 
-First, all known key names are once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L1063).
+First, all known key names are once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L980).
 Known keys are member names and enumeration values.
 
 Second, rather than lookup encoded characters in a dictionary or a long series of branches Jil does explicit checks for `"` and `\` and turns the rest into
@@ -191,7 +191,7 @@ Jil escapes them in the same manner as `\` and `"`.
 While number formatting in .NET is pretty fast, it has a lot of baggage to handle custom number formatting.
 
 Since JSON has a strict definition of a number, a Write() implementation without configuration is noticeably faster.
-To go the extra mile, Jil contains [separate implementations for `int`, `uint`, `ulong`, and `long`](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L495).
+To go the extra mile, Jil contains [separate implementations for `int`, `uint`, `ulong`, and `long`](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L803).
 
 Jil __does not__ include custom `decimal`, `double`, or `single` Write() implementations, as despite my best efforts I haven't been able to beat the one's built into .NET.
 If you think you're up to the challenge, I'd be really interested in seeing code that *is* faster than the included implementations.
@@ -200,16 +200,16 @@ If you think you're up to the challenge, I'd be really interested in seeing code
 
 Similarly to numbers, each of Jil's date formats has a custom Write() implementation.
 
- - [ISO8601](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L142) can be unrolled into a smaller number of `/` and `%` instructions
- - [Newtonsoft-style](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L471) is a subtraction and division, then fed into the custom `long` writing code
- - [Milliseconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L528) is essentially the same
- - [Seconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/InlineSerializer.cs#L577) just has a different divisor
+ - [ISO8601](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L142) can be unrolled into a smaller number of `/` and `%` instructions
+ - [Newtonsoft-style](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L471) is a subtraction and division, then fed into the custom `long` writing code
+ - [Milliseconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L528) is essentially the same
+ - [Seconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L577) just has a different divisor
  
 ### Custom Guid Formatting
 
 Noticing a pattern?
 
-Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/master/Jil/Serialize/Methods.cs#L18) (which is one of the reason's Jil only supports the D format).
+Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L18) (which is one of the reason's Jil only supports the D format).
 
 Fun fact about this method, I tested a more branch heavy version (which removed the byte lookup) which turned out to be considerably slower than the built-in method due to [branch prediction failures](http://stackoverflow.com/a/11227902/80572).
 Type 4 Guids being random makes for something quite close to the worst case for branch prediciton.
