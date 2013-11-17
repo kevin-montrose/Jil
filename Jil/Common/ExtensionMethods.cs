@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jil.Serialize
+namespace Jil.Common
 {
-    internal static class ExtensionMethods
+    static class ExtensionMethods
     {
         public static MethodInfo ShouldSerializeMethod(this PropertyInfo prop, Type serializingType)
         {
