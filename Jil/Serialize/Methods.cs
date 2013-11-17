@@ -16,43 +16,43 @@ namespace Jil.Serialize
         struct GuidStruct
         {
             [FieldOffset(0)]
-            public Guid Value;
+            private Guid Value;
 
             [FieldOffset(0)]
-            public byte B00;
+            public readonly byte B00;
             [FieldOffset(1)]
-            public byte B01;
+            public readonly byte B01;
             [FieldOffset(2)]
-            public byte B02;
+            public readonly byte B02;
             [FieldOffset(3)]
-            public byte B03;
+            public readonly byte B03;
             [FieldOffset(4)]
-            public byte B04;
+            public readonly byte B04;
             [FieldOffset(5)]
-            public byte B05;
+            public readonly byte B05;
 
             [FieldOffset(6)]
-            public byte B06;
+            public readonly byte B06;
             [FieldOffset(7)]
-            public byte B07;
+            public readonly byte B07;
             [FieldOffset(8)]
-            public byte B08;
+            public readonly byte B08;
             [FieldOffset(9)]
-            public byte B09;
+            public readonly byte B09;
 
             [FieldOffset(10)]
-            public byte B10;
+            public readonly byte B10;
             [FieldOffset(11)]
-            public byte B11;
+            public readonly byte B11;
 
             [FieldOffset(12)]
-            public byte B12;
+            public readonly byte B12;
             [FieldOffset(13)]
-            public byte B13;
+            public readonly byte B13;
             [FieldOffset(14)]
-            public byte B14;
+            public readonly byte B14;
             [FieldOffset(15)]
-            public byte B15;
+            public readonly byte B15;
 
             public GuidStruct(Guid invisibleMembers)
                 : this()
@@ -78,7 +78,7 @@ namespace Jil.Serialize
             buffer[18] = '-';
             buffer[23] = '-';
 
-            // ToByteArray() returns the bytes in a different order than you might expect
+            // Bytes are in a different order than you might expect
             // For: 35 91 8b c9 - 19 6d - 40 ea  - 97 79  - 88 9d 79 b7 53 f0 
             // Get: C9 8B 91 35   6D 19   EA 40    97 79    88 9D 79 B7 53 F0 
             // Ix:   0  1  2  3    4  5    6  7     8  9    10 11 12 13 14 15
