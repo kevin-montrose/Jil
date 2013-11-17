@@ -1946,8 +1946,6 @@ namespace Jil.Serialize
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
-            var iDictionary = typeof(IDictionary<,>).MakeGenericType(keyType, elementType);
-
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
@@ -1996,7 +1994,6 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);                   // object
                 }
 
-                Emit.CastClass(iDictionary);                  // IDictionary<,>
                 Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
                 Emit.StoreLocal(e);                           // --empty--
 
@@ -2069,8 +2066,6 @@ namespace Jil.Serialize
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
-            var iDictionary = typeof(IDictionary<,>).MakeGenericType(keyType, elementType);
-
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
 
@@ -2113,7 +2108,6 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);
                 }
 
-                Emit.CastClass(iDictionary);                  // IDictionary<,>
                 Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
                 Emit.StoreLocal(e);                           // --empty--
 
