@@ -20,6 +20,7 @@ namespace Jil.Serialize
         public static bool UseFastLists = true;
         public static bool UseFastArrays = true;
         public static bool UseFastGuids = true;
+        public static bool AllocationlessDictionaries = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -1941,10 +1942,36 @@ namespace Jil.Serialize
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
 
-            var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
-            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
-            var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
-            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
+            MethodInfo getEnumerator, enumeratorMoveNext;
+            PropertyInfo enumeratorCurrent;
+            Action<Sigil.Local> loadEnumerator;
+            Action<Sigil.Local> disposeEnumerator;
+
+            if (AllocationlessDictionaries && dictType.IsExactlyDictionaryType())
+            {
+                var enumerator = dictType.GetNestedType("Enumerator").MakeGenericType(keyType, elementType);
+                getEnumerator = dictType.GetMethod("GetEnumerator");
+                enumeratorMoveNext = enumerator.GetMethod("MoveNext");
+                enumeratorCurrent = enumerator.GetProperty("Current");
+                var dispose = enumerator.GetMethod("Dispose");
+
+                loadEnumerator = e => Emit.LoadLocalAddress(e);
+                disposeEnumerator =
+                    e =>
+                    {
+                        Emit.LoadLocalAddress(e);
+                        Emit.Call(dispose);
+                    };
+            }
+            else
+            {
+                var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
+                getEnumerator = iEnumerable.GetMethod("GetEnumerator");
+                enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
+                enumeratorCurrent = getEnumerator.ReturnType.GetProperty("Current");
+                loadEnumerator = e => Emit.LoadLocal(e);
+                disposeEnumerator = e => { };
+            }
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -1978,7 +2005,7 @@ namespace Jil.Serialize
 
             int onTheStack = 0;
 
-            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
+            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType))
             using (var isFirst = Emit.DeclareLocal<bool>())
             using (var kvpLoc = Emit.DeclareLocal(kvType))
             {
@@ -1994,14 +2021,14 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);                   // object
                 }
 
-                Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
-                Emit.StoreLocal(e);                           // --empty--
+                Emit.CallVirtual(getEnumerator);        // IEnumerator<KeyValuePair<,>>
+                Emit.StoreLocal(e);                     // --empty--
 
                 var loop = Emit.DefineLabel();
 
                 Emit.MarkLabel(loop);                   // --empty--
 
-                Emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                loadEnumerator(e);                      // IEnumerator<KeyValuePair<,>>(*?)
                 Emit.CallVirtual(enumeratorMoveNext);   // bool
                 Emit.BranchIfFalse(done);               // --empty--
 
@@ -2021,7 +2048,7 @@ namespace Jil.Serialize
                     Emit.LoadArgument(0);               // Action<>? TextWriter
                 }
 
-                Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                loadEnumerator(e);                      // Action<>? TextWriter? IEnumerator<KeyValuePair<,>>(*?)
                 LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
 
                 Emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
@@ -2032,9 +2059,10 @@ namespace Jil.Serialize
                 WriteKeyValueIfNotNull(onTheStack, keyType, elementType, isFirst);   // --empty--
 
                 Emit.Branch(loop);                      // --empty--
-            }
 
-            Emit.MarkLabel(done);
+                Emit.MarkLabel(done);
+                disposeEnumerator(e);
+            }
 
             DecreaseIndent();
 
@@ -2061,10 +2089,36 @@ namespace Jil.Serialize
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
 
-            var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
-            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
-            var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
-            var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
+            MethodInfo getEnumerator, enumeratorMoveNext;
+            PropertyInfo enumeratorCurrent;
+            Action<Sigil.Local> loadEnumerator;
+            Action<Sigil.Local> disposeEnumerator;
+
+            if (AllocationlessDictionaries && dictType.IsExactlyDictionaryType())
+            {
+                var enumerator = dictType.GetNestedType("Enumerator").MakeGenericType(keyType, elementType);
+                getEnumerator = dictType.GetMethod("GetEnumerator");
+                enumeratorMoveNext = enumerator.GetMethod("MoveNext");
+                enumeratorCurrent = enumerator.GetProperty("Current");
+                var dispose = enumerator.GetMethod("Dispose");
+
+                loadEnumerator = e => Emit.LoadLocalAddress(e);
+                disposeEnumerator =
+                    e =>
+                    {
+                        Emit.LoadLocalAddress(e);
+                        Emit.Call(dispose);
+                    };
+            }
+            else
+            {
+                var iEnumerable = typeof(IEnumerable<>).MakeGenericType(kvType);
+                getEnumerator = iEnumerable.GetMethod("GetEnumerator");
+                enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
+                enumeratorCurrent = getEnumerator.ReturnType.GetProperty("Current");
+                loadEnumerator = e => Emit.LoadLocal(e);
+                disposeEnumerator = e => { };
+            }
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -2096,8 +2150,8 @@ namespace Jil.Serialize
 
             var done = Emit.DefineLabel();
 
-            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
-            using(var kvpLoc = Emit.DeclareLocal(kvType))
+            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType))
+            using (var kvpLoc = Emit.DeclareLocal(kvType))
             {
                 if (inLocal != null)
                 {
@@ -2108,12 +2162,12 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);
                 }
 
-                Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<KeyValuePair<,>>
+                Emit.CallVirtual(getEnumerator);   // IEnumerator<KeyValuePair<,>>
                 Emit.StoreLocal(e);                           // --empty--
 
                 // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {
-                    Emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                    loadEnumerator(e);                      // IEnumerator<KeyValuePair<,>>(*?)
                     Emit.CallVirtual(enumeratorMoveNext);   // bool
                     Emit.BranchIfFalse(done);               // --empty--
 
@@ -2129,9 +2183,9 @@ namespace Jil.Serialize
                         Emit.LoadArgument(0);               // Action<>? TextWriter
                     }
 
-                    Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                    loadEnumerator(e);                      // Action<>? TextWriter? IEnumerator<>(*?)
                     LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
-                    
+
                     Emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
                     Emit.LoadLocalAddress(kvpLoc);          // Action<>? TextWriter? KeyValuePair<,>*
 
@@ -2142,7 +2196,7 @@ namespace Jil.Serialize
 
                 Emit.MarkLabel(loop);                   // --empty--
 
-                Emit.LoadLocal(e);                      // IEnumerator<KeyValuePair<,>>
+                loadEnumerator(e);                      // IEnumerator<KeyValuePair<,>>(*?)
                 Emit.CallVirtual(enumeratorMoveNext);   // bool
                 Emit.BranchIfFalse(done);               // --empty--
 
@@ -2158,7 +2212,7 @@ namespace Jil.Serialize
                     Emit.LoadArgument(0);               // Action<>? TextWriter
                 }
 
-                Emit.LoadLocal(e);                      // Action<>? TextWriter? IEnumerator<>
+                loadEnumerator(e);                      // Action<>? TextWriter? IEnumerator<>(*?)
                 LoadProperty(enumeratorCurrent);        // Action<>? TextWriter? KeyValuePair<,>
 
                 Emit.StoreLocal(kvpLoc);                // Action<>? TextWriter?
@@ -2169,9 +2223,10 @@ namespace Jil.Serialize
                 WriteKeyValue(keyType, elementType);   // --empty--
 
                 Emit.Branch(loop);                          // --empty--
-            }
 
-            Emit.MarkLabel(done);
+                Emit.MarkLabel(done);
+                disposeEnumerator(e);
+            }
 
             DecreaseIndent();
 
