@@ -46,9 +46,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DateTimeFormat.cs" />
+    <Compile Include="DeserializationException.cs" />
+    <Compile Include="Deserialize\InlineDeserializer.cs" />
+    <Compile Include="Deserialize\Methods.cs" />
+    <Compile Include="Deserialize\TypeCaches.cs" />
     <Compile Include="Serialize\CapacityCache.cs" />
     <Compile Include="Serialize\CapacityEstimator.cs" />
-    <Compile Include="Serialize\ExtensionMethods.cs" />
+    <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />

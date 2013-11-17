@@ -517,5 +517,10 @@ namespace Jil
 
             ISO8601TypeCache<T>.Thunk(output, data, 0);
         }
+
+        public static T Deserialize<T>(TextReader reader)
+        {
+            return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Thunk(reader, 0);
+        }
     }
 }
