@@ -675,6 +675,57 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
+
+        [TestMethod]
+        public void UseFasterGuids()
+        {
+            Action<TextWriter, _UseFastGuids, int> fast;
+            Action<TextWriter, _UseFastGuids, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseFastGuids>.UseFasterGuids = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineSerializerHelper.Build<_UseFastGuids>();
+                }
+
+                {
+                    InlineSerializer<_UseFastGuids>.UseFasterGuids = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseFastGuids>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseFastGuids>.UseFasterGuids = true;
+            }
+
+            var rand = new Random(85300005);
+
+            var toSerialize = new List<_UseFastGuids>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _UseFastGuids
+                    {
+                        A = _RandGuid(rand),
+                        B = rand.Next(2) == 0 ? null : (Guid?)_RandGuid(rand),
+                        C = Enumerable.Range(0, 7 + rand.Next(8)).Select(_ => _RandGuid(rand)).ToList(),
+                        D = Enumerable.Range(0, 5 + rand.Next(5)).ToDictionary(d => _RandString(rand) + _RandString(rand), d => _RandGuid(rand))
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

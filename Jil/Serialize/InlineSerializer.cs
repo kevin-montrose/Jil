@@ -20,6 +20,7 @@ namespace Jil.Serialize
         public static bool UseFastLists = true;
         public static bool UseFastArrays = true;
         public static bool UseFastGuids = true;
+        public static bool UseFasterGuids = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -877,7 +878,14 @@ namespace Jil.Serialize
 
             Emit.LoadLocal(CharBuffer);     // TextWriter Guid char[]
 
-            Emit.Call(Methods.WriteGuid);   // --empty--
+            if (UseFasterGuids)
+            {
+                Emit.Call(Methods.WriteGuidFast);   // --empty--
+            }
+            else
+            {
+                Emit.Call(Methods.WriteGuid);   // --empty--
+            }
 
             if (quotesNeedHandling)
             {
@@ -2785,7 +2793,7 @@ namespace Jil.Serialize
         void AddCharBuffer(Type serializingType)
         {
             // Don't tax the naive implementations by allocating a buffer they don't use
-            if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting)) return;
+            if (!(UseCustomIntegerToString || UseFastGuids || UseFasterGuids || UseCustomISODateFormatting)) return;
 
             var allTypes = serializingType.InvolvedTypes();
 
