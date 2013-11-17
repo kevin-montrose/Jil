@@ -5507,5 +5507,56 @@ namespace JilTests
                 Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true,\"Content\":null,\"ContentType\":null}", res);
             }
         }
+
+        [TestMethod]
+        public void AllocationlessVsNormalDictionaries()
+        {
+            var data =
+                new 
+                {
+                    A = 
+                        new Dictionary<string, string>
+                        {
+                            { "hello", "world" },
+                            { "fizz", null },
+                            { "foo", "bar" },
+                            { "init", "d" },
+                            { "dev", null }
+                        },
+                    B = (IDictionary<string, string>)
+                        new Dictionary<string, string>
+                        {
+                            { "hello", "world" },
+                            { "fizz", null },
+                            { "foo", "bar" },
+                            { "init", "d" },
+                            { "dev", null }
+                        }
+                };
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    data,
+                    str,
+                    Options.Default
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null},\"B\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null}}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    data,
+                    str,
+                    Options.ExcludeNulls
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"},\"B\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"}}", res);
+            }
+        }
     }
 }
