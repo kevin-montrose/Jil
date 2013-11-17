@@ -85,6 +85,15 @@ namespace Jil.Serialize
                 t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
         }
 
+        public static bool IsExactlyDictionaryType(this Type t)
+        {
+            if (!t.IsGenericType) return false;
+
+            var generic = t.GetGenericTypeDefinition();
+
+            return generic == typeof(Dictionary<,>);
+        }
+
         public static void ForEach<T>(this IEnumerable<T> e, Action<T> func)
         {
             foreach (var x in e)

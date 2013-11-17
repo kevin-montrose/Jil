@@ -675,6 +675,59 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
+
+        class _AllocationlessDictionaries
+        {
+            public Dictionary<string, int> A;
+        }
+
+        [TestMethod]
+        public void AllocationlessDictionaries()
+        {
+            Action<TextWriter, _AllocationlessDictionaries, int> allocationless;
+            Action<TextWriter, _AllocationlessDictionaries, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = true;
+
+                    // Build the *actual* serializer method
+                    allocationless = InlineSerializerHelper.Build<_AllocationlessDictionaries>();
+                }
+
+                {
+                    InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_AllocationlessDictionaries>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = true;
+            }
+
+            var rand = new Random(202457890);
+
+            var toSerialize = new List<_AllocationlessDictionaries>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _AllocationlessDictionaries
+                    {
+                        A = Enumerable.Range(0, 5 + rand.Next(5)).ToDictionary(_ => new string((""+_)[0], 5 + rand.Next(10)), _ => rand.Next())
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double allocationlessTime, normalTime;
+            CompareTimes(toSerialize, allocationless, normal, out allocationlessTime, out normalTime);
+
+            Assert.IsTrue(allocationlessTime < normalTime, "allocationlessTime = " + allocationlessTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }
