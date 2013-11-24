@@ -13,6 +13,38 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
+        public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ConsumeWhiteSpace(TextReader reader)
+        {
+            
+
+            int c;
+            while ((c = reader.Peek()) != -1)
+            {
+                if (!IsWhiteSpace(c)) return;
+
+                reader.Read();
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsWhiteSpace(int c)
+        {
+            // per http://www.ietf.org/rfc/rfc4627.txt
+            // whitespace in JSON is defined as 
+            //  \u0020  - space
+            //  \u0009  - tab
+            //  \u000A  - new line
+            //  \u000D  - carriage return
+
+            return
+                c == 0x20 ||
+                c == 0x09 ||
+                c == 0x0A ||
+                c == 0x0D;
+        }
+
         public static readonly MethodInfo ReadUInt8TillEnd = typeof(Methods).GetMethod("_ReadUInt8TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8TillEnd(TextReader reader)
@@ -33,7 +65,7 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Read();
-            if (c == -1) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return ret;
             
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -42,7 +74,7 @@ namespace Jil.Deserialize
 
             // digit #3
             c = reader.Read();
-            if (c == -1) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return ret;
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -80,7 +112,7 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Read();
-            if (c == -1) return (sbyte)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (sbyte)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -89,7 +121,7 @@ namespace Jil.Deserialize
 
             // digit #3
             c = reader.Read();
-            if (c == -1) return (sbyte)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (sbyte)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -329,7 +361,7 @@ namespace Jil.Deserialize
         {
             var ret = 0;
 
-            char1:
+            //char1:
             {
                 const int ix = 0;
 

@@ -10,6 +10,8 @@ namespace Jil
     /// </summary>
     public sealed class Options
     {
+#pragma warning disable 1591
+
         public static readonly Options Default = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
@@ -46,6 +48,8 @@ namespace Jil
         public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONP = new Options(prettyPrint: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
 
+#pragma warning restore 1591
+
         internal bool ShouldPrettyPrint { get; private set; }
         internal bool ShouldExcludeNulls { get; private set; }
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
@@ -53,6 +57,17 @@ namespace Jil
         internal bool ShouldIncludeInherited { get; private set; }
         internal bool ShouldEstimateOutputSize { get; private set; }
 
+        /// <summary>
+        /// Configuration for Jil serialization options.
+        /// 
+        /// Available options:
+        ///   prettyPrint - whether or not to include whitespace and newlines for ease of reading
+        ///   excludeNulls - whether or not to write object members whose value is null
+        ///   jsonp - whether or not the serialized json should be valid for use with JSONP
+        ///   dateFormat - the style in which to serialize DateTimes
+        ///   includeInherited - whether or not to serialize members declared by an objects base types
+        ///   estimateOutputSize - whether or not Jil should pre-allocate a buffer when serializing to a string based on an estimate of the size of the resulting string
+        /// </summary>
         public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, bool estimateOutputSize = false)
         {
             ShouldPrettyPrint = prettyPrint;
@@ -63,6 +78,11 @@ namespace Jil
             ShouldEstimateOutputSize = estimateOutputSize;
         }
 
+        /// <summary>
+        /// Returns a string representation of this Options object.
+        /// 
+        /// The format of this may change at any time, it is only meant for debugging.
+        /// </summary>
         public override string ToString()
         {
             return

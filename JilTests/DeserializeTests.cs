@@ -24,6 +24,45 @@ namespace JilTests
                     Assert.AreEqual((byte)i, b);
                 }
             }
+
+            for (int i = byte.MinValue; i <= byte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString()))
+                    {
+                        var b = JSON.Deserialize<byte>(str);
+
+                        Assert.AreEqual((byte)i, b);
+                    }
+                }
+            }
+
+            for (int i = byte.MinValue; i <= byte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<byte>(str);
+
+                        Assert.AreEqual((byte)i, b);
+                    }
+                }
+            }
+
+            for (int i = byte.MinValue; i <= byte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<byte>(str);
+
+                        Assert.AreEqual((byte)i, b);
+                    }
+                }
+            }
         }
 
         [TestMethod]
@@ -36,6 +75,45 @@ namespace JilTests
                     var b = JSON.Deserialize<sbyte>(str);
 
                     Assert.AreEqual((sbyte)i, b);
+                }
+            }
+
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString()))
+                    {
+                        var b = JSON.Deserialize<sbyte>(str);
+
+                        Assert.AreEqual((sbyte)i, b);
+                    }
+                }
+            }
+
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<sbyte>(str);
+
+                        Assert.AreEqual((sbyte)i, b);
+                    }
+                }
+            }
+
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<sbyte>(str);
+
+                        Assert.AreEqual((sbyte)i, b);
+                    }
                 }
             }
         }
