@@ -846,11 +846,76 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadFloatingPointTillEnd = typeof(Methods).GetMethod("_ReadFloatPointTillEnd", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadFloatingPointTillEnd = typeof(Methods).GetMethod("_ReadFloatingPointTillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double _ReadFloatPointTillEnd(TextReader reader)
+        static double _ReadFloatingPointTillEnd(TextReader reader, StringBuilder commonSb)
         {
-            throw new NotImplementedException();
+            int c;
+            bool negative = false;
+            bool seenDecimal = false;
+
+            var first = reader.Read();
+            if (first == -1) throw new DeserializationException("Expected digit or '-'");
+
+            if (first == '-')
+            {
+                negative = true;
+                first = reader.Read();
+                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit");
+                commonSb.Append((char)first);
+            }
+            else
+            {
+                commonSb.Append((char)first);
+            }
+
+            while ((c = reader.Read()) != -1 && !IsWhiteSpace(c))
+            {
+                if (c >= '0' && c <= '9')
+                {
+                    commonSb.Append((char)c);
+                    continue;
+                }
+
+                if (c == '.')
+                {
+                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number");
+
+                    commonSb.Append('.');
+                    seenDecimal = true;
+
+                    // there must be a following digit to be valid JSON
+                    c = reader.Read();
+                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    commonSb.Append((char)c);
+
+                    continue;
+                }
+
+                // exponent?
+                if (c == 'e' || c == 'E')
+                {
+                    var leading = double.Parse(commonSb.ToString()) * (negative ? -1.0 : 1.0);
+                    commonSb.Clear();   // cleanup for the next use
+
+                    var sign = reader.Peek();
+                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
+
+                    var exponentNegative = (sign == '-');
+                    if (sign == '-' || sign == '+') reader.Read();
+
+                    double exp = _ReadUInt64TillEnd(reader);
+
+                    exp = Math.Pow(10.0, (exp * (exponentNegative ? -1.0 : 1.0)));
+
+                    return leading * exp;
+                }
+            }
+
+            var ret = double.Parse(commonSb.ToString());
+            commonSb.Clear();   // cleanup for the next use
+
+            return ret * (negative ? -1.0 : 1.0);
         }
 
         public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);

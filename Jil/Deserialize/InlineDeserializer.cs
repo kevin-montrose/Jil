@@ -248,67 +248,69 @@ namespace Jil.Deserialize
 
         void ReadNumber(Type numberType, ExpectedEndMarker end)
         {
-            Emit.LoadArgument(0);
+            Emit.LoadArgument(0);               // TextReader
 
             if (numberType == typeof(byte))
             {
-                Emit.Call(GetReadUInt8(end));
+                Emit.Call(GetReadUInt8(end));   // byte
                 return;
             }
 
             if (numberType == typeof(sbyte))
             {
-                Emit.Call(GetReadInt8(end));
+                Emit.Call(GetReadInt8(end));    // sbyte
                 return;
             }
 
             if (numberType == typeof(short))
             {
-                Emit.Call(GetReadInt16(end));
+                Emit.Call(GetReadInt16(end));   // short
                 return;
             }
 
             if (numberType == typeof(ushort))
             {
-                Emit.Call(GetReadUInt16(end));
+                Emit.Call(GetReadUInt16(end));  // ushort
                 return;
             }
 
             if (numberType == typeof(int))
             {
-                Emit.Call(GetReadInt32(end));
+                Emit.Call(GetReadInt32(end));   // int
                 return;
             }
 
             if (numberType == typeof(uint))
             {
-                Emit.Call(GetReadUInt32(end));
+                Emit.Call(GetReadUInt32(end));  // uint
                 return;
             }
 
             if (numberType == typeof(long))
             {
-                Emit.Call(GetReadInt64(end));
+                Emit.Call(GetReadInt64(end));   // long
                 return;
             }
 
             if (numberType == typeof(ulong))
             {
-                Emit.Call(GetReadUInt64(end));
+                Emit.Call(GetReadUInt64(end));  // ulong
                 return;
             }
 
-            Emit.Call(GetReadFloatingPoint(end));
+            LoadStringBuilder();                    // TextReader StringBuilder
+
+            Emit.Call(GetReadFloatingPoint(end));   // double
 
             if (numberType == typeof(float))
             {
-                Emit.Convert<float>();
+                Emit.Convert<float>();              // float
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.NewObject<decimal, double>();
+                Emit.NewObject<decimal, double>();  // decimal
                 return;
             }
         }

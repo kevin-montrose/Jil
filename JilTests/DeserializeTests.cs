@@ -13,6 +13,108 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Decimals()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var res = JSON.Deserialize<decimal>(str);
+
+                Assert.AreEqual(0m, res);
+            }
+
+            using (var str = new StringReader("0.0"))
+            {
+                var res = JSON.Deserialize<decimal>(str);
+
+                Assert.AreEqual(0m, res);
+            }
+
+            var rand = new Random();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                decimal d = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
+                d *= (decimal)rand.NextDouble();
+
+                var asStr = ((double)d).ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<decimal>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Doubles()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var res = JSON.Deserialize<double>(str);
+
+                Assert.AreEqual(0.0, res);
+            }
+
+            using (var str = new StringReader("0.0"))
+            {
+                var res = JSON.Deserialize<double>(str);
+
+                Assert.AreEqual(0.0, res);
+            }
+
+            var rand = new Random();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                double d = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
+                d *= rand.NextDouble();
+
+                var asStr = d.ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<double>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Floats()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var res = JSON.Deserialize<float>(str);
+
+                Assert.AreEqual(0f, res);
+            }
+
+            using (var str = new StringReader("0.0"))
+            {
+                var res = JSON.Deserialize<float>(str);
+
+                Assert.AreEqual(0f, res);
+            }
+
+            var rand = new Random();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                float f = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
+                f *= (float)rand.NextDouble();
+
+                var asStr = f.ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<float>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+        }
+
+        [TestMethod]
         public void Longs()
         {
             using (var str = new StringReader("0"))
