@@ -10,6 +10,7 @@ using System.Reflection;
 
 namespace Jil.Deserialize
 {
+    // Note that WhiteSpace is always implicit allowed to "end" in place of a token
     [Flags]
     enum ExpectedEndMarker : byte
     {
@@ -329,13 +330,43 @@ namespace Jil.Deserialize
             ReadNumber(primitiveType, end);
         }
 
+        void ConsumeWhiteSpace()
+        {
+            Emit.LoadArgument(0);                   // TextReader
+            Emit.Call(Methods.ConsumeWhiteSpace);   // --empty--
+        }
+
+        void ExpectEndOfStream()
+        {
+            var success = Emit.DefineLabel();
+
+            Emit.LoadArgument(0);           // TextReader
+            Emit.Call(TextReader_Read);     // int
+            Emit.LoadConstant(-1);          // int -1
+            Emit.BranchIfEqual(success);    // --empty--
+
+            Emit.LoadConstant("Expected end of stream");        // string
+            Emit.NewObject<DeserializationException, string>(); // DeserializationException
+            Emit.Throw();                                       // --empty--
+
+            Emit.MarkLabel(success);        // --empty--
+        }
+
         Func<TextReader, int, ForType> BuildPrimitiveWithNewDelegate()
         {
             Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
 
             AddGlobalVariables();
 
+            ConsumeWhiteSpace();
+
             ReadPrimitive(typeof(ForType), ExpectedEndMarker.EndOfStream);
+
+            // we have to consume this, otherwise we might succeed with invalid JSON
+            ConsumeWhiteSpace();
+
+            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
+            ExpectEndOfStream();
 
             Emit.Return();
 

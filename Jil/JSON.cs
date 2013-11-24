@@ -518,6 +518,9 @@ namespace Jil
             ISO8601TypeCache<T>.Thunk(output, data, 0);
         }
 
+        /// <summary>
+        /// Deserializes JSON from the given TextReader.
+        /// </summary>
         public static T Deserialize<T>(TextReader reader)
         {
             return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Thunk(reader, 0);
