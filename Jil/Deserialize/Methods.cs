@@ -13,6 +13,69 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
+        public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static byte _ReadUInt8(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static sbyte _ReadInt8(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadInt16 = typeof(Methods).GetMethod("_ReadInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static short _ReadInt16(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadUInt16 = typeof(Methods).GetMethod("_ReadUInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ushort _ReadUInt16(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadInt32 = typeof(Methods).GetMethod("_ReadInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _ReadInt32(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadUInt32 = typeof(Methods).GetMethod("_ReadUInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static uint _ReadUInt32(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadInt64 = typeof(Methods).GetMethod("_ReadInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static long _ReadInt64(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadUInt64 = typeof(Methods).GetMethod("_ReadUInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ulong _ReadUInt64(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static readonly MethodInfo ReadFloatingPoint = typeof(Methods).GetMethod("_ReadFloatPoint", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double _ReadFloatPoint(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
         public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedString(TextReader reader, char[] buffer, StringBuilder commonSb)

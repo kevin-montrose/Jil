@@ -155,7 +155,69 @@ namespace Jil.Deserialize
 
         void ReadNumber(Type numberType)
         {
-            throw new NotImplementedException();
+            Emit.LoadArgument(0);
+
+            if (numberType == typeof(byte))
+            {
+                Emit.Call(Methods.ReadUInt8);
+                return;
+            }
+
+            if (numberType == typeof(sbyte))
+            {
+                Emit.Call(Methods.ReadInt8);
+                return;
+            }
+
+            if (numberType == typeof(short))
+            {
+                Emit.Call(Methods.ReadInt16);
+                return;
+            }
+
+            if (numberType == typeof(ushort))
+            {
+                Emit.Call(Methods.ReadUInt16);
+                return;
+            }
+
+            if (numberType == typeof(int))
+            {
+                Emit.Call(Methods.ReadInt32);
+                return;
+            }
+
+            if (numberType == typeof(uint))
+            {
+                Emit.Call(Methods.ReadUInt32);
+                return;
+            }
+
+            if (numberType == typeof(long))
+            {
+                Emit.Call(Methods.ReadInt64);
+                return;
+            }
+
+            if (numberType == typeof(ulong))
+            {
+                Emit.Call(Methods.ReadUInt64);
+                return;
+            }
+
+            Emit.Call(Methods.ReadFloatingPoint);
+
+            if (numberType == typeof(float))
+            {
+                Emit.Convert<float>();
+                return;
+            }
+
+            if (numberType == typeof(decimal))
+            {
+                Emit.NewObject<decimal, double>();
+                return;
+            }
         }
 
         void ReadPrimitive(Type primitiveType)
