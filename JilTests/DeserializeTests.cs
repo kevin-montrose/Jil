@@ -13,6 +13,112 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Shorts()
+        {
+            for (int i = short.MinValue; i <= short.MaxValue; i++)
+            {
+                using (var str = new StringReader(i.ToString()))
+                {
+                    var b = JSON.Deserialize<short>(str);
+
+                    Assert.AreEqual((short)i, b);
+                }
+            }
+
+            for (int i = short.MinValue; i <= short.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString()))
+                    {
+                        var b = JSON.Deserialize<short>(str);
+
+                        Assert.AreEqual((short)i, b);
+                    }
+                }
+            }
+
+            for (int i = short.MinValue; i <= short.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<short>(str);
+
+                        Assert.AreEqual((short)i, b);
+                    }
+                }
+            }
+
+            for (int i = short.MinValue; i <= short.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<short>(str);
+
+                        Assert.AreEqual((short)i, b);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
+        public void UShort()
+        {
+            for (int i = ushort.MinValue; i <= ushort.MaxValue; i++)
+            {
+                using (var str = new StringReader(i.ToString()))
+                {
+                    var b = JSON.Deserialize<ushort>(str);
+
+                    Assert.AreEqual((ushort)i, b);
+                }
+            }
+
+            for (int i = ushort.MinValue; i <= ushort.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString()))
+                    {
+                        var b = JSON.Deserialize<ushort>(str);
+
+                        Assert.AreEqual((ushort)i, b);
+                    }
+                }
+            }
+
+            for (int i = ushort.MinValue; i <= ushort.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<ushort>(str);
+
+                        Assert.AreEqual((ushort)i, b);
+                    }
+                }
+            }
+
+            for (int i = ushort.MinValue; i <= ushort.MaxValue; i++)
+            {
+                for (var j = 0; j < 5; j++)
+                {
+                    using (var str = new StringReader(new string(' ', j) + i.ToString() + new string(' ', j)))
+                    {
+                        var b = JSON.Deserialize<ushort>(str);
+
+                        Assert.AreEqual((ushort)i, b);
+                    }
+                }
+            }
+        }
+
+        [TestMethod]
         public void Bytes()
         {
             for (int i = byte.MinValue; i <= byte.MaxValue; i++)
