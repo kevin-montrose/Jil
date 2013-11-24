@@ -17,14 +17,86 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8TillEnd(TextReader reader)
         {
-            throw new NotImplementedException();
+            // max:  512
+            // min:    0
+            // digits: 3
+
+            byte ret = 0;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit");
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += (byte)c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1) return ret;
+            
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (byte)c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (byte)c;
+
+            return ret;
         }
 
         public static readonly MethodInfo ReadInt8TillEnd = typeof(Methods).GetMethod("_ReadInt8TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static sbyte _ReadInt8TillEnd(TextReader reader)
         {
-            throw new NotImplementedException();
+            // max:  127
+            // min: -127
+            // digits: 3
+
+            sbyte ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit");
+            }
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += (sbyte)c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1) return (sbyte)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (sbyte)c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1) return (sbyte)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (sbyte)c;
+
+            return (sbyte)(ret * (negative ? -1 : 1));
         }
 
         public static readonly MethodInfo ReadInt16TillEnd = typeof(Methods).GetMethod("_ReadInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
