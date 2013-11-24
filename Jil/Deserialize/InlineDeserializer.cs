@@ -12,8 +12,8 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
-        const int CharBufferSize = 4;
         const string CharBufferName = "char_buffer";
+        const string StringBuilderName = "string_builder";
         
         readonly Type RecursionLookupType;
 
@@ -24,17 +24,26 @@ namespace Jil.Deserialize
             RecursionLookupType = recursionLookupType;
         }
 
-        void AddCharBuffer()
+        void AddGlobalVariables()
         {
             Emit.DeclareLocal<char[]>(CharBufferName);
-            Emit.LoadConstant(CharBufferSize);
+            Emit.LoadConstant(Methods.CharBufferSize);
             Emit.NewArray<char>();
             Emit.StoreLocal(CharBufferName);
+
+            Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+            Emit.NewObject<StringBuilder>();
+            Emit.StoreLocal(StringBuilderName);
         }
 
         void LoadCharBuffer()
         {
             Emit.LoadLocal(CharBufferName);
+        }
+
+        void LoadStringBuilder()
+        {
+            Emit.LoadLocal(StringBuilderName);
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
@@ -88,7 +97,11 @@ namespace Jil.Deserialize
 
         void ReadString()
         {
-            throw new NotImplementedException();
+            ExpectQuote();                          // --empty--
+            Emit.LoadArgument(0);                   // TextReader
+            LoadCharBuffer();                       // TextReader char[]
+            LoadStringBuilder();                    // TextReader char[] StringBuilder
+            Emit.Call(Methods.ReadEncodedString);   // string
         }
 
         void ReadNumber(Type numberType)
@@ -117,7 +130,7 @@ namespace Jil.Deserialize
         {
             Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
 
-            AddCharBuffer();
+            AddGlobalVariables();
 
             ReadPrimitive(typeof(ForType));
 
