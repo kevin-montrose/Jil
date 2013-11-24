@@ -34,6 +34,9 @@ namespace Jil.Deserialize
                     // we didn't have to use anything but the buffer, make a string and return it!
                     if (first == '"')
                     {
+                        // avoid an allocation here
+                        if (ix == 0) return "";
+
                         return new string(buffer, 0, ix);
                     }
 
@@ -189,9 +192,130 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int FastHexToInt(char[] buffer)
         {
-            // TODO: this can be done much, much faster
-            var asStr = new string(buffer, 0, 4);
-            return int.Parse(asStr, System.Globalization.NumberStyles.HexNumber);
+            var ret = 0;
+
+            char1:
+            {
+                const int ix = 0;
+
+                var c = (int)buffer[ix];
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
+
+                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+            }
+
+            char2:
+            ret *= 16;
+            {
+                const int ix = 1;
+
+                var c = (int)buffer[ix];
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+            }
+
+            char3:
+            ret *= 16;
+            {
+                const int ix = 2;
+
+                var c = (int)buffer[ix];
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+            }
+
+            char4:
+            ret *= 16;
+            {
+                const int ix = 3;
+
+                var c = (int)buffer[ix];
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    return ret;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    return ret;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    return ret;
+                }
+
+                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+            }
         }
     }
 }
