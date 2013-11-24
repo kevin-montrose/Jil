@@ -255,14 +255,212 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int _ReadInt32TillEnd(TextReader reader)
         {
-            throw new NotImplementedException();
+            // max:  2147483647
+            // min: -2147483648
+            // digits:       10
+
+            long ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit");
+            }
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #4
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #5
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #6
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #7
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #8
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #9
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #10
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            return (int)(ret * (negative ? -1 : 1));
         }
 
         public static readonly MethodInfo ReadUInt32TillEnd = typeof(Methods).GetMethod("_ReadUInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static uint _ReadUInt32TillEnd(TextReader reader)
         {
-            throw new NotImplementedException();
+            // max: 4294967295
+            // min:          0
+            // digits:      10
+
+            uint ret = 0;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit");
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += (uint)c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #4
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #5
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #6
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #7
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #8
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #9
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #10
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            return ret;
         }
 
         public static readonly MethodInfo ReadInt64TillEnd = typeof(Methods).GetMethod("_ReadInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);

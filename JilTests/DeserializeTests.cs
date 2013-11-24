@@ -13,6 +13,56 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Ints()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var i = JSON.Deserialize<int>(str);
+
+                Assert.AreEqual(0, i);
+            }
+
+            using (var str = new StringReader(int.MaxValue.ToString()))
+            {
+                var i = JSON.Deserialize<int>(str);
+
+                Assert.AreEqual(int.MaxValue, i);
+            }
+
+            using (var str = new StringReader(int.MinValue.ToString()))
+            {
+                var i = JSON.Deserialize<int>(str);
+
+                Assert.AreEqual(int.MinValue, i);
+            }
+        }
+
+        [TestMethod]
+        public void UInts()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var i = JSON.Deserialize<uint>(str);
+
+                Assert.AreEqual((uint)0, i);
+            }
+
+            using (var str = new StringReader(uint.MaxValue.ToString()))
+            {
+                var i = JSON.Deserialize<uint>(str);
+
+                Assert.AreEqual(uint.MaxValue, i);
+            }
+
+            using (var str = new StringReader(uint.MinValue.ToString()))
+            {
+                var i = JSON.Deserialize<uint>(str);
+
+                Assert.AreEqual(uint.MinValue, i);
+            }
+        }
+
+        [TestMethod]
         public void Shorts()
         {
             for (int i = short.MinValue; i <= short.MaxValue; i++)
