@@ -30,7 +30,7 @@ namespace Jil.Deserialize
         static bool IsWhiteSpace(int c)
         {
             // per http://www.ietf.org/rfc/rfc4627.txt
-            // whitespace in JSON is defined as 
+            // insignificant whitespace in JSON is defined as 
             //  \u0020  - space
             //  \u0009  - tab
             //  \u000A  - new line
