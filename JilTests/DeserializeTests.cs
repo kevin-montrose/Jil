@@ -13,6 +13,56 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Longs()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var i = JSON.Deserialize<long>(str);
+
+                Assert.AreEqual(0L, i);
+            }
+
+            using (var str = new StringReader(long.MaxValue.ToString()))
+            {
+                var i = JSON.Deserialize<long>(str);
+
+                Assert.AreEqual(long.MaxValue, i);
+            }
+
+            using (var str = new StringReader(long.MinValue.ToString()))
+            {
+                var i = JSON.Deserialize<long>(str);
+
+                Assert.AreEqual(long.MinValue, i);
+            }
+        }
+
+        [TestMethod]
+        public void ULongs()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var i = JSON.Deserialize<ulong>(str);
+
+                Assert.AreEqual((ulong)0, i);
+            }
+
+            using (var str = new StringReader(ulong.MaxValue.ToString()))
+            {
+                var i = JSON.Deserialize<ulong>(str);
+
+                Assert.AreEqual(ulong.MaxValue, i);
+            }
+
+            using (var str = new StringReader(ulong.MinValue.ToString()))
+            {
+                var i = JSON.Deserialize<ulong>(str);
+
+                Assert.AreEqual(ulong.MinValue, i);
+            }
+        }
+
+        [TestMethod]
         public void Ints()
         {
             using (var str = new StringReader("0"))
