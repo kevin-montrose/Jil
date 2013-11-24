@@ -69,16 +69,56 @@ namespace Jil.Deserialize
             Emit.Throw();
         }
 
+        void ThrowExpected(params object[] ps)
+        {
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps));    // string
+            Emit.NewObject<DeserializationException, string>();         // DeserializationException
+            Emit.Throw();
+        }
+
+        void ExpectChar(char c)
+        {
+            var gotChar = Emit.DefineLabel();
+
+            RawReadChar(() => ThrowExpected(c));  // int
+            Emit.LoadConstant((int)c);            // int "
+            Emit.BranchIfEqual(gotChar);           // --empty--
+            ThrowExpected(c);                     // --empty--
+
+            Emit.MarkLabel(gotChar);               // --empty--
+        }
+
         void ExpectQuote()
         {
+            ExpectChar('"');
+        }
+
+        void ExpectQuoteOrNull(Action ifQuote, Action ifNull)
+        {
             var gotQuote = Emit.DefineLabel();
+            var gotN = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
 
-            RawReadChar(() => ThrowExpected('"'));  // int
-            Emit.LoadConstant((int)'"');            // int "
-            Emit.BranchIfEqual(gotQuote);           // --empty--
-            ThrowExpected('"');                     // --empty--
+            RawReadChar(() => ThrowExpected("\"", "null")); // int
+            Emit.Duplicate();                               // int int
+            Emit.LoadConstant((int)'"');                    // int int "
+            Emit.BranchIfEqual(gotQuote);                   // int 
+            Emit.LoadConstant((int)'n');                    // int n
+            Emit.BranchIfEqual(gotN);                       // --empty--
+            ThrowExpected("\"", "null");                    // --empty--
 
-            Emit.MarkLabel(gotQuote);               // --empty--
+            Emit.MarkLabel(gotQuote);                       // int
+            Emit.Pop();                                     // --empty--
+            ifQuote();                                      // ???
+            Emit.Branch(done);                              // ???
+
+            Emit.MarkLabel(gotN);                           // --empty--
+            ExpectChar('u');                                // --empty--
+            ExpectChar('l');                                // --empty--
+            ExpectChar('l');                                // --empty--
+            ifNull();                                       // ???
+
+            Emit.MarkLabel(done);                           // --empty--
         }
 
         void ReadChar()
@@ -97,11 +137,20 @@ namespace Jil.Deserialize
 
         void ReadString()
         {
-            ExpectQuote();                          // --empty--
-            Emit.LoadArgument(0);                   // TextReader
-            LoadCharBuffer();                       // TextReader char[]
-            LoadStringBuilder();                    // TextReader char[] StringBuilder
-            Emit.Call(Methods.ReadEncodedString);   // string
+            ExpectQuoteOrNull(
+                delegate
+                {
+                    // --empty--
+                    Emit.LoadArgument(0);                   // TextReader
+                    LoadCharBuffer();                       // TextReader char[]
+                    LoadStringBuilder();                    // TextReader char[] StringBuilder
+                    Emit.Call(Methods.ReadEncodedString);   // string
+                },
+                delegate
+                {
+                    Emit.LoadNull();                        // null
+                }
+            );
         }
 
         void ReadNumber(Type numberType)

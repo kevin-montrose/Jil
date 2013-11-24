@@ -15,6 +15,13 @@ namespace JilTests
         [TestMethod]
         public void Strings()
         {
+            using (var str = new StringReader("null"))
+            {
+                var c = JSON.Deserialize<string>(str);
+
+                Assert.IsNull(c);
+            }
+
             using (var str = new StringReader("\"\""))
             {
                 var c = JSON.Deserialize<string>(str);
