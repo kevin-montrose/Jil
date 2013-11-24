@@ -13,6 +13,34 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Bytes()
+        {
+            for (int i = byte.MinValue; i <= byte.MaxValue; i++)
+            {
+                using (var str = new StringReader(i.ToString()))
+                {
+                    var b = JSON.Deserialize<byte>(str);
+
+                    Assert.AreEqual((byte)i, b);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void SBytes()
+        {
+            for (int i = sbyte.MinValue; i <= sbyte.MaxValue; i++)
+            {
+                using (var str = new StringReader(i.ToString()))
+                {
+                    var b = JSON.Deserialize<sbyte>(str);
+
+                    Assert.AreEqual((sbyte)i, b);
+                }
+            }
+        }
+
+        [TestMethod]
         public void Strings()
         {
             using (var str = new StringReader("null"))
