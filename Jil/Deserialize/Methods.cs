@@ -13,65 +13,65 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
-        public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt8TillEnd = typeof(Methods).GetMethod("_ReadUInt8TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static byte _ReadUInt8(TextReader reader)
+        static byte _ReadUInt8TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt8TillEnd = typeof(Methods).GetMethod("_ReadInt8TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static sbyte _ReadInt8(TextReader reader)
+        static sbyte _ReadInt8TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadInt16 = typeof(Methods).GetMethod("_ReadInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt16TillEnd = typeof(Methods).GetMethod("_ReadInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static short _ReadInt16(TextReader reader)
+        static short _ReadInt16TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadUInt16 = typeof(Methods).GetMethod("_ReadUInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt16TillEnd = typeof(Methods).GetMethod("_ReadUInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ushort _ReadUInt16(TextReader reader)
+        static ushort _ReadUInt16TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadInt32 = typeof(Methods).GetMethod("_ReadInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt32TillEnd = typeof(Methods).GetMethod("_ReadInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int _ReadInt32(TextReader reader)
+        static int _ReadInt32TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadUInt32 = typeof(Methods).GetMethod("_ReadUInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt32TillEnd = typeof(Methods).GetMethod("_ReadUInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint _ReadUInt32(TextReader reader)
+        static uint _ReadUInt32TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadInt64 = typeof(Methods).GetMethod("_ReadInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt64TillEnd = typeof(Methods).GetMethod("_ReadInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static long _ReadInt64(TextReader reader)
+        static long _ReadInt64TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadUInt64 = typeof(Methods).GetMethod("_ReadUInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt64TillEnd = typeof(Methods).GetMethod("_ReadUInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ulong _ReadUInt64(TextReader reader)
+        static ulong _ReadUInt64TillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
 
-        public static readonly MethodInfo ReadFloatingPoint = typeof(Methods).GetMethod("_ReadFloatPoint", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadFloatingPointTillEnd = typeof(Methods).GetMethod("_ReadFloatPointTillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double _ReadFloatPoint(TextReader reader)
+        static double _ReadFloatPointTillEnd(TextReader reader)
         {
             throw new NotImplementedException();
         }
