@@ -303,6 +303,17 @@ namespace JilTests
         [TestMethod]
         public void Decimals()
         {
+            for (var i = -11.1m; i <= 22.2m; i += 0.03m)
+            {
+                var asStr = i.ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<decimal>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+
             using (var str = new StringReader("0"))
             {
                 var res = JSON.Deserialize<decimal>(str);
@@ -337,6 +348,17 @@ namespace JilTests
         [TestMethod]
         public void Doubles()
         {
+            for (var i = -11.1; i <= 22.2; i += 0.03)
+            {
+                var asStr = i.ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<double>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+
             using (var str = new StringReader("0"))
             {
                 var res = JSON.Deserialize<double>(str);
@@ -371,6 +393,17 @@ namespace JilTests
         [TestMethod]
         public void Floats()
         {
+            for (var i = -11.1f; i <= 22.2f; i += 0.03f)
+            {
+                var asStr = i.ToString();
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<float>(str);
+
+                    Assert.AreEqual(asStr, res.ToString());
+                }
+            }
+
             using (var str = new StringReader("0"))
             {
                 var res = JSON.Deserialize<float>(str);
