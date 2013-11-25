@@ -13,6 +13,294 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Overflow()
+        {
+            // byte
+            {
+                try
+                {
+                    using (var str = new StringReader("1234"))
+                    {
+                        JSON.Deserialize<byte>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("257"))
+                    {
+                        JSON.Deserialize<byte>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // sbyte
+            {
+                try
+                {
+                    using (var str = new StringReader("1234"))
+                    {
+                        JSON.Deserialize<sbyte>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("128"))
+                    {
+                        JSON.Deserialize<sbyte>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("-129"))
+                    {
+                        JSON.Deserialize<sbyte>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // short
+            {
+                try
+                {
+                    using (var str = new StringReader("320000"))
+                    {
+                        JSON.Deserialize<short>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("32768"))
+                    {
+                        JSON.Deserialize<short>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("-32769"))
+                    {
+                        JSON.Deserialize<short>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // ushort
+            {
+                try
+                {
+                    using (var str = new StringReader("320000"))
+                    {
+                        JSON.Deserialize<ushort>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("65536"))
+                    {
+                        JSON.Deserialize<ushort>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // int
+            {
+                try
+                {
+                    using (var str = new StringReader("21474830000"))
+                    {
+                        JSON.Deserialize<int>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("2147483648"))
+                    {
+                        JSON.Deserialize<int>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("-2147483649"))
+                    {
+                        JSON.Deserialize<int>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // uint
+            {
+                try
+                {
+                    using (var str = new StringReader("42949670000"))
+                    {
+                        JSON.Deserialize<uint>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("4294967296"))
+                    {
+                        JSON.Deserialize<uint>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // long
+            {
+                try
+                {
+                    using (var str = new StringReader("92233720368547750000"))
+                    {
+                        JSON.Deserialize<long>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("9223372036854775808"))
+                    {
+                        JSON.Deserialize<long>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("-9223372036854775809"))
+                    {
+                        JSON.Deserialize<long>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+
+            // ulong
+            {
+                try
+                {
+                    using (var str = new StringReader("184467440737095510000"))
+                    {
+                        JSON.Deserialize<ulong>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
+                }
+
+                try
+                {
+                    using (var str = new StringReader("18446744073709551616"))
+                    {
+                        JSON.Deserialize<ulong>(str);
+                        Assert.Fail("Shouldn't be possible");
+                    }
+                }
+                catch (OverflowException e)
+                {
+                    Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
+                }
+            }
+        }
+
+        [TestMethod]
         public void Decimals()
         {
             using (var str = new StringReader("0"))
