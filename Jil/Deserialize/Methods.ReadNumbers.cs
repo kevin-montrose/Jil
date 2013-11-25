@@ -13,6 +13,7 @@ namespace Jil.Deserialize
     //
     // Most of this file handles parsing integer numbers, it cheats for speed in a few ways.
     //   - unroll the loops because the type of a number gives us it's maximum size
+    //   - omit sign checks when dealing with unsigned types
     //   - build up w/o allocation using * and +, since we know everything's base-10 w/o separators
     //   - only do overflow checking after reading the *last* digit
     //      * base 10 again, you can't overflow 256 with 2 or fewer characters
@@ -29,7 +30,7 @@ namespace Jil.Deserialize
             // min:    0
             // digits: 3
 
-            int ret = 0;
+            uint ret = 0;
 
             // digit #1
             var c = reader.Read();
@@ -37,7 +38,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += c; // overflow not possible, maximum value = 9
+            ret += (uint)c;
 
             // digit #2
             c = reader.Read();
@@ -46,7 +47,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c; // overflow now possible, maximum value = 99
+            ret += (uint)c;
 
             // digit #3
             c = reader.Read();
@@ -55,9 +56,9 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += (uint)c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -109,7 +110,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += (sbyte)c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -179,7 +180,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -241,7 +242,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += (ushort)c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -356,7 +357,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -463,7 +464,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += (uint)c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             checked
             {
@@ -659,7 +660,7 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += (uint)c;
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             // one edge case, the minimum long value has to be checked for
             //   because otherwise we will overflow long and throw
@@ -866,7 +867,7 @@ namespace Jil.Deserialize
                 ret += (uint)c;
             }
 
-            CheckNumberOverfilTillEnd(reader);
+            CheckNumberOverflowTillEnd(reader);
 
             return ret;
         }
@@ -1089,7 +1090,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CheckNumberOverfilTillEnd(TextReader reader)
+        static void CheckNumberOverflowTillEnd(TextReader reader)
         {
             var next = reader.Peek();
 
