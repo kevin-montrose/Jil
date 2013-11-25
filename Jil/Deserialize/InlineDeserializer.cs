@@ -237,11 +237,29 @@ namespace Jil.Deserialize
             }
         }
 
-        static MethodInfo GetReadFloatingPoint(ExpectedEndMarker marker)
+        static MethodInfo GetReadDouble(ExpectedEndMarker marker)
         {
             switch (marker)
             {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadFloatingPointTillEnd;
+                case ExpectedEndMarker.EndOfStream: return Methods.ReadDoubleTillEnd;
+                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
+            }
+        }
+
+        static MethodInfo GetReadSingle(ExpectedEndMarker marker)
+        {
+            switch (marker)
+            {
+                case ExpectedEndMarker.EndOfStream: return Methods.ReadSingleTillEnd;
+                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
+            }
+        }
+
+        static MethodInfo GetReadDecimal(ExpectedEndMarker marker)
+        {
+            switch (marker)
+            {
+                case ExpectedEndMarker.EndOfStream: return Methods.ReadDecimalTillEnd;
                 default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
             }
         }
@@ -300,19 +318,25 @@ namespace Jil.Deserialize
 
             LoadStringBuilder();                    // TextReader StringBuilder
 
-            Emit.Call(GetReadFloatingPoint(end));   // double
+            if (numberType == typeof(double))
+            {
+                Emit.Call(GetReadDouble(end));   // double
+                return;
+            }
 
             if (numberType == typeof(float))
             {
-                Emit.Convert<float>();              // float
+                Emit.Call(GetReadSingle(end));  // float
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.NewObject<decimal, double>();  // decimal
+                Emit.Call(GetReadDecimal(end)); // decimal
                 return;
             }
+
+            throw new Exception("Unexpected number type: " + numberType);
         }
 
         void ReadPrimitive(Type primitiveType, ExpectedEndMarker end)
