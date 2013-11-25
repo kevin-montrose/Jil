@@ -13,6 +13,16 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CheckNumberOverfilTillEnd(TextReader reader)
+        {
+            var next = reader.Peek();
+
+            if (next == -1 || IsWhiteSpace(next)) return;
+
+            throw new OverflowException("Number did not end when expected, may overflow");
+        }
+
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ConsumeWhiteSpace(TextReader reader)
@@ -59,7 +69,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (byte)c;
+            ret += (byte)c; // overflow not possible, maximum value = 9
 
             // digit #2
             c = reader.Read();
@@ -68,7 +78,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (byte)c;
+            ret += (byte)c; // overflow now possible, maximum value = 99
 
             // digit #3
             c = reader.Read();
@@ -76,8 +86,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (byte)c;
+            checked
+            {
+                ret *= 10;
+                ret += (byte)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return ret;
         }
@@ -106,7 +121,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (sbyte)c;
+            ret += (sbyte)c;    // overflow not possible, max value = 9
 
             // digit #2
             c = reader.Read();
@@ -115,7 +130,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (sbyte)c;
+            ret += (sbyte)c;    // overflow not possible, max value = 99
 
             // digit #3
             c = reader.Read();
@@ -123,8 +138,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (sbyte)c;
+            checked
+            {
+                ret *= 10;
+                ret += (sbyte)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return (sbyte)(ret * (negative ? -1 : 1));
         }
@@ -153,7 +173,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (short)c;
+            ret += (short)c;    // overflow not possible, max value = 9
 
             // digit #2
             c = reader.Read();
@@ -162,7 +182,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (short)c;
+            ret += (short)c;    // overflow not possible, max value = 99
 
             // digit #3
             c = reader.Read();
@@ -171,7 +191,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (short)c;
+            ret += (short)c;    // overflow not possible, max value = 999
 
             // digit #4
             c = reader.Read();
@@ -180,7 +200,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (short)c;
+            ret += (short)c;    // overflow not possible, max value = 9999
 
             // digit #5
             c = reader.Read();
@@ -188,8 +208,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (short)c;
+            checked
+            {
+                ret *= 10;
+                ret += (short)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return (short)(ret * (negative ? -1 : 1));
         }
@@ -210,7 +235,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (ushort)c;
+            ret += (ushort)c;    // overflow not possible, max value = 9
 
             // digit #2
             c = reader.Read();
@@ -219,7 +244,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (ushort)c;
+            ret += (ushort)c;    // overflow not possible, max value = 99
 
             // digit #3
             c = reader.Read();
@@ -228,7 +253,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (ushort)c;
+            ret += (ushort)c;    // overflow not possible, max value = 999
 
             // digit #4
             c = reader.Read();
@@ -237,7 +262,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (ushort)c;
+            ret += (ushort)c;    // overflow not possible, max value = 9999
 
             // digit #5
             c = reader.Read();
@@ -245,8 +270,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (ushort)c;
+            checked
+            {
+                ret *= 10;
+                ret += (ushort)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return ret;
         }
@@ -259,7 +289,7 @@ namespace Jil.Deserialize
             // min: -2147483648
             // digits:       10
 
-            long ret = 0;
+            int ret = 0;
             var negative = false;
 
             // digit #1
@@ -275,7 +305,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += c;
+            ret += c;    // overflow not possible, max value = 9
 
             // digit #2
             c = reader.Read();
@@ -284,7 +314,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 99
 
             // digit #3
             c = reader.Read();
@@ -293,7 +323,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 999
 
             // digit #4
             c = reader.Read();
@@ -302,7 +332,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 9999
 
             // digit #5
             c = reader.Read();
@@ -311,7 +341,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 99999
 
             // digit #6
             c = reader.Read();
@@ -320,7 +350,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 999999
 
             // digit #7
             c = reader.Read();
@@ -329,7 +359,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 9999999
 
             // digit #8
             c = reader.Read();
@@ -338,7 +368,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 99999999
 
             // digit #9
             c = reader.Read();
@@ -347,7 +377,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;
+            ret += c;    // overflow not possible, max value = 999999999
 
             // digit #10
             c = reader.Read();
@@ -355,8 +385,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
+            checked
+            {
+                ret *= 10;
+                ret += c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return (int)(ret * (negative ? -1 : 1));
         }
@@ -377,7 +412,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 9
 
             // digit #2
             c = reader.Read();
@@ -386,7 +421,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 99
 
             // digit #3
             c = reader.Read();
@@ -395,7 +430,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 999
 
             // digit #4
             c = reader.Read();
@@ -404,7 +439,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 9999
 
             // digit #5
             c = reader.Read();
@@ -413,7 +448,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 99999
 
             // digit #6
             c = reader.Read();
@@ -422,7 +457,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 999999
 
             // digit #7
             c = reader.Read();
@@ -431,7 +466,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 9999999
 
             // digit #8
             c = reader.Read();
@@ -440,7 +475,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 99999999
 
             // digit #9
             c = reader.Read();
@@ -449,7 +484,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;
+            ret += (uint)c;    // overflow not possible, max value = 999999999
 
             // digit #10
             c = reader.Read();
@@ -457,8 +492,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;
+            checked
+            {
+                ret *= 10;
+                ret += (uint)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return ret;
         }
@@ -648,8 +688,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
+            checked
+            {
+                ret *= 10;
+                ret += c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return (ret * (negative ? -1 : 1));
         }
@@ -840,8 +885,13 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;
+            checked
+            {
+                ret *= 10;
+                ret += (uint)c;
+            }
+
+            CheckNumberOverfilTillEnd(reader);
 
             return ret;
         }
