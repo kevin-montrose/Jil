@@ -36,7 +36,7 @@ namespace JilTests
                 decimal d = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
                 d *= (decimal)rand.NextDouble();
 
-                var asStr = ((double)d).ToString();
+                var asStr = d.ToString();
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<decimal>(str);
