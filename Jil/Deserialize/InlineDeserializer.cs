@@ -378,6 +378,84 @@ namespace Jil.Deserialize
             Emit.MarkLabel(success);        // --empty--
         }
 
+        void LoadEnumValue(Type enumType, object val)
+        {
+            // TODO: ... all of it
+            Emit.LoadConstant(0);
+        }
+
+        void ReadEnum(Type enumType, Dictionary<char, List<Tuple<string, object>>> byChar, Sigil.Label finished)
+        {
+            var labels = byChar.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+
+            ReadEncodedChar();  // char
+
+            foreach (var kv in byChar)
+            {
+                var ifMatchesChar = kv.Key;
+                var gotoLabel = labels[ifMatchesChar];
+
+                Emit.Duplicate();                   // char char
+                Emit.LoadConstant(ifMatchesChar);   // char char char
+                Emit.BranchIfEqual(gotoLabel);      // char
+            }
+
+            Emit.Pop();
+            Emit.LoadConstant("Expected an instance of the " + enumType.FullName + " enum");
+            Emit.NewObject<DeserializationException, string>();
+            Emit.Throw();
+
+            foreach (var kv in byChar)
+            {
+                var label = labels[kv.Key];
+                var remainingOptions = byChar[kv.Key];
+
+                if (remainingOptions.Count == 1)
+                {
+                    ExpectQuote();
+
+                    LoadEnumValue(enumType, remainingOptions.Single().Item2);
+                    Emit.Branch(finished);
+                    continue;
+                }
+
+                var exactMatch = remainingOptions.Where(t => t.Item1 == "").SingleOrDefault();
+                if (exactMatch != null)
+                {
+                    var notMatch = Emit.DefineLabel();
+
+                    RawReadChar(() => ThrowExpected("any character"));  // char
+                    Emit.LoadConstant('"');                             // char "
+                    Emit.UnsignedBranchIfNotEqual(notMatch);            // --empty--
+
+                    LoadEnumValue(enumType, exactMatch.Item2);
+                    Emit.Branch(finished);
+
+                    Emit.MarkLabel(notMatch);
+                }
+
+                var withoutNextChar =
+                    remainingOptions.Select(t => Tuple.Create(new string(t.Item1.Skip(1).ToArray()), t.Item2));
+
+                var asDict =
+                    withoutNextChar.GroupBy(g => g.Item1[0]).ToDictionary(g => g.Key, g => g.ToList());
+
+                ReadEnum(enumType, asDict, finished);
+            }
+        }
+
+        void ReadEnum(Type enumType, ExpectedEndMarker end)
+        {
+            var names = Enum.GetNames(enumType);
+            var byChar = names.GroupBy(g => g[0]).ToDictionary(g => g.Key, g => g.Select(t => Tuple.Create(t, Enum.Parse(enumType, t))).ToList());
+            var finished = Emit.DefineLabel();
+
+            ExpectQuote();
+            ReadEnum(enumType, byChar, finished);
+
+            Emit.MarkLabel(finished);
+        }
+
         Func<TextReader, int, ForType> BuildPrimitiveWithNewDelegate()
         {
             Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
@@ -416,7 +494,23 @@ namespace Jil.Deserialize
 
         Func<TextReader, int, ForType> BuildEnumWithNewDelegate()
         {
-            throw new NotImplementedException();
+            Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
+
+            AddGlobalVariables();
+
+            ConsumeWhiteSpace();
+
+            ReadEnum(typeof(ForType), ExpectedEndMarker.EndOfStream);
+
+            // we have to consume this, otherwise we might succeed with invalid JSON
+            ConsumeWhiteSpace();
+
+            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
+            ExpectEndOfStream();
+
+            Emit.Return();
+
+            return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
         }
 
         Func<TextReader, int, ForType> BuildNullableWithNewDelegate()
