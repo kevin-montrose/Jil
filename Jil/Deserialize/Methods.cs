@@ -105,7 +105,7 @@ namespace Jil.Deserialize
             // min: -127
             // digits: 3
 
-            sbyte ret = 0;
+            int ret = 0;
             var negative = false;
 
             // digit #1
@@ -121,7 +121,7 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (sbyte)c;    // overflow not possible, max value = 9
+            ret += c;
 
             // digit #2
             c = reader.Read();
@@ -130,7 +130,7 @@ namespace Jil.Deserialize
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (sbyte)c;    // overflow not possible, max value = 99
+            ret += c;
 
             // digit #3
             c = reader.Read();
@@ -138,15 +138,15 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += (sbyte)c;
-            }
+            ret *= 10;
+            ret += (sbyte)c;
 
             CheckNumberOverfilTillEnd(reader);
 
-            return (sbyte)(ret * (negative ? -1 : 1));
+            checked
+            {
+                return (sbyte)(ret * (negative ? -1 : 1));
+            }
         }
 
         public static readonly MethodInfo ReadInt16TillEnd = typeof(Methods).GetMethod("_ReadInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
@@ -156,138 +156,6 @@ namespace Jil.Deserialize
             // max:  32767
             // min: -32768
             // digits:   5
-
-            short ret = 0;
-            var negative = false;
-
-            // digit #1
-            var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'");
-
-            if (c == '-')
-            {
-                negative = true;
-                c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit");
-            }
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (short)c;    // overflow not possible, max value = 9
-
-            // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (short)c;    // overflow not possible, max value = 99
-
-            // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (short)c;    // overflow not possible, max value = 999
-
-            // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (short)c;    // overflow not possible, max value = 9999
-
-            // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += (short)c;
-            }
-
-            CheckNumberOverfilTillEnd(reader);
-
-            return (short)(ret * (negative ? -1 : 1));
-        }
-
-        public static readonly MethodInfo ReadUInt16TillEnd = typeof(Methods).GetMethod("_ReadUInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static ushort _ReadUInt16TillEnd(TextReader reader)
-        {
-            // max: 65535
-            // min:     0
-            // digits:  5
-
-            ushort ret = 0;
-
-            // digit #1
-            var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit");
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (ushort)c;    // overflow not possible, max value = 9
-
-            // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (ushort)c;    // overflow not possible, max value = 99
-
-            // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (ushort)c;    // overflow not possible, max value = 999
-
-            // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (ushort)c;    // overflow not possible, max value = 9999
-
-            // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += (ushort)c;
-            }
-
-            CheckNumberOverfilTillEnd(reader);
-
-            return ret;
-        }
-
-        public static readonly MethodInfo ReadInt32TillEnd = typeof(Methods).GetMethod("_ReadInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int _ReadInt32TillEnd(TextReader reader)
-        {
-            // max:  2147483647
-            // min: -2147483648
-            // digits:       10
 
             int ret = 0;
             var negative = false;
@@ -305,104 +173,59 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += c;    // overflow not possible, max value = 9
+            ret += c;
 
             // digit #2
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;    // overflow not possible, max value = 99
+            ret += c;
 
             // digit #3
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;    // overflow not possible, max value = 999
+            ret += c;
 
             // digit #4
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;    // overflow not possible, max value = 9999
+            ret += c;
 
             // digit #5
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += c;    // overflow not possible, max value = 99999
-
-            // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;    // overflow not possible, max value = 999999
-
-            // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;    // overflow not possible, max value = 9999999
-
-            // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;    // overflow not possible, max value = 99999999
-
-            // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;    // overflow not possible, max value = 999999999
-
-            // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += c;
-            }
+            ret += c;
 
             CheckNumberOverfilTillEnd(reader);
 
-            return (int)(ret * (negative ? -1 : 1));
+            checked
+            {
+                return (short)(ret * (negative ? -1 : 1));
+            }
         }
 
-        public static readonly MethodInfo ReadUInt32TillEnd = typeof(Methods).GetMethod("_ReadUInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt16TillEnd = typeof(Methods).GetMethod("_ReadUInt16TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static uint _ReadUInt32TillEnd(TextReader reader)
+        static ushort _ReadUInt16TillEnd(TextReader reader)
         {
-            // max: 4294967295
-            // min:          0
-            // digits:      10
+            // max: 65535
+            // min:     0
+            // digits:  5
 
             uint ret = 0;
 
@@ -412,104 +235,59 @@ namespace Jil.Deserialize
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret += (uint)c;    // overflow not possible, max value = 9
+            ret += (uint)c;
 
             // digit #2
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 99
+            ret += (uint)c;
 
             // digit #3
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 999
+            ret += (uint)c;
 
             // digit #4
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 9999
+            ret += (ushort)c;
 
             // digit #5
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
+            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 99999
-
-            // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 999999
-
-            // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 9999999
-
-            // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 99999999
-
-            // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += (uint)c;    // overflow not possible, max value = 999999999
-
-            // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += (uint)c;
-            }
+            ret += (ushort)c;
 
             CheckNumberOverfilTillEnd(reader);
 
-            return ret;
+            checked
+            {
+                return (ushort)ret;
+            }
         }
 
-        public static readonly MethodInfo ReadInt64TillEnd = typeof(Methods).GetMethod("_ReadInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt32TillEnd = typeof(Methods).GetMethod("_ReadInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static long _ReadInt64TillEnd(TextReader reader)
+        static int _ReadInt32TillEnd(TextReader reader)
         {
-            // max:  9223372036854775807
-            // min: -9223372036854775808
-            // digits:                19
+            // max:  2147483647
+            // min: -2147483648
+            // digits:       10
 
             long ret = 0;
             var negative = false;
@@ -531,7 +309,7 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -540,7 +318,7 @@ namespace Jil.Deserialize
 
             // digit #3
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -549,7 +327,7 @@ namespace Jil.Deserialize
 
             // digit #4
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -558,7 +336,7 @@ namespace Jil.Deserialize
 
             // digit #5
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -567,7 +345,7 @@ namespace Jil.Deserialize
 
             // digit #6
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -576,7 +354,7 @@ namespace Jil.Deserialize
 
             // digit #7
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -585,7 +363,7 @@ namespace Jil.Deserialize
 
             // digit #8
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -594,7 +372,7 @@ namespace Jil.Deserialize
 
             // digit #9
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
@@ -603,100 +381,329 @@ namespace Jil.Deserialize
 
             // digit #10
             c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
+            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
 
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret *= 10;
             ret += c;
-
-            // digit #11
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #12
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #13
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #14
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #15
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #16
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #17
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #18
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            ret *= 10;
-            ret += c;
-
-            // digit #19
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ret * (negative ? -1 : 1));
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
-            checked
-            {
-                ret *= 10;
-                ret += c;
-            }
 
             CheckNumberOverfilTillEnd(reader);
 
-            return (ret * (negative ? -1 : 1));
+            checked
+            {
+                return (int)(ret * (negative ? -1 : 1));
+            }
+        }
+
+        public static readonly MethodInfo ReadUInt32TillEnd = typeof(Methods).GetMethod("_ReadUInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static uint _ReadUInt32TillEnd(TextReader reader)
+        {
+            // max: 4294967295
+            // min:          0
+            // digits:      10
+
+            ulong ret = 0;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit");
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += (uint)c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #4
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #5
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #6
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #7
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #8
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #9
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #10
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            CheckNumberOverfilTillEnd(reader);
+
+            checked
+            {
+                return (uint)ret;
+            }
+        }
+
+        public static readonly MethodInfo ReadInt64TillEnd = typeof(Methods).GetMethod("_ReadInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static long _ReadInt64TillEnd(TextReader reader)
+        {
+            // max:  9223372036854775807
+            // min: -9223372036854775808
+            // digits:                19
+
+            ulong ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit");
+            }
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += (uint)c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #4
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #5
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #6
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #7
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #8
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #9
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #10
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #11
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #12
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #13
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #14
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #15
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #16
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #17
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #18
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #19
+            c = reader.Read();
+            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += (uint)c;
+
+            CheckNumberOverfilTillEnd(reader);
+
+            // one edge case, the minimum long value has to be checked for
+            //   because otherwise we will overflow long and throw
+            if (negative && ret == 9223372036854775808UL)
+            {
+                return long.MinValue;
+            }
+
+            checked
+            {
+                return ((long)ret * (negative ? -1 : 1));
+            }
         }
 
         public static readonly MethodInfo ReadUInt64TillEnd = typeof(Methods).GetMethod("_ReadUInt64TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
