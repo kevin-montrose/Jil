@@ -365,6 +365,121 @@ namespace Jil.Deserialize
             }
         }
 
+        public static readonly MethodInfo ReadInt32TillComma = typeof(Methods).GetMethod("_ReadInt32TillComma", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _ReadInt32TillComma(TextReader reader)
+        {
+            // max:  2147483647
+            // min: -2147483648
+            // digits:       10
+
+            long ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit");
+            }
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret += c;
+
+            // digit #2
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #3
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #4
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #5
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #6
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #7
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #8
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #9
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            // digit #10
+            c = reader.Read();
+            if (c == ',' || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
+
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            ret *= 10;
+            ret += c;
+
+            CheckNumberOverflowTillComma(reader);
+
+            checked
+            {
+                return (int)(ret * (negative ? -1 : 1));
+            }
+        }
+
         public static readonly MethodInfo ReadUInt32TillEnd = typeof(Methods).GetMethod("_ReadUInt32TillEnd", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static uint _ReadUInt32TillEnd(TextReader reader)
@@ -1095,6 +1210,16 @@ namespace Jil.Deserialize
             var next = reader.Peek();
 
             if (next == -1 || IsWhiteSpace(next)) return;
+
+            throw new OverflowException("Number did not end when expected, may overflow");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void CheckNumberOverflowTillComma(TextReader reader)
+        {
+            var next = reader.Peek();
+
+            if (next == ',' || IsWhiteSpace(next)) return;
 
             throw new OverflowException("Number did not end when expected, may overflow");
         }
