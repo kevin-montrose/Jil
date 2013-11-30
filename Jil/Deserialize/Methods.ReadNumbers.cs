@@ -23,7 +23,6 @@ namespace Jil.Deserialize
     static partial class Methods
     {
         public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8(TextReader reader)
         {
             // max:  512
@@ -32,33 +31,27 @@ namespace Jil.Deserialize
 
             uint ret = 0;
 
-            // digit #1
+            // first digit *must* exist, we can't overread
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit");
-
-            c = c - '0';
+            c = c -'0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
             ret += (uint)c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (byte)ret;
-
-            c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            c = reader.Peek();
+            c  = c -'0';
+            if (c < 0 || c > 9) return (byte)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (byte)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (byte)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
-
-            CheckNumberOverflow(reader);
 
             checked
             {
@@ -93,24 +86,20 @@ namespace Jil.Deserialize
             ret += c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (sbyte)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (sbyte)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
-            ret += (sbyte)c;
-
-            CheckNumberOverflow(reader);
+            ret += c;
 
             checked
             {
@@ -145,42 +134,36 @@ namespace Jil.Deserialize
             ret += c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (short)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
-
-            CheckNumberOverflow(reader);
 
             checked
             {
@@ -207,42 +190,36 @@ namespace Jil.Deserialize
             ret += (uint)c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
             ret *= 10;
-            ret += (ushort)c;
+            ret += (uint)c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (ushort)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
             ret *= 10;
-            ret += (ushort)c;
-
-            CheckNumberOverflow(reader);
+            ret += (uint)c;
 
             checked
             {
@@ -277,87 +254,76 @@ namespace Jil.Deserialize
             ret += c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
 
             // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (int)(ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += c;
-
-            CheckNumberOverflow(reader);
 
             checked
             {
@@ -384,87 +350,76 @@ namespace Jil.Deserialize
             ret += (uint)c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return (uint)ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return (uint)ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
-
-            CheckNumberOverflow(reader);
 
             checked
             {
@@ -499,168 +454,148 @@ namespace Jil.Deserialize
             ret += (uint)c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #11
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #12
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #13
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #14
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #15
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #16
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #17
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #18
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #19
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ((long)ret * (negative ? -1 : 1));
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
-
-            CheckNumberOverflow(reader);
 
             // one edge case, the minimum long value has to be checked for
             //   because otherwise we will overflow long and throw
@@ -694,182 +629,163 @@ namespace Jil.Deserialize
             ret += (uint)c;
 
             // digit #2
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #3
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #4
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #5
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #6
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #7
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #8
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #9
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #10
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #11
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #12
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #13
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #14
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #15
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #16
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #17
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #18
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #19
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
             ret *= 10;
             ret += (uint)c;
 
             // digit #20
-            c = reader.Read();
-            if (c == -1 || IsWhiteSpace(c)) return ret;
-
+            c = reader.Peek();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) return ret;
+            reader.Read();
+
+            // ulong special case, we can overflow in the last **addition* instead of the last cast
             checked
             {
                 ret *= 10;
                 ret += (uint)c;
+
+                return ret;
             }
-
-            CheckNumberOverflow(reader);
-
-            return ret;
         }
 
         public static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
@@ -895,11 +811,12 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Read()) != -1 && !IsWhiteSpace(c))
+            while ((c = reader.Peek()) != -1)
             {
                 if (c >= '0' && c <= '9')
                 {
                     commonSb.Append((char)c);
+                    reader.Read();
                     continue;
                 }
 
@@ -909,11 +826,13 @@ namespace Jil.Deserialize
 
                     commonSb.Append('.');
                     seenDecimal = true;
+                    reader.Read();
 
                     // there must be a following digit to be valid JSON
-                    c = reader.Read();
+                    c = reader.Peek();
                     if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
                     commonSb.Append((char)c);
+                    reader.Read();
 
                     continue;
                 }
@@ -923,6 +842,7 @@ namespace Jil.Deserialize
                 {
                     var leading = double.Parse(commonSb.ToString()) * (negative ? -1.0 : 1.0);
                     commonSb.Clear();   // cleanup for the next use
+                    reader.Read();
 
                     var sign = reader.Peek();
                     if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
@@ -936,6 +856,8 @@ namespace Jil.Deserialize
 
                     return leading * exp;
                 }
+
+                throw new Exception("Unexpected character: " + c);
             }
 
             var ret = double.Parse(commonSb.ToString());
@@ -967,11 +889,12 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Read()) != -1 && !IsWhiteSpace(c))
+            while ((c = reader.Peek()) != -1)
             {
                 if (c >= '0' && c <= '9')
                 {
                     commonSb.Append((char)c);
+                    reader.Read();
                     continue;
                 }
 
@@ -981,11 +904,13 @@ namespace Jil.Deserialize
 
                     commonSb.Append('.');
                     seenDecimal = true;
+                    reader.Read();
 
                     // there must be a following digit to be valid JSON
-                    c = reader.Read();
+                    c = reader.Peek();
                     if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
                     commonSb.Append((char)c);
+                    reader.Read();
 
                     continue;
                 }
@@ -996,6 +921,7 @@ namespace Jil.Deserialize
                     // we're doing the math in doubles intentionally here, for precisions sake
                     var leading = double.Parse(commonSb.ToString()) * (negative ? -1.0 : 1.0);
                     commonSb.Clear();   // cleanup for the next use
+                    reader.Read();
 
                     var sign = reader.Peek();
                     if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
@@ -1009,12 +935,14 @@ namespace Jil.Deserialize
 
                     return (float)(leading * exp);
                 }
+
+                throw new Exception("Unexpected character: " + c);
             }
 
             var ret = float.Parse(commonSb.ToString());
             commonSb.Clear();   // cleanup for the next use
 
-            return ret * (negative ? -1f : 1f);
+            return ret * (negative ? -1f : 1f );
         }
 
         public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1040,11 +968,12 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Read()) != -1 && !IsWhiteSpace(c))
+            while ((c = reader.Peek()) != -1)
             {
                 if (c >= '0' && c <= '9')
                 {
                     commonSb.Append((char)c);
+                    reader.Read();
                     continue;
                 }
 
@@ -1054,11 +983,13 @@ namespace Jil.Deserialize
 
                     commonSb.Append('.');
                     seenDecimal = true;
+                    reader.Read();
 
                     // there must be a following digit to be valid JSON
-                    c = reader.Read();
+                    c = reader.Peek();
                     if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
                     commonSb.Append((char)c);
+                    reader.Read();
 
                     continue;
                 }
@@ -1068,6 +999,7 @@ namespace Jil.Deserialize
                 {
                     var leading = decimal.Parse(commonSb.ToString()) * (negative ? -1m : 1m);
                     commonSb.Clear();   // cleanup for the next use
+                    reader.Read();
 
                     var sign = reader.Peek();
                     if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
@@ -1081,6 +1013,8 @@ namespace Jil.Deserialize
 
                     return leading * exp;
                 }
+
+                throw new Exception("Unexpected character: " + c);
             }
 
             var ret = decimal.Parse(commonSb.ToString());
