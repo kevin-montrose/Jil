@@ -380,80 +380,76 @@ namespace Jil.Deserialize
 
         void LoadEnumValue(Type enumType, object val)
         {
-            // TODO: ... all of it
-            Emit.LoadConstant(0);
-        }
-
-        void ReadEnum(Type enumType, Dictionary<char, List<Tuple<string, object>>> byChar, Sigil.Label finished)
-        {
-            var labels = byChar.ToDictionary(d => d.Key, d => Emit.DefineLabel());
-
-            ReadEncodedChar();  // char
-
-            foreach (var kv in byChar)
+            var underlying = Enum.GetUnderlyingType(enumType);
+            if (underlying == typeof(sbyte))
             {
-                var ifMatchesChar = kv.Key;
-                var gotoLabel = labels[ifMatchesChar];
-
-                Emit.Duplicate();                   // char char
-                Emit.LoadConstant(ifMatchesChar);   // char char char
-                Emit.BranchIfEqual(gotoLabel);      // char
+                Emit.LoadConstant((sbyte)val);
+                return;
             }
 
-            Emit.Pop();
-            Emit.LoadConstant("Expected an instance of the " + enumType.FullName + " enum");
-            Emit.NewObject<DeserializationException, string>();
-            Emit.Throw();
-
-            foreach (var kv in byChar)
+            if (underlying == typeof(byte))
             {
-                var label = labels[kv.Key];
-                var remainingOptions = byChar[kv.Key];
-
-                if (remainingOptions.Count == 1)
-                {
-                    ExpectQuote();
-
-                    LoadEnumValue(enumType, remainingOptions.Single().Item2);
-                    Emit.Branch(finished);
-                    continue;
-                }
-
-                var exactMatch = remainingOptions.Where(t => t.Item1 == "").SingleOrDefault();
-                if (exactMatch != null)
-                {
-                    var notMatch = Emit.DefineLabel();
-
-                    RawReadChar(() => ThrowExpected("any character"));  // char
-                    Emit.LoadConstant('"');                             // char "
-                    Emit.UnsignedBranchIfNotEqual(notMatch);            // --empty--
-
-                    LoadEnumValue(enumType, exactMatch.Item2);
-                    Emit.Branch(finished);
-
-                    Emit.MarkLabel(notMatch);
-                }
-
-                var withoutNextChar =
-                    remainingOptions.Select(t => Tuple.Create(new string(t.Item1.Skip(1).ToArray()), t.Item2));
-
-                var asDict =
-                    withoutNextChar.GroupBy(g => g.Item1[0]).ToDictionary(g => g.Key, g => g.ToList());
-
-                ReadEnum(enumType, asDict, finished);
+                Emit.LoadConstant((byte)val);
+                return;
             }
+
+            if (underlying == typeof(short))
+            {
+                Emit.LoadConstant((short)val);
+                return;
+            }
+
+            if (underlying == typeof(ushort))
+            {
+                Emit.LoadConstant((ushort)val);
+                return;
+            }
+
+            if (underlying == typeof(int))
+            {
+                Emit.LoadConstant((int)val);
+                return;
+            }
+
+            if (underlying == typeof(uint))
+            {
+                Emit.LoadConstant((uint)val);
+                return;
+            }
+
+            if (underlying == typeof(long))
+            {
+                Emit.LoadConstant((long)val);
+                return;
+            }
+
+            if (underlying == typeof(ulong))
+            {
+                Emit.LoadConstant((ulong)val);
+                return;
+            }
+
+            throw new Exception("Unexpected underlying type, found: " + underlying);
         }
 
-        void ReadEnum(Type enumType, ExpectedEndMarker end)
+        static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public);
+        static readonly MethodInfo Enum_Parse = typeof(Enum).GetMethod("Parse", new[] { typeof(Type), typeof(string), typeof(bool) });
+        void ReadEnum(Type enumType)
         {
-            var names = Enum.GetNames(enumType);
-            var byChar = names.GroupBy(g => g[0]).ToDictionary(g => g.Key, g => g.Select(t => Tuple.Create(t, Enum.Parse(enumType, t))).ToList());
-            var finished = Emit.DefineLabel();
+            ExpectQuote();                          // --empty--
 
-            ExpectQuote();
-            ReadEnum(enumType, byChar, finished);
+            Emit.LoadConstant(enumType);            // RuntimeTypeHandle
+            Emit.Call(Type_GetTypeFromHandle);      // Type
 
-            Emit.MarkLabel(finished);
+            Emit.LoadArgument(0);                   // Type TextReader
+            LoadCharBuffer();                       // Type TextReader char[]
+            LoadStringBuilder();                    // Type TextReader char[] StringBuilder
+            Emit.Call(Methods.ReadEncodedString);   // Type string
+
+            Emit.LoadConstant(true);                // Type string bool
+
+            Emit.Call(Enum_Parse);                  // object
+            Emit.UnboxAny(enumType);                // enum
         }
 
         Func<TextReader, int, ForType> BuildPrimitiveWithNewDelegate()
@@ -500,7 +496,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
-            ReadEnum(typeof(ForType), ExpectedEndMarker.EndOfStream);
+            ReadEnum(typeof(ForType));
 
             // we have to consume this, otherwise we might succeed with invalid JSON
             ConsumeWhiteSpace();
@@ -508,7 +504,14 @@ namespace Jil.Deserialize
             // We also must confirm that we read everything, again otherwise we might accept garbage as valid
             ExpectEndOfStream();
 
-            Emit.Return();
+            try
+            {
+                Emit.Return();
+            }
+            catch (Sigil.SigilVerificationException e)
+            {
+                Console.Write(e);
+            }
 
             return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
         }

@@ -953,5 +953,23 @@ namespace JilTests
                 }
             }
         }
+
+        enum _Enums : int
+        {
+            Hello,
+            World,
+            Foo
+        }
+
+        [TestMethod]
+        public void Enums()
+        {
+            using (var str = new StringReader("\"Hello\""))
+            {
+                var val = JSON.Deserialize<_Enums>(str);
+
+                Assert.AreEqual(_Enums.Hello, val);
+            }
+        }
     }
 }
