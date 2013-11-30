@@ -92,12 +92,12 @@ namespace Jil.Deserialize
         {
             var gotChar = Emit.DefineLabel();
 
-            RawReadChar(() => ThrowExpected(c));  // int
-            Emit.LoadConstant((int)c);            // int int
-            Emit.BranchIfEqual(gotChar);           // --empty--
-            ThrowExpected(c);                     // --empty--
+            RawReadChar(() => ThrowExpected(c));    // int
+            Emit.LoadConstant((int)c);              // int int
+            Emit.BranchIfEqual(gotChar);            // --empty--
+            ThrowExpected(c);                       // --empty--
 
-            Emit.MarkLabel(gotChar);               // --empty--
+            Emit.MarkLabel(gotChar);                // --empty--
         }
 
         void ExpectQuote()
@@ -105,7 +105,7 @@ namespace Jil.Deserialize
             ExpectChar('"');
         }
 
-        void ExpectQuoteOrNull(Action ifQuote, Action ifNull)
+        void ExpectRawCharOrNull(char c, Action ifChar, Action ifNull)
         {
             var gotQuote = Emit.DefineLabel();
             var gotN = Emit.DefineLabel();
@@ -113,7 +113,7 @@ namespace Jil.Deserialize
 
             RawReadChar(() => ThrowExpected("\"", "null")); // int
             Emit.Duplicate();                               // int int
-            Emit.LoadConstant((int)'"');                    // int int "
+            Emit.LoadConstant((int)c);                      // int int int
             Emit.BranchIfEqual(gotQuote);                   // int 
             Emit.LoadConstant((int)'n');                    // int n
             Emit.BranchIfEqual(gotN);                       // --empty--
@@ -121,7 +121,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(gotQuote);                       // int
             Emit.Pop();                                     // --empty--
-            ifQuote();                                      // ???
+            ifChar();                                       // ???
             Emit.Branch(done);                              // ???
 
             Emit.MarkLabel(gotN);                           // --empty--
@@ -131,6 +131,11 @@ namespace Jil.Deserialize
             ifNull();                                       // ???
 
             Emit.MarkLabel(done);                           // --empty--
+        }
+
+        void ExpectQuoteOrNull(Action ifQuote, Action ifNull)
+        {
+            ExpectRawCharOrNull('"', ifQuote, ifNull);
         }
 
         void ReadChar()
@@ -206,6 +211,7 @@ namespace Jil.Deserialize
             switch (marker)
             {
                 case ExpectedEndMarker.EndOfStream: return Methods.ReadInt32TillEnd;
+                case ExpectedEndMarker.Comma: return Methods.ReadInt32TillComma;
                 default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
             }
         }
@@ -484,7 +490,64 @@ namespace Jil.Deserialize
 
         void ReadList(Type listType)
         {
-            throw new NotImplementedException();
+            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var addMtd = listType.GetMethod("Add");
+
+            var doRead = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
+
+            using (var loc = Emit.DeclareLocal(listType))
+            {
+                Action loadList;
+
+                if (!listType.IsValueType)
+                {
+                    loadList = () => Emit.LoadLocal(loc);
+
+                    ExpectRawCharOrNull(
+                        '[',
+                        () => { },
+                        () =>
+                        {
+                            Emit.LoadNull();
+                            Emit.Branch(done);
+                        }
+                    );
+                    Emit.Branch(doRead);
+                }
+                else
+                {
+                    loadList = () => Emit.LoadLocalAddress(loc);
+
+                    ExpectChar('[');
+                }
+
+
+                Emit.MarkLabel(doRead);                 // --empty--
+                if (listType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(loc);         // listType*
+                    Emit.InitializeObject(listType);    // --empty--
+                }
+                else
+                {
+                    Emit.NewObject(listType.GetConstructor(Type.EmptyTypes));   // listType
+                    Emit.StoreLocal(loc);                                       // --empty--
+                }
+
+                var startLoop = Emit.DefineLabel();
+
+                Emit.MarkLabel(startLoop);                      // --empty--
+                loadList();                                     // listType(*?)
+                RawPeekChar();                                  // listType(*?) int
+                Emit.LoadConstant(']');                         // listType int ']'
+                Emit.BranchIfEqual(done);                       // listType(*?)
+                Build(elementType, ExpectedEndMarker.Comma);    // listType(*?) elementType
+                Emit.CallVirtual(addMtd);                       // --empty--
+                Emit.Branch(startLoop);                         // --empty--
+
+                Emit.MarkLabel(done);                           // listType(*?)
+            }
         }
 
         void ReadDictionary(Type dictType)

@@ -1007,5 +1007,45 @@ namespace JilTests
                 Assert.IsFalse(val);
             }
         }
+
+        [TestMethod]
+        public void Lists()
+        {
+            using (var str = new StringReader("null"))
+            {
+                var val = JSON.Deserialize<List<int>>(str);
+                Assert.IsNull(val);
+            }
+
+            using (var str = new StringReader("[]"))
+            {
+                var val = JSON.Deserialize<List<int>>(str);
+                Assert.AreEqual(0, val.Count);
+            }
+
+            using (var str = new StringReader("[1]"))
+            {
+                var val = JSON.Deserialize<List<int>>(str);
+                Assert.AreEqual(1, val.Count);
+                Assert.AreEqual(1, val[0]);
+            }
+
+            using (var str = new StringReader("[1,2]"))
+            {
+                var val = JSON.Deserialize<List<int>>(str);
+                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual(1, val[0]);
+                Assert.AreEqual(2, val[1]);
+            }
+
+            using (var str = new StringReader("[1,2,3]"))
+            {
+                var val = JSON.Deserialize<List<int>>(str);
+                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual(1, val[0]);
+                Assert.AreEqual(2, val[1]);
+                Assert.AreEqual(3, val[2]);
+            }
+        }
     }
 }
