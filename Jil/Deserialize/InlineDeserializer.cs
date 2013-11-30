@@ -10,18 +10,6 @@ using System.Reflection;
 
 namespace Jil.Deserialize
 {
-    // Note that WhiteSpace is always implicit allowed to "end" in place of a token
-    [Flags]
-    enum ExpectedEndMarker : byte
-    {
-        Undefined = 0,
-
-        EndOfStream = 1,
-        Comma = 2,
-        CurlyBrace = 4,
-        SquareBrace = 8
-    }
-
     class InlineDeserializer<ForType>
     {
         const string CharBufferName = "char_buffer";
@@ -170,155 +158,55 @@ namespace Jil.Deserialize
             );
         }
 
-        static MethodInfo GetReadUInt8(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadUInt8TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadInt8(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadInt8TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadInt16(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadInt16TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadUInt16(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadUInt16TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadInt32(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadInt32TillEnd;
-                case ExpectedEndMarker.Comma: return Methods.ReadInt32TillComma;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadUInt32(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadUInt32TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadInt64(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadInt64TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadUInt64(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadUInt64TillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadDouble(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadDoubleTillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadSingle(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadSingleTillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        static MethodInfo GetReadDecimal(ExpectedEndMarker marker)
-        {
-            switch (marker)
-            {
-                case ExpectedEndMarker.EndOfStream: return Methods.ReadDecimalTillEnd;
-                default: throw new Exception("Unexpected ExpectedEndMarker: " + marker);
-            }
-        }
-
-        void ReadNumber(Type numberType, ExpectedEndMarker end)
+        void ReadNumber(Type numberType)
         {
             Emit.LoadArgument(0);               // TextReader
 
             if (numberType == typeof(byte))
             {
-                Emit.Call(GetReadUInt8(end));   // byte
+                Emit.Call(Methods.ReadUInt8);   // byte
                 return;
             }
 
             if (numberType == typeof(sbyte))
             {
-                Emit.Call(GetReadInt8(end));    // sbyte
+                Emit.Call(Methods.ReadInt8);    // sbyte
                 return;
             }
 
             if (numberType == typeof(short))
             {
-                Emit.Call(GetReadInt16(end));   // short
+                Emit.Call(Methods.ReadInt16);   // short
                 return;
             }
 
             if (numberType == typeof(ushort))
             {
-                Emit.Call(GetReadUInt16(end));  // ushort
+                Emit.Call(Methods.ReadUInt16);  // ushort
                 return;
             }
 
             if (numberType == typeof(int))
             {
-                Emit.Call(GetReadInt32(end));   // int
+                Emit.Call(Methods.ReadInt32);   // int
                 return;
             }
 
             if (numberType == typeof(uint))
             {
-                Emit.Call(GetReadUInt32(end));  // uint
+                Emit.Call(Methods.ReadUInt32);  // uint
                 return;
             }
 
             if (numberType == typeof(long))
             {
-                Emit.Call(GetReadInt64(end));   // long
+                Emit.Call(Methods.ReadInt64);   // long
                 return;
             }
 
             if (numberType == typeof(ulong))
             {
-                Emit.Call(GetReadUInt64(end));  // ulong
+                Emit.Call(Methods.ReadUInt64);  // ulong
                 return;
             }
 
@@ -326,19 +214,19 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(double))
             {
-                Emit.Call(GetReadDouble(end));   // double
+                Emit.Call(Methods.ReadDouble);   // double
                 return;
             }
 
             if (numberType == typeof(float))
             {
-                Emit.Call(GetReadSingle(end));  // float
+                Emit.Call(Methods.ReadSingle);  // float
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.Call(GetReadDecimal(end)); // decimal
+                Emit.Call(Methods.ReadDecimal); // decimal
                 return;
             }
 
@@ -383,7 +271,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(done);           // bool
         }
 
-        void ReadPrimitive(Type primitiveType, ExpectedEndMarker end)
+        void ReadPrimitive(Type primitiveType)
         {
             if (primitiveType == typeof(bool))
             {
@@ -403,7 +291,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            ReadNumber(primitiveType, end);
+            ReadNumber(primitiveType);
         }
 
         void ConsumeWhiteSpace()
@@ -455,7 +343,7 @@ namespace Jil.Deserialize
             Emit.UnboxAny(enumType);                // enum
         }
 
-        void ReadNullable(Type nullableType, ExpectedEndMarker endMarker)
+        void ReadNullable(Type nullableType)
         {
             var underlying = Nullable.GetUnderlyingType(nullableType);
 
@@ -470,9 +358,9 @@ namespace Jil.Deserialize
                 Emit.LoadConstant('n');             // int n
                 Emit.BranchIfEqual(maybeNull);      // --empty--
 
-                Build(underlying, endMarker);           // underlying
-                Emit.NewObject(nullableConst);          // nullableType
-                Emit.Branch(done);                      // nullableType
+                Build(underlying);                  // underlying
+                Emit.NewObject(nullableConst);      // nullableType
+                Emit.Branch(done);                  // nullableType
 
                 Emit.MarkLabel(maybeNull);          // --empty--
                 ExpectChar('n');                    // --empty--
@@ -542,7 +430,7 @@ namespace Jil.Deserialize
                 RawPeekChar();                                  // listType(*?) int
                 Emit.LoadConstant(']');                         // listType int ']'
                 Emit.BranchIfEqual(done);                       // listType(*?)
-                Build(elementType, ExpectedEndMarker.Comma);    // listType(*?) elementType
+                Build(elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
                 Emit.Branch(startLoop);                         // --empty--
 
@@ -560,17 +448,17 @@ namespace Jil.Deserialize
             throw new NotImplementedException();
         }
 
-        void Build(Type forType, ExpectedEndMarker endMarker)
+        void Build(Type forType)
         {
             if (forType.IsNullableType())
             {
-                ReadNullable(forType, endMarker);
+                ReadNullable(forType);
                 return;
             }
 
             if (forType.IsPrimitiveType())
             {
-                ReadPrimitive(forType, endMarker);
+                ReadPrimitive(forType);
                 return;
             }
 
@@ -605,7 +493,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
-            Build(forType, ExpectedEndMarker.EndOfStream);
+            Build(forType);
 
             // we have to consume this, otherwise we might succeed with invalid JSON
             ConsumeWhiteSpace();
