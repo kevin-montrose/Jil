@@ -452,64 +452,22 @@ namespace Jil.Deserialize
             Emit.UnboxAny(enumType);                // enum
         }
 
-        Func<TextReader, int, ForType> BuildPrimitiveWithNewDelegate()
-        {
-            Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
-
-            AddGlobalVariables();
-
-            ConsumeWhiteSpace();
-
-            ReadPrimitive(typeof(ForType), ExpectedEndMarker.EndOfStream);
-
-            // we have to consume this, otherwise we might succeed with invalid JSON
-            ConsumeWhiteSpace();
-
-            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
-            ExpectEndOfStream();
-
-            Emit.Return();
-
-            return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
-        }
-
-        Func<TextReader, int, ForType> BuildDictionaryWithNewDelegate()
+        void ReadNullable(Type nullableType)
         {
             throw new NotImplementedException();
         }
 
-        Func<TextReader, int, ForType> BuildObjectWithNewDelegate()
+        void ReadList(Type listType)
         {
             throw new NotImplementedException();
         }
 
-        Func<TextReader, int, ForType> BuildListWithNewDelegate()
+        void ReadDictionary(Type dictType)
         {
             throw new NotImplementedException();
         }
 
-        Func<TextReader, int, ForType> BuildEnumWithNewDelegate()
-        {
-            Emit = Emit.NewDynamicMethod(typeof(ForType), new[] { typeof(TextReader), typeof(int) });
-
-            AddGlobalVariables();
-
-            ConsumeWhiteSpace();
-
-            ReadEnum(typeof(ForType));
-
-            // we have to consume this, otherwise we might succeed with invalid JSON
-            ConsumeWhiteSpace();
-
-            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
-            ExpectEndOfStream();
-
-            Emit.Return();
-
-            return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
-        }
-
-        Func<TextReader, int, ForType> BuildNullableWithNewDelegate()
+        void ReadObject(Type objType)
         {
             throw new NotImplementedException();
         }
@@ -518,32 +476,59 @@ namespace Jil.Deserialize
         {
             var forType = typeof(ForType);
 
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) });
+
+            AddGlobalVariables();
+
+            ConsumeWhiteSpace();
+
             if (forType.IsNullableType())
             {
-                return BuildNullableWithNewDelegate();
+                ReadNullable(forType);
             }
-
-            if (forType.IsPrimitiveType())
+            else
             {
-                return BuildPrimitiveWithNewDelegate();
+                if (forType.IsPrimitiveType())
+                {
+                    ReadPrimitive(forType, ExpectedEndMarker.EndOfStream);
+                }
+                else
+                {
+                    if (forType.IsDictionaryType())
+                    {
+                        ReadDictionary(forType);
+                    }
+                    else
+                    {
+
+                        if (forType.IsListType())
+                        {
+                            ReadList(forType);
+                        }
+                        else
+                        {
+                            if (forType.IsEnum)
+                            {
+                                ReadEnum(forType);
+                            }
+                            else
+                            {
+                                ReadObject(forType);
+                            }
+                        }
+                    }
+                }
             }
 
-            if (forType.IsDictionaryType())
-            {
-                return BuildDictionaryWithNewDelegate();
-            }
+            // we have to consume this, otherwise we might succeed with invalid JSON
+            ConsumeWhiteSpace();
 
-            if (forType.IsListType())
-            {
-                return BuildListWithNewDelegate();
-            }
+            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
+            ExpectEndOfStream();
 
-            if (forType.IsEnum)
-            {
-                return BuildEnumWithNewDelegate();
-            }
+            Emit.Return();
 
-            return BuildObjectWithNewDelegate();
+            return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
         }
     }
 
