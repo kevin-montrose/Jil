@@ -53,6 +53,8 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += (uint)c;
 
+            AssertNotFollowedByDigit(reader);
+
             checked
             {
                 return (byte)ret;
@@ -100,6 +102,8 @@ namespace Jil.Deserialize
             reader.Read();
             ret *= 10;
             ret += c;
+
+            AssertNotFollowedByDigit(reader);
 
             checked
             {
@@ -165,6 +169,8 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += c;
 
+            AssertNotFollowedByDigit(reader);
+
             checked
             {
                 return (short)(ret * (negative ? -1 : 1));
@@ -220,6 +226,8 @@ namespace Jil.Deserialize
             reader.Read();
             ret *= 10;
             ret += (uint)c;
+
+            AssertNotFollowedByDigit(reader);
 
             checked
             {
@@ -325,6 +333,8 @@ namespace Jil.Deserialize
             ret *= 10;
             ret += c;
 
+            AssertNotFollowedByDigit(reader);
+
             checked
             {
                 return (int)(ret * (negative ? -1 : 1));
@@ -420,6 +430,8 @@ namespace Jil.Deserialize
             reader.Read();
             ret *= 10;
             ret += (uint)c;
+
+            AssertNotFollowedByDigit(reader);
 
             checked
             {
@@ -596,6 +608,8 @@ namespace Jil.Deserialize
             reader.Read();
             ret *= 10;
             ret += (uint)c;
+
+            AssertNotFollowedByDigit(reader);
 
             // one edge case, the minimum long value has to be checked for
             //   because otherwise we will overflow long and throw
@@ -778,6 +792,8 @@ namespace Jil.Deserialize
             if (c < 0 || c > 9) return ret;
             reader.Read();
 
+            AssertNotFollowedByDigit(reader);
+
             // ulong special case, we can overflow in the last **addition* instead of the last cast
             checked
             {
@@ -857,7 +873,8 @@ namespace Jil.Deserialize
                     return leading * exp;
                 }
 
-                throw new Exception("Unexpected character: " + c);
+                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
+                throw new DeserializationException(msg);
             }
 
             var ret = double.Parse(commonSb.ToString());
@@ -936,7 +953,8 @@ namespace Jil.Deserialize
                     return (float)(leading * exp);
                 }
 
-                throw new Exception("Unexpected character: " + c);
+                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
+                throw new DeserializationException(msg);
             }
 
             var ret = float.Parse(commonSb.ToString());
@@ -1014,7 +1032,8 @@ namespace Jil.Deserialize
                     return leading * exp;
                 }
 
-                throw new Exception("Unexpected character: " + c);
+                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
+                throw new DeserializationException(msg);
             }
 
             var ret = decimal.Parse(commonSb.ToString());
@@ -1024,13 +1043,11 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void CheckNumberOverflow(TextReader reader)
+        static void AssertNotFollowedByDigit(TextReader reader)
         {
             var next = reader.Peek();
 
-            if (next == -1 || IsWhiteSpace(next)) return;
-
-            throw new OverflowException("Number did not end when expected, may overflow");
+            if (next >= '0' && next <= '9') throw new OverflowException("Number did not end when expected, may overflow");
         }
     }
 }
