@@ -504,14 +504,7 @@ namespace Jil.Deserialize
             // We also must confirm that we read everything, again otherwise we might accept garbage as valid
             ExpectEndOfStream();
 
-            try
-            {
-                Emit.Return();
-            }
-            catch (Sigil.SigilVerificationException e)
-            {
-                Console.Write(e);
-            }
+            Emit.Return();
 
             return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
         }
