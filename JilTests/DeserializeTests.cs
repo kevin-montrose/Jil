@@ -971,5 +971,23 @@ namespace JilTests
                 Assert.AreEqual(_Enums.Hello, val);
             }
         }
+
+        [TestMethod]
+        public void Nullables()
+        {
+            using (var str = new StringReader("1"))
+            {
+                var val = JSON.Deserialize<int?>(str);
+
+                Assert.AreEqual((int?)1, val);
+            }
+
+            using (var str = new StringReader("null"))
+            {
+                var val = JSON.Deserialize<int?>(str);
+
+                Assert.AreEqual((int?)null, val);
+            }
+        }
     }
 }
