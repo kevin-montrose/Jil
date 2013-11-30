@@ -339,8 +339,52 @@ namespace Jil.Deserialize
             throw new Exception("Unexpected number type: " + numberType);
         }
 
+        void ReadBool()
+        {
+            var endOfStream = Emit.DefineLabel();
+            var mayBeTrue = Emit.DefineLabel();
+            var mayBeFalse = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
+
+            RawReadChar(() => Emit.Branch(endOfStream));    // int
+            Emit.Duplicate();                               // int int
+            Emit.LoadConstant('t');                         // int int 't'
+            Emit.BranchIfEqual(mayBeTrue);                  // int
+            Emit.LoadConstant('f');                         // int 'f'
+            Emit.BranchIfEqual(mayBeFalse);                 // --empty--
+
+            // end of stream **AND** not true or false case
+            Emit.MarkLabel(endOfStream);                    // --empty--
+            ThrowExpected("true or false");                 // --empty--
+
+            Emit.MarkLabel(mayBeTrue);      // int
+            Emit.Pop();                     // --empty--
+            ExpectChar('r');                // --empty--
+            ExpectChar('u');                // --empty--
+            ExpectChar('e');                // --empty--
+
+            Emit.LoadConstant(true);        // bool
+            Emit.Branch(done);              // bool
+
+            Emit.MarkLabel(mayBeFalse);     // --empty--
+            ExpectChar('a');                // --empty--
+            ExpectChar('l');                // --empty--
+            ExpectChar('s');                // --empty--
+            ExpectChar('e');                // --empty--
+
+            Emit.LoadConstant(false);       // bool
+
+            Emit.MarkLabel(done);           // bool
+        }
+
         void ReadPrimitive(Type primitiveType, ExpectedEndMarker end)
         {
+            if (primitiveType == typeof(bool))
+            {
+                ReadBool();
+                return;
+            }
+
             if (primitiveType == typeof(char))
             {
                 ReadChar();

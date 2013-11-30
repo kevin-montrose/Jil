@@ -989,5 +989,23 @@ namespace JilTests
                 Assert.AreEqual((int?)null, val);
             }
         }
+
+        [TestMethod]
+        public void Bools()
+        {
+            using (var str = new StringReader("true"))
+            {
+                var val = JSON.Deserialize<bool>(str);
+
+                Assert.IsTrue(val);
+            }
+
+            using (var str = new StringReader("false"))
+            {
+                var val = JSON.Deserialize<bool>(str);
+
+                Assert.IsFalse(val);
+            }
+        }
     }
 }
