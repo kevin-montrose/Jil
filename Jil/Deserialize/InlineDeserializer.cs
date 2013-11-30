@@ -521,7 +521,7 @@ namespace Jil.Deserialize
             throw new NotImplementedException();
         }
 
-        public Func<TextReader, int, ForType> Build()
+        public Func<TextReader, int, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
@@ -560,7 +560,7 @@ namespace Jil.Deserialize
         {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType);
 
-            var ret = obj.Build();
+            var ret = obj.BuildWithNewDelegate();
 
             return ret;
         }
