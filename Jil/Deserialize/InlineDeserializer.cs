@@ -93,7 +93,7 @@ namespace Jil.Deserialize
             var gotChar = Emit.DefineLabel();
 
             RawReadChar(() => ThrowExpected(c));  // int
-            Emit.LoadConstant((int)c);            // int "
+            Emit.LoadConstant((int)c);            // int int
             Emit.BranchIfEqual(gotChar);           // --empty--
             ThrowExpected(c);                     // --empty--
 
@@ -378,58 +378,11 @@ namespace Jil.Deserialize
             Emit.MarkLabel(success);        // --empty--
         }
 
-        void LoadEnumValue(Type enumType, object val)
+        static readonly MethodInfo TextReader_Peek = typeof(TextReader).GetMethod("Peek", BindingFlags.Public | BindingFlags.Instance);
+        void RawPeekChar()
         {
-            var underlying = Enum.GetUnderlyingType(enumType);
-            if (underlying == typeof(sbyte))
-            {
-                Emit.LoadConstant((sbyte)val);
-                return;
-            }
-
-            if (underlying == typeof(byte))
-            {
-                Emit.LoadConstant((byte)val);
-                return;
-            }
-
-            if (underlying == typeof(short))
-            {
-                Emit.LoadConstant((short)val);
-                return;
-            }
-
-            if (underlying == typeof(ushort))
-            {
-                Emit.LoadConstant((ushort)val);
-                return;
-            }
-
-            if (underlying == typeof(int))
-            {
-                Emit.LoadConstant((int)val);
-                return;
-            }
-
-            if (underlying == typeof(uint))
-            {
-                Emit.LoadConstant((uint)val);
-                return;
-            }
-
-            if (underlying == typeof(long))
-            {
-                Emit.LoadConstant((long)val);
-                return;
-            }
-
-            if (underlying == typeof(ulong))
-            {
-                Emit.LoadConstant((ulong)val);
-                return;
-            }
-
-            throw new Exception("Unexpected underlying type, found: " + underlying);
+            Emit.LoadArgument(0);                   // TextReader
+            Emit.CallVirtual(TextReader_Peek);      // int
         }
 
         static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public);
@@ -452,9 +405,37 @@ namespace Jil.Deserialize
             Emit.UnboxAny(enumType);                // enum
         }
 
-        void ReadNullable(Type nullableType)
+        void ReadNullable(Type nullableType, ExpectedEndMarker endMarker)
         {
-            throw new NotImplementedException();
+            var underlying = Nullable.GetUnderlyingType(nullableType);
+
+            var nullableConst = nullableType.GetConstructor(new[] { underlying });
+
+            var maybeNull = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
+
+            using (var loc = Emit.DeclareLocal(nullableType))
+            {
+                RawPeekChar();                      // int
+                Emit.LoadConstant('n');             // int n
+                Emit.BranchIfEqual(maybeNull);      // --empty--
+
+                Build(underlying, endMarker);           // underlying
+                Emit.NewObject(nullableConst);          // nullableType
+                Emit.Branch(done);                      // nullableType
+
+                Emit.MarkLabel(maybeNull);          // --empty--
+                ExpectChar('n');                    // --empty--
+                ExpectChar('u');                    // --empty--
+                ExpectChar('l');                    // --empty--
+                ExpectChar('l');                    // --empty--
+
+                Emit.LoadLocalAddress(loc);             // nullableType*
+                Emit.InitializeObject(nullableType);    // --empty--
+                Emit.LoadLocal(loc);                    // nullableType
+
+                Emit.MarkLabel(done);               // nullableType
+            }
         }
 
         void ReadList(Type listType)
@@ -472,6 +453,41 @@ namespace Jil.Deserialize
             throw new NotImplementedException();
         }
 
+        void Build(Type forType, ExpectedEndMarker endMarker)
+        {
+            if (forType.IsNullableType())
+            {
+                ReadNullable(forType, endMarker);
+                return;
+            }
+
+            if (forType.IsPrimitiveType())
+            {
+                ReadPrimitive(forType, endMarker);
+                return;
+            }
+
+            if (forType.IsDictionaryType())
+            {
+                ReadDictionary(forType);
+                return;
+            }
+
+            if (forType.IsListType())
+            {
+                ReadList(forType);
+                return;
+            }
+
+            if (forType.IsEnum)
+            {
+                ReadEnum(forType);
+                return;
+            }
+
+            ReadObject(forType);
+        }
+
         public Func<TextReader, int, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
@@ -482,43 +498,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
-            if (forType.IsNullableType())
-            {
-                ReadNullable(forType);
-            }
-            else
-            {
-                if (forType.IsPrimitiveType())
-                {
-                    ReadPrimitive(forType, ExpectedEndMarker.EndOfStream);
-                }
-                else
-                {
-                    if (forType.IsDictionaryType())
-                    {
-                        ReadDictionary(forType);
-                    }
-                    else
-                    {
-
-                        if (forType.IsListType())
-                        {
-                            ReadList(forType);
-                        }
-                        else
-                        {
-                            if (forType.IsEnum)
-                            {
-                                ReadEnum(forType);
-                            }
-                            else
-                            {
-                                ReadObject(forType);
-                            }
-                        }
-                    }
-                }
-            }
+            Build(forType, ExpectedEndMarker.EndOfStream);
 
             // we have to consume this, otherwise we might succeed with invalid JSON
             ConsumeWhiteSpace();
