@@ -466,9 +466,146 @@ namespace Jil.Deserialize
             throw new NotImplementedException();
         }
 
+        void SkipObjectMember()
+        {
+            Emit.LoadArgument(0);       // TextReader
+            Emit.Call(Methods.Skip);    // --empty--
+        }
+
         void ReadObject(Type objType)
         {
-            throw new NotImplementedException();
+            var done = Emit.DefineLabel();
+
+            if (!objType.IsValueType)
+            {
+                ExpectRawCharOrNull(
+                    '{',
+                    () => { },
+                    () =>
+                    {
+                        Emit.LoadNull();
+                        Emit.Branch(done);
+                    }
+                );
+            }
+            else
+            {
+                ExpectChar('{');
+            }
+
+            using (var loc = Emit.DeclareLocal(objType))
+            {
+                Action loadObj;
+                if (objType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(loc);     // objType*
+                    Emit.InitializeObject(objType); // --empty--
+
+                    loadObj = () => Emit.LoadLocalAddress(loc);
+                }
+                else
+                {
+                    Emit.NewObject(objType.GetConstructor(Type.EmptyTypes));    // objType
+                    Emit.StoreLocal(loc);                                       // --empty--
+
+                    loadObj = () => Emit.LoadLocal(loc);
+                }
+
+                var loopStart = Emit.DefineLabel();
+
+                var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
+
+                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+                
+                var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
+
+                var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
+                var orderInst = (Dictionary<string, int>)order.GetValue(null);
+                var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+
+                var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
+
+                ConsumeWhiteSpace();        // --empty--
+                loadObj();                  // objType(*?)
+                RawPeekChar();              // objType(*?) int 
+                Emit.LoadConstant('}');     // objType(*?) int '}'
+                Emit.BranchIfEqual(done);   // objType(*?)
+                Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
+                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
+                ExpectChar(':');            // objType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
+
+                var readingMember = Emit.DefineLabel();
+
+                Emit.MarkLabel(readingMember);  // objType(*?) Dictionary<string, int> string
+
+                using(var oLoc = Emit.DeclareLocal<int>())
+                {
+                    var isMember = Emit.DefineLabel();
+
+                    Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string
+                    Emit.Call(tryGetValue);         // objType(*?) bool
+                    Emit.BranchIfTrue(isMember);    // objType(*?)
+
+                    Emit.Pop();                     // --empty--
+                    SkipObjectMember();             // --empty--
+                    Emit.Branch(loopStart);         // --empty--
+
+                    Emit.MarkLabel(isMember);       // objType(*?)
+                    Emit.LoadLocal(oLoc);           // objType(*?) int
+                    Emit.Switch(inOrderLabels);     // objType(*?)
+
+                    // fallthrough case
+                    ThrowExpected("a member name"); // --empty--
+                }
+
+                foreach (var kv in labels)
+                {
+                    var label = kv.Value;
+                    var member = setters[kv.Key];
+
+                    Emit.MarkLabel(label);      // objType(*?)
+                    Build(member.ReturnType()); // objType(*?) memberType
+
+                    if (member is FieldInfo)
+                    {
+                        Emit.StoreField((FieldInfo)member);             // --empty--
+                    }
+                    else
+                    {
+                        Emit.Call(((PropertyInfo)member).SetMethod);    // --empty--
+                    }
+
+                    Emit.Branch(loopStart);     // --empty--
+                }
+
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(loopStart);      // --empty--
+                ConsumeWhiteSpace();            // --empty--
+                loadObj();                      // objType(*?)
+                RawPeekChar();                  // objType(*?) int 
+                Emit.Duplicate();               // objType(*?) int int
+                Emit.LoadConstant(',');         // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);   // objType(*?) int
+                Emit.LoadConstant('}');         // objType(*?) int '}'
+                Emit.BranchIfEqual(done);       // objType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "}");
+
+                Emit.MarkLabel(nextItem);   // objType(*?) int
+                Emit.Pop();                 // objType(*?)
+                Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
+                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
+                ExpectChar(':');            // objType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
+                Emit.Branch(readingMember); // objType(*?) Dictionary<string, int> string
+            }
+
+            Emit.MarkLabel(done);   // objType(*?)
         }
 
         void Build(Type forType)

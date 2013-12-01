@@ -1062,5 +1062,33 @@ namespace JilTests
                 Assert.AreEqual(3, val[2]);
             }
         }
+
+        class _Objects
+        {
+            public int A;
+        }
+
+        [TestMethod]
+        public void Objects()
+        {
+            using (var str = new StringReader("null"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNull(val);
+            }
+
+            using (var str = new StringReader("{}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+            }
+
+            using (var str = new StringReader("{\"A\": 123}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(123, val.A);
+            }
+        }
     }
 }
