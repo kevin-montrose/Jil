@@ -1066,6 +1066,7 @@ namespace JilTests
         class _Objects
         {
             public int A;
+            public string B { get; set; }
         }
 
         [TestMethod]
@@ -1088,6 +1089,29 @@ namespace JilTests
                 var val = JSON.Deserialize<_Objects>(str);
                 Assert.IsNotNull(val);
                 Assert.AreEqual(123, val.A);
+            }
+
+            using (var str = new StringReader("{\"B\": \"hello\"}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual("hello", val.B);
+            }
+
+            using (var str = new StringReader("{\"A\": 456, \"B\": \"hello\"}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(456, val.A);
+                Assert.AreEqual("hello", val.B);
+            }
+
+            using (var str = new StringReader("{\"B\": \"hello\", \"A\": 456}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(456, val.A);
+                Assert.AreEqual("hello", val.B);
             }
         }
     }

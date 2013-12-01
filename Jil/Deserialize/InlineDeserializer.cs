@@ -537,14 +537,16 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
 
                 var readingMember = Emit.DefineLabel();
-
                 Emit.MarkLabel(readingMember);  // objType(*?) Dictionary<string, int> string
 
                 using(var oLoc = Emit.DeclareLocal<int>())
                 {
                     var isMember = Emit.DefineLabel();
 
-                    Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string
+                    // DEBUG //
+                    Emit.Call(Methods.ProbeString);
+
+                    Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string int*
                     Emit.Call(tryGetValue);         // objType(*?) bool
                     Emit.BranchIfTrue(isMember);    // objType(*?)
 
@@ -554,6 +556,10 @@ namespace Jil.Deserialize
 
                     Emit.MarkLabel(isMember);       // objType(*?)
                     Emit.LoadLocal(oLoc);           // objType(*?) int
+
+                    // DEBUG //
+                    Emit.Call(Methods.ProbeInt);
+
                     Emit.Switch(inOrderLabels);     // objType(*?)
 
                     // fallthrough case
@@ -595,14 +601,18 @@ namespace Jil.Deserialize
                 // didn't get what we expected
                 ThrowExpected(",", "}");
 
-                Emit.MarkLabel(nextItem);   // objType(*?) int
-                Emit.Pop();                 // objType(*?)
-                Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
-                ExpectChar(':');            // objType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
-                Emit.Branch(readingMember); // objType(*?) Dictionary<string, int> string
+                Emit.MarkLabel(nextItem);           // objType(*?) int
+                Emit.Pop();                         // objType(*?)
+                Emit.LoadArgument(0);               // objType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+                Emit.Pop();                         // objType(*?)
+                ConsumeWhiteSpace();
+                Emit.LoadField(order);              // objType(*?) Dictionary<string, int> string
+                Build(typeof(string));              // objType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
+                ExpectChar(':');                    // objType(*?) Dictionary<string, int> string
+                ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
+                Emit.Branch(readingMember);         // objType(*?) Dictionary<string, int> string
             }
 
             Emit.MarkLabel(done);   // objType(*?)
