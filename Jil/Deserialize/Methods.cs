@@ -13,6 +13,12 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
+        public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
+        static void _Skip(TextReader reader)
+        {
+            throw new NotImplementedException();
+        }
+
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ConsumeWhiteSpace(TextReader reader)
