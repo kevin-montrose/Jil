@@ -383,6 +383,7 @@ namespace Jil.Deserialize
 
             var doRead = Emit.DefineLabel();
             var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
 
             using (var loc = Emit.DeclareLocal(listType))
             {
@@ -398,7 +399,8 @@ namespace Jil.Deserialize
                         () =>
                         {
                             Emit.LoadNull();
-                            Emit.Branch(done);
+                            Emit.CastClass(listType);
+                            Emit.Branch(doneSkipChar);
                         }
                     );
                     Emit.Branch(doRead);
@@ -457,7 +459,12 @@ namespace Jil.Deserialize
                 Emit.CallVirtual(addMtd);           // --empty--
                 Emit.Branch(startLoop);             // --empty--
 
-                Emit.MarkLabel(done);                           // listType(*?)
+                Emit.MarkLabel(done);               // listType(*?)
+                Emit.LoadArgument(0);               // listType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // listType(*?) int
+                Emit.Pop();                         // listType(*?)
+
+                Emit.MarkLabel(doneSkipChar);       // listType(*?)
             }
         }
 
@@ -475,6 +482,7 @@ namespace Jil.Deserialize
         void ReadObject(Type objType)
         {
             var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
 
             if (!objType.IsValueType)
             {
@@ -484,7 +492,8 @@ namespace Jil.Deserialize
                     () =>
                     {
                         Emit.LoadNull();
-                        Emit.Branch(done);
+                        Emit.CastClass(objType);
+                        Emit.Branch(doneSkipChar);
                     }
                 );
             }
@@ -608,7 +617,12 @@ namespace Jil.Deserialize
                 Emit.Branch(readingMember);         // objType(*?) Dictionary<string, int> string
             }
 
-            Emit.MarkLabel(done);   // objType(*?)
+            Emit.MarkLabel(done);               // objType(*?)
+            Emit.LoadArgument(0);               // objType(*?) TextReader
+            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+            Emit.Pop();                         // objType(*?)
+
+            Emit.MarkLabel(doneSkipChar);       // objType(*?)
         }
 
         void Build(Type forType)
