@@ -476,6 +476,8 @@ namespace Jil.Deserialize
         void SkipObjectMember()
         {
             Emit.LoadArgument(0);       // TextReader
+            LoadCharBuffer();           // TextReader char[]
+            LoadStringBuilder();        // TextReader char[] StringBuilder
             Emit.Call(Methods.Skip);    // --empty--
         }
 

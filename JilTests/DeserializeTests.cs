@@ -1219,5 +1219,128 @@ namespace JilTests
                 Assert.AreEqual(-1, str.Peek());
             }
         }
+
+        [TestMethod]
+        public void ObjectsSkipMembers()
+        {
+            using (var str = new StringReader("{\"C\":123}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":-123}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":123.456}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+
+
+            using (var str = new StringReader("{\"C\":-123.456}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":1E12}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":-1E12}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":1E-12}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":-1E-12}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":1.1E2}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":-1.1E2}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":1.1E+2}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":-1.1E+2}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\":\"hello\"}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+        }
     }
 }
