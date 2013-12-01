@@ -1063,11 +1063,13 @@ namespace JilTests
             }
         }
 
+#pragma warning disable 0649
         class _Objects
         {
             public int A;
             public string B { get; set; }
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void Objects()
@@ -1082,6 +1084,8 @@ namespace JilTests
             {
                 var val = JSON.Deserialize<_Objects>(str);
                 Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
             }
 
             using (var str = new StringReader("{\"A\": 123}"))
