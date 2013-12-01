@@ -543,9 +543,6 @@ namespace Jil.Deserialize
                 {
                     var isMember = Emit.DefineLabel();
 
-                    // DEBUG //
-                    Emit.Call(Methods.ProbeString);
-
                     Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string int*
                     Emit.Call(tryGetValue);         // objType(*?) bool
                     Emit.BranchIfTrue(isMember);    // objType(*?)
@@ -556,10 +553,6 @@ namespace Jil.Deserialize
 
                     Emit.MarkLabel(isMember);       // objType(*?)
                     Emit.LoadLocal(oLoc);           // objType(*?) int
-
-                    // DEBUG //
-                    Emit.Call(Methods.ProbeInt);
-
                     Emit.Switch(inOrderLabels);     // objType(*?)
 
                     // fallthrough case
