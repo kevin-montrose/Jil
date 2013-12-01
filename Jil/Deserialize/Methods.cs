@@ -13,6 +13,18 @@ namespace Jil.Deserialize
     {
         public const int CharBufferSize = 4;
 
+        public static readonly MethodInfo ProbeString = typeof(Methods).GetMethod("_ProbeString", BindingFlags.NonPublic | BindingFlags.Static);
+        static string _ProbeString(string str)
+        {
+            return str;
+        }
+
+        public static readonly MethodInfo ProbeInt = typeof(Methods).GetMethod("_ProbeInt", BindingFlags.NonPublic | BindingFlags.Static);
+        static int _ProbeInt(int ix)
+        {
+            return ix;
+        }
+
         public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
         static void _Skip(TextReader reader)
         {
