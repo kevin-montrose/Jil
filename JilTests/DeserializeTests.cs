@@ -1117,6 +1117,22 @@ namespace JilTests
                 Assert.AreEqual(456, val.A);
                 Assert.AreEqual("hello", val.B);
             }
+
+            using (var str = new StringReader("{\"B\":\"hello\",\"A\":456}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(456, val.A);
+                Assert.AreEqual("hello", val.B);
+            }
+
+            using (var str = new StringReader("   {  \"B\"    :   \"hello\"    ,    \"A\"   :   456   }  "))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(456, val.A);
+                Assert.AreEqual("hello", val.B);
+            }
         }
     }
 }
