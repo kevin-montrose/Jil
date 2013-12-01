@@ -410,7 +410,6 @@ namespace Jil.Deserialize
                     ExpectChar('[');
                 }
 
-
                 Emit.MarkLabel(doRead);                 // --empty--
                 if (listType.IsValueType)
                 {
@@ -423,16 +422,40 @@ namespace Jil.Deserialize
                     Emit.StoreLocal(loc);                                       // --empty--
                 }
 
-                var startLoop = Emit.DefineLabel();
-
-                Emit.MarkLabel(startLoop);                      // --empty--
-                loadList();                                     // listType(*?)
-                RawPeekChar();                                  // listType(*?) int
+                // first step unrolled, cause ',' isn't legal
+                ConsumeWhiteSpace();                            // --empty--
+                loadList();                                     // listType
+                RawPeekChar();                                  // listType int 
                 Emit.LoadConstant(']');                         // listType int ']'
                 Emit.BranchIfEqual(done);                       // listType(*?)
                 Build(elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
-                Emit.Branch(startLoop);                         // --empty--
+
+                var startLoop = Emit.DefineLabel();
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(startLoop);                      // --empty--
+                ConsumeWhiteSpace();                            // --empty--
+                loadList();                                     // listType(*?)
+                RawPeekChar();                                  // listType(*?) int
+                Emit.Duplicate();                               // listType(*?) int int
+                Emit.LoadConstant(',');                         // listType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);                   // listType(*?) int
+                Emit.LoadConstant(']');                         // listType(*?) int ']'
+                Emit.BranchIfEqual(done);                       // listType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "]");
+
+                Emit.MarkLabel(nextItem);           // listType(*?) int
+                Emit.Pop();                         // listType(*?)
+                Emit.LoadArgument(0);               // listType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // listType(*?) int
+                Emit.Pop();                         // listType(*?)
+                ConsumeWhiteSpace();                // listType(*?)
+                Build(elementType);                 // listType(*?) elementType
+                Emit.CallVirtual(addMtd);           // --empty--
+                Emit.Branch(startLoop);             // --empty--
 
                 Emit.MarkLabel(done);                           // listType(*?)
             }

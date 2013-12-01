@@ -1041,7 +1041,7 @@ namespace JilTests
             using (var str = new StringReader("[1,2,3]"))
             {
                 var val = JSON.Deserialize<List<int>>(str);
-                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual(3, val.Count);
                 Assert.AreEqual(1, val[0]);
                 Assert.AreEqual(2, val[1]);
                 Assert.AreEqual(3, val[2]);
