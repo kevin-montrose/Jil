@@ -15,17 +15,14 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _Skip(TextReader reader, char[] buffer, StringBuilder commonSb)
+        static void _Skip(TextReader reader)
         {
             var leadChar = reader.Peek();
 
             // skip a string
             if(leadChar == '"')
             {
-                reader.Read();  // skip the "
-
-                // TODO: A version of _ReadEncodedString that doesn't actually build up the string
-                _ReadEncodedString(reader, buffer, commonSb);
+                SkipEncodedString(reader);
                 return;
             }
 
@@ -44,49 +41,105 @@ namespace Jil.Deserialize
             // skip a number
             if ((leadChar >= '0' && leadChar <= '9') || leadChar == '-')
             {
-                reader.Read();  // ditch the number
-                
-                var seenDecimal = false;
-                var seenExponent = false;
-
-                while (true)
-                {
-                    var c = reader.Peek();
-
-                    if (c >= '0' && c <= '9')
-                    {
-                        reader.Read();  // skip the digit
-                        continue;
-                    }
-
-                    if (c == '.' && !seenDecimal)
-                    {
-                        reader.Read();      // skip the decimal
-                        seenDecimal = true;
-                        continue;
-                    }
-
-                    if ((c == 'e' || c == 'E') && !seenExponent)
-                    {
-                        reader.Read();      // skip the decimal
-                        seenExponent = true;
-                        seenDecimal = true;
-
-                        var next = reader.Peek();
-                        if (next == '-' || next == '+' || (next >= '0' && next <= '9'))
-                        {
-                            reader.Read();
-                            continue;
-                        }
-
-                        throw new DeserializationException("Expected -, or a digit");
-                    }
-
-                    return;
-                }
+                SkipNumber(reader);
+                return;
             }
 
             throw new DeserializationException("Expected digit, -, \", {, or [");
+        }
+
+        static void SkipEncodedString(TextReader reader)
+        {
+            reader.Read();  // skip the "
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character");
+
+                // we didn't have to use anything but the buffer, make a string and return it!
+                if (first == '"')
+                {
+                    return;
+                }
+
+                if (first != '\\')
+                {
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character");
+
+                switch (second)
+                {
+                    case '"': continue;
+                    case '\\': continue;
+                    case '/': continue;
+                    case 'b': continue;
+                    case 'f': continue;
+                    case 'n': continue;
+                    case 'r': continue;
+                    case 't': continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                var u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipNumber(TextReader reader)
+        {
+            reader.Read();  // ditch the start of the number
+
+            var seenDecimal = false;
+            var seenExponent = false;
+
+            while (true)
+            {
+                var c = reader.Peek();
+
+                if (c >= '0' && c <= '9')
+                {
+                    reader.Read();  // skip the digit
+                    continue;
+                }
+
+                if (c == '.' && !seenDecimal)
+                {
+                    reader.Read();      // skip the decimal
+                    seenDecimal = true;
+                    continue;
+                }
+
+                if ((c == 'e' || c == 'E') && !seenExponent)
+                {
+                    reader.Read();      // skip the decimal
+                    seenExponent = true;
+                    seenDecimal = true;
+
+                    var next = reader.Peek();
+                    if (next == '-' || next == '+' || (next >= '0' && next <= '9'))
+                    {
+                        reader.Read();
+                        continue;
+                    }
+
+                    throw new DeserializationException("Expected -, or a digit");
+                }
+
+                return;
+            }
         }
 
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
