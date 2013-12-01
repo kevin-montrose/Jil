@@ -14,9 +14,79 @@ namespace Jil.Deserialize
         public const int CharBufferSize = 4;
 
         public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
-        static void _Skip(TextReader reader)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _Skip(TextReader reader, char[] buffer, StringBuilder commonSb)
         {
-            throw new NotImplementedException();
+            var leadChar = reader.Peek();
+
+            // skip a string
+            if(leadChar == '"')
+            {
+                reader.Read();  // skip the "
+
+                // TODO: A version of _ReadEncodedString that doesn't actually build up the string
+                _ReadEncodedString(reader, buffer, commonSb);
+                return;
+            }
+
+            // skip an object
+            if (leadChar == '{')
+            {
+                throw new NotImplementedException();
+            }
+
+            // skip a list
+            if (leadChar == '[')
+            {
+                throw new NotImplementedException();
+            }
+
+            // skip a number
+            if ((leadChar >= '0' && leadChar <= '9') || leadChar == '-')
+            {
+                reader.Read();  // ditch the number
+                
+                var seenDecimal = false;
+                var seenExponent = false;
+
+                while (true)
+                {
+                    var c = reader.Peek();
+
+                    if (c >= '0' && c <= '9')
+                    {
+                        reader.Read();  // skip the digit
+                        continue;
+                    }
+
+                    if (c == '.' && !seenDecimal)
+                    {
+                        reader.Read();      // skip the decimal
+                        seenDecimal = true;
+                        continue;
+                    }
+
+                    if ((c == 'e' || c == 'E') && !seenExponent)
+                    {
+                        reader.Read();      // skip the decimal
+                        seenExponent = true;
+                        seenDecimal = true;
+
+                        var next = reader.Peek();
+                        if (next == '-' || next == '+' || (next >= '0' && next <= '9'))
+                        {
+                            reader.Read();
+                            continue;
+                        }
+
+                        throw new DeserializationException("Expected -, or a digit");
+                    }
+
+                    return;
+                }
+            }
+
+            throw new DeserializationException("Expected digit, -, \", {, or [");
         }
 
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
