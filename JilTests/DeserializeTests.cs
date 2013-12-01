@@ -311,6 +311,7 @@ namespace JilTests
                     var res = JSON.Deserialize<decimal>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -319,6 +320,7 @@ namespace JilTests
                 var res = JSON.Deserialize<decimal>(str);
 
                 Assert.AreEqual(0m, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("0.0"))
@@ -326,6 +328,7 @@ namespace JilTests
                 var res = JSON.Deserialize<decimal>(str);
 
                 Assert.AreEqual(0m, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             var rand = new Random();
@@ -341,6 +344,7 @@ namespace JilTests
                     var res = JSON.Deserialize<decimal>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
         }
@@ -356,6 +360,7 @@ namespace JilTests
                     var res = JSON.Deserialize<double>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -364,6 +369,7 @@ namespace JilTests
                 var res = JSON.Deserialize<double>(str);
 
                 Assert.AreEqual(0.0, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("0.0"))
@@ -371,6 +377,7 @@ namespace JilTests
                 var res = JSON.Deserialize<double>(str);
 
                 Assert.AreEqual(0.0, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             var rand = new Random();
@@ -386,6 +393,7 @@ namespace JilTests
                     var res = JSON.Deserialize<double>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
         }
@@ -401,6 +409,7 @@ namespace JilTests
                     var res = JSON.Deserialize<float>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -409,6 +418,7 @@ namespace JilTests
                 var res = JSON.Deserialize<float>(str);
 
                 Assert.AreEqual(0f, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("0.0"))
@@ -416,6 +426,7 @@ namespace JilTests
                 var res = JSON.Deserialize<float>(str);
 
                 Assert.AreEqual(0f, res);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             var rand = new Random();
@@ -431,6 +442,7 @@ namespace JilTests
                     var res = JSON.Deserialize<float>(str);
 
                     Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
         }
@@ -443,6 +455,7 @@ namespace JilTests
                 var i = JSON.Deserialize<long>(str);
 
                 Assert.AreEqual(0L, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(long.MaxValue.ToString()))
@@ -450,6 +463,7 @@ namespace JilTests
                 var i = JSON.Deserialize<long>(str);
 
                 Assert.AreEqual(long.MaxValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(long.MinValue.ToString()))
@@ -457,6 +471,7 @@ namespace JilTests
                 var i = JSON.Deserialize<long>(str);
 
                 Assert.AreEqual(long.MinValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -468,6 +483,7 @@ namespace JilTests
                 var i = JSON.Deserialize<ulong>(str);
 
                 Assert.AreEqual((ulong)0, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(ulong.MaxValue.ToString()))
@@ -475,6 +491,7 @@ namespace JilTests
                 var i = JSON.Deserialize<ulong>(str);
 
                 Assert.AreEqual(ulong.MaxValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(ulong.MinValue.ToString()))
@@ -482,6 +499,7 @@ namespace JilTests
                 var i = JSON.Deserialize<ulong>(str);
 
                 Assert.AreEqual(ulong.MinValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -493,6 +511,7 @@ namespace JilTests
                 var i = JSON.Deserialize<int>(str);
 
                 Assert.AreEqual(0, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(int.MaxValue.ToString()))
@@ -500,6 +519,7 @@ namespace JilTests
                 var i = JSON.Deserialize<int>(str);
 
                 Assert.AreEqual(int.MaxValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(int.MinValue.ToString()))
@@ -507,6 +527,7 @@ namespace JilTests
                 var i = JSON.Deserialize<int>(str);
 
                 Assert.AreEqual(int.MinValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -518,6 +539,7 @@ namespace JilTests
                 var i = JSON.Deserialize<uint>(str);
 
                 Assert.AreEqual((uint)0, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(uint.MaxValue.ToString()))
@@ -525,6 +547,7 @@ namespace JilTests
                 var i = JSON.Deserialize<uint>(str);
 
                 Assert.AreEqual(uint.MaxValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(uint.MinValue.ToString()))
@@ -532,6 +555,7 @@ namespace JilTests
                 var i = JSON.Deserialize<uint>(str);
 
                 Assert.AreEqual(uint.MinValue, i);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -545,6 +569,7 @@ namespace JilTests
                     var b = JSON.Deserialize<short>(str);
 
                     Assert.AreEqual((short)i, b);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -557,6 +582,7 @@ namespace JilTests
                         var b = JSON.Deserialize<short>(str);
 
                         Assert.AreEqual((short)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -570,6 +596,7 @@ namespace JilTests
                         var b = JSON.Deserialize<short>(str);
 
                         Assert.AreEqual((short)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -583,6 +610,7 @@ namespace JilTests
                         var b = JSON.Deserialize<short>(str);
 
                         Assert.AreEqual((short)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -598,6 +626,7 @@ namespace JilTests
                     var b = JSON.Deserialize<ushort>(str);
 
                     Assert.AreEqual((ushort)i, b);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -610,6 +639,7 @@ namespace JilTests
                         var b = JSON.Deserialize<ushort>(str);
 
                         Assert.AreEqual((ushort)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -623,6 +653,7 @@ namespace JilTests
                         var b = JSON.Deserialize<ushort>(str);
 
                         Assert.AreEqual((ushort)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -636,6 +667,7 @@ namespace JilTests
                         var b = JSON.Deserialize<ushort>(str);
 
                         Assert.AreEqual((ushort)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -651,6 +683,7 @@ namespace JilTests
                     var b = JSON.Deserialize<byte>(str);
 
                     Assert.AreEqual((byte)i, b);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -663,6 +696,7 @@ namespace JilTests
                         var b = JSON.Deserialize<byte>(str);
 
                         Assert.AreEqual((byte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -676,6 +710,7 @@ namespace JilTests
                         var b = JSON.Deserialize<byte>(str);
 
                         Assert.AreEqual((byte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -689,6 +724,7 @@ namespace JilTests
                         var b = JSON.Deserialize<byte>(str);
 
                         Assert.AreEqual((byte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -704,6 +740,7 @@ namespace JilTests
                     var b = JSON.Deserialize<sbyte>(str);
 
                     Assert.AreEqual((sbyte)i, b);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -716,6 +753,7 @@ namespace JilTests
                         var b = JSON.Deserialize<sbyte>(str);
 
                         Assert.AreEqual((sbyte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -729,6 +767,7 @@ namespace JilTests
                         var b = JSON.Deserialize<sbyte>(str);
 
                         Assert.AreEqual((sbyte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -742,6 +781,7 @@ namespace JilTests
                         var b = JSON.Deserialize<sbyte>(str);
 
                         Assert.AreEqual((sbyte)i, b);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -755,6 +795,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.IsNull(c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\""))
@@ -762,6 +803,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"a\""))
@@ -769,6 +811,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("a", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\\\\""))
@@ -776,6 +819,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\\", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\/\""))
@@ -783,6 +827,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("/", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\b\""))
@@ -790,6 +835,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\b", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\f\""))
@@ -797,6 +843,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\f", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\r\""))
@@ -804,6 +851,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\r", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\n\""))
@@ -811,6 +859,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\n", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\t\""))
@@ -818,6 +867,7 @@ namespace JilTests
                 var c = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\t", c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             for (var i = 0; i <= 2048; i++)
@@ -831,6 +881,7 @@ namespace JilTests
                     var shouldBe = "" + (char)i;
 
                     Assert.AreEqual(shouldBe, c);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
 
@@ -839,6 +890,7 @@ namespace JilTests
                 var s = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("abc", s);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"abcd\""))
@@ -846,6 +898,7 @@ namespace JilTests
                 var s = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("abcd", s);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\b\\f\\t\""))
@@ -853,6 +906,7 @@ namespace JilTests
                 var s = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\b\f\t", s);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\b\\f\\t\\r\""))
@@ -860,6 +914,7 @@ namespace JilTests
                 var s = JSON.Deserialize<string>(str);
 
                 Assert.AreEqual("\b\f\t\r", s);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             for (var i = 0; i <= 2048; i++)
@@ -877,6 +932,7 @@ namespace JilTests
                         var shouldBe = new string((char)i, j);
 
                         Assert.AreEqual(shouldBe, c);
+                        Assert.AreEqual(-1, str.Peek());
                     }
                 }
             }
@@ -890,6 +946,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('a', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\\\\""))
@@ -897,6 +954,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\\', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\/\""))
@@ -904,6 +962,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('/', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\b\""))
@@ -911,6 +970,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\b', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\f\""))
@@ -918,6 +978,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\f', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\r\""))
@@ -925,6 +986,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\r', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\n\""))
@@ -932,6 +994,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\n', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("\"\\t\""))
@@ -939,6 +1002,7 @@ namespace JilTests
                 var c = JSON.Deserialize<char>(str);
 
                 Assert.AreEqual('\t', c);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             for (var i = 0; i <= 2048; i++)
@@ -950,6 +1014,7 @@ namespace JilTests
                     var c = JSON.Deserialize<char>(str);
 
                     Assert.AreEqual(i, (int)c);
+                    Assert.AreEqual(-1, str.Peek());
                 }
             }
         }
@@ -969,6 +1034,7 @@ namespace JilTests
                 var val = JSON.Deserialize<_Enums>(str);
 
                 Assert.AreEqual(_Enums.Hello, val);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -980,6 +1046,7 @@ namespace JilTests
                 var val = JSON.Deserialize<int?>(str);
 
                 Assert.AreEqual((int?)1, val);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("null"))
@@ -987,6 +1054,7 @@ namespace JilTests
                 var val = JSON.Deserialize<int?>(str);
 
                 Assert.AreEqual((int?)null, val);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -998,6 +1066,7 @@ namespace JilTests
                 var val = JSON.Deserialize<bool>(str);
 
                 Assert.IsTrue(val);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("false"))
@@ -1005,6 +1074,7 @@ namespace JilTests
                 var val = JSON.Deserialize<bool>(str);
 
                 Assert.IsFalse(val);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -1015,18 +1085,21 @@ namespace JilTests
             {
                 var val = JSON.Deserialize<List<int>>(str);
                 Assert.IsNull(val);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("[]"))
             {
                 var val = JSON.Deserialize<List<int>>(str);
                 Assert.AreEqual(0, val.Count);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(" [     ] "))
             {
                 var val = JSON.Deserialize<List<int>>(str);
                 Assert.AreEqual(0, val.Count);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("[1]"))
@@ -1034,6 +1107,7 @@ namespace JilTests
                 var val = JSON.Deserialize<List<int>>(str);
                 Assert.AreEqual(1, val.Count);
                 Assert.AreEqual(1, val[0]);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("[1,2]"))
@@ -1042,6 +1116,7 @@ namespace JilTests
                 Assert.AreEqual(2, val.Count);
                 Assert.AreEqual(1, val[0]);
                 Assert.AreEqual(2, val[1]);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("[1,2,3]"))
@@ -1051,6 +1126,7 @@ namespace JilTests
                 Assert.AreEqual(1, val[0]);
                 Assert.AreEqual(2, val[1]);
                 Assert.AreEqual(3, val[2]);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader(" [ 1,2 ,3   ]    "))
@@ -1060,6 +1136,7 @@ namespace JilTests
                 Assert.AreEqual(1, val[0]);
                 Assert.AreEqual(2, val[1]);
                 Assert.AreEqual(3, val[2]);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
 
@@ -1078,6 +1155,7 @@ namespace JilTests
             {
                 var val = JSON.Deserialize<_Objects>(str);
                 Assert.IsNull(val);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{}"))
@@ -1086,6 +1164,7 @@ namespace JilTests
                 Assert.IsNotNull(val);
                 Assert.AreEqual(default(int), val.A);
                 Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{\"A\": 123}"))
@@ -1093,6 +1172,7 @@ namespace JilTests
                 var val = JSON.Deserialize<_Objects>(str);
                 Assert.IsNotNull(val);
                 Assert.AreEqual(123, val.A);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{\"B\": \"hello\"}"))
@@ -1100,6 +1180,7 @@ namespace JilTests
                 var val = JSON.Deserialize<_Objects>(str);
                 Assert.IsNotNull(val);
                 Assert.AreEqual("hello", val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{\"A\": 456, \"B\": \"hello\"}"))
@@ -1108,6 +1189,7 @@ namespace JilTests
                 Assert.IsNotNull(val);
                 Assert.AreEqual(456, val.A);
                 Assert.AreEqual("hello", val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{\"B\": \"hello\", \"A\": 456}"))
@@ -1116,6 +1198,7 @@ namespace JilTests
                 Assert.IsNotNull(val);
                 Assert.AreEqual(456, val.A);
                 Assert.AreEqual("hello", val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("{\"B\":\"hello\",\"A\":456}"))
@@ -1124,6 +1207,7 @@ namespace JilTests
                 Assert.IsNotNull(val);
                 Assert.AreEqual(456, val.A);
                 Assert.AreEqual("hello", val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
 
             using (var str = new StringReader("   {  \"B\"    :   \"hello\"    ,    \"A\"   :   456   }  "))
@@ -1132,6 +1216,7 @@ namespace JilTests
                 Assert.IsNotNull(val);
                 Assert.AreEqual(456, val.A);
                 Assert.AreEqual("hello", val.B);
+                Assert.AreEqual(-1, str.Peek());
             }
         }
     }
