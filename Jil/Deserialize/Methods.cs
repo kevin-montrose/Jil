@@ -29,13 +29,15 @@ namespace Jil.Deserialize
             // skip an object
             if (leadChar == '{')
             {
-                throw new NotImplementedException();
+                SkipObject(reader);
+                return;
             }
 
             // skip a list
             if (leadChar == '[')
             {
-                throw new NotImplementedException();
+                SkipList(reader);
+                return;
             }
 
             // skip a number
@@ -48,6 +50,69 @@ namespace Jil.Deserialize
             throw new DeserializationException("Expected digit, -, \", {, or [");
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipObject(TextReader reader)
+        {
+            reader.Read();  // skip the {
+
+            _ConsumeWhiteSpace(reader);
+            var a = reader.Peek();
+            if (a == '}')
+            {
+                reader.Read();
+                return;
+            }
+            SkipEncodedString(reader);
+            _ConsumeWhiteSpace(reader);
+            var b = reader.Read();
+            if (b != ':') throw new DeserializationException("Expected :");
+            _ConsumeWhiteSpace(reader);
+            _Skip(reader);
+
+            while (true)
+            {
+                _ConsumeWhiteSpace(reader);
+                var c = reader.Read();
+                if (c == '}') return;
+                if (c != ',') throw new DeserializationException("Expected ,");
+
+                _ConsumeWhiteSpace(reader);
+                SkipEncodedString(reader);
+                _ConsumeWhiteSpace(reader);
+                var d = reader.Read();
+                if (d != ':') throw new DeserializationException("Expected :");
+                _ConsumeWhiteSpace(reader);
+                _Skip(reader);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipList(TextReader reader)
+        {
+            reader.Read();  // skip the [
+
+            _ConsumeWhiteSpace(reader);
+            var a = reader.Peek();
+            if (a == ']')
+            {
+                reader.Read();
+                return;
+            }
+            _ConsumeWhiteSpace(reader);
+            _Skip(reader);
+
+            while (true)
+            {
+                _ConsumeWhiteSpace(reader);
+                var b = reader.Read();
+                if (b == ']') return;
+                if (b != ',') throw new DeserializationException("Expected ], or ,");
+                _ConsumeWhiteSpace(reader);
+                _Skip(reader);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void SkipEncodedString(TextReader reader)
         {
             reader.Read();  // skip the "
