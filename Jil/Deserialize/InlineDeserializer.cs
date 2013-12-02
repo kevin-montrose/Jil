@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         const string StringBuilderName = "string_builder";
         
         readonly Type RecursionLookupType;
+        HashSet<Type> RecursiveTypes;
 
         Emit Emit;
 
@@ -479,6 +480,14 @@ namespace Jil.Deserialize
             Emit.Call(Methods.Skip);    // --empty--
         }
 
+        void LoadRecursiveTypeDelegate(Type recursiveType)
+        {
+            var typeCache = RecursionLookupType.MakeGenericType(recursiveType);
+            var field = typeCache.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+
+            Emit.LoadField(field);
+        }
+
         void ReadObject(Type objType)
         {
             var done = Emit.DefineLabel();
@@ -572,9 +581,25 @@ namespace Jil.Deserialize
                 {
                     var label = kv.Value;
                     var member = setters[kv.Key];
+                    var memberType = member.ReturnType();
 
                     Emit.MarkLabel(label);      // objType(*?)
-                    Build(member.ReturnType()); // objType(*?) memberType
+                    if (RecursiveTypes.Contains(memberType))
+                    {
+                        var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), memberType);
+                        var funcInvoke = funcType.GetMethod("Invoke");
+
+                        LoadRecursiveTypeDelegate(memberType);  // objectType(*?) Func<TextReader, int, memberType>
+                        Emit.LoadArgument(0);                   // objectType(*?) Func<TextReader, int, memberType> TextReader
+                        Emit.LoadArgument(1);                   // objectType(*?) Func<TextReader, int, memberType> TextReader int
+                        Emit.LoadConstant(1);                   // objectType(*?) Func<TextReader, int, memberType> TextReader int 1
+                        Emit.Add();                             // objectType(*?) Func<TextReader, int, memberType> TextReader int
+                        Emit.Call(funcInvoke);                  // objectType(*?) memberType
+                    }
+                    else
+                    {
+                        Build(member.ReturnType()); // objType(*?) memberType
+                    }
 
                     if (member is FieldInfo)
                     {
@@ -663,6 +688,8 @@ namespace Jil.Deserialize
         public Func<TextReader, int, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
+
+            RecursiveTypes = forType.FindRecursiveTypes();
 
             Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) });
 
