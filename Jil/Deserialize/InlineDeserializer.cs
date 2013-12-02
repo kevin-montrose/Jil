@@ -155,6 +155,7 @@ namespace Jil.Deserialize
                 delegate
                 {
                     Emit.LoadNull();                        // null
+                    Emit.CastClass<string>();               // string
                 }
             );
         }
@@ -678,22 +679,7 @@ namespace Jil.Deserialize
                     var memberType = member.ReturnType();
 
                     Emit.MarkLabel(label);      // objType(*?)
-                    if (RecursiveTypes.Contains(memberType))
-                    {
-                        var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), memberType);
-                        var funcInvoke = funcType.GetMethod("Invoke");
-
-                        LoadRecursiveTypeDelegate(memberType);  // objectType(*?) Func<TextReader, int, memberType>
-                        Emit.LoadArgument(0);                   // objectType(*?) Func<TextReader, int, memberType> TextReader
-                        Emit.LoadArgument(1);                   // objectType(*?) Func<TextReader, int, memberType> TextReader int
-                        Emit.LoadConstant(1);                   // objectType(*?) Func<TextReader, int, memberType> TextReader int 1
-                        Emit.Add();                             // objectType(*?) Func<TextReader, int, memberType> TextReader int
-                        Emit.Call(funcInvoke);                  // objectType(*?) memberType
-                    }
-                    else
-                    {
-                        Build(member.ReturnType()); // objType(*?) memberType
-                    }
+                    Build(member.ReturnType()); // objType(*?) memberType
 
                     if (member is FieldInfo)
                     {
@@ -744,7 +730,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
         }
 
-        void Build(Type forType)
+        void Build(Type forType, bool allowRecursion = true)
         {
             if (forType.IsNullableType())
             {
@@ -776,6 +762,20 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (allowRecursion && RecursiveTypes.Contains(forType))
+            {
+                var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
+                var funcInvoke = funcType.GetMethod("Invoke");
+
+                LoadRecursiveTypeDelegate(forType); // Func<TextReader, int, memberType>
+                Emit.LoadArgument(0);               // Func<TextReader, int, memberType> TextReader
+                Emit.LoadArgument(1);               // Func<TextReader, int, memberType> TextReader int
+                Emit.LoadConstant(1);               // Func<TextReader, int, memberType> TextReader int 1
+                Emit.Add();                         // Func<TextReader, int, memberType> TextReader int
+                Emit.Call(funcInvoke);              // memberType
+                return;
+            }
+
             ReadObject(forType);
         }
 
@@ -791,7 +791,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
-            Build(forType);
+            Build(forType, allowRecursion: false);
 
             // we have to consume this, otherwise we might succeed with invalid JSON
             ConsumeWhiteSpace();
