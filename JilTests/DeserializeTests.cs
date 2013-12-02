@@ -1464,5 +1464,39 @@ namespace JilTests
                 Assert.AreEqual(-1, str.Peek());
             }
         }
+
+        [TestMethod]
+        public void Dictionaries()
+        {
+            using (var str = new StringReader("{\"A\": 123}"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, int>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(1, val.Count);
+                Assert.AreEqual(123, val["A"]);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"A\": 123, \"B\": 456}"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, int>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual(123, val["A"]);
+                Assert.AreEqual(456, val["B"]);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"A\": 123, \"B\": 456, \"C\": 789}"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, int>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(3, val.Count);
+                Assert.AreEqual(123, val["A"]);
+                Assert.AreEqual(456, val["B"]);
+                Assert.AreEqual(789, val["C"]);
+                Assert.AreEqual(-1, str.Peek());
+            }
+        }
     }
 }
