@@ -1497,6 +1497,37 @@ namespace JilTests
                 Assert.AreEqual(789, val["C"]);
                 Assert.AreEqual(-1, str.Peek());
             }
+
+            using (var str = new StringReader("{\"A\": null}"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, string>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(1, val.Count);
+                Assert.IsNull(val["A"]);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"A\": \"hello\", \"B\": \"world\"}"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, string>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(2, val.Count);
+                Assert.AreEqual("hello", val["A"]);
+                Assert.AreEqual("world", val["B"]);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            /*using (var str = new StringReader("{\"A\": {\"A\":123}, \"B\": {\"B\": \"abc\"}, \"C\": {\"A\":456, \"B\":\"fizz\"} }"))
+            {
+                var val = JSON.Deserialize<Dictionary<string, _Objects>>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(3, val.Count);
+                Assert.AreEqual(123, val["A"].A);
+                Assert.AreEqual("abc", val["B"].B);
+                Assert.AreEqual(456, val["C"].A);
+                Assert.AreEqual("fizz", val["C"].B);
+                Assert.AreEqual(-1, str.Peek());
+            }*/
         }
     }
 }
