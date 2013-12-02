@@ -19,6 +19,16 @@ namespace Jil.Deserialize
         {
             var leadChar = reader.Peek();
 
+            // skip null
+            if (leadChar == 'n')
+            {
+                reader.Read();
+                if (reader.Read() != 'u') throw new DeserializationException("Expected u");
+                if (reader.Read() != 'l') throw new DeserializationException("Expected u");
+                if (reader.Read() != 'l') throw new DeserializationException("Expected u");
+                return;
+            }
+
             // skip a string
             if(leadChar == '"')
             {
