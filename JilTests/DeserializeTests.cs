@@ -1517,7 +1517,7 @@ namespace JilTests
                 Assert.AreEqual(-1, str.Peek());
             }
 
-            /*using (var str = new StringReader("{\"A\": {\"A\":123}, \"B\": {\"B\": \"abc\"}, \"C\": {\"A\":456, \"B\":\"fizz\"} }"))
+            using (var str = new StringReader("{\"A\": {\"A\":123}, \"B\": {\"B\": \"abc\"}, \"C\": {\"A\":456, \"B\":\"fizz\"} }"))
             {
                 var val = JSON.Deserialize<Dictionary<string, _Objects>>(str);
                 Assert.IsNotNull(val);
@@ -1527,7 +1527,7 @@ namespace JilTests
                 Assert.AreEqual(456, val["C"].A);
                 Assert.AreEqual("fizz", val["C"].B);
                 Assert.AreEqual(-1, str.Peek());
-            }*/
+            }
         }
     }
 }
