@@ -471,7 +471,101 @@ namespace Jil.Deserialize
 
         void ReadDictionary(Type dictType)
         {
-            throw new NotImplementedException();
+            var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
+            if(keyType != typeof(string)) throw new Exception("Only dictionaries with strings for keys can be deserialized");
+            var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
+
+            var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { typeof(string), valType });
+
+            var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
+
+            if (!dictType.IsValueType)
+            {
+                ExpectRawCharOrNull(
+                    '{',
+                    () => { },
+                    () =>
+                    {
+                        Emit.LoadNull();
+                        Emit.CastClass(dictType);
+                        Emit.Branch(doneSkipChar);
+                    }
+                );
+            }
+            else
+            {
+                ExpectChar('{');
+            }
+
+            using (var loc = Emit.DeclareLocal(dictType))
+            {
+                Action loadDict;
+                if (dictType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(loc);         // dictType*
+                    Emit.InitializeObject(dictType);    // --empty--
+
+                    loadDict = () => Emit.LoadLocalAddress(loc);
+                }
+                else
+                {
+                    Emit.NewObject(dictType.GetConstructor(Type.EmptyTypes));   // dictType
+                    Emit.StoreLocal(loc);                                       // --empty--
+
+                    loadDict = () => Emit.LoadLocal(loc);
+                }
+
+                var loopStart = Emit.DefineLabel();
+
+                ConsumeWhiteSpace();        // --empty--
+                loadDict();                 // dictType(*?)
+                RawPeekChar();              // dictType(*?) int 
+                Emit.LoadConstant('}');     // dictType(*?) int '}'
+                Emit.BranchIfEqual(done);   // dictType(*?)
+                Build(typeof(string));      // dictType(*?) string
+                ConsumeWhiteSpace();        // dictType(*?) string
+                ExpectChar(':');            // dictType(*?) string
+                ConsumeWhiteSpace();        // dictType(*?) string
+                Build(valType);             // dictType(*?) string valType
+                Emit.CallVirtual(addMtd);   // --empty--
+
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(loopStart);      // --empty--
+                ConsumeWhiteSpace();            // --empty--
+                loadDict();                     // dictType(*?)
+                RawPeekChar();                  // dictType(*?) int 
+                Emit.Duplicate();               // dictType(*?) int int
+                Emit.LoadConstant(',');         // dictType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);   // dictType(*?) int
+                Emit.LoadConstant('}');         // dictType(*?) int '}'
+                Emit.BranchIfEqual(done);       // dictType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "}");
+
+                Emit.MarkLabel(nextItem);           // dictType(*?) int
+                Emit.Pop();                         // dictType(*?)
+                Emit.LoadArgument(0);               // dictType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // dictType(*?) int
+                Emit.Pop();                         // dictType(*?)
+                ConsumeWhiteSpace();
+                Build(typeof(string));              // dictType(*?) string
+                ConsumeWhiteSpace();                // dictType(*?) string
+                ExpectChar(':');                    // dictType(*?) string
+                ConsumeWhiteSpace();                // dictType(*?) string
+                Build(valType);                     // dictType(*?) string valType
+                Emit.CallVirtual(addMtd);           // --empty--
+                Emit.Branch(loopStart);             // --empty--
+            }
+
+            Emit.MarkLabel(done);               // dictType(*?)
+            Emit.LoadArgument(0);               // dictType(*?) TextReader
+            Emit.CallVirtual(TextReader_Read);  // dictType(*?) int
+            Emit.Pop();                         // dictType(*?)
+
+            Emit.MarkLabel(doneSkipChar);       // dictType(*?)
         }
 
         void SkipObjectMember()
