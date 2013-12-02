@@ -214,58 +214,7 @@ namespace Jil.Serialize
             return ret.ToList();
         }
 
-        static HashSet<Type> FindRecursiveTypes(Type forType)
-        {
-            var alreadySeen = new HashSet<Type>();
-            var ret = new HashSet<Type>();
-
-            var pending = new List<Type>();
-            pending.Add(forType);
-
-            while (pending.Count > 0)
-            {
-                var curType = pending[0];
-                pending.RemoveAt(0);
-
-                if (curType.IsPrimitiveType()) continue;
-
-                if (curType.IsListType())
-                {
-                    var listI = curType.GetListInterface();
-                    var valType = listI.GetGenericArguments()[0];
-                    pending.Add(valType);
-                    continue;
-                }
-
-                if (curType.IsDictionaryType())
-                {
-                    var dictI = curType.GetDictionaryInterface();
-                    var valType = dictI.GetGenericArguments()[1];
-                    pending.Add(valType);
-                    continue;
-                }
-
-                if (alreadySeen.Contains(curType))
-                {
-                    ret.Add(curType);
-                    continue;
-                }
-
-                alreadySeen.Add(curType);
-
-                foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
-                {
-                    pending.Add(field.FieldType);
-                }
-
-                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
-                {
-                    pending.Add(prop.PropertyType);
-                }
-            }
-
-            return ret;
-        }
+        
 
         void WriteMember(MemberInfo member, Sigil.Local inLocal = null)
         {
@@ -2857,7 +2806,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
@@ -2889,7 +2838,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildListWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
@@ -2905,7 +2854,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 
@@ -2939,7 +2888,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildNullableWithNewDelegate()
         {
-            var recursiveTypes = FindRecursiveTypes(typeof(ForType));
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
 

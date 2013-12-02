@@ -1441,5 +1441,28 @@ namespace JilTests
                 Assert.AreEqual(-1, str.Peek());
             }
         }
+
+#pragma warning disable 0649
+        class _RecursiveObjects
+        {
+            public string A;
+            public _RecursiveObjects B;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void RecursiveObjects()
+        {
+            using (var str = new StringReader("{\"A\": \"hello world\", \"B\": { \"A\": \"foo bar\", \"B\": {\"A\": \"fizz buzz\"}}}"))
+            {
+                var val = JSON.Deserialize<_RecursiveObjects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual("hello world", val.A);
+                Assert.AreEqual("foo bar", val.B.A);
+                Assert.AreEqual("fizz buzz", val.B.B.A);
+                Assert.IsNull(val.B.B.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+        }
     }
 }

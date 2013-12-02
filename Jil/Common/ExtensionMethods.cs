@@ -297,5 +297,58 @@ namespace Jil.Common
 
             return ret;
         }
+
+        public static HashSet<Type> FindRecursiveTypes(this Type forType)
+        {
+            var alreadySeen = new HashSet<Type>();
+            var ret = new HashSet<Type>();
+
+            var pending = new List<Type>();
+            pending.Add(forType);
+
+            while (pending.Count > 0)
+            {
+                var curType = pending[0];
+                pending.RemoveAt(0);
+
+                if (curType.IsPrimitiveType()) continue;
+
+                if (curType.IsListType())
+                {
+                    var listI = curType.GetListInterface();
+                    var valType = listI.GetGenericArguments()[0];
+                    pending.Add(valType);
+                    continue;
+                }
+
+                if (curType.IsDictionaryType())
+                {
+                    var dictI = curType.GetDictionaryInterface();
+                    var valType = dictI.GetGenericArguments()[1];
+                    pending.Add(valType);
+                    continue;
+                }
+
+                if (alreadySeen.Contains(curType))
+                {
+                    ret.Add(curType);
+                    continue;
+                }
+
+                alreadySeen.Add(curType);
+
+                foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    pending.Add(field.FieldType);
+                }
+
+                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                {
+                    pending.Add(prop.PropertyType);
+                }
+            }
+
+            return ret;
+        }
     }
 }
