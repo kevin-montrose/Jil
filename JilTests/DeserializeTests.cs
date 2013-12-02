@@ -1413,6 +1413,33 @@ namespace JilTests
                 Assert.IsNull(val.B);
                 Assert.AreEqual(-1, str.Peek());
             }
+
+            using (var str = new StringReader("{\"C\": null, \"CC\": null}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\": [null], \"CC\": [null]}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("{\"C\": {\"A\":null}, \"CC\": {\"B\":null}}"))
+            {
+                var val = JSON.Deserialize<_Objects>(str);
+                Assert.IsNotNull(val);
+                Assert.AreEqual(default(int), val.A);
+                Assert.IsNull(val.B);
+                Assert.AreEqual(-1, str.Peek());
+            }
         }
     }
 }
