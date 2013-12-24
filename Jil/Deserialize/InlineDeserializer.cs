@@ -781,7 +781,14 @@ namespace Jil.Deserialize
 
             RecursiveTypes = forType.FindRecursiveTypes();
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) });
+            bool doVerify;
+#if DEBUG
+            doVerify = true;
+#else
+            doVerify = false;
+#endif
+
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: doVerify);
 
             AddGlobalVariables();
 
