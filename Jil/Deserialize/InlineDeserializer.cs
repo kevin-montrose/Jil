@@ -155,7 +155,6 @@ namespace Jil.Deserialize
                 delegate
                 {
                     Emit.LoadNull();                        // null
-                    Emit.CastClass<string>();               // string
                 }
             );
         }
@@ -401,7 +400,6 @@ namespace Jil.Deserialize
                         () =>
                         {
                             Emit.LoadNull();
-                            Emit.CastClass(listType);
                             Emit.Branch(doneSkipChar);
                         }
                     );
@@ -489,7 +487,6 @@ namespace Jil.Deserialize
                     () =>
                     {
                         Emit.LoadNull();
-                        Emit.CastClass(dictType);
                         Emit.Branch(doneSkipChar);
                     }
                 );
@@ -596,7 +593,6 @@ namespace Jil.Deserialize
                     () =>
                     {
                         Emit.LoadNull();
-                        Emit.CastClass(objType);
                         Emit.Branch(doneSkipChar);
                     }
                 );

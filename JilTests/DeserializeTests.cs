@@ -1084,6 +1084,7 @@ namespace JilTests
             using (var str = new StringReader("null"))
             {
                 var val = JSON.Deserialize<List<int>>(str);
+
                 Assert.IsNull(val);
                 Assert.AreEqual(-1, str.Peek());
             }
