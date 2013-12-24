@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,446 @@ namespace JilTests
     [TestClass]
     public class SerializeTests
     {
+#if !DEBUG
+        public class MobileFeed
+        {
+            public List<MobileQuestion> hot_questions { get; set; }
+            public List<MobileInboxItem> inbox_items { get; set; }
+            public List<MobileQuestion> likely_to_answer_questions { get; set; }
+            public List<MobileRepChange> reputation_events { get; set; }
+            public List<MobileQuestion> cross_site_interesting_questions { get; set; }
+            public List<MobileBadgeAward> badges { get; set; }
+            public List<MobilePrivilege> earned_privileges { get; set; }
+            public List<MobilePrivilege> upcoming_privileges { get; set; }
+            public List<MobileCommunityBulletin> community_bulletins { get; set; }
+            public List<MobileAssociationBonus> association_bonuses { get; set; }
+            public List<MobileCareersJobAd> careers_job_ads { get; set; }
+            public List<MobileBannerAd> banner_ads { get; set; }
+
+            public long before { get; set; }
+            public long since { get; set; }
+
+            public int account_id { get; set; }
+
+            public MobileUpdateNotice update_notice { get; set; }
+
+            public static MobileFeed For(Random rand)
+            {
+                var hq = new List<MobileQuestion>();
+                var ii = new List<MobileInboxItem>();
+                var ltaq = new List<MobileQuestion>();
+                var re = new List<MobileRepChange>();
+                var csiq = new List<MobileQuestion>();
+                var b = new List<MobileBadgeAward>();
+                var ep = new List<MobilePrivilege>();
+                var up = new List<MobilePrivilege>();
+                var cb = new List<MobileCommunityBulletin>();
+                var ab = new List<MobileAssociationBonus>();
+                var cja = new List<MobileCareersJobAd>();
+                var ba = new List<MobileBannerAd>();
+
+                for (var i = 0; i < 5; i++)
+                {
+                    hq.Add(MobileQuestion.For(rand));
+                    ii.Add(MobileInboxItem.For(rand));
+                    ltaq.Add(MobileQuestion.For(rand));
+                    re.Add(MobileRepChange.For(rand));
+                    csiq.Add(MobileQuestion.For(rand));
+                    b.Add(MobileBadgeAward.For(rand));
+                    ep.Add(MobilePrivilege.For(rand));
+                    up.Add(MobilePrivilege.For(rand));
+                    cb.Add(MobileCommunityBulletin.For(rand));
+                    ab.Add(MobileAssociationBonus.For(rand));
+                    cja.Add(MobileCareersJobAd.For(rand));
+                    ba.Add(MobileBannerAd.For(rand));
+                }
+
+                return
+                    new MobileFeed
+                    {
+                        account_id = rand.Next(),
+                        association_bonuses = ab,
+                        badges = b,
+                        banner_ads = ba,
+                        before = rand.Next(),
+                        careers_job_ads = cja,
+                        community_bulletins = cb,
+                        cross_site_interesting_questions = csiq,
+                        earned_privileges = ep,
+                        hot_questions =hq,
+                        inbox_items = ii,
+                        likely_to_answer_questions = ltaq,
+                        reputation_events = re,
+                        since = rand.Next(),
+                        upcoming_privileges =up,
+                        update_notice = MobileUpdateNotice.For(rand)
+                    };
+            }
+        }
+
+        public interface IMobileFeedBase
+        {
+            int group_id { get; set; }
+            long added_date { get; set; }
+        }
+
+        public sealed class MobileQuestion : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public int question_id { get; set; }
+            public long question_creation_date { get; set; }
+            public string title { get; set; }
+            public long last_activity_date { get; set; }
+            public string[] tags { get; set; }
+            public string site { get; set; }
+
+            public bool is_deleted { get; set; }
+            public bool has_accepted_answer { get; set; }
+            public int answer_count { get; set; }
+
+            public static MobileQuestion For(Random rand)
+            {
+                return
+                    new MobileQuestion
+                    {
+                        added_date = rand.Next(),
+                        answer_count = rand.Next(),
+                        group_id = rand.Next(),
+                        has_accepted_answer = rand.Next() % 2 == 0,
+                        is_deleted = rand.Next() %2 == 0,
+                        last_activity_date = rand.Next(),
+                        question_creation_date = rand.Next(),
+                        question_id = rand.Next(),
+                        site = SpeedProofTests._RandString(rand),
+                        tags = Enumerable.Repeat(SpeedProofTests._RandString(rand), 5).ToArray(),
+                        title = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileRepChange : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string site { get; set; }
+
+            public string title { get; set; }
+            public string link { get; set; }
+            public int rep_change { get; set; }
+
+            public static MobileRepChange For(Random rand)
+            {
+                return
+                    new MobileRepChange
+                    {
+                        added_date = rand.Next(),
+                        group_id = rand.Next(),
+                        link = SpeedProofTests._RandString(rand),
+                        rep_change = rand.Next(),
+                        site = SpeedProofTests._RandString(rand),
+                        title = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileInboxItem : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public int? answer_id { get; set; }
+            public string body { get; set; }
+            public int? comment_id { get; set; }
+            public long creation_date { get; set; }
+            public string item_type { get; set; }
+            public string link { get; set; }
+            public int? question_id { get; set; }
+            public string title { get; set; }
+            public string site { get; set; }
+
+            public static MobileInboxItem For(Random rand)
+            {
+                return
+                    new MobileInboxItem
+                    {
+                        added_date = rand.Next(),
+                        answer_id = rand.Next(),
+                        body = SpeedProofTests._RandString(rand),
+                        comment_id = rand.Next(),
+                        creation_date = rand.Next(),
+                        group_id = rand.Next(),
+                        item_type = SpeedProofTests._RandString(rand),
+                        link = SpeedProofTests._RandString(rand),
+                        question_id = rand.Next(),
+                        site = SpeedProofTests._RandString(rand),
+                        title = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileBadgeAward : IMobileFeedBase
+        {
+            public enum BadgeRank : byte
+            {
+                bronze = 1,
+                silver = 2,
+                gold = 3
+            }
+
+            public enum BadgeType
+            {
+                named = 1,
+                tag_based = 2
+            }
+
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string site { get; set; }
+            public string badge_name { get; set; }
+            public string badge_description { get; set; }
+            public int badge_id { get; set; }
+
+            public int? post_id { get; set; }
+            public string link { get; set; }
+
+            public BadgeRank rank { get; set; }
+            public BadgeType badge_type { get; set; }
+
+            public static MobileBadgeAward For(Random rand)
+            {
+                return
+                    new MobileBadgeAward
+                    {
+                        added_date = rand.Next(),
+                        badge_description = SpeedProofTests._RandString(rand),
+                        badge_id = rand.Next(),
+                        badge_name = SpeedProofTests._RandString(rand),
+                        badge_type = (BadgeType)(rand.Next(2) + 1),
+                        group_id = rand.Next(),
+                        link = SpeedProofTests._RandString(rand),
+                        post_id = rand.Next(),
+                        rank = (BadgeRank)(rand.Next(3) + 1),
+                        site= SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobilePrivilege : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string site { get; set; }
+            public string privilege_short_description { get; set; }
+            public string privilege_long_description { get; set; }
+            public int privilege_id { get; set; }
+
+            public int reputation_required { get; set; }
+            public string link { get; set; }
+
+            public static MobilePrivilege For(Random rand)
+            {
+                return
+                    new MobilePrivilege
+                    {
+                        added_date = rand.Next(),
+                        group_id = rand.Next(),
+                        link = SpeedProofTests._RandString(rand),
+                        privilege_id = rand.Next(),
+                        privilege_long_description = SpeedProofTests._RandString(rand),
+                        privilege_short_description = SpeedProofTests._RandString(rand),
+                        reputation_required = rand.Next(),
+                        site = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileCommunityBulletin : IMobileFeedBase
+        {
+            public enum CommunityBulletinType : byte
+            {
+                blog_post = 1,
+                featured_meta_question = 2,
+                upcoming_event = 3
+            }
+
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string site { get; set; }
+
+            public string title { get; set; }
+            public string link { get; set; }
+
+            public CommunityBulletinType bulletin_type { get; set; }
+
+            public long? begin_date { get; set; }
+            public long? end_date { get; set; }
+            public string custom_date_string { get; set; }
+
+            public List<string> tags { get; set; }
+            public bool is_deleted { get; set; }
+            public bool has_accepted_answer { get; set; }
+            public int answer_count { get; set; }
+
+            public bool is_promoted { get; set; }
+
+            public static MobileCommunityBulletin For(Random rand)
+            {
+                return
+                    new MobileCommunityBulletin
+                    {
+                        added_date = rand.Next(),
+                        answer_count = rand.Next(),
+                        begin_date = rand.Next(),
+                        bulletin_type = (CommunityBulletinType)(rand.Next(3) + 1),
+                        custom_date_string = SpeedProofTests._RandString(rand),
+                        end_date = rand.Next(),
+                        group_id = rand.Next(),
+                        has_accepted_answer = rand.Next() %2 == 0,
+                        is_deleted = rand.Next() %2 == 0,
+                        is_promoted = rand.Next() %2 ==0,
+                        link = SpeedProofTests._RandString(rand),
+                        site = SpeedProofTests._RandString(rand),
+                        tags = Enumerable.Repeat(SpeedProofTests._RandString(rand), 5).ToList(),
+                        title = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileAssociationBonus : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string site { get; set; }
+            public int amount { get; set; }
+
+            public static MobileAssociationBonus For(Random rand)
+            {
+                return
+                    new MobileAssociationBonus
+                    {
+                        added_date = rand.Next(),
+                        amount = rand.Next(),
+                        site = SpeedProofTests._RandString(rand),
+                        group_id = rand.Next()
+                    };
+            }
+        }
+
+
+        public sealed class MobileCareersJobAd : IMobileFeedBase
+        {
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public int job_id { get; set; }
+            public string link { get; set; }
+            public string company_name { get; set; }
+            public string location { get; set; }
+            public string title { get; set; }
+
+            public static MobileCareersJobAd For(Random rand)
+            {
+                return
+                    new MobileCareersJobAd
+                    {
+                        added_date = rand.Next(),
+                        company_name = SpeedProofTests._RandString(rand),
+                        group_id = rand.Next(),
+                        job_id = rand.Next(),
+                        link = SpeedProofTests._RandString(rand),
+                        location = SpeedProofTests._RandString(rand),
+                        title = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileBannerAd : IMobileFeedBase
+        {
+            public sealed class MobileBannerAdImage
+            {
+                public string image_url { get; set; }
+                public int width { get; set; }
+                public int height { get; set; }
+
+                public static MobileBannerAdImage For(Random rand)
+                {
+                    return new MobileBannerAdImage
+                    {
+                        height = rand.Next(),
+                        image_url = SpeedProofTests._RandString(rand),
+                        width = rand.Next()
+                    };
+                }
+            }
+
+            public int group_id { get; set; }
+            public long added_date { get; set; }
+
+            public string link { get; set; }
+
+            // these should be kept in order such that the "best" image is first in the list
+            public List<MobileBannerAdImage> images { get; set; }
+
+            public static MobileBannerAd For(Random rand)
+            {
+                return
+                    new MobileBannerAd
+                    {
+                        added_date = rand.Next(),
+                        group_id = rand.Next(),
+                        images = Enumerable.Repeat(MobileBannerAdImage.For(rand), 3).ToList(),
+                        link = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        public sealed class MobileUpdateNotice
+        {
+            public bool should_update { get; set; }
+            public string message { get; set; }
+            public string minimum_supported_version { get; set; }
+
+            public static MobileUpdateNotice For(Random rand)
+            {
+                return
+                    new MobileUpdateNotice
+                    {
+                        should_update = rand.Next() %2 == 0,
+                        message = SpeedProofTests._RandString(rand),
+                        minimum_supported_version = SpeedProofTests._RandString(rand)
+                    };
+            }
+        }
+
+        [TestMethod]
+        public void FirstCallTime()
+        {
+            const int acceptableMS = 10000;
+
+            var random = new Random();
+
+            var feed = MobileFeed.For(random);
+
+            var timer = new Stopwatch();
+
+            using (var str = new StringWriter())
+            {
+                timer.Start();
+                JSON.Serialize(feed, str);
+                timer.Stop();
+            }
+
+            Assert.IsTrue(timer.ElapsedMilliseconds <= acceptableMS, "Took longer than " + acceptableMS + "ms to build a serializer for MobileFeed; unacceptable, was " + timer.ElapsedMilliseconds + "ms");
+        }
+#endif
+
         public class _SimpleObject
         {
             public int Foo;

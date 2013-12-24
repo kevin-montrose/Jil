@@ -2804,11 +2804,11 @@ namespace Jil.Serialize
             Emit.StoreLocal(CharBuffer);
         }
 
-        Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildObjectWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             // dirty trick here, we can prove that overflowing is *impossible* if there are no recursive types
             //   If that's the case, don't even bother with the check or the increment
@@ -2836,11 +2836,11 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType, int> BuildListWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildListWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             AddCharBuffer(typeof(ForType));
 
@@ -2852,11 +2852,11 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             AddCharBuffer(typeof(ForType));
 
@@ -2868,11 +2868,11 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate(bool doVerify)
         {
             var primitiveType = typeof(ForType);
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             AddCharBuffer(typeof(ForType));
 
@@ -2886,11 +2886,11 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType, int> BuildNullableWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildNullableWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
 
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             AddCharBuffer(typeof(ForType));
 
@@ -2906,9 +2906,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
-        Action<TextWriter, ForType, int> BuildEnumWithNewDelegate()
+        Action<TextWriter, ForType, int> BuildEnumWithNewDelegate(bool doVerify)
         {
-            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) });
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
             Emit.LoadArgument(1);
 
@@ -2923,32 +2923,39 @@ namespace Jil.Serialize
         {
             var forType = typeof(ForType);
 
+            bool doVerify;
+#if DEBUG
+            doVerify = true;
+#else
+            doVerify = false;
+#endif
+
             if (forType.IsNullableType())
             {
-                return BuildNullableWithNewDelegate();
+                return BuildNullableWithNewDelegate(doVerify);
             }
 
             if (forType.IsPrimitiveType())
             {
-                return BuildPrimitiveWithNewDelegate();
+                return BuildPrimitiveWithNewDelegate(doVerify);
             }
 
             if (forType.IsDictionaryType())
             {
-                return BuildDictionaryWithNewDelegate();
+                return BuildDictionaryWithNewDelegate(doVerify);
             }
 
             if (forType.IsListType())
             {
-                return BuildListWithNewDelegate();
+                return BuildListWithNewDelegate(doVerify);
             }
 
             if (forType.IsEnum)
             {
-                return BuildEnumWithNewDelegate();
+                return BuildEnumWithNewDelegate(doVerify);
             }
 
-            return BuildObjectWithNewDelegate();
+            return BuildObjectWithNewDelegate(doVerify);
         }
     }
 
