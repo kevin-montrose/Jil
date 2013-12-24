@@ -38,7 +38,7 @@
             The operations of the decompiled delegate can be inspected, and it can be replayed to a new Emit.
             </summary>
         </member>
-        <member name="M:Sigil.DisassembledOperations`1.EmitAll(System.String,System.Reflection.Emit.ModuleBuilder,Sigil.ValidationOptions)">
+        <member name="M:Sigil.DisassembledOperations`1.EmitAll(System.String,System.Reflection.Emit.ModuleBuilder)">
             <summary>
             Emits the disassembled instructions into a new Emit.
             </summary>
@@ -852,16 +852,19 @@
             Returns a ConstructorBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and module for the inner DynamicMethod.
             
             If name is not defined, a sane default is generated.
             
             If module is not defined, a module with the same trust as the executing assembly is used instead.
+            
+            By default, Sigil runs a rolling verification of the delegate being built.  Pass doVerify as false
+            to disable all verification.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and owner for the inner DynamicMethod.
             
@@ -870,7 +873,7 @@
             If owner is not defined, a module with the same trust as the executing assembly is used instead.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
@@ -879,21 +882,21 @@
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildStaticMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.BuildStaticMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating static methods.
             
             Equivalent to calling to BuildMethod, but with MethodAttributes.Static set and CallingConventions.Standard.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildInstanceMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.BuildInstanceMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating instance methods.
             
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
@@ -1644,13 +1647,6 @@
             Returns the maxmimum number of items on the stack for the IL stream created with the current emit.
             
             This is not the maximum that *can be placed*, but the maximum that actually are.
-            </summary>
-        </member>
-        <member name="P:Sigil.Emit`1.ValidationOptions">
-            <summary>
-            Returns the validation options that were used when creating this emit.
-            
-            These control when certain validation steps are run.
             </summary>
         </member>
         <member name="P:Sigil.Emit`1.Locals">
@@ -2978,7 +2974,7 @@
             Copies the given value type from the source to the destination.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,Sigil.ValidationOptions)">
+        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
             <summary>
             Creates a new EmitNonGeneric, optionally using the provided name and module for the inner DynamicMethod.
             
@@ -3039,7 +3035,7 @@
             Once this method is called the Emit may no longer be modified.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
@@ -3048,14 +3044,14 @@
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
             <summary>
             Convenience method for creating instance methods.
             
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
             <summary>
             Convenience method for creating static methods.
             
@@ -3092,7 +3088,7 @@
             Returns a MethodBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,Sigil.ValidationOptions)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
@@ -4603,31 +4599,6 @@
         <member name="M:Sigil.SigilVerificationException.ToString">
             <summary>
             Returns the message and stacks on this exception, in string form.
-            </summary>
-        </member>
-        <member name="T:Sigil.ValidationOptions">
-            <summary>
-            Sigil performs validation on IL as it is emitted.
-            
-            This can sometimes be costly, this enumeration is used to indicate what kind of validation should be
-            performed.
-            
-            By default, Sigil performs all available validation.  It is recommended that all validation be enabled
-            when debugging code.
-            
-            Note that all validation will still be performed when a delegate, method, or constructor is created.
-            </summary>
-        </member>
-        <member name="F:Sigil.ValidationOptions.None">
-            <summary>
-            Defers all validation that can be deferred
-            </summary>
-        </member>
-        <member name="F:Sigil.ValidationOptions.All">
-            <summary>
-            Performs all validation immediately.
-            
-            This is the default
             </summary>
         </member>
     </members>
