@@ -13,7 +13,15 @@ namespace Jil.Deserialize
 
         static NewtonsoftStyleTypeCache()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>));
+            try
+            {
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>));
+            }
+            catch (Sigil.SigilVerificationException e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }
