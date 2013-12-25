@@ -521,9 +521,21 @@ namespace Jil
         /// <summary>
         /// Deserializes JSON from the given TextReader.
         /// </summary>
-        public static T Deserialize<T>(TextReader reader)
+        public static T Deserialize<T>(TextReader reader, Options options = null)
         {
-            return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Thunk(reader, 0);
+            options = options ?? Options.Default;
+
+            switch (options.UseDateTimeFormat)
+            {
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                    return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Thunk(reader, 0);
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    return Jil.Deserialize.MillisecondStyleTypeCache<T>.Thunk(reader, 0);
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    return Jil.Deserialize.SecondStyleTypeCache<T>.Thunk(reader, 0);
+            }
+
+            throw new NotImplementedException();
         }
     }
 }

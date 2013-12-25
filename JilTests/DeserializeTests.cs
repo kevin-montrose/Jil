@@ -13,6 +13,54 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void SecondDateTimes()
+        {
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var now = DateTime.UtcNow;
+
+            var dtStr = JSON.Serialize(dt, Options.SecondsSinceUnixEpoch);
+            var nowStr = JSON.Serialize(now, Options.SecondsSinceUnixEpoch);
+
+            using (var str = new StringReader(dtStr))
+            {
+                var dtRet = JSON.Deserialize<DateTime>(str, Options.SecondsSinceUnixEpoch);
+                var delta = (dtRet - dt).Duration().TotalSeconds;
+                Assert.IsTrue(delta < 1);
+            }
+
+            using (var str = new StringReader(nowStr))
+            {
+                var nowRet = JSON.Deserialize<DateTime>(str, Options.SecondsSinceUnixEpoch);
+                var delta = (nowRet - now).Duration().TotalSeconds;
+                Assert.IsTrue(delta < 1);
+            }
+        }
+
+        [TestMethod]
+        public void MillisecondDateTimes()
+        {
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var now = DateTime.UtcNow;
+
+            var dtStr = JSON.Serialize(dt, Options.MillisecondsSinceUnixEpoch);
+            var nowStr = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
+
+            using (var str = new StringReader(dtStr))
+            {
+                var dtRet = JSON.Deserialize<DateTime>(str, Options.MillisecondsSinceUnixEpoch);
+                var delta = (dtRet - dt).Duration().TotalMilliseconds;
+                Assert.IsTrue(delta < 1);
+            }
+
+            using (var str = new StringReader(nowStr))
+            {
+                var nowRet = JSON.Deserialize<DateTime>(str, Options.MillisecondsSinceUnixEpoch);
+                var delta = (nowRet - now).Duration().TotalMilliseconds;
+                Assert.IsTrue(delta < 1);
+            }
+        }
+
+        [TestMethod]
         public void NewtsoftDateTimes()
         {
             var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
