@@ -28,7 +28,7 @@ namespace Benchmark
                 Assembly
                     .GetExecutingAssembly()
                     .GetTypes()
-                    .Where(t => t.Namespace == "Benchmark.Models" && !t.IsEnum)
+                    .Where(t => t.Namespace == "Benchmark.Models" && !t.IsEnum && !t.IsInterface)
                     .ToList();
 
             return ret;

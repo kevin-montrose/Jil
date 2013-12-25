@@ -61,6 +61,7 @@
     <Compile Include="Models\Comment.cs" />
     <Compile Include="Models\Error.cs" />
     <Compile Include="Models\Event.cs" />
+    <Compile Include="Models\Feed.cs" />
     <Compile Include="Models\FlagOption.cs" />
     <Compile Include="Models\InboxItem.cs" />
     <Compile Include="Models\Info.cs" />
