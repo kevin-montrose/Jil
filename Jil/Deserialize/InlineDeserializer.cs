@@ -272,6 +272,14 @@ namespace Jil.Deserialize
             Emit.MarkLabel(done);           // bool
         }
 
+        void ReadGuid()
+        {
+            ExpectQuote();
+            Emit.LoadArgument(0);           // TextReader
+            Emit.Call(Methods.ReadGuid);    // Guid
+            ExpectQuote();                  // Guid
+        }
+
         void ReadPrimitive(Type primitiveType)
         {
             if (primitiveType == typeof(bool))
@@ -289,6 +297,12 @@ namespace Jil.Deserialize
             if (primitiveType == typeof(string))
             {
                 ReadString();
+                return;
+            }
+
+            if (primitiveType == typeof(Guid))
+            {
+                ReadGuid();
                 return;
             }
 
