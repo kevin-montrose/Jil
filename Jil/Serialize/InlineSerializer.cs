@@ -738,38 +738,32 @@ namespace Jil.Serialize
 
             if (primitiveType == typeof(int) && SkipNumberFormatting)
             {
-                var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
                 var done = Emit.DefineLabel();
 
-                Emit.Duplicate();               // TextWriter int int
+                // stack is:
+                // TextWriter int
 
-                var labels = Enumerable.Range(0, 100).Select(l => Emit.DefineLabel()).ToArray();
+                using (var loc = Emit.DeclareLocal<int>())
+                {
+                    Emit.StoreLocal(loc);   // TextWriter
+                    Emit.LoadLocal(loc);    // TextWriter int
 
-                Emit.Switch(labels);            // TextWriter int
+                    Emit.Call(Methods.SwitchWriteInt);      // bool
+                    Emit.BranchIfTrue(done);                // --empty--
 
-                // default case
+                    Emit.LoadArgument(0);   // TextWriter
+                    Emit.LoadLocal(loc);    // TextWriter int
+                }
 
                 if (UseCustomIntegerToString)
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                    Emit.Call(Methods.CustomWriteInt); // --empty--
+                    Emit.Call(Methods.CustomWriteInt);   // --empty--
                 }
                 else
                 {
+                    var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
                     Emit.CallVirtual(writeInt);     // --empty--
-                }
-
-                Emit.Branch(done);              // --empty--
-
-                for (var i = 0; i < labels.Length; i++)
-                {
-                    var label = labels[i];
-
-                    Emit.MarkLabel(label);      // TextWriter int
-                    Emit.Pop();                 // TextWriter
-                    Emit.Pop();                 // --empty--
-                    WriteString("" + i);        // --empty--
-                    Emit.Branch(done);          // --empty--
                 }
 
                 Emit.MarkLabel(done);           // --empty--

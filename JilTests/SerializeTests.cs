@@ -434,7 +434,7 @@ namespace JilTests
         [TestMethod]
         public void FirstCallTime()
         {
-            const int acceptableMS = 10000;
+            const int acceptableMS = 1000;
 
             var random = new Random();
 
@@ -5997,6 +5997,17 @@ namespace JilTests
 
                 var res = str.ToString();
                 Assert.AreEqual("{\"A\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"},\"B\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"}}", res);
+            }
+        }
+
+        [TestMethod]
+        public void LessThan100()
+        {
+            for (var i = 0; i <= 100; i++)
+            {
+                var str = JSON.Serialize(i);
+
+                Assert.AreEqual(i.ToString(), str);
             }
         }
     }
