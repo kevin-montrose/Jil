@@ -324,12 +324,26 @@ namespace Jil.Deserialize
 
         void ReadMillisecondsDateTime()
         {
-            throw new NotImplementedException();
+            ReadPrimitive(typeof(long));            // long
+            Emit.LoadConstant(10000L);              // long long
+            Emit.Multiply();                        // long
+            Emit.LoadConstant(621355968000000000L); // long long
+            Emit.Add();                             // long
+
+            Emit.LoadConstant((int)DateTimeKind.Utc);       // long DateTimeKind
+            Emit.NewObject<DateTime, long, DateTimeKind>(); // DateTime
         }
 
         void ReadSecondsDateTime()
         {
-            throw new NotImplementedException();
+            ReadPrimitive(typeof(long));            // long
+            Emit.LoadConstant(10000000L);           // long long
+            Emit.Multiply();                        // long
+            Emit.LoadConstant(621355968000000000L); // long long
+            Emit.Add();                             // long
+
+            Emit.LoadConstant((int)DateTimeKind.Utc);       // long DateTimeKind
+            Emit.NewObject<DateTime, long, DateTimeKind>(); // DateTime
         }
 
         void ReadISO8601DateTime()
