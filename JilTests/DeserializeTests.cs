@@ -13,6 +13,30 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void NewtsoftDateTimes()
+        {
+            var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var now = DateTime.UtcNow;
+
+            var dtStr = JSON.Serialize(dt);
+            var nowStr = JSON.Serialize(now);
+
+            using (var str = new StringReader(dtStr))
+            {
+                var dtRet = JSON.Deserialize<DateTime>(str);
+                var delta = (dtRet - dt).Duration().TotalMilliseconds;
+                Assert.IsTrue(delta < 1);
+            }
+
+            using (var str = new StringReader(nowStr))
+            {
+                var nowRet = JSON.Deserialize<DateTime>(str);
+                var delta = (nowRet - now).Duration().TotalMilliseconds;
+                Assert.IsTrue(delta < 1);
+            }
+        }
+
+        [TestMethod]
         public void Guids()
         {
             var guid = Guid.NewGuid();

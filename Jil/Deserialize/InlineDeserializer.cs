@@ -16,13 +16,15 @@ namespace Jil.Deserialize
         const string StringBuilderName = "string_builder";
         
         readonly Type RecursionLookupType;
+        readonly DateTimeFormat DateFormat;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
 
-        public InlineDeserializer(Type recursionLookupType)
+        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat)
         {
             RecursionLookupType = recursionLookupType;
+            DateFormat = dateFormat;
         }
 
         void AddGlobalVariables()
@@ -280,6 +282,61 @@ namespace Jil.Deserialize
             ExpectQuote();                  // Guid
         }
 
+        void ReadDate()
+        {
+            switch (DateFormat)
+            {
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: ReadNewtosoftDateTime(); break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsDateTime(); break;
+                case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsDateTime(); break;
+                case DateTimeFormat.ISO8601: ReadISO8601DateTime(); break;
+                default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
+            }
+            
+        }
+
+        void ReadNewtosoftDateTime()
+        {
+            ExpectQuote();                  // --empty--
+            ExpectChar('\\');               // --empty--
+            ExpectChar('/');                // --empty--
+            ExpectChar('D');                // --empty--
+            ExpectChar('a');                // --empty--
+            ExpectChar('t');                // --empty--
+            ExpectChar('e');                // --empty--
+            ExpectChar('(');                // --empty--
+            ReadPrimitive(typeof(long));    // long
+            ExpectChar(')');                // long
+            ExpectChar('\\');               // long
+            ExpectChar('/');                // long
+
+            // convert MS into ticks
+            Emit.LoadConstant(10000L);              // long long
+            Emit.Multiply();                        // long
+            Emit.LoadConstant(621355968000000000L); // long long
+            Emit.Add();                             // long
+
+            Emit.LoadConstant((int)DateTimeKind.Utc);       // long DateTimeKind
+            Emit.NewObject<DateTime, long, DateTimeKind>(); // DateTime
+
+            ExpectQuote();                  // DateTime
+        }
+
+        void ReadMillisecondsDateTime()
+        {
+            throw new NotImplementedException();
+        }
+
+        void ReadSecondsDateTime()
+        {
+            throw new NotImplementedException();
+        }
+
+        void ReadISO8601DateTime()
+        {
+            throw new NotImplementedException();
+        }
+
         void ReadPrimitive(Type primitiveType)
         {
             if (primitiveType == typeof(bool))
@@ -303,6 +360,12 @@ namespace Jil.Deserialize
             if (primitiveType == typeof(Guid))
             {
                 ReadGuid();
+                return;
+            }
+
+            if (primitiveType == typeof(DateTime))
+            {
+                ReadDate();
                 return;
             }
 
@@ -824,9 +887,9 @@ namespace Jil.Deserialize
 
     static class InlineDeserializerHelper
     {
-        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType)
+        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat)
         {
-            var obj = new InlineDeserializer<ReturnType>(typeCacheType);
+            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
             var ret = obj.BuildWithNewDelegate();
 
