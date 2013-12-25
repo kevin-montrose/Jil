@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +13,160 @@ namespace Jil.Deserialize
     static partial class Methods
     {
         public const int CharBufferSize = 4;
+
+        [StructLayout(LayoutKind.Explicit, Pack = 1)]
+        struct GuidStruct
+        {
+            [FieldOffset(0)]
+            public readonly Guid Value;
+
+            [FieldOffset(0)]
+            public byte B00;
+            [FieldOffset(1)]
+            public byte B01;
+            [FieldOffset(2)]
+            public byte B02;
+            [FieldOffset(3)]
+            public byte B03;
+            [FieldOffset(4)]
+            public byte B04;
+            [FieldOffset(5)]
+            public byte B05;
+
+            [FieldOffset(6)]
+            public byte B06;
+            [FieldOffset(7)]
+            public byte B07;
+            [FieldOffset(8)]
+            public byte B08;
+            [FieldOffset(9)]
+            public byte B09;
+
+            [FieldOffset(10)]
+            public byte B10;
+            [FieldOffset(11)]
+            public byte B11;
+
+            [FieldOffset(12)]
+            public byte B12;
+            [FieldOffset(13)]
+            public byte B13;
+            [FieldOffset(14)]
+            public byte B14;
+            [FieldOffset(15)]
+            public byte B15;
+        }
+
+        public static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Guid _ReadGuid(TextReader reader)
+        {
+            // 1314FAD4-7505-439D-ABD2-DBD89242928C
+            // 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            //
+            // Guid is guaranteed to be a 36 character string
+
+            // Bytes are in a different order than you might expect
+            // For: 35 91 8b c9 - 19 6d - 40 ea  - 97 79  - 88 9d 79 b7 53 f0 
+            // Get: C9 8B 91 35   6D 19   EA 40    97 79    88 9D 79 B7 53 F0 
+            // Ix:   0  1  2  3    4  5    6  7     8  9    10 11 12 13 14 15
+            //
+            // And we have to account for dashes
+            //
+            // So the map is like so:
+            // chars[0]  -> bytes[3]  -> buffer[ 0, 1]
+            // chars[1]  -> bytes[2]  -> buffer[ 2, 3]
+            // chars[2]  -> bytes[1]  -> buffer[ 4, 5]
+            // chars[3]  -> bytes[0]  -> buffer[ 6, 7]
+            // chars[4]  -> bytes[5]  -> buffer[ 9,10]
+            // chars[5]  -> bytes[4]  -> buffer[11,12]
+            // chars[6]  -> bytes[7]  -> buffer[14,15]
+            // chars[7]  -> bytes[6]  -> buffer[16,17]
+            // chars[8]  -> bytes[8]  -> buffer[19,20]
+            // chars[9]  -> bytes[9]  -> buffer[21,22]
+            // chars[10] -> bytes[10] -> buffer[24,25]
+            // chars[11] -> bytes[11] -> buffer[26,27]
+            // chars[12] -> bytes[12] -> buffer[28,29]
+            // chars[13] -> bytes[13] -> buffer[30,31]
+            // chars[14] -> bytes[14] -> buffer[32,33]
+            // chars[15] -> bytes[15] -> buffer[34,35]
+
+            var asStruct = new GuidStruct();
+            asStruct.B03 = ReadGuidByte(reader);
+            asStruct.B02 = ReadGuidByte(reader);
+            asStruct.B01 = ReadGuidByte(reader);
+            asStruct.B00 = ReadGuidByte(reader);
+
+            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+            
+            asStruct.B05 = ReadGuidByte(reader);
+            asStruct.B04 = ReadGuidByte(reader);
+
+            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+
+            asStruct.B07 = ReadGuidByte(reader);
+            asStruct.B06 = ReadGuidByte(reader);
+
+            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+
+            asStruct.B08 = ReadGuidByte(reader);
+            asStruct.B09 = ReadGuidByte(reader);
+
+            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+
+            asStruct.B10 = ReadGuidByte(reader);
+            asStruct.B11 = ReadGuidByte(reader);
+            asStruct.B12 = ReadGuidByte(reader);
+            asStruct.B13 = ReadGuidByte(reader);
+            asStruct.B14 = ReadGuidByte(reader);
+            asStruct.B15 = ReadGuidByte(reader);
+
+            return asStruct.Value;
+        }
+
+        static byte ReadGuidByte(TextReader reader)
+        {
+            var a = reader.Read();
+            if (a == -1) throw new DeserializationException("Expected any character");
+            if (!((a >= '0' && a <= '9') || (a >= 'A' && a <= 'F') || (a >= 'a' && a <= 'f'))) throw new DeserializationException("Expected a hex number");
+            var b = reader.Read();
+            if (b == -1) throw new DeserializationException("Expected any character");
+            if (!((b >= '0' && b <= '9') || (b >= 'A' && b <= 'F') || (b >= 'a' && b <= 'f'))) throw new DeserializationException("Expected a hex number");
+
+            if (a <= '9')
+            {
+                a -= '0';
+            }
+            else
+            {
+                if (a <= 'F')
+                {
+                    a -= ('A' - 10);
+                }
+                else
+                {
+                    a -= ('a' - 10);
+                }
+            }
+
+            if (b <= '9')
+            {
+                b -= '0';
+            }
+            else
+            {
+                if (b <= 'F')
+                {
+                    b -= ('A' - 10);
+                }
+                else
+                {
+                    b -= ('a' - 10);
+                }
+            }
+
+            return (byte)(a * 16 + b);
+        }
 
         public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

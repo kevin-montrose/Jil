@@ -13,6 +13,24 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Guids()
+        {
+            var guid = Guid.NewGuid();
+
+            using (var str = new StringReader("\"" + guid.ToString("d").ToUpper() + "\""))
+            {
+                var g = JSON.Deserialize<Guid>(str);
+                Assert.AreEqual(guid, g);
+            }
+
+            using (var str = new StringReader("\"" + guid.ToString("d").ToLower() + "\""))
+            {
+                var g = JSON.Deserialize<Guid>(str);
+                Assert.AreEqual(guid, g);
+            }
+        }
+
+        [TestMethod]
         public void Overflow()
         {
             // byte
