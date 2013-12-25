@@ -96,19 +96,19 @@ namespace Jil.Deserialize
 
         void ExpectRawCharOrNull(char c, Action ifChar, Action ifNull)
         {
-            var gotQuote = Emit.DefineLabel();
+            var gotChar = Emit.DefineLabel();
             var gotN = Emit.DefineLabel();
             var done = Emit.DefineLabel();
 
             RawReadChar(() => ThrowExpected("\"", "null")); // int
             Emit.Duplicate();                               // int int
             Emit.LoadConstant((int)c);                      // int int int
-            Emit.BranchIfEqual(gotQuote);                   // int 
+            Emit.BranchIfEqual(gotChar);                    // int 
             Emit.LoadConstant((int)'n');                    // int n
             Emit.BranchIfEqual(gotN);                       // --empty--
             ThrowExpected("\"", "null");                    // --empty--
 
-            Emit.MarkLabel(gotQuote);                       // int
+            Emit.MarkLabel(gotChar);                        // int
             Emit.Pop();                                     // --empty--
             ifChar();                                       // ???
             Emit.Branch(done);                              // ???
