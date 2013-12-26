@@ -533,9 +533,10 @@ namespace Jil
                     return Jil.Deserialize.MillisecondStyleTypeCache<T>.Thunk(reader, 0);
                 case DateTimeFormat.SecondsSinceUnixEpoch:
                     return Jil.Deserialize.SecondStyleTypeCache<T>.Thunk(reader, 0);
+                case DateTimeFormat.ISO8601:
+                    return Jil.Deserialize.ISO8601StyleTypeCache<T>.Thunk(reader, 0);
+                default: throw new InvalidOperationException("Unexpected Options: " + options);
             }
-
-            throw new NotImplementedException();
         }
     }
 }
