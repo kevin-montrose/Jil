@@ -24,6 +24,140 @@ namespace JilTests
 #pragma warning restore 0649
 
         [TestMethod]
+        public void MalformedISO8601()
+        {
+            var buffer = new char[Jil.Deserialize.Methods.CharBufferSize];
+
+            using (var str = new StringReader("\"99\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("ISO8601 date must begin with a 4 character year", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"0000\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("ISO8601 year 0000 cannot be converted to a DateTime", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-13\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("Expected month to be between 01 and 12", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-12-00\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("Expected day to be between 01 and 31", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"19991200\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("Expected day to be between 01 and 31", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T12:34:56.1234+00:00\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferSize + " characters or less", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T1234\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("Expected :", inner.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"19000101T12:34\""))
+            {
+                str.Read(); // skip the "
+                try
+                {
+                    Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (TargetInvocationException e)
+                {
+                    var inner = e.InnerException as Jil.DeserializationException;
+                    Assert.IsNotNull(inner);
+                    Assert.AreEqual("Unexpected separator", inner.Message);
+                }
+            }
+        }
+
+        [TestMethod]
         public void ParseISO8601()
         {
             var buffer = new char[Jil.Deserialize.Methods.CharBufferSize];
