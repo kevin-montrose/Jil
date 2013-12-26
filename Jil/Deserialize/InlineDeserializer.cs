@@ -350,6 +350,7 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                      // --empty--
             Emit.LoadArgument(0);               // TextReader
+            LoadCharBuffer();
             Emit.Call(Methods.ReadISO8601Date); // DateTime
             ExpectQuote();                      // DateTime
         }
