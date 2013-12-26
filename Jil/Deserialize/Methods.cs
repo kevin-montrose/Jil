@@ -139,9 +139,10 @@ namespace Jil.Deserialize
             var time = ParseISO8601Time(buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
             if (!zPlusOrMinus.HasValue) return date + time;
 
-            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 2, ix);
+            // only +1 here because the separator is significant (oy vey)
+            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators);
 
-            return date.ToUniversalTime() + time + timezoneOffset;
+            return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
         }
 
         static DateTime ParseISO8601Date(char[] buffer, int start, int stop, out bool? hasSeparators)
@@ -626,9 +627,82 @@ namespace Jil.Deserialize
             }
         }
 
-        static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop)
+        static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
-            throw new NotImplementedException();
+            // Here are the possible formats for timezones
+            // Z
+            // +hh
+            // +hh:mm
+            // +hhmm
+            // -hh
+            // -hh:mm
+            // -hhmm
+
+            int c = buffer[start];
+            // no need to validate, the caller has done that
+            if (c == 'Z') return TimeSpan.Zero;
+            var isNegative = c == '-';
+            start++;
+
+            var len = (stop - start) + 1;
+
+            if (len < 2) throw new DeserializationException("Expected hour part of ISO8601 timezone offset");
+            var hour = 0;
+            c = buffer[start];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hour += (c - '0');
+            hour *= 10;
+            start++;
+            c = buffer[start];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hour += (c - '0');
+            if (hour > 24) throw new DeserializationException("Expected hour offset to be between 00 and 24");
+
+            // just an HOUR offset
+            if (start == stop)
+            {
+                TimeSpan ret;
+                if (isNegative)
+                {
+                    ret = new TimeSpan(-hour, 0, 0);
+                }
+                else
+                {
+                    ret = new TimeSpan(hour, 0, 0);
+                }
+
+                return ret;
+            }
+
+            start++;
+            c = buffer[start];
+            if (c == ':')
+            {
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator in ISO8601 timezone offset");
+
+                hasSeparators = true;
+                start++;
+            }
+
+            var mins = 0;
+            c = buffer[0];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            mins += (c - '0');
+            mins *= 10;
+            start++;
+            c = buffer[0];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            mins += (c - '0');
+            if (mins > 59) throw new DeserializationException("Expected minute offset to be between 00 and 59");
+
+            if (isNegative)
+            {
+                return new TimeSpan(-hour, -mins, 0);
+            }
+            else
+            {
+                return new TimeSpan(hour, mins, 0);
+            }
         }
 
         public static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
