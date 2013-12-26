@@ -348,7 +348,10 @@ namespace Jil.Deserialize
 
         void ReadISO8601DateTime()
         {
-            throw new NotImplementedException();
+            ExpectQuote();                      // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.Call(Methods.ReadISO8601Date); // DateTime
+            ExpectQuote();                      // DateTime
         }
 
         void ReadPrimitive(Type primitiveType)

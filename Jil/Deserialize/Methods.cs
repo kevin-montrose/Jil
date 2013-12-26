@@ -57,6 +57,291 @@ namespace Jil.Deserialize
             public byte B15;
         }
 
+        public static readonly MethodInfo ReadISO8601Date = typeof(Methods).GetMethod("_ReadISO8601Date", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTime _ReadISO8601Date(TextReader reader)
+        {
+            int c;
+            bool? hasSeparators;
+            // this datePart will be DateTimeKind.Local, per the spec
+            var datePart = ReadISO8601DatePart(reader, out c, out hasSeparators);
+
+            if (c == 'T')
+            {
+                reader.Read();  // skip the T
+                var timePart = ReadISO8601TimePart(reader, ref hasSeparators, out c);
+
+                if (c == 'Z' || c == '+' || c == '-')
+                {
+                    c = reader.Read();  // get that first char here, for ease
+                    var timezone = ReadTimeZone(reader, c, hasSeparators);
+
+                    datePart = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(datePart, DateTimeKind.Utc), timezone);
+                }
+
+                return datePart + timePart;
+            }
+
+            return datePart;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static TimeZoneInfo ReadTimeZone(TextReader reader, int c, bool? hasSeparators)
+        {
+            // ISO8601 is rather complicated, but timezones at least are representable equivalently in
+            //   .NET it seems
+            // See: http://en.wikipedia.org/wiki/ISO_8601
+
+            if (c == 'Z')
+            {
+                return TimeZoneInfo.Utc;
+            }
+
+            var negative = c == '-';
+
+            var hours = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hours += (c - '0');
+            hours *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hours += (c - '0');
+            if (hours > 24) throw new DeserializationException("Expected timezone hour offset to be between 00 and 24");
+
+            c = reader.Peek();
+            // this is just an HOUR offset
+            if (c == '"')
+            {
+                var ts = TimeSpan.FromHours(hours);
+                if (negative)
+                {
+                    ts = ts.Negate();
+                }
+
+                return TimeZoneInfo.CreateCustomTimeZone("Jil Custom Time Zone", ts, "Jil Custom Time Zone", "Jil Custom Time Zone");
+            }
+
+            if (c == ':')
+            {
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator in timezone offset");
+
+                hasSeparators = true;
+
+                reader.Read();
+            }
+
+            var minutes = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            minutes += (c - '0');
+            minutes *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            minutes += (c - '0');
+            if (minutes > 59) throw new DeserializationException("Expected timezone minute offset to be between 00 and 59");
+
+            // Not check for ", that's the responsibility of the calling code
+
+            var offset = new TimeSpan(hours, minutes, 0);
+            if (negative)
+            {
+                offset = offset.Negate();
+            }
+
+            return TimeZoneInfo.CreateCustomTimeZone("Jil Custom Time Zone", offset, "Jil Custom Time Zone", "Jil Custom Time Zone");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static TimeSpan ReadISO8601TimePart(TextReader reader, ref bool? hasSeparators, out int c)
+        {
+            // ISO8601 is rather complicated, and doesn't map exactly to the built in DateTime
+            // See: http://en.wikipedia.org/wiki/ISO_8601
+
+            var hours = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hours += (c - '0');
+            hours *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hours += (c - '0');
+
+            if (hours > 24) throw new DeserializationException("Expected hour to be between 00 and 24");
+
+            c = reader.Peek();
+            // this is just an HOUR portion
+            if (c == 'Z' || c == '+' || c == '-' || c == '"')
+            {
+                return TimeSpan.FromHours(hours);
+            }
+
+            if (c == ':')
+            {
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator in time");
+
+                hasSeparators = true;
+                reader.Read();
+            }
+            else
+            {
+                hasSeparators = false;
+            }
+
+            var minutes = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            minutes += (c - '0');
+            minutes *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            minutes += (c - '0');
+            if (minutes > 59) throw new DeserializationException("Expected minutes to be between 00 and 59");
+
+            c = reader.Peek();
+            if (c == ':')
+            {
+                if (!hasSeparators.Value) throw new DeserializationException("Unexpected separator in time");
+
+                reader.Read();
+            }
+            else
+            {
+                // this is just an HOUR and MINUTES portion
+                if (c == 'Z' || c == '+' || c == '-' || c == '"')
+                {
+                    return new TimeSpan(hours, minutes, 0);
+                }
+            }
+
+            var secs = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            secs += (c - '0');
+            secs *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            secs += (c - '0');
+            if (secs > 60) throw new DeserializationException("Expected seconds to be between 00 and 60");
+
+            c = reader.Peek();
+            if (c != 'Z' && c != '"' && c != '+' && c != '-') throw new DeserializationException("Expected Z, \", +, or -");
+
+            return new TimeSpan(hours, minutes, secs);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTime ReadISO8601DatePart(TextReader reader, out int c, out bool? hasSeparators)
+        {
+            // ISO8601 is rather complicated, and doesn't map exactly to the built in DateTime
+            // See: http://en.wikipedia.org/wiki/ISO_8601
+            // We're explicitly *NOT* supporting the week date format (YYYY-Www-D and similar)
+            //  this is because the .NET framework doesn't have an easy way to do that conversion
+            //  to a DateTime.
+            // TODO: ^^^ fix that, roll our own
+
+            // Every date must start with a year, which *must* be 4 characters long
+            // ISO8601 allows the 0 year and negative years, DateTime doesn't
+            var year = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            year += (c - '0');
+            year *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            year += (c - '0');
+            year *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            year += (c - '0');
+            year *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            year += (c - '0');
+
+            if (c <= 0) throw new DeserializationException("ISO8601 dates in or before the year 0000 cannot be mapped to a DateTime");
+
+            // this may be: ", -, W, T, or a digit
+            c = reader.Peek();
+
+            // if " or T, we're finished and this is just a **YEAR**
+            if (c == '"' || c == 'T')
+            {
+                hasSeparators = null;
+                return new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local);
+            }
+
+            if (c == 'W') throw new DeserializationException("ISO8601 week dates cannot be mapped to a DateTime");
+
+            hasSeparators = false;
+            if (c == '-')
+            {
+                reader.Read();
+                hasSeparators = true;
+            }
+
+            // Following the date is either the MONTH (as MM) or an ORDINAL number of days (as DDD)
+            var monthOrOrdinal = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            monthOrOrdinal += (c - '0');
+            monthOrOrdinal *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            monthOrOrdinal += (c - '0');
+
+            c = reader.Peek();
+
+            // this is an ORDINAL DATE
+            if (c >= '0' && c <= '9')
+            {
+                reader.Read();
+
+                monthOrOrdinal *= 10;
+                monthOrOrdinal += (c - '0');
+
+                if (monthOrOrdinal == 0 || monthOrOrdinal > 366) throw new DeserializationException("Expected ordinal to be between 001 and 366");
+
+                var ret = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local);
+                ret = ret.AddDays(monthOrOrdinal - 1);
+
+                return ret;
+            }
+
+            if (monthOrOrdinal == 0 || monthOrOrdinal > 12) throw new DeserializationException("Expected month to be between 01 and 12");
+
+            c = reader.Peek();
+
+            // if ", or T we're done and this is just a YYYY(-?)MM
+            if (c == '"' || c == 'T')
+            {
+                if (!hasSeparators.Value) throw new DeserializationException("ISO8601 date cannot end after month without separators");
+
+                return new DateTime(year, monthOrOrdinal, 1, 0, 0, 0, DateTimeKind.Local);
+            }
+
+            if (c == '-')
+            {
+                if (!hasSeparators.Value) throw new DeserializationException("Unexpected separator in date");
+
+                reader.Read();
+            }
+
+            var day = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            day += (c - '0');
+            day *= 10;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            day += (c - '0');
+
+            c = reader.Peek();
+            if (c != '"' && c != 'T') throw new DeserializationException("Expected \", or T");
+
+            return new DateTime(year, monthOrOrdinal, day, 0, 0, 0, DateTimeKind.Local);
+        }
+
         public static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Guid _ReadGuid(TextReader reader)
