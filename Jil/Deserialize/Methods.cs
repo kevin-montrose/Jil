@@ -113,7 +113,7 @@ namespace Jil.Deserialize
                 reader.Read();
 
                 ix++;
-                if (ix == CharBufferSize) throw new DeserializationException("Expected \" while parsing ISO8601 date");
+                if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less");
                 buffer[ix] = (char)c;
 
                 if (c == 'T')
@@ -169,7 +169,7 @@ namespace Jil.Deserialize
             // ^ TODO fix that!
 
             var len = (stop - start) + 1;
-            if (len < 4) throw new DeserializationException("ISO8601 must begin with a 4 character year");
+            if (len < 4) throw new DeserializationException("ISO8601 date must begin with a 4 character year");
 
             var year = 0;
             var month = 0;
@@ -416,6 +416,8 @@ namespace Jil.Deserialize
             }
             else
             {
+                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :");
+
                 hasSeparators = false;
             }
 
@@ -692,6 +694,12 @@ namespace Jil.Deserialize
 
                 hasSeparators = true;
                 start++;
+            }
+            else
+            {
+                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :");
+                
+                hasSeparators = false;
             }
 
             var mins = 0;
