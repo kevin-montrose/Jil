@@ -28,7 +28,7 @@ namespace JilTests
         {
             var buffer = new char[Jil.Deserialize.Methods.CharBufferSize];
 
-            using(var str = new StringReader("\"1900\""))
+            using (var str = new StringReader("\"1900\""))
             {
                 str.Read(); // skip the "
                 var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
@@ -182,8 +182,6 @@ namespace JilTests
                 Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Local), dt);
             }
 
-            // aslfjalksfkasndfklm
-
             using (var str = new StringReader("\"1989-01-31T12Z\""))
             {
                 str.Read(); // skip the "
@@ -308,6 +306,258 @@ namespace JilTests
                 str.Read(); // skip the "
                 var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
                 Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 0 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12,5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 30 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12.5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 30 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34,5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34.5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56,5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56.5+01:23\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 0 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12,5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 30 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12.5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 30 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234,5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234.5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456,5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456.5+0123\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12 + 1, 34 + 23, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 15, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12,5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 45, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12.5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 45, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34,5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34.5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56,5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56.5-11:45\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 15, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12,5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 45, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12.5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 45, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234,5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234.5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 30, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456,5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, 500, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456.5-1145\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, 500, DateTimeKind.Utc), dt);
             }
         }
 

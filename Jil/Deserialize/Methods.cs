@@ -62,7 +62,8 @@ namespace Jil.Deserialize
         static DateTime _ReadISO8601Date(TextReader reader, char[] buffer)
         {
             // ISO8601 is a plague
-            //   See: http://en.wikipedia.org/wiki/ISO_8601
+            //   See: http://en.wikipedia.org/wiki/ISO_8601 &
+            //        http://tools.ietf.org/html/rfc3339
 
             // Here are the possible formats for times
             // hh
@@ -139,8 +140,14 @@ namespace Jil.Deserialize
             var time = ParseISO8601Time(buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
             if (!zPlusOrMinus.HasValue) return date + time;
 
+            bool unknownLocalOffset;
             // only +1 here because the separator is significant (oy vey)
-            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators);
+            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
+
+            if (unknownLocalOffset)
+            {
+                return DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time;
+            }
 
             return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
         }
@@ -627,7 +634,7 @@ namespace Jil.Deserialize
             }
         }
 
-        static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop, ref bool? hasSeparators)
+        static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
             // Z
@@ -640,7 +647,11 @@ namespace Jil.Deserialize
 
             int c = buffer[start];
             // no need to validate, the caller has done that
-            if (c == 'Z') return TimeSpan.Zero;
+            if (c == 'Z')
+            {
+                unknownLocalOffset = false;
+                return TimeSpan.Zero;
+            }
             var isNegative = c == '-';
             start++;
 
@@ -661,17 +672,16 @@ namespace Jil.Deserialize
             // just an HOUR offset
             if (start == stop)
             {
-                TimeSpan ret;
+                unknownLocalOffset = false;
+
                 if (isNegative)
                 {
-                    ret = new TimeSpan(-hour, 0, 0);
+                    return new TimeSpan(-hour, 0, 0);
                 }
                 else
                 {
-                    ret = new TimeSpan(hour, 0, 0);
+                    return new TimeSpan(hour, 0, 0);
                 }
-
-                return ret;
             }
 
             start++;
@@ -685,22 +695,27 @@ namespace Jil.Deserialize
             }
 
             var mins = 0;
-            c = buffer[0];
+            c = buffer[start];
             if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
             mins += (c - '0');
             mins *= 10;
             start++;
-            c = buffer[0];
+            c = buffer[start];
             if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
             mins += (c - '0');
             if (mins > 59) throw new DeserializationException("Expected minute offset to be between 00 and 59");
 
             if (isNegative)
             {
+                // per Section 4.3 of of RFC3339 (http://tools.ietf.org/html/rfc3339)
+                // a timezone of "-00:00" is used to indicate an "Unknown Local Offset"
+                unknownLocalOffset = hour == 0 && mins == 0;
+
                 return new TimeSpan(-hour, -mins, 0);
             }
             else
             {
+                unknownLocalOffset = false;
                 return new TimeSpan(hour, mins, 0);
             }
         }
