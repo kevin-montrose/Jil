@@ -22,11 +22,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("ISO8601 date must begin with a 4 character year", inner.Message);
+                    Assert.AreEqual("ISO8601 date must begin with a 4 character year", e.Message);
                 }
             }
 
@@ -37,11 +35,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("ISO8601 year 0000 cannot be converted to a DateTime", inner.Message);
+                    Assert.AreEqual("ISO8601 year 0000 cannot be converted to a DateTime", e.Message);
                 }
             }
 
@@ -52,11 +48,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Expected month to be between 01 and 12", inner.Message);
+                    Assert.AreEqual("Expected month to be between 01 and 12", e.Message);
                 }
             }
 
@@ -67,11 +61,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Expected day to be between 01 and 31", inner.Message);
+                    Assert.AreEqual("Expected day to be between 01 and 31", e.Message);
                 }
             }
 
@@ -82,11 +74,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Expected day to be between 01 and 31", inner.Message);
+                    Assert.AreEqual("Expected day to be between 01 and 31", e.Message);
                 }
             }
 
@@ -97,11 +87,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferSize + " characters or less", inner.Message);
+                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferSize + " characters or less", e.Message);
                 }
             }
 
@@ -112,11 +100,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Expected :", inner.Message);
+                    Assert.AreEqual("Expected :", e.Message);
                 }
             }
 
@@ -127,11 +113,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Unexpected separator", inner.Message);
+                    Assert.AreEqual("Unexpected separator", e.Message);
                 }
             }
 
@@ -142,11 +126,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Unexpected separator in ISO8601 time", inner.Message);
+                    Assert.AreEqual("Unexpected separator in ISO8601 time", e.Message);
                 }
             }
 
@@ -157,11 +139,9 @@ namespace JilTests
                     JSON.Deserialize<DateTime>(str, Options.ISO8601);
                     Assert.Fail("Shouldn't be possible");
                 }
-                catch (Exception e)
+                catch (DeserializationException e)
                 {
-                    var inner = e as Jil.DeserializationException;
-                    Assert.IsNotNull(inner);
-                    Assert.AreEqual("Unexpected separator in ISO8601 timezone offset", inner.Message);
+                    Assert.AreEqual("Unexpected separator in ISO8601 timezone offset", e.Message);
                 }
             }
         }
