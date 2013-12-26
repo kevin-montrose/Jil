@@ -24,6 +24,38 @@ namespace JilTests
 #pragma warning restore 0649
 
         [TestMethod]
+        public void ParseISO8601()
+        {
+            using(var str = new StringReader("\"1900\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str });
+                Assert.AreEqual(new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1991-02\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str });
+                Assert.AreEqual(new DateTime(1991, 02, 1, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str });
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+        }
+
+        [TestMethod]
         public void FieldOffsetsInMemory()
         {
             Func<string, FieldInfo> get = str => typeof(_FieldOffsetsInMemory).GetField(str);
