@@ -36,4 +36,14 @@ namespace Jil.Deserialize
             Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch);
         }
     }
+
+    static class ISO8601StyleTypeCache<T>
+    {
+        public static readonly Func<TextReader, int, T> Thunk;
+
+        static ISO8601StyleTypeCache()
+        {
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601);
+        }
+    }
 }
