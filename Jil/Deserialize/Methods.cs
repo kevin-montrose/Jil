@@ -70,16 +70,16 @@ namespace Jil.Deserialize
             // hhmm
             // hh:mm:ss
             // hhmmss
-            // hh,fff           (note that the limit of 3 fractional parts is arbitrary, tune as appropriate)
-            // hh:mm,fff
-            // hhmm,fff
-            // hh:mm:ss,fff
-            // hhmmss,fff
-            // hh.fff
-            // hh:mm.fff
-            // hhmm.fff
-            // hh:mm:ss.fff
-            // hhmmss.fff
+            // hh,fff*
+            // hh:mm,fff*
+            // hhmm,fff*
+            // hh:mm:ss,fff*
+            // hhmmss,fff*
+            // hh.fff*
+            // hh:mm.fff*
+            // hhmm.fff*
+            // hh:mm:ss.fff*
+            // hhmmss.fff*
 
             // Here are the possible formats for timezones
             // Z
@@ -118,7 +118,7 @@ namespace Jil.Deserialize
                 if (c == 'T')
                 {
                     if (tPos.HasValue) throw new DeserializationException("Unexpected second T in ISO8601 date");
-                    tPos = ix;
+                    tPos = ix - 1;
                 }
 
                 if (tPos.HasValue)
@@ -126,7 +126,7 @@ namespace Jil.Deserialize
                     if (c == 'Z' || c == '+' || c == '-')
                     {
                         if (zPlusOrMinus.HasValue) throw new DeserializationException("Unexpected second Z, +, or - in ISO8601 date");
-                        zPlusOrMinus = ix;
+                        zPlusOrMinus = ix - 1;
                     }
                 }
             }
@@ -136,10 +136,10 @@ namespace Jil.Deserialize
             var date = ParseISO8601Date(buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
             if (!tPos.HasValue) return date;
 
-            var time = ParseISO8601Time(buffer, tPos.Value, zPlusOrMinus ?? ix);
+            var time = ParseISO8601Time(buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
             if (!zPlusOrMinus.HasValue) return date + time;
 
-            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value, ix);
+            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 2, ix);
 
             return date.ToUniversalTime() + time + timezoneOffset;
         }
@@ -327,8 +327,206 @@ namespace Jil.Deserialize
             }
         }
 
-        static TimeSpan ParseISO8601Time(char[] buffer, int start, int stop)
+        static TimeSpan ParseISO8601Time(char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
+            const double HoursToMilliseconds = 3600000;
+            const double MinutesToMilliseconds = 60000;
+            const double SecondsToMilliseconds = 1000;
+
+            // Here are the possible formats for times
+            // hh
+            // hh,fff*
+            // hh.fff*
+            //
+            // hhmmss
+            // hhmm
+            // hhmm,fff*
+            // hhmm.fff*
+            // hhmmss.fff*
+            // hhmmss,fff*
+            // hh:mm
+            // hh:mm:ss
+            // hh:mm,fff*
+            // hh:mm:ss,fff*
+            // hh:mm.fff*
+            // hh:mm:ss.fff*
+            
+            var len = (stop - start) + 1;
+            if (len < 2) throw new DeserializationException("ISO8601 must begin with a 2 character hour");
+
+            var hour = 0;
+            int c = buffer[start];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hour += (c - '0');
+            hour *= 10;
+            start++;
+            c = buffer[start];
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            hour += (c - '0');
+            if (hour > 24) throw new DeserializationException("Expected hour to be between 00 and 24");
+
+            // just an hour part
+            if (start == stop)
+            {
+                return TimeSpan.FromHours(hour);
+            }
+
+            start++;
+            c = buffer[start];
+
+            // hour with a fractional part
+            if (c == ',' || c == '.')
+            {
+                start++;
+                var frac = 0;
+                var fracLength = 0;
+                while (start <= stop)
+                {
+                    c = buffer[start];
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    frac *= 10;
+                    frac += (c - '0');
+
+                    fracLength++;
+                    start++;
+                }
+
+                if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+
+                double hoursAsMilliseconds = hour * HoursToMilliseconds;
+                hoursAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * HoursToMilliseconds;
+
+                return TimeSpan.FromMilliseconds(hoursAsMilliseconds);
+            }
+
+            if (c == ':')
+            {
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator");
+
+                hasSeparators = true;
+                start++;
+            }
+            else
+            {
+                hasSeparators = false;
+            }
+
+            if (hasSeparators.Value)
+            {
+                // Could still be
+                // hh:mm
+                // hh:mm:ss
+                // hh:mm,fff*
+                // hh:mm:ss,fff*
+                // hh:mm.fff*
+                // hh:mm:ss.fff*
+
+                if (len < 4) throw new DeserializationException("Expected hour part of ISO8601 time");
+
+                var min = 0;
+                c = buffer[start];
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                min += (c - '0');
+                min *= 10;
+                start++;
+                c = buffer[start];
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                min += (c - '0');
+                if (min > 59) throw new DeserializationException("Expected minute to be between 00 and 59");
+
+                // just HOUR and MINUTE part
+                if (start == stop)
+                {
+                    return new TimeSpan(hour, min, 0);
+                }
+
+                start++;
+                c = buffer[start];
+
+                // HOUR, MINUTE, and FRACTION
+                if (c == ',' || c == '.')
+                {
+                    start++;
+                    var frac = 0;
+                    var fracLength = 0;
+                    while (start <= stop)
+                    {
+                        c = buffer[start];
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        frac *= 10;
+                        frac += (c - '0');
+
+                        fracLength++;
+                        start++;
+                    }
+
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+
+                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
+                    double minsAsMilliseconds = min * MinutesToMilliseconds;
+                    minsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * MinutesToMilliseconds;
+
+                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
+                }
+
+                if (c != ':') throw new DeserializationException("Expected :");
+                start++;
+
+                var secs = 0;
+                c = buffer[start];
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                secs += (c - '0');
+                secs *= 10;
+                start++;
+                c = buffer[start];
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                secs += (c - '0');
+
+                // HOUR, MINUTE, and SECONDS
+                if (start == stop)
+                {
+                    return new TimeSpan(hour, min, secs);
+                }
+
+                start++;
+                c = buffer[start];
+                if (c == ',' || c == '.')
+                {
+                    start++;
+                    var frac = 0;
+                    var fracLength = 0;
+                    while (start <= stop)
+                    {
+                        c = buffer[start];
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        frac *= 10;
+                        frac += (c - '0');
+
+                        fracLength++;
+                        start++;
+                    }
+
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+
+                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
+                    double minsAsMilliseconds = min * MinutesToMilliseconds;
+                    double secsAsMilliseconds = secs * SecondsToMilliseconds;
+                    secsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * SecondsToMilliseconds;
+
+                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
+                }
+
+                throw new DeserializationException("Expected ,, or .");
+            }
+
+            // Could still be
+            // hhmmss
+            // hhmm
+            // hhmm,fff*
+            // hhmm.fff*
+            // hhmmss.fff*
+            // hhmmss,fff*
+
             throw new NotImplementedException();
         }
 
