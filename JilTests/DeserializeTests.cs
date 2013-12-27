@@ -13,6 +13,22 @@ namespace JilTests
     public class DeserializeTests
     {
         [TestMethod]
+        public void Arrays()
+        {
+            using (var str = new StringReader("[0,1,2,3,4,5]"))
+            {
+                var ret = JSON.Deserialize<int[]>(str);
+                Assert.AreEqual(6, ret.Length);
+                Assert.AreEqual(0, ret[0]);
+                Assert.AreEqual(1, ret[1]);
+                Assert.AreEqual(2, ret[2]);
+                Assert.AreEqual(3, ret[3]);
+                Assert.AreEqual(4, ret[4]);
+                Assert.AreEqual(5, ret[5]);
+            }
+        }
+
+        [TestMethod]
         public void ParseISO8601()
         {
             using (var str = new StringReader("\"1900\""))
