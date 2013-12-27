@@ -20,6 +20,17 @@ namespace Jil.Deserialize
             //        http://tools.ietf.org/html/rfc3339
             //        *is bullshit
 
+            // Here are the possible formats for dates
+            // YYYY-MM-DD
+            // YYYY-MM
+            // YYYY-DDD (ordinal date)
+            // YYYY-Www (week date, the W is a literal)
+            // YYYY-Www-D
+            // YYYYMMDD
+            // YYYYWww
+            // YYYYWwwD
+            // YYYYDDD
+
             // Here are the possible formats for times
             // hh
             // hh:mm
