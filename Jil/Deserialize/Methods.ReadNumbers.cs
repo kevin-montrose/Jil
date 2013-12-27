@@ -827,7 +827,7 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Peek()) != -1)
+            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
             {
                 if (c >= '0' && c <= '9')
                 {
@@ -906,7 +906,7 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Peek()) != -1)
+            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
             {
                 if (c >= '0' && c <= '9')
                 {
@@ -986,7 +986,7 @@ namespace Jil.Deserialize
                 commonSb.Append((char)first);
             }
 
-            while ((c = reader.Peek()) != -1)
+            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
             {
                 if (c >= '0' && c <= '9')
                 {
