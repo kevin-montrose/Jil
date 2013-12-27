@@ -12,7 +12,7 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        public const int CharBufferSize = 29;
+        public const int CharBufferSize = 32;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
