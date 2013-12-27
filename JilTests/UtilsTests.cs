@@ -559,6 +559,27 @@ namespace JilTests
                 var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
                 Assert.AreEqual(new DateTime(1989, 01, 31, 0, 49, 56, 500, DateTimeKind.Utc), dt);
             }
+
+            using (var str = new StringReader("\"1900-01-01 12:30Z\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1900-01-01t12:30+00\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"1900-01-01 12:30z\""))
+            {
+                str.Read(); // skip the "
+                var dt = (DateTime)Jil.Deserialize.Methods.ReadISO8601Date.Invoke(null, new object[] { str, buffer });
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
+            }
         }
 
         [TestMethod]
