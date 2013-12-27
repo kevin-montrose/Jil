@@ -12,21 +12,36 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+#pragma warning disable 0649
         class _InfoFailure
         {
             public decimal? questions_per_minute;
             public decimal? answers_per_minute;
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void InfoFailure()
         {
-            var data = "{\"questions_per_minute\":0,\"answers_per_minute\":null}";
-
-            using(var str = new StringReader(data))
             {
-                var res = JSON.Deserialize<_InfoFailure>(str, Options.ISO8601);
-                Assert.IsNotNull(res);
+                var data = "{\"questions_per_minute\":0,\"answers_per_minute\":null}";
+                using (var str = new StringReader(data))
+                {
+                    var res = JSON.Deserialize<_InfoFailure>(str, Options.ISO8601);
+                    Assert.IsNotNull(res);
+                    Assert.AreEqual(0, res.questions_per_minute);
+                    Assert.AreEqual(null, res.answers_per_minute);
+                }
+            }
+
+            {
+                var data = "{\"questions_per_minute\":0}";
+                using (var str = new StringReader(data))
+                {
+                    var res = JSON.Deserialize<_InfoFailure>(str, Options.ISO8601);
+                    Assert.IsNotNull(res);
+                    Assert.AreEqual(0, res.questions_per_minute);
+                }
             }
         }
 
