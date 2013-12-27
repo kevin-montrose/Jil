@@ -104,21 +104,41 @@ namespace Jil.Deserialize
             bool? hasSeparators;
 
             var date = ParseISO8601Date(buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
-            if (!tPos.HasValue) return date;
+            if (!tPos.HasValue)
+            {
+                return date;
+            }
 
             var time = ParseISO8601Time(buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
-            if (!zPlusOrMinus.HasValue) return date + time;
+            if (!zPlusOrMinus.HasValue)
+            {
+                try
+                {
+                    return date + time;
+                }
+                catch (Exception e)
+                {
+                    throw new DeserializationException("ISO8601 date with time could not be represented as a DateTime", e);
+                }
+            }
 
             bool unknownLocalOffset;
             // only +1 here because the separator is significant (oy vey)
             var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
 
-            if (unknownLocalOffset)
+            try
             {
-                return DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time;
-            }
+                if (unknownLocalOffset)
+                {
+                    return DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time;
+                }
 
-            return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
+                return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
+            }
+            catch (Exception e)
+            {
+                throw new DeserializationException("ISO8601 date with time and timezone offset could not be represented as a DateTime", e);
+            }
         }
 
         static DateTime ParseISO8601Date(char[] buffer, int start, int stop, out bool? hasSeparators)
@@ -168,6 +188,7 @@ namespace Jil.Deserialize
             if (start == stop)
             {
                 hasSeparators = null;
+                // year is [1,9999] for sure, no need to handle errors
                 return new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local);
             }
 
@@ -179,9 +200,9 @@ namespace Jil.Deserialize
                 start++;
 
                 // Could still be:
-                // YYYY-MM-DD           length: 10
                 // YYYY-MM              length:  7
                 // YYYY-DDD             length:  8
+                // YYYY-MM-DD           length: 10
 
                 switch (len)
                 {
@@ -196,6 +217,7 @@ namespace Jil.Deserialize
                         month += (c - '0');
                         if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12");
 
+                        // year is [1,9999] and month is [1,12] for sure, no need to handle errors
                         return new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Local);
 
                     case 8:
@@ -212,9 +234,17 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
                         day += (c - '0');
-                        if (day > 366) throw new DeserializationException("Expected ordinal day to be between 000 and 366");
+                        if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366");
 
-                        return (new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local)).AddDays(day);
+                        if (day == 366)
+                        {
+                            var isLeapYear = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+
+                            if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year");
+                        }
+
+                        // year is [1,9999] and day is [1,366], no need to handle errors
+                        return (new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local)).AddDays(day - 1);
 
                     case 10:
                         c = buffer[start];
@@ -242,7 +272,14 @@ namespace Jil.Deserialize
                         if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31");
                         start++;
 
-                        return (new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local));
+                        try
+                        {
+                            return (new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local));
+                        }
+                        catch (ArgumentOutOfRangeException e)
+                        {
+                            throw new DeserializationException("ISO8601 date could not be mapped to DateTime", e);
+                        }
 
                     default:
                         throw new DeserializationException("Unexpected date string length");
@@ -250,8 +287,8 @@ namespace Jil.Deserialize
             }
 
             // Could still be
-            // YYYYMMDD         length: 8
             // YYYYDDD          length: 7
+            // YYYYMMDD         length: 8
 
             switch (len)
             {
@@ -269,10 +306,18 @@ namespace Jil.Deserialize
                     c = buffer[start];
                     if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
                     day += (c - '0');
-                    if (day > 366) throw new DeserializationException("Expected ordinal day to be between 000 and 366");
+                    if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366");
                     start++;
 
-                    return (new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local)).AddDays(day);
+                    if (day == 366)
+                    {
+                        var isLeapYear = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+
+                        if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year");
+                    }
+
+                    // year is [1,9999] and day is [1,366], no need to handle errors
+                    return (new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Local)).AddDays(day - 1);
 
                 case 8:
                     c = buffer[start];
@@ -297,7 +342,14 @@ namespace Jil.Deserialize
                     if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31");
                     start++;
 
-                    return (new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local));
+                    try
+                    {
+                        return (new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Local));
+                    }
+                    catch (ArgumentOutOfRangeException e)
+                    {
+                        throw new DeserializationException("ISO8601 date could not be mapped to DateTime", e);
+                    }
 
                 default:
                     throw new DeserializationException("Unexpected date string length");

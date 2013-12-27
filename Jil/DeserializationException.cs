@@ -9,5 +9,7 @@ namespace Jil
     class DeserializationException : Exception
     {
         public DeserializationException(string msg) : base(msg) { }
+
+        public DeserializationException(string msg, Exception inner) : base(msg, inner) { }
     }
 }
