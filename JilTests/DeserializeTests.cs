@@ -144,6 +144,97 @@ namespace JilTests
                     Assert.AreEqual("Unexpected separator in ISO8601 timezone offset", e.Message);
                 }
             }
+
+            using (var str = new StringReader("\"1900-01-01+00:30\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Unexpected date string length", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Unexpected date string length", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected digit", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("ISO8601 time must begin with a 2 character hour", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T19:\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected minute part of ISO8601 time", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T19:19+\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected hour part of ISO8601 timezone offset", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-01-01T19:19+00:\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected digit", e.Message);
+                }
+            }
         }
 
         [TestMethod]

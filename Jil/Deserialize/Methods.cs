@@ -360,7 +360,7 @@ namespace Jil.Deserialize
             // hh:mm:ss.fff*
             
             var len = (stop - start) + 1;
-            if (len < 2) throw new DeserializationException("ISO8601 must begin with a 2 character hour");
+            if (len < 2) throw new DeserializationException("ISO8601 time must begin with a 2 character hour");
 
             var hour = 0;
             int c = buffer[start];
@@ -431,7 +431,7 @@ namespace Jil.Deserialize
                 // hh:mm.fff*
                 // hh:mm:ss.fff*
 
-                if (len < 4) throw new DeserializationException("Expected hour part of ISO8601 time");
+                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time");
 
                 var min = 0;
                 c = buffer[start];
@@ -538,7 +538,7 @@ namespace Jil.Deserialize
                 // hhmmss.fff*
                 // hhmmss,fff*
 
-                if (len < 4) throw new DeserializationException("Expected hour part of ISO8601 time");
+                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time");
 
                 var min = 0;
                 c = buffer[start];
