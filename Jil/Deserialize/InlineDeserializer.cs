@@ -481,6 +481,14 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
+            var isArray = listType.IsArray;
+
+            if (isArray)
+            {
+                listType = typeof(List<>).MakeGenericType(elementType);
+                addMtd = listType.GetMethod("Add");
+            }
+
             using (var loc = Emit.DeclareLocal(listType))
             {
                 Action loadList;
@@ -560,6 +568,12 @@ namespace Jil.Deserialize
                 Emit.Pop();                         // listType(*?)
 
                 Emit.MarkLabel(doneSkipChar);       // listType(*?)
+
+                if (isArray)
+                {
+                    var toArray = listType.GetMethod("ToArray");
+                    Emit.Call(toArray);             // elementType[]
+                }
             }
         }
 
