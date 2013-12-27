@@ -488,6 +488,18 @@ namespace JilTests
                 var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
                 Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
             }
+
+            using (var str = new StringReader("\"2004-366\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2004, 12, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"2004366\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2004, 12, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
         }
 
         [TestMethod]
@@ -711,6 +723,98 @@ namespace JilTests
                 catch (DeserializationException e)
                 {
                     Assert.AreEqual("Expected digit", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-366\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Ordinal day can only be 366 in a leap year", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900366\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Ordinal day can only be 366 in a leap year", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-999\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected ordinal day to be between 001 and 366", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900999\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected ordinal day to be between 001 and 366", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900-000\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected ordinal day to be between 001 and 366", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1900000\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected ordinal day to be between 001 and 366", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-02-29\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("ISO8601 date could not be mapped to DateTime", e.Message);
+                    Assert.IsNotNull(e.InnerException);
                 }
             }
         }
