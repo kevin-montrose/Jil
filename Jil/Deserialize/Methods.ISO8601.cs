@@ -83,7 +83,8 @@ namespace Jil.Deserialize
                 if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less");
                 buffer[ix] = (char)c;
 
-                if (c == 'T')
+                // RFC3339 allows lowercase t and spaces as alternatives to ISO8601's T
+                if (c == 'T' || c == 't' || c == ' ')
                 {
                     if (tPos.HasValue) throw new DeserializationException("Unexpected second T in ISO8601 date");
                     tPos = ix - 1;
@@ -91,7 +92,8 @@ namespace Jil.Deserialize
 
                 if (tPos.HasValue)
                 {
-                    if (c == 'Z' || c == '+' || c == '-')
+                    // RFC3339 allows lowercase z as alternatives to ISO8601's Z
+                    if (c == 'Z' || c == 'z' || c == '+' || c == '-')
                     {
                         if (zPlusOrMinus.HasValue) throw new DeserializationException("Unexpected second Z, +, or - in ISO8601 date");
                         zPlusOrMinus = ix - 1;
@@ -304,9 +306,9 @@ namespace Jil.Deserialize
 
         static TimeSpan ParseISO8601Time(char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
-            const double HoursToMilliseconds = 3600000;
-            const double MinutesToMilliseconds = 60000;
-            const double SecondsToMilliseconds = 1000;
+            const double HoursToMilliseconds   = 3600000;
+            const double MinutesToMilliseconds =   60000;
+            const double SecondsToMilliseconds =    1000;
 
             // Here are the possible formats for times
             // hh
@@ -616,7 +618,7 @@ namespace Jil.Deserialize
 
             int c = buffer[start];
             // no need to validate, the caller has done that
-            if (c == 'Z')
+            if (c == 'Z' || c == 'z')
             {
                 unknownLocalOffset = false;
                 return TimeSpan.Zero;
