@@ -143,19 +143,22 @@ namespace Benchmark
                 if (equalCheckable)
                 {
                     var copy = JsonConvert.DeserializeObject<T>(data);
+                    var jilCopy = JilDeserialize<T>(data);
 
                     _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, copy });
+                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, jilCopy });
                 }
                 else
                 {
-
                     var equalCheckableList = typeof(T).IsList();
                     if (equalCheckableList)
                     {
                         var copy = JsonConvert.DeserializeObject<T>(data);
+                        var jilCopy = JilDeserialize<T>(data);
 
                         var checkMethod = _CheckEqualityList.MakeGenericMethod(typeof(T).GetListInterface().GetGenericArguments()[0]);
                         checkMethod.Invoke(null, new object[] { obj, copy });
+                        checkMethod.Invoke(null, new object[] { obj, jilCopy });
                     }
                     else
                     {
@@ -164,9 +167,11 @@ namespace Benchmark
                         if (equalCheckableDict)
                         {
                             var copy = JsonConvert.DeserializeObject<T>(data);
+                            var jilCopy = JilDeserialize<T>(data);
 
                             var checkMethod = _CheckEqualityDictionary.MakeGenericMethod(typeof(T).GetDictionaryInterface().GetGenericArguments()[1]);
                             checkMethod.Invoke(null, new object[] { obj, copy });
+                            checkMethod.Invoke(null, new object[] { obj, jilCopy });
                         }
                         else
                         {
@@ -174,6 +179,8 @@ namespace Benchmark
                         }
                     }
                 }
+
+
             }
 #endif
 
@@ -233,6 +240,14 @@ namespace Benchmark
                 JSON.Serialize<T>(obj, str, Options.ISO8601);
 
                 return str.ToString();
+            }
+        }
+
+        static T JilDeserialize<T>(string data)
+        {
+            using (var str = new StringReader(data))
+            {
+                return JSON.Deserialize<T>(str, Options.ISO8601);
             }
         }
 

@@ -12,6 +12,52 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+        class _InfoFailure
+        {
+            public decimal? questions_per_minute;
+            public decimal? answers_per_minute;
+        }
+
+        [TestMethod]
+        public void InfoFailure()
+        {
+            var data = "{\"questions_per_minute\":0,\"answers_per_minute\":null}";
+
+            using(var str = new StringReader(data))
+            {
+                var res = JSON.Deserialize<_InfoFailure>(str, Options.ISO8601);
+                Assert.IsNotNull(res);
+            }
+        }
+
+        [TestMethod]
+        public void Zeros()
+        {
+            using (var str = new StringReader("0"))
+            {
+                var ret = JSON.Deserialize<int>(str);
+                Assert.AreEqual(0, ret);
+            }
+
+            using (var str = new StringReader("0"))
+            {
+                var ret = JSON.Deserialize<float>(str);
+                Assert.AreEqual(0f, ret);
+            }
+
+            using (var str = new StringReader("0"))
+            {
+                var ret = JSON.Deserialize<double>(str);
+                Assert.AreEqual(0.0, ret);
+            }
+
+            using (var str = new StringReader("0"))
+            {
+                var ret = JSON.Deserialize<decimal>(str);
+                Assert.AreEqual(0m, ret);
+            }
+        }
+
         [TestMethod]
         public void Arrays()
         {
