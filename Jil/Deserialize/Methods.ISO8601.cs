@@ -47,7 +47,7 @@ namespace Jil.Deserialize
             // hhmm.fff*
             // hh:mm:ss.fff*
             // hhmmss.fff*
-            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 3)
+            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 6)
 
             // Here are the possible formats for timezones
             // Z
@@ -61,10 +61,10 @@ namespace Jil.Deserialize
             // they are concatenated to form a full instant, with T as a separator between date & time
             // i.e. <date>T<time><timezone>
             // the longest possible string:
-            // 9999-12-31T01:23:45.678+01:23
+            // 9999-12-31T01:23:45.678901+01:23
             // 0123456789ABCDEFGHIJKLMNOPQRS
             //
-            // Maximum date size is 29 characters
+            // Maximum date size is 32 characters
 
             var ix = -1;
             int? tPos = null;

@@ -80,7 +80,7 @@ namespace JilTests
                 }
             }
 
-            using (var str = new StringReader("\"1900-01-01T12:34:56.1234+00:00\""))
+            using (var str = new StringReader("\"1900-01-01T12:34:56.123456789+00:00\""))
             {
                 try
                 {
