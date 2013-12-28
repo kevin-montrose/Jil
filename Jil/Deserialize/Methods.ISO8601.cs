@@ -155,9 +155,6 @@ namespace Jil.Deserialize
             // YYYYWwwD
             // YYYYDDD
 
-            // Explicitly not implementing week dates at this time
-            // ^ TODO fix that!
-
             var len = (stop - start) + 1;
             if (len < 4) throw new DeserializationException("ISO8601 date must begin with a 4 character year");
 
@@ -195,6 +192,114 @@ namespace Jil.Deserialize
 
             start++;
             hasSeparators = buffer[start] == '-';
+            var isWeekDate = buffer[start] == 'W';
+            if (hasSeparators.Value && start != stop)
+            {
+                isWeekDate = buffer[start + 1] == 'W';
+                if (isWeekDate)
+                {
+                    start++;
+                }
+            }
+
+            if (isWeekDate)
+            {
+                start++;    // skip the W
+
+                var week = 0;
+
+                if (hasSeparators.Value)
+                {
+                    // Could still be
+                    // YYYY-Www         length:  8
+                    // YYYY-Www-D       length: 10
+
+                    switch (len)
+                    {
+
+                        case 8:
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            week *= 10;
+                            start++;
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+
+                            return ConvertWeekDateToDateTime(year, week, 1);
+
+                        case 10:
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            week *= 10;
+                            start++;
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            start++;
+
+                            c = buffer[start];
+                            if (c != '-') throw new DeserializationException("Expected -");
+                            start++;
+
+                            c = buffer[start];
+                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7");
+                            day = (c - '0');
+
+                            return ConvertWeekDateToDateTime(year, week, day);
+
+                        default:
+                            throw new DeserializationException("Unexpected date string length");
+                    }
+                }
+                else
+                {
+                    // Could still be
+                    // YYYYWww          length: 7
+                    // YYYYWwwD         length: 8
+                    switch (len)
+                    {
+
+                        case 7:
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            week *= 10;
+                            start++;
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+
+                            return ConvertWeekDateToDateTime(year, week, 1);
+
+                        case 8:
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            week *= 10;
+                            start++;
+                            c = buffer[start];
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            week += (c - '0');
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            start++;
+
+                            c = buffer[start];
+                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7");
+                            day = (c - '0');
+
+                            return ConvertWeekDateToDateTime(year, week, day);
+
+                        default:
+                            throw new DeserializationException("Unexpected date string length");
+                    }
+                }
+            }
 
             if (hasSeparators.Value)
             {
@@ -750,6 +855,36 @@ namespace Jil.Deserialize
                 unknownLocalOffset = false;
                 return new TimeSpan(hour, mins, 0);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTime ConvertWeekDateToDateTime(int year, int week, int day)
+        {
+            // January 4th will always be in week 1
+            var ret = new DateTime(year, 1, 4, 0, 0, 0, DateTimeKind.Utc);
+
+            if (week != 1)
+            {
+                ret += TimeSpan.FromDays(7 * (week - 1));
+            }
+
+            int currentDay;
+            switch (ret.DayOfWeek)
+            {
+                case DayOfWeek.Sunday: currentDay = 7; break;
+                case DayOfWeek.Monday: currentDay = 1; break;
+                case DayOfWeek.Tuesday: currentDay = 2; break;
+                case DayOfWeek.Wednesday: currentDay = 3; break;
+                case DayOfWeek.Thursday: currentDay = 4; break;
+                case DayOfWeek.Friday: currentDay = 5; break;
+                case DayOfWeek.Saturday: currentDay = 6; break;
+                default: throw new Exception("Unexpected DayOfWeek");
+            }
+
+            var offset = day - currentDay;
+            ret += TimeSpan.FromDays(offset);
+
+            return ret;
         }
     }
 }
