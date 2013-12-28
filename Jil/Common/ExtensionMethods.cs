@@ -295,6 +295,12 @@ namespace Jil.Common
                 return "\"" + asChar.Value.JsonEscape(jsonp) + "\"";
             }
 
+            var asBool = obj is bool ? (bool?)(bool)obj : (bool?)null;
+            if (asBool != null)
+            {
+                return asBool.Value ? "true" : "false";
+            }
+
             return obj.ToString();
         }
 
