@@ -13,6 +13,46 @@ namespace JilTests
     public class DeserializeTests
     {
 #pragma warning disable 0649
+        class _IDictionaries
+        {
+            public IDictionary<string, sbyte> StringToBytes;
+            public IDictionary<string, IDictionary<string, int>> StringToStringToBytes;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void IDictionaries()
+        {
+            using (var str = new StringReader("{\"StringToBytes\":{\"a\":-1,\"b\":127,\"c\":8},\"StringToStringToBytes\":{\"foo\":{\"bar\":123}, \"fizz\":{\"buzz\":456, \"bar\":789}}}"))
+            {
+                var res = JSON.Deserialize<_IDictionaries>(str);
+                Assert.IsNotNull(res);
+
+                Assert.IsNotNull(res.StringToBytes);
+                Assert.AreEqual(3, res.StringToBytes.Count);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("a"));
+                Assert.AreEqual((sbyte)-1, res.StringToBytes["a"]);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("b"));
+                Assert.AreEqual((sbyte)127, res.StringToBytes["b"]);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("c"));
+                Assert.AreEqual((sbyte)8, res.StringToBytes["c"]);
+
+                Assert.IsNotNull(res.StringToStringToBytes);
+                Assert.AreEqual(2, res.StringToStringToBytes.Count);
+                Assert.IsTrue(res.StringToStringToBytes.ContainsKey("foo"));
+                Assert.AreEqual(1, res.StringToStringToBytes["foo"].Count);
+                Assert.IsTrue(res.StringToStringToBytes["foo"].ContainsKey("bar"));
+                Assert.AreEqual(123, res.StringToStringToBytes["foo"]["bar"]);
+                Assert.IsTrue(res.StringToStringToBytes.ContainsKey("fizz"));
+                Assert.AreEqual(2, res.StringToStringToBytes["fizz"].Count);
+                Assert.IsTrue(res.StringToStringToBytes["fizz"].ContainsKey("buzz"));
+                Assert.AreEqual(456, res.StringToStringToBytes["fizz"]["buzz"]);
+                Assert.IsTrue(res.StringToStringToBytes["fizz"].ContainsKey("bar"));
+                Assert.AreEqual(789, res.StringToStringToBytes["fizz"]["bar"]);
+            }
+        }
+
+#pragma warning disable 0649
         class _ILists
         {
             public IList<byte> Bytes;
