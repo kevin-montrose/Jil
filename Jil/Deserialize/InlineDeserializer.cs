@@ -589,6 +589,11 @@ namespace Jil.Deserialize
             if(keyType != typeof(string)) throw new Exception("Only dictionaries with strings for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
+            if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            {
+                dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valType);
+            }
+
             var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { typeof(string), valType });
 
             var done = Emit.DefineLabel();
