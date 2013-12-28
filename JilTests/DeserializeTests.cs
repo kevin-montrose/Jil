@@ -2193,7 +2193,7 @@ namespace JilTests
             {
                 var asStr = "\"\\u" + i.ToString("X4") + "\"";
 
-                using(var str = new StringReader(asStr))
+                using (var str = new StringReader(asStr))
                 {
                     var c = JSON.Deserialize<char>(str);
 
@@ -2740,6 +2740,21 @@ namespace JilTests
             {
                 var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
                 Assert.AreEqual(new DateTime(2010, 1, 3, 0, 0, 0, DateTimeKind.Utc), dt);
+            }
+        }
+
+        [TestMethod]
+        public void Surrogates()
+        {
+            var data = "abc" + Char.ConvertFromUtf32(Int32.Parse("2A601", System.Globalization.NumberStyles.HexNumber)) + "def";
+
+            Assert.IsTrue(data.Any(c => char.IsHighSurrogate(c)));
+            Assert.IsTrue(data.Any(c => char.IsLowSurrogate(c)));
+
+            using (var str = new StringReader("\"" + data + "\""))
+            {
+                var res = JSON.Deserialize<string>(str);
+                Assert.AreEqual(data, res);
             }
         }
     }
