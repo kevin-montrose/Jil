@@ -13,6 +13,46 @@ namespace JilTests
     public class DeserializeTests
     {
 #pragma warning disable 0649
+        class _ILists
+        {
+            public IList<byte> Bytes;
+            public IList<IList<int>> IntsOfInts;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void ILists()
+        {
+            using (var str = new StringReader("{\"Bytes\":[255,0,128],\"IntsOfInts\":[[1,2,3],[4,5,6],[7,8,9]]}"))
+            {
+                var res = JSON.Deserialize<_ILists>(str);
+                Assert.IsNotNull(res);
+
+                Assert.IsNotNull(res.Bytes);
+                Assert.AreEqual(3, res.Bytes.Count);
+                Assert.AreEqual(255, res.Bytes[0]);
+                Assert.AreEqual(0, res.Bytes[1]);
+                Assert.AreEqual(128, res.Bytes[2]);
+
+                Assert.IsNotNull(res.IntsOfInts);
+                Assert.AreEqual(3, res.IntsOfInts.Count);
+                Assert.IsNotNull(res.IntsOfInts[0]);
+                Assert.AreEqual(3, res.IntsOfInts[0].Count);
+                Assert.AreEqual(1, res.IntsOfInts[0][0]);
+                Assert.AreEqual(2, res.IntsOfInts[0][1]);
+                Assert.AreEqual(3, res.IntsOfInts[0][2]);
+                Assert.AreEqual(3, res.IntsOfInts[1].Count);
+                Assert.AreEqual(4, res.IntsOfInts[1][0]);
+                Assert.AreEqual(5, res.IntsOfInts[1][1]);
+                Assert.AreEqual(6, res.IntsOfInts[1][2]);
+                Assert.AreEqual(3, res.IntsOfInts[2].Count);
+                Assert.AreEqual(7, res.IntsOfInts[2][0]);
+                Assert.AreEqual(8, res.IntsOfInts[2][1]);
+                Assert.AreEqual(9, res.IntsOfInts[2][2]);
+            }
+        }
+
+#pragma warning disable 0649
         class _InfoFailure
         {
             public decimal? questions_per_minute;

@@ -475,6 +475,12 @@ namespace Jil.Deserialize
         void ReadList(Type listType)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
+
+            if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                listType = typeof(List<>).MakeGenericType(elementType);
+            }
+
             var addMtd = listType.GetMethod("Add");
 
             var doRead = Emit.DefineLabel();
