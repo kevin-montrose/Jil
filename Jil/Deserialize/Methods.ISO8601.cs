@@ -141,6 +141,7 @@ namespace Jil.Deserialize
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime ParseISO8601Date(char[] buffer, int start, int stop, out bool? hasSeparators)
         {
             // Here are the possible formats for dates
@@ -356,6 +357,7 @@ namespace Jil.Deserialize
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static TimeSpan ParseISO8601Time(char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
             const double HoursToMilliseconds   = 3600000;
@@ -657,6 +659,7 @@ namespace Jil.Deserialize
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
