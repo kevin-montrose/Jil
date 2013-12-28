@@ -300,6 +300,22 @@ namespace Jil.Serialize
 
                     return BitConverter.ToDouble(arr, 0);
                 };
+            Func<int, float> readFloat =
+                (at) =>
+                {
+                    var arr = new byte[4];
+                    arr[0] = cil[at];
+                    arr[1] = cil[at + 1];
+                    arr[2] = cil[at + 2];
+                    arr[3] = cil[at + 3];
+
+                    if (!BitConverter.IsLittleEndian)
+                    {
+                        Array.Reverse(arr);
+                    }
+
+                    return BitConverter.ToSingle(arr, 0);
+                };
 
             constantInt = null;
             constantLong = null;
@@ -374,7 +390,7 @@ namespace Jil.Serialize
 
                 case OperandType.ShortInlineR:
                     advance += 4;
-                    // TODO: what generates this?
+                    constantDouble = readFloat(operandStart);
                     return null;
 
                 case OperandType.ShortInlineVar:
