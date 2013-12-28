@@ -181,5 +181,136 @@ namespace JilTests
                 Assert.AreEqual(str.Length, Jil.Serialize.CapacityEstimator.For(typeof(Dictionary<string, _CapacityEstimator>), Jil.Options.Default, 0));
             }
         }
+
+#if !DEBUG
+#pragma warning disable 0649
+        class _IsConstant
+        {
+            public char ConstCharProp { get { return 'c'; } }
+            public char NonConstCharProp { get { return char.Parse("c"); } }
+            public const char ConstCharField = 'c';
+            public char NonConstCharField;
+
+            public string ConstStringProp { get { return "hello world"; } }
+            public string NonConstStringProp { get { return 3.ToString(); } }
+            public const string ConstStringField = "fizz buzz";
+            public string NonConstStringField;
+
+            public byte ConstByteProp { get { return 10; } }
+            public byte NonConstByteProp { get { return byte.Parse("2"); } }
+            public const byte ConstByteField = 255;
+            public byte NonConstByteField;
+
+            public sbyte ConstSByteProp { get { return 10; } }
+            public sbyte NonConstSByteProp { get { return sbyte.Parse("2"); } }
+            public const sbyte ConstSByteField = 127;
+            public sbyte NonConstSByteField;
+
+            public short ConstShortProp { get { return 10; } }
+            public short NonConstShortProp { get { return short.Parse("2"); } }
+            public const short ConstShortField = 10000;
+            public short NonConstShortField;
+
+            public ushort ConstUShortProp { get { return 10; } }
+            public ushort NonConstUShortProp { get { return ushort.Parse("2"); } }
+            public const ushort ConstUShortField = 10000;
+            public ushort NonConstUShortField;
+
+            public int ConstIntProp { get { return 10; } }
+            public int NonConstIntProp { get { return int.Parse("2"); } }
+            public const int ConstIntField = 456;
+            public int NonConstIntField;
+
+            public uint ConstUIntProp { get { return 10; } }
+            public uint NonConstUIntProp { get { return uint.Parse("2"); } }
+            public const uint ConstUIntField = 456;
+            public uint NonConstUIntField;
+
+            public long ConstLongProp { get { return 10L; } }
+            public long NonConstLongProp { get { return long.Parse("2"); } }
+            public const long ConstLongField = 456;
+            public long NonConstLongField;
+
+            public ulong ConstULongProp { get { return 10UL; } }
+            public ulong NonConstULongProp { get { return ulong.Parse("2"); } }
+            public const ulong ConstULongField = 456;
+            public ulong NonConstULongField;
+
+            public float ConstFloatProp { get { return 123; } }
+            public float NonConstFloatProp { get { return float.Parse("2"); } }
+            public const float ConstFloatField = 456;
+            public float NonConstFloatField;
+
+            public double ConstDoubleProp { get { return 123; } }
+            public double NonConstDoubleProp { get { return double.Parse("2"); } }
+            public const double ConstDoubleField = 456;
+            public double NonConstDoubleField;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void IsConstant()
+        {
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstCharProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstCharField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstStringProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstStringProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstStringField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstStringField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstByteProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstByteProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstByteField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstByteField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstSByteProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstSByteProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstSByteField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstSByteField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstShortProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstShortProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstShortField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstShortField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUShortProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUShortProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUShortField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUShortField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstIntProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstIntProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstIntField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstIntField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUIntProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUIntProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUIntField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUIntField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstLongProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstLongProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstLongField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstLongField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstULongProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstULongProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstULongField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstULongField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstFloatProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstFloatProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstFloatField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstFloatField").Single()));
+
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstDoubleProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstDoubleProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstDoubleField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstDoubleField").Single()));
+        }
+#endif
     }
 }

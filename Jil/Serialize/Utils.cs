@@ -193,6 +193,33 @@ namespace Jil.Serialize
             return ret;
         }
 
+        public static List<Tuple<OpCode, int?, long?, double?>> Decompile(MethodInfo mtd)
+        {
+            if (mtd == null) return null;
+            var mtdBody = mtd.GetMethodBody();
+            if (mtdBody == null) return null;
+            var cil = mtdBody.GetILAsByteArray();
+            if (cil == null) return null;
+
+            var ret = new List<Tuple<OpCode, int?, long?, double?>>();
+
+            int i = 0;
+            while (i < cil.Length)
+            {
+                int? ignored;
+                OpCode opcode;
+                int? intOperand;
+                long? longOperand;
+                double? doubleOperand;
+                var startsAt = i;
+                i += _ReadOp(cil, i, out ignored, out opcode, out intOperand, out longOperand, out doubleOperand);
+
+                ret.Add(Tuple.Create(opcode, intOperand, longOperand, doubleOperand));
+            }
+
+            return ret;
+        }
+
         private static List<int> _GetFieldHandles(byte[] cil)
         {
             var ret = new List<int>();
@@ -201,9 +228,12 @@ namespace Jil.Serialize
             while (i < cil.Length)
             {
                 int? fieldHandle;
-                OpCode ignored;
+                OpCode ignoredOp;
+                int? ignored1;
+                long? ignored2;
+                double? ignored3;
                 var startsAt = i;
-                i += _ReadOp(cil, i, out fieldHandle, out ignored);
+                i += _ReadOp(cil, i, out fieldHandle, out ignoredOp, out ignored1, out ignored2, out ignored3);
 
                 if (fieldHandle.HasValue)
                 {
@@ -214,7 +244,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        private static int _ReadOp(byte[] cil, int ix, out int? fieldHandle, out OpCode opcode)
+        private static int _ReadOp(byte[] cil, int ix, out int? fieldHandle, out OpCode opcode, out int? intOperand, out long? longOperand, out double? doubleOperand)
         {
             const byte ContinueOpcode = 0xFE;
 
@@ -235,14 +265,46 @@ namespace Jil.Serialize
                 advance++;
             }
 
-            fieldHandle = _ReadFieldOperands(opcode, cil, ix, ix + advance, ref advance);
+            fieldHandle = _ReadFieldOperands(opcode, cil, ix, ix + advance, ref advance, out intOperand, out longOperand, out doubleOperand);
 
             return advance;
         }
 
-        private static int? _ReadFieldOperands(OpCode op, byte[] cil, int instrStart, int operandStart, ref int advance)
+        private static int? _ReadFieldOperands(OpCode op, byte[] cil, int instrStart, int operandStart, ref int advance, out int? constantInt, out long? constantLong, out double? constantDouble)
         {
             Func<int, int> readInt = (at) => cil[at] | (cil[at + 1] << 8) | (cil[at + 2] << 16) | (cil[at + 3] << 24);
+            Func<int, long> readLong = 
+                (at) =>
+                {
+                    var a = (uint)(cil[at] | (cil[at + 1] << 8) | (cil[at + 2] << 16) | (cil[at + 3] << 24));
+                    var b = (uint)(cil[at+4] | (cil[at + 5] << 8) | (cil[at + 6] << 16) | (cil[at + 7] << 24));
+
+                    return (((long)b) << 32) | a;
+                };
+            Func<int, double> readDouble =
+                (at) =>
+                {
+                    var arr = new byte[8];
+                    arr[0] = cil[at];
+                    arr[1] = cil[at + 1];
+                    arr[2] = cil[at + 2];
+                    arr[3] = cil[at + 3];
+                    arr[4] = cil[at + 4];
+                    arr[5] = cil[at + 5];
+                    arr[6] = cil[at + 6];
+                    arr[7] = cil[at + 7];
+
+                    if (!BitConverter.IsLittleEndian)
+                    {
+                        Array.Reverse(arr);
+                    }
+
+                    return BitConverter.ToDouble(arr, 0);
+                };
+
+            constantInt = null;
+            constantLong = null;
+            constantDouble = null;
 
             switch (op.OperandType)
             {
@@ -277,10 +339,12 @@ namespace Jil.Serialize
 
                 case OperandType.InlineI:
                     advance += 4;
+                    constantInt = readInt(operandStart);
                     return null;
 
                 case OperandType.InlineI8:
                     advance += 8;
+                    constantLong = readLong(operandStart);
                     return null;
 
                 case OperandType.InlineNone:
@@ -288,6 +352,7 @@ namespace Jil.Serialize
 
                 case OperandType.InlineR:
                     advance += 8;
+                    constantDouble = readDouble(operandStart);
                     return null;
 
                 case OperandType.InlineSig:
@@ -296,6 +361,7 @@ namespace Jil.Serialize
 
                 case OperandType.InlineString:
                     advance += 4;
+                    constantInt = readInt(operandStart);
                     return null;
 
                 case OperandType.InlineVar:
@@ -304,10 +370,12 @@ namespace Jil.Serialize
 
                 case OperandType.ShortInlineI:
                     advance += 1;
+                    constantInt = cil[operandStart];
                     return null;
 
                 case OperandType.ShortInlineR:
                     advance += 4;
+                    // TODO: what generates this?
                     return null;
 
                 case OperandType.ShortInlineVar:
