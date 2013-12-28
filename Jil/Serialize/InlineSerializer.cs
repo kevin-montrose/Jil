@@ -22,6 +22,7 @@ namespace Jil.Serialize
         public static bool UseFastArrays = true;
         public static bool UseFastGuids = true;
         public static bool AllocationlessDictionaries = true;
+        public static bool PropagateConstants = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -214,7 +215,23 @@ namespace Jil.Serialize
             return ret.ToList();
         }
 
-        
+        void WriteConstantMember(MemberInfo member)
+        {
+            string stringEquiv;
+
+            if (PrettyPrint)
+            {
+                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\": ";
+            }
+            else
+            {
+                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\": ";
+            }
+
+            stringEquiv += member.GetConstantStringEquivalent(JSONP);
+
+            WriteString(stringEquiv);
+        }
 
         void WriteMember(MemberInfo member, Sigil.Local inLocal = null)
         {
@@ -1317,16 +1334,23 @@ namespace Jil.Serialize
                 LineBreakAndIndent();
             }
 
-            if (PrettyPrint)
+            if (PropagateConstants && member.IsConstant())
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                WriteConstantMember(member);
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
-            }
+                if (PrettyPrint)
+                {
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                }
+                else
+                {
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
+                }
 
-            WriteMember(member, inLocal);           // --empty--
+                WriteMember(member, inLocal);           // --empty--
+            }
 
             Emit.MarkLabel(end);
         }
@@ -1390,16 +1414,24 @@ namespace Jil.Serialize
                 LineBreakAndIndent();
             }
 
-            if (PrettyPrint)
+            if (PropagateConstants && member.IsConstant())
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                WriteConstantMember(member);
             }
             else
             {
-                WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
-            }
 
-            WriteMember(member, inLocal);           // --empty--
+                if (PrettyPrint)
+                {
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                }
+                else
+                {
+                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
+                }
+
+                WriteMember(member, inLocal);           // --empty--
+            }
 
             Emit.MarkLabel(end);
         }
