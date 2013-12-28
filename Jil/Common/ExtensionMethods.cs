@@ -158,7 +158,6 @@ namespace Jil.Common
             }
             else
             {
-
                 if (constInstr.Item1 == OpCodes.Ldstr)
                 {
                     var handle = constInstr.Item2.Value;
@@ -175,9 +174,14 @@ namespace Jil.Common
                     equivObj = constInstr.Item4.Value;
                 }
 
-                if (constInstr.Item1 == OpCodes.Ldc_I4 || constInstr.Item1 == OpCodes.Ldc_I4_S)
+                if (constInstr.Item1 == OpCodes.Ldc_I4)
                 {
                     equivObj = constInstr.Item2.Value;
+                }
+
+                if (constInstr.Item1 == OpCodes.Ldc_I4_S)
+                {
+                    equivObj = (sbyte)constInstr.Item2.Value;
                 }
 
                 if (constInstr.Item1 == OpCodes.Ldc_I8)
@@ -188,10 +192,84 @@ namespace Jil.Common
 
             if (equivObj != null && equivObj.GetType() != prop.ReturnType())
             {
-                equivObj = Convert.ChangeType(equivObj, prop.ReturnType());
+                //equivObj = Convert.ChangeType(equivObj, prop.ReturnType());
+                equivObj = ConvertType(equivObj, equivObj.GetType(), prop.ReturnType());
             }
 
             return GetConstantJSONStringEquivalent(equivObj, jsonp);
+        }
+
+        private static object ConvertType(object val, Type fromType, Type toType)
+        {
+            if (toType == typeof(sbyte))
+            {
+                if (fromType.IsSigned())
+                {
+                    var l = (long)Convert.ChangeType(val, typeof(long));
+
+                    return (sbyte)l;
+                }
+
+                var ul = (ulong)Convert.ChangeType(val, typeof(ulong));
+
+                return (sbyte)ul;
+            }
+
+            if (toType == typeof(ushort))
+            {
+                if (fromType.IsSigned())
+                {
+                    var l = (long)Convert.ChangeType(val, typeof(long));
+
+                    return (ushort)l;
+                }
+
+                var ul = (ulong)Convert.ChangeType(val, typeof(ulong));
+
+                return (ushort)ul;
+            }
+
+            if (toType == typeof(uint))
+            {
+                if (fromType.IsSigned())
+                {
+                    var l = (long)Convert.ChangeType(val, typeof(long));
+
+                    return (uint)l;
+                }
+
+                var ul = (ulong)Convert.ChangeType(val, typeof(ulong));
+
+                return (uint)ul;
+            }
+
+            if (toType == typeof(ulong))
+            {
+                if (fromType.IsSigned())
+                {
+                    long l = (long)Convert.ChangeType(val, typeof(long));
+
+                    return (ulong)l;
+                }
+
+                return Convert.ChangeType(val, typeof(ulong));
+            }
+
+            return Convert.ChangeType(val, toType);
+        }
+
+        public static bool IsUnsigned(this Type t)
+        {
+            return !t.IsSigned();
+        }
+
+        public static bool IsSigned(this Type t)
+        {
+            return
+                t == typeof(sbyte) ||
+                t == typeof(short) ||
+                t == typeof(int) ||
+                t == typeof(long);
         }
 
         public static string GetConstantJSONStringEquivalent(this FieldInfo field, bool jsonp)
