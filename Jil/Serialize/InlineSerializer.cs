@@ -225,10 +225,10 @@ namespace Jil.Serialize
             }
             else
             {
-                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\": ";
+                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\":";
             }
 
-            stringEquiv += member.GetConstantStringEquivalent(JSONP);
+            stringEquiv += member.GetConstantJSONStringEquivalent(JSONP);
 
             WriteString(stringEquiv);
         }

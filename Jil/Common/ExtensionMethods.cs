@@ -76,6 +76,24 @@ namespace Jil.Common
 
                 OpCodes.Ldnull      // always null
             };
+
+        static readonly IEnumerable<OpCode> ConstantLoadOpCodes = 
+            new[]
+            {
+                OpCodes.Ldc_I4_0,
+                OpCodes.Ldc_I4_1,
+                OpCodes.Ldc_I4_2,
+                OpCodes.Ldc_I4_3,
+                OpCodes.Ldc_I4_4,
+                OpCodes.Ldc_I4_5,
+                OpCodes.Ldc_I4_6,
+                OpCodes.Ldc_I4_7,
+                OpCodes.Ldc_I4_8,
+                OpCodes.Ldc_I4_M1,
+
+                OpCodes.Ldnull
+            };
+
         public static bool IsConstant(this PropertyInfo prop)
         {
             var getMtd = prop.GetMethod;
@@ -91,13 +109,13 @@ namespace Jil.Common
             if (hasNonConstantInstructions) return false;
 
             // if *two* constants are in play (somehow) we can't tell which one to propagate so break it
-            var numberOfConstants = instrs.Count(a => a.Item2.HasValue || a.Item3.HasValue || a.Item4.HasValue);
-            if (numberOfConstants > 1) return false;
+            var numberOfConstants = instrs.Count(a => ConstantLoadOpCodes.Contains(a.Item1) || a.Item2.HasValue || a.Item3.HasValue || a.Item4.HasValue);
+            if (numberOfConstants != 1) return false;
 
             return true;
         }
 
-        public static string GetConstantStringEquivalent(this MemberInfo member, bool jsonp)
+        public static string GetConstantJSONStringEquivalent(this MemberInfo member, bool jsonp)
         {
             var asField = member as FieldInfo;
             if (asField != null) return asField.GetConstantJSONStringEquivalent(jsonp);
@@ -110,13 +128,81 @@ namespace Jil.Common
 
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
         {
-            throw new NotImplementedException();
+            var instrs = Jil.Serialize.Utils.Decompile(prop.GetMethod);
+
+            var constInstr = instrs.Single(o => ConstantLoadOpCodes.Contains(o.Item1) || o.Item2.HasValue || o.Item3.HasValue || o.Item4.HasValue);
+
+            object equivObj = null;
+
+            if (ConstantLoadOpCodes.Contains(constInstr.Item1))
+            {
+                if (constInstr.Item1 == OpCodes.Ldnull)
+                {
+                    equivObj = null;
+                }
+                else
+                {
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_0) equivObj = 0;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_1) equivObj = 1;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_2) equivObj = 2;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_3) equivObj = 3;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_4) equivObj = 4;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_5) equivObj = 5;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_6) equivObj = 6;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_7) equivObj = 7;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_8) equivObj = 8;
+                    if (constInstr.Item1 == OpCodes.Ldc_I4_M1) equivObj = -1;
+
+                    if (equivObj == null) throw new Exception("Couldn't determine constant being loaded");
+                }
+            }
+            else
+            {
+
+                if (constInstr.Item1 == OpCodes.Ldstr)
+                {
+                    var handle = constInstr.Item2.Value;
+                    equivObj = prop.Module.ResolveString(handle);
+                }
+
+                if (constInstr.Item1 == OpCodes.Ldc_R8)
+                {
+                    equivObj = constInstr.Item4.Value;
+                }
+
+                if (constInstr.Item1 == OpCodes.Ldc_R4)
+                {
+                    equivObj = constInstr.Item4.Value;
+                }
+
+                if (constInstr.Item1 == OpCodes.Ldc_I4 || constInstr.Item1 == OpCodes.Ldc_I4_S)
+                {
+                    equivObj = constInstr.Item2.Value;
+                }
+
+                if (constInstr.Item1 == OpCodes.Ldc_I8)
+                {
+                    equivObj = constInstr.Item3.Value;
+                }
+            }
+
+            if (equivObj != null && equivObj.GetType() != prop.ReturnType())
+            {
+                equivObj = Convert.ChangeType(equivObj, prop.ReturnType());
+            }
+
+            return GetConstantJSONStringEquivalent(equivObj, jsonp);
         }
 
         public static string GetConstantJSONStringEquivalent(this FieldInfo field, bool jsonp)
         {
             var obj = field.GetRawConstantValue();
 
+            return GetConstantJSONStringEquivalent(obj, jsonp);
+        }
+
+        private static string GetConstantJSONStringEquivalent(object obj, bool jsonp)
+        {
             if (obj == null) return "null";
 
             var asStr = obj as string;
