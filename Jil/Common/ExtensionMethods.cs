@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,99 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static bool IsConstant(this MemberInfo member)
+        {
+            var asField = member as FieldInfo;
+            if (asField != null) return asField.IsConstant();
+
+            var asProp = member as PropertyInfo;
+            if (asProp != null) return asProp.IsConstant();
+
+            throw new Exception("Expected member to be a FieldInfo or PropetyInfo, found: " + member);
+        }
+
+        public static bool IsConstant(this FieldInfo field)
+        {
+            return field.IsLiteral && field.ReturnType().IsPropagatableType();
+        }
+
+        static readonly IEnumerable<OpCode> ReadOnlyOpCodes =
+            new[]
+            {   
+                OpCodes.Ldc_I4,     // Constant integer numbers
+                OpCodes.Ldc_I4_0,
+                OpCodes.Ldc_I4_1,
+                OpCodes.Ldc_I4_2,
+                OpCodes.Ldc_I4_3,
+                OpCodes.Ldc_I4_4,
+                OpCodes.Ldc_I4_5,
+                OpCodes.Ldc_I4_6,
+                OpCodes.Ldc_I4_7,
+                OpCodes.Ldc_I4_8,
+                OpCodes.Ldc_I4_M1,
+                OpCodes.Ldc_I4_S,
+                OpCodes.Ldc_I8,
+
+                OpCodes.Ldc_R4,     // Constant floating point numbers
+                OpCodes.Ldc_R8,
+
+                OpCodes.Ldstr,      // Constant strings
+
+                OpCodes.Conv_I,         // Conversion operators
+                OpCodes.Conv_I1,
+                OpCodes.Conv_I2,
+                OpCodes.Conv_I4,
+                OpCodes.Conv_I8,
+                OpCodes.Conv_Ovf_I,
+                OpCodes.Conv_Ovf_I_Un,
+                OpCodes.Conv_Ovf_I1,
+                OpCodes.Conv_Ovf_I1_Un,
+                OpCodes.Conv_Ovf_I2,
+                OpCodes.Conv_Ovf_I2_Un,
+                OpCodes.Conv_Ovf_I4,
+                OpCodes.Conv_Ovf_I4_Un,
+                OpCodes.Conv_Ovf_I8,
+                OpCodes.Conv_Ovf_I8_Un,
+                OpCodes.Conv_R4,
+                OpCodes.Conv_R8,
+
+                OpCodes.Ldnull      // always null
+            };
+        public static bool IsConstant(this PropertyInfo prop)
+        {
+            var instrs = Jil.Serialize.Utils.Decompile(prop.GetMethod);
+            if (instrs == null) return false;
+
+            // anything control flow-y, call-y, load-y, etc. means the property isn't constant
+            var hasNonConstantInstructions = instrs.Any(a => !ReadOnlyOpCodes.Contains(a.Item1) && a.Item1 != OpCodes.Ret);
+            if (hasNonConstantInstructions) return false;
+
+            // if *two* constants are in play (somehow) we can't tell which one to propagate so break it
+            var numberOfConstants = instrs.Count(a => a.Item2.HasValue || a.Item3.HasValue || a.Item4.HasValue);
+            if (numberOfConstants > 1) return false;
+
+            return true;
+        }
+
+        public static bool IsPropagatableType(this Type t)
+        {
+            return
+                t == typeof(string) ||
+                t == typeof(char) ||
+                t == typeof(float) ||
+                t == typeof(double) ||
+                t == typeof(byte) ||
+                t == typeof(sbyte) ||
+                t == typeof(short) ||
+                t == typeof(ushort) ||
+                t == typeof(int) ||
+                t == typeof(uint) ||
+                t == typeof(long) ||
+                t == typeof(ulong) ||
+                t == typeof(bool) ||
+                t.IsEnum;
+        }
+
         public static MethodInfo ShouldSerializeMethod(this PropertyInfo prop, Type serializingType)
         {
             var mtdName = "ShouldSerialize" + prop.Name;
