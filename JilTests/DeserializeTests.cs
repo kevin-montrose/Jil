@@ -974,6 +974,136 @@ namespace JilTests
                     Assert.IsNotNull(e.InnerException);
                 }
             }
+
+            using (var str = new StringReader("\"1999-W01-8\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected day to be a digit between 1 and 7", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-W01-0\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected day to be a digit between 1 and 7", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999W018\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected day to be a digit between 1 and 7", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999W010\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected day to be a digit between 1 and 7", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-W1\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Unexpected date string length", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999W1\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Unexpected date string length", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-W00\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected week to be between 01 and 53", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999W00\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected week to be between 01 and 53", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999-W54\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected week to be between 01 and 53", e.Message);
+                }
+            }
+
+            using (var str = new StringReader("\"1999W54\""))
+            {
+                try
+                {
+                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Expected week to be between 01 and 53", e.Message);
+                }
+            }
         }
 
         [TestMethod]
@@ -2582,6 +2712,34 @@ namespace JilTests
                 Assert.AreEqual(456, val["C"].A);
                 Assert.AreEqual("fizz", val["C"].B);
                 Assert.AreEqual(-1, str.Peek());
+            }
+        }
+
+        [TestMethod]
+        public void ISO8601WeekDates()
+        {
+            using (var str = new StringReader("\"2009-W01-1\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2008, 12, 29, 0, 0, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"2009W011\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2008, 12, 29, 0, 0, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"2009-W53-7\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2010, 1, 3, 0, 0, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"2009W537\""))
+            {
+                var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2010, 1, 3, 0, 0, 0, DateTimeKind.Utc), dt);
             }
         }
     }
