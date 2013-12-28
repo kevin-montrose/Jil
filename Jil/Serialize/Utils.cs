@@ -195,7 +195,6 @@ namespace Jil.Serialize
 
         public static List<Tuple<OpCode, int?, long?, double?>> Decompile(MethodInfo mtd)
         {
-            if (mtd == null) return null;
             var mtdBody = mtd.GetMethodBody();
             if (mtdBody == null) return null;
             var cil = mtdBody.GetILAsByteArray();

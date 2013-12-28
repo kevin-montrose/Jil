@@ -183,6 +183,107 @@ namespace JilTests
         }
 
 #if !DEBUG
+        class _ConstantFields
+        {
+            public const char C1 = ' ';
+            public const char C2 = '"';
+
+            public const string STR1 = null;
+            public const string STR2 = "hello world";
+            public const string STR3 = "\r\n\f";
+
+            public const byte B1 = 0;
+            public const byte B2 = 127;
+            public const byte B3 = 255;
+
+            public const sbyte SB1 = -128;
+            public const sbyte SB2 = 0;
+            public const sbyte SB3 = 127;
+
+            public const short S1 = short.MinValue;
+            public const short S2 = 0;
+            public const short S3 = short.MaxValue;
+
+            public const ushort US1 = 0;
+            public const ushort US2 = ushort.MaxValue / 2;
+            public const ushort US3 = ushort.MaxValue;
+
+            public const int I1 = int.MinValue;
+            public const int I2 = 0;
+            public const int I3 = int.MaxValue;
+
+            public const uint UI1 = 0;
+            public const uint UI2 = uint.MaxValue / 2;
+            public const uint UI3 = uint.MaxValue;
+
+            public const long L1 = long.MinValue;
+            public const long L2 = 0;
+            public const long L3 = long.MaxValue;
+
+            public const ulong UL1 = 0;
+            public const ulong UL2 = ulong.MaxValue / 2;
+            public const ulong UL3 = ulong.MaxValue;
+
+            public const float F1 = -1234.56f;
+            public const float F2 = 0;
+            public const float F3 = 1234.56f;
+
+            public const double D1 = -1234.56;
+            public const double D2 = 0;
+            public const double D3 = 1234.56;
+        }
+
+        [TestMethod]
+        public void ConstantFields()
+        {
+            Assert.AreEqual("\" \"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("C1"), false));
+            Assert.AreEqual("\"\\\"\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("C2"), false));
+
+            Assert.AreEqual("null", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("STR1"), false));
+            Assert.AreEqual("\"hello world\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("STR2"), false));
+            Assert.AreEqual(@"""\r\n\f""", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("STR3"), false));
+
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("B1"), false));
+            Assert.AreEqual("127", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("B2"), false));
+            Assert.AreEqual("255", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("B3"), false));
+
+            Assert.AreEqual("-128", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("SB1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("SB2"), false));
+            Assert.AreEqual("127", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("SB3"), false));
+
+            Assert.AreEqual("-32768", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("S1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("S2"), false));
+            Assert.AreEqual("32767", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("S3"), false));
+
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("US1"), false));
+            Assert.AreEqual("32767", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("US2"), false));
+            Assert.AreEqual("65535", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("US3"), false));
+
+            Assert.AreEqual("-2147483648", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("I1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("I2"), false));
+            Assert.AreEqual("2147483647", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("I3"), false));
+
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UI1"), false));
+            Assert.AreEqual("2147483647", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UI2"), false));
+            Assert.AreEqual("4294967295", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UI3"), false));
+
+            Assert.AreEqual("-9223372036854775808", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("L1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("L2"), false));
+            Assert.AreEqual("9223372036854775807", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("L3"), false));
+
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UL1"), false));
+            Assert.AreEqual("9223372036854775807", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UL2"), false));
+            Assert.AreEqual("18446744073709551615", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UL3"), false));
+
+            Assert.AreEqual("-1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("F1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("F2"), false));
+            Assert.AreEqual("1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("F3"), false));
+
+            Assert.AreEqual("-1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D1"), false));
+            Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D2"), false));
+            Assert.AreEqual("1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D3"), false));
+        }
+
 #pragma warning disable 0649
         class _IsConstant
         {
