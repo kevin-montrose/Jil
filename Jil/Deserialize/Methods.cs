@@ -541,7 +541,6 @@ namespace Jil.Deserialize
             var first = reader.Read();
             if (first == -1) throw new DeserializationException("Expected any character");
 
-            // TODO: high/low surrogates, do we need to worry about those?
             if (first != '\\') return (char)first;
 
             var second = reader.Read();
