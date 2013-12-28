@@ -215,7 +215,7 @@ namespace Jil.Serialize
             return ret.ToList();
         }
 
-        void WriteConstantMember(MemberInfo member)
+        void WriteConstantMember(MemberInfo member, bool prependComma)
         {
             string stringEquiv;
 
@@ -226,6 +226,11 @@ namespace Jil.Serialize
             else
             {
                 stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\":";
+            }
+
+            if (prependComma)
+            {
+                stringEquiv = "," + stringEquiv;
             }
 
             stringEquiv += member.GetConstantJSONStringEquivalent(JSONP);
@@ -1060,36 +1065,44 @@ namespace Jil.Serialize
             var firstPass = true;
             foreach (var member in writeOrder)
             {
-                if (!PrettyPrint)
+                if (PropagateConstants && member.IsConstant())
                 {
-                    string keyString;
-                    if (firstPass)
-                    {
-                        keyString = "\"" + member.Name.JsonEscape(JSONP) + "\":";
-                        firstPass = false;
-                    }
-                    else
-                    {
-                        keyString = ",\"" + member.Name.JsonEscape(JSONP) + "\":";
-                    }
-
-                    WriteString(keyString);         // --empty--
-                    WriteMember(member, inLocal);   // --empty--
+                    WriteConstantMember(member, prependComma: !firstPass);
+                    firstPass = false;
                 }
                 else
                 {
-                    if (!firstPass)
+                    if (!PrettyPrint)
                     {
-                        WriteString(",");
+                        string keyString;
+                        if (firstPass)
+                        {
+                            keyString = "\"" + member.Name.JsonEscape(JSONP) + "\":";
+                            firstPass = false;
+                        }
+                        else
+                        {
+                            keyString = ",\"" + member.Name.JsonEscape(JSONP) + "\":";
+                        }
+
+                        WriteString(keyString);         // --empty--
+                        WriteMember(member, inLocal);   // --empty--
                     }
+                    else
+                    {
+                        if (!firstPass)
+                        {
+                            WriteString(",");
+                        }
 
-                    LineBreakAndIndent();
+                        LineBreakAndIndent();
 
-                    firstPass = false;
+                        firstPass = false;
 
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");
+                        WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");
 
-                    WriteMember(member, inLocal);
+                        WriteMember(member, inLocal);
+                    }
                 }
             }
 
@@ -1336,7 +1349,7 @@ namespace Jil.Serialize
 
             if (PropagateConstants && member.IsConstant())
             {
-                WriteConstantMember(member);
+                WriteConstantMember(member, prependComma: false);
             }
             else
             {
@@ -1416,7 +1429,7 @@ namespace Jil.Serialize
 
             if (PropagateConstants && member.IsConstant())
             {
-                WriteConstantMember(member);
+                WriteConstantMember(member, prependComma: false);
             }
             else
             {

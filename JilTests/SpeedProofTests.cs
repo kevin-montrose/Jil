@@ -728,6 +728,85 @@ namespace JilTests
 
             Assert.IsTrue(allocationlessTime < normalTime, "allocationlessTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
+
+        class _PropagateConstants
+        {
+            public const bool F1 = true;
+            public bool P1 { get { return false; } }
+
+            public const byte F2 = 100;
+            public byte P2 { get { return 200; } }
+
+            public const sbyte F3 = -1;
+            public sbyte P3 { get { return -100; } }
+
+            public const short F4 = -1000;
+            public short P4 { get { return 1000; } }
+
+            public const ushort F5 = 6000;
+            public ushort P5 { get { return 12000; } }
+
+            public const int F6 = -1000000;
+            public int P6 { get { return 2000000; } }
+
+            public const uint F7 = 4000000000;
+            public uint P7 { get { return 4000000001; } }
+
+            public const long F8 = long.MaxValue;
+            public long P8 { get { return long.MinValue; } }
+
+            public const ulong F9 = ulong.MaxValue;
+            public ulong P9 { get { return 18446744073709551614UL; } }
+
+            public const string F10 = "hello world";
+            public string P10 { get { return null; } }
+
+            public const char F11 = '\u1234';
+            public char P11 { get { return '\u5678'; } }
+        }
+
+        [TestMethod]
+        public void PropagateConstants()
+        {
+            Action<TextWriter, _PropagateConstants, int> propagated;
+            Action<TextWriter, _PropagateConstants, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_PropagateConstants>.PropagateConstants = true;
+
+                    // Build the *actual* serializer method
+                    propagated = InlineSerializerHelper.Build<_PropagateConstants>();
+                }
+
+                {
+                    InlineSerializer<_PropagateConstants>.PropagateConstants = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_PropagateConstants>();
+                }
+            }
+            finally
+            {
+                InlineSerializer<_PropagateConstants>.PropagateConstants = true;
+            }
+
+            var rand = new Random(202457890);
+
+            var toSerialize = new List<_PropagateConstants>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(new _PropagateConstants { });
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double allocationlessTime, normalTime;
+            CompareTimes(toSerialize, propagated, normal, out allocationlessTime, out normalTime);
+
+            Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }
