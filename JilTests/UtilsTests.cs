@@ -186,6 +186,11 @@ namespace JilTests
 #pragma warning disable 0649
         class _IsConstant
         {
+            public bool ConstBoolProp { get { return true; } }
+            public bool NonConstBoolProp { get { return bool.Parse("False"); } }
+            public const bool ConstBoolField = true;
+            public bool NonConstBoolField;
+
             public char ConstCharProp { get { return 'c'; } }
             public char NonConstCharProp { get { return char.Parse("c"); } }
             public const char ConstCharField = 'c';
@@ -251,6 +256,11 @@ namespace JilTests
         [TestMethod]
         public void IsConstant()
         {
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstBoolProp").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstBoolProp").Single()));
+            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstBoolField").Single()));
+            Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstBoolField").Single()));
+
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstCharProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharField").Single()));
