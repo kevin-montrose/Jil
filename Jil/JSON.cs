@@ -520,6 +520,9 @@ namespace Jil
 
         /// <summary>
         /// Deserializes JSON from the given TextReader.
+        /// 
+        /// Pass an Options object to specify the particulars (such as DateTime formats) of
+        /// the JSON being deserialized.  If omitted, Options.Default is used.
         /// </summary>
         public static T Deserialize<T>(TextReader reader, Options options = null)
         {
@@ -536,6 +539,20 @@ namespace Jil
                 case DateTimeFormat.ISO8601:
                     return Jil.Deserialize.ISO8601StyleTypeCache<T>.Thunk(reader, 0);
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
+            }
+        }
+
+        /// <summary>
+        /// Deserializes JSON from the given string.
+        /// 
+        /// Pass an Options object to specify the particulars (such as DateTime formats) of
+        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// </summary>
+        public static T Deserialize<T>(string text, Options options = null)
+        {
+            using (var reader = new StringReader(text))
+            {
+                return Deserialize<T>(reader, options);
             }
         }
     }
