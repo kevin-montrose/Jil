@@ -187,42 +187,42 @@ namespace JilTests
         {
             public enum ByteEnum : byte
             {
-                A
+                A = 127
             }
 
             public enum SByteEnum : sbyte
             {
-                A
+                A = -3
             }
 
             public enum ShortEnum : short
             {
-                A
+                A = 1891
             }
 
             public enum UShortEnum : ushort
             {
-                A
+                A = 12381
             }
 
             public enum IntEnum : int
             {
-                A
+                A = 1238123
             }
 
             public enum UIntEnum : uint
             {
-                A
+                A = 9128123
             }
 
             public enum LongEnum : long
             {
-                A
+                A = 1381261112332
             }
 
             public enum ULongEnum : ulong
             {
-                A
+                A = 128971891
             }
 
             public char C1 { get { return ' '; } }
@@ -354,42 +354,42 @@ namespace JilTests
         {
             public enum ByteEnum : byte
             {
-                A
+                A = 127
             }
 
             public enum SByteEnum : sbyte
             {
-                A
+                A = -3
             }
 
             public enum ShortEnum : short
             {
-                A
+                A = 1891
             }
 
             public enum UShortEnum : ushort
             {
-                A
+                A = 12381
             }
 
             public enum IntEnum : int
             {
-                A
+                A = 1238123
             }
 
             public enum UIntEnum : uint
             {
-                A
+                A = 9128123
             }
 
             public enum LongEnum : long
             {
-                A
+                A = 1381261112332
             }
 
             public enum ULongEnum : ulong
             {
-                A
+                A = 128971891
             }
 
             public const char C1 = ' ';
