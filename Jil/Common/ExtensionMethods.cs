@@ -196,7 +196,7 @@ namespace Jil.Common
                 equivObj = ConvertType(equivObj, equivObj.GetType(), prop.ReturnType());
             }
 
-            return GetConstantJSONStringEquivalent(equivObj, jsonp);
+            return GetConstantJSONStringEquivalent(prop.ReturnType(), equivObj, jsonp);
         }
 
         private static object ConvertType(object val, Type fromType, Type toType)
@@ -276,10 +276,10 @@ namespace Jil.Common
         {
             var obj = field.GetRawConstantValue();
 
-            return GetConstantJSONStringEquivalent(obj, jsonp);
+            return GetConstantJSONStringEquivalent(field.ReturnType(), obj, jsonp);
         }
 
-        private static string GetConstantJSONStringEquivalent(object obj, bool jsonp)
+        private static string GetConstantJSONStringEquivalent(Type type, object obj, bool jsonp)
         {
             if (obj == null) return "null";
 

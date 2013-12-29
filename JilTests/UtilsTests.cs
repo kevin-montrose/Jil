@@ -185,6 +185,46 @@ namespace JilTests
 #if !DEBUG
         class _ConstantProperties
         {
+            public enum ByteEnum : byte
+            {
+                A
+            }
+
+            public enum SByteEnum : sbyte
+            {
+                A
+            }
+
+            public enum ShortEnum : short
+            {
+                A
+            }
+
+            public enum UShortEnum : ushort
+            {
+                A
+            }
+
+            public enum IntEnum : int
+            {
+                A
+            }
+
+            public enum UIntEnum : uint
+            {
+                A
+            }
+
+            public enum LongEnum : long
+            {
+                A
+            }
+
+            public enum ULongEnum : ulong
+            {
+                A
+            }
+
             public char C1 { get { return ' '; } }
             public char C2 { get { return '"'; } }
 
@@ -235,6 +275,15 @@ namespace JilTests
             public double D1 { get { return -1234.56; } }
             public double D2 { get { return 0; } }
             public double D3 { get { return 1234.56; } }
+
+            public ByteEnum BE { get { return ByteEnum.A; } }
+            public SByteEnum SBE { get { return SByteEnum.A; } }
+            public ShortEnum SE { get { return ShortEnum.A; } }
+            public UShortEnum USE { get { return UShortEnum.A; } }
+            public IntEnum IE { get { return IntEnum.A; } }
+            public UIntEnum UIE { get { return UIntEnum.A; } }
+            public LongEnum LE { get { return LongEnum.A; } }
+            public ULongEnum ULE { get { return ULongEnum.A; } }
         }
 
         [TestMethod]
@@ -290,10 +339,59 @@ namespace JilTests
             Assert.AreEqual("-1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("D1"), false));
             Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("D2"), false));
             Assert.AreEqual("1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("D3"), false));
+
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("BE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("SBE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("SE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("USE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("IE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("UIE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("LE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("ULE"), false));
         }
 
         class _ConstantFields
         {
+            public enum ByteEnum : byte
+            {
+                A
+            }
+
+            public enum SByteEnum : sbyte
+            {
+                A
+            }
+
+            public enum ShortEnum : short
+            {
+                A
+            }
+
+            public enum UShortEnum : ushort
+            {
+                A
+            }
+
+            public enum IntEnum : int
+            {
+                A
+            }
+
+            public enum UIntEnum : uint
+            {
+                A
+            }
+
+            public enum LongEnum : long
+            {
+                A
+            }
+
+            public enum ULongEnum : ulong
+            {
+                A
+            }
+
             public const char C1 = ' ';
             public const char C2 = '"';
 
@@ -343,6 +441,15 @@ namespace JilTests
             public const double D1 = -1234.56;
             public const double D2 = 0;
             public const double D3 = 1234.56;
+
+            public const ByteEnum BE = ByteEnum.A;
+            public const SByteEnum SBE = SByteEnum.A;
+            public const ShortEnum SE = ShortEnum.A;
+            public const UShortEnum USE = UShortEnum.A;
+            public const IntEnum IE = IntEnum.A;
+            public const UIntEnum UIE = UIntEnum.A;
+            public const LongEnum LE = LongEnum.A;
+            public const ULongEnum ULE = ULongEnum.A;
         }
 
         [TestMethod]
@@ -397,6 +504,15 @@ namespace JilTests
             Assert.AreEqual("-1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D1"), false));
             Assert.AreEqual("0", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D2"), false));
             Assert.AreEqual("1234.56", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("D3"), false));
+
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("BE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("SBE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("SE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("USE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("IE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("UIE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("LE"), false));
+            Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("ULE"), false));
         }
 
 #pragma warning disable 0649
