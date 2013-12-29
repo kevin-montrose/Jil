@@ -192,7 +192,6 @@ namespace Jil.Common
 
             if (equivObj != null && equivObj.GetType() != prop.ReturnType())
             {
-                //equivObj = Convert.ChangeType(equivObj, prop.ReturnType());
                 equivObj = ConvertType(equivObj, equivObj.GetType(), prop.ReturnType());
             }
 
@@ -201,6 +200,11 @@ namespace Jil.Common
 
         private static object ConvertType(object val, Type fromType, Type toType)
         {
+            if (toType.IsEnum)
+            {
+                toType = Enum.GetUnderlyingType(toType);
+            }
+
             if (toType == typeof(sbyte))
             {
                 if (fromType.IsSigned())
@@ -299,6 +303,11 @@ namespace Jil.Common
             if (asBool != null)
             {
                 return asBool.Value ? "true" : "false";
+            }
+
+            if (type.IsEnum)
+            {
+                return "\"" + Enum.GetName(type, obj).JsonEscape(jsonp) + "\"";
             }
 
             return obj.ToString();
