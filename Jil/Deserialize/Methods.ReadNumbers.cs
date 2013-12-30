@@ -806,7 +806,7 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double _ReadDouble(TextReader reader, StringBuilder commonSb)
+        static double _ReadDouble(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
             bool negative = false;
@@ -814,6 +814,8 @@ namespace Jil.Deserialize
 
             var first = reader.Read();
             if (first == -1) throw new DeserializationException("Expected digit or '-'");
+
+            commonSb = commonSb ?? new StringBuilder();
 
             if (first == '-')
             {
@@ -885,7 +887,7 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float _ReadSingle(TextReader reader, StringBuilder commonSb)
+        static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
             bool negative = false;
@@ -893,6 +895,8 @@ namespace Jil.Deserialize
 
             var first = reader.Read();
             if (first == -1) throw new DeserializationException("Expected digit or '-'");
+
+            commonSb = commonSb ?? new StringBuilder();
 
             if (first == '-')
             {
@@ -965,7 +969,7 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static decimal _ReadDecimal(TextReader reader, StringBuilder commonSb)
+        static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
             bool negative = false;
@@ -973,6 +977,8 @@ namespace Jil.Deserialize
 
             var first = reader.Read();
             if (first == -1) throw new DeserializationException("Expected digit or '-'");
+
+            commonSb = commonSb ?? new StringBuilder();
 
             if (first == '-')
             {
