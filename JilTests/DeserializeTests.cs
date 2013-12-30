@@ -12,6 +12,23 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+        struct _ValueTypes
+        {
+            public string A;
+            public int B { get; set; }
+        }
+
+        [TestMethod]
+        public void ValueTypes()
+        {
+            using (var str = new StringReader("{\"A\":\"hello\\u0000world\", \"B\":12345}"))
+            {
+                var res = JSON.Deserialize<_ValueTypes>(str);
+                Assert.AreEqual("hello\0world", res.A);
+                Assert.AreEqual(12345, res.B);
+            }
+        }
+
         class _LargeCharBuffer
         {
             public DateTime Date;
