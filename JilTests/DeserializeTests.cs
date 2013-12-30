@@ -12,6 +12,19 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+        [TestMethod]
+        public void IDictionaryIntToInt()
+        {
+            using (var str = new StringReader("{\"1\":2, \"3\":4, \"5\": 6}"))
+            {
+                var res = JSON.Deserialize<IDictionary<int, int>>(str);
+                Assert.AreEqual(3, res.Count);
+                Assert.AreEqual(2, res[1]);
+                Assert.AreEqual(4, res[3]);
+                Assert.AreEqual(6, res[5]);
+            }
+        }
+
         enum _DictionaryEnumKeys1 : byte
         {
             A,
