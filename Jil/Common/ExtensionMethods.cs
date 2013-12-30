@@ -10,6 +10,11 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static bool IsUserDefinedType(this Type type)
+        {
+            return !type.IsListType() && !type.IsDictionaryType() && !type.IsEnum && !type.IsPrimitiveType();
+        }
+
         public static bool IsConstant(this MemberInfo member)
         {
             var asField = member as FieldInfo;

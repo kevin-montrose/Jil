@@ -29,10 +29,22 @@ namespace Jil.Deserialize
 
         void AddGlobalVariables()
         {
-            Emit.DeclareLocal<char[]>(CharBufferName);
-            Emit.LoadConstant(Methods.CharBufferSize);
-            Emit.NewArray<char>();
-            Emit.StoreLocal(CharBufferName);
+            var involvedTypes = typeof(ForType).InvolvedTypes();
+
+            var needsCharBuffer =
+                involvedTypes.Contains(typeof(char)) ||
+                involvedTypes.Contains(typeof(string)) ||
+                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
+                involvedTypes.Any(t => t.IsEnum) ||
+                involvedTypes.Any(t => t.IsUserDefinedType());
+
+            if (needsCharBuffer)
+            {
+                Emit.DeclareLocal<char[]>(CharBufferName);
+                Emit.LoadConstant(Methods.CharBufferSize);
+                Emit.NewArray<char>();
+                Emit.StoreLocal(CharBufferName);
+            }
 
             Emit.DeclareLocal<StringBuilder>(StringBuilderName);
         }
