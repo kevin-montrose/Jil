@@ -586,7 +586,12 @@ namespace Jil.Deserialize
         void ReadDictionary(Type dictType)
         {
             var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
-            if(keyType != typeof(string) && !keyType.IsIntegerNumberType()) throw new Exception("Only dictionaries with strings or integers for keys can be deserialized");
+
+            var keyIsString = keyType == typeof(string);
+            var keyIsInteger = keyType.IsIntegerNumberType();
+            var keyIsEnum = keyType.IsEnum;
+
+            if(!(keyIsString || keyIsInteger || keyIsEnum)) throw new Exception("Only dictionaries with strings, integers, or enums for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
             if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
@@ -647,14 +652,21 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    ExpectQuote();          // dictType(*?)
-                    Build(keyType);         // dictType(*?) integer
-                    ExpectQuote();          // dictType(*?) integer
+                    if (keyIsInteger)
+                    {
+                        ExpectQuote();          // dictType(*?)
+                        Build(keyType);         // dictType(*?) integer
+                        ExpectQuote();          // dictType(*?) integer
+                    }
+                    else
+                    {
+                        Build(keyType);         // dictType(*?) enum
+                    }
                 }
-                ConsumeWhiteSpace();        // dictType(*?) (integer|string)
-                ExpectChar(':');            // dictType(*?) (integer|string)
-                ConsumeWhiteSpace();        // dictType(*?) (integer|string)
-                Build(valType);             // dictType(*?) (integer|string) valType
+                ConsumeWhiteSpace();        // dictType(*?) (integer|string|enum)
+                ExpectChar(':');            // dictType(*?) (integer|string|enum)
+                ConsumeWhiteSpace();        // dictType(*?) (integer|string|enum)
+                Build(valType);             // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);   // --empty--
 
                 var nextItem = Emit.DefineLabel();
@@ -684,14 +696,21 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    ExpectQuote();          // dictType(*?)
-                    Build(keyType);         // dictType(*?) integer
-                    ExpectQuote();          // dictType(*?) integer
+                    if (keyIsInteger)
+                    {
+                        ExpectQuote();          // dictType(*?)
+                        Build(keyType);         // dictType(*?) integer
+                        ExpectQuote();          // dictType(*?) integer
+                    }
+                    else
+                    {
+                        Build(keyType);         // dictType(*?) enum
+                    }
                 }
-                ConsumeWhiteSpace();                // dictType(*?) (integer|string)
-                ExpectChar(':');                    // dictType(*?) (integer|string)
-                ConsumeWhiteSpace();                // dictType(*?) (integer|string)
-                Build(valType);                     // dictType(*?) (integer|string) valType
+                ConsumeWhiteSpace();                // dictType(*?) (integer|string|enum)
+                ExpectChar(':');                    // dictType(*?) (integer|string|enum)
+                ConsumeWhiteSpace();                // dictType(*?) (integer|string|enum)
+                Build(valType);                     // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);           // --empty--
                 Emit.Branch(loopStart);             // --empty--
             }
