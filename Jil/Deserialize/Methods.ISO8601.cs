@@ -80,7 +80,7 @@ namespace Jil.Deserialize
                 reader.Read();
 
                 ix++;
-                if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less");
+                if (ix == CharBufferForDatesSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferForDatesSize + " characters or less");
                 buffer[ix] = (char)c;
 
                 // RFC3339 allows lowercase t and spaces as alternatives to ISO8601's T

@@ -12,6 +12,40 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+        class _LargeCharBuffer
+        {
+            public DateTime Date;
+            public string String;
+        }
+
+        [TestMethod]
+        public void LargeCharBuffer()
+        {
+            using (var str = new StringReader("{\"Date\": \"2013-12-30T04:17:21Z\", \"String\": \"hello world\"}"))
+            {
+                var res = JSON.Deserialize<_LargeCharBuffer>(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2013, 12, 30, 4, 17, 21, DateTimeKind.Utc), res.Date);
+                Assert.AreEqual("hello world", res.String);
+            }
+        }
+
+        class _SmallCharBuffer
+        {
+            public DateTime Date;
+            public string String;
+        }
+
+        [TestMethod]
+        public void SmallCharBuffer()
+        {
+            using (var str = new StringReader("{\"Date\": 1388377041, \"String\": \"hello world\"}"))
+            {
+                var res = JSON.Deserialize<_SmallCharBuffer>(str, Options.SecondsSinceUnixEpoch);
+                Assert.AreEqual(new DateTime(2013, 12, 30, 4, 17, 21, DateTimeKind.Utc), res.Date);
+                Assert.AreEqual("hello world", res.String);
+            }
+        }
+
         [TestMethod]
         public void IDictionaryIntToInt()
         {
@@ -1045,7 +1079,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferSize + " characters or less", e.Message);
+                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferForDatesSize + " characters or less", e.Message);
                 }
             }
 
