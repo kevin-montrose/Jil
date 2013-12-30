@@ -586,7 +586,7 @@ namespace Jil.Deserialize
         void ReadDictionary(Type dictType)
         {
             var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
-            if(keyType != typeof(string)) throw new Exception("Only dictionaries with strings for keys can be deserialized");
+            if(keyType != typeof(string) && !keyType.IsIntegerNumberType()) throw new Exception("Only dictionaries with strings or integers for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
             if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
@@ -594,7 +594,7 @@ namespace Jil.Deserialize
                 dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valType);
             }
 
-            var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { typeof(string), valType });
+            var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { keyType, valType });
 
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
@@ -641,11 +641,20 @@ namespace Jil.Deserialize
                 RawPeekChar();              // dictType(*?) int 
                 Emit.LoadConstant('}');     // dictType(*?) int '}'
                 Emit.BranchIfEqual(done);   // dictType(*?)
-                Build(typeof(string));      // dictType(*?) string
-                ConsumeWhiteSpace();        // dictType(*?) string
-                ExpectChar(':');            // dictType(*?) string
-                ConsumeWhiteSpace();        // dictType(*?) string
-                Build(valType);             // dictType(*?) string valType
+                if (keyType == typeof(string))
+                {
+                    Build(typeof(string));  // dictType(*?) string
+                }
+                else
+                {
+                    ExpectQuote();          // dictType(*?)
+                    Build(keyType);         // dictType(*?) integer
+                    ExpectQuote();          // dictType(*?) integer
+                }
+                ConsumeWhiteSpace();        // dictType(*?) (integer|string)
+                ExpectChar(':');            // dictType(*?) (integer|string)
+                ConsumeWhiteSpace();        // dictType(*?) (integer|string)
+                Build(valType);             // dictType(*?) (integer|string) valType
                 Emit.CallVirtual(addMtd);   // --empty--
 
                 var nextItem = Emit.DefineLabel();
@@ -668,12 +677,21 @@ namespace Jil.Deserialize
                 Emit.LoadArgument(0);               // dictType(*?) TextReader
                 Emit.CallVirtual(TextReader_Read);  // dictType(*?) int
                 Emit.Pop();                         // dictType(*?)
-                ConsumeWhiteSpace();
-                Build(typeof(string));              // dictType(*?) string
-                ConsumeWhiteSpace();                // dictType(*?) string
-                ExpectChar(':');                    // dictType(*?) string
-                ConsumeWhiteSpace();                // dictType(*?) string
-                Build(valType);                     // dictType(*?) string valType
+                ConsumeWhiteSpace();                // dictType(*?)
+                if (keyType == typeof(string))
+                {
+                    Build(typeof(string));  // dictType(*?) string
+                }
+                else
+                {
+                    ExpectQuote();          // dictType(*?)
+                    Build(keyType);         // dictType(*?) integer
+                    ExpectQuote();          // dictType(*?) integer
+                }
+                ConsumeWhiteSpace();                // dictType(*?) (integer|string)
+                ExpectChar(':');                    // dictType(*?) (integer|string)
+                ConsumeWhiteSpace();                // dictType(*?) (integer|string)
+                Build(valType);                     // dictType(*?) (integer|string) valType
                 Emit.CallVirtual(addMtd);           // --empty--
                 Emit.Branch(loopStart);             // --empty--
             }
