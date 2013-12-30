@@ -930,6 +930,11 @@ namespace Jil.Deserialize
             Emit.Pop();                         // objType(*?)
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
+
+            if(objType.IsValueType)
+            {
+                Emit.LoadObject(objType);     // objType
+            }
         }
 
         void Build(Type forType, bool allowRecursion = true)
