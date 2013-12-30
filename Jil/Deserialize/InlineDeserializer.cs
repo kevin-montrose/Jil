@@ -35,8 +35,6 @@ namespace Jil.Deserialize
             Emit.StoreLocal(CharBufferName);
 
             Emit.DeclareLocal<StringBuilder>(StringBuilderName);
-            Emit.NewObject<StringBuilder>();
-            Emit.StoreLocal(StringBuilderName);
         }
 
         void LoadCharBuffer()
@@ -46,7 +44,7 @@ namespace Jil.Deserialize
 
         void LoadStringBuilder()
         {
-            Emit.LoadLocal(StringBuilderName);
+            Emit.LoadLocalAddress(StringBuilderName);
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);

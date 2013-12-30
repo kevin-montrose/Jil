@@ -404,8 +404,10 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static string _ReadEncodedString(TextReader reader, char[] buffer, StringBuilder commonSb)
+        static string _ReadEncodedString(TextReader reader, char[] buffer, ref StringBuilder commonSb)
         {
+            commonSb = commonSb ?? new StringBuilder();
+
             {
                 var ix = 0;
 
