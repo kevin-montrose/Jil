@@ -17,6 +17,8 @@ namespace Jil.Deserialize
         
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
+
+        bool UsingLongCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
@@ -40,10 +42,21 @@ namespace Jil.Deserialize
 
             if (needsCharBuffer)
             {
+                UsingLongCharBuffer = involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601;
+
                 Emit.DeclareLocal<char[]>(CharBufferName);
-                Emit.LoadConstant(Methods.CharBufferSize);
-                Emit.NewArray<char>();
-                Emit.StoreLocal(CharBufferName);
+
+                if (UsingLongCharBuffer)
+                {
+                    Emit.LoadConstant(Methods.CharBufferForDatesSize);  // int
+                }
+                else
+                {
+                    Emit.LoadConstant(Methods.CharBufferSize);          // int
+                }
+
+                Emit.NewArray<char>();              // char[]
+                Emit.StoreLocal(CharBufferName);    // --empty--
             }
 
             // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
@@ -166,6 +179,18 @@ namespace Jil.Deserialize
             Emit.Call(Methods.ReadEncodedChar); // char
         }
 
+        void CallReadEncodedString()
+        {
+            if (UsingLongCharBuffer)
+            {
+                Emit.Call(Methods.ReadEncodedStringLong);
+            }
+            else
+            {
+                Emit.Call(Methods.ReadEncodedStringShort);
+            }
+        }
+
         void ReadString()
         {
             ExpectQuoteOrNull(
@@ -175,7 +200,8 @@ namespace Jil.Deserialize
                     Emit.LoadArgument(0);                   // TextReader
                     LoadCharBuffer();                       // TextReader char[]
                     LoadStringBuilder();                    // TextReader char[] StringBuilder
-                    Emit.Call(Methods.ReadEncodedString);   // string
+
+                    CallReadEncodedString();                // string
                 },
                 delegate
                 {
@@ -454,7 +480,7 @@ namespace Jil.Deserialize
             Emit.LoadArgument(0);                   // Type TextReader
             LoadCharBuffer();                       // Type TextReader char[]
             LoadStringBuilder();                    // Type TextReader char[] StringBuilder
-            Emit.Call(Methods.ReadEncodedString);   // Type string
+            CallReadEncodedString();                // Type string
 
             Emit.LoadConstant(true);                // Type string bool
 
