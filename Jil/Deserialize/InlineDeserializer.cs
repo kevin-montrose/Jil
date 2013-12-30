@@ -46,7 +46,20 @@ namespace Jil.Deserialize
                 Emit.StoreLocal(CharBufferName);
             }
 
-            Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+            // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
+            //   but we can save the slot on the stack in rare cases
+            var mayNeedStringBuilder =
+                involvedTypes.Contains(typeof(string)) ||
+                involvedTypes.Contains(typeof(float)) ||
+                involvedTypes.Contains(typeof(double)) ||
+                involvedTypes.Contains(typeof(decimal)) ||
+                involvedTypes.Any(t => t.IsEnum) ||
+                involvedTypes.Any(t => t.IsUserDefinedType());
+
+            if (mayNeedStringBuilder)
+            {
+                Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+            }
         }
 
         void LoadCharBuffer()
