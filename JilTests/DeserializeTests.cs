@@ -12,6 +12,178 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+        enum _DictionaryEnumKeys1 : byte
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys2 : sbyte
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys3 : short
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys4 : ushort
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys5 : int
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys6 : uint
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys7 : long
+        {
+            A,
+            B
+        }
+
+        enum _DictionaryEnumKeys8 : ulong
+        {
+            A,
+            B
+        }
+
+        [TestMethod]
+        public void DictionaryEnumKeys()
+        {
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys1, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys1.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys1, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys1.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys1.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys2, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys2.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys2, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys2.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys2.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys3, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys3.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys3, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys3.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys3.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys4, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys4.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys4, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys4.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys4.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys5, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys5.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys5, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys5.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys5.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys6, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys6.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys6, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys6.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys6.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys7, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys7.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys7, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys7.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys7.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys8, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys8.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<Dictionary<_DictionaryEnumKeys8, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys8.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys8.B]);
+            }
+        }
+
         [TestMethod]
         public void DictionaryNumberKeys()
         {
