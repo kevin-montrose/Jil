@@ -34,7 +34,6 @@ namespace Jil.Deserialize
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
             var needsCharBuffer =
-                involvedTypes.Contains(typeof(char)) ||
                 involvedTypes.Contains(typeof(string)) ||
                 (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
                 involvedTypes.Any(t => t.IsEnum) ||
@@ -175,7 +174,6 @@ namespace Jil.Deserialize
         void ReadEncodedChar()
         {
             Emit.LoadArgument(0);               // TextReader
-            LoadCharBuffer();
             Emit.Call(Methods.ReadEncodedChar); // char
         }
 

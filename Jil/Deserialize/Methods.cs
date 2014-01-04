@@ -675,7 +675,7 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadEncodedChar = typeof(Methods).GetMethod("_ReadEncodedChar", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static char _ReadEncodedChar(TextReader reader, char[] buffer)
+        static char _ReadEncodedChar(TextReader reader)
         {
             var first = reader.Read();
             if (first == -1) throw new DeserializationException("Expected any character");
@@ -700,20 +700,127 @@ namespace Jil.Deserialize
             if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
 
             // now we're in an escape sequence, we expect 4 hex #s; always
-            var ix = 0;
-            var read = 0;
-            var toRead = 4;
-            do
+            var ret = 0;
+
+            //char1:
             {
-                read = reader.Read(buffer, ix, toRead);
-                if (read == 0) throw new DeserializationException("Expected characters");
+                var c = reader.Read();
 
-                toRead -= read;
-                ix += read;
-            } while (toRead > 0);
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char2;
+                }
 
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
 
-            return (char)FastHexToInt(buffer);
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char2:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char3:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char4:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto finished;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            finished:
+            if (ret < char.MinValue || ret > char.MaxValue) throw new Exception("Encoded character out of System.Char range, found: " + ret);
+
+            return (char)ret;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
