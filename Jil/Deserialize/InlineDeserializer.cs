@@ -12,6 +12,8 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
+        public static bool AlwaysUseCharBuffer = true;
+
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
         
@@ -33,7 +35,7 @@ namespace Jil.Deserialize
         {
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
-            var needsCharBuffer = (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+            var needsCharBuffer = AlwaysUseCharBuffer || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {
