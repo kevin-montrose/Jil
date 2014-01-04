@@ -1,4 +1,5 @@
-﻿using Jil.Serialize;
+﻿using Jil.Deserialize;
+using Jil.Serialize;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -32,9 +33,10 @@ namespace JilTests
             return ret;
         }
 
-        public static string _RandString(Random rand)
+        public static string _RandString(Random rand, int? maxLength = null)
         {
-            var len = 1 + rand.Next(20);
+            var len = 1 + rand.Next(maxLength ?? 20);
+
             var ret = new char[len];
 
             for (var i = 0; i < len; i++)
@@ -55,6 +57,70 @@ namespace JilTests
             var second = rand.Next(60);
 
             return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
+        }
+
+        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
+        {
+            var asStrings = toSerialize.Select(o => Jil.JSON.Serialize(o, opts)).ToList();
+
+            var aTimer = new Stopwatch();
+            var bTimer = new Stopwatch();
+
+            Action timeA =
+                () =>
+                {
+                    aTimer.Start();
+                    for (var i = 0; i < asStrings.Count; i++)
+                    {
+                        using (var str = new StringReader(asStrings[i]))
+                        {
+                            a(str, 0);
+                        }
+                    }
+                    aTimer.Stop();
+                };
+
+            Action timeB =
+                () =>
+                {
+                    bTimer.Start();
+                    for (var i = 0; i < asStrings.Count; i++)
+                    {
+                        using (var str = new StringReader(asStrings[i]))
+                        {
+                            b(str, 0);
+                        }
+                    }
+                    bTimer.Stop();
+                };
+
+            for (var i = 0; i < 5; i++)
+            {
+                timeA();
+                timeB();
+            }
+
+            bTimer.Reset();
+            aTimer.Reset();
+
+            for (var i = 0; i < 100; i++)
+            {
+                var order = (i % 2) == 0;
+
+                if (order)
+                {
+                    timeA();
+                    timeB();
+                }
+                else
+                {
+                    timeB();
+                    timeA();
+                }
+            }
+
+            aTimeMS = aTimer.ElapsedMilliseconds;
+            bTimeMS = bTimer.ElapsedMilliseconds;
         }
 
         private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T, int> a, Action<TextWriter, T, int> b, out double aTimeMS, out double bTimeMS, bool checkCorrectness = true)
@@ -806,6 +872,61 @@ namespace JilTests
             CompareTimes(toSerialize, propagated, normal, out allocationlessTime, out normalTime);
 
             Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
+        }
+
+        class _AlwaysUseCharBuffer
+        {
+            public string A { get; set; }
+            public string B { get; set; }
+        }
+
+        [TestMethod]
+        public void AlwaysUseCharBuffer()
+        {
+            Func<TextReader, int, _AlwaysUseCharBuffer> fast;
+            Func<TextReader, int, _AlwaysUseCharBuffer> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = true;
+
+                    // Build the *actual* deserializer method
+                    fast = InlineDeserializerHelper.Build<_AlwaysUseCharBuffer>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBuffer>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                }
+
+                {
+                    InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = false;
+
+                    // Build the *actual* deserializer method
+                    normal = InlineDeserializerHelper.Build<_AlwaysUseCharBuffer>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBuffer>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = true;
+            }
+
+            var rand = new Random(202457890);
+
+            var toSerialize = new List<_AlwaysUseCharBuffer>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _AlwaysUseCharBuffer
+                    {
+                        A = _RandString(rand, 32),
+                        B = _RandString(rand, 64)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 #endif
     }
