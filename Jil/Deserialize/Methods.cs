@@ -12,7 +12,8 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        // .NET will expand up to 32 as well, don't bother unless you can get this down to 16
+        // .NET will expand a char[] allocation up to 32, don't bother trimming this unless you can get this down to 16
+        //    you'll just be making string parsing slower for no benefit
         public const int CharBufferSize = 32;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
