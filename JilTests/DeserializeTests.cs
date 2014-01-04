@@ -12,11 +12,13 @@ namespace JilTests
     [TestClass]
     public class DeserializeTests
     {
+#pragma warning disable 0649
         struct _ValueTypes
         {
             public string A;
             public int B { get; set; }
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void ValueTypes()
@@ -29,11 +31,13 @@ namespace JilTests
             }
         }
 
+#pragma warning disable 0649
         class _LargeCharBuffer
         {
             public DateTime Date;
             public string String;
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void LargeCharBuffer()
@@ -46,11 +50,13 @@ namespace JilTests
             }
         }
 
+#pragma warning disable 0649
         class _SmallCharBuffer
         {
             public DateTime Date;
             public string String;
         }
+#pragma warning restore 0649
 
         [TestMethod]
         public void SmallCharBuffer()

@@ -407,79 +407,9 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo ReadEncodedStringShort = typeof(Methods).GetMethod("_ReadEncodedStringShort", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static string _ReadEncodedStringShort(TextReader reader, char[] buffer, ref StringBuilder commonSb)
+        static string _ReadEncodedStringShort(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
-
-            {
-                var ix = 0;
-
-                while (ix <= CharBufferSize)
-                {
-                    if (ix == CharBufferSize)
-                    {
-                        commonSb.Append(new string(buffer, 0, ix));
-                        break;
-                    }
-
-                    var first = reader.Read();
-                    if (first == -1) throw new DeserializationException("Expected any character");
-
-                    // we didn't have to use anything but the buffer, make a string and return it!
-                    if (first == '"')
-                    {
-                        // avoid an allocation here
-                        if (ix == 0) return "";
-
-                        return new string(buffer, 0, ix);
-                    }
-
-                    if (first != '\\')
-                    {
-                        buffer[ix] = (char)first;
-                        ix++;
-                        continue;
-                    }
-
-                    var second = reader.Read();
-                    if (second == -1) throw new DeserializationException("Expected any character");
-
-                    switch (second)
-                    {
-                        case '"': buffer[ix] = '"'; ix++; continue;
-                        case '\\': buffer[ix] = '\\'; ix++; continue;
-                        case '/': buffer[ix] = '/'; ix++; continue;
-                        case 'b': buffer[ix] = '\b'; ix++; continue;
-                        case 'f': buffer[ix] = '\f'; ix++; continue;
-                        case 'n': buffer[ix] = '\n'; ix++; continue;
-                        case 'r': buffer[ix] = '\r'; ix++; continue;
-                        case 't': buffer[ix] = '\t'; ix++; continue;
-                    }
-
-                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
-
-                    commonSb.Append(buffer, 0, ix);
-
-                    // now we're in an escape sequence, we expect 4 hex #s; always
-                    ix = 0;
-                    var read = 0;
-                    var toRead = 4;
-                    do
-                    {
-                        read = reader.Read(buffer, ix, toRead);
-                        if (read == 0) throw new DeserializationException("Expected characters");
-
-                        toRead -= read;
-                        ix += read;
-                    } while (toRead > 0);
-
-                    var c = FastHexToInt(buffer);
-                    commonSb.Append((char)c);
-                    break;
-                }
-            }
-
-            // fall through to using a StringBuilder
 
             while (true)
             {
@@ -515,20 +445,125 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                var ix = 0;
-                var read = 0;
-                var toRead = 4;
-                do
+                var encodedChar = 0;
+
+                //char1:
                 {
-                    read = reader.Read(buffer, ix, toRead);
-                    if (read == 0) throw new DeserializationException("Expected characters");
+                    var c = reader.Read();
 
-                    toRead -= read;
-                    ix += read;
-                } while (toRead > 0);
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        encodedChar += c;
+                        goto char2;
+                    }
 
-                var asInt = FastHexToInt(buffer);
-                commonSb.Append((char)asInt);
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char2;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char2;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
+
+                char2:
+                encodedChar *= 16;
+                {
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        encodedChar += c;
+                        goto char3;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char3;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char3;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
+
+                char3:
+                encodedChar *= 16;
+                {
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        encodedChar += c;
+                        goto char4;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char4;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto char4;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
+
+                char4:
+                encodedChar *= 16;
+                {
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        encodedChar += c;
+                        goto finished;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto finished;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        encodedChar += 10 + c;
+                        goto finished;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
+
+                finished:
+                commonSb.Append(char.ConvertFromUtf32(encodedChar));
             }
 
             var ret = commonSb.ToString();

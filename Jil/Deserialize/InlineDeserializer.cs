@@ -33,15 +33,11 @@ namespace Jil.Deserialize
         {
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
-            var needsCharBuffer =
-                involvedTypes.Contains(typeof(string)) ||
-                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
-                involvedTypes.Any(t => t.IsEnum) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
+            var needsCharBuffer = (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {
-                UsingLongCharBuffer = involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601;
+                UsingLongCharBuffer = true;
 
                 Emit.DeclareLocal<char[]>(CharBufferName);
 
@@ -179,13 +175,19 @@ namespace Jil.Deserialize
 
         void CallReadEncodedString()
         {
+            // Stack starts
+            // TextReader
+
             if (UsingLongCharBuffer)
             {
-                Emit.Call(Methods.ReadEncodedStringLong);
+                LoadCharBuffer();                           // TextReader char[]
+                LoadStringBuilder();                        // TextReader char[] StringBuilder
+                Emit.Call(Methods.ReadEncodedStringLong);   // string
             }
             else
             {
-                Emit.Call(Methods.ReadEncodedStringShort);
+                LoadStringBuilder();                        // TextReader StringBuilder
+                Emit.Call(Methods.ReadEncodedStringShort);  // string
             }
         }
 
@@ -196,9 +198,6 @@ namespace Jil.Deserialize
                 {
                     // --empty--
                     Emit.LoadArgument(0);                   // TextReader
-                    LoadCharBuffer();                       // TextReader char[]
-                    LoadStringBuilder();                    // TextReader char[] StringBuilder
-
                     CallReadEncodedString();                // string
                 },
                 delegate
@@ -476,8 +475,6 @@ namespace Jil.Deserialize
             Emit.Call(Type_GetTypeFromHandle);      // Type
 
             Emit.LoadArgument(0);                   // Type TextReader
-            LoadCharBuffer();                       // Type TextReader char[]
-            LoadStringBuilder();                    // Type TextReader char[] StringBuilder
             CallReadEncodedString();                // Type string
 
             Emit.LoadConstant(true);                // Type string bool
