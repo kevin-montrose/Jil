@@ -33,6 +33,18 @@ namespace JilTests
             return ret;
         }
 
+        public static T _RandEnum<T>(Random rand)
+            where T : struct
+        {
+            var names = Enum.GetNames(typeof(T));
+
+            var ix = rand.Next(names.Length);
+
+            var retName = names[ix];
+
+            return (T)Enum.Parse(typeof(T), retName);
+        }
+
         public static string _RandString(Random rand, int? maxLength = null)
         {
             var len = 1 + rand.Next(maxLength ?? 20);
@@ -874,59 +886,106 @@ namespace JilTests
             Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
 
-        class _AlwaysUseCharBuffer
+        class _AlwaysUseCharBufferForStrings
         {
+            public enum Enums { Hello, World, Foo, Bar };
+
             public string A { get; set; }
             public string B { get; set; }
         }
 
         [TestMethod]
-        public void AlwaysUseCharBuffer()
+        public void AlwaysUseCharBufferForStrings()
         {
-            Func<TextReader, int, _AlwaysUseCharBuffer> fast;
-            Func<TextReader, int, _AlwaysUseCharBuffer> normal;
-
-            try
+            // objects
             {
+                Func<TextReader, int, _AlwaysUseCharBufferForStrings> fast;
+                Func<TextReader, int, _AlwaysUseCharBufferForStrings> normal;
+
+                try
                 {
-                    InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = true;
-
-                    // Build the *actual* deserializer method
-                    fast = InlineDeserializerHelper.Build<_AlwaysUseCharBuffer>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBuffer>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
-                }
-
-                {
-                    InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = false;
-
-                    // Build the *actual* deserializer method
-                    normal = InlineDeserializerHelper.Build<_AlwaysUseCharBuffer>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBuffer>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_AlwaysUseCharBuffer>.AlwaysUseCharBuffer = true;
-            }
-
-            var rand = new Random(202457890);
-
-            var toSerialize = new List<_AlwaysUseCharBuffer>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(
-                    new _AlwaysUseCharBuffer
                     {
-                        A = _RandString(rand, 32),
-                        B = _RandString(rand, 64)
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+
+                        // Build the *actual* deserializer method
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
                     }
-                );
+
+                    {
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
+
+                        // Build the *actual* deserializer method
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                    }
+                }
+                finally
+                {
+                    InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+                }
+
+                var rand = new Random(23450051);
+
+                var toSerialize = new List<_AlwaysUseCharBufferForStrings>();
+                for (var i = 0; i < 2000; i++)
+                {
+                    toSerialize.Add(
+                        new _AlwaysUseCharBufferForStrings
+                        {
+                            A = _RandString(rand, 32),
+                            B = _RandString(rand, 64)
+                        }
+                    );
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
             }
 
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+            // strings
+            {
+                Func<TextReader, int, string> fast;
+                Func<TextReader, int, string> normal;
 
-            double fastTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+                try
+                {
+                    {
+                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+                        // Build the *actual* deserializer method
+                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                    }
+
+                    {
+                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
+
+                        // Build the *actual* deserializer method
+                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                    }
+                }
+                finally
+                {
+                    InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
+                }
+
+                var rand = new Random(49139290);
+
+                var toSerialize = new List<string>();
+                for (var i = 0; i < 2000; i++)
+                {
+                    toSerialize.Add(_RandString(rand, 32));
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            }
         }
 #endif
     }
