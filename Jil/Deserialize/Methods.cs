@@ -443,125 +443,7 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                var encodedChar = 0;
-
-                //char1:
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        encodedChar += c;
-                        goto char2;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char2;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char2;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char2:
-                encodedChar *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        encodedChar += c;
-                        goto char3;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char3;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char3;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char3:
-                encodedChar *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        encodedChar += c;
-                        goto char4;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char4;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto char4;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char4:
-                encodedChar *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        encodedChar += c;
-                        goto finished;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto finished;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        encodedChar += 10 + c;
-                        goto finished;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                finished:
-                commonSb.Append(char.ConvertFromUtf32(encodedChar));
+                ReadHexQuadToBuilder(reader, commonSb);
             }
 
             var ret = commonSb.ToString();
@@ -628,20 +510,7 @@ namespace Jil.Deserialize
                     commonSb.Append(buffer, 0, ix);
 
                     // now we're in an escape sequence, we expect 4 hex #s; always
-                    ix = 0;
-                    var read = 0;
-                    var toRead = 4;
-                    do
-                    {
-                        read = reader.Read(buffer, ix, toRead);
-                        if (read == 0) throw new DeserializationException("Expected characters");
-
-                        toRead -= read;
-                        ix += read;
-                    } while (toRead > 0);
-
-                    var c = FastHexToInt(buffer);
-                    commonSb.Append((char)c);
+                    ReadHexQuadToBuilder(reader, commonSb);
                     break;
                 }
             }
@@ -682,20 +551,7 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                var ix = 0;
-                var read = 0;
-                var toRead = 4;
-                do
-                {
-                    read = reader.Read(buffer, ix, toRead);
-                    if (read == 0) throw new DeserializationException("Expected characters");
-
-                    toRead -= read;
-                    ix += read;
-                } while (toRead > 0);
-
-                var asInt = FastHexToInt(buffer);
-                commonSb.Append((char)asInt);
+                ReadHexQuadToBuilder(reader, commonSb);
             }
 
             var ret = commonSb.ToString();
@@ -857,132 +713,127 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int FastHexToInt(char[] buffer)
+        static void ReadHexQuadToBuilder(TextReader reader, StringBuilder commonSb)
         {
-            var ret = 0;
+            var encodedChar = 0;
 
             //char1:
             {
-                const int ix = 0;
-
-                var c = (int)buffer[ix];
+                var c = reader.Read();
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
                 {
-                    ret += c;
+                    encodedChar += c;
                     goto char2;
                 }
 
                 c -= ('A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char2;
                 }
 
                 c -= ('f' - 'A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char2;
                 }
 
-                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+                throw new Exception("Expected hex digit, found: " + c);
             }
 
             char2:
-            ret *= 16;
+            encodedChar *= 16;
             {
-                const int ix = 1;
-
-                var c = (int)buffer[ix];
+                var c = reader.Read();
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
                 {
-                    ret += c;
+                    encodedChar += c;
                     goto char3;
                 }
 
                 c -= ('A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char3;
                 }
 
                 c -= ('f' - 'A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char3;
                 }
 
-                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+                throw new Exception("Expected hex digit, found: " + c);
             }
 
             char3:
-            ret *= 16;
+            encodedChar *= 16;
             {
-                const int ix = 2;
-
-                var c = (int)buffer[ix];
+                var c = reader.Read();
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
                 {
-                    ret += c;
+                    encodedChar += c;
                     goto char4;
                 }
 
                 c -= ('A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char4;
                 }
 
                 c -= ('f' - 'A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
+                    encodedChar += 10 + c;
                     goto char4;
                 }
 
-                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+                throw new Exception("Expected hex digit, found: " + c);
             }
 
             char4:
-            ret *= 16;
+            encodedChar *= 16;
             {
-                const int ix = 3;
-
-                var c = (int)buffer[ix];
+                var c = reader.Read();
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
                 {
-                    ret += c;
-                    return ret;
+                    encodedChar += c;
+                    goto finished;
                 }
 
                 c -= ('A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
-                    return ret;
+                    encodedChar += 10 + c;
+                    goto finished;
                 }
 
                 c -= ('f' - 'A' - '0');
                 if (c >= 0 && c <= 5)
                 {
-                    ret += 10 + c;
-                    return ret;
+                    encodedChar += 10 + c;
+                    goto finished;
                 }
 
-                throw new Exception("Expected hex digit, found: " + buffer[ix]);
+                throw new Exception("Expected hex digit, found: " + c);
             }
+
+            finished:
+            commonSb.Append(char.ConvertFromUtf32(encodedChar));
         }
     }
 }
