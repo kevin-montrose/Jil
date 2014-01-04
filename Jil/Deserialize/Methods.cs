@@ -12,10 +12,8 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        // .NET will expand the size of a arrays w/ length < 4 to 4; no point in trying to skimp further w.r.t. GC
-        public const int CharBufferSize = 4;
         // .NET will expand up to 32 as well, don't bother unless you can get this down to 16
-        public const int CharBufferForDatesSize = 32;
+        public const int CharBufferSize = 32;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -405,9 +403,9 @@ namespace Jil.Deserialize
                 c == 0x0D;
         }
 
-        public static readonly MethodInfo ReadEncodedStringShort = typeof(Methods).GetMethod("_ReadEncodedStringShort", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static string _ReadEncodedStringShort(TextReader reader, ref StringBuilder commonSb)
+        static string _ReadEncodedString(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
 
@@ -574,18 +572,18 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadEncodedStringLong = typeof(Methods).GetMethod("_ReadEncodedStringLong", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static string _ReadEncodedStringLong(TextReader reader, char[] buffer, ref StringBuilder commonSb)
+        static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
 
             {
                 var ix = 0;
 
-                while (ix <= CharBufferForDatesSize)
+                while (ix <= CharBufferSize)
                 {
-                    if (ix == CharBufferForDatesSize)
+                    if (ix == CharBufferSize)
                     {
                         commonSb.Append(new string(buffer, 0, ix));
                         break;

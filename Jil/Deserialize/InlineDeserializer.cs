@@ -18,7 +18,7 @@ namespace Jil.Deserialize
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
 
-        bool UsingLongCharBuffer;
+        bool UsingCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
@@ -37,21 +37,13 @@ namespace Jil.Deserialize
 
             if (needsCharBuffer)
             {
-                UsingLongCharBuffer = true;
+                UsingCharBuffer = true;
 
                 Emit.DeclareLocal<char[]>(CharBufferName);
 
-                if (UsingLongCharBuffer)
-                {
-                    Emit.LoadConstant(Methods.CharBufferForDatesSize);  // int
-                }
-                else
-                {
-                    Emit.LoadConstant(Methods.CharBufferSize);          // int
-                }
-
-                Emit.NewArray<char>();              // char[]
-                Emit.StoreLocal(CharBufferName);    // --empty--
+                Emit.LoadConstant(Methods.CharBufferSize);  // int
+                Emit.NewArray<char>();                      // char[]
+                Emit.StoreLocal(CharBufferName);            // --empty--
             }
 
             // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
@@ -178,16 +170,16 @@ namespace Jil.Deserialize
             // Stack starts
             // TextReader
 
-            if (UsingLongCharBuffer)
+            if (UsingCharBuffer)
             {
                 LoadCharBuffer();                           // TextReader char[]
                 LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringLong);   // string
+                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
             }
             else
             {
                 LoadStringBuilder();                        // TextReader StringBuilder
-                Emit.Call(Methods.ReadEncodedStringShort);  // string
+                Emit.Call(Methods.ReadEncodedString);  // string
             }
         }
 
