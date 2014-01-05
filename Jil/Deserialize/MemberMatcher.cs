@@ -9,19 +9,48 @@ using Jil.Common;
 
 namespace Jil.Deserialize
 {
+    enum MemberMatcherMode
+    {
+        None = 0,
+
+        SixtyFour = 64,
+        ThrityTwo = 32,
+        Sixteen = 16,
+        Eight = 8,
+        Four = 4,
+        Two = 2,
+        One = 1
+    }
+
     class MemberMatcher<ForType>
     {
         public static bool IsEligible;
         public static bool IsAvailable;
         public static Dictionary<string, int> BucketLookup;
         public static Dictionary<string, uint> HashLookup;
+        public static MemberMatcherMode Mode;
 
         static MemberMatcher()
         {
-            IsAvailable = MakeMemberMatcher(out IsEligible, out BucketLookup, out HashLookup);
+            IsAvailable = MakeMemberMatcher(out IsEligible, out BucketLookup, out HashLookup, out Mode);
         }
 
-        static bool MakeMemberMatcher(out bool eligible, out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash)
+        public static MethodInfo GetHashMethod(MemberMatcherMode mode)
+        {
+            switch (mode)
+            {
+                case MemberMatcherMode.One:
+                case MemberMatcherMode.Two:
+                case MemberMatcherMode.Four:
+                case MemberMatcherMode.Eight:
+                case MemberMatcherMode.Sixteen:
+                case MemberMatcherMode.ThrityTwo:
+                case MemberMatcherMode.SixtyFour: return Methods.MemberHash;
+                default: throw new Exception("Unexpected MemberMatcherMode: " + mode);
+            }
+        }
+
+        static bool MakeMemberMatcher(out bool eligible, out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash, out MemberMatcherMode bestMode)
         {
             var forType = typeof(ForType);
 
@@ -38,46 +67,64 @@ namespace Jil.Deserialize
                 eligible = false;
                 memberToBucket = null;
                 memberToHash = null;
+                bestMode = MemberMatcherMode.None;
                 return false;
             }
 
             eligible = true;
 
-            var mToH = new Dictionary<string,uint>();
+            var allModes =
+                Enum.GetValues(typeof(MemberMatcherMode))
+                    .Cast<MemberMatcherMode>()
+                    .Where(m => m != MemberMatcherMode.None)
+                    .OrderBy(o => (int)o)
+                    .ToList();
 
-            var buckets =
-                memberNames.GroupBy(
-                     m =>
-                     {
-                         using (var str = new StringReader("\"" + m.JsonEscape(jsonp: false) + "\""))
-                         {
-                             str.Read();    // skip "
-
-                             var ps = new object[] { str, (int)-1, (uint)0 };
-                             Methods.MemberHash.Invoke(null, ps);
-
-                             var bucket = (int)ps[1];
-                             var hash = (uint)ps[2];
-
-                             mToH[m] = hash;
-
-                             return bucket;
-                         }
-                     }
-                );
-
-            var collisions = buckets.Any(g => g.Count() > 1);
-
-            if (collisions)
+            foreach (var mode in allModes)
             {
-                memberToHash = null;
-                memberToBucket = null;
-                return false;
+                var mToH = new Dictionary<string, uint>();
+
+                var method = GetHashMethod(mode);
+
+                var buckets =
+                    memberNames.GroupBy(
+                         m =>
+                         {
+                             using (var str = new StringReader("\"" + m.JsonEscape(jsonp: false) + "\""))
+                             {
+                                 str.Read();    // skip "
+
+                                 var ps = new object[] { str, (int)-1, (uint)0 };
+                                 method.Invoke(null, ps);
+
+                                 var bucket = (int)ps[1];
+                                 var hash = (uint)ps[2];
+
+                                 mToH[m] = hash;
+
+                                 return bucket;
+                             }
+                         }
+                    );
+
+                var collisions = buckets.Any(g => g.Count() > 1);
+
+                if (collisions)
+                {
+                    continue;
+                }
+
+                memberToHash = mToH;
+                memberToBucket = buckets.ToDictionary(d => d.Single(), d => d.Key);
+                bestMode = mode;
+                return true;
             }
 
-            memberToHash = mToH;
-            memberToBucket = buckets.ToDictionary(d => d.Single(), d => d.Key);
-            return true;
+
+            memberToHash = null;
+            memberToBucket = null;
+            bestMode = MemberMatcherMode.None;
+            return false;
         }
     }
 }
