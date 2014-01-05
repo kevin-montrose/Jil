@@ -610,7 +610,7 @@ namespace Jil.Deserialize
                     goto char2;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     ret += 10 + c;
@@ -639,7 +639,7 @@ namespace Jil.Deserialize
                     goto char3;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     ret += 10 + c;
@@ -668,7 +668,7 @@ namespace Jil.Deserialize
                     goto char4;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     ret += 10 + c;
@@ -697,7 +697,7 @@ namespace Jil.Deserialize
                     goto finished;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     ret += 10 + c;
@@ -736,7 +736,7 @@ namespace Jil.Deserialize
                     goto char2;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     encodedChar += 10 + c;
@@ -765,7 +765,7 @@ namespace Jil.Deserialize
                     goto char3;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     encodedChar += 10 + c;
@@ -794,7 +794,7 @@ namespace Jil.Deserialize
                     goto char4;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     encodedChar += 10 + c;
@@ -823,7 +823,7 @@ namespace Jil.Deserialize
                     goto finished;
                 }
 
-                c -= ('f' - 'A' - '0');
+                c -= ('f' - 'F');
                 if (c >= 0 && c <= 5)
                 {
                     encodedChar += 10 + c;
@@ -836,7 +836,5 @@ namespace Jil.Deserialize
             finished:
             commonSb.Append(char.ConvertFromUtf32(encodedChar));
         }
-
-        
     }
 }
