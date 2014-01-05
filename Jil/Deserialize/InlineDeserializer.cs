@@ -32,6 +32,24 @@ namespace Jil.Deserialize
             DateFormat = dateFormat;
         }
 
+        void SetProperty(PropertyInfo prop)
+        {
+            // Top of stack
+            // value
+            // object(*?)
+
+            var setMtd = prop.SetMethod;
+
+            if (setMtd.IsVirtual)
+            {
+                Emit.CallVirtual(setMtd);
+            }
+            else
+            {
+                Emit.Call(setMtd);
+            }
+        }
+
         void AddGlobalVariables()
         {
             var involvedTypes = typeof(ForType).InvolvedTypes();
@@ -931,7 +949,7 @@ namespace Jil.Deserialize
                         }
                         else
                         {
-                            Emit.Call(((PropertyInfo)member).SetMethod);    // --empty--
+                            SetProperty((PropertyInfo)member);              // --empty--
                         }
 
                         Emit.Branch(loopStart);     // --empty--
@@ -1098,7 +1116,7 @@ namespace Jil.Deserialize
                     }
                     else
                     {
-                        Emit.Call(((PropertyInfo)member).SetMethod);    // --empty--
+                        SetProperty((PropertyInfo)member);              // --empty--
                     }
 
                     Emit.Branch(loopStart);     // --empty--
