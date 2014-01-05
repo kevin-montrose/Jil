@@ -987,6 +987,79 @@ namespace JilTests
                 Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
             }
         }
+
+        class _UseHashWhenMatchingMembers
+        {
+            public enum UserType : byte
+            {
+                unregistered = 2,
+                registered = 3,
+                moderator = 4,
+                does_not_exist = 255
+            }
+
+            public int? user_id { get; set; }
+            public string display_name { get; set; }
+            public int? reputation { get; set; }
+            public UserType? user_type { get; set; }
+            public string link { get; set; }
+            public int? accept_rate { get; set; }
+        }
+
+        [TestMethod]
+        public void UseHashWhenMatchingMembers()
+        {
+            Func<TextReader, int, _UseHashWhenMatchingMembers> hash;
+            Func<TextReader, int, _UseHashWhenMatchingMembers> dictionary;
+
+            Assert.IsTrue(MemberMatcher<_UseHashWhenMatchingMembers>.IsAvailable);
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
+
+                    // Build the *actual* deserializer method
+                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                }
+
+                {
+                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = false;
+
+                    // Build the *actual* deserializer method
+                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
+            }
+
+            var rand = new Random(67982477);
+
+            var toSerialize = new List<_UseHashWhenMatchingMembers>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _UseHashWhenMatchingMembers
+                    {
+                        accept_rate = rand.Next(),
+                        display_name = _RandString(rand),
+                        link = _RandString(rand),
+                        reputation = rand.Next(),
+                        user_id = rand.Next(),
+                        user_type = _RandEnum<_UseHashWhenMatchingMembers.UserType>(rand)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double hashTime, dictionaryTime;
+            CompareTimes(toSerialize, Jil.Options.Default, hash, dictionary, out hashTime, out dictionaryTime);
+
+            Assert.IsTrue(hashTime < dictionaryTime, "hashTime = " + hashTime + ", dictionaryTime = " + dictionaryTime);
+        }
 #endif
     }
 }
