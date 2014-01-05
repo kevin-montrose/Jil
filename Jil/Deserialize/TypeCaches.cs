@@ -13,7 +13,17 @@ namespace Jil.Deserialize
 
         static NewtonsoftStyleTypeCache()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+        }
+    }
+
+    static class NewtonsoftStyleNoHashingTypeCache<T>
+    {
+        public static readonly Func<TextReader, int, T> Thunk;
+
+        static NewtonsoftStyleNoHashingTypeCache()
+        {
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleNoHashingTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: false);
         }
     }
 
@@ -23,7 +33,17 @@ namespace Jil.Deserialize
 
         static MillisecondStyleTypeCache()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch);
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: true);
+        }
+    }
+
+    static class MillisecondStyleNoHashingTypeCache<T>
+    {
+        public static readonly Func<TextReader, int, T> Thunk;
+
+        static MillisecondStyleNoHashingTypeCache()
+        {
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleNoHashingTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: false);
         }
     }
 
@@ -33,7 +53,17 @@ namespace Jil.Deserialize
 
         static SecondStyleTypeCache()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch);
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: true);
+        }
+    }
+
+    static class SecondStyleNoHashingTypeCache<T>
+    {
+        public static readonly Func<TextReader, int, T> Thunk;
+
+        static SecondStyleNoHashingTypeCache()
+        {
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleNoHashingTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: false);
         }
     }
 
@@ -43,7 +73,17 @@ namespace Jil.Deserialize
 
         static ISO8601StyleTypeCache()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601);
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601, allowHashing: true);
+        }
+    }
+
+    static class ISO8601StyleNoHashingTypeCache<T>
+    {
+        public static readonly Func<TextReader, int, T> Thunk;
+
+        static ISO8601StyleNoHashingTypeCache()
+        {
+            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleNoHashingTypeCache<>), DateTimeFormat.ISO8601, allowHashing: false);
         }
     }
 }

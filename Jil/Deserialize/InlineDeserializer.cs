@@ -21,13 +21,15 @@ namespace Jil.Deserialize
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
 
+        bool AllowHashing;
         bool UsingCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
 
-        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat)
+        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat, bool allowHashing)
         {
+            AllowHashing = allowHashing;
             RecursionLookupType = recursionLookupType;
             DateFormat = dateFormat;
         }
@@ -800,7 +802,7 @@ namespace Jil.Deserialize
 
         void ReadObject(Type objType)
         {
-            if (UseHashWhenMatchingMembers)
+            if (UseHashWhenMatchingMembers && AllowHashing)
             {
                 var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
                 var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
@@ -1250,9 +1252,9 @@ namespace Jil.Deserialize
 
     static class InlineDeserializerHelper
     {
-        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat)
+        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing)
         {
-            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
+            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat, allowHashing);
 
             var ret = obj.BuildWithNewDelegate();
 

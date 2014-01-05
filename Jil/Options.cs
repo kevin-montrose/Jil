@@ -11,7 +11,6 @@ namespace Jil
     public sealed class Options
     {
 #pragma warning disable 1591
-
         public static readonly Options Default = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
         public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
@@ -47,7 +46,6 @@ namespace Jil
         public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONP = new Options(excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONP = new Options(prettyPrint: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
-
 #pragma warning restore 1591
 
         internal bool ShouldPrettyPrint { get; private set; }
@@ -56,6 +54,7 @@ namespace Jil
         internal bool IsJSONP { get; private set; }
         internal bool ShouldIncludeInherited { get; private set; }
         internal bool ShouldEstimateOutputSize { get; private set; }
+        internal bool AllowHashFunction { get; private set; }
 
         /// <summary>
         /// Configuration for Jil serialization options.
@@ -67,8 +66,9 @@ namespace Jil
         ///   dateFormat - the style in which to serialize DateTimes
         ///   includeInherited - whether or not to serialize members declared by an objects base types
         ///   estimateOutputSize - whether or not Jil should pre-allocate a buffer when serializing to a string based on an estimate of the size of the resulting string
+        ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, bool estimateOutputSize = false)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, bool estimateOutputSize = false, bool allowHashFunction = true)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
@@ -76,6 +76,7 @@ namespace Jil
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
             ShouldEstimateOutputSize = estimateOutputSize;
+            AllowHashFunction = allowHashFunction;
         }
 
         /// <summary>

@@ -908,14 +908,14 @@ namespace JilTests
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                     }
 
                     {
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                     }
                 }
                 finally
@@ -956,14 +956,14 @@ namespace JilTests
                         InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                     }
 
                     {
                         InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                     }
                 }
                 finally
@@ -1020,14 +1020,14 @@ namespace JilTests
                     InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
 
                     // Build the *actual* deserializer method
-                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                 }
 
                 {
                     InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = false;
 
                     // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
+                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
                 }
             }
             finally
