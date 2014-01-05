@@ -50,7 +50,9 @@
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\MemberMatcher.cs" />
     <Compile Include="Deserialize\Methods.cs" />
-    <Compile Include="Deserialize\Methods.Hashes.cs" />
+    <Compile Include="Deserialize\Methods.Hashes.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
     <Compile Include="Deserialize\Methods.ReadNumbers.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
