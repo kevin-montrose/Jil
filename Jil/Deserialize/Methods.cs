@@ -841,7 +841,7 @@ namespace Jil.Deserialize
 
         public static readonly MethodInfo MemberHash = typeof(Methods).GetMethod("_MemberHash", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int _MemberHash(TextReader reader, out int length)
+        static int _MemberHash(TextReader reader, out int bucket, out uint fullHash)
         {
             // This is basically: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 
@@ -851,7 +851,7 @@ namespace Jil.Deserialize
             var result = offset;
             int unescaped;
 
-            length = 0;
+            var length = 0;
 
             while (true)
             {
@@ -874,14 +874,14 @@ namespace Jil.Deserialize
 
                 switch (second)
                 {
-                    case '"': return '"';
-                    case '\\': return '\\';
-                    case '/': return '/';
-                    case 'b': return '\b';
-                    case 'f': return '\f';
-                    case 'n': return '\n';
-                    case 'r': return '\r';
-                    case 't': return '\t';
+                    case '"': unescaped = '"'; goto finished;
+                    case '\\': unescaped = '\\'; goto finished;
+                    case '/': unescaped = '/'; goto finished;
+                    case 'b': unescaped = '\b'; goto finished;
+                    case 'f': unescaped = '\f'; goto finished;
+                    case 'n': unescaped = '\n'; goto finished;
+                    case 'r': unescaped = '\r'; goto finished;
+                    case 't': unescaped = '\t'; goto finished;
                 }
 
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
@@ -917,7 +917,7 @@ namespace Jil.Deserialize
                     throw new Exception("Expected hex digit, found: " + c);
                 }
 
-            char2:
+                char2:
                 unescaped *= 16;
                 {
                     var c = reader.Read();
@@ -946,7 +946,7 @@ namespace Jil.Deserialize
                     throw new Exception("Expected hex digit, found: " + c);
                 }
 
-            char3:
+                char3:
                 unescaped *= 16;
                 {
                     var c = reader.Read();
@@ -975,7 +975,7 @@ namespace Jil.Deserialize
                     throw new Exception("Expected hex digit, found: " + c);
                 }
 
-            char4:
+                char4:
                 unescaped *= 16;
                 {
                     var c = reader.Read();
@@ -1017,9 +1017,10 @@ namespace Jil.Deserialize
                 length++;
             }
 
-            var ret = (int)(result % MaximumMemberHashes);
+            fullHash = result;
+            bucket = (int)(result % MaximumMemberHashes);
 
-            return ret;
+            return length;
         }
     }
 }

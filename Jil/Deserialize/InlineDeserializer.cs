@@ -13,6 +13,7 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
+        public static bool UseHashWhenMatchingMembers = false;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -780,6 +781,221 @@ namespace Jil.Deserialize
         }
 
         void ReadObject(Type objType)
+        {
+            if (UseHashWhenMatchingMembers)
+            {
+                var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
+                var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
+
+                if (isAvailable)
+                {
+                    ReadObjectHashing(objType);
+                    return;
+                }
+            }
+
+            ReadObjectDictionaryLookup(objType);
+        }
+
+        void ReadObjectHashing(Type objType)
+        {
+            var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
+
+            if (!objType.IsValueType)
+            {
+                ExpectRawCharOrNull(
+                    '{',
+                    () => { },
+                    () =>
+                    {
+                        Emit.LoadNull();
+                        Emit.Branch(doneSkipChar);
+                    }
+                );
+            }
+            else
+            {
+                ExpectChar('{');
+            }
+
+            using (var loc = Emit.DeclareLocal(objType))
+            {
+                Action loadObj;
+                if (objType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(loc);     // objType*
+                    Emit.InitializeObject(objType); // --empty--
+
+                    loadObj = () => Emit.LoadLocalAddress(loc);
+                }
+                else
+                {
+                    Emit.NewObject(objType.GetConstructor(Type.EmptyTypes));    // objType
+                    Emit.StoreLocal(loc);                                       // --empty--
+
+                    loadObj = () => Emit.LoadLocal(loc);
+                }
+
+                var loopStart = Emit.DefineLabel();
+
+                var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
+                var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
+                var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
+                var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
+
+                ConsumeWhiteSpace();        // --empty--
+                loadObj();                  // objType(*?)
+                RawPeekChar();              // objType(*?) int 
+                Emit.LoadConstant('}');     // objType(*?) int '}'
+                Emit.BranchIfEqual(done);   // objType(*?)
+                
+                ExpectQuote();                  // objType(*?)
+                Emit.LoadArgument(0);           // objType(*?) TextReader
+                using (var bucket = Emit.DeclareLocal<int>())
+                using (var hash = Emit.DeclareLocal<uint>())
+                {
+                    Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
+                    Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
+                    Emit.Call(Methods.MemberHash);  // objType(*?) length
+                    Emit.LoadLocal(hash);           // objType(*?) length hash
+                    Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
+                }
+                ExpectQuote();
+                
+                ConsumeWhiteSpace();        // objType(*?) length hash bucket
+                ExpectChar(':');            // objType(*?) length hash bucket
+                ConsumeWhiteSpace();        // objType(*?) length hash bucket
+
+                var readingMember = Emit.DefineLabel();
+                Emit.MarkLabel(readingMember);  // objType(*?) length hash bucket
+
+                Emit.Switch(labels);            // objType(*?) length hash
+
+                // fallthrough case
+                Emit.Pop();                     // objType(*?) length
+                Emit.Pop();                     // objType(*?)
+                Emit.Pop();                     // --empty--
+                SkipObjectMember();             // --empty--
+                Emit.Branch(loopStart);
+
+                for(var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
+                {
+                    var label = labels[i];
+                    var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
+
+                    // this bucket is empty
+                    if (memberName == null)
+                    {
+                        Emit.MarkLabel(label);  // objType(*?) length hash
+                        Emit.Pop();             // objType(*?) length
+                        Emit.Pop();             // objType(*?)
+                        Emit.Pop();             // --empty--
+                        SkipObjectMember();     // --empty--
+                        Emit.Branch(loopStart); // --empty--
+                    }
+                    else
+                    {
+                        var member = objType.GetMember(memberName).Where(m => m is FieldInfo || m is PropertyInfo).Single();
+                        var hash = hashLookup[memberName];
+                        var memberType = member.ReturnType();
+
+                        var isHashMatch = Emit.DefineLabel();
+                        var isLengthMatch = Emit.DefineLabel();
+
+                        Emit.MarkLabel(label);                  // objType(*?) length hash
+                        Emit.LoadConstant(hash);                // objType(*?) length hash expectedHash
+                        Emit.BranchIfEqual(isHashMatch);        // objType(*?) length
+                        
+                        // collision
+                        Emit.Pop();                             // objType(*?)
+                        Emit.Pop();                             // --empty--
+                        SkipObjectMember();                     // --empty--
+                        Emit.Branch(loopStart);                 // --empty--
+                        
+                        Emit.MarkLabel(isHashMatch);
+                        Emit.LoadConstant(memberName.Length);   // objType(*?) length expectedLength
+                        Emit.BranchIfEqual(isLengthMatch);      // objType(*?)
+
+                        // collision
+                        Emit.Pop();                             // --empty--
+                        SkipObjectMember();                     // --empty--
+                        Emit.Branch(loopStart);                 // --empty--
+
+                        Emit.MarkLabel(isLengthMatch);          // objType(*?)
+                        Build(member.ReturnType());             // objType(*?) memberType
+
+                        if (member is FieldInfo)
+                        {
+                            Emit.StoreField((FieldInfo)member);             // --empty--
+                        }
+                        else
+                        {
+                            Emit.Call(((PropertyInfo)member).SetMethod);    // --empty--
+                        }
+
+                        Emit.Branch(loopStart);     // --empty--
+                    }
+                }
+
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(loopStart);      // --empty--
+                ConsumeWhiteSpace();            // --empty--
+                loadObj();                      // objType(*?)
+                RawPeekChar();                  // objType(*?) int 
+                Emit.Duplicate();               // objType(*?) int int
+                Emit.LoadConstant(',');         // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);   // objType(*?) int
+                Emit.LoadConstant('}');         // objType(*?) int '}'
+                Emit.BranchIfEqual(done);       // objType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "}");
+
+                Emit.MarkLabel(nextItem);           // objType(*?) int
+                
+                // skip the , & any whitespace
+                Emit.Pop();                         // objType(*?)
+                Emit.LoadArgument(0);               // objType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+                Emit.Pop();                         // objType(*?)
+                ConsumeWhiteSpace();                // objType(*?)
+                
+                ExpectQuote();                      // objType(*?)
+                Emit.LoadArgument(0);               // objType(*?) TextReader
+                using (var bucket = Emit.DeclareLocal<int>())
+                using (var hash = Emit.DeclareLocal<uint>())
+                {
+                    Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
+                    Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
+                    Emit.Call(Methods.MemberHash);  // objType(*?) length
+                    Emit.LoadLocal(hash);           // objType(*?) length hash
+                    Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
+                }
+                ExpectQuote();
+
+                ConsumeWhiteSpace();        // objType(*?) length hash bucket
+                ExpectChar(':');            // objType(*?) length hash bucket
+                ConsumeWhiteSpace();        // objType(*?) length hash bucket
+
+                Emit.Branch(readingMember); // objType(*?) length hash bucket
+            }
+
+            Emit.MarkLabel(done);               // objType(*?)
+            Emit.LoadArgument(0);               // objType(*?) TextReader
+            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+            Emit.Pop();                         // objType(*?)
+
+            Emit.MarkLabel(doneSkipChar);       // objType(*?)
+
+            if (objType.IsValueType)
+            {
+                Emit.LoadObject(objType);     // objType
+            }
+        }
+
+        void ReadObjectDictionaryLookup(Type objType)
         {
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
