@@ -2,15 +2,15 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>Sigil</id>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <authors>Kevin Montrose</authors>
     <owners>Kevin Montrose</owners>
     <licenseUrl>http://opensource.org/licenses/MS-PL</licenseUrl>
     <projectUrl>https://github.com/kevin-montrose/Sigil</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>A fail-fast validation helper for .NET CIL generation.</description>
-    <releaseNotes>Fixes for some edge cases where the stack would be reversed for verification purposes.</releaseNotes>
-    <copyright>2013 Kevin Montrose</copyright>
+    <releaseNotes>Fixes a bug in StoreField w.r.t. ValueTypes.</releaseNotes>
+    <copyright>2013-2014 Kevin Montrose</copyright>
     <tags>cil msil il bytecode</tags>
   </metadata>
 </package>

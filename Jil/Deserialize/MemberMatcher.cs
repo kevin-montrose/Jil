@@ -13,14 +13,15 @@ namespace Jil.Deserialize
     {
         public static bool IsEligible;
         public static bool IsAvailable;
-        public static Dictionary<string, int> HashLookup;
+        public static Dictionary<string, int> BucketLookup;
+        public static Dictionary<string, uint> HashLookup;
 
         static MemberMatcher()
         {
-            IsAvailable = MakeMemberMatcher(out IsEligible, out HashLookup);
+            IsAvailable = MakeMemberMatcher(out IsEligible, out BucketLookup, out HashLookup);
         }
 
-        static bool MakeMemberMatcher(out bool eligible, out Dictionary<string, int> hashToMember)
+        static bool MakeMemberMatcher(out bool eligible, out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash)
         {
             var forType = typeof(ForType);
 
@@ -35,35 +36,47 @@ namespace Jil.Deserialize
             if (memberNames.Count > Methods.MaximumMemberHashes)
             {
                 eligible = false;
-                hashToMember = null;
+                memberToBucket = null;
+                memberToHash = null;
                 return false;
             }
 
             eligible = true;
 
-            var hashed =
+            var mToH = new Dictionary<string,uint>();
+
+            var buckets =
                 memberNames.GroupBy(
                      m =>
                      {
                          using (var str = new StringReader("\"" + m.JsonEscape(jsonp: false) + "\""))
                          {
                              str.Read();    // skip "
-                             var ret = (int)Methods.MemberHash.Invoke(null, new object[] { str, null });
 
-                             return ret;
+                             var ps = new object[] { str, (int)-1, (uint)0 };
+                             Methods.MemberHash.Invoke(null, ps);
+
+                             var bucket = (int)ps[1];
+                             var hash = (uint)ps[2];
+
+                             mToH[m] = hash;
+
+                             return bucket;
                          }
                      }
                 );
 
-            var collisions = hashed.Any(g => g.Count() > 1);
+            var collisions = buckets.Any(g => g.Count() > 1);
 
             if (collisions)
             {
-                hashToMember = null;
+                memberToHash = null;
+                memberToBucket = null;
                 return false;
             }
 
-            hashToMember = hashed.ToDictionary(d => d.Single(), d => d.Key);
+            memberToHash = mToH;
+            memberToBucket = buckets.ToDictionary(d => d.Single(), d => d.Key);
             return true;
         }
     }
