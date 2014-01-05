@@ -16,6 +16,8 @@ namespace Jil.Deserialize
         //    you'll just be making string parsing slower for no benefit
         public const int CharBufferSize = 32;
 
+        public const int MaximumMemberHashes = 64;
+
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -100,7 +102,7 @@ namespace Jil.Deserialize
             asStruct.B00 = ReadGuidByte(reader);
 
             if (reader.Read() != '-') throw new DeserializationException("Expected -");
-            
+
             asStruct.B05 = ReadGuidByte(reader);
             asStruct.B04 = ReadGuidByte(reader);
 
@@ -187,7 +189,7 @@ namespace Jil.Deserialize
             }
 
             // skip a string
-            if(leadChar == '"')
+            if (leadChar == '"')
             {
                 SkipEncodedString(reader);
                 return;
@@ -620,7 +622,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-            char2:
+        char2:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -649,7 +651,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-            char3:
+        char3:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -678,7 +680,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-            char4:
+        char4:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -707,7 +709,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-            finished:
+        finished:
             if (ret < char.MinValue || ret > char.MaxValue) throw new Exception("Encoded character out of System.Char range, found: " + ret);
 
             return (char)ret;
@@ -746,7 +748,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-            char2:
+        char2:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -774,67 +776,250 @@ namespace Jil.Deserialize
 
                 throw new Exception("Expected hex digit, found: " + c);
             }
+
+        char3:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+        char4:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+        finished:
+            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+        }
+
+        public static readonly MethodInfo MemberHash = typeof(Methods).GetMethod("_MemberHash", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _MemberHash(TextReader reader, out int length)
+        {
+            // This is basically: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+
+            const uint prime = 16777619;
+            const uint offset = 2166136261;
+
+            var result = offset;
+            int unescaped;
+
+            length = 0;
+
+            while (true)
+            {
+                var first = reader.Peek();
+
+                if (first == -1) throw new Exception("Expected any character");
+
+                if (first == '"') break;
+
+                reader.Read();
+
+                if (first != '\\')
+                {
+                    unescaped = first;
+                    goto finished;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character");
+
+                switch (second)
+                {
+                    case '"': return '"';
+                    case '\\': return '\\';
+                    case '/': return '/';
+                    case 'b': return '\b';
+                    case 'f': return '\f';
+                    case 'n': return '\n';
+                    case 'r': return '\r';
+                    case 't': return '\t';
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                unescaped = 0;
+
+                //char1:
+                {
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        unescaped += c;
+                        goto char2;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char2;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char2;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
+
+            char2:
+                unescaped *= 16;
+                {
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        unescaped += c;
+                        goto char3;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char3;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char3;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
 
             char3:
-            encodedChar *= 16;
-            {
-                var c = reader.Read();
-
-                c -= '0';
-                if (c >= 0 && c <= 9)
+                unescaped *= 16;
                 {
-                    encodedChar += c;
-                    goto char4;
-                }
+                    var c = reader.Read();
 
-                c -= ('A' - '0');
-                if (c >= 0 && c <= 5)
-                {
-                    encodedChar += 10 + c;
-                    goto char4;
-                }
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        unescaped += c;
+                        goto char4;
+                    }
 
-                c -= ('f' - 'A' - '0');
-                if (c >= 0 && c <= 5)
-                {
-                    encodedChar += 10 + c;
-                    goto char4;
-                }
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char4;
+                    }
 
-                throw new Exception("Expected hex digit, found: " + c);
-            }
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto char4;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
+                }
 
             char4:
-            encodedChar *= 16;
-            {
-                var c = reader.Read();
-
-                c -= '0';
-                if (c >= 0 && c <= 9)
+                unescaped *= 16;
                 {
-                    encodedChar += c;
-                    goto finished;
+                    var c = reader.Read();
+
+                    c -= '0';
+                    if (c >= 0 && c <= 9)
+                    {
+                        unescaped += c;
+                        goto finished;
+                    }
+
+                    c -= ('A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto finished;
+                    }
+
+                    c -= ('f' - 'A' - '0');
+                    if (c >= 0 && c <= 5)
+                    {
+                        unescaped += 10 + c;
+                        goto finished;
+                    }
+
+                    throw new Exception("Expected hex digit, found: " + c);
                 }
 
-                c -= ('A' - '0');
-                if (c >= 0 && c <= 5)
-                {
-                    encodedChar += 10 + c;
-                    goto finished;
-                }
+                finished:
+                result ^= (uint)(unescaped & 0xFF);
+                result *= prime;
+                result ^= (uint)((unescaped >> 8) & 0xFF);
+                result *= prime;
+                result ^= (uint)((unescaped >> 16) & 0xFF);
+                result *= prime;
+                result ^= (uint)((unescaped >> 24) & 0xFF);
+                result *= prime;
 
-                c -= ('f' - 'A' - '0');
-                if (c >= 0 && c <= 5)
-                {
-                    encodedChar += 10 + c;
-                    goto finished;
-                }
-
-                throw new Exception("Expected hex digit, found: " + c);
+                length++;
             }
 
-            finished:
-            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+            var ret = (int)(result % MaximumMemberHashes);
+
+            return ret;
         }
     }
 }
