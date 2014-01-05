@@ -13,7 +13,7 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseHashWhenMatchingMembers = false;
+        public static bool UseHashWhenMatchingMembers = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -861,6 +861,8 @@ namespace Jil.Deserialize
                 var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
                 var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
                 var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
+                var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
+                var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
 
                 ConsumeWhiteSpace();        // --empty--
                 loadObj();                  // objType(*?)
@@ -875,7 +877,7 @@ namespace Jil.Deserialize
                 {
                     Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
                     Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
-                    Emit.Call(Methods.MemberHash);  // objType(*?) length
+                    Emit.Call(hashMtd);             // objType(*?) length
                     Emit.LoadLocal(hash);           // objType(*?) length hash
                     Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
                 }
@@ -987,7 +989,7 @@ namespace Jil.Deserialize
                 {
                     Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
                     Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
-                    Emit.Call(Methods.MemberHash);  // objType(*?) length
+                    Emit.Call(hashMtd);             // objType(*?) length
                     Emit.LoadLocal(hash);           // objType(*?) length hash
                     Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
                 }
