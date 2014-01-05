@@ -14,7 +14,7 @@ namespace Jil.Deserialize
         None = 0,
 
         SixtyFour = 64,
-        ThrityTwo = 32,
+        ThirtyTwo = 32,
         Sixteen = 16,
         Eight = 8,
         Four = 4,
@@ -38,12 +38,12 @@ namespace Jil.Deserialize
         {
             switch (mode)
             {
-                case MemberMatcherMode.One:
-                case MemberMatcherMode.Two:
-                case MemberMatcherMode.Four:
-                case MemberMatcherMode.Eight:
-                case MemberMatcherMode.Sixteen:
-                case MemberMatcherMode.ThrityTwo:
+                case MemberMatcherMode.One: return Methods.MemberHash1;
+                case MemberMatcherMode.Two: return Methods.MemberHash2;
+                case MemberMatcherMode.Four: return Methods.MemberHash4;
+                case MemberMatcherMode.Eight: return Methods.MemberHash8;
+                case MemberMatcherMode.Sixteen: return Methods.MemberHash16;
+                case MemberMatcherMode.ThirtyTwo: return Methods.MemberHash32;
                 case MemberMatcherMode.SixtyFour: return Methods.MemberHash64;
                 default: throw new Exception("Unexpected MemberMatcherMode: " + mode);
             }
