@@ -24,7 +24,6 @@ namespace Jil.Deserialize
 
     class MemberMatcher<ForType>
     {
-        public static bool IsEligible;
         public static bool IsAvailable;
         public static Dictionary<string, int> BucketLookup;
         public static Dictionary<string, uint> HashLookup;
@@ -32,7 +31,7 @@ namespace Jil.Deserialize
 
         static MemberMatcher()
         {
-            IsAvailable = MakeMemberMatcher(out IsEligible, out BucketLookup, out HashLookup, out Mode);
+            IsAvailable = MakeMemberMatcher(out BucketLookup, out HashLookup, out Mode);
         }
 
         public static MethodInfo GetHashMethod(MemberMatcherMode mode)
@@ -45,12 +44,12 @@ namespace Jil.Deserialize
                 case MemberMatcherMode.Eight:
                 case MemberMatcherMode.Sixteen:
                 case MemberMatcherMode.ThrityTwo:
-                case MemberMatcherMode.SixtyFour: return Methods.MemberHash;
+                case MemberMatcherMode.SixtyFour: return Methods.MemberHash64;
                 default: throw new Exception("Unexpected MemberMatcherMode: " + mode);
             }
         }
 
-        static bool MakeMemberMatcher(out bool eligible, out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash, out MemberMatcherMode bestMode)
+        static bool MakeMemberMatcher(out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash, out MemberMatcherMode bestMode)
         {
             var forType = typeof(ForType);
 
@@ -60,18 +59,6 @@ namespace Jil.Deserialize
             var members = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>());
 
             var memberNames = members.Select(m => m.Name).ToList();
-
-            // This can't be uncapped
-            if (memberNames.Count > Methods.MaximumMemberHashes)
-            {
-                eligible = false;
-                memberToBucket = null;
-                memberToHash = null;
-                bestMode = MemberMatcherMode.None;
-                return false;
-            }
-
-            eligible = true;
 
             var allModes =
                 Enum.GetValues(typeof(MemberMatcherMode))

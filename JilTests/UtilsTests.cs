@@ -681,9 +681,6 @@ namespace JilTests
                 var matcher = typeof(Jil.Deserialize.MemberMatcher<>).MakeGenericType(type);
                 if (matcher.ContainsGenericParameters) continue;
 
-                var isEligible = (bool)matcher.GetField("IsEligible").GetValue(null);
-                if (!isEligible) continue;
-
                 var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
                 if (!isAvailable) fails++;
                 if (isAvailable) success++;

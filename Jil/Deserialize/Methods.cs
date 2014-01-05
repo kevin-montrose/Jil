@@ -16,8 +16,6 @@ namespace Jil.Deserialize
         //    you'll just be making string parsing slower for no benefit
         public const int CharBufferSize = 32;
 
-        public const int MaximumMemberHashes = 64;
-
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -622,7 +620,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char2:
+            char2:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -651,7 +649,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char3:
+            char3:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -680,7 +678,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char4:
+            char4:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -709,7 +707,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        finished:
+            finished:
             if (ret < char.MinValue || ret > char.MaxValue) throw new Exception("Encoded character out of System.Char range, found: " + ret);
 
             return (char)ret;
@@ -748,7 +746,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char2:
+            char2:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -777,7 +775,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char3:
+            char3:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -806,7 +804,7 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        char4:
+            char4:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -835,13 +833,137 @@ namespace Jil.Deserialize
                 throw new Exception("Expected hex digit, found: " + c);
             }
 
-        finished:
+            finished:
             commonSb.Append(char.ConvertFromUtf32(encodedChar));
         }
 
-        public static readonly MethodInfo MemberHash = typeof(Methods).GetMethod("_MemberHash", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int _MemberHash(TextReader reader, out int bucket, out uint fullHash)
+        static int ReadHexQuad(TextReader reader)
+        {
+            int unescaped = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char2:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char3:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            char4:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                throw new Exception("Expected hex digit, found: " + c);
+            }
+
+            finished:
+            return unescaped;
+        }
+
+        public static readonly MethodInfo MemberHash64 = typeof(Methods).GetMethod("_MemberHash64", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _MemberHash64(TextReader reader, out int bucket, out uint fullHash)
         {
             // This is basically: http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 
@@ -887,122 +1009,7 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                unescaped = 0;
-
-                //char1:
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        unescaped += c;
-                        goto char2;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char2;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char2;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char2:
-                unescaped *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        unescaped += c;
-                        goto char3;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char3;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char3;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char3:
-                unescaped *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        unescaped += c;
-                        goto char4;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char4;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto char4;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
-
-                char4:
-                unescaped *= 16;
-                {
-                    var c = reader.Read();
-
-                    c -= '0';
-                    if (c >= 0 && c <= 9)
-                    {
-                        unescaped += c;
-                        goto finished;
-                    }
-
-                    c -= ('A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto finished;
-                    }
-
-                    c -= ('f' - 'A' - '0');
-                    if (c >= 0 && c <= 5)
-                    {
-                        unescaped += 10 + c;
-                        goto finished;
-                    }
-
-                    throw new Exception("Expected hex digit, found: " + c);
-                }
+                unescaped = ReadHexQuad(reader);
 
                 finished:
                 result ^= (uint)(unescaped & 0xFF);
@@ -1018,7 +1025,7 @@ namespace Jil.Deserialize
             }
 
             fullHash = result;
-            bucket = (int)(result % MaximumMemberHashes);
+            bucket = (int)(result % 64);
 
             return length;
         }
