@@ -71,7 +71,7 @@ namespace JilTests
             return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
         }
 
-        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
+        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, T> a, Func<TextReader, T> b, out double aTimeMS, out double bTimeMS)
         {
             var asStrings = toSerialize.Select(o => Jil.JSON.Serialize(o, opts)).ToList();
 
@@ -86,7 +86,7 @@ namespace JilTests
                     {
                         using (var str = new StringReader(asStrings[i]))
                         {
-                            a(str, 0);
+                            a(str);
                         }
                     }
                     aTimer.Stop();
@@ -100,7 +100,7 @@ namespace JilTests
                     {
                         using (var str = new StringReader(asStrings[i]))
                         {
-                            b(str, 0);
+                            b(str);
                         }
                     }
                     bTimer.Stop();
@@ -848,8 +848,8 @@ namespace JilTests
         {
             // objects
             {
-                Func<TextReader, int, _AlwaysUseCharBufferForStrings> fast;
-                Func<TextReader, int, _AlwaysUseCharBufferForStrings> normal;
+                Func<TextReader, _AlwaysUseCharBufferForStrings> fast;
+                Func<TextReader, _AlwaysUseCharBufferForStrings> normal;
 
                 try
                 {
@@ -896,8 +896,8 @@ namespace JilTests
 
             // strings
             {
-                Func<TextReader, int, string> fast;
-                Func<TextReader, int, string> normal;
+                Func<TextReader, string> fast;
+                Func<TextReader, string> normal;
 
                 try
                 {
@@ -958,8 +958,8 @@ namespace JilTests
         [TestMethod]
         public void UseHashWhenMatchingMembers()
         {
-            Func<TextReader, int, _UseHashWhenMatchingMembers> hash;
-            Func<TextReader, int, _UseHashWhenMatchingMembers> dictionary;
+            Func<TextReader, _UseHashWhenMatchingMembers> hash;
+            Func<TextReader, _UseHashWhenMatchingMembers> dictionary;
 
             Assert.IsTrue(MemberMatcher<_UseHashWhenMatchingMembers>.IsAvailable);
 
