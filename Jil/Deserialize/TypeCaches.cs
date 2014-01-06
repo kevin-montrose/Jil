@@ -9,7 +9,7 @@ namespace Jil.Deserialize
 {
     static class NewtonsoftStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static NewtonsoftStyleTypeCache()
         {
@@ -19,7 +19,7 @@ namespace Jil.Deserialize
 
     static class NewtonsoftStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static NewtonsoftStyleNoHashingTypeCache()
         {
@@ -29,7 +29,7 @@ namespace Jil.Deserialize
 
     static class MillisecondStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static MillisecondStyleTypeCache()
         {
@@ -39,7 +39,7 @@ namespace Jil.Deserialize
 
     static class MillisecondStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static MillisecondStyleNoHashingTypeCache()
         {
@@ -49,7 +49,7 @@ namespace Jil.Deserialize
 
     static class SecondStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static SecondStyleTypeCache()
         {
@@ -59,7 +59,7 @@ namespace Jil.Deserialize
 
     static class SecondStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static SecondStyleNoHashingTypeCache()
         {
@@ -69,7 +69,7 @@ namespace Jil.Deserialize
 
     static class ISO8601StyleTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static ISO8601StyleTypeCache()
         {
@@ -79,7 +79,7 @@ namespace Jil.Deserialize
 
     static class ISO8601StyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, int, T> Thunk;
+        public static readonly Func<TextReader, T> Thunk;
 
         static ISO8601StyleNoHashingTypeCache()
         {

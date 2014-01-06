@@ -1202,14 +1202,11 @@ namespace Jil.Deserialize
 
             if (allowRecursion && RecursiveTypes.Contains(forType))
             {
-                var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
+                var funcType = typeof(Func<,>).MakeGenericType(typeof(TextReader), forType);
                 var funcInvoke = funcType.GetMethod("Invoke");
 
-                LoadRecursiveTypeDelegate(forType); // Func<TextReader, int, memberType>
-                Emit.LoadArgument(0);               // Func<TextReader, int, memberType> TextReader
-                Emit.LoadArgument(1);               // Func<TextReader, int, memberType> TextReader int
-                Emit.LoadConstant(1);               // Func<TextReader, int, memberType> TextReader int 1
-                Emit.Add();                         // Func<TextReader, int, memberType> TextReader int
+                LoadRecursiveTypeDelegate(forType); // Func<TextReader, memberType>
+                Emit.LoadArgument(0);               // Func<TextReader, memberType> TextReader
                 Emit.Call(funcInvoke);              // memberType
                 return;
             }
@@ -1217,7 +1214,7 @@ namespace Jil.Deserialize
             ReadObject(forType);
         }
 
-        public Func<TextReader, int, ForType> BuildWithNewDelegate()
+        public Func<TextReader, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
@@ -1230,7 +1227,7 @@ namespace Jil.Deserialize
             doVerify = false;
 #endif
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: doVerify);
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: doVerify);
 
             AddGlobalVariables();
 
@@ -1246,13 +1243,13 @@ namespace Jil.Deserialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, int, ForType>>();
+            return Emit.CreateDelegate<Func<TextReader, ForType>>();
         }
     }
 
     static class InlineDeserializerHelper
     {
-        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing)
+        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing)
         {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat, allowHashing);
 
