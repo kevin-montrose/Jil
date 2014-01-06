@@ -82,7 +82,7 @@ namespace Jil
                 return "null";
             }
 
-            using (var str = options.ShouldEstimateOutputSize ? new StringWriter(new StringBuilder(CapacityCache.Get(data.GetType(), options))) : new StringWriter())
+            using (var str = new StringWriter())
             {
                 SerializeDynamic(data, str, options);
                 return str.ToString();
@@ -131,7 +131,7 @@ namespace Jil
         {
             options = options ?? Options.Default;
 
-            using (var str = options.ShouldEstimateOutputSize ? new StringWriter(new StringBuilder(CapacityCache.Get<T>(options))) : new StringWriter())
+            using (var str = new StringWriter())
             {
                 Serialize(data, str, options);
                 return str.ToString();
