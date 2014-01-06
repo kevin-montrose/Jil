@@ -50,7 +50,7 @@ namespace Jil.Serialize
         //    member access is the "fastest" most often given the buckets I've chosen to use.
         // I make no claims that this is absolutely ideal, but it appears to be better than
         //   declaration order.
-        internal static int[] MemberOrdering = new int[] { 3, 1, -4, 2 };
+        internal static int[] MemberOrdering = new int[] { -1, 3, 4, -2 };
 
         public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
         {
