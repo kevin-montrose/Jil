@@ -1298,8 +1298,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-
-                Assert.AreEqual("{\"F\":{\"E\":{\"C\":999},\"B\":\"world\",\"D\":456},\"A\":\"hello\",\"C\":123}", res);
+                Assert.AreEqual("{\"F\":{\"E\":{\"C\":999},\"D\":456,\"B\":\"world\"},\"C\":123,\"A\":\"hello\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -1362,8 +1361,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-
-                Assert.AreEqual("{\n \"F\": {\n  \"F\": null,\n  \"E\": {\n   \"F\": null,\n   \"E\": null,\n   \"A\": null,\n   \"B\": null,\n   \"C\": 999,\n   \"D\": null\n  },\n  \"A\": null,\n  \"B\": \"world\",\n  \"C\": null,\n  \"D\": 456\n },\n \"E\": null,\n \"A\": \"hello\",\n \"B\": null,\n \"C\": 123,\n \"D\": null\n}", res);
+                Assert.AreEqual("{\n \"E\": null,\n \"F\": {\n  \"E\": {\n   \"E\": null,\n   \"F\": null,\n   \"D\": null,\n   \"C\": 999,\n   \"B\": null,\n   \"A\": null\n  },\n  \"F\": null,\n  \"D\": 456,\n  \"C\": null,\n  \"B\": \"world\",\n  \"A\": null\n },\n \"D\": null,\n \"C\": 123,\n \"B\": null,\n \"A\": \"hello\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1394,8 +1392,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-
-                Assert.AreEqual("{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"B\": \"world\",\n  \"D\": 456\n },\n \"A\": \"hello\",\n \"C\": 123\n}", res);
+                Assert.AreEqual("{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"D\": 456,\n  \"B\": \"world\"\n },\n \"C\": 123,\n \"A\": \"hello\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1412,7 +1409,6 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-
                 Assert.AreEqual("{\n \"hello world\": 31415926,\n \"fizz buzz\": null,\n \"foo bar\": 1318\n}", res);
             }
 
@@ -1430,7 +1426,6 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-
                 Assert.AreEqual("{\n \"hello world\": 31415926,\n \"foo bar\": 1318\n}", res);
             }
         }
@@ -1813,7 +1808,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -1847,7 +1842,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1881,7 +1876,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511000,\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+                Assert.AreEqual("{\"A\":-23215049511000,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -1915,7 +1910,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1949,7 +1944,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511,\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+                Assert.AreEqual("{\"A\":-23215049511,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -1983,7 +1978,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511,\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+                Assert.AreEqual("{\n \"A\": -23215049511,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2017,7 +2012,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"C\":\"hello\\u2028\\u2029world\",\"B\":null}", res);
+                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2051,7 +2046,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"C\": \"hello\\u2028\\u2029world\",\n \"B\": null\n}", res);
+                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -5607,7 +5602,8 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"B\":null}", str.ToString());
+                    var res = str.ToString();
+                    Assert.AreEqual("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"B\":null}", res);
                 }
             }
 
@@ -5654,7 +5650,8 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"}", str.ToString());
+                    var res = str.ToString();
+                    Assert.AreEqual("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}}", res);
                 }
             }
 
@@ -5701,7 +5698,8 @@ namespace JilTests
                         Options.PrettyPrint
                     );
 
-                    Assert.AreEqual("{\n \"C\": [\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\n \"D\": {\n  \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n  \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n },\n \"A\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"B\": null\n}", str.ToString());
+                    var res = str.ToString();
+                    Assert.AreEqual("{\n \"A\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"C\": [\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\n \"D\": {\n  \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n  \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n },\n \"B\": null\n}", res);
                 }
             }
         }
@@ -5751,7 +5749,8 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":1,\"C\":\"hello world\",\"B\":null}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -5782,7 +5781,7 @@ namespace JilTests
                     }
                 );
 
-                Assert.AreEqual("{\"A\":1,\"C\":\"hello world\",\"B\":null}", str);
+                Assert.AreEqual("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", str);
             }
 
             {
@@ -5823,7 +5822,8 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":null,\"B\":null,\"C\":null,\"D\":null,\"E\":null,\"F\":null,\"G\":null,\"H\":null,\"I\":null,\"J\":null,\"K\":null}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"K\":null,\"J\":null,\"I\":null,\"H\":null,\"G\":null,\"F\":null,\"E\":null,\"D\":null,\"C\":null,\"B\":null,\"A\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -5841,7 +5841,8 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":\"hello\",\"B\":null,\"C\":\"world\",\"D\":null,\"E\":\"fizz\",\"F\":null,\"G\":\"buzz\",\"H\":null,\"I\":\"foo\",\"J\":null,\"K\":\"bar\"}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"K\":\"bar\",\"J\":null,\"I\":\"foo\",\"H\":null,\"G\":\"buzz\",\"F\":null,\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":null,\"A\":\"hello\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -5861,7 +5862,8 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":\"hello\",\"B\":\"world\",\"C\":null,\"D\":\"fizz\",\"E\":\"buzz\",\"F\":null,\"G\":\"foo\",\"H\":\"bar\",\"I\":null,\"J\":\"syn\",\"K\":\"ack\"}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"K\":\"ack\",\"J\":\"syn\",\"I\":null,\"H\":\"bar\",\"G\":\"foo\",\"F\":null,\"E\":\"buzz\",\"D\":\"fizz\",\"C\":null,\"B\":\"world\",\"A\":\"hello\"}", res);
             }
             using (var str = new StringWriter())
             {
@@ -5879,7 +5881,8 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":null,\"B\":\"hello\",\"C\":\"world\",\"D\":null,\"E\":\"fizz\",\"F\":\"buzz\",\"G\":null,\"H\":\"foo\",\"I\":\"bar\",\"J\":null,\"K\":\"syn\"}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"K\":\"syn\",\"J\":null,\"I\":\"bar\",\"H\":\"foo\",\"G\":null,\"F\":\"buzz\",\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":\"hello\",\"A\":null}", res);
             }
         }
 
@@ -5933,7 +5936,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true}", res);
+                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -5945,7 +5948,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"type\":\"foo\",\"error_name\":null,\"error_message\":\"you don goofed\",\"total\":1,\"page_size\":2,\"page\":3,\"quota_remaining\":4,\"quota_max\":5,\"backoff\":6,\"error_id\":7,\"has_more\":true,\"Content\":null,\"ContentType\":null}", res);
+                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"Content\":null,\"ContentType\":null,\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
         }
 
