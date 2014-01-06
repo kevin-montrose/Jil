@@ -5740,6 +5740,17 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic(
+                    null,
+                    str
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("null", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.SerializeDynamic(
                     new
                     {
                         A = 1,
@@ -5764,13 +5775,20 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":1,\"B\":false}", str.ToString());
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":1,\"B\":false}", res);
             }
         }
 
         [TestMethod]
         public void SerializeDynamicToString()
         {
+            {
+                var str = JSON.SerializeDynamic(null);
+
+                Assert.AreEqual("null", str);
+            }
+
             {
                 var str = JSON.SerializeDynamic(
                     new
