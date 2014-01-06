@@ -703,57 +703,6 @@ namespace JilTests
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
-        class _UseAutoSizedStringWriter
-        {
-            public int A;
-            public int B;
-            public List<int> C;
-            public Dictionary<int, Guid> D;
-        }
-
-        [TestMethod]
-        public void UseAutoSizedStringWriter()
-        {
-            var fastOptions = new Jil.Options(estimateOutputSize: true);
-
-            Action<TextWriter, _UseAutoSizedStringWriter, int> fast =
-                (str, model, ignored) =>
-                {
-                    Jil.JSON.Serialize(model, fastOptions);
-                };
-
-            var normalOptions = new Jil.Options(estimateOutputSize: false);
-
-            Action<TextWriter, _UseAutoSizedStringWriter, int> normal =
-                (str, model, ignored) =>
-                {
-                    Jil.JSON.Serialize(model, normalOptions);
-                };
-
-            var rand = new Random(70490340);
-
-            var toSerialize = new List<_UseAutoSizedStringWriter>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(
-                    new _UseAutoSizedStringWriter
-                    {
-                        A = rand.Next(1000),
-                        B = rand.Next(1000),
-                        C = Enumerable.Range(5, rand.Next(5) + 5).Select(_ => rand.Next(1000)).ToList(),
-                        D = Enumerable.Range(5, rand.Next(5) + 5).ToDictionary(_ => _, _ => _RandGuid(rand))
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double fastTime, normalTime;
-            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
-
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
-        }
-
         class _AllocationlessDictionaries
         {
             public Dictionary<string, int> A;

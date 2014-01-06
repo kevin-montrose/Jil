@@ -53,7 +53,6 @@ namespace Jil
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
         internal bool IsJSONP { get; private set; }
         internal bool ShouldIncludeInherited { get; private set; }
-        internal bool ShouldEstimateOutputSize { get; private set; }
         internal bool AllowHashFunction { get; private set; }
 
         /// <summary>
@@ -65,17 +64,15 @@ namespace Jil
         ///   jsonp - whether or not the serialized json should be valid for use with JSONP
         ///   dateFormat - the style in which to serialize DateTimes
         ///   includeInherited - whether or not to serialize members declared by an objects base types
-        ///   estimateOutputSize - whether or not Jil should pre-allocate a buffer when serializing to a string based on an estimate of the size of the resulting string
         ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, bool estimateOutputSize = false, bool allowHashFunction = true)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, bool allowHashFunction = true)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
-            ShouldEstimateOutputSize = estimateOutputSize;
             AllowHashFunction = allowHashFunction;
         }
 
@@ -88,13 +85,12 @@ namespace Jil
         {
             return
                 string.Format(
-                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, ShouldEstimateOutputSize = {5} }}",
+                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, AllowHashFunction = {5} }}",
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,
                     JSONP,
-                    ShouldIncludeInherited,
-                    ShouldEstimateOutputSize
+                    AllowHashFunction
                 );
         }
     }

@@ -3010,10 +3010,6 @@ namespace Jil.Serialize
 
             var opts = new Options(pretty, excludeNulls, jsonp, dateFormat, includeInherited);
 
-            var estimatedInitialCapacity = CapacityEstimator.For(typeof(BuildForType), opts, 0);
-
-            CapacityCache.Set<BuildForType>(opts, estimatedInitialCapacity);
-
             return ret;
         }
     }

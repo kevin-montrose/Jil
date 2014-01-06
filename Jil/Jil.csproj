@@ -61,8 +61,6 @@
     <Compile Include="Deserialize\Methods.ISO8601.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
-    <Compile Include="Serialize\CapacityCache.cs" />
-    <Compile Include="Serialize\CapacityEstimator.cs" />
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JSON.cs" />
