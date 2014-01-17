@@ -193,27 +193,35 @@ namespace Jil.Serialize
             return ret;
         }
 
-        public static List<Tuple<OpCode, int?, long?, double?>> Decompile(MethodInfo mtd)
+        public static List<Tuple<OpCode, int?, long?, double?, FieldInfo>> Decompile(MethodBase mtd)
         {
             var mtdBody = mtd.GetMethodBody();
             if (mtdBody == null) return null;
             var cil = mtdBody.GetILAsByteArray();
             if (cil == null) return null;
 
-            var ret = new List<Tuple<OpCode, int?, long?, double?>>();
+            var ret = new List<Tuple<OpCode, int?, long?, double?, FieldInfo>>();
 
             int i = 0;
             while (i < cil.Length)
             {
-                int? ignored;
+                int? fieldHandle;
                 OpCode opcode;
                 int? intOperand;
                 long? longOperand;
                 double? doubleOperand;
                 var startsAt = i;
-                i += _ReadOp(cil, i, out ignored, out opcode, out intOperand, out longOperand, out doubleOperand);
+                i += _ReadOp(cil, i, out fieldHandle, out opcode, out intOperand, out longOperand, out doubleOperand);
 
-                ret.Add(Tuple.Create(opcode, intOperand, longOperand, doubleOperand));
+                FieldInfo field = null;
+                if (fieldHandle.HasValue)
+                {
+                    var genArguments = mtd.DeclaringType.GetGenericArguments();
+
+                    field = mtd.Module.ResolveField(fieldHandle.Value, genArguments, null);
+                }
+
+                ret.Add(Tuple.Create(opcode, intOperand, longOperand, doubleOperand, field));
             }
 
             return ret;
@@ -381,6 +389,7 @@ namespace Jil.Serialize
 
                 case OperandType.InlineVar:
                     advance += 2;
+                    constantInt = cil[operandStart];
                     return null;
 
                 case OperandType.ShortInlineI:
@@ -395,6 +404,7 @@ namespace Jil.Serialize
 
                 case OperandType.ShortInlineVar:
                     advance += 1;
+                    constantInt = cil[operandStart];
                     return null;
 
                 default: throw new Exception("Unexpected operand type [" + op.OperandType + "]");
@@ -478,6 +488,79 @@ namespace Jil.Serialize
                 //    all the exceptional cases
                 return new Dictionary<FieldInfo, int>();
             }
+        }
+
+        /// <summary>
+        /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
+        /// We need this for anonymous types because we can't set properties (they're read-only).
+        /// 
+        /// How this works is kind of fun.
+        /// 
+        /// By spec, the arguments to the constructor are in declaration order for an anonymous type.
+        /// So: new { A, B, C } => new SomeType(A a, B b, C c)
+        /// 
+        /// However there is no way to get declaration order via reflection, it's just not data that's
+        /// preserved.  Furthermore, the names of backing fields for those read-only properties are not
+        /// defined by the spec.
+        /// 
+        /// So I got clever.
+        /// 
+        /// This method decompiles the constructor to find out which fields are set by which arguments (by index).
+        /// It then decompiles all properties to find out which fields back which properties.
+        /// Then it finally works backwards from each property, taking the property's name type and using it's backing
+        /// field to lookup which index to pass it in as when constructing the anonymous object.
+        /// </summary>
+        public static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap(Type objType)
+        {
+            var cons = objType.GetConstructors().Single();
+
+            var consInstrs = Jil.Serialize.Utils.Decompile(cons);
+
+            var fieldToArgumentIndex = new Dictionary<FieldInfo, int>();
+
+            var fields = objType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
+
+            foreach (var field in fields)
+            {
+                var storeInstr = consInstrs.FindIndex(d => d.Item1 == OpCodes.Stfld && d.Item5 == field);
+                var preceedingLdArg = consInstrs.Take(storeInstr).Reverse().First(f => f.Item1.IsLoadArgumentOpCode());
+
+                int paramIx;
+                switch (preceedingLdArg.Item1.Value)
+                {
+                    // Ldarg_0 will be `this`, so we'll never see it
+
+                    // Ldarg_1
+                    case 0x03: paramIx = 1; break;
+                    // Ldarg_2
+                    case 0x04: paramIx = 2; break;
+                    // Ldarg_3
+                    case 0x05: paramIx = 3; break;
+
+                    // Ldarg, Ldarg_S
+                    default: paramIx = preceedingLdArg.Item2.Value; break;
+                }
+
+                fieldToArgumentIndex[field] = paramIx;
+            }
+
+            var propertyToBackingField = new Dictionary<PropertyInfo, FieldInfo>();
+            foreach (var prop in objType.GetProperties())
+            {
+                var propInstrs = Jil.Serialize.Utils.Decompile(prop.GetMethod);
+                var backingField = propInstrs.Single(p => p.Item1 == OpCodes.Ldfld);
+
+                propertyToBackingField[prop] = backingField.Item5;
+            }
+
+            var nameToTypeAndConsIndex =
+                propertyToBackingField
+                    .ToDictionary(
+                        d => d.Key.Name,
+                        d => Tuple.Create(d.Key.PropertyType, fieldToArgumentIndex[d.Value] - 1)    // -1 here because `this` adds 1 in the IL
+                    );
+
+            return nameToTypeAndConsIndex;
         }
     }
 }
