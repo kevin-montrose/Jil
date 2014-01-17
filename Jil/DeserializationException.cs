@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Jil
 {
-    class DeserializationException : Exception
+    public class DeserializationException : Exception
     {
-        public DeserializationException(string msg) : base(msg) { }
+        internal DeserializationException(string msg) : base(msg) { }
 
-        public DeserializationException(string msg, Exception inner) : base(msg, inner) { }
+        internal DeserializationException(string msg, Exception inner) : base(msg, inner) { }
     }
 }
