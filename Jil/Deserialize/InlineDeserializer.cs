@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Jil.Common;
 using Sigil.NonGeneric;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Jil.Deserialize
 {
@@ -802,6 +803,14 @@ namespace Jil.Deserialize
 
         void ReadObject(Type objType)
         {
+            var isAnonymous = objType.IsAnonymouseClass();
+
+            if (isAnonymous)
+            {
+                ReadAnonymousObject(objType);
+                return;
+            }
+
             if (UseHashWhenMatchingMembers && AllowHashing)
             {
                 var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
@@ -1174,6 +1183,11 @@ namespace Jil.Deserialize
             {
                 Emit.LoadObject(objType);     // objType
             }
+        }
+
+        void ReadAnonymousObject(Type objType)
+        {
+            throw new NotImplementedException();
         }
 
         void Build(Type forType, bool allowRecursion = true)
