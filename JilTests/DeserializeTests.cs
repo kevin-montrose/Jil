@@ -3288,7 +3288,7 @@ namespace JilTests
 
         List<T> AnonObjectByExample<T>(T example, string str)
         {
-            return JSON.Deserialize<List<T>>(str);
+            return JSON.Deserialize<List<T>>(str, Options.ISO8601);
         }
 
         [TestMethod]

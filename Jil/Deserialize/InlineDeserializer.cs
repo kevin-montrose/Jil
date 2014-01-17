@@ -1187,7 +1187,136 @@ namespace Jil.Deserialize
 
         void ReadAnonymousObject(Type objType)
         {
-            throw new NotImplementedException();
+            var cons = objType.GetConstructors().Single();
+
+            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
+
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+            var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
+            var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
+            var orderInst = (Dictionary<string, int>)order.GetValue(null);
+
+            var localMap = new Dictionary<string, Sigil.Local>();
+            foreach (var kv in propertyMap)
+            {
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+            }
+
+            var labels = orderInst.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+            var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
+
+            var doneNotNull = Emit.DefineLabel();
+            var doneNull = Emit.DefineLabel();
+
+            ExpectRawCharOrNull(
+                '{',
+                () => { },
+                () =>
+                {
+                    Emit.Branch(doneNull);
+                }
+            );
+
+            var loopStart = Emit.DefineLabel();
+
+            ConsumeWhiteSpace();        // --empty--
+            RawPeekChar();              // int 
+            Emit.LoadConstant('}');     // int '}'
+            Emit.BranchIfEqual(doneNotNull);   // --empty--
+            Emit.LoadField(order);      // Dictionary<string, int> string
+            Build(typeof(string));      // Dictionary<string, int> string
+            ConsumeWhiteSpace();        // Dictionary<string, int> string
+            ExpectChar(':');            // Dictionary<string, int> string
+            ConsumeWhiteSpace();        // Dictionary<string, int> string
+
+            var readingMember = Emit.DefineLabel();
+            Emit.MarkLabel(readingMember);  // Dictionary<string, int> string
+
+            using (var oLoc = Emit.DeclareLocal<int>())
+            {
+                var isMember = Emit.DefineLabel();
+
+                Emit.LoadLocalAddress(oLoc);    // Dictionary<string, int> string int*
+                Emit.Call(tryGetValue);         // bool
+                Emit.BranchIfTrue(isMember);    // --empty--
+
+                SkipObjectMember();             // --empty--
+                Emit.Branch(loopStart);         // --empty--
+
+                Emit.MarkLabel(isMember);       // --empty--
+                Emit.LoadLocal(oLoc);           // int
+                Emit.Switch(inOrderLabels);     // --empty--
+
+                // fallthrough case
+                ThrowExpected("a member name"); // --empty--
+            }
+
+            foreach (var kv in labels)
+            {
+                var label = kv.Value;
+                var local = localMap[kv.Key];
+
+                Emit.MarkLabel(label);  // --empty--
+                Build(local.LocalType); // localType
+
+                Emit.StoreLocal(local); // --empty--
+
+                Emit.Branch(loopStart); // --empty--
+            }
+
+            var nextItem = Emit.DefineLabel();
+
+            Emit.MarkLabel(loopStart);      // --empty--
+            ConsumeWhiteSpace();            // --empty--
+            RawPeekChar();                  // int 
+            Emit.Duplicate();               // int int
+            Emit.LoadConstant(',');         // int int ','
+            Emit.BranchIfEqual(nextItem);   // int
+            Emit.LoadConstant('}');         // int '}'
+            Emit.BranchIfEqual(doneNotNull);       // --empty--
+
+            // didn't get what we expected
+            ThrowExpected(",", "}");
+
+            Emit.MarkLabel(nextItem);           // int
+            Emit.Pop();                         // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+            ConsumeWhiteSpace();                // --empty--
+            Emit.LoadField(order);              // Dictionary<string, int> string
+            Build(typeof(string));              // Dictionary<string, int> string
+            ConsumeWhiteSpace();                // Dictionary<string, int> string
+            ExpectChar(':');                    // Dictionary<string, int> string
+            ConsumeWhiteSpace();                // Dictionary<string, int> string
+            Emit.Branch(readingMember);         // Dictionary<string, int> string
+
+            Emit.MarkLabel(doneNotNull);               // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+
+            var done = Emit.DefineLabel();
+
+            foreach(var kv in propertyMap.OrderBy(o => o.Value.Item2))
+            {
+                var local = localMap[kv.Key];
+                Emit.LoadLocal(local);
+            }
+
+            Emit.NewObject(cons);               // objType
+            Emit.Branch(done);                  // objType
+
+            Emit.MarkLabel(doneNull);           // --empty--
+            Emit.LoadNull();                    // null
+
+            Emit.MarkLabel(done);               // objType
+
+            // free up all those locals for use again
+            foreach (var kv in localMap)
+            {
+                kv.Value.Dispose();
+            }
         }
 
         void Build(Type forType, bool allowRecursion = true)
