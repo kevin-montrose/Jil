@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DateTimeFormat.cs" />
     <Compile Include="DeserializationException.cs" />
+    <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\MemberMatcher.cs" />
     <Compile Include="Deserialize\Methods.cs" />
