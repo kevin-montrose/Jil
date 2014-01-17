@@ -8,9 +8,8 @@ using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Jil.Common;
 
-namespace Jil.Serialize
+namespace Jil.Common
 {
     partial class Utils
     {
@@ -514,7 +513,7 @@ namespace Jil.Serialize
         {
             var cons = objType.GetConstructors().Single();
 
-            var consInstrs = Jil.Serialize.Utils.Decompile(cons);
+            var consInstrs = Utils.Decompile(cons);
 
             var fieldToArgumentIndex = new Dictionary<FieldInfo, int>();
 
@@ -547,7 +546,7 @@ namespace Jil.Serialize
             var propertyToBackingField = new Dictionary<PropertyInfo, FieldInfo>();
             foreach (var prop in objType.GetProperties())
             {
-                var propInstrs = Jil.Serialize.Utils.Decompile(prop.GetMethod);
+                var propInstrs = Utils.Decompile(prop.GetMethod);
                 var backingField = propInstrs.Single(p => p.Item1 == OpCodes.Ldfld);
 
                 propertyToBackingField[prop] = backingField.Item5;

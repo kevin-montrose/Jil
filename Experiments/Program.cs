@@ -1,4 +1,5 @@
-﻿using Jil.Serialize;
+﻿using Jil.Common;
+using Jil.Serialize;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

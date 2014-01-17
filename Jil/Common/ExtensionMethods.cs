@@ -186,7 +186,7 @@ namespace Jil.Common
             // virtual methods can't be proven constant, who knows what overrides are out there
             if (getMtd == null || getMtd.IsVirtual) return false;
 
-            var instrs = Jil.Serialize.Utils.Decompile(getMtd);
+            var instrs = Utils.Decompile(getMtd);
             if (instrs == null) return false;
 
             // anything control flow-y, call-y, load-y, etc. means the property isn't constant
@@ -213,7 +213,7 @@ namespace Jil.Common
 
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
         {
-            var instrs = Jil.Serialize.Utils.Decompile(prop.GetMethod);
+            var instrs = Utils.Decompile(prop.GetMethod);
 
             var constInstr = instrs.Single(o => ConstantLoadOpCodes.Contains(o.Item1) || o.Item2.HasValue || o.Item3.HasValue || o.Item4.HasValue);
 
