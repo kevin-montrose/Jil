@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Jil.Serialize;
+using Jil.Common;
 using System.Reflection;
 using System.IO;
 using System.Linq;

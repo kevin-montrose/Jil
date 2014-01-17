@@ -72,7 +72,7 @@
     <Compile Include="Serialize\TypeCaches.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Serialize\Utils.cs" />
+    <Compile Include="Common\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
