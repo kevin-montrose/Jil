@@ -851,8 +851,12 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    Emit.NewObject(objType.GetConstructor(Type.EmptyTypes));    // objType
-                    Emit.StoreLocal(loc);                                       // --empty--
+                    var cons = objType.GetConstructor(Type.EmptyTypes);
+
+                    // TODO: deal with constructor being empty... probably pre-verify?
+
+                    Emit.NewObject(cons);   // objType
+                    Emit.StoreLocal(loc);   // --empty--
 
                     loadObj = () => Emit.LoadLocal(loc);
                 }
@@ -1051,8 +1055,12 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    Emit.NewObject(objType.GetConstructor(Type.EmptyTypes));    // objType
-                    Emit.StoreLocal(loc);                                       // --empty--
+                    var cons = objType.GetConstructor(Type.EmptyTypes);
+
+                    // TODO: deal with constructor being empty... probably pre-verify?
+
+                    Emit.NewObject(cons);   // objType
+                    Emit.StoreLocal(loc);   // --empty--
 
                     loadObj = () => Emit.LoadLocal(loc);
                 }
