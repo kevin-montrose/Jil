@@ -3364,5 +3364,23 @@ namespace JilTests
                 Assert.AreEqual(8, first.I);
             }
         }
+
+        private class testClass
+        {
+            public object[][] Items { get; set; }
+        }
+
+        [TestMethod]
+        public void Deserialize_DoubleObjectArrayProperty()
+        {
+            string json = "{\"Items\": [[\"email1@stackoverflow.com\", 7], [\"email2@stackoverflow.com\", 4]]}";
+            testClass items = JSON.Deserialize<testClass>(json);
+            Assert.IsNotNull(items);
+            Assert.IsNotNull(items.Items);
+            Assert.AreEqual(2, items.Items.Length);
+            Assert.AreEqual("email1@stackoverflow.com", items.Items[0][0].ToString());
+            Assert.IsTrue(items.Items[0][1] is int);
+            Assert.AreEqual(7, Convert.ToInt32(items.Items[0][1]));
+        }
     }
 }
