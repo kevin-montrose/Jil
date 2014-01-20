@@ -3294,40 +3294,74 @@ namespace JilTests
         [TestMethod]
         public void AnonObjects()
         {
-            var example =
-                new
-                {
-                    A = 1,
-                    B = 1.0,
-                    C = 1.0f,
-                    D = 1.0m,
-                    E = "",
-                    F = 'a',
-                    G = Guid.NewGuid(),
-                    H = DateTime.UtcNow,
-                    I = new [] { 1, 2, 3 }
-                };
-
-            const string str = "[{\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}]";
-
-            var res = AnonObjectByExample(example, str);
-            Assert.IsNotNull(res);
-            Assert.AreEqual(3, res.Count);
-            var first = res[0];
-            Assert.AreEqual(1234, first.A);
-            Assert.AreEqual(123.45, first.B);
-            Assert.AreEqual(678.90f, first.C);
-            Assert.AreEqual(0m, first.D);
-            Assert.AreEqual("hello world", first.E);
-            Assert.AreEqual('c', first.F);
-            Assert.AreEqual(Guid.Parse("EB29803F-A68D-4647-8512-5F0EE906CC90"), first.G);
-            Assert.AreEqual(new DateTime(1999, 12, 31, 0, 0, 0, DateTimeKind.Utc), first.H);
-            Assert.IsNotNull(first.I);
-            Assert.AreEqual(10, first.I.Length);
-
-            for (var i = 0; i < 10; i++)
             {
-                Assert.AreEqual(i + 1, first.I[i]);
+                var example =
+                    new
+                    {
+                        A = 1,
+                        B = 1.0,
+                        C = 1.0f,
+                        D = 1.0m,
+                        E = "",
+                        F = 'a',
+                        G = Guid.NewGuid(),
+                        H = DateTime.UtcNow,
+                        I = new[] { 1, 2, 3 }
+                    };
+
+                const string str = "[{\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}]";
+
+                var res = AnonObjectByExample(example, str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(3, res.Count);
+                var first = res[0];
+                Assert.AreEqual(1234, first.A);
+                Assert.AreEqual(123.45, first.B);
+                Assert.AreEqual(678.90f, first.C);
+                Assert.AreEqual(0m, first.D);
+                Assert.AreEqual("hello world", first.E);
+                Assert.AreEqual('c', first.F);
+                Assert.AreEqual(Guid.Parse("EB29803F-A68D-4647-8512-5F0EE906CC90"), first.G);
+                Assert.AreEqual(new DateTime(1999, 12, 31, 0, 0, 0, DateTimeKind.Utc), first.H);
+                Assert.IsNotNull(first.I);
+                Assert.AreEqual(10, first.I.Length);
+
+                for (var i = 0; i < 10; i++)
+                {
+                    Assert.AreEqual(i + 1, first.I[i]);
+                }
+            }
+
+            {
+                var example =
+                    new
+                    {
+                        A = 1,
+                        B = 1,
+                        C = 1,
+                        D = 1,
+                        E = 1,
+                        F = 1,
+                        G = 1,
+                        H = 1,
+                        I = 1
+                    };
+
+                const string str = "[{\"A\":1, \"B\": 2, \"C\": 3, \"E\": 4, \"F\": 5, \"G\": 6, \"H\": 7, \"I\": 8}]";
+
+                var res = AnonObjectByExample(example, str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(1, res.Count);
+                var first = res[0];
+                Assert.AreEqual(1, first.A);
+                Assert.AreEqual(2, first.B);
+                Assert.AreEqual(3, first.C);
+                Assert.AreEqual(0, first.D);
+                Assert.AreEqual(4, first.E);
+                Assert.AreEqual(5, first.F);
+                Assert.AreEqual(6, first.G);
+                Assert.AreEqual(7, first.H);
+                Assert.AreEqual(8, first.I);
             }
         }
     }
