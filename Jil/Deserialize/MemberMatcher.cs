@@ -25,13 +25,14 @@ namespace Jil.Deserialize
     class MemberMatcher<ForType>
     {
         public static bool IsAvailable;
+        public static Dictionary<string, MemberInfo> MemberLookup;
         public static Dictionary<string, int> BucketLookup;
         public static Dictionary<string, uint> HashLookup;
         public static MemberMatcherMode Mode;
 
         static MemberMatcher()
         {
-            IsAvailable = MakeMemberMatcher(out BucketLookup, out HashLookup, out Mode);
+            IsAvailable = MakeMemberMatcher(out MemberLookup, out BucketLookup, out HashLookup, out Mode);
         }
 
         public static MethodInfo GetHashMethod(MemberMatcherMode mode)
@@ -49,7 +50,7 @@ namespace Jil.Deserialize
             }
         }
 
-        static bool MakeMemberMatcher(out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash, out MemberMatcherMode bestMode)
+        static bool MakeMemberMatcher(out Dictionary<string, MemberInfo> memberLookup, out Dictionary<string, int> memberToBucket, out Dictionary<string, uint> memberToHash, out MemberMatcherMode bestMode)
         {
             var forType = typeof(ForType);
 
@@ -58,7 +59,9 @@ namespace Jil.Deserialize
 
             var members = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>());
 
-            var memberNames = members.Select(m => m.Name).ToList();
+            memberLookup = members.ToDictionary(m => m.GetSerializationName(), m => m);
+
+            var memberNames = memberLookup.Keys;
 
             var allModes =
                 Enum.GetValues(typeof(MemberMatcherMode))

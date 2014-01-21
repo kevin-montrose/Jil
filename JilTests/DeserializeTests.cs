@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -3362,6 +3363,33 @@ namespace JilTests
                 Assert.AreEqual(6, first.G);
                 Assert.AreEqual(7, first.H);
                 Assert.AreEqual(8, first.I);
+            }
+        }
+
+        class _DataMemberName
+        {
+            public string Plain { get; set; }
+
+            [DataMember(Name = "FakeName")]
+            public string RealName { get; set; }
+
+#pragma warning disable 0649
+            [DataMember(Name = "NotSoSecretName")]
+            public int SecretName;
+#pragma warning restore 0649
+        }
+
+        [TestMethod]
+        public void DataMemberName()
+        {
+            using (var str = new StringReader("{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}"))
+            {
+                var obj = JSON.Deserialize<_DataMemberName>(str);
+
+                Assert.IsNotNull(obj);
+                Assert.AreEqual("hello world", obj.Plain);
+                Assert.AreEqual("Really RealName", obj.RealName);
+                Assert.AreEqual(314159, obj.SecretName);
             }
         }
     }

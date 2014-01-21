@@ -221,11 +221,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\": ";
+                stringEquiv = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ";
             }
             else
             {
-                stringEquiv = "\"" + member.Name.JsonEscape(JSONP) + "\":";
+                stringEquiv = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
             }
 
             if (prependComma)
@@ -1077,12 +1077,12 @@ namespace Jil.Serialize
                         string keyString;
                         if (firstPass)
                         {
-                            keyString = "\"" + member.Name.JsonEscape(JSONP) + "\":";
+                            keyString = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
                             firstPass = false;
                         }
                         else
                         {
-                            keyString = ",\"" + member.Name.JsonEscape(JSONP) + "\":";
+                            keyString = ",\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
                         }
 
                         WriteString(keyString);         // --empty--
@@ -1099,7 +1099,7 @@ namespace Jil.Serialize
 
                         firstPass = false;
 
-                        WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");
+                        WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");
 
                         WriteMember(member, inLocal);
                     }
@@ -1355,11 +1355,11 @@ namespace Jil.Serialize
             {
                 if (PrettyPrint)
                 {
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");     // --empty--
                 }
                 else
                 {
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
+                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":");      // --empty--
                 }
 
                 WriteMember(member, inLocal);           // --empty--
@@ -1436,11 +1436,11 @@ namespace Jil.Serialize
 
                 if (PrettyPrint)
                 {
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\": ");     // --empty--
+                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");     // --empty--
                 }
                 else
                 {
-                    WriteString("\"" + member.Name.JsonEscape(JSONP) + "\":");      // --empty--
+                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":");      // --empty--
                 }
 
                 WriteMember(member, inLocal);           // --empty--

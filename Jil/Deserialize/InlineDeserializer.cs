@@ -873,6 +873,7 @@ namespace Jil.Deserialize
                 var loopStart = Emit.DefineLabel();
 
                 var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
+                var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
                 var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
                 var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
                 var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
@@ -931,7 +932,7 @@ namespace Jil.Deserialize
                     }
                     else
                     {
-                        var member = objType.GetMember(memberName).Where(m => m is FieldInfo || m is PropertyInfo).Single();
+                        var member = memberLookup[memberName];
                         var hash = hashLookup[memberName];
                         var memberType = member.ReturnType();
 

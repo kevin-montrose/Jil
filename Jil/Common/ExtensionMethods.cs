@@ -11,6 +11,15 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static string GetSerializationName(this MemberInfo member)
+        {
+            var attrs = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
+
+            if (attrs == null) return member.Name;
+
+            return attrs.Name;
+        }
+
         public static bool IsLoadArgumentOpCode(this OpCode op)
         {
             return

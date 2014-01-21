@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.Deserialize
 {
@@ -27,7 +28,7 @@ namespace Jil.Deserialize
 
             var members = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>());
 
-            return members.ToDictionary(m => m.Name, m => m);
+            return members.ToDictionary(m => m.GetSerializationName(), m => m);
         }
     }
 }

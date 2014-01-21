@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -6050,6 +6051,37 @@ namespace JilTests
             var json = JSON.Serialize(items);
             string expectedJson = "{\"a\":{\"a\":{\"Id\":1,\"Name\":\"a\"},\"b\":{\"Id\":2,\"Name\":\"b\"}}}";
             Assert.AreEqual(expectedJson, json);
+        }
+
+        class _DataMemberName
+        {
+            public string Plain { get; set; }
+
+            [DataMember(Name="FakeName")]
+            public string RealName { get; set; }
+
+            [DataMember(Name = "NotSoSecretName")]
+            public int SecretName;
+        }
+
+        [TestMethod]
+        public void DataMemberName()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _DataMemberName
+                    {
+                        Plain = "hello world",
+                        RealName = "Really RealName",
+                        SecretName = 314159
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}", res);
+            }
         }
     }
 }
