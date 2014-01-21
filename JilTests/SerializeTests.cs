@@ -6031,5 +6031,25 @@ namespace JilTests
                 Assert.AreEqual(i.ToString(), str);
             }
         }
+
+        private class simplePoco
+        {
+            public string Name { get; set; }
+            public int Id { get; set; }
+        }
+
+        [TestMethod]
+        public void SerializeNestedDictionary()
+        {
+            var items = new Dictionary<string, Dictionary<string, simplePoco>>();
+            items.Add("a", new Dictionary<string, simplePoco>
+            {
+                {"a", new simplePoco {Id = 1, Name = "a"}}, 
+                {"b", new simplePoco {Id = 2, Name = "b"}}
+            });
+            var json = JSON.Serialize(items);
+            string expectedJson = "{\"a\":{\"a\":{\"Id\":1,\"Name\":\"a\"},\"b\":{\"Id\":2,\"Name\":\"b\"}}}";
+            Assert.AreEqual(expectedJson, json);
+        }
     }
 }
