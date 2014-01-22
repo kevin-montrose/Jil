@@ -118,15 +118,17 @@ namespace Jil.Deserialize
 
         void ThrowExpected(char c)
         {
-            Emit.LoadConstant("Expected character: '" + c + "'");   // string
-            Emit.NewObject<DeserializationException, string>();     // DeserializationException
+            Emit.LoadConstant("Expected character: '" + c + "'");               // string
+            Emit.LoadArgument(0);                                               // string TextReader
+            Emit.NewObject<DeserializationException, string, TextReader>();     // DeserializationException
             Emit.Throw();
         }
 
         void ThrowExpected(params object[] ps)
         {
-            Emit.LoadConstant("Expected: " + string.Join(", ", ps));    // string
-            Emit.NewObject<DeserializationException, string>();         // DeserializationException
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps));                // string
+            Emit.LoadArgument(0);                                                   // string TextReader
+            Emit.NewObject<DeserializationException, string, TextReader>();         // DeserializationException
             Emit.Throw();
         }
 
@@ -478,9 +480,10 @@ namespace Jil.Deserialize
             Emit.LoadConstant(-1);          // int -1
             Emit.BranchIfEqual(success);    // --empty--
 
-            Emit.LoadConstant("Expected end of stream");        // string
-            Emit.NewObject<DeserializationException, string>(); // DeserializationException
-            Emit.Throw();                                       // --empty--
+            Emit.LoadConstant("Expected end of stream");                    // string
+            Emit.LoadArgument(0);                                           // string TextReader
+            Emit.NewObject<DeserializationException, string, TextReader>(); // DeserializationException
+            Emit.Throw();                                                   // --empty--
 
             Emit.MarkLabel(success);        // --empty--
         }

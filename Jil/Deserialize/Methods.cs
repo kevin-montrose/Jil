@@ -99,22 +99,22 @@ namespace Jil.Deserialize
             asStruct.B01 = ReadGuidByte(reader);
             asStruct.B00 = ReadGuidByte(reader);
 
-            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+            if (reader.Read() != '-') throw new DeserializationException("Expected -", reader);
 
             asStruct.B05 = ReadGuidByte(reader);
             asStruct.B04 = ReadGuidByte(reader);
 
-            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+            if (reader.Read() != '-') throw new DeserializationException("Expected -", reader);
 
             asStruct.B07 = ReadGuidByte(reader);
             asStruct.B06 = ReadGuidByte(reader);
 
-            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+            if (reader.Read() != '-') throw new DeserializationException("Expected -", reader);
 
             asStruct.B08 = ReadGuidByte(reader);
             asStruct.B09 = ReadGuidByte(reader);
 
-            if (reader.Read() != '-') throw new DeserializationException("Expected -");
+            if (reader.Read() != '-') throw new DeserializationException("Expected -", reader);
 
             asStruct.B10 = ReadGuidByte(reader);
             asStruct.B11 = ReadGuidByte(reader);
@@ -129,11 +129,11 @@ namespace Jil.Deserialize
         static byte ReadGuidByte(TextReader reader)
         {
             var a = reader.Read();
-            if (a == -1) throw new DeserializationException("Expected any character");
-            if (!((a >= '0' && a <= '9') || (a >= 'A' && a <= 'F') || (a >= 'a' && a <= 'f'))) throw new DeserializationException("Expected a hex number");
+            if (a == -1) throw new DeserializationException("Expected any character", reader);
+            if (!((a >= '0' && a <= '9') || (a >= 'A' && a <= 'F') || (a >= 'a' && a <= 'f'))) throw new DeserializationException("Expected a hex number", reader);
             var b = reader.Read();
-            if (b == -1) throw new DeserializationException("Expected any character");
-            if (!((b >= '0' && b <= '9') || (b >= 'A' && b <= 'F') || (b >= 'a' && b <= 'f'))) throw new DeserializationException("Expected a hex number");
+            if (b == -1) throw new DeserializationException("Expected any character", reader);
+            if (!((b >= '0' && b <= '9') || (b >= 'A' && b <= 'F') || (b >= 'a' && b <= 'f'))) throw new DeserializationException("Expected a hex number", reader);
 
             if (a <= '9')
             {
@@ -180,9 +180,9 @@ namespace Jil.Deserialize
             if (leadChar == 'n')
             {
                 reader.Read();
-                if (reader.Read() != 'u') throw new DeserializationException("Expected u");
-                if (reader.Read() != 'l') throw new DeserializationException("Expected u");
-                if (reader.Read() != 'l') throw new DeserializationException("Expected u");
+                if (reader.Read() != 'u') throw new DeserializationException("Expected u", reader);
+                if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
+                if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
                 return;
             }
 
@@ -214,7 +214,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            throw new DeserializationException("Expected digit, -, \", {, or [");
+            throw new DeserializationException("Expected digit, -, \", {, n, or [", reader);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,7 +232,7 @@ namespace Jil.Deserialize
             SkipEncodedString(reader);
             _ConsumeWhiteSpace(reader);
             var b = reader.Read();
-            if (b != ':') throw new DeserializationException("Expected :");
+            if (b != ':') throw new DeserializationException("Expected :", reader);
             _ConsumeWhiteSpace(reader);
             _Skip(reader);
 
@@ -241,13 +241,13 @@ namespace Jil.Deserialize
                 _ConsumeWhiteSpace(reader);
                 var c = reader.Read();
                 if (c == '}') return;
-                if (c != ',') throw new DeserializationException("Expected ,");
+                if (c != ',') throw new DeserializationException("Expected ,", reader);
 
                 _ConsumeWhiteSpace(reader);
                 SkipEncodedString(reader);
                 _ConsumeWhiteSpace(reader);
                 var d = reader.Read();
-                if (d != ':') throw new DeserializationException("Expected :");
+                if (d != ':') throw new DeserializationException("Expected :", reader);
                 _ConsumeWhiteSpace(reader);
                 _Skip(reader);
             }
@@ -273,7 +273,7 @@ namespace Jil.Deserialize
                 _ConsumeWhiteSpace(reader);
                 var b = reader.Read();
                 if (b == ']') return;
-                if (b != ',') throw new DeserializationException("Expected ], or ,");
+                if (b != ',') throw new DeserializationException("Expected ], or ,", reader);
                 _ConsumeWhiteSpace(reader);
                 _Skip(reader);
             }
@@ -287,7 +287,7 @@ namespace Jil.Deserialize
             while (true)
             {
                 var first = reader.Read();
-                if (first == -1) throw new DeserializationException("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 // we didn't have to use anything but the buffer, make a string and return it!
                 if (first == '"')
@@ -301,7 +301,7 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
 
                 switch (second)
                 {
@@ -315,17 +315,17 @@ namespace Jil.Deserialize
                     case 't': continue;
                 }
 
-                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 var u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit");
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
             }
         }
 
@@ -367,7 +367,7 @@ namespace Jil.Deserialize
                         continue;
                     }
 
-                    throw new DeserializationException("Expected -, or a digit");
+                    throw new DeserializationException("Expected -, or a digit", reader);
                 }
 
                 return;
@@ -413,7 +413,7 @@ namespace Jil.Deserialize
             while (true)
             {
                 var first = reader.Read();
-                if (first == -1) throw new DeserializationException("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"')
                 {
@@ -427,7 +427,7 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
 
                 switch (second)
                 {
@@ -441,7 +441,7 @@ namespace Jil.Deserialize
                     case 't': commonSb.Append('\t'); continue;
                 }
 
-                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 ReadHexQuadToBuilder(reader, commonSb);
@@ -473,7 +473,7 @@ namespace Jil.Deserialize
                     }
 
                     var first = reader.Read();
-                    if (first == -1) throw new DeserializationException("Expected any character");
+                    if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                     // we didn't have to use anything but the buffer, make a string and return it!
                     if (first == '"')
@@ -492,7 +492,7 @@ namespace Jil.Deserialize
                     }
 
                     var second = reader.Read();
-                    if (second == -1) throw new DeserializationException("Expected any character");
+                    if (second == -1) throw new DeserializationException("Expected any character", reader);
 
                     switch (second)
                     {
@@ -506,7 +506,7 @@ namespace Jil.Deserialize
                         case 't': buffer[ix] = '\t'; ix++; continue;
                     }
 
-                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                     commonSb.Append(buffer, 0, ix);
 
@@ -521,7 +521,7 @@ namespace Jil.Deserialize
             while (true)
             {
                 var first = reader.Read();
-                if (first == -1) throw new DeserializationException("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"')
                 {
@@ -535,7 +535,7 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
 
                 switch (second)
                 {
@@ -549,7 +549,7 @@ namespace Jil.Deserialize
                     case 't': commonSb.Append('\t'); continue;
                 }
 
-                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 ReadHexQuadToBuilder(reader, commonSb);
@@ -568,12 +568,12 @@ namespace Jil.Deserialize
         static char _ReadEncodedChar(TextReader reader)
         {
             var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected any character");
+            if (first == -1) throw new DeserializationException("Expected any character", reader);
 
             if (first != '\\') return (char)first;
 
             var second = reader.Read();
-            if (second == -1) throw new DeserializationException("Expected any character");
+            if (second == -1) throw new DeserializationException("Expected any character", reader);
 
             switch (second)
             {
@@ -587,7 +587,7 @@ namespace Jil.Deserialize
                 case 't': return '\t';
             }
 
-            if (second != 'u') throw new DeserializationException("Unrecognized escape sequence");
+            if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
             // now we're in an escape sequence, we expect 4 hex #s; always
             var ret = 0;
@@ -617,7 +617,7 @@ namespace Jil.Deserialize
                     goto char2;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char2:
@@ -646,7 +646,7 @@ namespace Jil.Deserialize
                     goto char3;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char3:
@@ -675,7 +675,7 @@ namespace Jil.Deserialize
                     goto char4;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char4:
@@ -704,11 +704,11 @@ namespace Jil.Deserialize
                     goto finished;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             finished:
-            if (ret < char.MinValue || ret > char.MaxValue) throw new Exception("Encoded character out of System.Char range, found: " + ret);
+            if (ret < char.MinValue || ret > char.MaxValue) throw new DeserializationException("Encoded character out of System.Char range, found: " + ret, reader);
 
             return (char)ret;
         }
@@ -743,7 +743,7 @@ namespace Jil.Deserialize
                     goto char2;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char2:
@@ -772,7 +772,7 @@ namespace Jil.Deserialize
                     goto char3;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char3:
@@ -801,7 +801,7 @@ namespace Jil.Deserialize
                     goto char4;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char4:
@@ -830,7 +830,7 @@ namespace Jil.Deserialize
                     goto finished;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             finished:

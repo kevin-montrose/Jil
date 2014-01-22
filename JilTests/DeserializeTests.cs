@@ -1619,8 +1619,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1632,8 +1633,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1648,8 +1650,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1661,8 +1664,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
 
@@ -1674,8 +1678,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1690,8 +1695,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1703,8 +1709,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
 
@@ -1716,8 +1723,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1732,8 +1740,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1745,8 +1754,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1761,8 +1771,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1774,8 +1785,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
 
@@ -1787,8 +1799,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1803,8 +1816,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1816,8 +1830,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1832,8 +1847,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1845,8 +1861,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
 
@@ -1858,8 +1875,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }
@@ -1874,8 +1892,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Number did not end when expected, may overflow", e.Message);
                 }
 
@@ -1887,8 +1906,9 @@ namespace JilTests
                         Assert.Fail("Shouldn't be possible");
                     }
                 }
-                catch (OverflowException e)
+                catch (DeserializationException e)
                 {
+                    Assert.IsInstanceOfType(e.InnerException, typeof(OverflowException));
                     Assert.AreEqual("Arithmetic operation resulted in an overflow.", e.Message);
                 }
             }

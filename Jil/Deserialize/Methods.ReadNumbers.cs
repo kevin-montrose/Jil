@@ -43,34 +43,34 @@ namespace Jil.Deserialize
             // first digit hour
             c = reader.Read();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             temp += c;
 
             // second digit hour
             temp *= 10;
             c = reader.Read();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             temp += c;
 
-            if (temp > 23) throw new DeserializationException("Expected hour portion of timezone offset between 0 and 24");
+            if (temp > 23) throw new DeserializationException("Expected hour portion of timezone offset between 0 and 24", reader);
 
             temp = 0;
             // first digit minute
             temp *= 10;
             c = reader.Read();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             temp += c;
 
             // second digit minute
             temp *= 10;
             c = reader.Read();
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             temp += c;
 
-            if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59");
+            if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59", reader);
         }
 
         public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
@@ -86,7 +86,7 @@ namespace Jil.Deserialize
             // first digit *must* exist, we can't overread
             var c = reader.Read();
             c = c -'0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
@@ -126,17 +126,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit");
+                if (c == -1) throw new DeserializationException("Expected digit", reader);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += c;
 
             // digit #2
@@ -176,17 +176,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit");
+                if (c == -1) throw new DeserializationException("Expected digit", reader);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += c;
 
             // digit #2
@@ -241,10 +241,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit");
+            if (c == -1) throw new DeserializationException("Expected digit", reader);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
@@ -300,17 +300,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit");
+                if (c == -1) throw new DeserializationException("Expected digit", reader);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += c;
 
             // digit #2
@@ -405,10 +405,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit");
+            if (c == -1) throw new DeserializationException("Expected digit", reader);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
@@ -504,17 +504,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'");
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit");
+                if (c == -1) throw new DeserializationException("Expected digit", reader);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
@@ -688,10 +688,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit");
+            if (c == -1) throw new DeserializationException("Expected digit", reader);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
@@ -865,7 +865,7 @@ namespace Jil.Deserialize
             bool seenDecimal = false;
 
             var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'");
+            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             commonSb = commonSb ?? new StringBuilder();
 
@@ -873,7 +873,7 @@ namespace Jil.Deserialize
             {
                 negative = true;
                 first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit");
+                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
                 commonSb.Append((char)first);
             }
             else
@@ -892,7 +892,7 @@ namespace Jil.Deserialize
 
                 if (c == '.')
                 {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number");
+                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
 
                     commonSb.Append('.');
                     seenDecimal = true;
@@ -900,7 +900,7 @@ namespace Jil.Deserialize
 
                     // there must be a following digit to be valid JSON
                     c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     commonSb.Append((char)c);
                     reader.Read();
 
@@ -915,7 +915,7 @@ namespace Jil.Deserialize
                     reader.Read();
 
                     var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
+                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
 
                     var exponentNegative = (sign == '-');
                     if (sign == '-' || sign == '+') reader.Read();
@@ -928,7 +928,7 @@ namespace Jil.Deserialize
                 }
 
                 var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg);
+                throw new DeserializationException(msg, reader);
             }
 
             var ret = double.Parse(commonSb.ToString());
@@ -946,7 +946,7 @@ namespace Jil.Deserialize
             bool seenDecimal = false;
 
             var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'");
+            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             commonSb = commonSb ?? new StringBuilder();
 
@@ -954,7 +954,7 @@ namespace Jil.Deserialize
             {
                 negative = true;
                 first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit");
+                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
                 commonSb.Append((char)first);
             }
             else
@@ -973,7 +973,7 @@ namespace Jil.Deserialize
 
                 if (c == '.')
                 {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number");
+                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
 
                     commonSb.Append('.');
                     seenDecimal = true;
@@ -981,7 +981,7 @@ namespace Jil.Deserialize
 
                     // there must be a following digit to be valid JSON
                     c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     commonSb.Append((char)c);
                     reader.Read();
 
@@ -997,7 +997,7 @@ namespace Jil.Deserialize
                     reader.Read();
 
                     var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
+                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
 
                     var exponentNegative = (sign == '-');
                     if (sign == '-' || sign == '+') reader.Read();
@@ -1010,7 +1010,7 @@ namespace Jil.Deserialize
                 }
 
                 var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg);
+                throw new DeserializationException(msg, reader);
             }
 
             var ret = float.Parse(commonSb.ToString());
@@ -1028,7 +1028,7 @@ namespace Jil.Deserialize
             bool seenDecimal = false;
 
             var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'");
+            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
 
             commonSb = commonSb ?? new StringBuilder();
 
@@ -1036,7 +1036,7 @@ namespace Jil.Deserialize
             {
                 negative = true;
                 first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit");
+                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
                 commonSb.Append((char)first);
             }
             else
@@ -1055,7 +1055,7 @@ namespace Jil.Deserialize
 
                 if (c == '.')
                 {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number");
+                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
 
                     commonSb.Append('.');
                     seenDecimal = true;
@@ -1063,7 +1063,7 @@ namespace Jil.Deserialize
 
                     // there must be a following digit to be valid JSON
                     c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     commonSb.Append((char)c);
                     reader.Read();
 
@@ -1078,7 +1078,7 @@ namespace Jil.Deserialize
                     reader.Read();
 
                     var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit");
+                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
 
                     var exponentNegative = (sign == '-');
                     if (sign == '-' || sign == '+') reader.Read();
@@ -1091,7 +1091,7 @@ namespace Jil.Deserialize
                 }
 
                 var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg);
+                throw new DeserializationException(msg, reader);
             }
 
             var ret = decimal.Parse(commonSb.ToString());
@@ -1105,7 +1105,10 @@ namespace Jil.Deserialize
         {
             var next = reader.Peek();
 
-            if (next >= '0' && next <= '9') throw new OverflowException("Number did not end when expected, may overflow");
+            if (next >= '0' && next <= '9')
+            {
+                throw new DeserializationException(new OverflowException("Number did not end when expected, may overflow"), reader);
+            }
         }
     }
 }

@@ -41,8 +41,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -96,8 +96,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -138,7 +138,7 @@ namespace Jil.Deserialize
             {
                 var first = reader.Peek();
 
-                if (first == -1) throw new Exception("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"') break;
 
@@ -151,8 +151,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -193,7 +193,7 @@ namespace Jil.Deserialize
             {
                 var first = reader.Peek();
 
-                if (first == -1) throw new Exception("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"') break;
 
@@ -206,8 +206,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -248,7 +248,7 @@ namespace Jil.Deserialize
             {
                 var first = reader.Peek();
 
-                if (first == -1) throw new Exception("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"') break;
 
@@ -261,8 +261,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -303,7 +303,7 @@ namespace Jil.Deserialize
             {
                 var first = reader.Peek();
 
-                if (first == -1) throw new Exception("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"') break;
 
@@ -316,8 +316,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -358,7 +358,7 @@ namespace Jil.Deserialize
             {
                 var first = reader.Peek();
 
-                if (first == -1) throw new Exception("Expected any character");
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
 
                 if (first == '"') break;
 
@@ -371,8 +371,8 @@ namespace Jil.Deserialize
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character");
-                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member");
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second != 'u') throw new DeserializationException("Unexpected escape sequence in object member", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 unescaped = ReadHexQuad(reader);
@@ -426,7 +426,7 @@ namespace Jil.Deserialize
                     goto char2;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char2:
@@ -455,7 +455,7 @@ namespace Jil.Deserialize
                     goto char3;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char3:
@@ -484,7 +484,7 @@ namespace Jil.Deserialize
                     goto char4;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             char4:
@@ -513,7 +513,7 @@ namespace Jil.Deserialize
                     goto finished;
                 }
 
-                throw new Exception("Expected hex digit, found: " + c);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
             }
 
             finished:

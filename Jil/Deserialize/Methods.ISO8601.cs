@@ -72,7 +72,7 @@ namespace Jil.Deserialize
             while (true)
             {
                 var c = reader.Peek();
-                if (c == -1) throw new DeserializationException("Unexpected end of stream while parsing ISO8601 date");
+                if (c == -1) throw new DeserializationException("Unexpected end of stream while parsing ISO8601 date", reader);
 
                 if (c == '"') break;
 
@@ -80,13 +80,13 @@ namespace Jil.Deserialize
                 reader.Read();
 
                 ix++;
-                if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less");
+                if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less", reader);
                 buffer[ix] = (char)c;
 
                 // RFC3339 allows lowercase t and spaces as alternatives to ISO8601's T
                 if (c == 'T' || c == 't' || c == ' ')
                 {
-                    if (tPos.HasValue) throw new DeserializationException("Unexpected second T in ISO8601 date");
+                    if (tPos.HasValue) throw new DeserializationException("Unexpected second T in ISO8601 date", reader);
                     tPos = ix - 1;
                 }
 
@@ -95,7 +95,7 @@ namespace Jil.Deserialize
                     // RFC3339 allows lowercase z as alternatives to ISO8601's Z
                     if (c == 'Z' || c == 'z' || c == '+' || c == '-')
                     {
-                        if (zPlusOrMinus.HasValue) throw new DeserializationException("Unexpected second Z, +, or - in ISO8601 date");
+                        if (zPlusOrMinus.HasValue) throw new DeserializationException("Unexpected second Z, +, or - in ISO8601 date", reader);
                         zPlusOrMinus = ix - 1;
                     }
                 }
@@ -103,13 +103,13 @@ namespace Jil.Deserialize
 
             bool? hasSeparators;
 
-            var date = ParseISO8601Date(buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
+            var date = ParseISO8601Date(reader, buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
             if (!tPos.HasValue)
             {
                 return date;
             }
 
-            var time = ParseISO8601Time(buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
+            var time = ParseISO8601Time(reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
             if (!zPlusOrMinus.HasValue)
             {
                 try
@@ -118,13 +118,13 @@ namespace Jil.Deserialize
                 }
                 catch (Exception e)
                 {
-                    throw new DeserializationException("ISO8601 date with time could not be represented as a DateTime", e);
+                    throw new DeserializationException("ISO8601 date with time could not be represented as a DateTime", reader, e);
                 }
             }
 
             bool unknownLocalOffset;
             // only +1 here because the separator is significant (oy vey)
-            var timezoneOffset = ParseISO8601TimeZoneOffset(buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
+            var timezoneOffset = ParseISO8601TimeZoneOffset(reader, buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
 
             try
             {
@@ -137,12 +137,12 @@ namespace Jil.Deserialize
             }
             catch (Exception e)
             {
-                throw new DeserializationException("ISO8601 date with time and timezone offset could not be represented as a DateTime", e);
+                throw new DeserializationException("ISO8601 date with time and timezone offset could not be represented as a DateTime", reader, e);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static DateTime ParseISO8601Date(char[] buffer, int start, int stop, out bool? hasSeparators)
+        static DateTime ParseISO8601Date(TextReader reader, char[] buffer, int start, int stop, out bool? hasSeparators)
         {
             // Here are the possible formats for dates
             // YYYY-MM-DD
@@ -156,31 +156,31 @@ namespace Jil.Deserialize
             // YYYYDDD
 
             var len = (stop - start) + 1;
-            if (len < 4) throw new DeserializationException("ISO8601 date must begin with a 4 character year");
+            if (len < 4) throw new DeserializationException("ISO8601 date must begin with a 4 character year", reader);
 
             var year = 0;
             var month = 0;
             var day = 0;
             int c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             year += (c - '0');
             year *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             year += (c - '0');
             year *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             year += (c - '0');
             year *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             year += (c - '0');
 
-            if (year == 0) throw new DeserializationException("ISO8601 year 0000 cannot be converted to a DateTime");
+            if (year == 0) throw new DeserializationException("ISO8601 year 0000 cannot be converted to a DateTime", reader);
 
             // we've reached the end
             if (start == stop)
@@ -219,41 +219,41 @@ namespace Jil.Deserialize
 
                         case 8:
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
                             week *= 10;
                             start++;
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
-                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53", reader);
 
                             return ConvertWeekDateToDateTime(year, week, 1);
 
                         case 10:
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
                             week *= 10;
                             start++;
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
-                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53", reader);
                             start++;
 
                             c = buffer[start];
-                            if (c != '-') throw new DeserializationException("Expected -");
+                            if (c != '-') throw new DeserializationException("Expected -", reader);
                             start++;
 
                             c = buffer[start];
-                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7");
+                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7", reader);
                             day = (c - '0');
 
                             return ConvertWeekDateToDateTime(year, week, day);
 
                         default:
-                            throw new DeserializationException("Unexpected date string length");
+                            throw new DeserializationException("Unexpected date string length", reader);
                     }
                 }
                 else
@@ -266,37 +266,37 @@ namespace Jil.Deserialize
 
                         case 7:
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
                             week *= 10;
                             start++;
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
-                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53", reader);
 
                             return ConvertWeekDateToDateTime(year, week, 1);
 
                         case 8:
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
                             week *= 10;
                             start++;
                             c = buffer[start];
-                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                             week += (c - '0');
-                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53");
+                            if (week == 0 || week > 53) throw new DeserializationException("Expected week to be between 01 and 53", reader);
                             start++;
 
                             c = buffer[start];
-                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7");
+                            if (c < '1' || c > '7') throw new DeserializationException("Expected day to be a digit between 1 and 7", reader);
                             day = (c - '0');
 
                             return ConvertWeekDateToDateTime(year, week, day);
 
                         default:
-                            throw new DeserializationException("Unexpected date string length");
+                            throw new DeserializationException("Unexpected date string length", reader);
                     }
                 }
             }
@@ -314,39 +314,39 @@ namespace Jil.Deserialize
                 {
                     case 7:
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         month += (c - '0');
                         month *= 10;
                         start++;
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         month += (c - '0');
-                        if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12");
+                        if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12", reader);
 
                         // year is [1,9999] and month is [1,12] for sure, no need to handle errors
                         return new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Local);
 
                     case 8:
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         day += (c - '0');
                         day *= 10;
                         start++;
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         day += (c - '0');
                         day *= 10;
                         start++;
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         day += (c - '0');
-                        if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366");
+                        if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366", reader);
 
                         if (day == 366)
                         {
                             var isLeapYear = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 
-                            if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year");
+                            if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year", reader);
                         }
 
                         // year is [1,9999] and day is [1,366], no need to handle errors
@@ -354,28 +354,28 @@ namespace Jil.Deserialize
 
                     case 10:
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         month += (c - '0');
                         month *= 10;
                         start++;
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         month += (c - '0');
-                        if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12");
+                        if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12", reader);
                         start++;
 
-                        if (buffer[start] != '-') throw new DeserializationException("Expected -");
+                        if (buffer[start] != '-') throw new DeserializationException("Expected -", reader);
                         start++;
 
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         day += (c - '0');
                         day *= 10;
                         start++;
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         day += (c - '0');
-                        if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31");
+                        if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31", reader);
                         start++;
 
                         try
@@ -384,11 +384,11 @@ namespace Jil.Deserialize
                         }
                         catch (ArgumentOutOfRangeException e)
                         {
-                            throw new DeserializationException("ISO8601 date could not be mapped to DateTime", e);
+                            throw new DeserializationException("ISO8601 date could not be mapped to DateTime", reader, e);
                         }
 
                     default:
-                        throw new DeserializationException("Unexpected date string length");
+                        throw new DeserializationException("Unexpected date string length", reader);
                 }
             }
 
@@ -400,26 +400,26 @@ namespace Jil.Deserialize
             {
                 case 7:
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     day += (c - '0');
                     day *= 10;
                     start++;
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     day += (c - '0');
                     day *= 10;
                     start++;
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     day += (c - '0');
-                    if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366");
+                    if (day == 0 || day > 366) throw new DeserializationException("Expected ordinal day to be between 001 and 366", reader);
                     start++;
 
                     if (day == 366)
                     {
                         var isLeapYear = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 
-                        if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year");
+                        if (!isLeapYear) throw new DeserializationException("Ordinal day can only be 366 in a leap year", reader);
                     }
 
                     // year is [1,9999] and day is [1,366], no need to handle errors
@@ -427,25 +427,25 @@ namespace Jil.Deserialize
 
                 case 8:
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     month += (c - '0');
                     month *= 10;
                     start++;
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     month += (c - '0');
-                    if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12");
+                    if (month == 0 || month > 12) throw new DeserializationException("Expected month to be between 01 and 12", reader);
                     start++;
 
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     day += (c - '0');
                     day *= 10;
                     start++;
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     day += (c - '0');
-                    if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31");
+                    if (day == 0 || day > 31) throw new DeserializationException("Expected day to be between 01 and 31", reader);
                     start++;
 
                     try
@@ -454,16 +454,16 @@ namespace Jil.Deserialize
                     }
                     catch (ArgumentOutOfRangeException e)
                     {
-                        throw new DeserializationException("ISO8601 date could not be mapped to DateTime", e);
+                        throw new DeserializationException("ISO8601 date could not be mapped to DateTime", reader, e);
                     }
 
                 default:
-                    throw new DeserializationException("Unexpected date string length");
+                    throw new DeserializationException("Unexpected date string length", reader);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TimeSpan ParseISO8601Time(char[] buffer, int start, int stop, ref bool? hasSeparators)
+        static TimeSpan ParseISO8601Time(TextReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
             const double HoursToMilliseconds   = 3600000;
             const double MinutesToMilliseconds =   60000;
@@ -488,18 +488,18 @@ namespace Jil.Deserialize
             // hh:mm:ss.fff
 
             var len = (stop - start) + 1;
-            if (len < 2) throw new DeserializationException("ISO8601 time must begin with a 2 character hour");
+            if (len < 2) throw new DeserializationException("ISO8601 time must begin with a 2 character hour", reader);
 
             var hour = 0;
             int c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             hour += (c - '0');
             hour *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             hour += (c - '0');
-            if (hour > 24) throw new DeserializationException("Expected hour to be between 00 and 24");
+            if (hour > 24) throw new DeserializationException("Expected hour to be between 00 and 24", reader);
 
             // just an hour part
             if (start == stop)
@@ -519,7 +519,7 @@ namespace Jil.Deserialize
                 while (start <= stop)
                 {
                     c = buffer[start];
-                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                    if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                     frac *= 10;
                     frac += (c - '0');
 
@@ -527,7 +527,7 @@ namespace Jil.Deserialize
                     start++;
                 }
 
-                if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+                if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
                 double hoursAsMilliseconds = hour * HoursToMilliseconds;
                 hoursAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * HoursToMilliseconds;
@@ -537,14 +537,14 @@ namespace Jil.Deserialize
 
             if (c == ':')
             {
-                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator");
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator", reader);
 
                 hasSeparators = true;
                 start++;
             }
             else
             {
-                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :");
+                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :", reader);
 
                 hasSeparators = false;
             }
@@ -559,18 +559,18 @@ namespace Jil.Deserialize
                 // hh:mm.fff
                 // hh:mm:ss.fff
 
-                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time");
+                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time", reader);
 
                 var min = 0;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 min += (c - '0');
                 min *= 10;
                 start++;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 min += (c - '0');
-                if (min > 59) throw new DeserializationException("Expected minute to be between 00 and 59");
+                if (min > 59) throw new DeserializationException("Expected minute to be between 00 and 59", reader);
 
                 // just HOUR and MINUTE part
                 if (start == stop)
@@ -590,7 +590,7 @@ namespace Jil.Deserialize
                     while (start <= stop)
                     {
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         frac *= 10;
                         frac += (c - '0');
 
@@ -598,7 +598,7 @@ namespace Jil.Deserialize
                         start++;
                     }
 
-                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
                     double hoursAsMilliseconds = hour * HoursToMilliseconds;
                     double minsAsMilliseconds = min * MinutesToMilliseconds;
@@ -607,17 +607,17 @@ namespace Jil.Deserialize
                     return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
                 }
 
-                if (c != ':') throw new DeserializationException("Expected :");
+                if (c != ':') throw new DeserializationException("Expected :", reader);
                 start++;
 
                 var secs = 0;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 secs += (c - '0');
                 secs *= 10;
                 start++;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 secs += (c - '0');
 
                 // HOUR, MINUTE, and SECONDS
@@ -636,7 +636,7 @@ namespace Jil.Deserialize
                     while (start <= stop)
                     {
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         frac *= 10;
                         frac += (c - '0');
 
@@ -644,7 +644,7 @@ namespace Jil.Deserialize
                         start++;
                     }
 
-                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
                     double hoursAsMilliseconds = hour * HoursToMilliseconds;
                     double minsAsMilliseconds = min * MinutesToMilliseconds;
@@ -654,7 +654,7 @@ namespace Jil.Deserialize
                     return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                 }
 
-                throw new DeserializationException("Expected ,, or .");
+                throw new DeserializationException("Expected ,, or .", reader);
             }
             else
             {
@@ -666,18 +666,18 @@ namespace Jil.Deserialize
                 // hhmmss.fff
                 // hhmmss,fff
 
-                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time");
+                if (len < 4) throw new DeserializationException("Expected minute part of ISO8601 time", reader);
 
                 var min = 0;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 min += (c - '0');
                 min *= 10;
                 start++;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 min += (c - '0');
-                if (min > 59) throw new DeserializationException("Expected minute to be between 00 and 59");
+                if (min > 59) throw new DeserializationException("Expected minute to be between 00 and 59", reader);
 
                 // just HOUR and MINUTE part
                 if (start == stop)
@@ -697,7 +697,7 @@ namespace Jil.Deserialize
                     while (start <= stop)
                     {
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         frac *= 10;
                         frac += (c - '0');
 
@@ -705,7 +705,7 @@ namespace Jil.Deserialize
                         start++;
                     }
 
-                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
                     double hoursAsMilliseconds = hour * HoursToMilliseconds;
                     double minsAsMilliseconds = min * MinutesToMilliseconds;
@@ -714,16 +714,16 @@ namespace Jil.Deserialize
                     return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
                 }
 
-                if (c == ':') throw new DeserializationException("Unexpected separator in ISO8601 time");
+                if (c == ':') throw new DeserializationException("Unexpected separator in ISO8601 time", reader);
 
                 var secs = 0;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 secs += (c - '0');
                 secs *= 10;
                 start++;
                 c = buffer[start];
-                if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                 secs += (c - '0');
 
                 // HOUR, MINUTE, and SECONDS
@@ -742,7 +742,7 @@ namespace Jil.Deserialize
                     while (start <= stop)
                     {
                         c = buffer[start];
-                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+                        if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
                         frac *= 10;
                         frac += (c - '0');
 
@@ -750,7 +750,7 @@ namespace Jil.Deserialize
                         start++;
                     }
 
-                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time");
+                    if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
                     double hoursAsMilliseconds = hour * HoursToMilliseconds;
                     double minsAsMilliseconds = min * MinutesToMilliseconds;
@@ -760,12 +760,12 @@ namespace Jil.Deserialize
                     return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                 }
 
-                throw new DeserializationException("Expected ,, or .");
+                throw new DeserializationException("Expected ,, or .", reader);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TimeSpan ParseISO8601TimeZoneOffset(char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
+        static TimeSpan ParseISO8601TimeZoneOffset(TextReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
             // Z
@@ -788,17 +788,17 @@ namespace Jil.Deserialize
 
             var len = (stop - start) + 1;
 
-            if (len < 2) throw new DeserializationException("Expected hour part of ISO8601 timezone offset");
+            if (len < 2) throw new DeserializationException("Expected hour part of ISO8601 timezone offset", reader);
             var hour = 0;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             hour += (c - '0');
             hour *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             hour += (c - '0');
-            if (hour > 24) throw new DeserializationException("Expected hour offset to be between 00 and 24");
+            if (hour > 24) throw new DeserializationException("Expected hour offset to be between 00 and 24", reader);
 
             // just an HOUR offset
             if (start == stop)
@@ -819,28 +819,28 @@ namespace Jil.Deserialize
             c = buffer[start];
             if (c == ':')
             {
-                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator in ISO8601 timezone offset");
+                if (hasSeparators.HasValue && !hasSeparators.Value) throw new DeserializationException("Unexpected separator in ISO8601 timezone offset", reader);
 
                 hasSeparators = true;
                 start++;
             }
             else
             {
-                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :");
+                if (hasSeparators.HasValue && hasSeparators.Value) throw new DeserializationException("Expected :", reader);
 
                 hasSeparators = false;
             }
 
             var mins = 0;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             mins += (c - '0');
             mins *= 10;
             start++;
             c = buffer[start];
-            if (c < '0' || c > '9') throw new DeserializationException("Expected digit");
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
             mins += (c - '0');
-            if (mins > 59) throw new DeserializationException("Expected minute offset to be between 00 and 59");
+            if (mins > 59) throw new DeserializationException("Expected minute offset to be between 00 and 59", reader);
 
             if (isNegative)
             {
