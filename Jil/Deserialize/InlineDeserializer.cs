@@ -368,42 +368,20 @@ namespace Jil.Deserialize
             var expectEnd = Emit.DefineLabel();
             var withTimeZone = Emit.DefineLabel();
 
-            ExpectQuote();                  // --empty--
-            ExpectChar('\\');               // --empty--
-            ExpectChar('/');                // --empty--
-            ExpectChar('D');                // --empty--
-            ExpectChar('a');                // --empty--
-            ExpectChar('t');                // --empty--
-            ExpectChar('e');                // --empty--
-            ExpectChar('(');                // --empty--
-            ReadPrimitive(typeof(long));    // long
-
-            RawPeekChar();                  // long int
-            Emit.Duplicate();               // long int int
-            Emit.LoadConstant('+');         // long int int +
-            Emit.BranchIfEqual(isPlus);     // long int
-            Emit.LoadConstant('-');         // long int -
-            Emit.BranchIfEqual(isMinus);    // long
-
-            Emit.Branch(expectEnd);         // long
-
-            Emit.MarkLabel(isPlus);                             // long int
-            Emit.Pop();                                         // long
+            ExpectQuote();                                      // --empty--
+            ExpectChar('\\');                                   // --empty--
+            ExpectChar('/');                                    // --empty--
+            ExpectChar('D');                                    // --empty--
+            ExpectChar('a');                                    // --empty--
+            ExpectChar('t');                                    // --empty--
+            ExpectChar('e');                                    // --empty--
+            ExpectChar('(');                                    // --empty--
+            ReadPrimitive(typeof(long));                        // long
             Emit.LoadArgument(0);                               // long TextReader
-            Emit.Call(Methods.ReadTimeZoneAsMillisecondOffset); // long long
-            Emit.Branch(withTimeZone);                          // long long
-
-            Emit.MarkLabel(isMinus);                            // long
-            Emit.LoadArgument(0);                               // long TextReader
-            Emit.Call(Methods.ReadTimeZoneAsMillisecondOffset); // long long
-
-            Emit.MarkLabel(withTimeZone);   // long long
-            Emit.Add();                     // long
-
-            Emit.MarkLabel(expectEnd);      // long
-            ExpectChar(')');                // long
-            ExpectChar('\\');               // long
-            ExpectChar('/');                // long
+            Emit.Call(Methods.DiscardNewtonsoftTimeZoneOffset); // long
+            ExpectChar(')');                                    // long
+            ExpectChar('\\');                                   // long
+            ExpectChar('/');                                    // long
 
             // convert MS into ticks
             Emit.LoadConstant(10000L);              // long long
