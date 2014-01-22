@@ -1546,6 +1546,49 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void NewtonsoftDateTimesWithTimeZones()
+        {
+            var newtonsoft = Newtonsoft.Json.JsonSerializer.Create(new Newtonsoft.Json.JsonSerializerSettings
+            {
+                DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat
+            });
+
+            var now = DateTime.UtcNow;
+
+            for (var i = 0; i < 100000; i++)
+            {
+                var dtUtc = now + TimeSpan.FromMilliseconds(i);
+                var dtLocal = dtUtc.ToLocalTime();
+
+                string asStr;
+                using(var str  = new StringWriter())
+                {
+                    newtonsoft.Serialize(str, dtLocal);
+                    asStr = str.ToString();
+                    Assert.IsTrue(asStr.Contains('-') || asStr.Contains('+'));
+                }
+
+                DateTime shouldMatch, shouldMatchUtc;
+                using (var str = new StringReader(asStr))
+                {
+                    shouldMatch = (DateTime)newtonsoft.Deserialize(str, typeof(DateTime));
+                    shouldMatchUtc = shouldMatch.ToUniversalTime();
+                }
+
+                DateTime jilDt, jilDtUtc;
+                using (var str = new StringReader(asStr))
+                {
+                    jilDt = JSON.Deserialize<DateTime>(str);
+                    jilDtUtc = jilDt.ToUniversalTime();
+                }
+
+                Assert.IsTrue((dtUtc - shouldMatchUtc).Duration().TotalMilliseconds < 1);
+                Assert.IsTrue((dtUtc - jilDtUtc).Duration().TotalMilliseconds < 1);
+                Assert.IsTrue((shouldMatchUtc - jilDtUtc).Duration().TotalMilliseconds == 0);
+            }
+        }
+
+        [TestMethod]
         public void Guids()
         {
             var guid = Guid.NewGuid();

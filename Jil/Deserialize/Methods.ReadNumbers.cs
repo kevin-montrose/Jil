@@ -22,7 +22,64 @@ namespace Jil.Deserialize
     //      * *except* for long, where we accumulate into a ulong and do the special checked; because there's no larger type
     static partial class Methods
     {
+        public static readonly MethodInfo ReadTimeZoneAsMillisecondOffset = typeof(Methods).GetMethod("_ReadTimeZoneAsMillisecondOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static long _ReadTimeZoneAsMillisecondOffset(TextReader reader)
+        {
+            // this is a special case when reading timezone information for NewtsonsoftStyle DateTimes
+            // max +9999
+            // min -9999
+            // digits: 4
+
+            var positive = reader.Read() == '+';
+
+            long ret = 0;
+            long temp = 0;
+            
+            // first digit hour
+            var c = reader.Read();
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            temp += c;
+
+            // second digit hour
+            temp *= 10;
+            c = reader.Read();
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            temp += c;
+
+            if (temp > 23) throw new DeserializationException("Expected hour portion of timezone offset between 0 and 24");
+
+            ret += (temp * 3600000L);
+
+            temp = 0;
+            // first digit minute
+            temp *= 10;
+            c = reader.Read();
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            temp += c;
+
+            // second digit minute
+            temp *= 10;
+            c = reader.Read();
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit");
+            temp += c;
+
+            if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59");
+
+            ret += (temp * 60000L);
+
+            ret = positive ? ret : -ret;
+
+            //return ret;
+            return 0;
+        }
+
         public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8(TextReader reader)
         {
             // max:  512

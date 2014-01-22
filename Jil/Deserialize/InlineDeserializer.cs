@@ -363,6 +363,11 @@ namespace Jil.Deserialize
 
         void ReadNewtosoftDateTime()
         {
+            var isPlus = Emit.DefineLabel();
+            var isMinus = Emit.DefineLabel();
+            var expectEnd = Emit.DefineLabel();
+            var withTimeZone = Emit.DefineLabel();
+
             ExpectQuote();                  // --empty--
             ExpectChar('\\');               // --empty--
             ExpectChar('/');                // --empty--
@@ -372,6 +377,30 @@ namespace Jil.Deserialize
             ExpectChar('e');                // --empty--
             ExpectChar('(');                // --empty--
             ReadPrimitive(typeof(long));    // long
+
+            RawPeekChar();                  // long int
+            Emit.Duplicate();               // long int int
+            Emit.LoadConstant('+');         // long int int +
+            Emit.BranchIfEqual(isPlus);     // long int
+            Emit.LoadConstant('-');         // long int -
+            Emit.BranchIfEqual(isMinus);    // long
+
+            Emit.Branch(expectEnd);         // long
+
+            Emit.MarkLabel(isPlus);                             // long int
+            Emit.Pop();                                         // long
+            Emit.LoadArgument(0);                               // long TextReader
+            Emit.Call(Methods.ReadTimeZoneAsMillisecondOffset); // long long
+            Emit.Branch(withTimeZone);                          // long long
+
+            Emit.MarkLabel(isMinus);                            // long
+            Emit.LoadArgument(0);                               // long TextReader
+            Emit.Call(Methods.ReadTimeZoneAsMillisecondOffset); // long long
+
+            Emit.MarkLabel(withTimeZone);   // long long
+            Emit.Add();                     // long
+
+            Emit.MarkLabel(expectEnd);      // long
             ExpectChar(')');                // long
             ExpectChar('\\');               // long
             ExpectChar('/');                // long
