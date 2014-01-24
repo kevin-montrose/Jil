@@ -817,6 +817,18 @@ namespace Jil.Deserialize
 
             if (isAnonymous)
             {
+                if (UseHashWhenMatchingMembers && AllowHashing)
+                {
+                    var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
+                    var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
+
+                    if (isAvailable)
+                    {
+                        ReadAnonymousObjectHashing(objType);
+                        return;
+                    }
+                }
+
                 ReadAnonymousObject(objType);
                 return;
             }
@@ -1194,6 +1206,186 @@ namespace Jil.Deserialize
             {
                 Emit.LoadObject(objType);     // objType
             }
+        }
+
+        void ReadAnonymousObjectHashing(Type objType)
+        {
+            var done = Emit.DefineLabel();
+            var doneSkip = Emit.DefineLabel();
+
+            ExpectRawCharOrNull(
+                '{',
+                () => { },
+                () =>
+                {
+                    Emit.LoadNull();            // null
+                    Emit.Branch(doneSkip);  // null
+                }
+            );
+
+            var loopStart = Emit.DefineLabel();
+
+            var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
+            var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
+            var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
+            var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
+            var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
+            var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
+            var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
+
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)matcher.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            var locals = propertyMap.ToDictionary(kv => kv.Key, kv => Emit.DeclareLocal(kv.Value.Item1));
+
+            var cons = objType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Single();
+
+            ConsumeWhiteSpace();        // --empty--
+            RawPeekChar();              // int 
+            Emit.LoadConstant('}');     // int '}'
+            Emit.BranchIfEqual(done);   // --empty--
+
+            ExpectQuote();                  // --empty--
+            Emit.LoadArgument(0);           // TextReader
+            using (var bucket = Emit.DeclareLocal<int>())
+            using (var hash = Emit.DeclareLocal<uint>())
+            {
+                Emit.LoadLocalAddress(bucket);  // TextReader int*
+                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
+                Emit.Call(hashMtd);             // length
+                Emit.LoadLocal(hash);           // length hash
+                Emit.LoadLocal(bucket);         // length hash bucket
+            }
+            ExpectQuote();                  // length hash bucket
+
+            ConsumeWhiteSpace();        // length hash bucket
+            ExpectChar(':');            // length hash bucket
+            ConsumeWhiteSpace();        // length hash bucket
+
+            var readingMember = Emit.DefineLabel();
+            Emit.MarkLabel(readingMember);  // length hash bucket
+
+            Emit.Switch(labels);            // length hash
+
+            // fallthrough case
+            Emit.Pop();                     // length
+            Emit.Pop();                     // --empty--
+            SkipObjectMember();             // --empty--
+            Emit.Branch(loopStart);         // --empty--
+
+            for (var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
+            {
+                var label = labels[i];
+                var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
+
+                // this bucket is empty
+                if (memberName == null)
+                {
+                    Emit.MarkLabel(label);  // length hash
+                    Emit.Pop();             // length
+                    Emit.Pop();             // --empty--
+                    SkipObjectMember();     // --empty--
+                    Emit.Branch(loopStart); // --empty--
+                }
+                else
+                {
+                    var member = memberLookup[memberName];
+                    var hash = hashLookup[memberName];
+                    var memberType = member.ReturnType();
+                    var local = locals[memberName];
+
+                    var isHashMatch = Emit.DefineLabel();
+                    var isLengthMatch = Emit.DefineLabel();
+
+                    Emit.MarkLabel(label);                  // length hash
+                    Emit.LoadConstant(hash);                // length hash expectedHash
+                    Emit.BranchIfEqual(isHashMatch);        // length
+
+                    // collision
+                    Emit.Pop();                             // --empty--
+                    SkipObjectMember();                     // --empty--
+                    Emit.Branch(loopStart);                 // --empty--
+
+                    Emit.MarkLabel(isHashMatch);            // length
+                    Emit.LoadConstant(memberName.Length);   // length expectedLength
+                    Emit.BranchIfEqual(isLengthMatch);      // --empty--
+
+                    // collision
+                    SkipObjectMember();                     // --empty--
+                    Emit.Branch(loopStart);                 // --empty--
+
+                    Emit.MarkLabel(isLengthMatch);          // --empty--
+                    Build(member.ReturnType());             // memberType
+                    Emit.StoreLocal(local);                 // --empty--
+
+                    Emit.Branch(loopStart);     // --empty--
+                }
+            }
+
+            var nextItem = Emit.DefineLabel();
+
+            Emit.MarkLabel(loopStart);      // --empty--
+            ConsumeWhiteSpace();            // --empty--
+            RawPeekChar();                  // int 
+            Emit.Duplicate();               // int int
+            Emit.LoadConstant(',');         // int int ','
+            Emit.BranchIfEqual(nextItem);   // int
+            Emit.LoadConstant('}');         // int '}'
+            Emit.BranchIfEqual(done);       // --empty--
+
+            // didn't get what we expected
+            ThrowExpected(",", "}");
+
+            // skip the , & any whitespace
+            Emit.MarkLabel(nextItem);           // int
+            Emit.Pop();                         // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+            ConsumeWhiteSpace();                // --empty--
+
+            ExpectQuote();                      // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            using (var bucket = Emit.DeclareLocal<int>())
+            using (var hash = Emit.DeclareLocal<uint>())
+            {
+                Emit.LoadLocalAddress(bucket);  // TextReader int*
+                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
+                Emit.Call(hashMtd);             // length
+                Emit.LoadLocal(hash);           // length hash
+                Emit.LoadLocal(bucket);         // length hash bucket
+            }
+            ExpectQuote();
+
+            ConsumeWhiteSpace();        // length hash bucket
+            ExpectChar(':');            // length hash bucket
+            ConsumeWhiteSpace();        // length hash bucket
+
+            try
+            {
+                Emit.Branch(readingMember); // length hash bucket
+            }
+            catch (Sigil.SigilVerificationException e)
+            {
+                throw;
+            }
+
+            Emit.MarkLabel(done);               // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+
+            // TODO: Create anonymous object
+            foreach (var propName in propertyMap.OrderBy(kv => kv.Value.Item2).Select(p => p.Key))
+            {
+                var local = locals[propName];
+                Emit.LoadLocal(local);
+                local.Dispose();
+            }
+
+            // stack is full of parameters
+            Emit.NewObject(cons);           // objType
+
+            Emit.MarkLabel(doneSkip);       // objType
         }
 
         void ReadAnonymousObject(Type objType)
