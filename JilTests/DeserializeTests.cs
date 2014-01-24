@@ -3357,6 +3357,32 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void AnonNulls()
+        {
+            {
+                var example = new { A = 1 };
+
+                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]", false);
+                Assert.AreEqual(3, a.Count);
+                Assert.IsNull(a[0]);
+                Assert.IsNotNull(a[1]);
+                Assert.AreEqual(1234, a[1].A);
+                Assert.IsNull(a[2]);
+            }
+
+            {
+                var example = new { A = 1 };
+
+                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]", true);
+                Assert.AreEqual(3, a.Count);
+                Assert.IsNull(a[0]);
+                Assert.IsNotNull(a[1]);
+                Assert.AreEqual(1234, a[1].A);
+                Assert.IsNull(a[2]);
+            }
+        }
+
+        [TestMethod]
         public void AnonObjects()
         {
             {
