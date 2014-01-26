@@ -158,7 +158,7 @@ namespace Experiments
                 InlineSerializer<ComplexType>.ReorderMembers = false;
 
                 // Build the *actual* serializer method
-                var normal = InlineSerializerHelper.Build<ComplexType>();
+                var normal = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false);
 
                 MethodCache[NormalKey] = normal;
             }
@@ -182,7 +182,7 @@ namespace Experiments
                     try
                     {
                         // Build the *actual* serializer method
-                        mtd = InlineSerializerHelper.Build<ComplexType>();
+                        mtd = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false);
                     }
                     finally
                     {

@@ -238,14 +238,14 @@ namespace JilTests
                     InlineSerializer<_ReorderMembers>.ReorderMembers = true;
 
                     // Build the *actual* serializer method
-                    memoryOrder = InlineSerializerHelper.Build<_ReorderMembers>();
+                    memoryOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_ReorderMembers>.ReorderMembers = false;
 
                     // Build the *actual* serializer method
-                    normalOrder = InlineSerializerHelper.Build<_ReorderMembers>();
+                    normalOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -303,14 +303,14 @@ namespace JilTests
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>();
+                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>();
+                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -367,14 +367,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = true;
 
                     // Build the *actual* serializer method
-                    custom = InlineSerializerHelper.Build<_UseCustomIntegerToString>();
+                    custom = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomIntegerToString>();
+                    normal = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -427,14 +427,14 @@ namespace JilTests
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>();
+                    skipped = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>();
+                    normal = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -487,14 +487,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(dateFormat: Jil.DateTimeFormat.ISO8601);
+                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601);
                 }
 
                 {
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(dateFormat: Jil.DateTimeFormat.ISO8601);
+                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601);
                 }
             }
             finally
@@ -549,14 +549,14 @@ namespace JilTests
                     InlineSerializer<_UseFastLists>.UseFastLists = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastLists>();
+                    fast = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_UseFastLists>.UseFastLists = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastLists>();
+                    normal = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -606,14 +606,14 @@ namespace JilTests
                     InlineSerializer<_UseFastArrays>.UseFastArrays = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastArrays>();
+                    fast = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_UseFastArrays>.UseFastArrays = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastArrays>();
+                    normal = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -664,14 +664,14 @@ namespace JilTests
                     InlineSerializer<_UseFastGuids>.UseFastGuids = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastGuids>();
+                    fast = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_UseFastGuids>.UseFastGuids = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastGuids>();
+                    normal = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -720,14 +720,14 @@ namespace JilTests
                     InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = true;
 
                     // Build the *actual* serializer method
-                    allocationless = InlineSerializerHelper.Build<_AllocationlessDictionaries>();
+                    allocationless = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_AllocationlessDictionaries>();
+                    normal = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -804,14 +804,14 @@ namespace JilTests
                     InlineSerializer<_PropagateConstants>.PropagateConstants = true;
 
                     // Build the *actual* serializer method
-                    propagated = InlineSerializerHelper.Build<_PropagateConstants>();
+                    propagated = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
 
                 {
                     InlineSerializer<_PropagateConstants>.PropagateConstants = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_PropagateConstants>();
+                    normal = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>));
                 }
             }
             finally
@@ -855,16 +855,18 @@ namespace JilTests
                 {
                     {
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+                        Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                     }
 
                     {
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
+                        Exception ignored;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_AlwaysUseCharBufferForStrings>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                     }
                 }
                 finally
@@ -903,16 +905,18 @@ namespace JilTests
                 {
                     {
                         InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
+                        Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat:Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                     }
 
                     {
                         InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
+                        Exception ignored;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<string>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                     }
                 }
                 finally
@@ -967,16 +971,18 @@ namespace JilTests
             {
                 {
                     InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
+                    Exception ignored;
 
                     // Build the *actual* deserializer method
-                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                 }
 
                 {
                     InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = false;
+                    Exception ignored;
 
                     // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true);
+                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                 }
             }
             finally
