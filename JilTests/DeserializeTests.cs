@@ -3553,6 +3553,51 @@ namespace JilTests
             }
         }
 
+        static T _EmptyAnonymousObject<T>(T example, string str, Options opts)
+        {
+            return JSON.Deserialize<T>(str, opts);
+        }
+
+        [TestMethod]
+        public void EmptyAnonymousObject()
+        {
+            var ex = new { };
+
+            {
+                {
+                    var obj = _EmptyAnonymousObject(ex, "null", Options.Default);
+                    Assert.IsNull(obj);
+                }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{}", Options.Default);
+                    Assert.IsNotNull(obj);
+                }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", Options.Default);
+                    Assert.IsNotNull(obj);
+                }
+            }
+
+            {
+                {
+                    var obj = _EmptyAnonymousObject(ex, "null", new Options(allowHashFunction: false));
+                    Assert.IsNull(obj);
+                }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{}", new Options(allowHashFunction: false));
+                    Assert.IsNotNull(obj);
+                }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", new Options(allowHashFunction: false));
+                    Assert.IsNotNull(obj);
+                }
+            }
+        }
+
         [TestMethod]
         public void SystemObject()
         {

@@ -829,7 +829,7 @@ namespace Jil.Deserialize
                     }
                 }
 
-                ReadAnonymousObject(objType);
+                ReadAnonymousObjectDictionaryLookup(objType);
                 return;
             }
 
@@ -1249,7 +1249,7 @@ namespace Jil.Deserialize
                 () => { },
                 () =>
                 {
-                    Emit.LoadNull();            // null
+                    Emit.LoadNull();        // null
                     Emit.Branch(doneSkip);  // null
                 }
             );
@@ -1257,18 +1257,26 @@ namespace Jil.Deserialize
             var loopStart = Emit.DefineLabel();
 
             var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)matcher.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            var cons = objType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Single();
+
+            if (propertyMap.Count == 0)
+            {
+                Emit.NewObject(cons);       // objType
+
+                Emit.MarkLabel(doneSkip);   // objType
+
+                return;
+            }
+
+            var locals = propertyMap.ToDictionary(kv => kv.Key, kv => Emit.DeclareLocal(kv.Value.Item1));
             var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
             var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
             var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
             var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
             var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
             var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
-
-            var propertyMap = (Dictionary<string, Tuple<Type, int>>)matcher.GetField("ParametersToTypeAndIndex").GetValue(null);
-
-            var locals = propertyMap.ToDictionary(kv => kv.Key, kv => Emit.DeclareLocal(kv.Value.Item1));
-
-            var cons = objType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Single();
 
             ConsumeWhiteSpace();        // --empty--
             RawPeekChar();              // int 
@@ -1419,12 +1427,23 @@ namespace Jil.Deserialize
             Emit.MarkLabel(doneSkip);       // objType
         }
 
-        void ReadAnonymousObject(Type objType)
+        void ReadAnonymousObjectDictionaryLookup(Type objType)
         {
+            var doneNotNull = Emit.DefineLabel();
+            var doneNull = Emit.DefineLabel();
+
+            ExpectRawCharOrNull(
+                '{',
+                () => { },
+                () =>
+                {
+                    Emit.Branch(doneNull);
+                }
+            );
+
             var cons = objType.GetConstructors().Single();
 
             var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
-
             var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
             var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
             var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
@@ -1438,18 +1457,6 @@ namespace Jil.Deserialize
 
             var labels = orderInst.ToDictionary(d => d.Key, d => Emit.DefineLabel());
             var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
-
-            var doneNotNull = Emit.DefineLabel();
-            var doneNull = Emit.DefineLabel();
-
-            ExpectRawCharOrNull(
-                '{',
-                () => { },
-                () =>
-                {
-                    Emit.Branch(doneNull);
-                }
-            );
 
             var loopStart = Emit.DefineLabel();
 
