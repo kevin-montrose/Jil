@@ -1449,7 +1449,7 @@ namespace Jil.Deserialize
             if (propertyMap.Count == 0)
             {
                 Emit.NewObject(cons);           // objType
-                Emit.Branch(doneNotNull);          // objType
+                Emit.Branch(doneNotNull);       // objType
 
                 Emit.MarkLabel(doneNull);       // null
                 Emit.LoadNull();                // null
