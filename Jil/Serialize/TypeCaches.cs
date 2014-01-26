@@ -66,7 +66,7 @@ namespace Jil.Serialize
 
         static NewtonsoftStylePrettyPrintJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -96,7 +96,7 @@ namespace Jil.Serialize
 
         static NewtonsoftStylePrettyPrintInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -106,7 +106,7 @@ namespace Jil.Serialize
 
         static NewtonsoftStyleJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -116,7 +116,7 @@ namespace Jil.Serialize
 
         static NewtonsoftStyleInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -226,7 +226,7 @@ namespace Jil.Serialize
 
         static MillisecondsPrettyPrintJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -256,7 +256,7 @@ namespace Jil.Serialize
 
         static MillisecondsPrettyPrintInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -266,7 +266,7 @@ namespace Jil.Serialize
 
         static MillisecondsJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -276,7 +276,7 @@ namespace Jil.Serialize
 
         static MillisecondsInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -386,7 +386,7 @@ namespace Jil.Serialize
 
         static SecondsPrettyPrintJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -416,7 +416,7 @@ namespace Jil.Serialize
 
         static SecondsPrettyPrintInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -426,7 +426,7 @@ namespace Jil.Serialize
 
         static SecondsJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -436,7 +436,7 @@ namespace Jil.Serialize
 
         static SecondsInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -546,7 +546,7 @@ namespace Jil.Serialize
 
         static ISO8601PrettyPrintJSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -576,7 +576,7 @@ namespace Jil.Serialize
 
         static ISO8601PrettyPrintInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -586,7 +586,7 @@ namespace Jil.Serialize
 
         static ISO8601JSONPInheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601JSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601JSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false);
         }
     }
 
@@ -596,7 +596,7 @@ namespace Jil.Serialize
 
         static ISO8601InheritedTypeCache()
         {
-            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601InheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.ISO8601, includeInherited: true);
+            Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601InheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false);
         }
     }
 

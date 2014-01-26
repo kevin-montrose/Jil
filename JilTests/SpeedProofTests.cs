@@ -238,14 +238,14 @@ namespace JilTests
                     InlineSerializer<_ReorderMembers>.ReorderMembers = true;
 
                     // Build the *actual* serializer method
-                    memoryOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    memoryOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_ReorderMembers>.ReorderMembers = false;
 
                     // Build the *actual* serializer method
-                    normalOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normalOrder = InlineSerializerHelper.Build<_ReorderMembers>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -303,14 +303,14 @@ namespace JilTests
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -367,14 +367,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = true;
 
                     // Build the *actual* serializer method
-                    custom = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    custom = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_UseCustomIntegerToString>.UseCustomIntegerToString = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_UseCustomIntegerToString>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -427,14 +427,14 @@ namespace JilTests
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    skipped = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_SkipDateTimeMathMethods>.SkipDateTimeMathMethods = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_SkipDateTimeMathMethods>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -487,14 +487,14 @@ namespace JilTests
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = true;
 
                     // Build the *actual* serializer method
-                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601, pretty: false);
+                    skipped = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601, pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_UseCustomISODateFormatting>.UseCustomISODateFormatting = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601, pretty: false);
+                    normal = InlineSerializerHelper.Build<_UseCustomISODateFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.ISO8601, pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -549,14 +549,14 @@ namespace JilTests
                     InlineSerializer<_UseFastLists>.UseFastLists = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    fast = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_UseFastLists>.UseFastLists = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_UseFastLists>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -606,14 +606,14 @@ namespace JilTests
                     InlineSerializer<_UseFastArrays>.UseFastArrays = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    fast = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_UseFastArrays>.UseFastArrays = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_UseFastArrays>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -664,14 +664,14 @@ namespace JilTests
                     InlineSerializer<_UseFastGuids>.UseFastGuids = true;
 
                     // Build the *actual* serializer method
-                    fast = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    fast = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_UseFastGuids>.UseFastGuids = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_UseFastGuids>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -720,14 +720,14 @@ namespace JilTests
                     InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = true;
 
                     // Build the *actual* serializer method
-                    allocationless = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    allocationless = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_AllocationlessDictionaries>.AllocationlessDictionaries = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_AllocationlessDictionaries>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
@@ -804,14 +804,14 @@ namespace JilTests
                     InlineSerializer<_PropagateConstants>.PropagateConstants = true;
 
                     // Build the *actual* serializer method
-                    propagated = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    propagated = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
 
                 {
                     InlineSerializer<_PropagateConstants>.PropagateConstants = false;
 
                     // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false);
+                    normal = InlineSerializerHelper.Build<_PropagateConstants>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false);
                 }
             }
             finally
