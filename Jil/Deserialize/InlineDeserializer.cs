@@ -897,6 +897,22 @@ namespace Jil.Deserialize
                 var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
                 var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
                 var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
+
+                // special case object w/ no deserializable properties
+                if (bucketLookup.Count == 0)
+                {
+                    loadObj();                      // objType(*?)
+
+                    Emit.MarkLabel(doneSkipChar);   // objType(*?)
+
+                    if (objType.IsValueType)
+                    {
+                        Emit.LoadObject(objType);   // objType
+                    }
+
+                    return;
+                }
+
                 var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
                 var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
                 var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
@@ -1102,7 +1118,22 @@ namespace Jil.Deserialize
                 var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
 
                 var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
-                
+
+                // special case object w/ no deserializable properties
+                if (setters.Count == 0)
+                {
+                    loadObj();                      // objType(*?)
+
+                    Emit.MarkLabel(doneSkipChar);   // objType(*?)
+
+                    if (objType.IsValueType)
+                    {
+                        Emit.LoadObject(objType);   // objType
+                    }
+
+                    return;
+                }
+
                 var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
 
                 var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);

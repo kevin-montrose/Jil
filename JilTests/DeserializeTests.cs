@@ -3552,5 +3552,55 @@ namespace JilTests
                 Assert.AreEqual(314159, obj.SecretName);
             }
         }
+
+        [TestMethod]
+        public void SystemObject()
+        {
+            {
+                using (var str = new StringReader("null"))
+                {
+                    var obj = JSON.Deserialize<object>(str);
+
+                    Assert.IsNull(obj);
+                }
+
+                using (var str = new StringReader("{}"))
+                {
+                    var obj = JSON.Deserialize<object>(str);
+
+                    Assert.IsNotNull(obj);
+                }
+
+                using (var str = new StringReader("{\"A\":1234"))
+                {
+                    var obj = JSON.Deserialize<object>(str);
+
+                    Assert.IsNotNull(obj);
+                }
+            }
+
+            {
+                using (var str = new StringReader("null"))
+                {
+                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+
+                    Assert.IsNull(obj);
+                }
+
+                using (var str = new StringReader("{}"))
+                {
+                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+
+                    Assert.IsNotNull(obj);
+                }
+
+                using (var str = new StringReader("{\"A\":1234"))
+                {
+                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+
+                    Assert.IsNotNull(obj);
+                }
+            }
+        }
     }
 }
