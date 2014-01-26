@@ -3000,7 +3000,7 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited = false)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
         {
             typeCacheType = typeCacheType ?? typeof(NewtonsoftStyleTypeCache<>);
 
