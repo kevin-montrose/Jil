@@ -1445,6 +1445,20 @@ namespace Jil.Deserialize
 
             var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
             var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            if (propertyMap.Count == 0)
+            {
+                Emit.NewObject(cons);           // objType
+                Emit.Branch(doneNotNull);          // objType
+
+                Emit.MarkLabel(doneNull);       // null
+                Emit.LoadNull();                // null
+
+                Emit.MarkLabel(doneNotNull);    // objType
+
+                return;
+            }
+
             var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
             var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
             var orderInst = (Dictionary<string, int>)order.GetValue(null);
