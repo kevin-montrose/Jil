@@ -3647,5 +3647,43 @@ namespace JilTests
                 }
             }
         }
+
+        class _MissingConstructor
+        {
+            public int A;
+            public double B;
+
+            public _MissingConstructor(int a, double b)
+            {
+                A = a;
+                B = b;
+            }
+        }
+
+        [TestMethod]
+        public void MissingConstructor()
+        {
+            try
+            {
+                JSON.Deserialize<_MissingConstructor>("null");
+                Assert.Fail();
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_MissingConstructor: Expected a parameterless constructor for JilTests.DeserializeTests+_MissingConstructor", e.Message);
+                Assert.IsInstanceOfType(e.InnerException, typeof(Jil.Common.ConstructionException));
+            }
+
+            try
+            {
+                JSON.Deserialize<_MissingConstructor>("null", new Options(allowHashFunction: false));
+                Assert.Fail();
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_MissingConstructor: Expected a parameterless constructor for JilTests.DeserializeTests+_MissingConstructor", e.Message);
+                Assert.IsInstanceOfType(e.InnerException, typeof(Jil.Common.ConstructionException));
+            }
+        }
     }
 }

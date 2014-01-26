@@ -46,6 +46,8 @@ namespace Jil
             InspectReader(reader);
         }
 
+        internal DeserializationException(string msg, Exception inner) : base(msg + ": " + inner.Message, inner) { }
+
         void InspectReader(TextReader reader)
         {
             try

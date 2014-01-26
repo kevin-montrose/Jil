@@ -301,7 +301,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            throw new Exception("Unexpected number type: " + numberType);
+            throw new ConstructionException("Unexpected number type: " + numberType);
         }
 
         void ReadBool()
@@ -358,7 +358,7 @@ namespace Jil.Deserialize
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsDateTime(); break;
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsDateTime(); break;
                 case DateTimeFormat.ISO8601: ReadISO8601DateTime(); break;
-                default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
+                default: throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
             }
             
         }
@@ -665,7 +665,7 @@ namespace Jil.Deserialize
             var keyIsInteger = keyType.IsIntegerNumberType();
             var keyIsEnum = keyType.IsEnum;
 
-            if(!(keyIsString || keyIsInteger || keyIsEnum)) throw new Exception("Only dictionaries with strings, integers, or enums for keys can be deserialized");
+            if (!(keyIsString || keyIsInteger || keyIsEnum)) throw new ConstructionException("Only dictionaries with strings, integers, or enums for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
             if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
@@ -884,7 +884,7 @@ namespace Jil.Deserialize
                 {
                     var cons = objType.GetConstructor(Type.EmptyTypes);
 
-                    // TODO: deal with constructor being empty... probably pre-verify?
+                    if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
                     Emit.StoreLocal(loc);   // --empty--
@@ -1105,7 +1105,7 @@ namespace Jil.Deserialize
                 {
                     var cons = objType.GetConstructor(Type.EmptyTypes);
 
-                    // TODO: deal with constructor being empty... probably pre-verify?
+                    if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
                     Emit.StoreLocal(loc);   // --empty--
@@ -1399,21 +1399,13 @@ namespace Jil.Deserialize
             ExpectChar(':');            // length hash bucket
             ConsumeWhiteSpace();        // length hash bucket
 
-            try
-            {
-                Emit.Branch(readingMember); // length hash bucket
-            }
-            catch (Sigil.SigilVerificationException e)
-            {
-                throw;
-            }
+            Emit.Branch(readingMember); // length hash bucket
 
             Emit.MarkLabel(done);               // --empty--
             Emit.LoadArgument(0);               // TextReader
             Emit.CallVirtual(TextReader_Read);  // int
             Emit.Pop();                         // --empty--
 
-            // TODO: Create anonymous object
             foreach (var propName in propertyMap.OrderBy(kv => kv.Value.Item2).Select(p => p.Key))
             {
                 var local = locals[propName];
@@ -1655,11 +1647,35 @@ namespace Jil.Deserialize
 
     static class InlineDeserializerHelper
     {
-        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing)
+        static Func<TextReader, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        {
+            var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
+            var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
+
+            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader) });
+            emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
+            emit.LoadField(stashField);
+            emit.NewObject<DeserializationException, string, Exception>();
+            emit.Throw();
+
+            return emit.CreateDelegate<Func<TextReader, ReturnType>>();
+        }
+
+        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing, out Exception exceptionDuringBuild)
         {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat, allowHashing);
 
-            var ret = obj.BuildWithNewDelegate();
+            Func<TextReader, ReturnType> ret;
+            try
+            {
+                ret = obj.BuildWithNewDelegate();
+                exceptionDuringBuild = null;
+            }
+            catch (ConstructionException e)
+            {
+                exceptionDuringBuild = e;
+                ret = BuildAlwaysFailsWith<ReturnType>(typeCacheType);
+            }
 
             return ret;
         }

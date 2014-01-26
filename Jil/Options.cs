@@ -89,7 +89,8 @@ namespace Jil
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,
-                    JSONP,
+                    IsJSONP,
+                    ShouldIncludeInherited,
                     AllowHashFunction
                 );
         }
