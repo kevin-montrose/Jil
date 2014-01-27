@@ -245,7 +245,7 @@ namespace Jil.Serialize
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
 
-            if (asField == null && asProp == null) throw new Exception("Wha?");
+            if (asField == null && asProp == null) throw new ConstructionException("Encountered a serializable member that is neither a field nor a property: " + member);
 
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
@@ -693,7 +693,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            throw new InvalidOperationException("Unexpected DateFormat: " + DateFormat);
+            throw new ConstructionException("Unexpected DateFormat: " + DateFormat);
         }
 
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
@@ -1267,7 +1267,7 @@ namespace Jil.Serialize
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
 
-            if (asField == null && asProp == null) throw new Exception("Wha?");
+            if (asField == null && asProp == null) throw new ConstructionException("Encountered a serializable member that is neither a field nor a property: " + member);
 
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
@@ -1376,7 +1376,7 @@ namespace Jil.Serialize
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
 
-            if (asField == null && asProp == null) throw new Exception("Wha?");
+            if (asField == null && asProp == null) throw new ConstructionException("Encountered a serializable member that is neither a field nor a property: " + member);
 
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
@@ -1926,7 +1926,7 @@ namespace Jil.Serialize
 
             if (!(keyIsString || keyIsEnum || keysAreIntegers))
             {
-                throw new InvalidOperationException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
+                throw new ConstructionException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
             }
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
@@ -2073,7 +2073,7 @@ namespace Jil.Serialize
 
             if (!(keysAreStrings || keysAreEnums || keysAreIntegers))
             {
-                throw new InvalidOperationException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
+                throw new ConstructionException("JSON dictionaries must have strings, enums, or integers as keys, found: " + keyType);
             }
 
             var kvType = typeof(KeyValuePair<,>).MakeGenericType(keyType, elementType);
@@ -2665,43 +2665,50 @@ namespace Jil.Serialize
                 Emit.LoadConstant((byte)val);
                 return;
             }
+
             if (type == typeof(sbyte))
             {
                 Emit.LoadConstant((sbyte)val);
                 return;
             }
+
             if (type == typeof(short))
             {
                 Emit.LoadConstant((short)val);
                 return;
             }
+
             if (type == typeof(ushort))
             {
                 Emit.LoadConstant((ushort)val);
                 return;
             }
+
             if (type == typeof(int))
             {
                 Emit.LoadConstant((int)val);
                 return;
             }
+
             if (type == typeof(uint))
             {
                 Emit.LoadConstant((uint)val);
                 return;
             }
+
             if (type == typeof(long))
             {
                 Emit.LoadConstant((long)val);
                 return;
             }
+
             if (type == typeof(ulong))
             {
                 Emit.LoadConstant((ulong)val);
                 return;
             }
 
-            throw new Exception("Unexpected type: " + type);
+            throw new ConstructionException("Unexpected type: " + type);
         }
         
         void WriteDiscontiguousEnumeration(Type enumType, bool popTextWriter)
@@ -3000,15 +3007,35 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        static Action<TextWriter, BuildForType, int> BuildAlwaysFailsWith<BuildForType>(Type typeCacheType)
         {
-            typeCacheType = typeCacheType ?? typeof(NewtonsoftStyleTypeCache<>);
+            var specificTypeCache = typeCacheType.MakeGenericType(typeof(BuildForType));
+            var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited);
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(BuildForType), typeof(int) });
+            emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
+            emit.LoadField(stashField);
+            emit.NewObject<Exception, string, Exception>();
+            emit.Throw();
 
-            var ret = obj.Build();
+            return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>();
+        }
 
-            var opts = new Options(pretty, excludeNulls, jsonp, dateFormat, includeInherited);
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        {
+            Action<TextWriter, BuildForType, int> ret;
+            try
+            {
+                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited);
+
+                ret = obj.Build();
+                exceptionDuringBuild = null;
+            }
+            catch (ConstructionException e)
+            {
+                exceptionDuringBuild = e;
+                ret = BuildAlwaysFailsWith<BuildForType>(typeCacheType);
+            }
 
             return ret;
         }

@@ -6083,5 +6083,21 @@ namespace JilTests
                 Assert.AreEqual("{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}", res);
             }
         }
+
+        [TestMethod]
+        public void BadDictionaryType()
+        {
+            try
+            {
+                JSON.Serialize(new Dictionary<double, int>());
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual("Error occurred building a serializer for System.Collections.Generic.Dictionary`2[System.Double,System.Int32]", e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", e.InnerException.Message);
+            }
+        }
     }
 }

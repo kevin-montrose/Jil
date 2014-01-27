@@ -156,9 +156,10 @@ namespace Experiments
             try
             {
                 InlineSerializer<ComplexType>.ReorderMembers = false;
+                Exception ignored;
 
                 // Build the *actual* serializer method
-                var normal = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false);
+                var normal = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
 
                 MethodCache[NormalKey] = normal;
             }
@@ -181,8 +182,10 @@ namespace Experiments
 
                     try
                     {
+                        Exception ignored;
+
                         // Build the *actual* serializer method
-                        mtd = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false);
+                        mtd = InlineSerializerHelper.Build<ComplexType>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
                     }
                     finally
                     {
