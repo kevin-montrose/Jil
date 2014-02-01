@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -910,7 +911,7 @@ namespace Jil.Deserialize
                 // exponent?
                 if (c == 'e' || c == 'E')
                 {
-                    var leading = double.Parse(commonSb.ToString()) * (negative ? -1.0 : 1.0);
+                    var leading = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1.0 : 1.0);
                     commonSb.Clear();   // cleanup for the next use
                     reader.Read();
 
@@ -931,7 +932,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException(msg, reader);
             }
 
-            var ret = double.Parse(commonSb.ToString());
+            var ret = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();   // cleanup for the next use
 
             return ret * (negative ? -1.0 : 1.0);
@@ -992,7 +993,7 @@ namespace Jil.Deserialize
                 if (c == 'e' || c == 'E')
                 {
                     // we're doing the math in doubles intentionally here, for precisions sake
-                    var leading = double.Parse(commonSb.ToString()) * (negative ? -1.0 : 1.0);
+                    var leading = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1.0 : 1.0);
                     commonSb.Clear();   // cleanup for the next use
                     reader.Read();
 
@@ -1013,10 +1014,10 @@ namespace Jil.Deserialize
                 throw new DeserializationException(msg, reader);
             }
 
-            var ret = float.Parse(commonSb.ToString());
+            var ret = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();   // cleanup for the next use
 
-            return ret * (negative ? -1f : 1f );
+            return ret * (negative ? -1f : 1f);
         }
 
         public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1073,7 +1074,7 @@ namespace Jil.Deserialize
                 // exponent?
                 if (c == 'e' || c == 'E')
                 {
-                    var leading = decimal.Parse(commonSb.ToString()) * (negative ? -1m : 1m);
+                    var leading = decimal.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1m : 1m);
                     commonSb.Clear();   // cleanup for the next use
                     reader.Read();
 
@@ -1094,7 +1095,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException(msg, reader);
             }
 
-            var ret = decimal.Parse(commonSb.ToString());
+            var ret = decimal.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();   // cleanup for the next use
 
             return ret * (negative ? -1m : 1m);
