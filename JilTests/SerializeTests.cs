@@ -6099,5 +6099,22 @@ namespace JilTests
                 Assert.AreEqual("JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", e.InnerException.Message);
             }
         }
+
+        class _NoNameDataMember
+        {
+            [DataMember(Order = 1)]
+            public int Id { get; set; }
+        }
+
+        [TestMethod]
+        public void NoNameDataMember()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _NoNameDataMember { Id = 1234 }, str);
+                var res = str.ToString();
+                Assert.AreEqual("{\"Id\":1234}", res);
+            }
+        }
     }
 }

@@ -3685,5 +3685,22 @@ namespace JilTests
                 Assert.IsInstanceOfType(e.InnerException, typeof(Jil.Common.ConstructionException));
             }
         }
+
+        class _NoNameDataMember
+        {
+            [DataMember(Order = 1)]
+            public int Id { get; set; }
+        }
+
+        [TestMethod]
+        public void NoNameDataMember()
+        {
+            using (var str = new StringReader("{\"Id\":1234}"))
+            {
+                var res = JSON.Deserialize<_NoNameDataMember>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(1234, res.Id);
+            }
+        }
     }
 }
