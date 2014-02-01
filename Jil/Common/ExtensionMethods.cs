@@ -15,7 +15,7 @@ namespace Jil.Common
         {
             var attrs = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
 
-            if (attrs == null) return member.Name;
+            if (attrs == null || string.IsNullOrEmpty(attrs.Name)) return member.Name;
 
             return attrs.Name;
         }
