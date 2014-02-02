@@ -404,6 +404,7 @@ namespace Jil.Common
             {
                 return "\"" + Enum.GetName(type, obj).JsonEscape(jsonp) + "\"";
             }
+            
             var formattable = obj as IFormattable;
             if (formattable != null)
                 return formattable.ToString(null, CultureInfo.InvariantCulture);

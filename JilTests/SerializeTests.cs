@@ -6119,11 +6119,11 @@ namespace JilTests
             }
         }
 
-        class _WeirdCulture : IDisposable
+        class _DoubleWeirdCulture : IDisposable
         {
             CultureInfo RestoreToCulture;
 
-            public _WeirdCulture(CultureInfo culture)
+            public _DoubleWeirdCulture(CultureInfo culture)
             {
                 RestoreToCulture = Thread.CurrentThread.CurrentCulture;
                 Thread.CurrentThread.CurrentCulture = culture;
@@ -6140,13 +6140,13 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void WeirdCulture()
+        public void DoubleWeirdCulture()
         {
             var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
             var currentCulture = CultureInfo.CurrentCulture;
             var weirdCulture = allCultures.Where(c => c.NumberFormat.CurrencyDecimalSeparator != "." && c != currentCulture).First();
 
-            using (new _WeirdCulture(weirdCulture))
+            using (new _DoubleWeirdCulture(weirdCulture))
             {
                 Assert.AreEqual("123.456", JSON.Serialize(123.456));
 
@@ -6155,6 +6155,29 @@ namespace JilTests
                     JSON.Serialize(123.456, str);
                     var res = str.ToString();
                     Assert.AreEqual("123.456", res);
+                }
+            }
+        }
+
+        class _DoubleConstantWeirdCulture
+        {
+            public double Const { get { return 3.14159; } }
+        }
+
+        [TestMethod]
+        public void DoubleConstantWeirdCulture()
+        {
+            var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            var currentCulture = CultureInfo.CurrentCulture;
+            var weirdCulture = allCultures.Where(c => c.NumberFormat.CurrencyDecimalSeparator != "." && c != currentCulture).First();
+
+            using (new _DoubleWeirdCulture(weirdCulture))
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(new _DoubleConstantWeirdCulture(), str);
+                    var res = str.ToString();
+                    Assert.AreEqual("{\"Const\":3.14159}", res);
                 }
             }
         }
