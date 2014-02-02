@@ -131,7 +131,7 @@ namespace Jil
         {
             options = options ?? Options.Default;
 
-            using (var str = new StringWriter())
+            using (var str = new StringWriter(System.Globalization.CultureInfo.InvariantCulture))
             {
                 Serialize(data, str, options);
                 return str.ToString();

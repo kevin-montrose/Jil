@@ -6148,6 +6148,8 @@ namespace JilTests
 
             using (new _WeirdCulture(weirdCulture))
             {
+                Assert.AreEqual("123.456", JSON.Serialize(123.456));
+
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(123.456, str);
