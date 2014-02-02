@@ -3,10 +3,12 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace JilTests
@@ -80,12 +82,12 @@ namespace JilTests
                         community_bulletins = cb,
                         cross_site_interesting_questions = csiq,
                         earned_privileges = ep,
-                        hot_questions =hq,
+                        hot_questions = hq,
                         inbox_items = ii,
                         likely_to_answer_questions = ltaq,
                         reputation_events = re,
                         since = rand.Next(),
-                        upcoming_privileges =up,
+                        upcoming_privileges = up,
                         update_notice = MobileUpdateNotice.For(rand)
                     };
             }
@@ -122,7 +124,7 @@ namespace JilTests
                         answer_count = rand.Next(),
                         group_id = rand.Next(),
                         has_accepted_answer = rand.Next() % 2 == 0,
-                        is_deleted = rand.Next() %2 == 0,
+                        is_deleted = rand.Next() % 2 == 0,
                         last_activity_date = rand.Next(),
                         question_creation_date = rand.Next(),
                         question_id = rand.Next(),
@@ -237,7 +239,7 @@ namespace JilTests
                         link = SpeedProofTests._RandString(rand),
                         post_id = rand.Next(),
                         rank = (BadgeRank)(rand.Next(3) + 1),
-                        site= SpeedProofTests._RandString(rand)
+                        site = SpeedProofTests._RandString(rand)
                     };
             }
         }
@@ -314,9 +316,9 @@ namespace JilTests
                         custom_date_string = SpeedProofTests._RandString(rand),
                         end_date = rand.Next(),
                         group_id = rand.Next(),
-                        has_accepted_answer = rand.Next() %2 == 0,
-                        is_deleted = rand.Next() %2 == 0,
-                        is_promoted = rand.Next() %2 ==0,
+                        has_accepted_answer = rand.Next() % 2 == 0,
+                        is_deleted = rand.Next() % 2 == 0,
+                        is_promoted = rand.Next() % 2 == 0,
                         link = SpeedProofTests._RandString(rand),
                         site = SpeedProofTests._RandString(rand),
                         tags = Enumerable.Repeat(SpeedProofTests._RandString(rand), 5).ToList(),
@@ -425,7 +427,7 @@ namespace JilTests
                 return
                     new MobileUpdateNotice
                     {
-                        should_update = rand.Next() %2 == 0,
+                        should_update = rand.Next() % 2 == 0,
                         message = SpeedProofTests._RandString(rand),
                         minimum_supported_version = SpeedProofTests._RandString(rand)
                     };
@@ -509,7 +511,7 @@ namespace JilTests
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, {"world", new _Cyclical { Foo = 456 } } }, str);
+                JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, { "world", new _Cyclical { Foo = 456 } } }, str);
                 var res = str.ToString();
                 Assert.AreEqual("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
             }
@@ -688,7 +690,7 @@ namespace JilTests
             {
                 public string Single;
             }
-            
+
             public class _Two
             {
                 public int _;
@@ -774,7 +776,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new []
+                    new[]
                     {
                         new _List { Key = "whatever", Val = 123 },
                         new _List { Key = "indeed", Val = 456 }
@@ -1188,7 +1190,7 @@ namespace JilTests
 
             using (var str = new StringWriter())
             {
-                JSON.Serialize(new Dictionary<string, double?> { { "hello", null }, {"world", 3.21}}, str);
+                JSON.Serialize(new Dictionary<string, double?> { { "hello", null }, { "world", 3.21 } }, str);
                 Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
@@ -1538,7 +1540,7 @@ namespace JilTests
         [TestMethod]
         public void AllOptions()
         {
-            using(var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 JSON.Serialize(
                     new
@@ -2077,7 +2079,7 @@ namespace JilTests
         [TestMethod]
         public void InfiniteRecursion()
         {
-            using(var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 var root = new _InfiniteRecursion { A = 123 };
                 root.Next = root;
@@ -2350,7 +2352,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new [] { _EnumMembers.Bar, _EnumMembers.World, _EnumMembers.Fizz, _EnumMembers.Foo, _EnumMembers.Fizz },
+                    new[] { _EnumMembers.Bar, _EnumMembers.World, _EnumMembers.Fizz, _EnumMembers.Foo, _EnumMembers.Fizz },
                     str
                 );
 
@@ -5848,7 +5850,7 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize(
-                    new _LotsOfStrings 
+                    new _LotsOfStrings
                     {
                         A = "hello",
                         C = "world",
@@ -5975,9 +5977,9 @@ namespace JilTests
         public void AllocationlessVsNormalDictionaries()
         {
             var data =
-                new 
+                new
                 {
-                    A = 
+                    A =
                         new Dictionary<string, string>
                         {
                             { "hello", "world" },
@@ -6057,7 +6059,7 @@ namespace JilTests
         {
             public string Plain { get; set; }
 
-            [DataMember(Name="FakeName")]
+            [DataMember(Name = "FakeName")]
             public string RealName { get; set; }
 
             [DataMember(Name = "NotSoSecretName")]
@@ -6114,6 +6116,44 @@ namespace JilTests
                 JSON.Serialize(new _NoNameDataMember { Id = 1234 }, str);
                 var res = str.ToString();
                 Assert.AreEqual("{\"Id\":1234}", res);
+            }
+        }
+
+        class _WeirdCulture : IDisposable
+        {
+            CultureInfo RestoreToCulture;
+
+            public _WeirdCulture(CultureInfo culture)
+            {
+                RestoreToCulture = Thread.CurrentThread.CurrentCulture;
+                Thread.CurrentThread.CurrentCulture = culture;
+            }
+
+            public void Dispose()
+            {
+                if (RestoreToCulture != null)
+                {
+                    Thread.CurrentThread.CurrentCulture = RestoreToCulture;
+                    RestoreToCulture = null;
+                }
+            }
+        }
+
+        [TestMethod]
+        public void WeirdCulture()
+        {
+            var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            var currentCulture = CultureInfo.CurrentCulture;
+            var weirdCulture = allCultures.Where(c => c.NumberFormat.CurrencyDecimalSeparator != "." && c != currentCulture).First();
+
+            using (new _WeirdCulture(weirdCulture))
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(123.456, str);
+                    var res = str.ToString();
+                    Assert.AreEqual("123.456", res);
+                }
             }
         }
     }
