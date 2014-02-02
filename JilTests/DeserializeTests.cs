@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -1919,12 +1920,12 @@ namespace JilTests
         {
             for (var i = -11.1m; i <= 22.2m; i += 0.03m)
             {
-                var asStr = i.ToString();
+                var asStr = i.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<decimal>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
@@ -1952,12 +1953,12 @@ namespace JilTests
                 decimal d = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
                 d *= (decimal)rand.NextDouble();
 
-                var asStr = d.ToString();
+                var asStr = d.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<decimal>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
@@ -1968,12 +1969,12 @@ namespace JilTests
         {
             for (var i = -11.1; i <= 22.2; i += 0.03)
             {
-                var asStr = i.ToString();
+                var asStr = i.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<double>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
@@ -2001,12 +2002,12 @@ namespace JilTests
                 double d = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
                 d *= rand.NextDouble();
 
-                var asStr = d.ToString();
+                var asStr = d.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<double>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
@@ -2017,12 +2018,12 @@ namespace JilTests
         {
             for (var i = -11.1f; i <= 22.2f; i += 0.03f)
             {
-                var asStr = i.ToString();
+                var asStr = i.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<float>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
@@ -2050,12 +2051,12 @@ namespace JilTests
                 float f = rand.Next() * (rand.Next() % 2 == 0 ? -1 : 1);
                 f *= (float)rand.NextDouble();
 
-                var asStr = f.ToString();
+                var asStr = f.ToString(CultureInfo.InvariantCulture);
                 using (var str = new StringReader(asStr))
                 {
                     var res = JSON.Deserialize<float>(str);
 
-                    Assert.AreEqual(asStr, res.ToString());
+                    Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
