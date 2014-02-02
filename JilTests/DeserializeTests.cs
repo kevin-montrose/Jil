@@ -3934,5 +3934,60 @@ namespace JilTests
                 }
             }
         }
+
+        //struct _AllFloatsStruct
+        //{
+        //    public float Float;
+        //    public string AsString;
+        //    public string Format;
+        //    public uint I;
+        //}
+
+        //static readonly string[] _AllFloatsFormats = new[] { "F", "F1", "F2", "F3", "F4", "F5", "G", "R" };
+        //static IEnumerable<_AllFloatsStruct> _AllFloats()
+        //{
+        //    var byteArr = new byte[4];
+
+        //    for (ulong i = 0; i <= uint.MaxValue; i++)
+        //    {
+        //        var asInt = (uint)i;
+        //        byteArr[0] = (byte)((asInt) & 0xFF);
+        //        byteArr[1] = (byte)((asInt >> 8) & 0xFF);
+        //        byteArr[2] = (byte)((asInt >> 16) & 0xFF);
+        //        byteArr[3] = (byte)((asInt >> 24) & 0xFF);
+        //        var f = BitConverter.ToSingle(byteArr, 0);
+
+        //        for (var j = 0; j < _AllFloatsFormats.Length; j++)
+        //        {
+        //            var format = _AllFloatsFormats[j];
+        //            var asStr = f.ToString(format);
+
+        //            yield return new _AllFloatsStruct { AsString = asStr, Float = f, Format = format, I = asInt };
+        //        }
+        //    }
+        //}
+
+        //[TestMethod]
+        //public void AllFloats()
+        //{
+        //    var parallel = _AllFloats().AsParallel().WithExecutionMode(ParallelExecutionMode.ForceParallelism).WithDegreeOfParallelism(Environment.ProcessorCount - 1);
+
+        //    parallel.ForAll(
+        //        part =>
+        //        {
+        //            var i = part.I;
+        //            var format = part.Format;
+        //            var asStr = part.AsString;
+        //            var res = JSON.Deserialize<float>(asStr);
+        //            var reStr = res.ToString(format);
+
+        //            var delta = Math.Abs((float.Parse(asStr) - float.Parse(reStr)));
+
+        //            var closeEnough = asStr == reStr || delta <= float.Epsilon;
+
+        //            Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
+        //        }
+        //    );
+        //}
     }
 }
