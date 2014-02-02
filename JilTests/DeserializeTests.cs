@@ -1974,18 +1974,14 @@ namespace JilTests
             // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
             //
             string sep = ".";
-            string[] string_values = new string[11];
+            string[] string_values = new string[7];
             string_values[0] = "1";
-            string_values[1] = sep + "1";
-            string_values[2] = "1" + sep + "1";
-            string_values[3] = "-12";
-            string_values[4] = "44" + sep + "444432";
-            string_values[5] = sep + "000021121";
-            string_values[6] = "   " + sep + "00001";
-            string_values[7] = "  " + sep + "223    ";
-            string_values[8] = "         -221" + sep + "3233";
-            string_values[9] = "6" + sep + "28318530717958647692528676655900577";
-            string_values[10] = "1e-05";
+            string_values[1] = "1" + sep + "1";
+            string_values[2] = "-12";
+            string_values[3] = "44" + sep + "444432";
+            string_values[4] = "         -221" + sep + "3233";
+            string_values[5] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[6] = "1e-05";
             foreach (var i in string_values)
             {
                 using (var str = new StringReader(i))
@@ -2057,22 +2053,17 @@ namespace JilTests
             // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
             //
             string sep = ".";
-            string[] string_values = new string[15];
+            string[] string_values = new string[10];
             string_values[0] = "1";
-            string_values[1] = sep + "1";
-            string_values[2] = "1" + sep + "1";
-            string_values[3] = "-12";
-            string_values[4] = "44" + sep + "444432";
-            string_values[5] = sep + "000021121";
-            string_values[6] = "   " + sep + "00001";
-            string_values[7] = "  " + sep + "223    ";
-            string_values[8] = "         -221" + sep + "3233";
-            string_values[9] = " 1" + sep + "7976931348623157e308 ";
-            string_values[10] = "+1" + sep + "7976931348623157E308";
-            string_values[11] = "-1" + sep + "7976931348623157e308";
-            string_values[12] = "4" + sep + "9406564584124650e-324";
-            string_values[13] = "6" + sep + "28318530717958647692528676655900577";
-            string_values[14] = "1e-05";
+            string_values[1] = "1" + sep + "1";
+            string_values[2] = "-12";
+            string_values[3] = "44" + sep + "444432";
+            string_values[4] = "         -221" + sep + "3233";
+            string_values[5] = " 1" + sep + "7976931348623157e308 ";
+            string_values[6] = "-1" + sep + "7976931348623157e308";
+            string_values[7] = "4" + sep + "9406564584124650e-324";
+            string_values[8] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[9] = "1e-05";
             foreach (var i in string_values)
             {
                 using (var str = new StringReader(i))
@@ -2144,18 +2135,14 @@ namespace JilTests
             // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
             //
             string sep = ".";
-            string[] string_values = new string[11];
+            string[] string_values = new string[7];
             string_values[0] = "1";
-            string_values[1] = sep + "1";
-            string_values[2] = "1" + sep + "1";
-            string_values[3] = "-12";
-            string_values[4] = "44" + sep + "444432";
-            string_values[5] = sep + "000021121";
-            string_values[6] = "   " + sep + "00001";
-            string_values[7] = "  " + sep + "223    ";
-            string_values[8] = "         -221" + sep + "3233";
-            string_values[9] = "6" + sep + "28318530717958647692528676655900577";
-            string_values[10] = "1e-05";
+            string_values[1] = "1" + sep + "1";
+            string_values[2] = "-12";
+            string_values[3] = "44" + sep + "444432";
+            string_values[4] = "         -221" + sep + "3233";
+            string_values[5] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[6] = "1e-05";
             foreach (var i in string_values)
             {
                 using (var str = new StringReader(i))
@@ -3820,10 +3807,10 @@ namespace JilTests
                     JSON.Deserialize<double>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual("E10", rest);
                 }
             }
 
@@ -3834,10 +3821,10 @@ namespace JilTests
                     JSON.Deserialize<double>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual(".3.4.5.6", rest);
                 }
             }
 
@@ -3850,8 +3837,8 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual("+10", rest);
                 }
             }
         }
@@ -3866,9 +3853,9 @@ namespace JilTests
                     JSON.Deserialize<float>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
+                    var rest = e.SnippetAfterError;
                     Assert.IsTrue(rest.Length > 0);
                 }
             }
@@ -3880,9 +3867,9 @@ namespace JilTests
                     JSON.Deserialize<float>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
+                    var rest = e.SnippetAfterError;
                     Assert.IsTrue(rest.Length > 0);
                 }
             }
@@ -3896,7 +3883,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
+                    var rest = e.SnippetAfterError;
                     Assert.IsTrue(rest.Length > 0);
                 }
             }
@@ -3912,10 +3899,10 @@ namespace JilTests
                     JSON.Deserialize<decimal>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual("E10", rest);
                 }
             }
 
@@ -3926,10 +3913,10 @@ namespace JilTests
                     JSON.Deserialize<decimal>(str);
                     Assert.Fail();
                 }
-                catch (DeserializationException)
+                catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual(".3.4.5.6", rest);
                 }
             }
 
@@ -3942,8 +3929,8 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    var rest = str.ReadToEnd();
-                    Assert.IsTrue(rest.Length > 0);
+                    var rest = e.SnippetAfterError;
+                    Assert.AreEqual("+10", rest);
                 }
             }
         }
