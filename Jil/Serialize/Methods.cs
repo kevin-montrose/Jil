@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -1071,6 +1072,54 @@ namespace Jil.Serialize
             } while (copy != 0);
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+        }
+
+        internal static readonly MethodInfo ProxyFloat = typeof(Methods).GetMethod("_ProxyFloat", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ProxyFloat(TextWriter writer, float f)
+        {
+            var invariant = CultureInfo.InvariantCulture;
+
+            var canUseBuiltIn = writer.FormatProvider == invariant;
+            if (canUseBuiltIn)
+            {
+                writer.Write(f);
+                return;
+            }
+
+            writer.Write(f.ToString(invariant));
+        }
+
+        internal static readonly MethodInfo ProxyDouble = typeof(Methods).GetMethod("_ProxyDouble", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ProxyDouble(TextWriter writer, double d)
+        {
+            var invariant = CultureInfo.InvariantCulture;
+
+            var canUseBuiltIn = writer.FormatProvider == invariant;
+            if (canUseBuiltIn)
+            {
+                writer.Write(d);
+                return;
+            }
+
+            writer.Write(d.ToString(invariant));
+        }
+
+        internal static readonly MethodInfo ProxyDecimal = typeof(Methods).GetMethod("_ProxyDecimal", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ProxyDecimal(TextWriter writer, decimal d)
+        {
+            var invariant = CultureInfo.InvariantCulture;
+
+            var canUseBuiltIn = writer.FormatProvider == invariant;
+            if (canUseBuiltIn)
+            {
+                writer.Write(d);
+                return;
+            }
+
+            writer.Write(d.ToString(invariant));
         }
     }
 }

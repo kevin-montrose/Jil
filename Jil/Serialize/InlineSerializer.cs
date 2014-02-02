@@ -793,8 +793,6 @@ namespace Jil.Serialize
                 return;
             }
 
-            var builtInMtd = typeof(TextWriter).GetMethod("Write", new[] { primitiveType });
-
             var isIntegerType = primitiveType == typeof(int) || primitiveType == typeof(uint) || primitiveType == typeof(long) || primitiveType == typeof(ulong);
 
             if (isIntegerType && UseCustomIntegerToString)
@@ -832,7 +830,26 @@ namespace Jil.Serialize
                 }
             }
 
-            Emit.CallVirtual(builtInMtd);       // --empty--
+            // Stack is: TextWriter (float|double|decimal)
+
+            MethodInfo proxyMethod;
+            if (primitiveType == typeof(float))
+            {
+                proxyMethod = Methods.ProxyFloat;
+            }
+            else
+            {
+                if (primitiveType == typeof(double))
+                {
+                    proxyMethod = Methods.ProxyDouble;
+                }
+                else
+                {
+                    proxyMethod = Methods.ProxyDecimal;
+                }
+            }
+
+            Emit.Call(proxyMethod);       // --empty--
         }
 
         void WriteGuidFast(bool quotesNeedHandling)
