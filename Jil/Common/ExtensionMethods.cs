@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -403,8 +404,11 @@ namespace Jil.Common
             {
                 return "\"" + Enum.GetName(type, obj).JsonEscape(jsonp) + "\"";
             }
-
-            return obj.ToString();
+            var formattable = obj as IFormattable;
+            if (formattable != null)
+                return formattable.ToString(null, CultureInfo.InvariantCulture);
+            else
+                return obj.ToString();
         }
 
         public static bool IsPropagatableType(this Type t)
