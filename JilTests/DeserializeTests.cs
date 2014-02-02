@@ -3809,5 +3809,143 @@ namespace JilTests
                 Assert.AreEqual(1234, res.Id);
             }
         }
+
+        [TestMethod]
+        public void BadDouble()
+        {
+            using (var str = new StringReader("1.2E10E10"))
+            {
+                try
+                {
+                    JSON.Deserialize<double>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2.3.4.5.6"))
+            {
+                try
+                {
+                    JSON.Deserialize<double>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2E++10"))
+            {
+                try
+                {
+                    JSON.Deserialize<double>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException e)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void BadFloat()
+        {
+            using (var str = new StringReader("1.2E10E10"))
+            {
+                try
+                {
+                    JSON.Deserialize<float>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2.3.4.5.6"))
+            {
+                try
+                {
+                    JSON.Deserialize<float>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2E++10"))
+            {
+                try
+                {
+                    JSON.Deserialize<float>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException e)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void BadDecimal()
+        {
+            using (var str = new StringReader("1.2E10E10"))
+            {
+                try
+                {
+                    JSON.Deserialize<decimal>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2.3.4.5.6"))
+            {
+                try
+                {
+                    JSON.Deserialize<decimal>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+
+            using (var str = new StringReader("1.2E++10"))
+            {
+                try
+                {
+                    JSON.Deserialize<decimal>(str);
+                    Assert.Fail();
+                }
+                catch (DeserializationException e)
+                {
+                    var rest = str.ReadToEnd();
+                    Assert.IsTrue(rest.Length > 0);
+                }
+            }
+        }
     }
 }
