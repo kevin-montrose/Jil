@@ -1562,7 +1562,7 @@ namespace JilTests
                 var dtLocal = dtUtc.ToLocalTime();
 
                 string asStr;
-                using(var str  = new StringWriter())
+                using (var str = new StringWriter())
                 {
                     newtonsoft.Serialize(str, dtLocal);
                     asStr = str.ToString();
@@ -1962,6 +1962,40 @@ namespace JilTests
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
+
+            //This string_values are from Mono project
+            // mono / mcs / class / corlib / Test / System / DoubleTest.cs
+
+            // DoubleTest.cs - NUnit Test Cases for the System.Double class
+            //
+            // Bob Doan <bdoan@sicompos.com>
+            //
+            // (C) Ximian, Inc.  http://www.ximian.com
+            // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
+            //
+            string sep = ".";
+            string[] string_values = new string[11];
+            string_values[0] = "1";
+            string_values[1] = sep + "1";
+            string_values[2] = "1" + sep + "1";
+            string_values[3] = "-12";
+            string_values[4] = "44" + sep + "444432";
+            string_values[5] = sep + "000021121";
+            string_values[6] = "   " + sep + "00001";
+            string_values[7] = "  " + sep + "223    ";
+            string_values[8] = "         -221" + sep + "3233";
+            string_values[9] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[10] = "1e-05";
+            foreach (var i in string_values)
+            {
+                using (var str = new StringReader(i))
+                {
+                    var res = JSON.Deserialize<decimal>(str);
+
+                    Assert.AreEqual(decimal.Parse(i, NumberStyles.Float, CultureInfo.InvariantCulture), res);
+                    Assert.AreEqual(-1, str.Peek());
+                }
+            }
         }
 
         [TestMethod]
@@ -2011,6 +2045,44 @@ namespace JilTests
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
+
+            //This string_values are from Mono project
+            // mono / mcs / class / corlib / Test / System / DoubleTest.cs
+
+            // DoubleTest.cs - NUnit Test Cases for the System.Double class
+            //
+            // Bob Doan <bdoan@sicompos.com>
+            //
+            // (C) Ximian, Inc.  http://www.ximian.com
+            // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
+            //
+            string sep = ".";
+            string[] string_values = new string[15];
+            string_values[0] = "1";
+            string_values[1] = sep + "1";
+            string_values[2] = "1" + sep + "1";
+            string_values[3] = "-12";
+            string_values[4] = "44" + sep + "444432";
+            string_values[5] = sep + "000021121";
+            string_values[6] = "   " + sep + "00001";
+            string_values[7] = "  " + sep + "223    ";
+            string_values[8] = "         -221" + sep + "3233";
+            string_values[9] = " 1" + sep + "7976931348623157e308 ";
+            string_values[10] = "+1" + sep + "7976931348623157E308";
+            string_values[11] = "-1" + sep + "7976931348623157e308";
+            string_values[12] = "4" + sep + "9406564584124650e-324";
+            string_values[13] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[14] = "1e-05";
+            foreach (var i in string_values)
+            {
+                using (var str = new StringReader(i))
+                {
+                    var res = JSON.Deserialize<double>(str);
+
+                    Assert.AreEqual(double.Parse(i, CultureInfo.InvariantCulture), res);
+                    Assert.AreEqual(-1, str.Peek());
+                }
+            }
         }
 
         [TestMethod]
@@ -2057,6 +2129,40 @@ namespace JilTests
                     var res = JSON.Deserialize<float>(str);
 
                     Assert.AreEqual(asStr, res.ToString(CultureInfo.InvariantCulture));
+                    Assert.AreEqual(-1, str.Peek());
+                }
+            }
+
+            //This string_values are from Mono project
+            // mono / mcs / class / corlib / Test / System / DoubleTest.cs
+
+            // DoubleTest.cs - NUnit Test Cases for the System.Double class
+            //
+            // Bob Doan <bdoan@sicompos.com>
+            //
+            // (C) Ximian, Inc.  http://www.ximian.com
+            // Copyright (C) 2005 Novell, Inc (http://www.novell.com)
+            //
+            string sep = ".";
+            string[] string_values = new string[11];
+            string_values[0] = "1";
+            string_values[1] = sep + "1";
+            string_values[2] = "1" + sep + "1";
+            string_values[3] = "-12";
+            string_values[4] = "44" + sep + "444432";
+            string_values[5] = sep + "000021121";
+            string_values[6] = "   " + sep + "00001";
+            string_values[7] = "  " + sep + "223    ";
+            string_values[8] = "         -221" + sep + "3233";
+            string_values[9] = "6" + sep + "28318530717958647692528676655900577";
+            string_values[10] = "1e-05";
+            foreach (var i in string_values)
+            {
+                using (var str = new StringReader(i))
+                {
+                    var res = JSON.Deserialize<float>(str);
+
+                    Assert.AreEqual(float.Parse(i, CultureInfo.InvariantCulture), res);
                     Assert.AreEqual(-1, str.Peek());
                 }
             }
