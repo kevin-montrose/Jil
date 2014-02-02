@@ -40,7 +40,7 @@ namespace Jil.Deserialize
             reader.Read();
 
             var temp = 0;
-            
+
             // first digit hour
             c = reader.Read();
             c = c - '0';
@@ -86,13 +86,13 @@ namespace Jil.Deserialize
 
             // first digit *must* exist, we can't overread
             var c = reader.Read();
-            c = c -'0';
+            c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
             ret += (uint)c;
 
             // digit #2
             c = reader.Peek();
-            c  = c -'0';
+            c = c - '0';
             if (c < 0 || c > 9) return (byte)ret;
             reader.Read();
             ret *= 10;
@@ -862,80 +862,15 @@ namespace Jil.Deserialize
         static double _ReadDouble(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
-            bool negative = false;
-            bool seenDecimal = false;
-
-            var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
-
             commonSb = commonSb ?? new StringBuilder();
-
-            if (first == '-')
+            while (((c = reader.Peek()) != -1) && ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+' || c == 'e' || c == 'E'))
             {
-                negative = true;
-                first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
-                commonSb.Append((char)first);
+                commonSb.Append((char)c);
+                reader.Read();
             }
-            else
-            {
-                commonSb.Append((char)first);
-            }
-
-            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
-            {
-                if (c >= '0' && c <= '9')
-                {
-                    commonSb.Append((char)c);
-                    reader.Read();
-                    continue;
-                }
-
-                if (c == '.')
-                {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
-
-                    commonSb.Append('.');
-                    seenDecimal = true;
-                    reader.Read();
-
-                    // there must be a following digit to be valid JSON
-                    c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
-                    commonSb.Append((char)c);
-                    reader.Read();
-
-                    continue;
-                }
-
-                // exponent?
-                if (c == 'e' || c == 'E')
-                {
-                    var leading = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1.0 : 1.0);
-                    commonSb.Clear();   // cleanup for the next use
-                    reader.Read();
-
-                    var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
-
-                    var exponentNegative = (sign == '-');
-                    if (sign == '-' || sign == '+') reader.Read();
-
-                    double exp = _ReadUInt64(reader);
-
-                    exp = Math.Pow(10.0, (exp * (exponentNegative ? -1.0 : 1.0)));
-
-                    return leading * exp;
-                }
-
-                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg, reader);
-            }
-
-            var ret = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
-            commonSb.Clear();   // cleanup for the next use
-
-            return ret * (negative ? -1.0 : 1.0);
+            double result = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
         }
 
         public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
@@ -943,81 +878,15 @@ namespace Jil.Deserialize
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
-            bool negative = false;
-            bool seenDecimal = false;
-
-            var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
-
             commonSb = commonSb ?? new StringBuilder();
-
-            if (first == '-')
+            while (((c = reader.Peek()) != -1) && ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+' || c == 'e' || c == 'E'))
             {
-                negative = true;
-                first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
-                commonSb.Append((char)first);
+                commonSb.Append((char)c);
+                reader.Read();
             }
-            else
-            {
-                commonSb.Append((char)first);
-            }
-
-            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
-            {
-                if (c >= '0' && c <= '9')
-                {
-                    commonSb.Append((char)c);
-                    reader.Read();
-                    continue;
-                }
-
-                if (c == '.')
-                {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
-
-                    commonSb.Append('.');
-                    seenDecimal = true;
-                    reader.Read();
-
-                    // there must be a following digit to be valid JSON
-                    c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
-                    commonSb.Append((char)c);
-                    reader.Read();
-
-                    continue;
-                }
-
-                // exponent?
-                if (c == 'e' || c == 'E')
-                {
-                    // we're doing the math in doubles intentionally here, for precisions sake
-                    var leading = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1.0 : 1.0);
-                    commonSb.Clear();   // cleanup for the next use
-                    reader.Read();
-
-                    var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
-
-                    var exponentNegative = (sign == '-');
-                    if (sign == '-' || sign == '+') reader.Read();
-
-                    double exp = _ReadUInt64(reader);
-
-                    exp = Math.Pow(10.0, (exp * (exponentNegative ? -1.0 : 1.0)));
-
-                    return (float)(leading * exp);
-                }
-
-                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg, reader);
-            }
-
-            var ret = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
-            commonSb.Clear();   // cleanup for the next use
-
-            return ret * (negative ? -1f : 1f);
+            float result = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
         }
 
         public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1025,80 +894,15 @@ namespace Jil.Deserialize
         static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {
             int c;
-            bool negative = false;
-            bool seenDecimal = false;
-
-            var first = reader.Read();
-            if (first == -1) throw new DeserializationException("Expected digit or '-'", reader);
-
             commonSb = commonSb ?? new StringBuilder();
-
-            if (first == '-')
+            while (((c = reader.Peek()) != -1) && ((c >= '0' && c <= '9') || c == '.' || c == '-' || c == '+' || c == 'e' || c == 'E'))
             {
-                negative = true;
-                first = reader.Read();
-                if (first == -1 || IsWhiteSpace(first) || first < '0' || first > '9') throw new DeserializationException("Expected digit", reader);
-                commonSb.Append((char)first);
+                commonSb.Append((char)c);
+                reader.Read();
             }
-            else
-            {
-                commonSb.Append((char)first);
-            }
-
-            while ((c = reader.Peek()) != -1 && c != ',' && c != '}' && c != ']')
-            {
-                if (c >= '0' && c <= '9')
-                {
-                    commonSb.Append((char)c);
-                    reader.Read();
-                    continue;
-                }
-
-                if (c == '.')
-                {
-                    if (seenDecimal) throw new DeserializationException("Two decimals in one floating point number", reader);
-
-                    commonSb.Append('.');
-                    seenDecimal = true;
-                    reader.Read();
-
-                    // there must be a following digit to be valid JSON
-                    c = reader.Peek();
-                    if (c == -1 || IsWhiteSpace(c) || c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
-                    commonSb.Append((char)c);
-                    reader.Read();
-
-                    continue;
-                }
-
-                // exponent?
-                if (c == 'e' || c == 'E')
-                {
-                    var leading = decimal.Parse(commonSb.ToString(), CultureInfo.InvariantCulture) * (negative ? -1m : 1m);
-                    commonSb.Clear();   // cleanup for the next use
-                    reader.Read();
-
-                    var sign = reader.Peek();
-                    if (sign == -1 || (sign != '-' && sign != '+' && !(sign >= '0' && sign <= '9'))) throw new DeserializationException("Expected sign or digit", reader);
-
-                    var exponentNegative = (sign == '-');
-                    if (sign == '-' || sign == '+') reader.Read();
-
-                    decimal exp = _ReadUInt64(reader);
-
-                    exp = (decimal)Math.Pow(10.0, (double)(exp * (exponentNegative ? -1m : 1m)));
-
-                    return leading * exp;
-                }
-
-                var msg = !seenDecimal ? "Expected digit, ., e, or E" : "Expected digit, e, or E";
-                throw new DeserializationException(msg, reader);
-            }
-
-            var ret = decimal.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
-            commonSb.Clear();   // cleanup for the next use
-
-            return ret * (negative ? -1m : 1m);
+            decimal result = decimal.Parse(commonSb.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
