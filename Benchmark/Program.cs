@@ -118,23 +118,31 @@ namespace Benchmark
         }
 
         static MethodInfo _DoSpeedTest = typeof(Program).GetMethod("DoSpeedTest", BindingFlags.Static | BindingFlags.NonPublic);
-        static List<Result> DoSpeedTest<T>(string serializerName, string niceTypeName, Func<T, string> serializeFunc, T obj)
+        static List<Result> DoSpeedTest<T, V>(string serializerName, string niceTypeName, Func<T, V> serializeFunc, Func<V, T> deserializeFunc, T obj)
             where T : class
+            where V : class
         {
             const int TestRuns = 100;
 
-            string data = null;
+            V data = null;
 
             var testGroup = new TestGroup(niceTypeName + " - " + serializerName);
 
-            Console.Write("\t" + serializerName + "... ");
+            Console.WriteLine(serializerName);
 
-            var result =
+            var serializeResult =
                 testGroup
                     .Plan("Serialization", () => data = serializeFunc(obj), TestRuns)
                     .GetResult();
 
-            Console.WriteLine(result.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
+            Console.WriteLine("\t" + serializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
+
+            var deserializeResult =
+                testGroup
+                    .Plan("Deserialization", () => deserializeFunc(data), TestRuns)
+                    .GetResult();
+
+            Console.WriteLine("\t" + deserializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
 
 #if DEBUG
             if (serializerName == "Jil")
@@ -142,8 +150,8 @@ namespace Benchmark
                 var equalCheckable = obj is IGenericEquality<T>;
                 if (equalCheckable)
                 {
-                    var copy = JsonConvert.DeserializeObject<T>(data);
-                    var jilCopy = JilDeserialize<T>(data);
+                    var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
+                    var jilCopy = JilDeserialize<T>((string)(object)data);
 
                     _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, copy });
                     _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, jilCopy });
@@ -153,8 +161,8 @@ namespace Benchmark
                     var equalCheckableList = typeof(T).IsList();
                     if (equalCheckableList)
                     {
-                        var copy = JsonConvert.DeserializeObject<T>(data);
-                        var jilCopy = JilDeserialize<T>(data);
+                        var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
+                        var jilCopy = JilDeserialize<T>((string)(object)data);
 
                         var checkMethod = _CheckEqualityList.MakeGenericMethod(typeof(T).GetListInterface().GetGenericArguments()[0]);
                         checkMethod.Invoke(null, new object[] { obj, copy });
@@ -166,8 +174,8 @@ namespace Benchmark
                         var equalCheckableDict = typeof(T).IsDictionary();
                         if (equalCheckableDict)
                         {
-                            var copy = JsonConvert.DeserializeObject<T>(data);
-                            var jilCopy = JilDeserialize<T>(data);
+                            var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
+                            var jilCopy = JilDeserialize<T>((string)(object)data);
 
                             var checkMethod = _CheckEqualityDictionary.MakeGenericMethod(typeof(T).GetDictionaryInterface().GetGenericArguments()[1]);
                             checkMethod.Invoke(null, new object[] { obj, copy });
@@ -185,14 +193,24 @@ namespace Benchmark
 #endif
 
             return
-                result.Outcomes.Select(
+                serializeResult.Outcomes.Select(
                     o =>
                         new Result
                         {
-                            Serializer = serializerName,
+                            Serializer = serializerName + " (Serialize)",
                             TypeName = niceTypeName,
                             Ellapsed = o.Elapsed
                         }
+                ).Concat(
+                    deserializeResult.Outcomes.Select(
+                        o =>
+                            new Result
+                            {
+                                Serializer = serializerName + " (Deserialize)",
+                                TypeName = niceTypeName,
+                                Ellapsed = o.Elapsed
+                            }
+                    )
                 ).ToList();
         }
 
@@ -210,6 +228,24 @@ namespace Benchmark
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
             ret.DynamicInvoke(new object[] { null });
+
+            return ret;
+        }
+
+        static MethodInfo _NewtonsoftDeserialize = typeof(Program).GetMethod("NewtonsoftDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
+        static T NewtonsoftDeserialize<T>(string str)
+        {
+            return JsonConvert.DeserializeObject<T>(str);
+        }
+
+        static object GetNewtonsoftDeserializer(Type forType, string defaultVal)
+        {
+            var mtd = _NewtonsoftDeserialize.MakeGenericMethod(forType);
+
+            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { defaultVal });
 
             return ret;
         }
@@ -232,6 +268,24 @@ namespace Benchmark
             return ret;
         }
 
+        static MethodInfo _ServiceStackDeserialize = typeof(Program).GetMethod("ServiceStackDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
+        static T ServiceStackDeserialize<T>(string str)
+        {
+            return ServiceStack.Text.JsonSerializer.DeserializeFromString<T>(str);
+        }
+
+        static object GetServiceStackDeserializer(Type forType, string defaultVal)
+        {
+            var mtd = _ServiceStackDeserialize.MakeGenericMethod(forType);
+
+            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { defaultVal });
+
+            return ret;
+        }
+
         static MethodInfo _JilSerialize = typeof(Program).GetMethod("JilSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string JilSerialize<T>(T obj)
         {
@@ -240,14 +294,6 @@ namespace Benchmark
                 JSON.Serialize<T>(obj, str, Options.ISO8601);
 
                 return str.ToString();
-            }
-        }
-
-        static T JilDeserialize<T>(string data)
-        {
-            using (var str = new StringReader(data))
-            {
-                return JSON.Deserialize<T>(str, Options.ISO8601);
             }
         }
 
@@ -263,14 +309,35 @@ namespace Benchmark
             return ret;
         }
 
+        static MethodInfo _JilDeserialize = typeof(Program).GetMethod("JilDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
+        static T JilDeserialize<T>(string data)
+        {
+            using (var str = new StringReader(data))
+            {
+                return JSON.Deserialize<T>(str, Options.ISO8601);
+            }
+        }
+
+        static object GetJilDeserializer(Type forType, string defaultVal)
+        {
+            var mtd = _JilDeserialize.MakeGenericMethod(forType);
+
+            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { defaultVal });
+
+            return ret;
+        }
+
         static MethodInfo _ProtobufSerialize = typeof(Program).GetMethod("ProtobufSerialize", BindingFlags.NonPublic | BindingFlags.Static);
-        static string ProtobufSerialize<T>(T obj)
+        static byte[] ProtobufSerialize<T>(T obj)
         {
             using (var mem = new MemoryStream())
             {
                 ProtoBuf.Serializer.Serialize<T>(mem, obj);
 
-                return "";
+                return mem.ToArray();
             }
         }
 
@@ -278,12 +345,34 @@ namespace Benchmark
         {
             var mtd = _ProtobufSerialize.MakeGenericMethod(forType);
 
-            var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
+            var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(byte[]));
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
             ret.DynamicInvoke(new object[] { null });
 
             return ret;
+        }
+
+        static MethodInfo _ProtobufDeserialize = typeof(Program).GetMethod("ProtobufDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
+        static T ProtobufDeserialize<T>(byte[] bytes)
+        {
+            using (var mem = new MemoryStream(bytes))
+            {
+                return ProtoBuf.Serializer.Deserialize<T>(mem);
+            }
+        }
+
+        static object GetProtobufDeserializer(Type forType)
+        {
+            var mtd = _ProtobufDeserialize.MakeGenericMethod(forType);
+
+            var funcType = typeof(Func<,>).MakeGenericType(typeof(byte[]), forType);
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            ret.DynamicInvoke(new object[] { new byte[0] });
+
+            return ret;
+
         }
 
         static int[][] Permutations = 
@@ -336,12 +425,15 @@ namespace Benchmark
             {
                 var typeName = model.Name;
 
-                var serialize = _DoSpeedTest.MakeGenericMethod(model);
-
                 var newtonsoftSerializer = GetNewtonsoftSerializer(model);
                 var serviceStackSerializer = GetServiceStackSerializer(model);
                 var jilSerializer = GetJilSerializer(model);
                 var protoSerializer = GetProtobufSerializer(model);
+
+                var newtonsoftDeserializer = GetNewtonsoftDeserializer(model, "{}");
+                var serviceStackDeserializer = GetServiceStackDeserializer(model, "{}");
+                var jilDeserializer = GetJilDeserializer(model, "{}");
+                var protoDeserializer = GetProtobufDeserializer(model);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -353,17 +445,21 @@ namespace Benchmark
                     {
                         string name;
                         object serializer;
+                        object deserializer;
+                        Type resultType;
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
-                            case 2: name = "Jil"; serializer = jilSerializer; break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
+                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
+                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
+                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 
-                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, singleObj });
+                        var serialize = _DoSpeedTest.MakeGenericMethod(model, resultType);
+
+                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, deserializer, singleObj });
 
                         ret.AddRange(results);
                     }
@@ -377,12 +473,15 @@ namespace Benchmark
 
                 var asList = typeof(List<>).MakeGenericType(model);
 
-                var serialize = _DoSpeedTest.MakeGenericMethod(asList);
-
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asList);
                 var serviceStackSerializer = GetServiceStackSerializer(asList);
                 var jilSerializer = GetJilSerializer(asList);
                 var protoSerializer = GetProtobufSerializer(asList);
+
+                var newtonsoftDeserializer = GetNewtonsoftDeserializer(asList, "[]");
+                var serviceStackDeserializer = GetServiceStackDeserializer(asList, "[]");
+                var jilDeserializer = GetJilDeserializer(asList, "[]");
+                var protoDeserializer = GetProtobufDeserializer(asList);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -394,17 +493,21 @@ namespace Benchmark
                     {
                         string name;
                         object serializer;
+                        object deserializer;
+                        Type resultType;
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
-                            case 2: name = "Jil"; serializer = jilSerializer; break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
+                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
+                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
+                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 
-                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, listObj });
+                        var serialize = _DoSpeedTest.MakeGenericMethod(asList, resultType);
+
+                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, deserializer, listObj });
 
                         ret.AddRange(results);
                     }
@@ -418,12 +521,15 @@ namespace Benchmark
 
                 var asDict = typeof(Dictionary<,>).MakeGenericType(typeof(string), model);
 
-                var serialize = _DoSpeedTest.MakeGenericMethod(asDict);
-
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asDict);
                 var serviceStackSerializer = GetServiceStackSerializer(asDict);
                 var jilSerializer = GetJilSerializer(asDict);
                 var protoSerializer = GetProtobufSerializer(asDict);
+
+                var newtonsoftDeserializer = GetNewtonsoftDeserializer(asDict, "{}");
+                var serviceStackDeserializer = GetServiceStackDeserializer(asDict, "{}");
+                var jilDeserializer = GetJilDeserializer(asDict, "{}");
+                var protoDeserializer = GetProtobufDeserializer(asDict);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -435,17 +541,21 @@ namespace Benchmark
                     {
                         string name;
                         object serializer;
+                        object deserializer;
+                        Type resultType;
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; break;
-                            case 2: name = "Jil"; serializer = jilSerializer; break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; break;
+                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
+                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
+                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 
-                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, dictObj });
+                        var serialize = _DoSpeedTest.MakeGenericMethod(asDict, resultType);
+
+                        var results = (List<Result>)serialize.Invoke(null, new object[] { name, typeName, serializer, deserializer, dictObj });
 
                         ret.AddRange(results);
                     }
@@ -504,88 +614,94 @@ namespace Benchmark
             var allTypes = stats.Select(s => s.TypeName).Distinct().OrderBy(o => o).ToList();
             distinctTypeCount = 0;
 
-            foreach (var type in allTypes)
+            var serializerResults = stats.Where(s => s.Serializer.EndsWith("(Serialize)"));
+            var deserializerResults = stats.Where(s => s.Serializer.EndsWith("(Deserialize)"));
+
+            foreach (var subsetStats in new[] { serializerResults, deserializerResults })
             {
-                var newtonsoft = stats.Single(s => s.TypeName == type && s.Serializer == "Json.NET");
-                var serviceStack = stats.Single(s => s.TypeName == type && s.Serializer == "ServiceStack.Text");
-                var jil = stats.Single(s => s.TypeName == type && s.Serializer == "Jil");
-                var proto = stats.Single(s => s.TypeName == type && s.Serializer == "Protobuf-net");
-
-                if (jil.Min == 0 || jil.Median == 0 || jil.Average == 0 || jil.Max == 0)
+                foreach (var type in allTypes)
                 {
-                    Console.WriteLine(type);
-                    Console.WriteLine("\t***INCONCLUSIVE, Jil elapsed time was 0ms***");
-                    continue;
-                }
+                    var newtonsoft = subsetStats.Single(s => s.TypeName == type && s.Serializer.StartsWith("Json.NET"));
+                    var serviceStack = subsetStats.Single(s => s.TypeName == type && s.Serializer.StartsWith("ServiceStack.Text"));
+                    var jil = subsetStats.Single(s => s.TypeName == type && s.Serializer.StartsWith("Jil"));
+                    var proto = subsetStats.Single(s => s.TypeName == type && s.Serializer.StartsWith("Protobuf-net"));
 
-                // don't count types if they were inclusive
-                distinctTypeCount++;
-
-                if (!(jil.Min <= newtonsoft.Min && jil.Min <= serviceStack.Min))
-                {
-                    jilMinFailures.Add(type);
-                }
-
-                if (!(jil.Median <= newtonsoft.Median && jil.Median <= serviceStack.Median))
-                {
-                    jilMedFailures.Add(type);
-                }
-
-                if (jil.Min < proto.Min)
-                {
-                    jilMinBeatPB.Add(type);
-                }
-
-                Action<string, Func<dynamic, double>> print =
-                    (name, getter) =>
+                    if (jil.Min == 0 || jil.Median == 0 || jil.Average == 0 || jil.Max == 0)
                     {
-                        Console.Write("\t" + name + ": ");
-                        var nD = getter(newtonsoft);
-                        var sD = getter(serviceStack);
-                        var jD = getter(jil);
+                        Console.WriteLine(type);
+                        Console.WriteLine("\t***INCONCLUSIVE, Jil elapsed time was 0ms***");
+                        continue;
+                    }
 
-                        var pD = getter(proto);
+                    // don't count types if they were inclusive
+                    distinctTypeCount++;
 
-                        var jilVsProtobuf = jD / pD;
+                    if (!(jil.Min <= newtonsoft.Min && jil.Min <= serviceStack.Min))
+                    {
+                        jilMinFailures.Add(type);
+                    }
 
-                        string tail;
-                        if (jD < pD)
+                    if (!(jil.Median <= newtonsoft.Median && jil.Median <= serviceStack.Median))
+                    {
+                        jilMedFailures.Add(type);
+                    }
+
+                    if (jil.Min < proto.Min)
+                    {
+                        jilMinBeatPB.Add(type);
+                    }
+
+                    Action<string, Func<dynamic, double>> print =
+                        (name, getter) =>
                         {
-                            tail = (pD / jD) + "x faster than Protobuf-net]";
-                        }
-                        else
-                        {
-                            tail = (jD / pD) + "x slower than Protobuf-net]";
-                        }
+                            Console.Write("\t" + name + ": ");
+                            var nD = getter(newtonsoft);
+                            var sD = getter(serviceStack);
+                            var jD = getter(jil);
 
-                        if (jD <= nD && jD <= sD)
-                        {
-                            var nextBest = Math.Min(nD, sD);
+                            var pD = getter(proto);
 
-                            var timesFaster = nextBest / jD;
+                            var jilVsProtobuf = jD / pD;
 
-                            Console.WriteLine("Jil @" + jD + "ms [" + timesFaster + "x faster than next best; "+tail);
-                            return;
-                        }
+                            string tail;
+                            if (jD < pD)
+                            {
+                                tail = (pD / jD) + "x faster than Protobuf-net]";
+                            }
+                            else
+                            {
+                                tail = (jD / pD) + "x slower than Protobuf-net]";
+                            }
 
-                        if (sD <= nD && sD <= jD)
-                        {
-                            Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms; " + tail);
-                            return;
-                        }
+                            if (jD <= nD && jD <= sD)
+                            {
+                                var nextBest = Math.Min(nD, sD);
 
-                        if (nD <= sD && nD <= jD)
-                        {
-                            Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms; " + tail);
-                            return;
-                        }
-                    };
+                                var timesFaster = nextBest / jD;
 
-                Console.WriteLine(type);
-                print("Min", d => d.Min);
-                print("Max", d => d.Max);
-                print("Avg", d => d.Average);
-                print("Med", d => d.Median);
+                                Console.WriteLine("Jil @" + jD + "ms [" + timesFaster + "x faster than next best; " + tail);
+                                return;
+                            }
+
+                            if (sD <= nD && sD <= jD)
+                            {
+                                Console.WriteLine("ServiceStack.Text @" + sD + "ms [vs Jil @" + jD + "ms; " + tail);
+                                return;
+                            }
+
+                            if (nD <= sD && nD <= jD)
+                            {
+                                Console.WriteLine("Newtonsoft @" + nD + "ms [vs Jil @" + jD + "ms; " + tail);
+                                return;
+                            }
+                        };
+
+                    Console.WriteLine(type);
+                    print("Min", d => d.Min);
+                    print("Max", d => d.Max);
+                    print("Avg", d => d.Average);
+                    print("Med", d => d.Median);
+                }
             }
         }
 
