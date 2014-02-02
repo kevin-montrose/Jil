@@ -705,22 +705,6 @@ namespace Benchmark
             }
         }
 
-        static void QuickGraph(List<Result> results)
-        {
-            Console.WriteLine();
-
-            var typeName = results.Select(r => r.TypeName).Distinct().Single();
-
-            Console.WriteLine(typeName + ":");
-
-            var medianTimes = results.GroupBy(g => g.Serializer).ToDictionary(g => g.Key, g => g.Select(r => r.Ellapsed.TotalMilliseconds).Median());
-
-            foreach (var kv in medianTimes.OrderBy(r => r.Key))
-            {
-                Console.WriteLine("\t" + kv.Key + ": " + kv.Value);
-            }
-        }
-
         static void DoQuickGraph()
         {
             const int runCount = 10;
@@ -762,42 +746,70 @@ namespace Benchmark
             }
             Console.SetOut(oldOut);
 
-            Func<List<Result>, double> jil = r => r.Where(w => w.Serializer == "Jil").Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, double> jsonNet = r => r.Where(w => w.Serializer == "Json.NET").Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, double> protobufNet = r => r.Where(w => w.Serializer == "Protobuf-net").Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, double> serviceStackText = r => r.Where(w => w.Serializer == "ServiceStack.Text").Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jil = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jsonNet = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Json.NET")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> protobufNet = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Protobuf-net")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> serviceStackText = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("ServiceStack.Text")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
 
-            Console.WriteLine("Single:");
-            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user), jsonNet(user), protobufNet(user), serviceStackText(user));
-            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer), jsonNet(answer), protobufNet(answer), serviceStackText(answer));
-            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question), jsonNet(question), protobufNet(question), serviceStackText(question));
+            {
+                Func<Result, bool> serialize = r => r.Serializer.Contains("(Serialize)");
+
+                Console.WriteLine("Serializing");
+                Console.WriteLine("===========");
+
+                Console.WriteLine("Single:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user, serialize), jsonNet(user, serialize), protobufNet(user, serialize), serviceStackText(user, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer, serialize), jsonNet(answer, serialize), protobufNet(answer, serialize), serviceStackText(answer, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question, serialize), jsonNet(question, serialize), protobufNet(question, serialize), serviceStackText(question, serialize));
+
+                Console.WriteLine();
+
+                Console.WriteLine("Lists:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList, serialize), jsonNet(userList, serialize), protobufNet(userList, serialize), serviceStackText(userList, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList, serialize), jsonNet(answerList, serialize), protobufNet(answerList, serialize), serviceStackText(answerList, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList, serialize), jsonNet(questionList, serialize), protobufNet(questionList, serialize), serviceStackText(questionList, serialize));
+
+                Console.WriteLine();
+
+                Console.WriteLine("Dictionaries of strings to:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict, serialize), jsonNet(userDict, serialize), protobufNet(userDict, serialize), serviceStackText(userDict, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict, serialize), jsonNet(answerDict, serialize), protobufNet(answerDict, serialize), serviceStackText(answerDict, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict, serialize), jsonNet(questionDict, serialize), protobufNet(questionDict, serialize), serviceStackText(questionDict, serialize));
+            }
 
             Console.WriteLine();
 
-            Console.WriteLine("Lists:");
-            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList), jsonNet(userList), protobufNet(userList), serviceStackText(userList));
-            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList), jsonNet(answerList), protobufNet(answerList), serviceStackText(answerList));
-            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList), jsonNet(questionList), protobufNet(questionList), serviceStackText(questionList));
+            {
+                Func<Result, bool> deserialize = r => r.Serializer.Contains("(Deserialize)");
 
-            Console.WriteLine();
+                Console.WriteLine("Deserializing");
+                Console.WriteLine("=============");
 
-            Console.WriteLine("Dictionaries of strings to:");
-            Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-            Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict), jsonNet(userDict), protobufNet(userDict), serviceStackText(userDict));
-            Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict), jsonNet(answerDict), protobufNet(answerDict), serviceStackText(answerDict));
-            Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict), jsonNet(questionDict), protobufNet(questionDict), serviceStackText(questionDict));
+                Console.WriteLine("Single:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user, deserialize), jsonNet(user, deserialize), protobufNet(user, deserialize), serviceStackText(user, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer, deserialize), jsonNet(answer, deserialize), protobufNet(answer, deserialize), serviceStackText(answer, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question, deserialize), jsonNet(question, deserialize), protobufNet(question, deserialize), serviceStackText(question, deserialize));
 
-            /*QuickGraph(question);
-            QuickGraph(answer);
-            QuickGraph(user);
-            QuickGraph(questionList);
-            QuickGraph(answerList);
-            QuickGraph(userList);
-            QuickGraph(questionDict);
-            QuickGraph(answerDict);
-            QuickGraph(userDict);*/
+                Console.WriteLine();
+
+                Console.WriteLine("Lists:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList, deserialize), jsonNet(userList, deserialize), protobufNet(userList, deserialize), serviceStackText(userList, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList, deserialize), jsonNet(answerList, deserialize), protobufNet(answerList, deserialize), serviceStackText(answerList, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList, deserialize), jsonNet(questionList, deserialize), protobufNet(questionList, deserialize), serviceStackText(questionList, deserialize));
+
+                Console.WriteLine();
+
+                Console.WriteLine("Dictionaries of strings to:");
+                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
+                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict, deserialize), jsonNet(userDict, deserialize), protobufNet(userDict, deserialize), serviceStackText(userDict, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict, deserialize), jsonNet(answerDict, deserialize), protobufNet(answerDict, deserialize), serviceStackText(answerDict, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict, deserialize), jsonNet(questionDict, deserialize), protobufNet(questionDict, deserialize), serviceStackText(questionDict, deserialize));
+            }
         }
 
         static void Main(string[] args)
