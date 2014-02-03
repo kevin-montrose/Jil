@@ -1,42 +1,58 @@
-### Jil (WIP)
+### Jil
 
-A fast JSON serializer, built on [Sigil](https://github.com/kevin-montrose/Sigil) with a number of somewhat crazy optimization tricks.
+A fast JSON (de)serializer, built on [Sigil](https://github.com/kevin-montrose/Sigil) with a number of somewhat crazy optimization tricks.
 
-While *usable* in it's current state, Jil is far from finished.  It should be treated as a Work In Progress, don't use it for anything
-serious just yet...
-
-[Preliminary releases are available on Nuget](https://www.nuget.org/packages/Jil/) in addition to this repository.
+[Releases are available on Nuget](https://www.nuget.org/packages/Jil/) in addition to this repository.
 
 ## Usage
 
+### Serializing
+
 ```
     using(var output = new StringWriter())
-	{
-		JSON.Serialize(
-			new
-			{
-				MyInt = 1,
-				MyString = "hello world",
-				// etc.
-			},
-			output
-		);
-	}
+    {
+        JSON.Serialize(
+            new
+            {
+                MyInt = 1,
+                MyString = "hello world",
+                // etc.
+            },
+            output
+        );
+    }
 ```
+
+There is also a `Serialize` method that works directly on strings.
 
 The first time Jil is used to serialize a given configuration and type pair, it will spend extra time building the serializer.
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" serialization.
 
 The suggested way to use Jil is with the generic `JSON.Serialize` method, however a slightly slower `JSON.SerializeDynamic` method
-is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branhches
+is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branches
 when compared to `Serialize`, and the first invocation for a given type will do a small amount of additiona code generation.
 
-Note, at this time Jil **does not** include a JSON _deserializer_.
+### Deserializing
+
+```
+    using(var input = new StringReader(myString))
+    {
+        var result = JSON.Deserialize<MyType>(input);
+    }
+```
+
+There is also a `Deserialize` method that works directly on strings.
+
+The first time Jil is used to deserialize a given configuration and type pair, it will spend extra time building the deserializer.
+Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
+with an earlier "throw away" deserialization.
+
+Jil currently **does not** support dynamic deserialization.
 
 ## Supported Types
 
-Jil will only serialize types that can be reasonably represented as [JSON](http://json.org).
+Jil will only (de)serialize types that can be reasonably represented as [JSON](http://json.org).
 
 The following types (and any user defined types composed of them) are supported:
 
@@ -53,27 +69,48 @@ The following types (and any user defined types composed of them) are supported:
   - IList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
-Jil serializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
-declaration order).
+Jil deserializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
+declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.datamemberattribute.name(v=vs.110).aspx) is respected by Jil, as is the [ShouldSerializeXXX() pattern](http://msdn.microsoft.com/en-us/library/53b8022e(v=vs.110).aspx).
 
 ## Configuration
 
-Jil's `JSON.Serialize` method takes an optional `Options` parameter which controls:
+Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options` parameter which controls:
 
-  - The format of serialized DateTimes, one of
+  - The format of DateTimes, one of
     * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string, ie. "\/Date(##...##)\/"
 	* MillisecondsSinceUnixEpoch, a number, which can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 	* SecondsSinceUnixEpoch, a number, commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
 	* ISO8601, a string, ie. "2011-07-14T19:43:37Z"
   - Whether or not to exclude null values when serializing dictionaries, and object members
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
-  - Whether or not the JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
+  - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
   - Whether or not to include inherited members when serializing
+  - Whether or not to try to use hash functions when deserializing member names
+        * Collisions may be forced if input is malicious
 
 ## Benchmarks
 
-Jil aims to be the fastest general purpose JSON serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
+Jil aims to be the fastest general purpose JSON (serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
 in the pursuit of speed.
+
+These benchmarks were run on a machine with the following specs:
+
+<ul>
+ <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
+ <li>System Manufacturer: Apple Inc.</li>
+ <li>System Model: MacBookPro8,2</li>
+ <li>Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz</li>
+ <li>Memory: 8192MB RAM</li>
+ <ul>
+  <li>DDR3</li>
+  <li>Dual Channel</li>
+  <li>665.2 MHZ</li>
+ </ul>
+</ul>
+
+As with all benchmarks, take these with a grain of salt.
+
+### Serialization
 
 For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark):
 
@@ -105,24 +142,21 @@ Numbers can be found in [this Google Document](https://docs.google.com/spreadshe
 Note that times are in milliseconds in this benchmark, and in _microseconds_ in the preceeding one.  Also be aware that the following serializers
 in theburningmonk benchmark are **not** JSON serializers: protobuf-net, MongoDB Driver BSON, and Json.Net BSON.
 
-These benchmarks were run on a machine with the following specs:
-
-<ul>
- <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
- <li>System Manufacturer: Apple Inc.</li>
- <li>System Model: MacBookPro8,2</li>
- <li>Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz</li>
- <li>Memory: 8192MB RAM</li>
- <ul>
-  <li>DDR3</li>
-  <li>Dual Channel</li>
-  <li>665.2 MHZ</li>
- </ul>
-</ul>
-
-As with all benchmarks, take these with a grain of salt.
-
 <sub>*This is meant to simulate typical content from the Stack Exchange API.</sub>
+
+### Deserialization
+
+The same libraries and same types were used to test deserialization.
+
+<img src="http://i.imgur.com/NXQOS8n.png" />
+
+<img src="http://i.imgur.com/opUEdOs.png" />
+
+<img src="http://i.imgur.com/62h8hXf.png" />
+
+Numbers can be found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdHEwZ3FCZDB3aEZCelZUMElBUUIyRnc&usp=drive_web#gid=0).
+
+[Recent JSON serializer benchmarks by theburningmonk](http://theburningmonk.com/2014/02/json-serializers-benchmarks-updated/) have included Jil 1.0.x as well.
 
 ## Tricks
 
@@ -136,11 +170,11 @@ Using Sigil also makes hacking on Jil much more productive, as debuging IL gener
 
 ### Trade Memory For Speed
 
-Jil's internal serializers are (in the absense of recursive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
+Jil's internal serializers and deserializers are (in the absense of recursive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
 .NET's JIT more context when generating machine code.
 
-The serializers Jil create also do no Options checking at serialization time, Options are baked in at first use.  This means
-that Jil may create up to 32 different serializers for a single type (though in practice, many fewer).
+The methods Jil create also do no Options checking at serialization time, Options are baked in at first use.  This means
+that Jil may create up to 32 different serializers and 8 different deserializers for a single type (though in practice, many fewer).
 
 ### Optimizing Member Access Order
 
@@ -166,10 +200,12 @@ This is a fairly naive implementation of this idea, there's almost more that cou
 
 .NET's GC is excellent, but no-GC is still faster than any-GC.
 
-Jil tries to avoid allocating any reference types, with following exceptions:
+Jil tries to avoid allocating any reference types, with some exceptions:
 
  - [a 36-length char\[\]](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L2785) if any integer numbers, DateTimes, or GUIDs are being serialized
- - one byte[] per GUID being serialized, as a consequence of using [Guid.ToByteArray](http://msdn.microsoft.com/en-us/library/system.guid.tobytearray.aspx)
+ - [a 32-length char\[\]](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/InlineDeserializer.cs#L64) if any strings, user defined objects, or ISO8601 DateTimes are being deserialized
+
+Depending on the data being deserialized a `StringBuilder` may also be allocated.  If a `TextWriter` does not have an invariant culture, strings may also be allocated when serializing floating point numbers.
 
 ### Escaping Tricks
 
@@ -222,4 +258,14 @@ Although arrays implement `IList<T>` the JIT generates much better code if you g
 
 Many enums end up having sequential values, Jil will exploit this if possible and generate a subtraction and jump table lookup.
 Non-sequential enumerations are handled with a long series of branches.
+
+### Custom Number Readers
+
+Just like Jil maintains many different methods for writing integer types, it also maintains [different methods for reading them](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.ReadNumbers.cs).  These methods omit unnecessary sign checks, overflow checks, and culture-specific formatting support.
+
+### Hash Based Member Name Lookups
+
+Rather than read a member name into a string or buffer when deserializing, Jil will try to hash it one character at a time and use the remainder operator and a jump table instead.  Jil uses [variants](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.Hashes.cs) of the [Fowler–Noll–Vo hash function](http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) for this purpose, and falls back to Dictionary lookups if it fails.
+
+
 
