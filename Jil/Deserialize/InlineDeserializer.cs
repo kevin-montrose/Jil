@@ -1619,6 +1619,15 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (forType.IsSimpleInterface())
+            {
+                var interfaceImpl = typeof(InterfaceImplementation<>).MakeGenericType(forType);
+                var interfaceImplType = (Type)interfaceImpl.GetField("Proxy").GetValue(null);
+
+                ReadObject(interfaceImplType);
+                return;
+            }
+
             ReadObject(forType);
         }
 

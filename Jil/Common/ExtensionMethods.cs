@@ -516,6 +516,31 @@ namespace Jil.Common
             return generic == typeof(Dictionary<,>);
         }
 
+        public static bool IsSimpleInterface(this Type t)
+        {
+            // not an interface? bail
+            if (!t.IsInterface) return false;
+
+            // not public? bail
+            if (!t.IsPublic) return false;
+
+            var members = t.GetMembers();
+
+            var mtds = members.OfType<MethodInfo>().ToList();
+            var props = members.OfType<PropertyInfo>().ToList();
+
+            // something weird here, bail
+            if (mtds.Count + props.Count != members.Length) return false;
+
+            // any methods that aren't property accessors? bail
+            if (mtds.Any(m => !props.Any(p => p.GetMethod == m || p.SetMethod == m))) return false;
+            
+            // define a property that takes parameters? bail
+            if (props.Any(p => p.GetIndexParameters().Length != 0)) return false;
+
+            return true;
+        }
+
         public static void ForEach<T>(this IEnumerable<T> e, Action<T> func)
         {
             foreach (var x in e)

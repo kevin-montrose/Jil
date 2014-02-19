@@ -13,6 +13,12 @@ using System.Threading.Tasks;
 
 namespace JilTests
 {
+    public interface _Interface
+    {
+        int A { get; set; }
+        string B { get; set; }
+    }
+
     [TestClass]
     public class DeserializeTests
     {
@@ -3952,6 +3958,18 @@ namespace JilTests
                 Assert.AreEqual(2, res.A.Count());
                 Assert.AreEqual("abcd", res.A.ElementAt(0));
                 Assert.AreEqual("efgh", res.A.ElementAt(1));
+            }
+        }
+
+        [TestMethod]
+        public void Interface()
+        {
+            using (var str = new StringReader("{\"A\":1234, \"B\": \"hello world\"}"))
+            {
+                var res = JSON.Deserialize<_Interface>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(1234, res.A);
+                Assert.AreEqual("hello world", res.B);
             }
         }
 
