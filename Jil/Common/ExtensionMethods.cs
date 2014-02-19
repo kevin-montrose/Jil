@@ -524,13 +524,13 @@ namespace Jil.Common
             // not public? bail
             if (!t.IsPublic) return false;
 
-            var members = t.GetMembers();
+            var members = t.GetAllInterfaceMembers();
 
             var mtds = members.OfType<MethodInfo>().ToList();
             var props = members.OfType<PropertyInfo>().ToList();
 
             // something weird here, bail
-            if (mtds.Count + props.Count != members.Length) return false;
+            if (mtds.Count + props.Count != members.Count) return false;
 
             // any methods that aren't property accessors? bail
             if (mtds.Any(m => !props.Any(p => p.GetMethod == m || p.SetMethod == m))) return false;
@@ -539,6 +539,32 @@ namespace Jil.Common
             if (props.Any(p => p.GetIndexParameters().Length != 0)) return false;
 
             return true;
+        }
+
+        public static List<MemberInfo> GetAllInterfaceMembers(this Type t)
+        {
+            if (!t.IsInterface) throw new Exception("Expected interface, found: " + t);
+
+            var pending = new Stack<Type>();
+            pending.Push(t);
+
+            var ret = new List<MemberInfo>();
+
+            while (pending.Count > 0)
+            {
+                var current = pending.Pop();
+
+                ret.AddRange(current.GetMembers());
+
+                if (current.BaseType != null)
+                {
+                    pending.Push(current.BaseType);
+                }
+
+                current.GetInterfaces().ForEach(i => pending.Push(i));
+            }
+
+            return ret;
         }
 
         public static void ForEach<T>(this IEnumerable<T> e, Action<T> func)

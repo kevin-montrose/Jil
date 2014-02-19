@@ -13,10 +13,15 @@ using System.Threading.Tasks;
 
 namespace JilTests
 {
-    public interface _Interface
+    public interface _Interface1
     {
         int A { get; set; }
         string B { get; set; }
+    }
+
+    public interface _Interface2 : _Interface1
+    {
+        double C { get; set; }
     }
 
     [TestClass]
@@ -3966,10 +3971,19 @@ namespace JilTests
         {
             using (var str = new StringReader("{\"A\":1234, \"B\": \"hello world\"}"))
             {
-                var res = JSON.Deserialize<_Interface>(str);
+                var res = JSON.Deserialize<_Interface1>(str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(1234, res.A);
                 Assert.AreEqual("hello world", res.B);
+            }
+
+            using (var str = new StringReader("{\"A\":1234, \"B\": \"hello world\", \"C\": 3.14159}"))
+            {
+                var res = JSON.Deserialize<_Interface2>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(1234, res.A);
+                Assert.AreEqual("hello world", res.B);
+                Assert.AreEqual(3.14159, res.C);
             }
         }
 

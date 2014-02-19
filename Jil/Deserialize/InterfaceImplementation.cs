@@ -20,7 +20,9 @@ namespace Jil.Deserialize
 
             var typeBuilder = AssemblyBuilderContainer.ModBuilder.DefineType(iType.Name + "Impl", TypeAttributes.Class, typeof(object), new[] { iType });
 
-            foreach (var prop in iType.GetProperties())
+            var allMembers = iType.GetAllInterfaceMembers();
+
+            foreach (var prop in allMembers.OfType<PropertyInfo>())
             {
                 var propType = prop.ReturnType();
 
