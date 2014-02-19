@@ -3997,7 +3997,7 @@ namespace JilTests
             {
                 var res = JSON.Deserialize<_Interface3>(str);
                 Assert.IsNotNull(res);
-                Assert.AreEqual(0, res.A);
+                Assert.AreEqual(1234, res.A);
                 Assert.AreEqual(890, res.C);
             }
         }

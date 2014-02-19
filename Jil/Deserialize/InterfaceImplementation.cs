@@ -37,10 +37,20 @@ namespace Jil.Deserialize
                 var iGetter = prop.GetMethod;
                 var iSetter = prop.SetMethod;
 
-                var backingField =
-                    iSetter != null ? 
-                        typeBuilder.DefineField("_" + prop.Name, propType, FieldAttributes.Private) : 
-                        null;
+                Func<FieldInfo> getBackingField;
+                {
+                    FieldInfo backingField = null;
+                    getBackingField = 
+                        () =>
+                        {
+                            if (backingField == null)
+                            {
+                                backingField = typeBuilder.DefineField("_" + prop.Name + "_" + Guid.NewGuid(), prop.ReturnType(), FieldAttributes.Private);
+                            }
+
+                            return backingField;
+                        };
+                }
 
                 if (iGetter != null)
                 {
@@ -51,53 +61,33 @@ namespace Jil.Deserialize
 
                     var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(propType, Type.EmptyTypes, typeBuilder, name, accessor);
 
-                    if (iSetter != null)
-                    {
-                        // property could be populated, so we need a real implementation
-                        emit.LoadArgument(0);
-                        emit.LoadField(backingField);
-                        emit.Return();
-                    }
-                    else
-                    {
-                        // property can never be set (no setter), so this is a no-op
-                        if (propType.IsValueType)
-                        {
-                            using (var loc = emit.DeclareLocal(propType))
-                            {
-                                emit.LoadLocalAddress(loc);
-                                emit.InitializeObject(propType);
-                                emit.LoadLocal(loc);
-                                emit.Return();
-                            }
-                        }
-                        else
-                        {
-                            emit.LoadNull();
-                            emit.Return();
-                        }
-                    }
+                    // property could be populated, so we need a real implementation
+                    emit.LoadArgument(0);
+                    emit.LoadField(getBackingField());
+                    emit.Return();
 
                     var getter = emit.CreateMethod();
                     propBuilder.SetGetMethod(getter);
                 }
 
-
-                if(iSetter != null)
+                // If there's a getter we want to *add* a setter
+                //    and, of course, if there's a setter in the interface
+                //    we have to define one anyway
+                if (iGetter != null || iSetter != null)
                 {
-                    var accessor = iSetter.Attributes;
-                    var name = iSetter.Name;
+                    var accessor = iSetter != null ? iSetter.Attributes : MethodAttributes.Private;
+                    var name = iSetter != null ? iSetter.Name : "set_" + prop.Name;
 
                     accessor &= ~MethodAttributes.Abstract;
 
-                    var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(typeof(void), new [] { propType }, typeBuilder, name, accessor);
+                    var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(typeof(void), new[] { propType }, typeBuilder, name, accessor);
 
                     if (iGetter != null)
                     {
-                        // property can be populated, so setter needs a real impl
+                        // property can be read, so setter needs a real impl
                         emit.LoadArgument(0);
                         emit.LoadArgument(1);
-                        emit.StoreField(backingField);
+                        emit.StoreField(getBackingField());
                         emit.Return();
                     }
                     else
