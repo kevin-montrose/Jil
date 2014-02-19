@@ -845,7 +845,14 @@ namespace Jil.Serialize
                 }
                 else
                 {
-                    proxyMethod = Methods.ProxyDecimal;
+                    if (primitiveType == typeof(decimal))
+                    {
+                        proxyMethod = Methods.ProxyDecimal;
+                    }
+                    else
+                    {
+                        proxyMethod = typeof(TextWriter).GetMethod("Write", new Type[] { primitiveType });
+                    }
                 }
             }
 
