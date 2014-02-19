@@ -18,7 +18,13 @@ namespace Jil.Deserialize
         {
             var iType = typeof(Interface);
 
-            var typeBuilder = AssemblyBuilderContainer.ModBuilder.DefineType(iType.Name + "Impl", TypeAttributes.Class, typeof(object), new[] { iType });
+            var typeBuilder = 
+                AssemblyBuilderContainer.ModBuilder.DefineType(
+                    iType.Name + "Impl", 
+                    TypeAttributes.Class | TypeAttributes.Sealed, 
+                    typeof(object), 
+                    new[] { iType }
+                );
 
             var allMembers = iType.GetAllInterfaceMembers();
 
@@ -28,42 +34,81 @@ namespace Jil.Deserialize
 
                 var propBuilder = typeBuilder.DefineProperty(prop.Name, prop.Attributes, propType, Type.EmptyTypes);
 
-                var backingField = typeBuilder.DefineField("_" + prop.Name, propType, FieldAttributes.Private);
-
                 var iGetter = prop.GetMethod;
-                MethodBuilder getter;
+                var iSetter = prop.SetMethod;
+
+                var backingField =
+                    iSetter != null ? 
+                        typeBuilder.DefineField("_" + prop.Name, propType, FieldAttributes.Private) : 
+                        null;
+
+                if (iGetter != null)
                 {
-                    var accessor = iGetter != null ? iGetter.Attributes : MethodAttributes.Private;
-                    var name = iGetter != null ? iGetter.Name : "get_" + prop.Name;
+                    var accessor = iGetter.Attributes;
+                    var name = iGetter.Name;
 
                     accessor &= ~MethodAttributes.Abstract;
 
                     var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(propType, Type.EmptyTypes, typeBuilder, name, accessor);
-                    emit.LoadArgument(0);
-                    emit.LoadField(backingField);
-                    emit.Return();
 
-                    getter = emit.CreateMethod();
+                    if (iSetter != null)
+                    {
+                        // property could be populated, so we need a real implementation
+                        emit.LoadArgument(0);
+                        emit.LoadField(backingField);
+                        emit.Return();
+                    }
+                    else
+                    {
+                        // property can never be set (no setter), so this is a no-op
+                        if (propType.IsValueType)
+                        {
+                            using (var loc = emit.DeclareLocal(propType))
+                            {
+                                emit.LoadLocalAddress(loc);
+                                emit.InitializeObject(propType);
+                                emit.LoadLocal(loc);
+                                emit.Return();
+                            }
+                        }
+                        else
+                        {
+                            emit.LoadNull();
+                            emit.Return();
+                        }
+                    }
+
+                    var getter = emit.CreateMethod();
+                    propBuilder.SetGetMethod(getter);
                 }
-                propBuilder.SetGetMethod(getter);
 
-                var iSetter = prop.SetMethod;
-                MethodBuilder setter;
+
+                if(iSetter != null)
                 {
-                    var accessor = iSetter != null ? iSetter.Attributes : MethodAttributes.Private;
-                    var name = iSetter != null ? iSetter.Name : "get_" + prop.Name;
+                    var accessor = iSetter.Attributes;
+                    var name = iSetter.Name;
 
                     accessor &= ~MethodAttributes.Abstract;
 
                     var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(typeof(void), new [] { propType }, typeBuilder, name, accessor);
-                    emit.LoadArgument(0);
-                    emit.LoadArgument(1);
-                    emit.StoreField(backingField);
-                    emit.Return();
 
-                    setter = emit.CreateMethod();
+                    if (iGetter != null)
+                    {
+                        // property can be populated, so setter needs a real impl
+                        emit.LoadArgument(0);
+                        emit.LoadArgument(1);
+                        emit.StoreField(backingField);
+                        emit.Return();
+                    }
+                    else
+                    {
+                        // property can never be read (no getter), so this is a no-op
+                        emit.Return();
+                    }
+
+                    var setter = emit.CreateMethod();
+                    propBuilder.SetSetMethod(setter);
                 }
-                propBuilder.SetSetMethod(setter);
             }
 
             Proxy = typeBuilder.CreateType();

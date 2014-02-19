@@ -24,6 +24,13 @@ namespace JilTests
         double C { get; set; }
     }
 
+    public interface _Interface3
+    {
+        int A { get; }
+        int B { set; }
+        int C { get; set; }
+    }
+
     [TestClass]
     public class DeserializeTests
     {
@@ -3984,6 +3991,14 @@ namespace JilTests
                 Assert.AreEqual(1234, res.A);
                 Assert.AreEqual("hello world", res.B);
                 Assert.AreEqual(3.14159, res.C);
+            }
+
+            using (var str = new StringReader("{\"A\":1234, \"B\":4567, \"C\":890}"))
+            {
+                var res = JSON.Deserialize<_Interface3>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(0, res.A);
+                Assert.AreEqual(890, res.C);
             }
         }
 
