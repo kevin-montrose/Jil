@@ -21,6 +21,10 @@ namespace Jil.DeserializeDynamic
             Number = 7
         }
 
+        public static readonly JsonObject Null = new JsonObject { Type = JsonObjectType.Null };
+        public static readonly JsonObject True = new JsonObject { Type = JsonObjectType.True };
+        public static readonly JsonObject False = new JsonObject { Type = JsonObjectType.False };
+
         JsonObjectType Type;
         string StringValue;
         double NumberValue;
@@ -58,14 +62,17 @@ namespace Jil.DeserializeDynamic
 
         public JsonObject Pop()
         {
+            if (Parent == null) return this;
+
             return Parent;
         }
 
         public void Put(JsonObject other)
         {
-            switch(Type){
-                case JsonObjectType.Array: ArrayValue.Add(other); break;
-                case JsonObjectType.Object: ObjectMembers.Add(other); break;
+            switch(Type)
+            {
+                case JsonObjectType.Array: ArrayValue.Add(other); return;
+                case JsonObjectType.Object: ObjectMembers.Add(other); return;
                 case JsonObjectType.ObjectMember:
                     if (MemberPart1 == null)
                     {
@@ -82,7 +89,7 @@ namespace Jil.DeserializeDynamic
                             throw new InvalidOperationException();
                         }
                     }
-                    break;
+                    return;
             }
 
             throw new InvalidOperationException();
@@ -107,10 +114,6 @@ namespace Jil.DeserializeDynamic
 
     sealed class ObjectBuilder
     {
-        static readonly JsonObject Null = new JsonObject();
-        static readonly JsonObject True = new JsonObject();
-        static readonly JsonObject False = new JsonObject();
-
         public StringBuilder CommonStringBuffer;
 
         char[] _CommonCharBuffer;
@@ -131,11 +134,11 @@ namespace Jil.DeserializeDynamic
         {
             if (BeingBuilt == null)
             {
-                BeingBuilt = Null;
+                BeingBuilt = JsonObject.Null;
             }
             else
             {
-                BeingBuilt.Put(Null);
+                BeingBuilt.Put(JsonObject.Null);
             }
         }
 
@@ -143,11 +146,11 @@ namespace Jil.DeserializeDynamic
         {
             if (BeingBuilt == null)
             {
-                BeingBuilt = True;
+                BeingBuilt = JsonObject.True;
             }
             else
             {
-                BeingBuilt.Put(True);
+                BeingBuilt.Put(JsonObject.True);
             }
         }
 
@@ -155,11 +158,11 @@ namespace Jil.DeserializeDynamic
         {
             if (BeingBuilt == null)
             {
-                BeingBuilt = False;
+                BeingBuilt = JsonObject.False;
             }
             else
             {
-                BeingBuilt.Put(False);
+                BeingBuilt.Put(JsonObject.False);
             }
         }
 

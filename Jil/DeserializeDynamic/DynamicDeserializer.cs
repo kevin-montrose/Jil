@@ -15,6 +15,10 @@ namespace Jil.DeserializeDynamic
 
             DeserializeMember(reader, ret);
 
+            Methods.ConsumeWhiteSpace(reader);
+            var c = reader.Peek();
+            if (c != -1) throw new DeserializationException("Expected end of stream", reader);
+
             return ret;
         }
 
@@ -96,6 +100,14 @@ namespace Jil.DeserializeDynamic
 
             while(true)
             {
+                c = reader.Peek();
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (c == ']')
+                {
+                    reader.Read();  // skip the ]
+                    break;
+                }
+
                 DeserializeMember(reader, builder);
                 Methods.ConsumeWhiteSpace(reader);
                 c = reader.Read();
@@ -119,6 +131,15 @@ namespace Jil.DeserializeDynamic
             while (true)
             {
                 Methods.ConsumeWhiteSpace(reader);
+
+                c = reader.Peek();
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (c == '}')
+                {
+                    reader.Read();  // skip }
+                    break;
+                }
+
                 c = reader.Read();
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
                 if (c != '"') throw new DeserializationException("Expected \", found " + (char)c, reader);
