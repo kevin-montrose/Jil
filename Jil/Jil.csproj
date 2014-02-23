@@ -51,6 +51,9 @@
     <Compile Include="Common\ConstructionException.cs" />
     <Compile Include="DateTimeFormat.cs" />
     <Compile Include="DeserializationException.cs" />
+    <Compile Include="DeserializeDynamic\DynamicDeserializer.cs" />
+    <Compile Include="DeserializeDynamic\Methods.cs" />
+    <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousMemberMatcher.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />
