@@ -118,7 +118,7 @@ namespace Benchmark
         }
 
         static MethodInfo _DoSpeedTest = typeof(Program).GetMethod("DoSpeedTest", BindingFlags.Static | BindingFlags.NonPublic);
-        static List<Result> DoSpeedTest<T, V>(string serializerName, string niceTypeName, Func<T, V> serializeFunc, Func<V, T> deserializeFunc, T obj)
+        static List<Result> DoSpeedTest<T, V>(string serializerName, string niceTypeName, Func<T, V> serializeFunc, Func<V, dynamic> deserializeFunc, T obj)
             where T : class
             where V : class
         {
@@ -232,6 +232,11 @@ namespace Benchmark
             return ret;
         }
 
+        static dynamic NewtonsoftDeserializeDynamic(string str)
+        {
+            return JsonConvert.DeserializeObject(str);
+        }
+
         static MethodInfo _NewtonsoftDeserialize = typeof(Program).GetMethod("NewtonsoftDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
         static T NewtonsoftDeserialize<T>(string str)
         {
@@ -240,12 +245,16 @@ namespace Benchmark
 
         static object GetNewtonsoftDeserializer(Type forType, string defaultVal)
         {
-            var mtd = _NewtonsoftDeserialize.MakeGenericMethod(forType);
+            /*var mtd = _NewtonsoftDeserialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
             ret.DynamicInvoke(new object[] { defaultVal });
+
+            return ret;*/
+
+            Func<string, dynamic> ret = str => NewtonsoftDeserializeDynamic(str);
 
             return ret;
         }
@@ -268,6 +277,11 @@ namespace Benchmark
             return ret;
         }
 
+        static dynamic ServiceStackDeserializeDynamic(string str)
+        {
+            return ServiceStack.Text.JsonObject.Parse(str);
+        }
+
         static MethodInfo _ServiceStackDeserialize = typeof(Program).GetMethod("ServiceStackDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
         static T ServiceStackDeserialize<T>(string str)
         {
@@ -276,12 +290,16 @@ namespace Benchmark
 
         static object GetServiceStackDeserializer(Type forType, string defaultVal)
         {
-            var mtd = _ServiceStackDeserialize.MakeGenericMethod(forType);
+            /*var mtd = _ServiceStackDeserialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
             ret.DynamicInvoke(new object[] { defaultVal });
+
+            return ret;*/
+
+            Func<string, dynamic> ret = str => ServiceStackDeserializeDynamic(str);
 
             return ret;
         }
@@ -309,6 +327,14 @@ namespace Benchmark
             return ret;
         }
 
+        static dynamic JilDeserializeDynamic(string data)
+        {
+            using(var str = new StringReader(data))
+            {
+                return JSON.DeserializeDynamic(str);
+            }
+        }
+
         static MethodInfo _JilDeserialize = typeof(Program).GetMethod("JilDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
         static T JilDeserialize<T>(string data)
         {
@@ -320,12 +346,16 @@ namespace Benchmark
 
         static object GetJilDeserializer(Type forType, string defaultVal)
         {
-            var mtd = _JilDeserialize.MakeGenericMethod(forType);
+            /*var mtd = _JilDeserialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
             ret.DynamicInvoke(new object[] { defaultVal });
+
+            return ret;*/
+
+            Func<string, dynamic> ret = str => JilDeserializeDynamic(str);
 
             return ret;
         }
