@@ -100,5 +100,66 @@ namespace JilTests
                 var res = JSON.DeserializeDynamic(str);
             }
         }
+
+        [TestMethod]
+        public void ObjectEnumeration()
+        {
+            using (var str = new StringReader("{\"hello\":123, \"world\":456, \"foo\":789}"))
+            {
+                var c = 0;
+                var res = JSON.DeserializeDynamic(str);
+                foreach (var kv in res)
+                {
+                    string key = kv.Key;
+                    dynamic val = kv.Value;
+
+                    switch(c){
+                        case 0: 
+                            Assert.AreEqual("hello", key);
+                            Assert.AreEqual(123, (int)val);
+                            break;
+                        case 1:
+                            Assert.AreEqual("world", key);
+                            Assert.AreEqual(456, (int)val);
+                            break;
+                        case 2:
+                            Assert.AreEqual("foo", key);
+                            Assert.AreEqual(789, (int)val);
+                            break;
+                        default: throw new Exception();
+                    }
+                    c++;
+                }
+                Assert.AreEqual(3, c);
+            }
+        }
+
+        [TestMethod]
+        public void ArrayEnumerator()
+        {
+            using (var str = new StringReader("[\"abcd\", \"efgh\", \"ijkl\"]"))
+            {
+                var c = 0;
+                var res = JSON.DeserializeDynamic(str);
+                foreach (var val in ((System.Collections.IEnumerable)res))
+                {
+                    switch (c)
+                    {
+                        case 0:
+                            Assert.AreEqual("abcd", (string)val);
+                            break;
+                        case 1:
+                            Assert.AreEqual("efgh", (string)val);
+                            break;
+                        case 2:
+                            Assert.AreEqual("ijkl", (string)val);
+                            break;
+                        default: throw new Exception();
+                    }
+                    c++;
+                }
+                Assert.AreEqual(3, c);
+            }
+        }
     }
 }

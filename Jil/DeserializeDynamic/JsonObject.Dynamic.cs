@@ -192,6 +192,20 @@ namespace Jil.DeserializeDynamic
                         return true;
                     }
                     break;
+                case JsonObjectType.Object:
+                    if (returnType == typeof(System.Collections.IEnumerable))
+                    {
+                        result = ObjectMembers;
+                        return true;
+                    }
+                    break;
+                case JsonObjectType.Array:
+                    if (returnType == typeof(System.Collections.IEnumerable))
+                    {
+                        result = ArrayMembers;
+                        return true;
+                    }
+                    break;
             }
 
             result = null;
@@ -201,6 +215,49 @@ namespace Jil.DeserializeDynamic
         public override bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
         {
             return this.InnerTryConvert(binder.ReturnType, out result);
+        }
+
+        public override bool TryInvokeMember(System.Dynamic.InvokeMemberBinder binder, object[] args, out object result)
+        {
+            if (Type == JsonObjectType.Object)
+            {
+                if (binder.Name == "GetEnumerator" && args.Length == 0)
+                {
+                    result = ObjectMembers.GetEnumerator();
+                    return true;
+                }
+
+                if(binder.Name == "ContainsKey" && args.Length == 1)
+                {
+                    var key = args[0] as string;
+                    if(key == null)
+                    {
+                        result = null;
+                        return false;
+                    }
+
+                    result = ObjectMembers.ContainsKey(key);
+                    return true;
+                }
+
+                result = null;
+                return false;
+            }
+
+            if (Type == JsonObjectType.Array)
+            {
+                if (binder.Name == "GetEnumerator" && args.Length == 0)
+                {
+                    result = ArrayMembers.GetEnumerator();
+                    return true;
+                }
+
+                result = null;
+                return false;
+            }
+
+            result = null;
+            return false;
         }
     }
 }

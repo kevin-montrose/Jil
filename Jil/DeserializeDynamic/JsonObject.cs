@@ -11,15 +11,13 @@ namespace Jil.DeserializeDynamic
     {
         enum JsonObjectType : byte
         {
-            // These first 3 need to be in this order with these values for better code gen; don't jack with them
             Array = 0,
             Object = 1,
             ObjectMember = 2,
-            Null = 3,
-            True = 4,
-            False = 5,
-            String = 6,
-            Number = 7
+            True = 3,
+            False = 4,
+            String = 5,
+            Number = 6
         }
 
         internal static readonly JsonObject True = new JsonObject { Type = JsonObjectType.True };
