@@ -52,6 +52,10 @@
     <Compile Include="DateTimeFormat.cs" />
     <Compile Include="DeserializationException.cs" />
     <Compile Include="DeserializeDynamic\DynamicDeserializer.cs" />
+    <Compile Include="DeserializeDynamic\JsonObject.cs" />
+    <Compile Include="DeserializeDynamic\JsonObject.Dynamic.cs">
+      <DependentUpon>JsonObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeserializeDynamic\Methods.cs" />
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousMemberMatcher.cs" />

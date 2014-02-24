@@ -1,0 +1,206 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Jil.DeserializeDynamic
+{
+    partial class JsonObject
+    {
+        public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
+        {
+            if (Type == JsonObjectType.Array)
+            {
+                if (indexes.Length != 1)
+                {
+                    result = null;
+                    return false;
+                }
+
+                var indexRaw = indexes[0];
+                if (!(indexRaw is int))
+                {
+                    result = null;
+                    return false;
+                }
+
+                var ix = (int)indexRaw;
+                if (ix < 0 || ix >= ArrayValue.Count)
+                {
+                    result = null;
+                    return false;
+                }
+
+                var val = ArrayValue[ix];
+                return val.InnerTryConvert(binder.ReturnType, out result);
+            }
+
+            if (Type == JsonObjectType.Object)
+            {
+                if (indexes.Length != 1)
+                {
+                    result = null;
+                    return false;
+                }
+
+                var key = indexes[0] as string;
+                if (key == null)
+                {
+                    result = null;
+                    return false;
+                }
+
+                JsonObject rawValue;
+                if (!ObjectMembers.TryGetValue(key, out rawValue))
+                {
+                    result = null;
+                    return false;
+                }
+
+                return rawValue.InnerTryConvert(binder.ReturnType, out result);
+            }
+
+            result = null;
+            return false;
+        }
+
+        static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
+
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            if (Type == JsonObjectType.Object)
+            {
+                return ObjectMembers.Keys;
+            }
+
+            if (Type == JsonObjectType.Array)
+            {
+                return ArrayMembers;
+            }
+
+            return Enumerable.Empty<string>();
+        }
+
+        public override bool TryGetMember(System.Dynamic.GetMemberBinder binder, out object result)
+        {
+            if (Type == JsonObjectType.Array)
+            {
+                if (binder.Name == "Count" || binder.Name == "Length")
+                {
+                    result = ArrayValue.Count;
+                    return true;
+                }
+
+                result = null;
+                return false;
+            }
+
+            if (Type != JsonObjectType.Object)
+            {
+                result = null;
+                return false;
+            }
+            
+            JsonObject val;
+            if (!ObjectMembers.TryGetValue(binder.Name, out val))
+            {
+                result = null;
+                return false;
+            }
+
+            return val.InnerTryConvert(binder.ReturnType, out result);
+        }
+
+        bool InnerTryConvert(Type returnType, out object result)
+        {
+            if (returnType == typeof(object))
+            {
+                result = this;
+                return true;
+            }
+
+            switch (Type)
+            {
+                case JsonObjectType.False:
+                    result = false;
+                    return returnType == typeof(bool);
+                case JsonObjectType.True:
+                    result = true;
+                    return returnType == typeof(bool);
+                case JsonObjectType.Number:
+                    if (returnType == typeof(double))
+                    {
+                        result = NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(float))
+                    {
+                        result = (float)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(decimal))
+                    {
+                        result = (decimal)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(byte))
+                    {
+                        result = (byte)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(sbyte))
+                    {
+                        result = (sbyte)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(short))
+                    {
+                        result = (short)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(ushort))
+                    {
+                        result = (ushort)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(int))
+                    {
+                        result = (int)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(uint))
+                    {
+                        result = (uint)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(long))
+                    {
+                        result = (long)NumberValue;
+                        return true;
+                    }
+                    if (returnType == typeof(ulong))
+                    {
+                        result = (ulong)NumberValue;
+                        return true;
+                    }
+                    break;
+                case JsonObjectType.String:
+                    if (returnType == typeof(string))
+                    {
+                        result = StringValue;
+                        return true;
+                    }
+                    break;
+            }
+
+            result = null;
+            return false;
+        }
+
+        public override bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
+        {
+            return this.InnerTryConvert(binder.ReturnType, out result);
+        }
+    }
+}

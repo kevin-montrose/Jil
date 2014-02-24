@@ -87,7 +87,6 @@ namespace JilTests
             using (var str = new StringReader("{\"hello\": 123, \"world\":[1,2,3]}"))
             {
                 var res = JSON.DeserializeDynamic(str);
-                Assert.AreEqual(2, (int)res.Count);
                 Assert.AreEqual(123, (int)res["hello"]);
                 var arr = res["world"];
                 Assert.AreEqual(3, (int)arr.Length);
@@ -99,7 +98,6 @@ namespace JilTests
             using (var str = new StringReader("{}"))
             {
                 var res = JSON.DeserializeDynamic(str);
-                Assert.AreEqual(0, (int)res.Count);
             }
         }
     }

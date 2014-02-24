@@ -6,112 +6,6 @@ using System.Threading.Tasks;
 
 namespace Jil.DeserializeDynamic
 {
-    sealed class JsonObject
-    {
-        enum JsonObjectType : byte
-        {
-            // These first 3 need to be in this order with these values for better code gen; don't jack with them
-            Array = 0,
-            Object = 1,
-            ObjectMember = 2,
-            Null = 3,
-            True = 4,
-            False = 5,
-            String = 6,
-            Number = 7
-        }
-
-        public static readonly JsonObject Null = new JsonObject { Type = JsonObjectType.Null };
-        public static readonly JsonObject True = new JsonObject { Type = JsonObjectType.True };
-        public static readonly JsonObject False = new JsonObject { Type = JsonObjectType.False };
-
-        JsonObjectType Type;
-        string StringValue;
-        double NumberValue;
-        JsonObject Parent;
-        List<JsonObject> ArrayValue;
-        List<JsonObject> ObjectMembers;
-
-        JsonObject MemberPart1;
-        JsonObject MemberPart2;
-
-        public static JsonObject ForString(string str)
-        {
-            return new JsonObject { Type = JsonObjectType.String, StringValue = str };
-        }
-
-        public static JsonObject ForNumber(double num)
-        {
-            return new JsonObject { Type = JsonObjectType.Number, NumberValue = num };
-        }
-
-        public static JsonObject NewArray(JsonObject parent)
-        {
-            return new JsonObject { Type = JsonObjectType.Array, Parent = parent, ArrayValue = new List<JsonObject>() };
-        }
-
-        public static JsonObject NewObject(JsonObject parent)
-        {
-            return new JsonObject { Type = JsonObjectType.Object, Parent = parent, ObjectMembers = new List<JsonObject>() };
-        }
-
-        public static JsonObject NewObjectMember(JsonObject parent)
-        {
-            return new JsonObject { Type = JsonObjectType.ObjectMember, Parent = parent };
-        }
-
-        public JsonObject Pop()
-        {
-            if (Parent == null) return this;
-
-            return Parent;
-        }
-
-        public void Put(JsonObject other)
-        {
-            switch(Type)
-            {
-                case JsonObjectType.Array: ArrayValue.Add(other); return;
-                case JsonObjectType.Object: ObjectMembers.Add(other); return;
-                case JsonObjectType.ObjectMember:
-                    if (MemberPart1 == null)
-                    {
-                        MemberPart1 = other;
-                    }
-                    else
-                    {
-                        if (MemberPart2 == null)
-                        {
-                            MemberPart2 = other;
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException();
-                        }
-                    }
-                    return;
-            }
-
-            throw new InvalidOperationException();
-        }
-
-        public object ValueOf()
-        {
-            switch (Type)
-            {
-                case JsonObjectType.Array: return ArrayValue.Select(a => a.ValueOf()).ToArray();
-                case JsonObjectType.Object: return ObjectMembers.ToDictionary(m => (string)m.MemberPart1.ValueOf(), m => m.MemberPart2.ValueOf());
-                case JsonObjectType.ObjectMember: throw new NotImplementedException();
-                case JsonObjectType.Null: return null;
-                case JsonObjectType.True: return true;
-                case JsonObjectType.False: return false;
-                case JsonObjectType.String: return StringValue;
-                case JsonObjectType.Number: return NumberValue;
-                default: throw new InvalidOperationException();
-            }
-        }
-    }
-
     sealed class ObjectBuilder
     {
         public StringBuilder CommonStringBuffer;
@@ -132,13 +26,9 @@ namespace Jil.DeserializeDynamic
 
         public void PutNull()
         {
-            if (BeingBuilt == null)
+            if (BeingBuilt != null)
             {
-                BeingBuilt = JsonObject.Null;
-            }
-            else
-            {
-                BeingBuilt.Put(JsonObject.Null);
+                BeingBuilt.Put(null);
             }
         }
 
@@ -222,7 +112,7 @@ namespace Jil.DeserializeDynamic
         {
             var member = JsonObject.NewObjectMember(BeingBuilt);
 
-            BeingBuilt.Put(member);
+            //BeingBuilt.Put(member);
             BeingBuilt = member;
         }
 
@@ -244,9 +134,9 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        public object ValueOf()
+        public dynamic ValueOf()
         {
-            return BeingBuilt.ValueOf();
+            return BeingBuilt;
         }
     }
 }
