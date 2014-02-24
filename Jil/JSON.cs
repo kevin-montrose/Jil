@@ -593,7 +593,7 @@ namespace Jil
         {
             var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader);
 
-            return built.ValueOf();
+            return built.BeingBuilt;
         }
     }
 }

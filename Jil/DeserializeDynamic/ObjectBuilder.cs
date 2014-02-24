@@ -22,7 +22,7 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        JsonObject BeingBuilt;
+        public JsonObject BeingBuilt;
 
         public void PutNull()
         {
@@ -132,11 +132,6 @@ namespace Jil.DeserializeDynamic
             {
                 BeingBuilt.Put(num);
             }
-        }
-
-        public dynamic ValueOf()
-        {
-            return BeingBuilt;
         }
     }
 }
