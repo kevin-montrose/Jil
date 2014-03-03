@@ -141,7 +141,7 @@ namespace JilTests
             {
                 var c = 0;
                 var res = JSON.DeserializeDynamic(str);
-                foreach (var val in ((System.Collections.IEnumerable)res))
+                foreach (var val in res)
                 {
                     switch (c)
                     {

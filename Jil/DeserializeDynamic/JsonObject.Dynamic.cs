@@ -202,7 +202,7 @@ namespace Jil.DeserializeDynamic
                 case JsonObjectType.Array:
                     if (returnType == typeof(System.Collections.IEnumerable))
                     {
-                        result = ArrayMembers;
+                        result = ArrayValue;
                         return true;
                     }
                     break;
