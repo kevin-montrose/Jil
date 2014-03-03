@@ -38,6 +38,18 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Guids()
+        {
+            var guid = Guid.NewGuid();
+
+            using (var str = new StringReader("\"" + guid + "\""))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.AreEqual(guid, (Guid)res);
+            }
+        }
+
         enum _Enums
         {
             Hello,

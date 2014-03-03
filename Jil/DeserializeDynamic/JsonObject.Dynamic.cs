@@ -197,6 +197,18 @@ namespace Jil.DeserializeDynamic
                         result = Enum.Parse(returnType, StringValue, ignoreCase: true);
                         return true;
                     }
+                    if (returnType == typeof(Guid))
+                    {
+                        Guid guid;
+                        if (!Guid.TryParseExact(StringValue, "D", out guid))
+                        {
+                            result = null;
+                            return false;
+                        }
+
+                        result = guid;
+                        return true;
+                    }
                     break;
                 case JsonObjectType.Object:
                     if (returnType == typeof(System.Collections.IEnumerable))
