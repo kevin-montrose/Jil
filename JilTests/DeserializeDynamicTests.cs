@@ -38,6 +38,40 @@ namespace JilTests
             }
         }
 
+        enum _Enums
+        {
+            Hello,
+            World
+        }
+
+        [TestMethod]
+        public void Enums()
+        {
+            using (var str = new StringReader("\"Hello\""))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.AreEqual(_Enums.Hello, (_Enums)res);
+            }
+
+            using (var str = new StringReader("\"hello\""))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.AreEqual(_Enums.Hello, (_Enums)res);
+            }
+
+            using (var str = new StringReader("\"World\""))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.AreEqual(_Enums.World, (_Enums)res);
+            }
+
+            using (var str = new StringReader("\"world\""))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.AreEqual(_Enums.World, (_Enums)res);
+            }
+        }
+
         [TestMethod]
         public void Number()
         {

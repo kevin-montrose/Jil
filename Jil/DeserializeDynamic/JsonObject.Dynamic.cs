@@ -192,6 +192,11 @@ namespace Jil.DeserializeDynamic
                         result = StringValue;
                         return true;
                     }
+                    if (returnType.IsEnum)
+                    {
+                        result = Enum.Parse(returnType, StringValue, ignoreCase: true);
+                        return true;
+                    }
                     break;
                 case JsonObjectType.Object:
                     if (returnType == typeof(System.Collections.IEnumerable))
