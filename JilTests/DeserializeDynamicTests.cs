@@ -161,5 +161,36 @@ namespace JilTests
                 Assert.AreEqual(3, c);
             }
         }
+
+        [TestMethod]
+        public void ArrayCoercion()
+        {
+            using (var str = new StringReader("[123, 456, 789]"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                IEnumerable<int> asArr = res;
+                Assert.AreEqual(3, asArr.Count());
+                Assert.AreEqual(123, asArr.ElementAt(0));
+                Assert.AreEqual(456, asArr.ElementAt(1));
+                Assert.AreEqual(789, asArr.ElementAt(2));
+            }
+        }
+
+        [TestMethod]
+        public void DictionaryCoercion()
+        {
+            using (var str = new StringReader("{\"a\": 123, \"b\": 456, \"c\": 789}"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                IDictionary<string, int> asDict = res;
+                Assert.AreEqual(3, asDict.Count());
+                Assert.IsTrue(asDict.ContainsKey("a"));
+                Assert.AreEqual(123, asDict["a"]);
+                Assert.IsTrue(asDict.ContainsKey("b"));
+                Assert.AreEqual(456, asDict["b"]);
+                Assert.IsTrue(asDict.ContainsKey("c"));
+                Assert.AreEqual(789, asDict["c"]);
+            }
+        }
     }
 }

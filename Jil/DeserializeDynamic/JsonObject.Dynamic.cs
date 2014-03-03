@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
@@ -198,11 +199,63 @@ namespace Jil.DeserializeDynamic
                         result = ObjectMembers;
                         return true;
                     }
+
+                    if (returnType.IsGenericDictionary())
+                    {
+                        var args = returnType.GetGenericArguments();
+                        var keyType = args[0];
+                        var valType = args[1];
+
+                        // only strings can object keys
+                        if (keyType != typeof(string))
+                        {
+                            result = null;
+                            return false;
+                        }
+
+                        var coerced = new Dictionary<string, object>(ObjectMembers.Count);
+                        foreach(var kv in ObjectMembers)
+                        {
+                            object innerResult;
+                            if (!kv.Value.InnerTryConvert(valType, out innerResult))
+                            {
+                                result = null;
+                                return false;
+                            }
+
+                            coerced[kv.Key] = innerResult;
+                        }
+
+                        result = Utils.MakeDynamicDictionaryProxy(coerced, valType);
+                        return true;
+                    }
                     break;
                 case JsonObjectType.Array:
                     if (returnType == typeof(System.Collections.IEnumerable))
                     {
                         result = ArrayValue;
+                        return true;
+                    }
+
+                    if (returnType.IsGenericEnumerable())
+                    {
+                        var castTo = returnType.GetGenericArguments()[0];
+
+                        var dynamicProjection =
+                            ArrayValue.Select(
+                                val =>
+                                {
+                                    object innerResult;
+                                    if (!val.InnerTryConvert(castTo, out innerResult))
+                                    {
+                                        throw new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException("Cannot convert " + val.GetType().FullName + " to " + castTo.FullName);
+                                    }
+
+                                    return innerResult;
+                                }
+                            );
+
+                        result = Utils.DynamicProject(dynamicProjection, castTo);
                         return true;
                     }
                     break;

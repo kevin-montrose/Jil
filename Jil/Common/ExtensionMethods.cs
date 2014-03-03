@@ -12,6 +12,16 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static bool IsGenericDictionary(this Type forType)
+        {
+            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == typeof(IDictionary<,>);
+        }
+
+        public static bool IsGenericEnumerable(this Type forType)
+        {
+            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+        }
+
         public static string GetSerializationName(this MemberInfo member)
         {
             var attrs = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();

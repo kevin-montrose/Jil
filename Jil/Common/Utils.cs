@@ -561,5 +561,67 @@ namespace Jil.Common
 
             return nameToTypeAndConsIndex;
         }
+
+        static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
+        static IEnumerable<T> _DynamicProjectTo<T>(IEnumerable<object> e)
+        {
+            return e.Cast<T>();
+        }
+
+        static System.Collections.Hashtable DynamicCastCache = new System.Collections.Hashtable();
+        public static object DynamicProject(IEnumerable<object> e, Type castElementsTo)
+        {
+            Func<IEnumerable<object>, object> cached = (Func<IEnumerable<object>, object>)DynamicCastCache[castElementsTo];
+            if (cached == null)
+            {
+                var mtd = DynamicProjectTo.MakeGenericMethod(castElementsTo);
+                var emit = Sigil.Emit<Func<IEnumerable<object>, object>>.NewDynamicMethod();
+                emit.LoadArgument(0);
+                emit.Call(mtd);
+                emit.Return();
+                cached = emit.CreateDelegate();
+
+                lock (DynamicCastCache)
+                {
+                    DynamicCastCache[castElementsTo] = cached;
+                }
+            }
+
+            return cached(e);
+        }
+
+        static MethodInfo MakeDynamicDictionary = typeof(Utils).GetMethod("_MakeDynamicDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+        static object _MakeDynamicDictionary<T>(IDictionary<string, object> real)
+        {
+            var ret = new Dictionary<string, T>();
+            foreach (var kv in real)
+            {
+                ret[kv.Key] = (T)kv.Value;
+            }
+
+            return ret;
+        }
+
+        static System.Collections.Hashtable DynamicDictionaryCache = new System.Collections.Hashtable();
+        public static object MakeDynamicDictionaryProxy(IDictionary<string, object> inner, Type valType)
+        {
+            Func<IDictionary<string, object>, object> cached = (Func<IDictionary<string, object>, object>)DynamicDictionaryCache[valType];
+            if (cached == null)
+            {
+                var mtd = MakeDynamicDictionary.MakeGenericMethod(valType);
+                var emit = Sigil.Emit<Func<IDictionary<string, object>, object>>.NewDynamicMethod();
+                emit.LoadArgument(0);
+                emit.Call(mtd);
+                emit.Return();
+
+                cached = emit.CreateDelegate();
+                lock (DynamicDictionaryCache)
+                {
+                    DynamicDictionaryCache[valType] = cached;
+                }
+            }
+
+            return cached(inner);
+        }
     }
 }
