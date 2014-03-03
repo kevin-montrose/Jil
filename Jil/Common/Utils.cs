@@ -571,7 +571,7 @@ namespace Jil.Common
         static System.Collections.Hashtable DynamicCastCache = new System.Collections.Hashtable();
         public static object DynamicProject(IEnumerable<object> e, Type castElementsTo)
         {
-            Func<IEnumerable<object>, object> cached = (Func<IEnumerable<object>, object>)DynamicCastCache[castElementsTo];
+            var cached = (Func<IEnumerable<object>, object>)DynamicCastCache[castElementsTo];
             if (cached == null)
             {
                 var mtd = DynamicProjectTo.MakeGenericMethod(castElementsTo);
@@ -590,34 +590,69 @@ namespace Jil.Common
             return cached(e);
         }
 
-        static MethodInfo MakeDynamicDictionary = typeof(Utils).GetMethod("_MakeDynamicDictionary", BindingFlags.Static | BindingFlags.NonPublic);
-        static object _MakeDynamicDictionary<T>(IDictionary<string, object> real)
+        static MethodInfo ProjectToStringDictionary = typeof(Utils).GetMethod("_ProjectToStringDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+        static object _ProjectToStringDictionary<T>(IDictionary<object, object> real)
         {
             var ret = new Dictionary<string, T>();
             foreach (var kv in real)
             {
-                ret[kv.Key] = (T)kv.Value;
+                ret[(string)kv.Key] = (T)kv.Value;
             }
 
             return ret;
         }
 
-        static System.Collections.Hashtable DynamicDictionaryCache = new System.Collections.Hashtable();
-        public static object MakeDynamicDictionaryProxy(IDictionary<string, object> inner, Type valType)
+        static System.Collections.Hashtable StringDictionaryCache = new System.Collections.Hashtable();
+        public static object ProjectStringDictionary(IDictionary<object, object> inner, Type valType)
         {
-            Func<IDictionary<string, object>, object> cached = (Func<IDictionary<string, object>, object>)DynamicDictionaryCache[valType];
+            var cached = (Func<IDictionary<object, object>, object>)StringDictionaryCache[valType];
             if (cached == null)
             {
-                var mtd = MakeDynamicDictionary.MakeGenericMethod(valType);
-                var emit = Sigil.Emit<Func<IDictionary<string, object>, object>>.NewDynamicMethod();
+                var mtd = ProjectToStringDictionary.MakeGenericMethod(valType);
+                var emit = Sigil.Emit<Func<IDictionary<object, object>, object>>.NewDynamicMethod();
                 emit.LoadArgument(0);
                 emit.Call(mtd);
                 emit.Return();
 
                 cached = emit.CreateDelegate();
-                lock (DynamicDictionaryCache)
+                lock (StringDictionaryCache)
                 {
-                    DynamicDictionaryCache[valType] = cached;
+                    StringDictionaryCache[valType] = cached;
+                }
+            }
+
+            return cached(inner);
+        }
+
+        static MethodInfo ProjectToEnumDictionary = typeof(Utils).GetMethod("_ProjectToEnumDictionary", BindingFlags.Static | BindingFlags.NonPublic);
+        static object _ProjectToEnumDictionary<TEnum, TValue>(IDictionary<object, object> real)
+            where TEnum : struct
+        {
+            var ret = new Dictionary<TEnum, TValue>();
+            foreach (var kv in real)
+            {
+                ret[(TEnum)kv.Key] = (TValue)kv.Value;
+            }
+
+            return ret;
+        }
+
+        static System.Collections.Hashtable EnumDictionaryCache = new System.Collections.Hashtable();
+        public static object ProjectEnumDictionary(IDictionary<object, object> inner, Type keyType, Type valType)
+        {
+            var cached = (Func<IDictionary<object, object>, object>)EnumDictionaryCache[valType];
+            if (cached == null)
+            {
+                var mtd = ProjectToEnumDictionary.MakeGenericMethod(keyType, valType);
+                var emit = Sigil.Emit<Func<IDictionary<object, object>, object>>.NewDynamicMethod();
+                emit.LoadArgument(0);
+                emit.Call(mtd);
+                emit.Return();
+
+                cached = emit.CreateDelegate();
+                lock (EnumDictionaryCache)
+                {
+                    EnumDictionaryCache[valType] = cached;
                 }
             }
 

@@ -223,15 +223,18 @@ namespace Jil.DeserializeDynamic
                         var keyType = args[0];
                         var valType = args[1];
 
-                        // only strings can object keys
-                        if (keyType != typeof(string))
+                        var stringKeys = keyType == typeof(string);
+                        var enumKeys = keyType.IsEnum;
+
+                        // only strings and enums can be keys
+                        if (!(stringKeys || enumKeys))
                         {
                             result = null;
                             return false;
                         }
 
-                        var coerced = new Dictionary<string, object>(ObjectMembers.Count);
-                        foreach(var kv in ObjectMembers)
+                        var coerced = new Dictionary<object, object>(ObjectMembers.Count);
+                        foreach (var kv in ObjectMembers)
                         {
                             object innerResult;
                             if (!kv.Value.InnerTryConvert(valType, out innerResult))
@@ -240,10 +243,27 @@ namespace Jil.DeserializeDynamic
                                 return false;
                             }
 
-                            coerced[kv.Key] = innerResult;
+                            if (stringKeys)
+                            {
+                                coerced[kv.Key] = innerResult;
+                            }
+                            else
+                            {
+                                object @enum = Enum.Parse(keyType, kv.Key, ignoreCase: true);
+                                coerced[@enum] = innerResult;
+                            }
                         }
 
-                        result = Utils.MakeDynamicDictionaryProxy(coerced, valType);
+                        if (stringKeys)
+                        {
+                            result = Utils.ProjectStringDictionary(coerced, valType);
+                        }
+                        else
+                        {
+                            // enum keys
+                            result = Utils.ProjectEnumDictionary(coerced, keyType, valType);
+                        }
+
                         return true;
                     }
                     break;

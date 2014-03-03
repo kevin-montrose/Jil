@@ -255,6 +255,13 @@ namespace JilTests
             }
         }
 
+        enum _DictionaryCoercion
+        {
+            a,
+            b,
+            c
+        }
+
         [TestMethod]
         public void DictionaryCoercion()
         {
@@ -269,6 +276,19 @@ namespace JilTests
                 Assert.AreEqual(456, asDict["b"]);
                 Assert.IsTrue(asDict.ContainsKey("c"));
                 Assert.AreEqual(789, asDict["c"]);
+            }
+
+            using (var str = new StringReader("{\"a\": 123, \"b\": 456, \"c\": 789}"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                IDictionary<_DictionaryCoercion, int> asDict = res;
+                Assert.AreEqual(3, asDict.Count());
+                Assert.IsTrue(asDict.ContainsKey(_DictionaryCoercion.a));
+                Assert.AreEqual(123, asDict[_DictionaryCoercion.a]);
+                Assert.IsTrue(asDict.ContainsKey(_DictionaryCoercion.b));
+                Assert.AreEqual(456, asDict[_DictionaryCoercion.b]);
+                Assert.IsTrue(asDict.ContainsKey(_DictionaryCoercion.c));
+                Assert.AreEqual(789, asDict[_DictionaryCoercion.c]);
             }
         }
     }
