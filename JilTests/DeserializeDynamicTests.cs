@@ -13,6 +13,32 @@ namespace JilTests
     public class DeserializeDynamicTests
     {
         [TestMethod]
+        public void Bool()
+        {
+            using (var str = new StringReader("true"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.IsTrue((bool)res);
+            }
+
+            using (var str = new StringReader("false"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.IsFalse((bool)res);
+            }
+        }
+
+        [TestMethod]
+        public void Null()
+        {
+            using (var str = new StringReader("null"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                Assert.IsNull(res);
+            }
+        }
+
+        [TestMethod]
         public void Number()
         {
             using (var str = new StringReader("1"))
@@ -98,6 +124,13 @@ namespace JilTests
             using (var str = new StringReader("{}"))
             {
                 var res = JSON.DeserializeDynamic(str);
+                Assert.IsNotNull(res);
+                var c = 0;
+                foreach (var x in res)
+                {
+                    c++;
+                }
+                Assert.AreEqual(0, c);
             }
         }
 

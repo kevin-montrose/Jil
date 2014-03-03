@@ -7,7 +7,7 @@ using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
-    partial class JsonObject
+    sealed partial class JsonObject
     {
         public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
         {
