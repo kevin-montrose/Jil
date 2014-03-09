@@ -585,7 +585,7 @@ namespace Jil
         }
 
         /// <summary>
-        /// Deserializes JSON from the given string, inferring types from the structure of the JSON string.
+        /// Deserializes JSON from the given TextReader, inferring types from the structure of the JSON text.
         /// 
         /// For the best performance, use the strongly typed Deserialize method when possible.
         /// </summary>
@@ -594,6 +594,19 @@ namespace Jil
             var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader);
 
             return built.BeingBuilt;
+        }
+
+        /// <summary>
+        /// Deserializes JSON from the given string, inferring types from the structure of the JSON text.
+        /// 
+        /// For the best performance, use the strongly typed Deserialize method when possible.
+        /// </summary>
+        public static dynamic DeserializeDynamic(string str)
+        {
+            using (var reader = new StringReader(str))
+            {
+                return DeserializeDynamic(reader);
+            }
         }
     }
 }

@@ -91,28 +91,28 @@ namespace JilTests
             {
                 var res = JSON.DeserializeDynamic(str);
                 var val = (double)res;
-                Assert.AreEqual(1.0, val);
+                Assert.AreEqual((1.0).ToString(), val.ToString());
             }
 
             using (var str = new StringReader("1.234"))
             {
                 var res = JSON.DeserializeDynamic(str);
                 var val = (double)res;
-                Assert.AreEqual(1.234, val);
+                Assert.AreEqual((1.234).ToString(), val.ToString());
             }
 
             using (var str = new StringReader("-10e4"))
             {
                 var res = JSON.DeserializeDynamic(str);
                 var val = (double)res;
-                Assert.AreEqual(-100000, val);
+                Assert.AreEqual((-100000).ToString(), val.ToString());
             }
 
             using (var str = new StringReader("-1.3e-4"))
             {
                 var res = JSON.DeserializeDynamic(str);
                 var val = (double)res;
-                Assert.AreEqual(-0.00013, val);
+                Assert.AreEqual((-0.00013).ToString(), val.ToString());
             }
         }
 

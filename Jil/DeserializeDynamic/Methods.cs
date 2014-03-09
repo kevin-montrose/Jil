@@ -356,5 +356,39 @@ namespace Jil.DeserializeDynamic
             commonSb.Clear();
             return result;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long ReadLong(char firstChar, TextReader reader, out byte length)
+        {
+            var negate = false;
+            long ret = 0;
+            if (firstChar == '-')
+            {
+                negate = true;
+                length = 0;
+            }
+            else
+            {
+                ret = (firstChar - '0');
+                length = 1;
+            }
+
+            int c;
+            while ((c = reader.Peek()) != -1)
+            {
+                c -= '0';
+                if (c < 0 || c > 9) break;
+
+                reader.Read();  // skip digit
+                length++;
+
+                ret *= 10;
+                ret += c;
+            }
+
+            if (negate) ret = -ret;
+
+            return ret;
+        }
     }
 }

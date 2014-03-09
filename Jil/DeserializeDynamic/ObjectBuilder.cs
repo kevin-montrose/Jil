@@ -133,5 +133,18 @@ namespace Jil.DeserializeDynamic
                 BeingBuilt.Put(num);
             }
         }
+
+        public void PutFastNumber(long numberPart1, long numberPart2, byte numberPart2Len, long numberPart3, long numberPart4, byte numberPart4Len)
+        {
+            var num = JsonObject.ForFastNumber(numberPart1, numberPart2, numberPart2Len, numberPart3, numberPart4, numberPart4Len);
+            if (BeingBuilt == null)
+            {
+                BeingBuilt = num;
+            }
+            else
+            {
+                BeingBuilt.Put(num);
+            }
+        }
     }
 }

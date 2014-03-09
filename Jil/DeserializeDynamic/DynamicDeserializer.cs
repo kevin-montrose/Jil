@@ -9,6 +9,8 @@ namespace Jil.DeserializeDynamic
 {
     class DynamicDeserializer
     {
+        internal static bool UseFastNumberParsing = true;
+
         public static ObjectBuilder Deserialize(TextReader reader)
         {
             var ret = new ObjectBuilder();
@@ -172,9 +174,68 @@ namespace Jil.DeserializeDynamic
 
         static void DeserializeNumber(char leadingChar, TextReader reader, ObjectBuilder builder)
         {
-            var number = Methods.ReadDouble(leadingChar, reader, ref builder.CommonStringBuffer);
+            if (!UseFastNumberParsing)
+            {
+                var number = Methods.ReadDouble(leadingChar, reader, ref builder.CommonStringBuffer);
 
-            builder.PutNumber(number);
+                builder.PutNumber(number);
+
+                return;
+            }
+
+            long beforeDot, afterDot, afterEbeforeDot, afterEafterDot;
+            byte afterDotLen, afterEafterDotLen;
+            byte ignored;
+
+            beforeDot = Methods.ReadLong(leadingChar, reader, out ignored);
+            var c = reader.Peek();
+            if (c == '.')
+            {
+                reader.Read();
+                c = reader.Read();
+                if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader);
+
+                afterDot = Methods.ReadLong((char)c, reader, out afterDotLen);
+
+                c = reader.Peek();
+            }
+            else
+            {
+                afterDot = afterDotLen = 0;
+            }
+
+            if (c == 'e' || c == 'E')
+            {
+                reader.Read();
+                c = reader.Read();
+                if (c == '+')
+                {
+                    reader.Read();
+                    c = reader.Read();
+                }
+                if (c != '-' && !(c >= '0' || c <= '9')) throw new DeserializationException("Expected -, +, or digit", reader);
+                afterEbeforeDot = Methods.ReadLong((char)c, reader, out ignored);
+
+                c = reader.Peek();
+                if (c == '.')
+                {
+                    reader.Read();
+                    c = reader.Read();
+                    if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader);
+
+                    afterEafterDot = Methods.ReadLong((char)c, reader, out afterEafterDotLen);
+                }
+                else
+                {
+                    afterEafterDot = afterEafterDotLen = 0;
+                }
+            }
+            else
+            {
+                afterEafterDot = afterEbeforeDot = afterEafterDotLen = 0;
+            }
+
+            builder.PutFastNumber(beforeDot, afterDot, afterDotLen, afterEbeforeDot, afterEafterDot, afterEafterDotLen);
         }
     }
 }

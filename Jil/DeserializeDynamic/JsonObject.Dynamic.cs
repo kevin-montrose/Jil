@@ -129,6 +129,85 @@ namespace Jil.DeserializeDynamic
                 case JsonObjectType.True:
                     result = true;
                     return returnType == typeof(bool);
+                case JsonObjectType.FastNumber:
+                    if (returnType == typeof(double))
+                    {
+                        double res;
+                        var ret = FastNumberToDouble(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(float))
+                    {
+                        float res;
+                        var ret = FastNumberToFloat(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(decimal))
+                    {
+                        decimal res;
+                        var ret = FastNumberToDecimal(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(byte))
+                    {
+                        byte res;
+                        var ret = FastNumberToByte(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(sbyte))
+                    {
+                        sbyte res;
+                        var ret = FastNumberToSByte(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(short))
+                    {
+                        short res;
+                        var ret = FastNumberToShort(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(ushort))
+                    {
+                        ushort res;
+                        var ret = FastNumberToUShort(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(int))
+                    {
+                        int res;
+                        var ret = FastNumberToInt(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(uint))
+                    {
+                        uint res;
+                        var ret = FastNumberToUInt(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(long))
+                    {
+                        long res;
+                        var ret = FastNumberToLong(out res);
+                        result = res;
+                        return ret;
+                    }
+                    if (returnType == typeof(ulong))
+                    {
+                        ulong res;
+                        var ret = FastNumberToULong(out res);
+                        result = res;
+                        return ret;
+                    }
+                    break;
                 case JsonObjectType.Number:
                     if (returnType == typeof(double))
                     {

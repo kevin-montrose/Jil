@@ -646,7 +646,7 @@ namespace Experiments
 
         static void Main(string[] args)
         {
-            if (args.Length == 1)
+            /*if (args.Length == 1)
             {
                 var defaultOut = Console.Out;
 
@@ -662,7 +662,33 @@ namespace Experiments
             Console.WriteLine();
             Console.WriteLine("**" + string.Join(", ", best) + "**");
 
-            Console.ReadKey();
+            Console.ReadKey();*/
+
+            for (var i = 0; i < 100000; i++)
+            {
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("1234"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("-1.234"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("\"hello world\""));
+                Console.WriteLine((string)Jil.JSON.DeserializeDynamic("null"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("true"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("false"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[]"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[1,2,3,4,5]"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[1.2, -3.4, 4.5]"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[\"hello\", \"world\", \"foo\", \"bar\"]"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[null, true, false]"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": 123, \"world\":456}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": -1.234, \"world\": 4.567}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": \"foo\", \"world\": \"bar\"}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": null, \"world\": null}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": true, \"world\": false}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": [], \"world\": [\"hello\", \"world\", \"foo\", \"bar\"]}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": [1,2,3,4,5], \"world\": [1.2, -3.4, 4.5]}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": [null, true, false], \"world\": {}}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": {\"hello\": 123, \"world\":456}, \"world\": {\"hello\": \"foo\", \"world\": \"bar\"}}"));
+                Console.WriteLine(Jil.JSON.DeserializeDynamic("[{\"hello\": 123, \"world\":456}, {\"hello\": -1.234, \"world\": 4.567}, {\"hello\": \"foo\", \"world\": \"bar\"}]"));
+            }
         }
     }
 }
