@@ -23,15 +23,6 @@ namespace Jil.DeserializeDynamic
             if (FastNumberPart3 != 0)
             {
                 double power = FastNumberPart3;
-                if (FastNumberPart4 != 0)
-                {
-                    double frac = (power == 0 ? 1 : Math.Sign(power)) * FastNumberPart4;
-                    var divideBy = Math.Pow(10, FastNumberPart4Length);
-                    frac /= divideBy;
-
-                    power += frac;
-                }
-
                 ret *= Math.Pow(10, power);
             }
 

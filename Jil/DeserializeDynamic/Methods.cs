@@ -358,20 +358,41 @@ namespace Jil.DeserializeDynamic
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long ReadLong(char firstChar, TextReader reader, out byte length)
+        public static long ReadLong(char firstChar, TextReader reader)
         {
             var negate = false;
             long ret = 0;
             if (firstChar == '-')
             {
                 negate = true;
-                length = 0;
             }
             else
             {
                 ret = (firstChar - '0');
-                length = 1;
             }
+
+            int c;
+            while ((c = reader.Peek()) != -1)
+            {
+                c -= '0';
+                if (c < 0 || c > 9) break;
+
+                reader.Read();  // skip digit
+
+                ret *= 10;
+                ret += c;
+            }
+
+            if (negate) ret = -ret;
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint ReadUInt(char firstChar, TextReader reader, out byte length)
+        {
+            length = 1;
+            uint ret = (uint)(firstChar - '0');
 
             int c;
             while ((c = reader.Peek()) != -1)
@@ -383,10 +404,8 @@ namespace Jil.DeserializeDynamic
                 length++;
 
                 ret *= 10;
-                ret += c;
+                ret += (uint)c;
             }
-
-            if (negate) ret = -ret;
 
             return ret;
         }

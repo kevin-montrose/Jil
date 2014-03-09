@@ -183,11 +183,11 @@ namespace Jil.DeserializeDynamic
                 return;
             }
 
-            long beforeDot, afterDot, afterEbeforeDot, afterEafterDot;
-            byte afterDotLen, afterEafterDotLen;
-            byte ignored;
+            long beforeDot, afterE;
+            uint afterDot;
+            byte afterDotLen;
 
-            beforeDot = Methods.ReadLong(leadingChar, reader, out ignored);
+            beforeDot = Methods.ReadLong(leadingChar, reader);
             var c = reader.Peek();
             if (c == '.')
             {
@@ -195,7 +195,7 @@ namespace Jil.DeserializeDynamic
                 c = reader.Read();
                 if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader);
 
-                afterDot = Methods.ReadLong((char)c, reader, out afterDotLen);
+                afterDot = Methods.ReadUInt((char)c, reader, out afterDotLen);
 
                 c = reader.Peek();
             }
@@ -210,32 +210,17 @@ namespace Jil.DeserializeDynamic
                 c = reader.Read();
                 if (c == '+')
                 {
-                    reader.Read();
                     c = reader.Read();
                 }
                 if (c != '-' && !(c >= '0' || c <= '9')) throw new DeserializationException("Expected -, +, or digit", reader);
-                afterEbeforeDot = Methods.ReadLong((char)c, reader, out ignored);
-
-                c = reader.Peek();
-                if (c == '.')
-                {
-                    reader.Read();
-                    c = reader.Read();
-                    if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader);
-
-                    afterEafterDot = Methods.ReadLong((char)c, reader, out afterEafterDotLen);
-                }
-                else
-                {
-                    afterEafterDot = afterEafterDotLen = 0;
-                }
+                afterE = Methods.ReadLong((char)c, reader);
             }
             else
             {
-                afterEafterDot = afterEbeforeDot = afterEafterDotLen = 0;
+                afterE = 0;
             }
 
-            builder.PutFastNumber(beforeDot, afterDot, afterDotLen, afterEbeforeDot, afterEafterDot, afterEafterDotLen);
+            builder.PutFastNumber(beforeDot, afterDot, afterDotLen, afterE);
         }
     }
 }

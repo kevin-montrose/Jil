@@ -1,6 +1,7 @@
 ﻿using Jil;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -290,6 +291,207 @@ namespace JilTests
                 Assert.IsTrue(asDict.ContainsKey(_DictionaryCoercion.c));
                 Assert.AreEqual(789, asDict[_DictionaryCoercion.c]);
             }
+        }
+
+        [TestMethod]
+        public void TrickyFloats()
+        {
+            {
+                uint i = 1276679976;
+                var f = ULongToFloat(i, new byte[4]);
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R"), Format = "R", I = i });
+            }
+
+            {
+                uint i = 1343554351;
+                var f = ULongToFloat(i, new byte[4]);
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R"), Format = "R", I = i });
+            }
+        }
+
+        struct _AllFloatsStruct
+        {
+            public float Float;
+            public string AsString;
+            public string Format;
+            public uint I;
+        }
+
+        static float ULongToFloat(ulong i, byte[] byteArr)
+        {
+            var asInt = (uint)i;
+            byteArr[0] = (byte)((asInt) & 0xFF);
+            byteArr[1] = (byte)((asInt >> 8) & 0xFF);
+            byteArr[2] = (byte)((asInt >> 16) & 0xFF);
+            byteArr[3] = (byte)((asInt >> 24) & 0xFF);
+            var f = BitConverter.ToSingle(byteArr, 0);
+
+            return f;
+        }
+
+        static readonly string[] _AllFloatsFormats = new[] { "F", "G", "R" };
+        static IEnumerable<_AllFloatsStruct> _AllFloats()
+        {
+            var byteArr = new byte[4];
+
+            for (ulong i = 0; i <= uint.MaxValue; i++)
+            {
+                var f = ULongToFloat(i, byteArr);
+
+                if (float.IsNaN(f) || float.IsInfinity(f)) continue;
+
+                for (var j = 0; j < _AllFloatsFormats.Length; j++)
+                {
+                    var format = _AllFloatsFormats[j];
+                    var asStr = f.ToString(format);
+
+                    yield return new _AllFloatsStruct { AsString = asStr, Float = f, Format = format, I = (uint)i };
+                }
+            }
+        }
+
+        class _AllFloatsPartitioner : Partitioner<_AllFloatsStruct>
+        {
+            IEnumerable<_AllFloatsStruct> Underlying;
+
+            public _AllFloatsPartitioner(IEnumerable<_AllFloatsStruct> underlying)
+                : base()
+            {
+                Underlying = underlying;
+            }
+
+            public override bool SupportsDynamicPartitions
+            {
+                get
+                {
+                    return true;
+                }
+            }
+
+            public override IEnumerable<_AllFloatsStruct> GetDynamicPartitions()
+            {
+                return new DynamicPartition(Underlying);
+            }
+
+            public override IList<IEnumerator<_AllFloatsStruct>> GetPartitions(int partitionCount)
+            {
+                throw new NotImplementedException();
+            }
+
+            class DynamicPartition : IEnumerable<_AllFloatsStruct>
+            {
+                internal IEnumerator<_AllFloatsStruct> All;
+
+                public DynamicPartition(IEnumerable<_AllFloatsStruct> all)
+                {
+                    All = all.GetEnumerator();
+                }
+
+                public IEnumerator<_AllFloatsStruct> GetEnumerator()
+                {
+                    return new DynamicEnumerator(this);
+                }
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+                {
+                    return this.GetEnumerator();
+                }
+
+                class DynamicEnumerator : IEnumerator<_AllFloatsStruct>
+                {
+                    const int Capacity = 100;
+                    DynamicPartition Outer;
+                    Queue<_AllFloatsStruct> Pending;
+
+                    public DynamicEnumerator(DynamicPartition outer)
+                    {
+                        Outer = outer;
+                        Pending = new Queue<_AllFloatsStruct>(Capacity);
+                    }
+
+                    public _AllFloatsStruct Current
+                    {
+                        get;
+                        private set;
+                    }
+
+                    public void Dispose()
+                    {
+                        // Don't care
+                    }
+
+                    object System.Collections.IEnumerator.Current
+                    {
+                        get { return this.Current; }
+                    }
+
+                    public bool MoveNext()
+                    {
+                        if (Pending.Count == 0)
+                        {
+                            lock (Outer.All)
+                            {
+                                while (Outer.All.MoveNext() && Pending.Count < Capacity)
+                                {
+                                    Pending.Enqueue(Outer.All.Current);
+                                }
+                            }
+                        }
+
+                        if (Pending.Count == 0) return false;
+
+                        Current = Pending.Dequeue();
+                        return true;
+                    }
+
+                    public void Reset()
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+        }
+
+        static void CheckFloat(_AllFloatsStruct part)
+        {
+            var i = part.I;
+            var format = part.Format;
+            var asStr = part.AsString;
+            var dyn = JSON.DeserializeDynamic(asStr);
+            var res = (float)dyn;
+            var reStr = res.ToString(format);
+
+            var delta = Math.Abs((float.Parse(asStr) - float.Parse(reStr)));
+
+            var closeEnough = part.Float.ToString() == res.ToString() || asStr == reStr || delta <= float.Epsilon;
+
+            Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
+        }
+
+        //[TestMethod]
+        public void AllFloats()
+        {
+            var e = _AllFloats();
+            var partitioner = new _AllFloatsPartitioner(e);
+
+            var options = new ParallelOptions();
+            options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
+
+            Parallel.ForEach(
+                partitioner,
+                options,
+                part =>
+                {
+                    try
+                    {
+                        CheckFloat(part);
+                    }
+                    catch (Exception x)
+                    {
+                        throw new Exception(part.AsString, x);
+                    }
+                }
+            );
         }
     }
 }

@@ -32,11 +32,9 @@ namespace Jil.DeserializeDynamic
         Dictionary<string, JsonObject> ObjectMembers;
 
         long FastNumberPart1;
-        long FastNumberPart2;
+        uint FastNumberPart2;
         byte FastNumberPart2Length;
         long FastNumberPart3;
-        long FastNumberPart4;
-        byte FastNumberPart4Length;
 
         JsonObject MemberPart1;
         JsonObject MemberPart2;
@@ -51,9 +49,9 @@ namespace Jil.DeserializeDynamic
             return new JsonObject { Type = JsonObjectType.Number, NumberValue = num };
         }
 
-        internal static JsonObject ForFastNumber(long a, long b, byte bLen, long c, long d, byte dLen)
+        internal static JsonObject ForFastNumber(long a, uint b, byte bLen, long c)
         {
-            return new JsonObject { Type = JsonObjectType.FastNumber, FastNumberPart1 = a, FastNumberPart2 = b, FastNumberPart2Length = bLen, FastNumberPart3 = c, FastNumberPart4 = d, FastNumberPart4Length = dLen };
+            return new JsonObject { Type = JsonObjectType.FastNumber, FastNumberPart1 = a, FastNumberPart2 = b, FastNumberPart2Length = bLen, FastNumberPart3 = c };
         }
 
         internal static JsonObject NewArray(JsonObject parent)
