@@ -1036,6 +1036,49 @@ namespace JilTests
 
             Assert.IsTrue(hashTime < dictionaryTime, "hashTime = " + hashTime + ", dictionaryTime = " + dictionaryTime);
         }
+
+        [TestMethod]
+        public void DynamicDeserializer_UseFastNumberParsing()
+        {
+            Func<TextReader, double> fast =
+                txt =>
+                {
+                    Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = true;
+
+                    var ret = Jil.JSON.DeserializeDynamic(txt);;
+
+                    return (double)ret;
+                };
+            Func<TextReader, double> normal =
+                txt =>
+                {
+                    Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = false;
+
+                    var ret = Jil.JSON.DeserializeDynamic(txt); ;
+
+                    return (double)ret;
+                };
+
+            var rand = new Random(67982477);
+
+            var toSerialize = new List<double>();
+            for (var i = 0; i < 3000; i++)
+            {
+                var val = rand.NextDouble();
+                val *= rand.Next();
+
+                if (rand.Next(2) == 0) val = -val;
+
+                toSerialize.Add(val);
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }
