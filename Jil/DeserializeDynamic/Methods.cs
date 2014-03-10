@@ -358,23 +358,41 @@ namespace Jil.DeserializeDynamic
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ReadULong(char firstChar, TextReader reader)
+        public static ulong ReadULong(char firstChar, TextReader reader, out byte overflowByPowersOfTen)
         {
-            ulong ret = (ulong)(firstChar - '0');
+            // ulong.MaxValue
+            // ==============
+            // 18446744073709551615
+            // 123456789ABCDEFGHIJK
+            //
+            // Length: 20 
 
+            overflowByPowersOfTen = 0;
+            ulong ret;
             int c;
-            while ((c = reader.Peek()) != -1)
+
+            // char1
+            ret = (ulong)(firstChar - '0');
+
+            for (var i = 2; i < 20; i++)
             {
-                c -= '0';
-                if (c < 0 || c > 9) break;
-
-                reader.Read();  // skip digit
-
+                c = reader.Peek();
+                if (c < '0' || c > '9') return ret;
+                reader.Read();
                 ret *= 10;
-                ret += (uint)c;
+                ret += (uint)(c - '0');
             }
 
-            return ret;
+            // now every character is just an extra order of magnitude for the exponent
+            for(var i = 0; i < byte.MaxValue; i++)
+            {
+                c = reader.Peek();
+                if (c < '0' || c > '9') return ret;
+                reader.Read();
+                overflowByPowersOfTen++;
+            }
+
+            throw new DeserializationException("Number too large to be parsed encountered", reader);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

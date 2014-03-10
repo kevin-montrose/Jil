@@ -188,6 +188,7 @@ namespace Jil.DeserializeDynamic
             long afterE;
             uint afterDot;
             byte afterDotLen;
+            byte extraOrdersOfMagnitude;
 
             if (leadingChar == '-')
             {
@@ -202,7 +203,7 @@ namespace Jil.DeserializeDynamic
                 negative = false;
             }
 
-            beforeDot = Methods.ReadULong(leadingChar, reader);
+            beforeDot = Methods.ReadULong(leadingChar, reader, out extraOrdersOfMagnitude);
             var c = reader.Peek();
             if (c == '.')
             {
@@ -233,6 +234,21 @@ namespace Jil.DeserializeDynamic
             else
             {
                 afterE = 0;
+            }
+
+            if (extraOrdersOfMagnitude != 0)
+            {
+                try
+                {
+                    checked
+                    {
+                        afterE += extraOrdersOfMagnitude;
+                    }
+                }
+                catch (OverflowException)
+                {
+                    throw new DeserializationException("Number too large to be parsed encountered", reader);
+                }
             }
 
             builder.PutFastNumber(negative, beforeDot, afterDot, afterDotLen, afterE);

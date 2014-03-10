@@ -313,6 +313,12 @@ namespace JilTests
                 var f = ULongToFloat(i, new byte[4]);
                 CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F"), Format = "F", I = i });
             }
+
+            {
+                uint i = 1602224307;
+                var f = ULongToFloat(i, new byte[4]);
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F"), Format = "F", I = i });
+            }
         }
 
         struct _AllFloatsStruct
@@ -474,7 +480,7 @@ namespace JilTests
             Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void AllFloats()
         {
             var e = _AllFloats();
