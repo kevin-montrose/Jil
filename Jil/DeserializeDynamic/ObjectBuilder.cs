@@ -134,9 +134,9 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        public void PutFastNumber(long beforeDot, uint afterDot, byte afterDotLength, long afterE)
+        public void PutFastNumber(bool negative, ulong beforeDot, uint afterDot, byte afterDotLength, long afterE)
         {
-            var num = JsonObject.ForFastNumber(beforeDot, afterDot, afterDotLength, afterE);
+            var num = JsonObject.ForFastNumber(negative, beforeDot, afterDot, afterDotLength, afterE);
             if (BeingBuilt == null)
             {
                 BeingBuilt = num;

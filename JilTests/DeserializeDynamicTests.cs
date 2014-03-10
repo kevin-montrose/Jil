@@ -307,6 +307,12 @@ namespace JilTests
                 var f = ULongToFloat(i, new byte[4]);
                 CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R"), Format = "R", I = i });
             }
+
+            {
+                uint i = 1593835550;
+                var f = ULongToFloat(i, new byte[4]);
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F"), Format = "F", I = i });
+            }
         }
 
         struct _AllFloatsStruct

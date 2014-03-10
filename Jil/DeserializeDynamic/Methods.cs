@@ -358,6 +358,26 @@ namespace Jil.DeserializeDynamic
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ReadULong(char firstChar, TextReader reader)
+        {
+            ulong ret = (ulong)(firstChar - '0');
+
+            int c;
+            while ((c = reader.Peek()) != -1)
+            {
+                c -= '0';
+                if (c < 0 || c > 9) break;
+
+                reader.Read();  // skip digit
+
+                ret *= 10;
+                ret += (uint)c;
+            }
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ReadLong(char firstChar, TextReader reader)
         {
             var negate = false;

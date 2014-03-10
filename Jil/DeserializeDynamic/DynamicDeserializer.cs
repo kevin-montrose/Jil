@@ -183,11 +183,26 @@ namespace Jil.DeserializeDynamic
                 return;
             }
 
-            long beforeDot, afterE;
+            bool negative;
+            ulong beforeDot;
+            long afterE;
             uint afterDot;
             byte afterDotLen;
 
-            beforeDot = Methods.ReadLong(leadingChar, reader);
+            if (leadingChar == '-')
+            {
+                var next = reader.Read();
+                if (next != '-' && !(next >= '0' && next <= '9')) throw new DeserializationException("Expected -, or digit", reader);
+
+                leadingChar = (char)next;
+                negative = true;
+            }
+            else
+            {
+                negative = false;
+            }
+
+            beforeDot = Methods.ReadULong(leadingChar, reader);
             var c = reader.Peek();
             if (c == '.')
             {
@@ -220,7 +235,7 @@ namespace Jil.DeserializeDynamic
                 afterE = 0;
             }
 
-            builder.PutFastNumber(beforeDot, afterDot, afterDotLen, afterE);
+            builder.PutFastNumber(negative, beforeDot, afterDot, afterDotLen, afterE);
         }
     }
 }

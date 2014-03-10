@@ -13,7 +13,7 @@ namespace Jil.DeserializeDynamic
             double ret = FastNumberPart1;
             if (FastNumberPart2 != 0)
             {
-                double frac = (ret == 0 ? 1 : Math.Sign(ret)) * FastNumberPart2;
+                double frac = FastNumberPart2;
                 var divideBy = Math.Pow(10, FastNumberPart2Length);
                 frac /= divideBy;
 
@@ -26,7 +26,14 @@ namespace Jil.DeserializeDynamic
                 ret *= Math.Pow(10, power);
             }
 
-            result = ret;
+            if (FastNumberNegative)
+            {
+                result = -ret;
+            }
+            else
+            {
+                result = ret;
+            }
             return true;
         }
 
