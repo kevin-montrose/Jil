@@ -53,6 +53,11 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
+        bool FastNumberIsInteger()
+        {
+            return FastNumberPart2Length == 0 && FastNumberPart3 == 0;
+        }
+
         bool FastNumberToByte(out byte result)
         {
             double res;
@@ -131,6 +136,37 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToInt(out int result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                const ulong MaxNegativeMagnitude = (ulong)(-(long)int.MinValue);
+
+                if (!FastNumberIsInteger())
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (!FastNumberNegative && FastNumberPart1 > int.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberNegative && FastNumberPart1 > MaxNegativeMagnitude)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (int)FastNumberPart1;
+                if (FastNumberNegative)
+                {
+                    result = -result;
+                }
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {

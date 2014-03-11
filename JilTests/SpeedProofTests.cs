@@ -1040,44 +1040,99 @@ namespace JilTests
         [TestMethod]
         public void DynamicDeserializer_UseFastNumberParsing()
         {
-            Func<TextReader, double> fast =
-                txt =>
-                {
-                    Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = true;
-
-                    var ret = Jil.JSON.DeserializeDynamic(txt);;
-
-                    return (double)ret;
-                };
-            Func<TextReader, double> normal =
-                txt =>
-                {
-                    Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = false;
-
-                    var ret = Jil.JSON.DeserializeDynamic(txt); ;
-
-                    return (double)ret;
-                };
-
-            var rand = new Random(67982477);
-
-            var toSerialize = new List<double>();
-            for (var i = 0; i < 3000; i++)
+            try
             {
-                var val = rand.NextDouble();
-                val *= rand.Next();
+                Func<TextReader, double> fast =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = true;
 
-                if (rand.Next(2) == 0) val = -val;
+                        var ret = Jil.JSON.DeserializeDynamic(txt); ;
 
-                toSerialize.Add(val);
+                        return (double)ret;
+                    };
+                Func<TextReader, double> normal =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = false;
+
+                        var ret = Jil.JSON.DeserializeDynamic(txt); ;
+
+                        return (double)ret;
+                    };
+
+                var rand = new Random(201523240);
+
+                var toSerialize = new List<double>();
+                for (var i = 0; i < 3000; i++)
+                {
+                    var val = rand.NextDouble();
+                    val *= rand.Next();
+
+                    if (rand.Next(2) == 0) val = -val;
+
+                    toSerialize.Add(val);
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
             }
+            finally
+            {
+                Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = true;
+            }
+        }
 
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+        [TestMethod]
+        public void DynamicDeserializer_UseFastIntegerConversion()
+        {
+            try
+            {
+                Func<TextReader, int> fast =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = true;
 
-            double fastTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+                        var ret = Jil.JSON.DeserializeDynamic(txt);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+                        return (int)ret;
+                    };
+                Func<TextReader, int> normal =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = false;
+
+                        var ret = Jil.JSON.DeserializeDynamic(txt); ;
+
+                        return (int)ret;
+                    };
+
+                var rand = new Random(211641195);
+
+                var toSerialize = new List<int>();
+                for (var i = 0; i < 10000; i++)
+                {
+                    var val = rand.Next();
+                    if (rand.Next(2) == 0) val = -val;
+
+                    toSerialize.Add(val);
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            }
+            finally
+            {
+                Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = true;
+            }
         }
 #endif
     }

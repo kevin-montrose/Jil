@@ -357,6 +357,28 @@ namespace JilTests
             Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
         }
 
+        //[TestMethod]
+        public void AllInts()
+        {
+            for (long i = int.MinValue; i <= int.MaxValue; i++)
+            {
+                try
+                {
+                    var asInt = (int)i;
+                    using (var str = new StringReader(asInt.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (int)dyn;
+                        Assert.AreEqual(asInt, v, "Failed on i=" + asInt);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (int)i, e);
+                }
+            }
+        }
+
         //static readonly string[] _AllFloatsFormats = new[] { "F", "G", "R" };
         //static IEnumerable<_AllFloatsStruct> _AllFloats()
         //{

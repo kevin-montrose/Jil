@@ -10,6 +10,7 @@ namespace Jil.DeserializeDynamic
     class DynamicDeserializer
     {
         internal static bool UseFastNumberParsing = true;
+        internal static bool UseFastIntegerConversion = true;
 
         public static ObjectBuilder Deserialize(TextReader reader)
         {
