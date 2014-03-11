@@ -357,6 +357,46 @@ namespace JilTests
             Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
         }
 
+        [TestMethod]
+        public void SignedSmallNumberTests()
+        {
+            for (long i = sbyte.MinValue; i <= sbyte.MaxValue; i++)
+            {
+                try
+                {
+                    var asNum = (sbyte)i;
+                    using (var str = new StringReader(asNum.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (sbyte)dyn;
+                        Assert.AreEqual(asNum, v, "Failed on i=" + asNum);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (sbyte)i, e);
+                }
+            }
+
+            for (long i = short.MinValue; i <= short.MaxValue; i++)
+            {
+                try
+                {
+                    var asNum = (short)i;
+                    using (var str = new StringReader(asNum.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (short)dyn;
+                        Assert.AreEqual(asNum, v, "Failed on i=" + asNum);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (short)i, e);
+                }
+            }
+        }
+
         //[TestMethod]
         //public void AllInts()
         //{

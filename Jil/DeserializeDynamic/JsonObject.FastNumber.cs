@@ -79,6 +79,37 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToSByte(out sbyte result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                const ulong MaxNegativeMagnitude = (ulong)(-(long)sbyte.MinValue);
+
+                if (!FastNumberIsInteger())
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (!FastNumberNegative && FastNumberPart1 > (int)sbyte.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberNegative && FastNumberPart1 > MaxNegativeMagnitude)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (sbyte)FastNumberPart1;
+                if (FastNumberNegative)
+                {
+                    result = (sbyte)-result;
+                }
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
@@ -98,6 +129,37 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToShort(out short result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                const ulong MaxNegativeMagnitude = (ulong)(-(long)short.MinValue);
+
+                if (!FastNumberIsInteger())
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (!FastNumberNegative && FastNumberPart1 > (int)short.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberNegative && FastNumberPart1 > MaxNegativeMagnitude)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (short)FastNumberPart1;
+                if (FastNumberNegative)
+                {
+                    result = (short)-result;
+                }
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
