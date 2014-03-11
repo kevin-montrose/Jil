@@ -397,6 +397,46 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void UnsignedSmallNumberTests()
+        {
+            for (long i = byte.MinValue; i <= byte.MaxValue; i++)
+            {
+                try
+                {
+                    var asNum = (byte)i;
+                    using (var str = new StringReader(asNum.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (byte)dyn;
+                        Assert.AreEqual(asNum, v, "Failed on i=" + asNum);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (byte)i, e);
+                }
+            }
+
+            for (long i = ushort.MinValue; i <= ushort.MaxValue; i++)
+            {
+                try
+                {
+                    var asNum = (ushort)i;
+                    using (var str = new StringReader(asNum.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (ushort)dyn;
+                        Assert.AreEqual(asNum, v, "Failed on i=" + asNum);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (ushort)i, e);
+                }
+            }
+        }
+
         //[TestMethod]
         //public void AllInts()
         //{

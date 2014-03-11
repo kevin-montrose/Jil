@@ -60,6 +60,25 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToByte(out byte result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                if (!FastNumberIsInteger() || FastNumberNegative)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberPart1 > (int)byte.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (byte)FastNumberPart1;
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
@@ -179,6 +198,25 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToUShort(out ushort result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                if (!FastNumberIsInteger() || FastNumberNegative)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberPart1 > (int)ushort.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (ushort)FastNumberPart1;
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
