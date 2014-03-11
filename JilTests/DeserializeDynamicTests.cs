@@ -357,7 +357,7 @@ namespace JilTests
             Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
         }
 
-        //[TestMethod]
+        [TestMethod]
         public void AllInts()
         {
             for (long i = int.MinValue; i <= int.MaxValue; i++)
