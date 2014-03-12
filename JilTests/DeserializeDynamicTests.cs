@@ -437,6 +437,28 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void AllUInts()
+        {
+            for (long i = uint.MinValue; i <= uint.MaxValue; i++)
+            {
+                try
+                {
+                    var asUInt = (uint)i;
+                    using (var str = new StringReader(asUInt.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var v = (uint)dyn;
+                        Assert.AreEqual(asUInt, v, "Failed on i=" + asUInt);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed on i = " + (uint)i, e);
+                }
+            }
+        }
+
         //[TestMethod]
         //public void AllInts()
         //{

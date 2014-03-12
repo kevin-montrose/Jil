@@ -286,6 +286,25 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToUInt(out uint result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                if (!FastNumberIsInteger() || FastNumberNegative)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberPart1 > uint.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (uint)FastNumberPart1;
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
