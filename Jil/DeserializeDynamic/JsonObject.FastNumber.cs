@@ -374,6 +374,19 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToULong(out ulong result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                if (!FastNumberIsInteger() || FastNumberNegative)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = FastNumberPart1;
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {

@@ -438,24 +438,24 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void LongSampling()
+        public void ULongSampling()
         {
-            Action<long> test =
+            Action<ulong> test =
                 l =>
                 {
                     using (var str = new StringReader(l.ToString()))
                     {
                         var dyn = JSON.DeserializeDynamic(str);
-                        var res = (long)dyn;
+                        var res = (ulong)dyn;
                         Assert.AreEqual(l, res);
                     }
                 };
 
-            test(long.MaxValue);
-            test(long.MinValue);
+            test(ulong.MaxValue);
+            test(ulong.MinValue);
 
-            const long step = 8589934596;
-            var i = long.MinValue;
+            const ulong step = 8589934596;
+            var i = ulong.MinValue;
 
             while (true)
             {
@@ -471,9 +471,47 @@ namespace JilTests
                 }
                 catch { break; }
 
-                if (i == long.MaxValue) break;
+                if (i == ulong.MaxValue) break;
             }
         }
+
+        //[TestMethod]
+        //public void LongSampling()
+        //{
+        //    Action<long> test =
+        //        l =>
+        //        {
+        //            using (var str = new StringReader(l.ToString()))
+        //            {
+        //                var dyn = JSON.DeserializeDynamic(str);
+        //                var res = (long)dyn;
+        //                Assert.AreEqual(l, res);
+        //            }
+        //        };
+
+        //    test(long.MaxValue);
+        //    test(long.MinValue);
+
+        //    const long step = 8589934596;
+        //    var i = long.MinValue;
+
+        //    while (true)
+        //    {
+        //        test(i);
+        //        test(i + 1);
+
+        //        try
+        //        {
+        //            checked
+        //            {
+        //                i += step;
+        //            }
+        //        }
+        //        catch { break; }
+
+        //        if (i == long.MaxValue) break;
+        //    }
+        //}
 
         //[TestMethod]
         //public void AllUInts()
