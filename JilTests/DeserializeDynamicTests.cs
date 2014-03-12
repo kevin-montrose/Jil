@@ -437,6 +437,44 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void LongSampling()
+        {
+            Action<long> test =
+                l =>
+                {
+                    using (var str = new StringReader(l.ToString()))
+                    {
+                        var dyn = JSON.DeserializeDynamic(str);
+                        var res = (long)dyn;
+                        Assert.AreEqual(l, res);
+                    }
+                };
+
+            test(long.MaxValue);
+            test(long.MinValue);
+
+            const long step = 8589934596;
+            var i = long.MinValue;
+
+            while (true)
+            {
+                test(i);
+                test(i + 1);
+
+                try
+                {
+                    checked
+                    {
+                        i += step;
+                    }
+                }
+                catch { break; }
+
+                if (i == long.MaxValue) break;
+            }
+        }
+
         //[TestMethod]
         //public void AllUInts()
         //{

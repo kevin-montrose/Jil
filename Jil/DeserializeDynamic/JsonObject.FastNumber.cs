@@ -324,6 +324,37 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberToLong(out long result)
         {
+            if (DynamicDeserializer.UseFastIntegerConversion)
+            {
+                const ulong MaxNegativeMagnitude = unchecked((ulong)(-long.MinValue));
+
+                if (!FastNumberIsInteger())
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (!FastNumberNegative && FastNumberPart1 > long.MaxValue)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                if (FastNumberNegative && FastNumberPart1 > MaxNegativeMagnitude)
+                {
+                    result = 0;
+                    return false;
+                }
+
+                result = (long)FastNumberPart1;
+                if (FastNumberNegative)
+                {
+                    result = -result;
+                }
+
+                return true;
+            }
+
             double res;
             if (!FastNumberToDouble(out res))
             {
