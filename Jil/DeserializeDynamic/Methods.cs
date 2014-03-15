@@ -383,6 +383,15 @@ namespace Jil.DeserializeDynamic
                 ret += (uint)(c - '0');
             }
 
+            // Tricky, if the next character is <= 5 we *can* represent it as a ulong; otherwise jump to magnitude counting
+            c = reader.Peek();
+            if (c >= '0' && c <= '5')
+            {
+                reader.Read();
+                ret *= 10;
+                ret += (uint)(c - '0');
+            }
+
             // now every character is just an extra order of magnitude for the exponent
             for(var i = 0; i < byte.MaxValue; i++)
             {
