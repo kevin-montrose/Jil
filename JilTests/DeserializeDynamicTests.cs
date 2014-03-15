@@ -441,13 +441,20 @@ namespace JilTests
         public void ULongSampling()
         {
             Action<ulong> test =
-                l =>
+                ul =>
                 {
-                    using (var str = new StringReader(l.ToString()))
+                    using (var str = new StringReader(ul.ToString()))
                     {
-                        var dyn = JSON.DeserializeDynamic(str);
-                        var res = (ulong)dyn;
-                        Assert.AreEqual(l, res);
+                        try
+                        {
+                            var dyn = JSON.DeserializeDynamic(str);
+                            var res = (ulong)dyn;
+                            Assert.AreEqual(ul, res);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new Exception("Failed on i = " + ul, e);
+                        }
                     }
                 };
 
