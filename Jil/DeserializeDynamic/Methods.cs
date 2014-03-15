@@ -383,13 +383,28 @@ namespace Jil.DeserializeDynamic
                 ret += (uint)(c - '0');
             }
 
-            // Tricky, if the next character is <= 5 we *can* represent it as a ulong; otherwise jump to magnitude counting
+            // still more number to go?
             c = reader.Peek();
-            if (c >= '0' && c <= '5')
+            if (c < '0' || c > '9') return ret;
+
+            // now we need to see if we can pack this very last digit into the ulong
+            //  this check is only necessary *now* because, due to base 10, you can't 
+            //  overflow a ulong until the 20th digit
+            var retCanBeMultiplied = (ulong.MaxValue / ret) >= 10;
+            if(retCanBeMultiplied)
             {
-                reader.Read();
-                ret *= 10;
-                ret += (uint)(c - '0');
+                // remaining space will only be < 9 when we're really close
+                //   to ulong.MaxValue (ie. we've read 1844674407370955161 
+                //   and are now on the last digit, which could be [0, 5])
+                var remainingSpace = (ulong.MaxValue - (ret * 10UL));
+                var asAdd = (uint)(c - '0');
+                if (asAdd <= remainingSpace)
+                {
+                    // we fit the criteria, advance!
+                    reader.Read();
+                    ret *= 10;
+                    ret += asAdd;
+                }
             }
 
             // now every character is just an extra order of magnitude for the exponent

@@ -294,8 +294,15 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void TrickyFloats()
+        public void TrickyNumbers()
         {
+            {
+                ulong ul = 10000000002342929928UL;
+                var dyn = JSON.DeserializeDynamic(ul.ToString());
+                var asULong = (ulong)dyn;
+                Assert.AreEqual(ul, asULong);
+            }
+
             {
                 uint i = 1276679976;
                 var f = ULongToFloat(i, new byte[4]);
