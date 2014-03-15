@@ -38,6 +38,16 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_ExhaustiveTest|AnyCPU'">
+    <OutputPath>bin\Release_ExhaustiveTest\</OutputPath>
+    <DefineConstants>TRACE;EXHAUSTIVE_TEST</DefineConstants>
+    <Optimize>true</Optimize>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -89,6 +99,7 @@
   <ItemGroup>
     <Compile Include="DeserializeDynamicTests.cs" />
     <Compile Include="DeserializeTests.cs" />
+    <Compile Include="ExhaustiveTests.cs" />
     <Compile Include="SerializeTests.cs" />
     <Compile Include="SpeedProofTests.cs" />
     <Compile Include="UtilsTests.cs" />

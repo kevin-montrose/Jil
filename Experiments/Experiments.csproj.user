@@ -4,4 +4,8 @@
     <StartWorkingDirectory>C:\Users\Montrose\Dropbox\Jil\</StartWorkingDirectory>
     <StartArguments>Experiments-out.txt</StartArguments>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_ExhaustiveTest|AnyCPU'">
+    <StartWorkingDirectory>C:\Users\Montrose\Dropbox\Jil\</StartWorkingDirectory>
+    <StartArguments>Experiments-out.txt</StartArguments>
+  </PropertyGroup>
 </Project>

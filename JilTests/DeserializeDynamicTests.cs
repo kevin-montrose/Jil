@@ -328,42 +328,6 @@ namespace JilTests
             }
         }
 
-        struct _AllFloatsStruct
-        {
-            public float Float;
-            public string AsString;
-            public string Format;
-            public uint I;
-        }
-
-        static float ULongToFloat(ulong i, byte[] byteArr)
-        {
-            var asInt = (uint)i;
-            byteArr[0] = (byte)((asInt) & 0xFF);
-            byteArr[1] = (byte)((asInt >> 8) & 0xFF);
-            byteArr[2] = (byte)((asInt >> 16) & 0xFF);
-            byteArr[3] = (byte)((asInt >> 24) & 0xFF);
-            var f = BitConverter.ToSingle(byteArr, 0);
-
-            return f;
-        }
-
-        static void CheckFloat(_AllFloatsStruct part)
-        {
-            var i = part.I;
-            var format = part.Format;
-            var asStr = part.AsString;
-            var dyn = JSON.DeserializeDynamic(asStr);
-            var res = (float)dyn;
-            var reStr = res.ToString(format);
-
-            var delta = Math.Abs((float.Parse(asStr) - float.Parse(reStr)));
-
-            var closeEnough = part.Float.ToString() == res.ToString() || asStr == reStr || delta <= float.Epsilon;
-
-            Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
-        }
-
         [TestMethod]
         public void SignedSmallNumberTests()
         {
@@ -444,280 +408,40 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
-        public void ULongSampling()
+        internal struct _AllFloatsStruct
         {
-            Action<ulong> test =
-                ul =>
-                {
-                    using (var str = new StringReader(ul.ToString()))
-                    {
-                        try
-                        {
-                            var dyn = JSON.DeserializeDynamic(str);
-                            var res = (ulong)dyn;
-                            Assert.AreEqual(ul, res);
-                        }
-                        catch (Exception e)
-                        {
-                            throw new Exception("Failed on i = " + ul, e);
-                        }
-                    }
-                };
-
-            test(ulong.MaxValue);
-            test(ulong.MinValue);
-
-            const ulong step = 8589934596;
-            var i = ulong.MinValue;
-
-            while (true)
-            {
-                test(i);
-                test(i + 1);
-
-                try
-                {
-                    checked
-                    {
-                        i += step;
-                    }
-                }
-                catch { break; }
-
-                if (i == ulong.MaxValue) break;
-            }
+            public float Float;
+            public string AsString;
+            public string Format;
+            public uint I;
         }
 
-        //[TestMethod]
-        //public void LongSampling()
-        //{
-        //    Action<long> test =
-        //        l =>
-        //        {
-        //            using (var str = new StringReader(l.ToString()))
-        //            {
-        //                var dyn = JSON.DeserializeDynamic(str);
-        //                var res = (long)dyn;
-        //                Assert.AreEqual(l, res);
-        //            }
-        //        };
+        internal static float ULongToFloat(ulong i, byte[] byteArr)
+        {
+            var asInt = (uint)i;
+            byteArr[0] = (byte)((asInt) & 0xFF);
+            byteArr[1] = (byte)((asInt >> 8) & 0xFF);
+            byteArr[2] = (byte)((asInt >> 16) & 0xFF);
+            byteArr[3] = (byte)((asInt >> 24) & 0xFF);
+            var f = BitConverter.ToSingle(byteArr, 0);
 
-        //    test(long.MaxValue);
-        //    test(long.MinValue);
+            return f;
+        }
 
-        //    const long step = 8589934596;
-        //    var i = long.MinValue;
+        internal static void CheckFloat(_AllFloatsStruct part)
+        {
+            var i = part.I;
+            var format = part.Format;
+            var asStr = part.AsString;
+            var dyn = JSON.DeserializeDynamic(asStr);
+            var res = (float)dyn;
+            var reStr = res.ToString(format);
 
-        //    while (true)
-        //    {
-        //        test(i);
-        //        test(i + 1);
+            var delta = Math.Abs((float.Parse(asStr) - float.Parse(reStr)));
 
-        //        try
-        //        {
-        //            checked
-        //            {
-        //                i += step;
-        //            }
-        //        }
-        //        catch { break; }
+            var closeEnough = part.Float.ToString() == res.ToString() || asStr == reStr || delta <= float.Epsilon;
 
-        //        if (i == long.MaxValue) break;
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AllUInts()
-        //{
-        //    for (long i = uint.MinValue; i <= uint.MaxValue; i++)
-        //    {
-        //        try
-        //        {
-        //            var asUInt = (uint)i;
-        //            using (var str = new StringReader(asUInt.ToString()))
-        //            {
-        //                var dyn = JSON.DeserializeDynamic(str);
-        //                var v = (uint)dyn;
-        //                Assert.AreEqual(asUInt, v, "Failed on i=" + asUInt);
-        //            }
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            throw new Exception("Failed on i = " + (uint)i, e);
-        //        }
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AllInts()
-        //{
-        //    for (long i = int.MinValue; i <= int.MaxValue; i++)
-        //    {
-        //        try
-        //        {
-        //            var asInt = (int)i;
-        //            using (var str = new StringReader(asInt.ToString()))
-        //            {
-        //                var dyn = JSON.DeserializeDynamic(str);
-        //                var v = (int)dyn;
-        //                Assert.AreEqual(asInt, v, "Failed on i=" + asInt);
-        //            }
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            throw new Exception("Failed on i = " + (int)i, e);
-        //        }
-        //    }
-        //}
-
-        //static readonly string[] _AllFloatsFormats = new[] { "F", "G", "R" };
-        //static IEnumerable<_AllFloatsStruct> _AllFloats()
-        //{
-        //    var byteArr = new byte[4];
-
-        //    for (ulong i = 0; i <= uint.MaxValue; i++)
-        //    {
-        //        var f = ULongToFloat(i, byteArr);
-
-        //        if (float.IsNaN(f) || float.IsInfinity(f)) continue;
-
-        //        for (var j = 0; j < _AllFloatsFormats.Length; j++)
-        //        {
-        //            var format = _AllFloatsFormats[j];
-        //            var asStr = f.ToString(format);
-
-        //            yield return new _AllFloatsStruct { AsString = asStr, Float = f, Format = format, I = (uint)i };
-        //        }
-        //    }
-        //}
-
-        //class _AllFloatsPartitioner : Partitioner<_AllFloatsStruct>
-        //{
-        //    IEnumerable<_AllFloatsStruct> Underlying;
-
-        //    public _AllFloatsPartitioner(IEnumerable<_AllFloatsStruct> underlying)
-        //        : base()
-        //    {
-        //        Underlying = underlying;
-        //    }
-
-        //    public override bool SupportsDynamicPartitions
-        //    {
-        //        get
-        //        {
-        //            return true;
-        //        }
-        //    }
-
-        //    public override IEnumerable<_AllFloatsStruct> GetDynamicPartitions()
-        //    {
-        //        return new DynamicPartition(Underlying);
-        //    }
-
-        //    public override IList<IEnumerator<_AllFloatsStruct>> GetPartitions(int partitionCount)
-        //    {
-        //        throw new NotImplementedException();
-        //    }
-
-        //    class DynamicPartition : IEnumerable<_AllFloatsStruct>
-        //    {
-        //        internal IEnumerator<_AllFloatsStruct> All;
-
-        //        public DynamicPartition(IEnumerable<_AllFloatsStruct> all)
-        //        {
-        //            All = all.GetEnumerator();
-        //        }
-
-        //        public IEnumerator<_AllFloatsStruct> GetEnumerator()
-        //        {
-        //            return new DynamicEnumerator(this);
-        //        }
-
-        //        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-        //        {
-        //            return this.GetEnumerator();
-        //        }
-
-        //        class DynamicEnumerator : IEnumerator<_AllFloatsStruct>
-        //        {
-        //            const int Capacity = 100;
-        //            DynamicPartition Outer;
-        //            Queue<_AllFloatsStruct> Pending;
-
-        //            public DynamicEnumerator(DynamicPartition outer)
-        //            {
-        //                Outer = outer;
-        //                Pending = new Queue<_AllFloatsStruct>(Capacity);
-        //            }
-
-        //            public _AllFloatsStruct Current
-        //            {
-        //                get;
-        //                private set;
-        //            }
-
-        //            public void Dispose()
-        //            {
-        //                // Don't care
-        //            }
-
-        //            object System.Collections.IEnumerator.Current
-        //            {
-        //                get { return this.Current; }
-        //            }
-
-        //            public bool MoveNext()
-        //            {
-        //                if (Pending.Count == 0)
-        //                {
-        //                    lock (Outer.All)
-        //                    {
-        //                        while (Outer.All.MoveNext() && Pending.Count < Capacity)
-        //                        {
-        //                            Pending.Enqueue(Outer.All.Current);
-        //                        }
-        //                    }
-        //                }
-
-        //                if (Pending.Count == 0) return false;
-
-        //                Current = Pending.Dequeue();
-        //                return true;
-        //            }
-
-        //            public void Reset()
-        //            {
-        //                throw new NotSupportedException();
-        //            }
-        //        }
-        //    }
-        //}
-
-        //[TestMethod]
-        //public void AllFloats()
-        //{
-        //    var e = _AllFloats();
-        //    var partitioner = new _AllFloatsPartitioner(e);
-
-        //    var options = new ParallelOptions();
-        //    options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
-
-        //    Parallel.ForEach(
-        //        partitioner,
-        //        options,
-        //        part =>
-        //        {
-        //            try
-        //            {
-        //                CheckFloat(part);
-        //            }
-        //            catch (Exception x)
-        //            {
-        //                throw new Exception(part.AsString, x);
-        //            }
-        //        }
-        //    );
-        //}
+            Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
+        }
     }
 }

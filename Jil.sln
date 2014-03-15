@@ -18,23 +18,32 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Release_ExhaustiveTest|Any CPU = Release_ExhaustiveTest|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Release_ExhaustiveTest|Any CPU.ActiveCfg = Release_ExhaustiveTest|Any CPU
+		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Release_ExhaustiveTest|Any CPU.Build.0 = Release_ExhaustiveTest|Any CPU
 		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Release_ExhaustiveTest|Any CPU.ActiveCfg = Release_ExhaustiveTest|Any CPU
+		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Release_ExhaustiveTest|Any CPU.Build.0 = Release_ExhaustiveTest|Any CPU
 		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D12CD30-3BCE-4CC4-BC8A-94C951802804}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E26CA103-9746-4038-876F-19218F47C29C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E26CA103-9746-4038-876F-19218F47C29C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E26CA103-9746-4038-876F-19218F47C29C}.Release_ExhaustiveTest|Any CPU.ActiveCfg = Release_ExhaustiveTest|Any CPU
+		{E26CA103-9746-4038-876F-19218F47C29C}.Release_ExhaustiveTest|Any CPU.Build.0 = Release_ExhaustiveTest|Any CPU
 		{E26CA103-9746-4038-876F-19218F47C29C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E26CA103-9746-4038-876F-19218F47C29C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release_ExhaustiveTest|Any CPU.ActiveCfg = Release_ExhaustiveTest|Any CPU
+		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release_ExhaustiveTest|Any CPU.Build.0 = Release_ExhaustiveTest|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
