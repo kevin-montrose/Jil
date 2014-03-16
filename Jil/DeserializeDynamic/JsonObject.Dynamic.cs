@@ -110,6 +110,12 @@ namespace Jil.DeserializeDynamic
                 return false;
             }
 
+            if (val == null)
+            {
+                result = null;
+                return true;
+            }
+
             return val.InnerTryConvert(binder.ReturnType, out result);
         }
 

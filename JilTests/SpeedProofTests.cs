@@ -1134,6 +1134,108 @@ namespace JilTests
                 Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = true;
             }
         }
+
+        class _UseFastMemberStartCheck
+        {
+            public int A { get; set; }
+            public int[] B {get;set;}
+            public string C { get; set; }
+            public _UseFastMemberStartCheck D { get; set; }
+            public bool E { get; set; }
+            public double F { get; set; }
+
+            internal static _UseFastMemberStartCheck Random(Random rand)
+            {
+                var arrLen = rand.Next(10);
+                int[] arr;
+                if (arrLen == 0)
+                {
+                    arr = null;
+                }
+                else
+                {
+                    arr = new int[arrLen];
+                    for (var i = 0; i < arr.Length; i++)
+                    {
+                        arr[i] = rand.Next();
+                    }
+                }
+
+                return
+                    new _UseFastMemberStartCheck
+                    {
+                        A = rand.Next() * (rand.Next(2) == 0 ? 1 : -1),
+                        B = arr,
+                        C = _RandString(rand),
+                        D = rand.Next(2) == 0 ? Random(rand) : null,
+                        E = rand.Next(2) == 0,
+                        F = rand.NextDouble() * rand.Next()
+                    };
+            }
+
+            internal static _UseFastMemberStartCheck FromDynamic(dynamic dyn)
+            {
+                if (dyn == null) return null;
+
+                var arr = (IEnumerable<int>)dyn.B;
+
+                return 
+                    new _UseFastMemberStartCheck
+                    {
+                        A = dyn.A,
+                        B = arr != null ? arr.ToArray() : null,
+                        C = dyn.C,
+                        D = FromDynamic(dyn.D),
+                        E = dyn.E,
+                        F = dyn.F,
+                    };
+            }
+        }
+
+        [TestMethod]
+        public void DynamicDeserializer_UseFastMemberStartCheck()
+        {
+            try
+            {
+                Func<TextReader, _UseFastMemberStartCheck> fast =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastMemberStartCheck = true;
+
+                        var ret = Jil.JSON.DeserializeDynamic(txt);
+
+                        return _UseFastMemberStartCheck.FromDynamic(ret);
+                    };
+                Func<TextReader, _UseFastMemberStartCheck> normal =
+                    txt =>
+                    {
+                        Jil.DeserializeDynamic.DynamicDeserializer.UseFastMemberStartCheck = false;
+
+                        var ret = Jil.JSON.DeserializeDynamic(txt); ;
+
+                        return _UseFastMemberStartCheck.FromDynamic(ret);
+                    };
+
+                var rand = new Random(21174517);
+
+                var toSerialize = new List<_UseFastMemberStartCheck>();
+                for (var i = 0; i < 1000; i++)
+                {
+                    toSerialize.Add(_UseFastMemberStartCheck.Random(rand));
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            }
+            finally
+            {
+                Jil.DeserializeDynamic.DynamicDeserializer.UseFastMemberStartCheck = true;
+            }
+        }
 #endif
     }
 }
