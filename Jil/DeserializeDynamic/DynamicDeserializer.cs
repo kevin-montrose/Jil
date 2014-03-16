@@ -55,11 +55,14 @@ namespace Jil.DeserializeDynamic
 
                 var val = (uint)c;
 
+                //(a + 116) % (b ^ 3)
+
                 var a = (byte)((val >> 4) & 0x0F);
                 var b = (byte)(val & 0x0F);
-                if (b == 0) goto checkNumber;
-                uint ix = ((a - (uint)13) % (b * (uint)159)) % (uint)16;
-                ix -= 9;
+
+                var right = (b ^ (uint)3);
+                if (right == 0) goto checkNumber;
+                uint ix = ((a + (uint)116) % right);
                 switch (ix)
                 {
                     // "
@@ -72,25 +75,25 @@ namespace Jil.DeserializeDynamic
                         if (c != '[') break;
                         DeserializeArray(reader, builder);
                         return;
-                    // n
+                    // f
                     case 2:
-                        if (c != 'n') break;
-                        DeserializeNull(reader, builder);
+                        if (c != 'f') break;
+                        DeserializeFalse(reader, builder);
                         return;
                     // {
                     case 3:
                         if (c != '{') break;
                         DeserializeObject(reader, builder);
                         return;
-                    // f
-                    case 4:
-                        if (c != 'f') break;
-                        DeserializeFalse(reader, builder);
-                        return;
                     // t
-                    case 5:
+                    case 4:
                         if (c != 't') break;
                         DeserializeTrue(reader, builder);
+                        return;
+                    // n
+                    case 5:
+                        if (c != 'n') break;
+                        DeserializeNull(reader, builder);
                         return;
                     // -
                     case 6:
