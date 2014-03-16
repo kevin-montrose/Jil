@@ -53,16 +53,12 @@ namespace Jil.DeserializeDynamic
 
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
 
-                var val = (uint)c;
+                var val = (byte)c;
 
-                //(a + 116) % (b ^ 3)
+                //(val ^ 77) % 10
 
-                var a = (byte)((val >> 4) & 0x0F);
-                var b = (byte)(val & 0x0F);
-
-                var right = (b ^ (uint)3);
-                if (right == 0) goto checkNumber;
-                uint ix = ((a + (uint)116) % right);
+                uint ix = (uint)((val ^ (byte)77) % (byte)10);
+                ix -= 1;
                 switch (ix)
                 {
                     // "
@@ -85,20 +81,20 @@ namespace Jil.DeserializeDynamic
                         if (c != '{') break;
                         DeserializeObject(reader, builder);
                         return;
-                    // t
-                    case 4:
-                        if (c != 't') break;
-                        DeserializeTrue(reader, builder);
-                        return;
                     // n
-                    case 5:
+                    case 4:
                         if (c != 'n') break;
                         DeserializeNull(reader, builder);
                         return;
                     // -
-                    case 6:
+                    case 5:
                         if (c != '-') break;
                         DeserializeNumber('-', reader, builder);
+                        return;
+                    // t
+                    case 6:
+                        if (c != 't') break;
+                        DeserializeTrue(reader, builder);
                         return;
                 }
             }
@@ -116,8 +112,6 @@ namespace Jil.DeserializeDynamic
                     case '-': DeserializeNumber((char)c, reader, builder); return;
                 }
             }
-
-            checkNumber:
 
             if (c >= '0' && c <= '9')
             {

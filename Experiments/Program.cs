@@ -705,20 +705,8 @@ namespace Experiments
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("[{\"hello\": 123, \"world\":456}, {\"hello\": -1.234, \"world\": 4.567}, {\"hello\": \"foo\", \"world\": \"bar\"}]"));
             }*/
 
-            var aVals = new List<byte>();
-            var bVals = new List<byte>();
-
-            foreach (var c in PossibleChars)
-            {
-                var b = (byte)(c & 0x0F);
-                var a = (byte)((c >> 4) & 0x0F);
-
-                aVals.Add(a);
-                bVals.Add(b);
-            }
-
             var e = AllPossibleFuncs();
-            var partitioner = new _BigPartitioner<Tuple<byte, byte, Operator, Operator, Operator>>(e);
+            var partitioner = new _BigPartitioner<Tuple<byte, byte, Operator, Operator>>(e);
 
             var options = new ParallelOptions();
             options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
@@ -728,7 +716,7 @@ namespace Experiments
                 options,
                 t =>
                 {
-                    var possible = Try(t.Item1, t.Item2, t.Item3, t.Item4, t.Item5, aVals, bVals);
+                    var possible = Try(t.Item1, t.Item2, t.Item3, t.Item4, PossibleChars.Select(i => (byte)i));
                     if (possible == null) return;
 
                     if(IsContiguous(possible))
@@ -845,14 +833,13 @@ namespace Experiments
             }
         }
 
-        static IEnumerable<Tuple<byte, byte, Operator, Operator, Operator>> AllPossibleFuncs()
+        static IEnumerable<Tuple<byte, byte, Operator, Operator>> AllPossibleFuncs()
         {
             for (var c1 = 0; c1 <= byte.MaxValue; c1++)
                 for (var c2 = 0; c2 <= byte.MaxValue; c2++)
-                        for (var op1 = 0; op1 <= (int)Operator.Mod; op1++)
-                            for (var op2 = 0; op2 <= (int)Operator.Mod; op2++)
-                                for (var op3 = 0; op3 <= (int)Operator.Mod; op3++)
-                                        yield return Tuple.Create((byte)c1, (byte)c2, (Operator)op1, (Operator)op2, (Operator)op3);
+                    for (var op1 = 0; op1 <= (int)Operator.Mod; op1++)
+                        for (var op2 = 0; op2 <= (int)Operator.Mod; op2++)
+                                    yield return Tuple.Create((byte)c1, (byte)c2, (Operator)op1, (Operator)op2);
         }
 
         static bool IsContiguous(List<uint> vals)
@@ -875,7 +862,7 @@ namespace Experiments
             return true;
         }
 
-        static List<uint> Try(byte c1, byte c2, Operator op1, Operator op2, Operator op3, IEnumerable<byte> aVals, IEnumerable<byte> bVals)
+        static List<uint> Try(byte c1, byte c2, Operator op1, Operator op2, IEnumerable<byte> vals)
         {
             Func<Operator, Func<uint, uint, uint>> getOpFunc =
                 op =>
@@ -896,19 +883,17 @@ namespace Experiments
             Func<uint, uint, uint> o1, o2, o3;
             o1 = getOpFunc(op1);
             o2 = getOpFunc(op2);
-            o3 = getOpFunc(op3);
-            Func<uint, uint, uint> func = (a, b) => o2(o1(a, c1), o3(b, c2));
+            Func<uint, uint> func = (val) => o2(o1(val, c1), c2);
 
-            var ret = new List<uint>(aVals.Count());
+            var ret = new List<uint>(vals.Count());
 
-            for (var i = 0; i < aVals.Count(); i++)
+            for (var i = 0; i < vals.Count(); i++)
             {
-                var a = aVals.ElementAt(i);
-                var b = bVals.ElementAt(i);
+                var val = vals.ElementAt(i);
 
                 try
                 {
-                    ret.Add(func(a, b));
+                    ret.Add(func(val));
                 }
                 catch (Exception)
                 {
