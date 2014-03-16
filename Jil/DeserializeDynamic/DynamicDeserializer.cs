@@ -55,10 +55,8 @@ namespace Jil.DeserializeDynamic
 
                 var val = (byte)c;
 
-                //(val ^ 77) % 10
-
-                uint ix = (uint)((val ^ (byte)77) % (byte)10);
-                ix -= 1;
+                uint ix = (uint)((val >> (byte)2) + (val | (byte)65)) | (byte)3;
+                ix = (ix - 107) >> 3;
                 switch (ix)
                 {
                     // "
@@ -71,30 +69,30 @@ namespace Jil.DeserializeDynamic
                         if (c != '[') break;
                         DeserializeArray(reader, builder);
                         return;
-                    // f
+                    // -
                     case 2:
+                        if (c != '-') break;
+                        DeserializeNumber('-', reader, builder);
+                        return;
+                    // f
+                    case 3:
                         if (c != 'f') break;
                         DeserializeFalse(reader, builder);
-                        return;
-                    // {
-                    case 3:
-                        if (c != '{') break;
-                        DeserializeObject(reader, builder);
                         return;
                     // n
                     case 4:
                         if (c != 'n') break;
                         DeserializeNull(reader, builder);
                         return;
-                    // -
-                    case 5:
-                        if (c != '-') break;
-                        DeserializeNumber('-', reader, builder);
-                        return;
                     // t
-                    case 6:
+                    case 5:
                         if (c != 't') break;
                         DeserializeTrue(reader, builder);
+                        return;
+                    // {
+                    case 6:
+                        if (c != '{') break;
+                        DeserializeObject(reader, builder);
                         return;
                 }
             }

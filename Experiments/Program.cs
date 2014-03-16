@@ -649,14 +649,36 @@ namespace Experiments
 
         enum Operator
         {
-            And = 0,
-            Or = 1,
-            Xor = 2,
-            Add = 3,
-            Sub = 4,
-            Mult = 5,
-            Div = 6,
-            Mod = 7
+            And = 0,    // 0.5 to  1 cycles
+            Or = 1,     // 0.5 to  1 cycles
+            Xor = 2,    // 0.5 to  1 cycles
+            Add = 3,    // 0.5 to  1 cycles
+            Sub = 4,    // 0.5 to  1 cycles
+            ShR = 5,    //   1 to  3 cycles
+            ShL = 6,    //   1 to  3 cycles
+            /*Mult = 5,   // 1   to 18 cycles
+            Div = 6,    // 23  to 80 cycles
+            Mod = 7     // 23  to 80 cycles*/
+        }
+
+        class EchodTextWriter : TextWriter
+        {
+            public override Encoding Encoding
+            {
+                get { return Writers[0].Encoding; }
+            }
+
+            TextWriter[] Writers;
+
+            public EchodTextWriter(params TextWriter[] writers)
+            {
+                Writers = writers;
+            }
+
+            public override void Write(char value)
+            {
+                Writers.ForEach(w => w.Write(value));
+            }
         }
 
         static void Main(string[] args)
@@ -705,28 +727,36 @@ namespace Experiments
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("[{\"hello\": 123, \"world\":456}, {\"hello\": -1.234, \"world\": 4.567}, {\"hello\": \"foo\", \"world\": \"bar\"}]"));
             }*/
 
-            var e = AllPossibleFuncs();
-            var partitioner = new _BigPartitioner<Tuple<byte, byte, Operator, Operator>>(e);
+            using(var file = File.CreateText(@".\Experiments.txt"))
+            {
+                file.AutoFlush = true;
+                Console.SetOut(new EchodTextWriter(file, Console.Out));
 
-            var options = new ParallelOptions();
-            options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
+                Console.WriteLine("Starting...");
 
-            Parallel.ForEach(
-                partitioner,
-                options,
-                t =>
-                {
-                    var possible = Try(t.Item1, t.Item2, t.Item3, t.Item4, PossibleChars.Select(i => (byte)i));
-                    if (possible == null) return;
+                var e = AllPossibleFuncs();
+                var partitioner = new _BigPartitioner<Tuple<byte, byte, byte, Operator, Operator, Operator, Operator>>(e);
 
-                    if(IsContiguous(possible))
+                var options = new ParallelOptions();
+                options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
+
+                Parallel.ForEach(
+                    partitioner,
+                    options,
+                    t =>
                     {
-                        Console.WriteLine(t);
-                    }
-                }
-            );
+                        var possible = Try(t.Item1, t.Item2, t.Item3, t.Item4, t.Item5, t.Item6, t.Item7, PossibleChars.Select(i => (byte)i));
+                        if (possible == null) return;
 
-            Console.WriteLine("Finished");
+                        if(IsContiguous(possible))
+                        {
+                            Console.WriteLine(t);
+                        }
+                    }
+                );
+
+                Console.WriteLine("Finished");
+            }
 
             Console.ReadKey();
         }
@@ -833,13 +863,18 @@ namespace Experiments
             }
         }
 
-        static IEnumerable<Tuple<byte, byte, Operator, Operator>> AllPossibleFuncs()
+        static IEnumerable<Tuple<byte, byte, byte, Operator, Operator, Operator, Operator>> AllPossibleFuncs()
         {
+            var maxOp = Enum.GetValues(typeof(Operator)).Cast<int>().Max();
+
             for (var c1 = 0; c1 <= byte.MaxValue; c1++)
                 for (var c2 = 0; c2 <= byte.MaxValue; c2++)
-                    for (var op1 = 0; op1 <= (int)Operator.Mod; op1++)
-                        for (var op2 = 0; op2 <= (int)Operator.Mod; op2++)
-                                    yield return Tuple.Create((byte)c1, (byte)c2, (Operator)op1, (Operator)op2);
+                    for (var c3 = 0; c3 <= byte.MaxValue; c3++)
+                        for (var op1 = 0; op1 <= (int)maxOp; op1++)
+                            for (var op2 = 0; op2 <= (int)maxOp; op2++)
+                                for (var op3 = 0; op3 <= (int)maxOp; op3++)
+                                    for (var op4 = 0; op4 <= (int)maxOp; op4++)
+                                        yield return Tuple.Create((byte)c1, (byte)c2, (byte)c3, (Operator)op1, (Operator)op2, (Operator)op3, (Operator)op4);
         }
 
         static bool IsContiguous(List<uint> vals)
@@ -862,7 +897,7 @@ namespace Experiments
             return true;
         }
 
-        static List<uint> Try(byte c1, byte c2, Operator op1, Operator op2, IEnumerable<byte> vals)
+        static List<uint> Try(byte c1, byte c2, byte c3, Operator op1, Operator op2, Operator op3, Operator op4, IEnumerable<byte> vals)
         {
             Func<Operator, Func<uint, uint, uint>> getOpFunc =
                 op =>
@@ -874,16 +909,20 @@ namespace Experiments
                         case Operator.Xor: return (x, y) => x ^ y;
                         case Operator.Add: return (x, y) => x + y;
                         case Operator.Sub: return (x, y) => x - y;
-                        case Operator.Mult: return (x, y) => x * y;
+                        case Operator.ShR: return (x, y) => x >> (byte)y;
+                        case Operator.ShL: return (x, y) => x << (byte)y;
+                        /*case Operator.Mult: return (x, y) => x * y;
                         case Operator.Div: return (x, y) => x / y;
-                        case Operator.Mod: return (x, y) => x % y;
+                        case Operator.Mod: return (x, y) => x % y;*/
                         default: throw new Exception();
                     }
                 };
-            Func<uint, uint, uint> o1, o2, o3;
+            Func<uint, uint, uint> o1, o2, o3, o4;
             o1 = getOpFunc(op1);
             o2 = getOpFunc(op2);
-            Func<uint, uint> func = (val) => o2(o1(val, c1), c2);
+            o3 = getOpFunc(op3);
+            o4 = getOpFunc(op4);
+            Func<uint, uint> func = (val) => o1(o2(o3(val, c1), o4(val, c2)), c3);
 
             var ret = new List<uint>(vals.Count());
 
