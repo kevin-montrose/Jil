@@ -1,4 +1,6 @@
-﻿#if EXHAUSTIVE_TEST
+﻿// You probably do not want to run these tests
+// They take about 60 CPU hours
+#if EXHAUSTIVE_TEST
 
 using Jil;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,7 +15,7 @@ using System.Threading.Tasks;
 namespace JilTests
 {
     [TestClass]
-    class ExhaustiveTests
+    public class ExhaustiveTests
     {
         [TestMethod]
         public void ULongSampling()
