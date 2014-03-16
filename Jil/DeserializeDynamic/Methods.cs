@@ -15,20 +15,18 @@ namespace Jil.DeserializeDynamic
         //    you'll just be making string parsing slower for no benefit
         public const int CharBufferSize = 32;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ConsumeWhiteSpace(TextReader reader)
         {
             int c;
             while ((c = reader.Peek()) != -1)
             {
-                if (!_IsWhiteSpace(c)) return;
+                if (!IsWhiteSpace(c)) return;
 
                 reader.Read();
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool _IsWhiteSpace(int c)
+        static bool IsWhiteSpace(int c)
         {
             // per http://www.ietf.org/rfc/rfc4627.txt
             // insignificant whitespace in JSON is defined as 
@@ -150,7 +148,6 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ReadHexQuadToBuilder(TextReader reader, StringBuilder commonSb)
         {
             var encodedChar = 0;
@@ -274,7 +271,6 @@ namespace Jil.DeserializeDynamic
             commonSb.Append(char.ConvertFromUtf32(encodedChar));
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double ReadDouble(char firstChar, TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -357,7 +353,6 @@ namespace Jil.DeserializeDynamic
             return result;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong ReadULong(char firstChar, TextReader reader, out byte overflowByPowersOfTen)
         {
             // ulong.MaxValue
@@ -419,7 +414,6 @@ namespace Jil.DeserializeDynamic
             throw new DeserializationException("Number too large to be parsed encountered", reader);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static long ReadLong(char firstChar, TextReader reader)
         {
             var negate = false;
@@ -450,7 +444,6 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ReadUInt(char firstChar, TextReader reader, out byte length)
         {
             length = 1;

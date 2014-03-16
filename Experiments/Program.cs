@@ -1,6 +1,7 @@
 ﻿using Jil.Common;
 using Jil.Serialize;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -644,6 +645,17 @@ namespace Experiments
 
         }
 
+        static char[] PossibleChars = new[] { '"', '[', '{', 'n', 't', 'f', '-' };
+
+        enum Operator
+        {
+            Add = 0,
+            Sub = 1,
+            Mult = 2,
+            Div = 3,
+            Mod = 4
+        }
+
         static void Main(string[] args)
         {
             /*if (args.Length == 1)
@@ -664,7 +676,7 @@ namespace Experiments
 
             Console.ReadKey();*/
 
-            for (var i = 0; i < 100000; i++)
+            /*for (var i = 0; i < 100000; i++)
             {
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("1234"));
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("-1.234"));
@@ -688,7 +700,218 @@ namespace Experiments
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": [null, true, false], \"world\": {}}"));
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("{\"hello\": {\"hello\": 123, \"world\":456}, \"world\": {\"hello\": \"foo\", \"world\": \"bar\"}}"));
                 Console.WriteLine(Jil.JSON.DeserializeDynamic("[{\"hello\": 123, \"world\":456}, {\"hello\": -1.234, \"world\": 4.567}, {\"hello\": \"foo\", \"world\": \"bar\"}]"));
+            }*/
+
+            var aVals = new List<byte>();
+            var bVals = new List<byte>();
+
+            foreach (var c in PossibleChars)
+            {
+                var b = (byte)(c & 0x0F);
+                var a = (byte)((c >> 4) & 0x0F);
+
+                aVals.Add(a);
+                bVals.Add(b);
             }
+
+            var e = AllPossibleFuncs();
+            var partitioner = new _BigPartitioner<Tuple<byte, byte, byte, Operator, Operator, Operator, Operator>>(e);
+
+            var options = new ParallelOptions();
+            options.MaxDegreeOfParallelism = Environment.ProcessorCount - 1;
+
+            Parallel.ForEach(
+                partitioner,
+                options,
+                t =>
+                {
+                    var possible = Try(t.Item1, t.Item2, t.Item3, t.Item4, t.Item5, t.Item6, t.Item7, aVals, bVals);
+                    if (possible == null) return;
+
+                    if(IsContiguous(possible))
+                    {
+                        Console.WriteLine(t);
+                    }
+                }
+            );
+
+            Console.ReadKey();
+        }
+
+        class _BigPartitioner<T> : Partitioner<T>
+        {
+            IEnumerable<T> Underlying;
+
+            public _BigPartitioner(IEnumerable<T> underlying)
+                : base()
+            {
+                Underlying = underlying;
+            }
+
+            public override bool SupportsDynamicPartitions
+            {
+                get
+                {
+                    return true;
+                }
+            }
+
+            public override IEnumerable<T> GetDynamicPartitions()
+            {
+                return new DynamicPartition<T>(Underlying);
+            }
+
+            public override IList<IEnumerator<T>> GetPartitions(int partitionCount)
+            {
+                throw new NotImplementedException();
+            }
+
+            class DynamicPartition<V> : IEnumerable<V>
+            {
+                internal IEnumerator<V> All;
+
+                public DynamicPartition(IEnumerable<V> all)
+                {
+                    All = all.GetEnumerator();
+                }
+
+                public IEnumerator<V> GetEnumerator()
+                {
+                    return new DynamicEnumerator<V>(this);
+                }
+
+                System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+                {
+                    return this.GetEnumerator();
+                }
+
+                class DynamicEnumerator<W> : IEnumerator<W>
+                {
+                    const int Capacity = 100;
+                    DynamicPartition<W> Outer;
+                    Queue<W> Pending;
+
+                    public DynamicEnumerator(DynamicPartition<W> outer)
+                    {
+                        Outer = outer;
+                        Pending = new Queue<W>(Capacity);
+                    }
+
+                    public W Current
+                    {
+                        get;
+                        private set;
+                    }
+
+                    public void Dispose()
+                    {
+                        // Don't care
+                    }
+
+                    object System.Collections.IEnumerator.Current
+                    {
+                        get { return this.Current; }
+                    }
+
+                    public bool MoveNext()
+                    {
+                        if (Pending.Count == 0)
+                        {
+                            lock (Outer.All)
+                            {
+                                while (Outer.All.MoveNext() && Pending.Count < Capacity)
+                                {
+                                    Pending.Enqueue(Outer.All.Current);
+                                }
+                            }
+                        }
+
+                        if (Pending.Count == 0) return false;
+
+                        Current = Pending.Dequeue();
+                        return true;
+                    }
+
+                    public void Reset()
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+        }
+
+        static IEnumerable<Tuple<byte, byte, byte, Operator, Operator, Operator, Operator>> AllPossibleFuncs()
+        {
+            for (var c1 = 0; c1 <= byte.MaxValue; c1++)
+                for (var c2 = 0; c2 <= byte.MaxValue; c2++)
+                    for (var c3 = PossibleChars.Length; c3 <= byte.MaxValue; c3++)
+                        for (var op1 = 0; op1 <= (int)Operator.Mod; op1++)
+                            for (var op2 = 0; op2 <= (int)Operator.Mod; op2++)
+                                for (var op3 = 0; op3 <= (int)Operator.Mod; op3++)
+                                    for (var op4 = 0; op4 <= (int)Operator.Mod; op4++)
+                                        yield return Tuple.Create((byte)c1, (byte)c2, (byte)c3, (Operator)op1, (Operator)op2, (Operator)op3, (Operator)op4);
+        }
+
+        static bool IsContiguous(List<uint> vals)
+        {
+            var inOrder = vals.OrderBy(v => v).ToList();
+            var diff = vals[1] - vals[0];
+            var prev = vals[1];
+
+            foreach (var val in inOrder.Skip(2))
+            {
+                var curDiff = val - prev;
+                if (curDiff != diff) return false;
+
+                prev = val;
+            }
+
+            // not actually useful...
+            if (diff == 0) return false;
+
+            return true;
+        }
+
+        static List<uint> Try(byte c1, byte c2, byte c3, Operator op1, Operator op2, Operator op3, Operator op4, IEnumerable<byte> aVals, IEnumerable<byte> bVals)
+        {
+            Func<Operator, Func<uint, uint, uint>> getOpFunc =
+                op =>
+                {
+                    switch (op)
+                    {
+                        case Operator.Add: return (x, y) => x + y;
+                        case Operator.Sub: return (x, y) => x - y;
+                        case Operator.Mult: return (x, y) => x * y;
+                        case Operator.Div: return (x, y) => x / y;
+                        case Operator.Mod: return (x, y) => x % y;
+                        default: throw new Exception();
+                    }
+                };
+            Func<uint, uint, uint> o1, o2, o3, o4;
+            o1 = getOpFunc(op1);
+            o2 = getOpFunc(op2);
+            o3 = getOpFunc(op3);
+            o4 = getOpFunc(op4);
+            Func<uint, uint, uint> func = (a, b) => o4(o2(o1(a, c1), o3(b, c2)), c3);
+
+            var ret = new List<uint>(aVals.Count());
+
+            for (var i = 0; i < aVals.Count(); i++)
+            {
+                var a = aVals.ElementAt(i);
+                var b = bVals.ElementAt(i);
+
+                try
+                {
+                    ret.Add(func(a, b));
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+
+            return ret;
         }
     }
 }

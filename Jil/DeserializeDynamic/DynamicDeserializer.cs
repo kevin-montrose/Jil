@@ -11,6 +11,7 @@ namespace Jil.DeserializeDynamic
     {
         internal static bool UseFastNumberParsing = true;
         internal static bool UseFastIntegerConversion = true;
+        internal static bool UseFastMemberStartCheck = true;
 
         public static ObjectBuilder Deserialize(TextReader reader)
         {
@@ -30,17 +31,90 @@ namespace Jil.DeserializeDynamic
             Methods.ConsumeWhiteSpace(reader);
 
             var c = reader.Read();
-            switch (c)
+            if (UseFastMemberStartCheck)
             {
-                case -1: throw new DeserializationException("Unexpected end of stream", reader);
-                case '"': DeserializeString(reader, builder); return;
-                case '[': DeserializeArray(reader, builder); return;
-                case '{': DeserializeObject(reader, builder); return;
-                case 'n': DeserializeNull(reader, builder); return;
-                case 't': DeserializeTrue(reader, builder); return;
-                case 'f': DeserializeFalse(reader, builder); return;
-                case '-': DeserializeNumber((char)c, reader, builder); return;
+                // What's going on here is a little tricky.
+                // Basically, the switch in the else of this outer if
+                //   is one of the hottest parts of dynamic deserialization.
+                // Speeding up a switch is *hard*.
+                // The theory is that, since the switch is turned into a series of ifs,
+                //   the branch predictor is gonna be really bad.  Exactly which character
+                //   will be in `c` is very nearly random.
+                // Instead of a naive switch, I found a dinky little formula that maps
+                //   the 7 characters we care about to a contiguous range.  This lets us turn
+                //   the series of ifs into a jump table.  This lets us cut out the branch predictor
+                //   somewhat, and turns the remaining ifs into "almost always false"-branches that
+                //   the predictor should do a good job on.
+                // In the outer else a character would go through, on average, 4 comparisons.
+                // This code will go through, *always*, 3 comparisons.  More math though.
+                //
+                // It remains to be seen if this code is actually faster though.  There are other,
+                //   potentially lighter weight, functions that could be tried as well.
+
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+
+                var val = (uint)c;
+
+                var a = (byte)((val >> 4) & 0x0F);
+                var b = (byte)(val & 0x0F);
+                if (b == 0) goto checkNumber;
+                uint ix = ((a - (uint)13) % (b * (uint)159)) % (uint)16;
+                ix -= 9;
+                switch (ix)
+                {
+                    // "
+                    case 0:
+                        if (c != '"') break;
+                        DeserializeString(reader, builder);
+                        return;
+                    // [
+                    case 1:
+                        if (c != '[') break;
+                        DeserializeArray(reader, builder);
+                        return;
+                    // n
+                    case 2:
+                        if (c != 'n') break;
+                        DeserializeNull(reader, builder);
+                        return;
+                    // {
+                    case 3:
+                        if (c != '{') break;
+                        DeserializeObject(reader, builder);
+                        return;
+                    // f
+                    case 4:
+                        if (c != 'f') break;
+                        DeserializeFalse(reader, builder);
+                        return;
+                    // t
+                    case 5:
+                        if (c != 't') break;
+                        DeserializeTrue(reader, builder);
+                        return;
+                    // -
+                    case 6:
+                        if (c != '-') break;
+                        DeserializeNumber('-', reader, builder);
+                        return;
+                }
             }
+            else
+            {
+                switch (c)
+                {
+                    case -1: throw new DeserializationException("Unexpected end of stream", reader);
+                    case '"': DeserializeString(reader, builder); return;
+                    case '[': DeserializeArray(reader, builder); return;
+                    case '{': DeserializeObject(reader, builder); return;
+                    case 'n': DeserializeNull(reader, builder); return;
+                    case 't': DeserializeTrue(reader, builder); return;
+                    case 'f': DeserializeFalse(reader, builder); return;
+                    case '-': DeserializeNumber((char)c, reader, builder); return;
+                }
+            }
+
+            checkNumber:
 
             if (c >= '0' && c <= '9')
             {
