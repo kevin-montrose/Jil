@@ -8,6 +8,7 @@ namespace Jil.DeserializeDynamic
 {
     sealed class ObjectBuilder
     {
+        private Options Options;
         public StringBuilder CommonStringBuffer;
 
         char[] _CommonCharBuffer;
@@ -23,6 +24,11 @@ namespace Jil.DeserializeDynamic
         }
 
         public JsonObject BeingBuilt;
+
+        public ObjectBuilder(Options options)
+        {
+            Options = options;
+        }
 
         public void PutNull()
         {
@@ -60,11 +66,11 @@ namespace Jil.DeserializeDynamic
         {
             if (BeingBuilt == null)
             {
-                BeingBuilt = JsonObject.ForString(str);
+                BeingBuilt = JsonObject.ForString(str, Options);
             }
             else
             {
-                BeingBuilt.Put(JsonObject.ForString(str));
+                BeingBuilt.Put(JsonObject.ForString(str, Options));
             }
         }
 
@@ -123,7 +129,7 @@ namespace Jil.DeserializeDynamic
 
         public void PutNumber(double number)
         {
-            var num = JsonObject.ForNumber(number);
+            var num = JsonObject.ForNumber(number, Options);
             if (BeingBuilt == null)
             {
                 BeingBuilt = num;
@@ -136,7 +142,7 @@ namespace Jil.DeserializeDynamic
 
         public void PutFastNumber(bool negative, ulong beforeDot, uint afterDot, byte afterDotLength, long afterE)
         {
-            var num = JsonObject.ForFastNumber(negative, beforeDot, afterDot, afterDotLength, afterE);
+            var num = JsonObject.ForFastNumber(negative, beforeDot, afterDot, afterDotLength, afterE, Options);
             if (BeingBuilt == null)
             {
                 BeingBuilt = num;

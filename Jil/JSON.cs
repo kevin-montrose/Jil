@@ -589,9 +589,11 @@ namespace Jil
         /// 
         /// For the best performance, use the strongly typed Deserialize method when possible.
         /// </summary>
-        public static dynamic DeserializeDynamic(TextReader reader)
+        public static dynamic DeserializeDynamic(TextReader reader, Options options = null)
         {
-            var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader);
+            options = options ?? Options.Default;
+
+            var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader, options);
 
             return built.BeingBuilt;
         }
@@ -601,11 +603,11 @@ namespace Jil
         /// 
         /// For the best performance, use the strongly typed Deserialize method when possible.
         /// </summary>
-        public static dynamic DeserializeDynamic(string str)
+        public static dynamic DeserializeDynamic(string str, Options options = null)
         {
             using (var reader = new StringReader(str))
             {
-                return DeserializeDynamic(reader);
+                return DeserializeDynamic(reader, options);
             }
         }
     }

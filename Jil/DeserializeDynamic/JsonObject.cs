@@ -40,19 +40,21 @@ namespace Jil.DeserializeDynamic
         JsonObject MemberPart1;
         JsonObject MemberPart2;
 
-        internal static JsonObject ForString(string str)
+        Options Options;
+
+        internal static JsonObject ForString(string str, Options options)
         {
-            return new JsonObject { Type = JsonObjectType.String, StringValue = str };
+            return new JsonObject { Type = JsonObjectType.String, StringValue = str, Options = options };
         }
 
-        internal static JsonObject ForNumber(double num)
+        internal static JsonObject ForNumber(double num, Options options)
         {
-            return new JsonObject { Type = JsonObjectType.Number, NumberValue = num };
+            return new JsonObject { Type = JsonObjectType.Number, NumberValue = num, Options = options };
         }
 
-        internal static JsonObject ForFastNumber(bool neg, ulong a, uint b, byte bLen, long c)
+        internal static JsonObject ForFastNumber(bool neg, ulong a, uint b, byte bLen, long c, Options options)
         {
-            return new JsonObject { Type = JsonObjectType.FastNumber, FastNumberNegative = neg, FastNumberPart1 = a, FastNumberPart2 = b, FastNumberPart2Length = bLen, FastNumberPart3 = c };
+            return new JsonObject { Type = JsonObjectType.FastNumber, FastNumberNegative = neg, FastNumberPart1 = a, FastNumberPart2 = b, FastNumberPart2Length = bLen, FastNumberPart3 = c, Options = options };
         }
 
         internal static JsonObject NewArray(JsonObject parent)

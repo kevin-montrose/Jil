@@ -12,9 +12,9 @@ namespace Jil.DeserializeDynamic
         internal static bool UseFastNumberParsing = true;
         internal static bool UseFastIntegerConversion = true;
 
-        public static ObjectBuilder Deserialize(TextReader reader)
+        public static ObjectBuilder Deserialize(TextReader reader, Options options)
         {
-            var ret = new ObjectBuilder();
+            var ret = new ObjectBuilder(options);
 
             DeserializeMember(reader, ret);
 

@@ -213,6 +213,28 @@ namespace Jil.DeserializeDynamic
                         result = res;
                         return ret;
                     }
+                    if (returnType == typeof(DateTime))
+                    {
+                        long res;
+                        var ret = FastNumberToLong(out res);
+                        if (!ret)
+                        {
+                            result = null;
+                            return false;
+                        }
+                        switch(Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                result = Methods.UnixEpoch + TimeSpan.FromMilliseconds(res);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                result = Methods.UnixEpoch + TimeSpan.FromSeconds(res);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.Number:
                     if (returnType == typeof(double))
@@ -270,6 +292,22 @@ namespace Jil.DeserializeDynamic
                         result = (ulong)NumberValue;
                         return true;
                     }
+                    if (returnType == typeof(DateTime))
+                    {
+                        var res = (long)NumberValue;
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                result = Methods.UnixEpoch + TimeSpan.FromMilliseconds(res);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                result = Methods.UnixEpoch + TimeSpan.FromSeconds(res);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.String:
                     if (returnType == typeof(string))
@@ -293,6 +331,22 @@ namespace Jil.DeserializeDynamic
 
                         result = guid;
                         return true;
+                    }
+                    if (returnType == typeof(DateTime))
+                    {
+                        switch(Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                                DateTime res;
+                                var ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out res);
+                                result = res;
+                                return ret;
+                            case DateTimeFormat.ISO8601:
+                                throw new NotImplementedException();
+                            default:
+                                result = null;
+                                return false;
+                        }
                     }
                     break;
                 case JsonObjectType.Object:
