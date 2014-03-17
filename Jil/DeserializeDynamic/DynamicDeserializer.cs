@@ -53,54 +53,53 @@ namespace Jil.DeserializeDynamic
 
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
 
-                var val = (byte)c;
-
-                uint ix = (uint)((val >> (byte)2) + (val | (byte)65));
-                ix = (ix - 107) >> 2;
+                int ix = (c | 65) - 91;
                 switch (ix)
                 {
-                    // "
-                    case 0:
-                        if (c != '"') break;
-                        DeserializeString(reader, builder);
-                        return;
                     // [
-                    case 1:
+                    case 0:
                         if (c != '[') break;
                         DeserializeArray(reader, builder);
                         return;
-                    
-                    case 2: // nop
-                    // -
-                    case 3:
-                        if (c != '-') break;
-                        DeserializeNumber('-', reader, builder);
+
+                    case 1: case 2: case 3: case 4: case 5: case 6: case 7: break;
+                    // "
+                    case 8:
+                        if (c != '"') break;
+                        DeserializeString(reader, builder);
                         return;
                     
-                    case 4: // nop
+                    case 9: case 10: case 11: break;
                     // f
-                    case 5:
+                    case 12:
                         if (c != 'f') break;
                         DeserializeFalse(reader, builder);
                         return;
-                    
-                    case 6: // nop
+
+                    case 17: break;
+                    // -
+                    case 18:
+                        if (c != '-') break;
+                        DeserializeNumber('-', reader, builder);
+                        return;
+
+                    case 19: break;
                     // n
-                    case 7:
+                    case 20:
                         if (c != 'n') break;
                         DeserializeNull(reader, builder);
                         return;
                     
-                    case 8: // nop
+                    case 21: case 22: case 23: case 24: case 25: break;
                     // t
-                    case 9:
+                    case 26:
                         if (c != 't') break;
                         DeserializeTrue(reader, builder);
                         return;
                     
-                    case 10: // nop
+                    case 27:case 28: case 29: case 30: case 31: break;
                     // {
-                    case 11:
+                    case 32:
                         if (c != '{') break;
                         DeserializeObject(reader, builder);
                         return;
