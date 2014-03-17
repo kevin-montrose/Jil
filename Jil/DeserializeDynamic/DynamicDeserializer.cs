@@ -11,7 +11,6 @@ namespace Jil.DeserializeDynamic
     {
         internal static bool UseFastNumberParsing = true;
         internal static bool UseFastIntegerConversion = true;
-        internal static bool UseFastMemberStartCheck = true;
 
         public static ObjectBuilder Deserialize(TextReader reader)
         {
@@ -31,92 +30,16 @@ namespace Jil.DeserializeDynamic
             Methods.ConsumeWhiteSpace(reader);
 
             var c = reader.Read();
-            if (UseFastMemberStartCheck)
+
+            switch (c)
             {
-                // What's going on here is a little tricky.
-                // Basically, the switch in the else of this outer if
-                //   is one of the hottest parts of dynamic deserialization.
-                // Speeding up a switch is *hard*.
-                // The theory is that, since the switch is turned into a series of ifs,
-                //   the branch predictor is gonna be really bad.  Exactly which character
-                //   will be in `c` is very nearly random.
-                // Instead of a naive switch, I found a dinky little formula that maps
-                //   the 7 characters we care about to a contiguous range.  This lets us turn
-                //   the series of ifs into a jump table.  This lets us cut out the branch predictor
-                //   somewhat, and turns the remaining ifs into "almost always false"-branches that
-                //   the predictor should do a good job on.
-                // In the outer else a character would go through, on average, 4 comparisons.
-                // This code will go through, *always*, 3 comparisons.  More math though.
-                //
-                // It remains to be seen if this code is actually faster.  There are other,
-                //   potentially lighter weight, functions that could be tried as well.
-                int ix = (c | 65) - 91;
-                switch (ix)
-                {
-                    // [
-                    case 0:
-                        if (c != '[') break;
-                        DeserializeArray(reader, builder);
-                        return;
-
-                    case 1: case 2: case 3: case 4: case 5: case 6: case 7: break;
-                    // "
-                    case 8:
-                        if (c != '"') break;
-                        DeserializeString(reader, builder);
-                        return;
-                    
-                    case 9: case 10: case 11: break;
-                    // f
-                    case 12:
-                        if (c != 'f') break;
-                        DeserializeFalse(reader, builder);
-                        return;
-
-                    case 17: break;
-                    // -
-                    case 18:
-                        if (c != '-') break;
-                        DeserializeNumber('-', reader, builder);
-                        return;
-
-                    case 19: break;
-                    // n
-                    case 20:
-                        if (c != 'n') break;
-                        DeserializeNull(reader, builder);
-                        return;
-                    
-                    case 21: case 22: case 23: case 24: case 25: break;
-                    // t
-                    case 26:
-                        if (c != 't') break;
-                        DeserializeTrue(reader, builder);
-                        return;
-                    
-                    case 27:case 28: case 29: case 30: case 31: break;
-                    // {
-                    case 32:
-                        if (c != '{') break;
-                        DeserializeObject(reader, builder);
-                        return;
-                }
-
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
-            }
-            else
-            {
-                switch (c)
-                {
-                    case -1: throw new DeserializationException("Unexpected end of stream", reader);
-                    case '"': DeserializeString(reader, builder); return;
-                    case '[': DeserializeArray(reader, builder); return;
-                    case '{': DeserializeObject(reader, builder); return;
-                    case 'n': DeserializeNull(reader, builder); return;
-                    case 't': DeserializeTrue(reader, builder); return;
-                    case 'f': DeserializeFalse(reader, builder); return;
-                    case '-': DeserializeNumber((char)c, reader, builder); return;
-                }
+                case '"': DeserializeString(reader, builder); return;
+                case '[': DeserializeArray(reader, builder); return;
+                case '{': DeserializeObject(reader, builder); return;
+                case 'n': DeserializeNull(reader, builder); return;
+                case 't': DeserializeTrue(reader, builder); return;
+                case 'f': DeserializeFalse(reader, builder); return;
+                case '-': DeserializeNumber('-', reader, builder); return;
             }
 
             if (c >= '0' && c <= '9')
@@ -124,6 +47,8 @@ namespace Jil.DeserializeDynamic
                 DeserializeNumber((char)c, reader, builder);
                 return;
             }
+
+            if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
 
             throw new DeserializationException("Expected \", [, {, n, t, f, -, 0, 1, 2, 3, 4, 5, 6, 7, 8, or 9; found " + (char)c, reader);
         }
