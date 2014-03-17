@@ -48,15 +48,15 @@ namespace Jil.DeserializeDynamic
                 // In the outer else a character would go through, on average, 4 comparisons.
                 // This code will go through, *always*, 3 comparisons.  More math though.
                 //
-                // It remains to be seen if this code is actually faster though.  There are other,
+                // It remains to be seen if this code is actually faster.  There are other,
                 //   potentially lighter weight, functions that could be tried as well.
 
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
 
                 var val = (byte)c;
 
-                uint ix = (uint)((val >> (byte)2) + (val | (byte)65)) | (byte)3;
-                ix = (ix - 107) >> 3;
+                uint ix = (uint)((val >> (byte)2) + (val | (byte)65));
+                ix = (ix - 107) >> 2;
                 switch (ix)
                 {
                     // "
@@ -69,28 +69,38 @@ namespace Jil.DeserializeDynamic
                         if (c != '[') break;
                         DeserializeArray(reader, builder);
                         return;
+                    
+                    case 2: // nop
                     // -
-                    case 2:
+                    case 3:
                         if (c != '-') break;
                         DeserializeNumber('-', reader, builder);
                         return;
+                    
+                    case 4: // nop
                     // f
-                    case 3:
+                    case 5:
                         if (c != 'f') break;
                         DeserializeFalse(reader, builder);
                         return;
+                    
+                    case 6: // nop
                     // n
-                    case 4:
+                    case 7:
                         if (c != 'n') break;
                         DeserializeNull(reader, builder);
                         return;
+                    
+                    case 8: // nop
                     // t
-                    case 5:
+                    case 9:
                         if (c != 't') break;
                         DeserializeTrue(reader, builder);
                         return;
+                    
+                    case 10: // nop
                     // {
-                    case 6:
+                    case 11:
                         if (c != '{') break;
                         DeserializeObject(reader, builder);
                         return;
