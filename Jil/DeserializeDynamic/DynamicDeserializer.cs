@@ -50,9 +50,6 @@ namespace Jil.DeserializeDynamic
                 //
                 // It remains to be seen if this code is actually faster.  There are other,
                 //   potentially lighter weight, functions that could be tried as well.
-
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
-
                 int ix = (c | 65) - 91;
                 switch (ix)
                 {
@@ -104,6 +101,8 @@ namespace Jil.DeserializeDynamic
                         DeserializeObject(reader, builder);
                         return;
                 }
+
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
             }
             else
             {
