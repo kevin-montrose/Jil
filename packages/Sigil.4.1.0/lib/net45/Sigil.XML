@@ -818,7 +818,7 @@
             Returns a ConstructorBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and module for the inner DynamicMethod.
             
@@ -826,26 +826,41 @@
             
             If module is not defined, a module with the same trust as the executing assembly is used instead.
             
-            By default, Sigil runs a rolling verification of the delegate being built.  Pass doVerify as false
-            to disable all verification.
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,System.Boolean)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and owner for the inner DynamicMethod.
             
             If name is not defined, a sane default is generated.
             
             If owner is not defined, a module with the same trust as the executing assembly is used instead.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
             The DelegateType and MethodBuilder must agree on return types, parameter types, and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.BuildStaticMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean)">
@@ -862,13 +877,19 @@
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
             The DelegateType and TypeBuilder must agree on parameter types and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.Duplicate">
@@ -1635,6 +1656,19 @@
             Lookup for declared labels by name.
             </summary>
         </member>
+        <member name="F:Sigil.Impl.RollingVerifier.UsesStrictBranchVerification">
+            From the spec [see section - III.1.7.5 Backward branch constraints]:
+              In particular, if that single-pass analysis arrives at an instruction, call it location X, that 
+              immediately follows an unconditional branch, and where X is not the target of an earlier branch 
+              instruction, then the state of the evaluation stack at X, clearly, cannot be derived from existing 
+              information. In this case, the CLI demands that the evaluation stack at X be empty.
+            
+            In practice, DynamicMethods don't need to follow this rule *but* that doesn't mean stricter
+            verification won't be needed elsewhere.
+            
+            If this is set, then an "expectation of empty stack" transition is inserted before unconditional branches
+            where needed.
+        </member>
         <member name="T:Sigil.NonGeneric.Emit">
             <summary>
             Helper for CIL generation that fails as soon as a sequence of instructions
@@ -2237,13 +2271,19 @@
             Copies the given value type from the source to the destination.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean,System.Boolean)">
             <summary>
             Creates a new EmitNonGeneric, optionally using the provided name and module for the inner DynamicMethod.
             
             If name is not defined, a sane default is generated.
             
             If module is not defined, a module with the same trust as the executing assembly is used instead.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.CreateDelegate(System.Type,System.String@,Sigil.OptimizationOptions)">
@@ -2298,23 +2338,29 @@
             Once this method is called the Emit may no longer be modified.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
             The DelegateType and MethodBuilder must agree on return types, parameter types, and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating instance methods.
             
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating static methods.
             
@@ -2351,13 +2397,19 @@
             Returns a MethodBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
             The DelegateType and TypeBuilder must agree on parameter types and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.CreateConstructor(System.String@,Sigil.OptimizationOptions)">

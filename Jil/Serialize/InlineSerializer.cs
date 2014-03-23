@@ -287,10 +287,8 @@ namespace Jil.Serialize
                         return;
                     }
 
-                    WriteList(serializingType, loc);
+                    throw new Exception("Shouldn't be possible");
                 }
-
-                return;
             }
 
             var isRecursive = RecursiveTypes.ContainsKey(serializingType);
@@ -364,6 +362,12 @@ namespace Jil.Serialize
             using (var loc = Emit.DeclareLocal(serializingType))
             {
                 Emit.StoreLocal(loc);   // TextWriter;
+
+                if (serializingType.IsEnumerableType())
+                {
+                    WriteEnumerable(serializingType, loc);
+                    return;
+                }
 
                 WriteObject(serializingType, loc);
             }
@@ -439,13 +443,20 @@ namespace Jil.Serialize
                             {
                                 if (underlyingType.IsDictionaryType())
                                 {
-                                    WriteList(underlyingType, loc);
+                                    WriteDictionary(underlyingType, loc);
                                 }
                                 else
                                 {
-                                    Emit.Pop();
+                                    if (underlyingType.IsEnumerableType())
+                                    {
+                                        WriteEnumerable(underlyingType, loc);
+                                    }
+                                    else
+                                    {
+                                        Emit.Pop();
 
-                                    WriteObject(underlyingType, loc);
+                                        WriteObject(underlyingType, loc);
+                                    }
                                 }
                             }
                         }
@@ -1747,14 +1758,17 @@ namespace Jil.Serialize
                 return;
             }
 
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            WriteEnumerable(listType, inLocal);
+        }
+
+        void WriteEnumerable(Type enumerableType, Sigil.Local inLocal = null)
+        {
+            var elementType = enumerableType.GetEnumerableInterface().GetGenericArguments()[0];
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
             var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
-
-            var iList = typeof(IList<>).MakeGenericType(elementType);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -1795,7 +1809,6 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);
                 }
 
-                Emit.CastClass(iList);                        // IList<>
                 Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<>
                 Emit.StoreLocal(e);                           // --empty--
 
@@ -1918,6 +1931,12 @@ namespace Jil.Serialize
                 if (elementType.IsDictionaryType())
                 {
                     WriteDictionary(elementType, loc);
+                    return;
+                }
+
+                if (elementType.IsEnumerableType())
+                {
+                    WriteEnumerable(elementType, loc);
                     return;
                 }
 
@@ -2450,6 +2469,15 @@ namespace Jil.Serialize
                     return;
                 }
 
+                if (elementType.IsEnumerableType())
+                {
+                    WriteEnumerable(elementType, loc);
+
+                    Emit.MarkLabel(done);
+
+                    return;
+                }
+
                 WriteObject(elementType, loc);
             }
 
@@ -2611,6 +2639,12 @@ namespace Jil.Serialize
                 if (elementType.IsDictionaryType())
                 {
                     WriteDictionary(elementType, loc);
+                    return;
+                }
+
+                if (elementType.IsEnumerableType())
+                {
+                    WriteEnumerable(elementType, loc);
                     return;
                 }
 
@@ -2922,6 +2956,22 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
+        Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate(bool doVerify)
+        {
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
+
+            AddCharBuffer(typeof(ForType));
+
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
+
+            WriteEnumerable(typeof(ForType));
+            Emit.Return();
+
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+        }
+
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
@@ -3023,6 +3073,11 @@ namespace Jil.Serialize
             if (forType.IsEnum)
             {
                 return BuildEnumWithNewDelegate(doVerify);
+            }
+
+            if (forType.IsEnumerableType())
+            {
+                return BuildEnumerableWithNewDelegate(doVerify);
             }
 
             return BuildObjectWithNewDelegate(doVerify);
