@@ -852,7 +852,7 @@
             Returns a ConstructorBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and module for the inner DynamicMethod.
             
@@ -860,26 +860,41 @@
             
             If module is not defined, a module with the same trust as the executing assembly is used instead.
             
-            By default, Sigil runs a rolling verification of the delegate being built.  Pass doVerify as false
-            to disable all verification.
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,System.Boolean)">
+        <member name="M:Sigil.Emit`1.NewDynamicMethod(System.Type,System.String,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, optionally using the provided name and owner for the inner DynamicMethod.
             
             If name is not defined, a sane default is generated.
             
             If owner is not defined, a module with the same trust as the executing assembly is used instead.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.Emit`1.BuildMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
             The DelegateType and MethodBuilder must agree on return types, parameter types, and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.BuildStaticMethod(System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean)">
@@ -896,13 +911,19 @@
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.Emit`1.BuildConstructor(System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
             The DelegateType and TypeBuilder must agree on parameter types and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.Duplicate">
@@ -2227,49 +2248,6 @@
             The ExceptionBlock this FinallyBlock appears as part of.
             </summary>
         </member>
-        <member name="T:Sigil.Impl.NonGenericPlaceholderDelegate">
-            <summary>
-            This is a placeholder type used from EmitNonGeneric to take the place of DelegateType in proper Emit.
-            </summary>
-        </member>
-        <member name="T:Sigil.Impl.NullType">
-            <summary>
-            This type represents a provably null value on the stack.
-            
-            Nulls typically arrive on the stack via LoadNull.
-            
-            Null can be assigned to any reference type safely, without the need for a CastClass.
-            
-            This type is exposed to allow for stack assertions containing null via Emit.MarkLabel.
-            </summary>
-        </member>
-        <member name="T:Sigil.Impl.NativeIntType">
-            <summary>
-            This type represents a "native int" on the stack.
-            
-            The size of native int varies depending on the architecture an assembly is executed on.
-            Raw pointers are often of type native int.
-            
-            This type is exposed to allow for stack assertions containing native int via Emit.MarkLabel.
-            </summary>
-        </member>
-        <member name="M:Sigil.Impl.TypeOnStack.Mark(Sigil.Impl.InstructionAndTransitions,System.Int32)">
-            <summary>
-            Call to indicate that something on the stack was used
-            as the #{index}'d (starting at 0) parameter to the {code} 
-            opcode.
-            </summary>
-        </member>
-        <member name="M:Sigil.Impl.TypeOnStack.CountMarks(System.Reflection.Emit.OpCode,System.Int32)">
-            <summary>
-            Returns the # of times this value was used as the given #{index}'d parameter to the {code} instruction.
-            </summary>
-        </member>
-        <member name="M:Sigil.Impl.TypeOnStack.CountMarks">
-            <summary>
-            Returns the total number of times this value was marked.
-            </summary>
-        </member>
         <member name="T:Sigil.Label">
             <summary>
             Represents a Label in a CIL stream, and thus a Leave and Branch target.
@@ -2370,6 +2348,228 @@
         <member name="P:Sigil.LocalLookup.Names">
             <summary>
             Returns the names of all the locals in scope
+            </summary>
+        </member>
+        <member name="T:Sigil.Operation`1">
+            <summary>
+            Represents a call to an Emit, used when providing introspection details about the generated IL stream.
+            </summary>
+        </member>
+        <member name="M:Sigil.Operation`1.ToString">
+            <summary>
+            A string representation of this Operation.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.OpCode">
+            <summary>
+            The OpCode that corresponds to an Emit call.
+            Note that the opcode may not correspond to the final short forms and other optimizations.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.Parameters">
+            <summary>
+            The parameters passsed to a call to Emit.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsExceptionBlockStart">
+            <summary>
+            This operation marks the beginning of an exception block,
+            which is analogous to a call to Emit.BeginExceptionBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsExceptionBlockEnd">
+            <summary>
+            This operation marks the end of an exception block,
+            which is analogous to a call to Emit.EndExceptionBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsCatchBlockStart">
+            <summary>
+            This operation marks the beginning of a catch block,
+            which is analogous to a call to Emit.BeginCatchBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsCatchBlockEnd">
+            <summary>
+            This operation marks the end of a catch block,
+            which is analogous to a call to Emit.EndCatchBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsFinallyBlockStart">
+            <summary>
+            This operation marks the beginning of a finally block,
+            which is analogous to a call to Emit.BeginFinallyBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsFinallyBlockEnd">
+            <summary>
+            This operation marks the end of a finally block,
+            which is analogous to a call to Emit.EndFinallyBlock.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsMarkLabel">
+            <summary>
+            This operation marks a label, the name of the label is given in LabelName.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.LabelName">
+            <summary>
+            If this operation marks a label, which is indicated by IsMarkLabel, then this property
+            returns the name of the label being marked.
+            </summary>
+        </member>
+        <member name="P:Sigil.Operation`1.IsOpCode">
+            <summary>
+            Returns true if this operation is emitted a CIL opcode.
+            </summary>
+        </member>
+        <member name="T:Sigil.OperationResultUsage`1">
+            <summary>
+            Represents an IL operation, and the subsequent operations that may use it's result.
+            </summary>
+        </member>
+        <member name="M:Sigil.OperationResultUsage`1.ToString">
+            <summary>
+            Returns a string representation of this OperationResultUsage.
+            </summary>
+        </member>
+        <member name="P:Sigil.OperationResultUsage`1.ProducesResult">
+            <summary>
+            The operation that is producing a result.
+            </summary>
+        </member>
+        <member name="P:Sigil.OperationResultUsage`1.ResultUsedBy">
+            <summary>
+            The operations that may use the result produced by the ProducesResult operation.
+            </summary>
+        </member>
+        <member name="T:Sigil.OptimizationOptions">
+            <summary>
+            Sigil can perform optimizations to the emitted IL. This enum tells Sigil which optimizations to perform.
+            </summary>
+        </member>
+        <member name="F:Sigil.OptimizationOptions.None">
+            <summary>
+            Perform no optional optimizations.
+            </summary>
+        </member>
+        <member name="F:Sigil.OptimizationOptions.EnableBranchPatching">
+            <summary>
+            Choose optimal branch instructions.
+            </summary>
+        </member>
+        <member name="F:Sigil.OptimizationOptions.EnableTrivialCastEliding">
+            <summary>
+            Elide CastClass and IsInstance instructions which are no-ops, such as casting a System.String to a System.Object.
+            </summary>
+        </member>
+        <member name="F:Sigil.OptimizationOptions.All">
+            <summary>
+            Perform all optimizations.
+            </summary>
+        </member>
+        <member name="T:Sigil.Parameter">
+            <summary>
+            Represents a parameter to a decompiled delegate.
+            </summary>
+        </member>
+        <member name="M:Sigil.Parameter.ToString">
+            <summary>
+            Returns a string representation of this Parameter.
+            </summary>
+        </member>
+        <member name="P:Sigil.Parameter.Position">
+            <summary>
+            The index of the parameter.
+            </summary>
+        </member>
+        <member name="P:Sigil.Parameter.ParameterType">
+            <summary>
+            The type of the parameter.
+            </summary>
+        </member>
+        <member name="T:Sigil.SigilVerificationException">
+            <summary>
+            A SigilVerificationException is thrown whenever a CIL stream becomes invalid.
+            
+            There are many possible causes of this including: operator type mismatches, underflowing the stack, and branching from one stack state to another.
+            
+            Invalid arguments, non-sensical parameters, and other non-correctness related errors will throw more specific exceptions.
+            
+            SigilVerificationException will typically include the state of the stack (or stacks) at the instruction in error.
+            </summary>
+        </member>
+        <member name="M:Sigil.SigilVerificationException.GetDebugInfo">
+            <summary>
+            Returns a string representation of any stacks attached to this exception.
+            
+            This is meant for debugging purposes, and should not be called during normal operation.
+            </summary>
+        </member>
+        <member name="M:Sigil.SigilVerificationException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Implementation for ISerializable.
+            </summary>
+        </member>
+        <member name="M:Sigil.SigilVerificationException.ToString">
+            <summary>
+            Returns the message and stacks on this exception, in string form.
+            </summary>
+        </member>
+        <member name="T:Sigil.Impl.NonGenericPlaceholderDelegate">
+            <summary>
+            This is a placeholder type used from EmitNonGeneric to take the place of DelegateType in proper Emit.
+            </summary>
+        </member>
+        <member name="F:Sigil.Impl.RollingVerifier.UsesStrictBranchVerification">
+            From the spec [see section - III.1.7.5 Backward branch constraints]:
+              In particular, if that single-pass analysis arrives at an instruction, call it location X, that 
+              immediately follows an unconditional branch, and where X is not the target of an earlier branch 
+              instruction, then the state of the evaluation stack at X, clearly, cannot be derived from existing 
+              information. In this case, the CLI demands that the evaluation stack at X be empty.
+            
+            In practice, DynamicMethods don't need to follow this rule *but* that doesn't mean stricter
+            verification won't be needed elsewhere.
+            
+            If this is set, then an "expectation of empty stack" transition is inserted before unconditional branches
+            where needed.
+        </member>
+        <member name="T:Sigil.Impl.NullType">
+            <summary>
+            This type represents a provably null value on the stack.
+            
+            Nulls typically arrive on the stack via LoadNull.
+            
+            Null can be assigned to any reference type safely, without the need for a CastClass.
+            
+            This type is exposed to allow for stack assertions containing null via Emit.MarkLabel.
+            </summary>
+        </member>
+        <member name="T:Sigil.Impl.NativeIntType">
+            <summary>
+            This type represents a "native int" on the stack.
+            
+            The size of native int varies depending on the architecture an assembly is executed on.
+            Raw pointers are often of type native int.
+            
+            This type is exposed to allow for stack assertions containing native int via Emit.MarkLabel.
+            </summary>
+        </member>
+        <member name="M:Sigil.Impl.TypeOnStack.Mark(Sigil.Impl.InstructionAndTransitions,System.Int32)">
+            <summary>
+            Call to indicate that something on the stack was used
+            as the #{index}'d (starting at 0) parameter to the {code} 
+            opcode.
+            </summary>
+        </member>
+        <member name="M:Sigil.Impl.TypeOnStack.CountMarks(System.Reflection.Emit.OpCode,System.Int32)">
+            <summary>
+            Returns the # of times this value was used as the given #{index}'d parameter to the {code} instruction.
+            </summary>
+        </member>
+        <member name="M:Sigil.Impl.TypeOnStack.CountMarks">
+            <summary>
+            Returns the total number of times this value was marked.
             </summary>
         </member>
         <member name="T:Sigil.NonGeneric.Emit">
@@ -2974,13 +3174,19 @@
             Copies the given value type from the source to the destination.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.NewDynamicMethod(System.Type,System.Type[],System.String,System.Reflection.Emit.ModuleBuilder,System.Boolean,System.Boolean)">
             <summary>
             Creates a new EmitNonGeneric, optionally using the provided name and module for the inner DynamicMethod.
             
             If name is not defined, a sane default is generated.
             
             If module is not defined, a module with the same trust as the executing assembly is used instead.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.CreateDelegate(System.Type,System.String@,Sigil.OptimizationOptions)">
@@ -3035,23 +3241,29 @@
             Once this method is called the Emit may no longer be modified.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a method on the given TypeBuilder.
             
             The DelegateType and MethodBuilder must agree on return types, parameter types, and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildInstanceMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating instance methods.
             
             Equivalent to calling to BuildMethod, but with CallingConventions.HasThis.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildStaticMethod(System.Type,System.Type[],System.Reflection.Emit.TypeBuilder,System.String,System.Reflection.MethodAttributes,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Convenience method for creating static methods.
             
@@ -3088,13 +3300,19 @@
             Returns a MethodBuilder, which can be used to define overrides or for further inspection.
             </summary>
         </member>
-        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean)">
+        <member name="M:Sigil.NonGeneric.Emit.BuildConstructor(System.Type[],System.Reflection.Emit.TypeBuilder,System.Reflection.MethodAttributes,System.Reflection.CallingConventions,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             Creates a new Emit, suitable for building a constructo on the given TypeBuilder.
             
             The DelegateType and TypeBuilder must agree on parameter types and parameter counts.
             
             If you intend to use unveriable code, you must set allowUnverifiableCode to true.
+            
+            If doVerify is false (default is true) Sigil will *not* throw an exception on invalid IL.  This is faster, but the benefits
+            of Sigil are reduced to "a nicer ILGenerator interface".
+            
+            If strictBranchValidation is true (default is false) Sigil will enforce "Backward branch constraints" which are *technically* required
+            for valid CIL, but in practice often ignored.  The most common case to set this option is if you are generating types to write to disk.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.CreateConstructor(System.String@,Sigil.OptimizationOptions)">
@@ -4433,172 +4651,6 @@
         <member name="P:Sigil.NonGeneric.EmitShorthand.Labels">
             <summary>
             Lookup for declared labels by name.
-            </summary>
-        </member>
-        <member name="T:Sigil.Operation`1">
-            <summary>
-            Represents a call to an Emit, used when providing introspection details about the generated IL stream.
-            </summary>
-        </member>
-        <member name="M:Sigil.Operation`1.ToString">
-            <summary>
-            A string representation of this Operation.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.OpCode">
-            <summary>
-            The OpCode that corresponds to an Emit call.
-            Note that the opcode may not correspond to the final short forms and other optimizations.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.Parameters">
-            <summary>
-            The parameters passsed to a call to Emit.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsExceptionBlockStart">
-            <summary>
-            This operation marks the beginning of an exception block,
-            which is analogous to a call to Emit.BeginExceptionBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsExceptionBlockEnd">
-            <summary>
-            This operation marks the end of an exception block,
-            which is analogous to a call to Emit.EndExceptionBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsCatchBlockStart">
-            <summary>
-            This operation marks the beginning of a catch block,
-            which is analogous to a call to Emit.BeginCatchBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsCatchBlockEnd">
-            <summary>
-            This operation marks the end of a catch block,
-            which is analogous to a call to Emit.EndCatchBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsFinallyBlockStart">
-            <summary>
-            This operation marks the beginning of a finally block,
-            which is analogous to a call to Emit.BeginFinallyBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsFinallyBlockEnd">
-            <summary>
-            This operation marks the end of a finally block,
-            which is analogous to a call to Emit.EndFinallyBlock.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsMarkLabel">
-            <summary>
-            This operation marks a label, the name of the label is given in LabelName.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.LabelName">
-            <summary>
-            If this operation marks a label, which is indicated by IsMarkLabel, then this property
-            returns the name of the label being marked.
-            </summary>
-        </member>
-        <member name="P:Sigil.Operation`1.IsOpCode">
-            <summary>
-            Returns true if this operation is emitted a CIL opcode.
-            </summary>
-        </member>
-        <member name="T:Sigil.OperationResultUsage`1">
-            <summary>
-            Represents an IL operation, and the subsequent operations that may use it's result.
-            </summary>
-        </member>
-        <member name="M:Sigil.OperationResultUsage`1.ToString">
-            <summary>
-            Returns a string representation of this OperationResultUsage.
-            </summary>
-        </member>
-        <member name="P:Sigil.OperationResultUsage`1.ProducesResult">
-            <summary>
-            The operation that is producing a result.
-            </summary>
-        </member>
-        <member name="P:Sigil.OperationResultUsage`1.ResultUsedBy">
-            <summary>
-            The operations that may use the result produced by the ProducesResult operation.
-            </summary>
-        </member>
-        <member name="T:Sigil.OptimizationOptions">
-            <summary>
-            Sigil can perform optimizations to the emitted IL. This enum tells Sigil which optimizations to perform.
-            </summary>
-        </member>
-        <member name="F:Sigil.OptimizationOptions.None">
-            <summary>
-            Perform no optional optimizations.
-            </summary>
-        </member>
-        <member name="F:Sigil.OptimizationOptions.EnableBranchPatching">
-            <summary>
-            Choose optimal branch instructions.
-            </summary>
-        </member>
-        <member name="F:Sigil.OptimizationOptions.EnableTrivialCastEliding">
-            <summary>
-            Elide CastClass and IsInstance instructions which are no-ops, such as casting a System.String to a System.Object.
-            </summary>
-        </member>
-        <member name="F:Sigil.OptimizationOptions.All">
-            <summary>
-            Perform all optimizations.
-            </summary>
-        </member>
-        <member name="T:Sigil.Parameter">
-            <summary>
-            Represents a parameter to a decompiled delegate.
-            </summary>
-        </member>
-        <member name="M:Sigil.Parameter.ToString">
-            <summary>
-            Returns a string representation of this Parameter.
-            </summary>
-        </member>
-        <member name="P:Sigil.Parameter.Position">
-            <summary>
-            The index of the parameter.
-            </summary>
-        </member>
-        <member name="P:Sigil.Parameter.ParameterType">
-            <summary>
-            The type of the parameter.
-            </summary>
-        </member>
-        <member name="T:Sigil.SigilVerificationException">
-            <summary>
-            A SigilVerificationException is thrown whenever a CIL stream becomes invalid.
-            
-            There are many possible causes of this including: operator type mismatches, underflowing the stack, and branching from one stack state to another.
-            
-            Invalid arguments, non-sensical parameters, and other non-correctness related errors will throw more specific exceptions.
-            
-            SigilVerificationException will typically include the state of the stack (or stacks) at the instruction in error.
-            </summary>
-        </member>
-        <member name="M:Sigil.SigilVerificationException.GetDebugInfo">
-            <summary>
-            Returns a string representation of any stacks attached to this exception.
-            
-            This is meant for debugging purposes, and should not be called during normal operation.
-            </summary>
-        </member>
-        <member name="M:Sigil.SigilVerificationException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Implementation for ISerializable.
-            </summary>
-        </member>
-        <member name="M:Sigil.SigilVerificationException.ToString">
-            <summary>
-            Returns the message and stacks on this exception, in string form.
             </summary>
         </member>
     </members>
