@@ -476,6 +476,17 @@ namespace Jil.Common
             catch (Exception) { return false; }
         }
 
+        public static bool IsEnumerable(this Type t)
+        {
+            try
+            {
+                return
+                    (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)) ||
+                    t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            }
+            catch (Exception) { return false; }
+        }
+
         public static Type GetListInterface(this Type t)
         {
             return

@@ -287,10 +287,8 @@ namespace Jil.Serialize
                         return;
                     }
 
-                    WriteList(serializingType, loc);
+                    throw new Exception("Shouldn't be possible");
                 }
-
-                return;
             }
 
             var isRecursive = RecursiveTypes.ContainsKey(serializingType);
@@ -363,6 +361,12 @@ namespace Jil.Serialize
 
             using (var loc = Emit.DeclareLocal(serializingType))
             {
+                if (serializingType.IsEnumerable())
+                {
+                    WriteEnumerable(serializingType, loc);
+                    return;
+                }
+
                 Emit.StoreLocal(loc);   // TextWriter;
 
                 WriteObject(serializingType, loc);
@@ -439,13 +443,20 @@ namespace Jil.Serialize
                             {
                                 if (underlyingType.IsDictionaryType())
                                 {
-                                    WriteList(underlyingType, loc);
+                                    WriteDictionary(underlyingType, loc);
                                 }
                                 else
                                 {
-                                    Emit.Pop();
+                                    if (underlyingType.IsEnumerable())
+                                    {
+                                        WriteEnumerable(underlyingType, loc);
+                                    }
+                                    else
+                                    {
+                                        Emit.Pop();
 
-                                    WriteObject(underlyingType, loc);
+                                        WriteObject(underlyingType, loc);
+                                    }
                                 }
                             }
                         }
@@ -1867,6 +1878,11 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
+        void WriteEnumerable(Type enumerableType, Sigil.Local loc)
+        {
+            throw new NotImplementedException();
+        }
+
         void WriteElement(Type elementType)
         {
             if (elementType.IsPrimitiveType())
@@ -1918,6 +1934,12 @@ namespace Jil.Serialize
                 if (elementType.IsDictionaryType())
                 {
                     WriteDictionary(elementType, loc);
+                    return;
+                }
+
+                if (elementType.IsEnumerable())
+                {
+                    WriteEnumerable(elementType, loc);
                     return;
                 }
 
@@ -2450,6 +2472,15 @@ namespace Jil.Serialize
                     return;
                 }
 
+                if (elementType.IsEnumerable())
+                {
+                    WriteEnumerable(elementType, loc);
+
+                    Emit.MarkLabel(done);
+
+                    return;
+                }
+
                 WriteObject(elementType, loc);
             }
 
@@ -2611,6 +2642,12 @@ namespace Jil.Serialize
                 if (elementType.IsDictionaryType())
                 {
                     WriteDictionary(elementType, loc);
+                    return;
+                }
+
+                if (elementType.IsEnumerable())
+                {
+                    WriteEnumerable(elementType, loc);
                     return;
                 }
 
