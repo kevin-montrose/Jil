@@ -469,20 +469,20 @@ namespace Jil.DeserializeDynamic
 
         public static bool ReadNewtonsoftStyleDateTime(string str, out DateTime dt)
         {
-            // Format: \/Date(#####+####)\/
+            // Format: /Date(#####+####)/
 
             dt = DateTime.MinValue;
 
-            if(str.Length < 11) return false;
+            if (str.Length < 9) return false;
 
-            if (str[0] != '\\' || str[1] != '/' || str[2] != 'D' || str[3] != 'a' || str[4] != 't' || str[5] != 'e' || str[6] != '(')
+            if (str[0] != '/' || str[1] != 'D' || str[2] != 'a' || str[3] != 't' || str[4] != 'e' || str[5] != '(')
             {
                 return false;
             }
 
             bool negative = false;
 
-            var ix = 7;
+            var ix = 6;
             var c = str[ix];
             if (c == '-')
             {
@@ -494,7 +494,7 @@ namespace Jil.DeserializeDynamic
             if (c < '0' || c > '9') return false;
 
             long l = 0;
-            for(var i = 0; ix < str.Length - 1 && i < 20; i++)
+            for (var i = 0; ix < str.Length - 1 && i < 20; i++)
             {
                 l *= 10;
                 l += (c - '0');
@@ -505,29 +505,28 @@ namespace Jil.DeserializeDynamic
 
             if (negative) l = -l;
 
-            if(ix == str.Length) return false;
+            if (ix == str.Length) return false;
             var isPlus = str[ix] == '+';
-            if(isPlus){
+            if (isPlus)
+            {
                 ix++;
-                for(var i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                 {
-                    if(ix == str.Length) return false;
+                    if (ix == str.Length) return false;
                     c = str[ix];
-                    if(c < '0' || c > '9') return false;
+                    if (c < '0' || c > '9') return false;
                     ix++;
                 }
             }
 
             var remainingLen = str.Length - ix;
-            if(remainingLen != 3) return false;
+            if (remainingLen != 2) return false;
             if (str[ix] != ')') return false;
             ix++;
-            if(str[ix] != '\\') return false;
-            ix++;
-            if(str[ix] != '/') return false;
+            if (str[ix] != '/') return false;
 
             dt = UnixEpoch + TimeSpan.FromMilliseconds(l);
-            return false;
+            return true;
         }
     }
 }
