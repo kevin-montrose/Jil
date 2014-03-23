@@ -476,7 +476,7 @@ namespace Jil.Common
             catch (Exception) { return false; }
         }
 
-        public static bool IsEnumerable(this Type t)
+        public static bool IsEnumerableType(this Type t)
         {
             try
             {
@@ -493,6 +493,14 @@ namespace Jil.Common
                 (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ?
                 t :
                 t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+        }
+
+        public static Type GetEnumerableInterface(this Type t)
+        {
+            return
+                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)) ?
+                t :
+                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
         }
 
         public static Type GetCollectionInterface(this Type t)
@@ -778,6 +786,14 @@ namespace Jil.Common
                     continue;
                 }
 
+                if (cur.IsEnumerableType())
+                {
+                    var val = cur.GetEnumerableInterface().GetGenericArguments()[0];
+                    pending.Push(val);
+
+                    continue;
+                }
+
                 cur.GetFields().ForEach(f => pending.Push(f.FieldType));
                 cur.GetProperties().Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Length == 0).ForEach(p => pending.Push(p.PropertyType));
             }
@@ -812,6 +828,14 @@ namespace Jil.Common
                 {
                     var dictI = curType.GetDictionaryInterface();
                     var valType = dictI.GetGenericArguments()[1];
+                    pending.Add(valType);
+                    continue;
+                }
+
+                if (curType.IsEnumerableType())
+                {
+                    var enumI = curType.GetEnumerableInterface();
+                    var valType = enumI.GetGenericArguments()[0];
                     pending.Add(valType);
                     continue;
                 }

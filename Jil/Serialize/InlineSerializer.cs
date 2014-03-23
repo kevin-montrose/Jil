@@ -361,13 +361,13 @@ namespace Jil.Serialize
 
             using (var loc = Emit.DeclareLocal(serializingType))
             {
-                if (serializingType.IsEnumerable())
+                Emit.StoreLocal(loc);   // TextWriter;
+
+                if (serializingType.IsEnumerableType())
                 {
                     WriteEnumerable(serializingType, loc);
                     return;
                 }
-
-                Emit.StoreLocal(loc);   // TextWriter;
 
                 WriteObject(serializingType, loc);
             }
@@ -447,7 +447,7 @@ namespace Jil.Serialize
                                 }
                                 else
                                 {
-                                    if (underlyingType.IsEnumerable())
+                                    if (underlyingType.IsEnumerableType())
                                     {
                                         WriteEnumerable(underlyingType, loc);
                                     }
@@ -1758,14 +1758,17 @@ namespace Jil.Serialize
                 return;
             }
 
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            WriteEnumerable(listType, inLocal);
+        }
+
+        void WriteEnumerable(Type enumerableType, Sigil.Local inLocal = null)
+        {
+            var elementType = enumerableType.GetEnumerableInterface().GetGenericArguments()[0];
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
             var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
-
-            var iList = typeof(IList<>).MakeGenericType(elementType);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -1806,7 +1809,6 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);
                 }
 
-                Emit.CastClass(iList);                        // IList<>
                 Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<>
                 Emit.StoreLocal(e);                           // --empty--
 
@@ -1878,11 +1880,6 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteEnumerable(Type enumerableType, Sigil.Local loc)
-        {
-            throw new NotImplementedException();
-        }
-
         void WriteElement(Type elementType)
         {
             if (elementType.IsPrimitiveType())
@@ -1937,7 +1934,7 @@ namespace Jil.Serialize
                     return;
                 }
 
-                if (elementType.IsEnumerable())
+                if (elementType.IsEnumerableType())
                 {
                     WriteEnumerable(elementType, loc);
                     return;
@@ -2472,7 +2469,7 @@ namespace Jil.Serialize
                     return;
                 }
 
-                if (elementType.IsEnumerable())
+                if (elementType.IsEnumerableType())
                 {
                     WriteEnumerable(elementType, loc);
 
@@ -2645,7 +2642,7 @@ namespace Jil.Serialize
                     return;
                 }
 
-                if (elementType.IsEnumerable())
+                if (elementType.IsEnumerableType())
                 {
                     WriteEnumerable(elementType, loc);
                     return;
@@ -2959,6 +2956,22 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
         }
 
+        Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate(bool doVerify)
+        {
+            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+
+            Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
+
+            AddCharBuffer(typeof(ForType));
+
+            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
+
+            WriteEnumerable(typeof(ForType));
+            Emit.Return();
+
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+        }
+
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(bool doVerify)
         {
             var recursiveTypes = typeof(ForType).FindRecursiveTypes();
@@ -3060,6 +3073,11 @@ namespace Jil.Serialize
             if (forType.IsEnum)
             {
                 return BuildEnumWithNewDelegate(doVerify);
+            }
+
+            if (forType.IsEnumerableType())
+            {
+                return BuildEnumerableWithNewDelegate(doVerify);
             }
 
             return BuildObjectWithNewDelegate(doVerify);

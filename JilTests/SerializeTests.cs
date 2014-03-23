@@ -6181,5 +6181,40 @@ namespace JilTests
                 }
             }
         }
+
+        class _Enumerables
+        {
+            public IEnumerable<int> A;
+            public Dictionary<int, IEnumerable<int>> B;
+            public List<IEnumerable<double>> C;
+            public IEnumerable<IEnumerable<string>> D;
+        }
+
+        [TestMethod]
+        public void Enumerables()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _Enumerables
+                    {
+                        A = new [] { 1, 2, 3 },
+                        B = new Dictionary<int,IEnumerable<int>> { {1, new[] {2, 3} }, {2, new [] { 4, 5 }}},
+                        C = new List<IEnumerable<double>> { new [] { 1.1, 2.2, 3.3 }, new [] { 4.4, 5.5, 6.6 }},
+                        D = new [] { new [] { "hello", "world" }, new [] { "foo", "bar" } }
+                    },
+                    str
+                );
+                var res = str.ToString();
+                Assert.AreEqual("{\"A\":[1,2,3],\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<IEnumerable<int>>(new[] { 1, 2, 3 }, str);
+                var res = str.ToString();
+                Assert.AreEqual("[1,2,3]", res);
+            }
+        }
     }
 }
