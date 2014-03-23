@@ -506,8 +506,8 @@ namespace Jil.DeserializeDynamic
             if (negative) l = -l;
 
             if (ix == str.Length) return false;
-            var isPlus = str[ix] == '+';
-            if (isPlus)
+            var hasTimeZone = str[ix] == '+' || str[ix] == '-';
+            if (hasTimeZone)
             {
                 ix++;
                 for (var i = 0; i < 4; i++)

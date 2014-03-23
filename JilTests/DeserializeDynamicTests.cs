@@ -1039,7 +1039,8 @@ namespace JilTests
                 DateTime jilDt, jilDtUtc;
                 using (var str = new StringReader(asStr))
                 {
-                    jilDt = JSON.DeserializeDynamic(str);
+                    var dyn = JSON.DeserializeDynamic(str);
+                    jilDt = dyn;
                     jilDtUtc = ((DateTime)jilDt).ToUniversalTime();
                 }
 
