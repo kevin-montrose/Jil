@@ -71,6 +71,9 @@
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
     <Compile Include="DeserializeDynamic\Methods.cs" />
+    <Compile Include="DeserializeDynamic\Methods.ISO8601.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousMemberMatcher.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />

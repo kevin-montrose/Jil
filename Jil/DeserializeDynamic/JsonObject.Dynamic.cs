@@ -334,15 +334,19 @@ namespace Jil.DeserializeDynamic
                     }
                     if (returnType == typeof(DateTime))
                     {
+                        DateTime res;
+                        bool ret;
+
                         switch(Options.UseDateTimeFormat)
                         {
                             case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                                DateTime res;
-                                var ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out res);
+                                ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out res);
                                 result = res;
                                 return ret;
                             case DateTimeFormat.ISO8601:
-                                throw new NotImplementedException();
+                                ret = Methods.ReadISO8601DateTime(StringValue, out res);
+                                result = res;
+                                return ret;
                             default:
                                 result = null;
                                 return false;

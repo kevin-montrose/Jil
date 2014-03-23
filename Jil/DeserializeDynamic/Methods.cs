@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Jil.DeserializeDynamic
 {
-    static class Methods
+    static partial class Methods
     {
         internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
