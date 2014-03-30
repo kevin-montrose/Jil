@@ -1049,5 +1049,61 @@ namespace JilTests
                 Assert.IsTrue((shouldMatchUtc - jilDtUtc).Duration().TotalMilliseconds == 0);
             }
         }
+
+        [TestMethod]
+        public void IEnumerableDynamic()
+        {
+            using (var str = new StringReader("[1, 2, 3.3, \"hello\"]"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                var ie = (IEnumerable<dynamic>)res;
+                Assert.AreEqual(4, ie.Count());
+                Assert.AreEqual(1, (int)ie.ElementAt(0));
+                Assert.AreEqual(2, (int)ie.ElementAt(1));
+                Assert.AreEqual(3.3f, (float)ie.ElementAt(2));
+                Assert.AreEqual("hello", (string)ie.ElementAt(3));
+            }
+
+            using (var str = new StringReader("{\"a\": [1, 2, 3.3, \"hello\"]}"))
+            {
+                var res = JSON.DeserializeDynamic(str);
+                var ie = (IEnumerable<dynamic>)res.a;
+                Assert.AreEqual(4, ie.Count());
+                Assert.AreEqual(1, (int)ie.ElementAt(0));
+                Assert.AreEqual(2, (int)ie.ElementAt(1));
+                Assert.AreEqual(3.3f, (float)ie.ElementAt(2));
+                Assert.AreEqual("hello", (string)ie.ElementAt(3));
+            }
+        }
+
+        [TestMethod]
+        public void Nullables()
+        {
+            using (var str = new StringReader("[null, 1]"))
+            {
+                var res = (IEnumerable<dynamic>)JSON.DeserializeDynamic(str);
+                Assert.AreEqual((byte?)null, (byte?)res.ElementAt(0));
+                Assert.AreEqual((byte?)1, (byte?)res.ElementAt(1));
+                Assert.AreEqual((ushort?)null, (ushort?)res.ElementAt(0));
+                Assert.AreEqual((ushort?)1, (ushort?)res.ElementAt(1));
+                Assert.AreEqual((uint?)null, (uint?)res.ElementAt(0));
+                Assert.AreEqual((uint?)1, (uint?)res.ElementAt(1));
+                Assert.AreEqual((ulong?)null, (ulong?)res.ElementAt(0));
+                Assert.AreEqual((ulong?)1, (ulong?)res.ElementAt(1));
+            }
+
+            using (var str = new StringReader("[null, -1]"))
+            {
+                var res = (IEnumerable<dynamic>)JSON.DeserializeDynamic(str);
+                Assert.AreEqual((sbyte?)null, (sbyte?)res.ElementAt(0));
+                Assert.AreEqual((sbyte?)-1, (sbyte?)res.ElementAt(1));
+                Assert.AreEqual((short?)null, (short?)res.ElementAt(0));
+                Assert.AreEqual((short?)-1, (short?)res.ElementAt(1));
+                Assert.AreEqual((int?)null, (int?)res.ElementAt(0));
+                Assert.AreEqual((int?)-1, (int?)res.ElementAt(1));
+                Assert.AreEqual((long?)null, (long?)res.ElementAt(0));
+                Assert.AreEqual((long?)-1, (long?)res.ElementAt(1));
+            }
+        }
     }
 }

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Jil.Common;
+using System.Dynamic;
 
 namespace Jil.DeserializeDynamic
 {
-    sealed partial class JsonObject
+    sealed partial class JsonObject : DynamicObject
     {
         public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
         {
@@ -67,7 +68,6 @@ namespace Jil.DeserializeDynamic
         }
 
         static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
-
         public override IEnumerable<string> GetDynamicMemberNames()
         {
             if (Type == JsonObjectType.Object)
@@ -82,7 +82,6 @@ namespace Jil.DeserializeDynamic
 
             return Enumerable.Empty<string>();
         }
-
         public override bool TryGetMember(System.Dynamic.GetMemberBinder binder, out object result)
         {
             if (Type == JsonObjectType.Array)
@@ -106,8 +105,10 @@ namespace Jil.DeserializeDynamic
             JsonObject val;
             if (!ObjectMembers.TryGetValue(binder.Name, out val))
             {
+                // for fetching a MEMBER, return null if we don't have it
+                // that was `var foo = obj.misssing_prop == null;` can work
                 result = null;
-                return false;
+                return true;
             }
 
             if (val == null)
@@ -125,6 +126,11 @@ namespace Jil.DeserializeDynamic
             {
                 result = this;
                 return true;
+            }
+
+            if (returnType.IsNullableType())
+            {
+                returnType = Nullable.GetUnderlyingType(returnType);
             }
 
             switch (Type)
@@ -421,6 +427,14 @@ namespace Jil.DeserializeDynamic
                     {
                         var castTo = returnType.GetGenericArguments()[0];
 
+                        if (castTo == typeof(object))
+                        {
+                            result = ArrayValue;
+                            return true;
+                        }
+
+                        bool bail = false;
+
                         var dynamicProjection =
                             ArrayValue.Select(
                                 val =>
@@ -428,7 +442,8 @@ namespace Jil.DeserializeDynamic
                                     object innerResult;
                                     if (!val.InnerTryConvert(castTo, out innerResult))
                                     {
-                                        throw new Microsoft.CSharp.RuntimeBinder.RuntimeBinderException("Cannot convert " + val.GetType().FullName + " to " + castTo.FullName);
+                                        bail = true;
+                                        return Activator.CreateInstance(castTo);
                                     }
 
                                     return innerResult;
@@ -436,6 +451,13 @@ namespace Jil.DeserializeDynamic
                             );
 
                         result = Utils.DynamicProject(dynamicProjection, castTo);
+
+                        if (bail)
+                        {
+                            result = null;
+                            return false;
+                        }
+
                         return true;
                     }
                     break;
