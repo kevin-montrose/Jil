@@ -38,6 +38,14 @@ namespace Benchmark.Models
                         this.tag_background_color.TrueEqualsString(obj.tag_background_color) &&
                         this.tag_foreground_color.TrueEqualsString(obj.tag_foreground_color);
                 }
+
+                public bool EqualsDynamic(dynamic obj)
+                {
+                    return
+                        this.link_color.TrueEqualsString((string)obj.link_color) &&
+                        this.tag_background_color.TrueEqualsString((string)obj.tag_background_color) &&
+                        this.tag_foreground_color.TrueEqualsString((string)obj.tag_foreground_color);
+                }
             }
 
             [ProtoMember(1)]
@@ -99,6 +107,29 @@ namespace Benchmark.Models
                     this.styling.TrueEquals(obj.styling) &&
                     this.twitter_account.TrueEqualsString(obj.twitter_account);
             }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.aliases.TrueEqualsString((IEnumerable<string>)obj.aliases) &&
+                    this.api_site_parameter.TrueEqualsString((string)obj.api_site_parameter) &&
+                    this.audience.TrueEqualsString((string)obj.audience) &&
+                    this.closed_beta_date.TrueEquals((DateTime?)obj.closed_beta_date) &&
+                    this.favicon_url.TrueEqualsString((string)obj.favicon_url) &&
+                    this.high_resolution_icon_url.TrueEqualsString((string)obj.high_resolution_icon_url) &&
+                    this.icon_url.TrueEqualsString((string)obj.icon_url) &&
+                    this.launch_date.TrueEquals((DateTime?)obj.launch_date) &&
+                    this.logo_url.TrueEqualsString((string)obj.logo_url) &&
+                    this.markdown_extensions.TrueEqualsString((IEnumerable<string>)obj.markdown_extensions) &&
+                    this.name.TrueEqualsString((string)obj.name) &&
+                    this.open_beta_date.TrueEquals((DateTime?)obj.open_beta_date) &&
+                    this.related_sites.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.related_sites) &&
+                    this.site_state.TrueEquals((SiteState?)obj.site_state) &&
+                    this.site_type.TrueEqualsString((string)obj.site_type) &&
+                    this.site_url.TrueEqualsString((string)obj.site_url) &&
+                    (this.styling == null && obj.styling == null || this.styling.EqualsDynamic(obj.styling)) &&
+                    this.twitter_account.TrueEqualsString((string)obj.twitter_account);
+            }
         }
 
         [ProtoContract]
@@ -126,6 +157,14 @@ namespace Benchmark.Models
                     this.name.TrueEqualsString(obj.name) &&
                     this.relation.TrueEquals(obj.relation) &&
                     this.api_site_parameter.TrueEqualsString(obj.api_site_parameter);
+            }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.name.TrueEqualsString((string)obj.name) &&
+                    this.relation.TrueEquals((SiteRelation?)obj.relation) &&
+                    this.api_site_parameter.TrueEqualsString((string)obj.api_site_parameter);
             }
         }
 
@@ -175,6 +214,25 @@ namespace Benchmark.Models
                 this.total_unanswered.TrueEquals(obj.total_unanswered) &&
                 this.total_users.TrueEquals(obj.total_users) &&
                 this.total_votes.TrueEquals(obj.total_votes);
+        }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.answers_per_minute.TrueEquals((decimal?)obj.answers_per_minute) &&
+                this.api_revision.TrueEqualsString((string)obj.api_revision) &&
+                this.badges_per_minute.TrueEquals((decimal?)obj.badges_per_minute) &&
+                this.new_active_users.TrueEquals((int?)obj.new_active_users) &&
+                this.questions_per_minute.TrueEquals((decimal?)obj.questions_per_minute) &&
+                (this.site == null && obj.site == null || this.site.EqualsDynamic(obj.site)) &&
+                this.total_accepted.TrueEquals((int?)obj.total_accepted) &&
+                this.total_answers.TrueEquals((int?)obj.total_answers) &&
+                this.total_badges.TrueEquals((int?)obj.total_badges) &&
+                this.total_comments.TrueEquals((int?)obj.total_comments) &&
+                this.total_questions.TrueEquals((int?)obj.total_questions) &&
+                this.total_unanswered.TrueEquals((int?)obj.total_unanswered) &&
+                this.total_users.TrueEquals((int?)obj.total_users) &&
+                this.total_votes.TrueEquals((int?)obj.total_votes);
         }
     }
 }

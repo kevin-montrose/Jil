@@ -36,5 +36,17 @@ namespace Benchmark.Models
                 this.last_excerpt_editor.TrueEquals(obj.last_excerpt_editor) &&
                 this.tag_name.TrueEqualsString(obj.tag_name);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.body_last_edit_date.TrueEquals((DateTime?)obj.body_last_edit_date) &&
+                this.excerpt.TrueEqualsString((string)obj.excerpt) &&
+                this.excerpt_last_edit_date.TrueEquals((DateTime?)obj.excerpt_last_edit_date) &&
+                (this.last_body_editor == null && obj.last_body_editor == null || this.last_body_editor.EqualsDynamic(obj.last_body_editor)) &&
+                (this.last_excerpt_editor == null && obj.last_excerpt_editor == null || this.last_excerpt_editor.EqualsDynamic(obj.last_excerpt_editor)) &&
+                this.tag_name.TrueEqualsString((string)obj.tag_name);
+        }
     }
 }

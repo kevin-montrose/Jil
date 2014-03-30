@@ -52,5 +52,18 @@ namespace Benchmark.Models
                 this.rank.TrueEquals(obj.rank) &&
                 this.user.TrueEquals(obj.user);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.award_count.TrueEquals((int?)obj.award_count) &&
+                this.badge_id.TrueEquals((int?)obj.badge_id) &&
+                this.badge_type.TrueEquals((BadgeType?)obj.badge_type) &&
+                this.description.TrueEqualsString((string)obj.description) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                this.name.TrueEqualsString((string)obj.name) &&
+                this.rank.TrueEquals((BadgeRank?)obj.rank) &&
+                (this.user == null && obj.user == null || this.user.EqualsDynamic(obj.user));
+        }
     }
 }

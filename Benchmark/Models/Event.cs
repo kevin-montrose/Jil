@@ -39,5 +39,15 @@ namespace Benchmark.Models
                 this.excerpt.TrueEqualsString(obj.excerpt) &&
                 this.link.TrueEqualsString(obj.link);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.event_id.TrueEquals((int?)obj.event_id) &&
+                this.event_type.TrueEquals((EventType?)obj.event_type) &&
+                this.excerpt.TrueEqualsString((string)obj.excerpt) &&
+                this.link.TrueEqualsString((string)obj.link);
+        }
     }
 }

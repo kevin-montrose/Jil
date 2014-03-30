@@ -75,5 +75,28 @@ namespace Benchmark.Models
                 this.tags.TrueEqualsString(obj.tags) &&
                 this.title.TrueEqualsString(obj.title);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                this.answer_id.TrueEquals((int?)obj.answer_id) &&
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.closed_date.TrueEquals((DateTime?)obj.closed_date) &&
+                this.community_owned_date.TrueEquals((DateTime?)obj.community_owned_date) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.excerpt.TrueEqualsString((string)obj.excerpt) &&
+                this.is_accepted.TrueEquals((bool?)obj.is_accepted) &&
+                this.is_answered.TrueEquals((bool?)obj.is_answered) &&
+                this.item_type.TrueEquals((SearchExcerptItemType?)obj.item_type) &&
+                this.last_activity_date.TrueEquals((DateTime?)obj.last_activity_date) &&
+                (this.last_activity_user == null && obj.last_activity_user == null || this.last_activity_user.EqualsDynamic(obj.last_activity_user)) &&
+                this.locked_date.TrueEquals((DateTime?)obj.locked_date) &&
+                (this.owner == null && obj.owner == null || this.owner.EqualsDynamic(obj.owner)) &&
+                this.question_id.TrueEquals((int?)obj.question_id) &&
+                this.score.TrueEquals((int?)obj.score) &&
+                this.tags.TrueEqualsString((IEnumerable<string>)obj.tags) &&
+                this.title.TrueEqualsString((string)obj.title);
+        }
     }
 }

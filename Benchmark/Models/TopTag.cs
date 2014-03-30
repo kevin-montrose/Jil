@@ -33,5 +33,16 @@ namespace Benchmark.Models
                 this.tag_name.TrueEqualsString(obj.tag_name) &&
                 this.user_id.TrueEquals(obj.user_id);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                this.answer_score.TrueEquals((int?)obj.answer_score) &&
+                this.question_count.TrueEquals((int?)obj.question_count) &&
+                this.question_score.TrueEquals((int?)obj.question_score) &&
+                this.tag_name.TrueEqualsString((string)obj.tag_name) &&
+                this.user_id.TrueEquals((int?)obj.user_id);
+        }
     }
 }

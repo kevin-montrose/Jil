@@ -24,5 +24,13 @@ namespace Benchmark.Models
                 this.reputation.TrueEquals(obj.reputation) &&
                 this.short_description.TrueEqualsString(obj.short_description);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.description.TrueEqualsString((string)obj.description) &&
+                this.reputation.TrueEquals((int?)obj.reputation) &&
+                this.short_description.TrueEqualsString((string)obj.short_description);
+        }
     }
 }

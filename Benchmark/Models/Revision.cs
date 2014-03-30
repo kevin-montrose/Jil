@@ -69,5 +69,26 @@ namespace Benchmark.Models
                 this.title.TrueEqualsString(obj.title) &&
                 this.user.TrueEquals(obj.user);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.comment.TrueEqualsString((string)obj.comment) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.is_rollback.TrueEquals((bool?)obj.is_rollback) &&
+                this.last_body.TrueEqualsString((string)obj.last_body) &&
+                this.last_tags.TrueEqualsString((IEnumerable<string>)obj.last_tags) &&
+                this.last_title.TrueEqualsString((string)obj.last_title) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.post_type.TrueEquals((PostType?)obj.post_type) &&
+                this.revision_guid.TrueEqualsString((string)obj.revision_guid) &&
+                this.revision_number.TrueEquals((int?)obj.revision_number) &&
+                this.revision_type.TrueEquals((RevisionType?)obj.revision_type) &&
+                this.set_community_wiki.TrueEquals((bool?)obj.set_community_wiki) &&
+                this.tags.TrueEqualsString((IEnumerable<string>)obj.tags) &&
+                this.title.TrueEqualsString((string)obj.title) &&
+                (this.user == null && obj.user == null || this.user.EqualsDynamic(obj.user));
+        }
     }
 }

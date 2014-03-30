@@ -69,5 +69,28 @@ namespace Benchmark.Models
                 this.up_vote_count.TrueEquals(obj.up_vote_count) &&
                 this.upvoted.TrueEquals(obj.upvoted);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.body_markdown.TrueEqualsString((string)obj.body_markdown) &&
+                this.comment_count.TrueEquals((int?)obj.comment_count) &&
+                this.comments.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.comments) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.down_vote_count.TrueEquals((int?)obj.down_vote_count) &&
+                this.downvoted.TrueEquals((bool?)obj.downvoted) &&
+                this.last_activity_date.TrueEquals((DateTime?)obj.last_activity_date) &&
+                this.last_edit_date.TrueEquals((DateTime?)obj.last_edit_date) &&
+                (this.last_editor == null && obj.last_editor == null || this.last_editor.EqualsDynamic(obj.last_editor)) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                (this.owner == null && obj.owner == null || this.owner.EqualsDynamic(obj.owner)) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.post_type.TrueEquals((PostType?)obj.post_type) &&
+                this.score.TrueEquals((int?)obj.score) &&
+                this.share_link.TrueEqualsString((string)obj.share_link) &&
+                this.up_vote_count.TrueEquals((int?)obj.up_vote_count) &&
+                this.upvoted.TrueEquals((bool?)obj.upvoted);
+        }
     }
 }

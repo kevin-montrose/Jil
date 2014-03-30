@@ -118,7 +118,7 @@ namespace Benchmark
         }
 
         static MethodInfo _DoSpeedTest = typeof(Program).GetMethod("DoSpeedTest", BindingFlags.Static | BindingFlags.NonPublic);
-        static List<Result> DoSpeedTest<T, V>(string serializerName, string niceTypeName, Func<T, V> serializeFunc, Func<V, dynamic> deserializeFunc, T obj)
+        static List<Result> DoSpeedTest<T, V>(string serializerName, string niceTypeName, Func<T, V> serializeFunc, Func<V, T, dynamic> deserializeFunc, T obj)
             where T : class
             where V : class
         {
@@ -139,7 +139,7 @@ namespace Benchmark
 
             var deserializeResult =
                 testGroup
-                    .Plan("Deserialization", () => deserializeFunc(data), TestRuns)
+                    .Plan("Deserialization", () => deserializeFunc(data, obj), TestRuns)
                     .GetResult();
 
             Console.WriteLine("\t" + deserializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
@@ -232,9 +232,17 @@ namespace Benchmark
             return ret;
         }
 
-        static dynamic NewtonsoftDeserializeDynamic(string str)
+        static MethodInfo _NewtonsoftDeserializeDynamic = typeof(Program).GetMethod("NewtonsoftDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
+        static dynamic NewtonsoftDeserializeDynamic<T>(string str, T shouldMatch)
+            where T : IGenericEquality<T>
         {
-            return JsonConvert.DeserializeObject(str);
+            dynamic ret = JsonConvert.DeserializeObject(str);
+            if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
+            {
+                return ret;
+            }
+
+            throw new Exception("Deserialization failed");
         }
 
         static MethodInfo _NewtonsoftDeserialize = typeof(Program).GetMethod("NewtonsoftDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -245,16 +253,9 @@ namespace Benchmark
 
         static object GetNewtonsoftDeserializer(Type forType, string defaultVal)
         {
-            /*var mtd = _NewtonsoftDeserialize.MakeGenericMethod(forType);
-
-            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var mtd = _NewtonsoftDeserializeDynamic.MakeGenericMethod(forType);
+            var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
             var ret = Delegate.CreateDelegate(funcType, mtd);
-
-            ret.DynamicInvoke(new object[] { defaultVal });
-
-            return ret;*/
-
-            Func<string, dynamic> ret = str => NewtonsoftDeserializeDynamic(str);
 
             return ret;
         }
@@ -277,9 +278,17 @@ namespace Benchmark
             return ret;
         }
 
-        static dynamic ServiceStackDeserializeDynamic(string str)
+        static MethodInfo _ServiceStackDeserializeDynamic = typeof(Program).GetMethod("ServiceStackDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
+        static dynamic ServiceStackDeserializeDynamic<T>(string str, T shouldMatch)
+            where T : IGenericEquality<T>
         {
-            return ServiceStack.Text.JsonObject.Parse(str);
+            dynamic ret = ServiceStack.Text.JsonObject.Parse(str);
+            if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
+            {
+                return ret;
+            }
+
+            throw new Exception("Deserialization failed");
         }
 
         static MethodInfo _ServiceStackDeserialize = typeof(Program).GetMethod("ServiceStackDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -290,16 +299,9 @@ namespace Benchmark
 
         static object GetServiceStackDeserializer(Type forType, string defaultVal)
         {
-            /*var mtd = _ServiceStackDeserialize.MakeGenericMethod(forType);
-
-            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var mtd = _ServiceStackDeserializeDynamic.MakeGenericMethod(forType);
+            var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
             var ret = Delegate.CreateDelegate(funcType, mtd);
-
-            ret.DynamicInvoke(new object[] { defaultVal });
-
-            return ret;*/
-
-            Func<string, dynamic> ret = str => ServiceStackDeserializeDynamic(str);
 
             return ret;
         }
@@ -327,11 +329,19 @@ namespace Benchmark
             return ret;
         }
 
-        static dynamic JilDeserializeDynamic(string data)
+        static MethodInfo _JilDeserializeDynamic = typeof(Program).GetMethod("JilDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
+        static dynamic JilDeserializeDynamic<T>(string data, T shouldMatch)
+            where T : IGenericEquality<T>
         {
             using(var str = new StringReader(data))
             {
-                return JSON.DeserializeDynamic(str);
+                var ret = JSON.DeserializeDynamic(str);
+                if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))
+                {
+                    return ret;
+                }
+
+                throw new Exception("Deserialization failed");
             }
         }
 
@@ -346,95 +356,24 @@ namespace Benchmark
 
         static object GetJilDeserializer(Type forType, string defaultVal)
         {
-            /*var mtd = _JilDeserialize.MakeGenericMethod(forType);
-
-            var funcType = typeof(Func<,>).MakeGenericType(typeof(string), forType);
+            var mtd = _JilDeserializeDynamic.MakeGenericMethod(forType);
+            var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
             var ret = Delegate.CreateDelegate(funcType, mtd);
 
-            ret.DynamicInvoke(new object[] { defaultVal });
-
-            return ret;*/
-
-            Func<string, dynamic> ret = str => JilDeserializeDynamic(str);
-
             return ret;
-        }
-
-        static MethodInfo _ProtobufSerialize = typeof(Program).GetMethod("ProtobufSerialize", BindingFlags.NonPublic | BindingFlags.Static);
-        static byte[] ProtobufSerialize<T>(T obj)
-        {
-            using (var mem = new MemoryStream())
-            {
-                ProtoBuf.Serializer.Serialize<T>(mem, obj);
-
-                return mem.ToArray();
-            }
-        }
-
-        static object GetProtobufSerializer(Type forType)
-        {
-            var mtd = _ProtobufSerialize.MakeGenericMethod(forType);
-
-            var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(byte[]));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
-
-            ret.DynamicInvoke(new object[] { null });
-
-            return ret;
-        }
-
-        static MethodInfo _ProtobufDeserialize = typeof(Program).GetMethod("ProtobufDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
-        static T ProtobufDeserialize<T>(byte[] bytes)
-        {
-            using (var mem = new MemoryStream(bytes))
-            {
-                return ProtoBuf.Serializer.Deserialize<T>(mem);
-            }
-        }
-
-        static object GetProtobufDeserializer(Type forType)
-        {
-            var mtd = _ProtobufDeserialize.MakeGenericMethod(forType);
-
-            var funcType = typeof(Func<,>).MakeGenericType(typeof(byte[]), forType);
-            var ret = Delegate.CreateDelegate(funcType, mtd);
-
-            ret.DynamicInvoke(new object[] { new byte[0] });
-
-            return ret;
-
         }
 
         static int[][] Permutations = 
             new int[][] 
             {
-                new [] {0, 1, 2, 3},
-                new [] {0, 1, 3, 2},
-                new [] {0, 2, 1, 3},
-                new [] {0, 2, 3, 1},
-                new [] {0, 3, 1, 2},
-                new [] {0, 3, 2, 1},
+                new [] {0, 1, 2},
+                new [] {0, 2, 1},
                 
-                new [] {1, 0, 2, 3},
-                new [] {1, 0, 3, 2},
-                new [] {1, 2, 0, 3},
-                new [] {1, 2, 3, 0},
-                new [] {1, 3, 0, 2},
-                new [] {1, 3, 2, 0},
+                new [] {1, 0, 2},
+                new [] {1, 2, 0},
 
-                new [] {2, 0, 1, 3},
-                new [] {2, 0, 3, 1},
-                new [] {2, 1, 0, 3},
-                new [] {2, 1, 3, 0},
-                new [] {2, 3, 0, 1},
-                new [] {2, 3, 1, 0},
-
-                new [] {3, 0, 1, 2},
-                new [] {3, 0, 2, 1},
-                new [] {3, 1, 0, 2},
-                new [] {3, 1, 2, 0},
-                new [] {3, 2, 0, 1},
-                new [] {3, 2, 1, 0}
+                new [] {2, 0, 1},
+                new [] {2, 1, 0},
             };
 
         [Flags]
@@ -458,12 +397,10 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(model);
                 var serviceStackSerializer = GetServiceStackSerializer(model);
                 var jilSerializer = GetJilSerializer(model);
-                var protoSerializer = GetProtobufSerializer(model);
 
                 var newtonsoftDeserializer = GetNewtonsoftDeserializer(model, "{}");
                 var serviceStackDeserializer = GetServiceStackDeserializer(model, "{}");
                 var jilDeserializer = GetJilDeserializer(model, "{}");
-                var protoDeserializer = GetProtobufDeserializer(model);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -483,7 +420,6 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
                             case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -506,12 +442,10 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asList);
                 var serviceStackSerializer = GetServiceStackSerializer(asList);
                 var jilSerializer = GetJilSerializer(asList);
-                var protoSerializer = GetProtobufSerializer(asList);
 
                 var newtonsoftDeserializer = GetNewtonsoftDeserializer(asList, "[]");
                 var serviceStackDeserializer = GetServiceStackDeserializer(asList, "[]");
                 var jilDeserializer = GetJilDeserializer(asList, "[]");
-                var protoDeserializer = GetProtobufDeserializer(asList);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -531,7 +465,6 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
                             case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -554,12 +487,10 @@ namespace Benchmark
                 var newtonsoftSerializer = GetNewtonsoftSerializer(asDict);
                 var serviceStackSerializer = GetServiceStackSerializer(asDict);
                 var jilSerializer = GetJilSerializer(asDict);
-                var protoSerializer = GetProtobufSerializer(asDict);
 
                 var newtonsoftDeserializer = GetNewtonsoftDeserializer(asDict, "{}");
                 var serviceStackDeserializer = GetServiceStackDeserializer(asDict, "{}");
                 var jilDeserializer = GetJilDeserializer(asDict, "{}");
-                var protoDeserializer = GetProtobufDeserializer(asDict);
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -579,7 +510,6 @@ namespace Benchmark
                             case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
                             case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
                             case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
-                            case 3: name = "Protobuf-net"; serializer = protoSerializer; deserializer = protoDeserializer; resultType = typeof(byte[]); break;
                             default: throw new InvalidOperationException();
                         }
 

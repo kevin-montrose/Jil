@@ -30,5 +30,15 @@ namespace Benchmark.Models
                 this.last_applied_date.TrueEquals(obj.last_applied_date) &&
                 this.to_tag.TrueEqualsString(obj.to_tag);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.applied_count.TrueEquals((int?)obj.applied_count) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.from_tag.TrueEqualsString((string)obj.from_tag) &&
+                this.last_applied_date.TrueEquals((DateTime?)obj.last_applied_date) &&
+                this.to_tag.TrueEqualsString((string)obj.to_tag);
+        }
     }
 }

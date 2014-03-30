@@ -57,5 +57,22 @@ namespace Benchmark.Models
                 this.score.TrueEquals(obj.score) &&
                 this.upvoted.TrueEquals(obj.upvoted);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.body_markdown.TrueEqualsString((string)obj.body_markdown) &&
+                this.comment_id.TrueEquals((int?)obj.comment_id) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.edited.TrueEquals((bool?)obj.edited) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                (this.owner == null && obj.owner == null || this.owner.EqualsDynamic(obj.owner)) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.post_type.TrueEquals((PostType?)obj.post_type) &&
+                (this.reply_to_user == null && obj.reply_to_user == null || this.reply_to_user.EqualsDynamic(obj.reply_to_user)) &&
+                this.score.TrueEquals((int?)obj.score) &&
+                this.upvoted.TrueEquals((bool?)obj.upvoted);
+        }
     }
 }

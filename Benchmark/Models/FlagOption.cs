@@ -42,5 +42,19 @@ namespace Benchmark.Models
                 this.sub_options.TrueEqualsList(obj.sub_options) &&
                 this.title.TrueEqualsString(obj.title);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.count.TrueEquals((int?)obj.count) &&
+                this.description.TrueEqualsString((string)obj.description) &&
+                this.has_flagged.TrueEquals((bool?)obj.has_flagged) &&
+                this.option_id.TrueEquals((int?)obj.option_id) &&
+                this.requires_comment.TrueEquals((bool?)obj.requires_comment) &&
+                this.requires_question_id.TrueEquals((bool?)obj.requires_question_id) &&
+                this.requires_site.TrueEquals((bool?)obj.requires_site) &&
+                this.sub_options.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.sub_options) &&
+                this.title.TrueEqualsString((string)obj.title);
+        }
     }
 }

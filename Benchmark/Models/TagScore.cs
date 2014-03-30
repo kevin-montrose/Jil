@@ -24,5 +24,13 @@ namespace Benchmark.Models
                 this.score.TrueEquals(obj.score) &&
                 this.user.TrueEquals(obj.user);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.post_count.TrueEquals((int?)obj.post_count) &&
+                this.score.TrueEquals((int?)obj.score) &&
+                (this.user == null && obj.user == null || this.user.EqualsDynamic(obj.user));
+        }
     }
 }

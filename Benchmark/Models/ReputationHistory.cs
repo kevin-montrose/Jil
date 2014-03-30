@@ -67,5 +67,15 @@ namespace Benchmark.Models
                 this.reputation_history_type.TrueEquals(obj.reputation_history_type) &&
                 this.user_id.TrueEquals(obj.user_id);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.reputation_change.TrueEquals((int?)obj.reputation_change) &&
+                this.reputation_history_type.TrueEquals((ReputationHistoryType?)obj.reputation_history_type) &&
+                this.user_id.TrueEquals((int?)obj.user_id);
+        }
     }
 }

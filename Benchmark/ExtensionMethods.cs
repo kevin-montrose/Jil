@@ -9,6 +9,7 @@ namespace Benchmark
     interface IGenericEquality<T>
     {
         bool Equals(T obj);
+        bool EqualsDynamic(dynamic obj);
     }
 
     static class ExtensionMethods
@@ -76,6 +77,39 @@ namespace Benchmark
             }
 
             return true;
+        }
+
+        public static bool TrueEqualsListDynamic<T>(this IEnumerable<T> a, IEnumerable<dynamic> b)
+        where T : class, IGenericEquality<T>
+        {
+            if (object.ReferenceEquals(a, null) && object.ReferenceEquals(b, null)) return true;
+            if (object.ReferenceEquals(a, null)) return false;
+            if (object.ReferenceEquals(b, null)) return false;
+
+            if (a.Count() != b.Count()) return false;
+
+            using (var e1 = a.GetEnumerator())
+            using (var e2 = b.GetEnumerator())
+            {
+                while (e1.MoveNext() && e2.MoveNext())
+                {
+                    var c1 = e1.Current;
+                    var c2 = e2.Current;
+
+                    if (c1 == null && c2 != null) return false;
+                    if (c2 == null && c1 != null) return false;
+                    if (!c1.EqualsDynamic(c2)) return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool TrueEqualsList<T>(this IEnumerable<T> a, dynamic dynB)
+            where T : class, IGenericEquality<T>
+        {
+            var b = (IEnumerable<T>)dynB;
+            return TrueEqualsList(a, b);
         }
 
         public static bool TrueEquals<T>(this T? a, T? b)

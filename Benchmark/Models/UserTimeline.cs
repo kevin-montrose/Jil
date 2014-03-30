@@ -60,5 +60,21 @@ namespace Benchmark.Models
                 this.title.TrueEqualsString(obj.title) &&
                 this.user_id.TrueEquals(obj.user_id);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.badge_id.TrueEquals((int?)obj.badge_id) &&
+                this.comment_id.TrueEquals((int?)obj.comment_id) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.detail.TrueEqualsString((string)obj.detail) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.post_type.TrueEquals((PostType?)obj.post_type) &&
+                this.suggested_edit_id.TrueEquals((int?)obj.suggested_edit_id) &&
+                this.timeline_type.TrueEquals((UserTimelineType?)obj.timeline_type) &&
+                this.title.TrueEqualsString((string)obj.title) &&
+                this.user_id.TrueEquals((int?)obj.user_id);
+        }
     }
 }

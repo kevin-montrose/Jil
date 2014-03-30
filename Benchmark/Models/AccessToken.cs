@@ -27,5 +27,14 @@ namespace Benchmark.Models
                 account_id.TrueEquals(obj.account_id) ||
                 scope.TrueEqualsString(obj.scope);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                access_token.TrueEqualsString((string)obj.access_token) ||
+                expires_on_date.TrueEquals((DateTime?)obj.expires_on_date) ||
+                account_id.TrueEquals((int?)obj.account_id) ||
+                scope.TrueEqualsString((IEnumerable<string>)obj.scope);
+        }
     }
 }

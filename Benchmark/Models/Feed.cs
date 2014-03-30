@@ -66,6 +66,27 @@ namespace Benchmark.Models
                 this.upcoming_privileges.TrueEqualsList(obj.upcoming_privileges) &&
                 this.update_notice.TrueEquals(obj.update_notice);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.account_id == obj.account_id &&
+                this.association_bonuses.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.association_bonuses) &&
+                this.badges.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.badges) &&
+                this.banner_ads.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.banner_ads) &&
+                this.before == (long?)obj.before &&
+                this.careers_job_ads.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.careers_job_ads) &&
+                this.community_bulletins.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.community_bulletins) &&
+                this.cross_site_interesting_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.cross_site_interesting_questions) &&
+                this.earned_privileges.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.earned_privileges) &&
+                this.hot_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.hot_questions) &&
+                this.inbox_items.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.inbox_items) &&
+                this.likely_to_answer_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.likely_to_answer_questions) &&
+                this.reputation_events.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.reputation_events) &&
+                this.since == (long?)obj.since &&
+                this.upcoming_privileges.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.upcoming_privileges) &&
+                (this.update_notice == null && obj.update_notice == null || this.update_notice.EqualsDynamic(obj.update_notice));
+        }
     }
 
     interface IMobileFeedBase<T> : IGenericEquality<T>
@@ -117,6 +138,22 @@ namespace Benchmark.Models
                 this.tags.TrueEqualsString(obj.tags) &&
                 this.title == obj.title;
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.added_date == (long?)obj.added_date &&
+                this.answer_count == (int?)obj.answer_count &&
+                this.group_id == (int?)obj.group_id &&
+                this.has_accepted_answer == (bool?)obj.has_accepted_answer &&
+                this.is_deleted == (bool?)obj.is_deleted &&
+                this.last_activity_date == (long?)obj.last_activity_date &&
+                this.question_creation_date == (long?)obj.question_creation_date &&
+                this.question_id == (int?)obj.question_id &&
+                this.site == (string)obj.site &&
+                this.tags.TrueEqualsString((IEnumerable<string>)obj.tags) &&
+                this.title == (string)obj.title;
+        }
     }
 
     [ProtoContract]
@@ -138,6 +175,17 @@ namespace Benchmark.Models
         public int? rep_change { get; set; }
 
         public bool Equals(MobileRepChange obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.group_id == obj.group_id &&
+                this.link == obj.link &&
+                this.rep_change == obj.rep_change &&
+                this.site == obj.site &&
+                this.title == obj.title;
+        }
+
+        public bool EqualsDynamic(dynamic obj)
         {
             return
                 this.added_date == obj.added_date &&
@@ -177,6 +225,22 @@ namespace Benchmark.Models
         public string site { get; set; }
 
         public bool Equals(MobileInboxItem obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.answer_id == obj.answer_id &&
+                this.body == obj.body &&
+                this.comment_id == obj.comment_id &&
+                this.creation_date == obj.creation_date &&
+                this.group_id == obj.group_id &&
+                this.item_type == obj.item_type &&
+                this.link == obj.link &&
+                this.question_id == obj.question_id &&
+                this.site == obj.site &&
+                this.title == obj.title;
+        }
+
+        public bool EqualsDynamic(dynamic obj)
         {
             return
                 this.added_date == obj.added_date &&
@@ -247,6 +311,21 @@ namespace Benchmark.Models
                 this.rank == obj.rank &&
                 this.site == obj.site;
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.badge_description == obj.badge_description &&
+                this.badge_id == obj.badge_id &&
+                this.badge_name == obj.badge_name &&
+                this.badge_type == obj.badge_type &&
+                this.group_id == obj.group_id &&
+                this.link == obj.link &&
+                this.post_id == obj.post_id &&
+                this.rank == obj.rank &&
+                this.site == obj.site;
+        }
     }
 
     [ProtoContract]
@@ -272,6 +351,19 @@ namespace Benchmark.Models
         public string link { get; set; }
 
         public bool Equals(MobilePrivilege obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.group_id == obj.group_id &&
+                this.link == obj.link &&
+                this.privilege_id == obj.privilege_id &&
+                this.privilege_long_description == obj.privilege_long_description &&
+                this.privilege_short_description == obj.privilege_short_description &&
+                this.reputation_required == obj.reputation_required &&
+                this.site == obj.site;
+        }
+
+        public bool EqualsDynamic(dynamic obj)
         {
             return
                 this.added_date == obj.added_date &&
@@ -348,6 +440,25 @@ namespace Benchmark.Models
                 this.tags.TrueEqualsString(obj.tags) &&
                 this.title == obj.title;
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.added_date == (long?)obj.added_date &&
+                this.answer_count == (int?)obj.answer_count &&
+                this.begin_date == (long?)obj.begin_date &&
+                this.bulletin_type == (CommunityBulletinType?)obj.bulletin_type &&
+                this.custom_date_string == (string)obj.custom_date_string &&
+                this.end_date == (long?)obj.end_date &&
+                this.group_id == (int?)obj.group_id &&
+                this.has_accepted_answer == (bool?)obj.has_accepted_answer &&
+                this.is_deleted == (bool?)obj.is_deleted &&
+                this.is_promoted == (bool?)obj.is_promoted &&
+                this.link == (string)obj.link &&
+                this.site == (string)obj.site &&
+                this.tags.TrueEqualsString((IEnumerable<string>)obj.tags) &&
+                this.title == (string)obj.title;
+        }
     }
 
     [ProtoContract]
@@ -364,6 +475,15 @@ namespace Benchmark.Models
         public int? amount { get; set; }
 
         public bool Equals(MobileAssociationBonus obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.amount == obj.amount &&
+                this.group_id == obj.group_id &&
+                this.site == obj.site;
+        }
+
+        public bool EqualsDynamic(dynamic obj)
         {
             return
                 this.added_date == obj.added_date &&
@@ -403,6 +523,18 @@ namespace Benchmark.Models
                 this.location == obj.location &&
                 this.title == obj.title;
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.added_date == obj.added_date &&
+                this.company_name == obj.company_name &&
+                this.group_id == obj.group_id &&
+                this.job_id == obj.job_id &&
+                this.link == obj.link &&
+                this.location == obj.location &&
+                this.title == obj.title;
+        }
     }
 
     [ProtoContract]
@@ -419,6 +551,14 @@ namespace Benchmark.Models
             public int? height { get; set; }
 
             public bool Equals(MobileBannerAdImage obj)
+            {
+                return
+                    this.height == obj.height &&
+                    this.image_url == obj.image_url &&
+                    this.width == obj.width;
+            }
+
+            public bool EqualsDynamic(dynamic obj)
             {
                 return
                     this.height == obj.height &&
@@ -446,6 +586,15 @@ namespace Benchmark.Models
                 this.images.TrueEqualsList(obj.images) &&
                 this.link == obj.link;
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.added_date == (long?)obj.added_date &&
+                this.group_id == (int?)obj.group_id &&
+                this.images.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.images) &&
+                this.link == (string)obj.link;
+        }
     }
 
     [ProtoContract]
@@ -459,6 +608,14 @@ namespace Benchmark.Models
         public string minimum_supported_version { get; set; }
 
         public bool Equals(MobileUpdateNotice obj)
+        {
+            return
+                this.message == obj.message &&
+                this.minimum_supported_version == obj.minimum_supported_version &&
+                this.should_update == obj.should_update;
+        }
+
+        public bool EqualsDynamic(dynamic obj)
         {
             return
                 this.message == obj.message &&

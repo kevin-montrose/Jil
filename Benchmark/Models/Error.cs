@@ -24,5 +24,13 @@ namespace Benchmark.Models
                 this.error_name.TrueEqualsString(obj.error_name) &&
                 this.description.TrueEqualsString(obj.description);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.error_id.TrueEquals((int?)obj.error_id) &&
+                this.error_name.TrueEqualsString((string)obj.error_name) &&
+                this.description.TrueEqualsString((string)obj.description);
+        }
     }
 }

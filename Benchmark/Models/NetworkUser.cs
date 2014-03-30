@@ -48,5 +48,21 @@ namespace Benchmark.Models
                 this.user_id.TrueEquals(obj.user_id) &&
                 this.user_type.TrueEquals(obj.user_type);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.account_id.TrueEquals((int?)obj.account_id) &&
+                this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                (this.badge_counts == null && obj.badge_counts == null || this.badge_counts.EqualsDynamic(obj.badge_counts)) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.last_access_date.TrueEquals((DateTime?)obj.last_access_date) &&
+                this.question_count.TrueEquals((int?)obj.question_count) &&
+                this.reputation.TrueEquals((int?)obj.reputation) &&
+                this.site_name.TrueEqualsString((string)obj.site_name) &&
+                this.site_url.TrueEqualsString((string)obj.site_url) &&
+                this.user_id.TrueEquals((int?)obj.user_id) &&
+                this.user_type.TrueEquals((UserType?)obj.user_type);
+        }
     }
 }

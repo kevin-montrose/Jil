@@ -27,6 +27,14 @@ namespace Benchmark.Models
                     this.silver.TrueEquals(obj.silver) &&
                     this.gold.TrueEquals(obj.gold);
             }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.bronze.TrueEquals((int?)obj.bronze) &&
+                    this.silver.TrueEquals((int?)obj.silver) &&
+                    this.gold.TrueEquals((int?)obj.gold);
+            }
         }
 
         [ProtoMember(1)]
@@ -117,6 +125,39 @@ namespace Benchmark.Models
                 this.user_type.TrueEquals(obj.user_type) &&
                 this.view_count.TrueEquals(obj.view_count) &&
                 this.website_url.TrueEqualsString(obj.website_url);
+        }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.about_me.TrueEqualsString((string)obj.about_me) &&
+                this.accept_rate.TrueEquals((int?)obj.accept_rate) &&
+                this.account_id.TrueEquals((int?)obj.account_id) &&
+                this.age.TrueEquals((int?)obj.age) &&
+                this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                (this.badge_counts == null && obj.badge_counts == null || this.badge_counts.EqualsDynamic(obj.badge_counts)) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.display_name.TrueEqualsString((string)obj.display_name) &&
+                this.down_vote_count.TrueEquals((int?)obj.down_vote_count) &&
+                this.is_employee.TrueEquals((bool?)obj.is_employee) &&
+                this.last_access_date.TrueEquals((DateTime?)obj.last_access_date) &&
+                this.last_modified_date.TrueEquals((DateTime?)obj.last_modified_date) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                this.location.TrueEqualsString((string)obj.location) &&
+                this.profile_image.TrueEqualsString((string)obj.profile_image) &&
+                this.question_count.TrueEquals((int?)obj.question_count) &&
+                this.reputation.TrueEquals((int?)obj.reputation) &&
+                this.reputation_change_day.TrueEquals((int?)obj.reputation_change_day) &&
+                this.reputation_change_month.TrueEquals((int?)obj.reputation_change_month) &&
+                this.reputation_change_quarter.TrueEquals((int?)obj.reputation_change_quarter) &&
+                this.reputation_change_week.TrueEquals((int?)obj.reputation_change_week) &&
+                this.reputation_change_year.TrueEquals((int?)obj.reputation_change_year) &&
+                this.timed_penalty_date.TrueEquals((DateTime?)obj.timed_penalty_date) &&
+                this.up_vote_count.TrueEquals((int?)obj.up_vote_count) &&
+                this.user_id.TrueEquals((int?)obj.user_id) &&
+                this.user_type.TrueEquals((UserType?)obj.user_type) &&
+                this.view_count.TrueEquals((int?)obj.view_count) &&
+                this.website_url.TrueEqualsString((string)obj.website_url);
         }
     }
 }

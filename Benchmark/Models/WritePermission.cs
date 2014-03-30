@@ -36,5 +36,17 @@ namespace Benchmark.Models
                 this.object_type.TrueEqualsString(obj.object_type) &&
                 this.user_id.TrueEquals(obj.user_id);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.can_add.TrueEquals((bool?)obj.can_add) &&
+                this.can_delete.TrueEquals((bool?)obj.can_delete) &&
+                this.can_edit.TrueEquals((bool?)obj.can_edit) &&
+                this.max_daily_actions.TrueEquals((int?)obj.max_daily_actions) &&
+                this.min_seconds_between_actions.TrueEquals((int?)obj.min_seconds_between_actions) &&
+                this.object_type.TrueEqualsString((string)obj.object_type) &&
+                this.user_id.TrueEquals((int?)obj.user_id);
+        }
     }
 }

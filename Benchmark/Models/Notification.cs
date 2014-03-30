@@ -51,5 +51,15 @@ namespace Benchmark.Models
                 this.post_id.TrueEquals(obj.post_id) &&
                 this.is_unread.TrueEquals(obj.is_unread);
         }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.body.TrueEqualsString((string)obj.body) &&
+                (this.site == null && obj.site == null || this.site.EqualsDynamic(obj.site)) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.post_id.TrueEquals((int?)obj.post_id) &&
+                this.is_unread.TrueEquals((bool?)obj.is_unread);
+        }
     }
 }

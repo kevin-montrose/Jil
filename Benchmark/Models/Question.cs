@@ -33,6 +33,15 @@ namespace Benchmark.Models
                         this.question_id.TrueEquals(obj.question_id) &&
                         this.title.TrueEqualsString(obj.title);
                 }
+
+                public bool EqualsDynamic(dynamic obj)
+                {
+                    return
+                        this.accepted_answer_id.TrueEquals((int?)obj.accepted_answer_id) &&
+                        this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                        this.question_id.TrueEquals((int?)obj.question_id) &&
+                        this.title.TrueEqualsString((string)obj.title);
+                }
             }
 
             [ProtoMember(1)]
@@ -55,6 +64,16 @@ namespace Benchmark.Models
                     this.original_questions.TrueEqualsList(obj.original_questions) &&
                     this.reason.TrueEqualsString(obj.reason);
             }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.by_users.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.by_users) &&
+                    this.description.TrueEqualsString((string)obj.description) &&
+                    this.on_hold.TrueEquals((bool?)obj.on_hold) &&
+                    this.original_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.original_questions) &&
+                    this.reason.TrueEqualsString((string)obj.reason);
+            }
         }
 
         [ProtoContract]
@@ -74,6 +93,14 @@ namespace Benchmark.Models
                     this.creation_date.TrueEquals(obj.creation_date) &&
                     this.owner_user_id.TrueEquals(obj.owner_user_id);
             }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.body.TrueEqualsString((string)obj.body) &&
+                    this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                    this.owner_user_id.TrueEquals((int?)obj.owner_user_id);
+            }
         }
 
         [ProtoContract]
@@ -92,6 +119,14 @@ namespace Benchmark.Models
                     this.on_date.TrueEquals(obj.on_date) &&
                     this.other_site.TrueEquals(obj.other_site) &&
                     this.question_id.TrueEquals(obj.question_id);
+            }
+
+            public bool EqualsDynamic(dynamic obj)
+            {
+                return
+                    this.on_date.TrueEquals((DateTime?)obj.on_date) &&
+                    (this.other_site == null && obj.other_site == null || this.other_site.EqualsDynamic(obj.other_site)) &&
+                    this.question_id.TrueEquals((int?)obj.question_id);
             }
         }
 
@@ -219,6 +254,51 @@ namespace Benchmark.Models
                 this.up_vote_count.TrueEquals(obj.up_vote_count) &&
                 this.upvoted.TrueEquals(obj.upvoted) &&
                 this.view_count.TrueEquals(obj.view_count);
+        }
+
+        public bool EqualsDynamic(dynamic obj)
+        {
+            return
+                this.accepted_answer_id.TrueEquals((int?)obj.accepted_answer_id) &&
+                this.answer_count.TrueEquals((int?)obj.answer_count) &&
+                this.answers.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.answers) &&
+                this.body.TrueEqualsString((string)obj.body) &&
+                this.body_markdown.TrueEqualsString((string)obj.body_markdown) &&
+                this.bounty_amount.TrueEquals((int?)obj.bounty_amount) &&
+                this.bounty_closes_date.TrueEquals((DateTime?)obj.bounty_closes_date) &&
+                this.close_vote_count.TrueEquals((int?)obj.close_vote_count) &&
+                this.closed_date.TrueEquals((DateTime?)obj.closed_date) &&
+                (this.closed_details == null && obj.closed_details == null || this.closed_details.EqualsDynamic(obj.closed_details)) &&
+                this.closed_reason.TrueEqualsString((string)obj.closed_reason) &&
+                this.comment_count.TrueEquals((int?)obj.comment_count) &&
+                this.comments.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.comments) &&
+                this.community_owned_date.TrueEquals((DateTime?)obj.community_owned_date) &&
+                this.creation_date.TrueEquals((DateTime?)obj.creation_date) &&
+                this.delete_vote_count.TrueEquals((int?)obj.delete_vote_count) &&
+                this.down_vote_count.TrueEquals((int?)obj.down_vote_count) &&
+                this.downvoted.TrueEquals((bool?)obj.downvoted) &&
+                this.favorite_count.TrueEquals((int?)obj.favorite_count) &&
+                this.favorited.TrueEquals((bool?)obj.favorited) &&
+                this.is_answered.TrueEquals((bool?)obj.is_answered) &&
+                this.last_activity_date.TrueEquals((DateTime?)obj.last_activity_date) &&
+                this.last_edit_date.TrueEquals((DateTime?)obj.last_edit_date) &&
+                (this.last_editor == null && obj.last_editor == null || this.last_editor.EqualsDynamic(obj.last_editor)) &&
+                this.link.TrueEqualsString((string)obj.link) &&
+                this.locked_date.TrueEquals((DateTime?)obj.locked_date) &&
+                (this.migrated_from == null && obj.migrated_from == null || this.migrated_from.EqualsDynamic(obj.migrated_from)) &&
+                (this.migrated_to == null && obj.migrated_to == null || this.migrated_to.EqualsDynamic(obj.migrated_to)) &&
+                (this.notice == null && obj.notice == null || this.notice.EqualsDynamic(obj.notice)) &&
+                (this.owner == null && obj.owner == null || this.owner.EqualsDynamic(obj.owner)) &&
+                this.protected_date.TrueEquals((DateTime?)obj.protected_date) &&
+                this.question_id.TrueEquals((int?)obj.question_id) &&
+                this.reopen_vote_count.TrueEquals((int?)obj.reopen_vote_count) &&
+                this.score.TrueEquals((int?)obj.score) &&
+                this.share_link.TrueEqualsString((string)obj.share_link) &&
+                this.tags.TrueEqualsString((IEnumerable<string>)obj.tags) &&
+                this.title.TrueEqualsString((string)obj.title) &&
+                this.up_vote_count.TrueEquals((int?)obj.up_vote_count) &&
+                this.upvoted.TrueEquals((bool?)obj.upvoted) &&
+                this.view_count.TrueEquals((int?)obj.view_count);
         }
     }
 }
