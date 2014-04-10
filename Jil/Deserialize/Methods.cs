@@ -214,7 +214,28 @@ namespace Jil.Deserialize
                 return;
             }
 
-            throw new DeserializationException("Expected digit, -, \", {, n, or [", reader);
+            // skip false
+            if (leadChar == 'f')
+            {
+                reader.Read();
+                if (reader.Read() != 'a') throw new DeserializationException("Expected a", reader);
+                if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
+                if (reader.Read() != 's') throw new DeserializationException("Expected s", reader);
+                if (reader.Read() != 'e') throw new DeserializationException("Expected e", reader);
+                return;
+            }
+
+            // skip true
+            if (leadChar == 't')
+            {
+                reader.Read();
+                if (reader.Read() != 'r') throw new DeserializationException("Expected r", reader);
+                if (reader.Read() != 'u') throw new DeserializationException("Expected u", reader);
+                if (reader.Read() != 'e') throw new DeserializationException("Expected e", reader);
+                return;
+            }
+
+            throw new DeserializationException("Expected digit, -, \", {, n, t, f, or [", reader);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
