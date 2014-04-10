@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class User : IGenericEquality<User>
+    public class User : IGenericEquality<User>
     {
         [ProtoContract]
         public class BadgeCount : IGenericEquality<BadgeCount>

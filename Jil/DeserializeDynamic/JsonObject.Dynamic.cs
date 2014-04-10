@@ -10,8 +10,15 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject : DynamicObject
     {
+        static string ToString(System.Dynamic.GetIndexBinder binder)
+        {
+            return "[" + binder.ReturnType + ", " + ToString(binder.CallInfo) + "]";
+        }
+
         public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryGetIndex(" + ToString(binder) + ", " + ToString(indexes) + ", out)");
+
             if (Type == JsonObjectType.Array)
             {
                 if (indexes.Length != 1)
@@ -70,6 +77,8 @@ namespace Jil.DeserializeDynamic
         static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
         public override IEnumerable<string> GetDynamicMemberNames()
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": GetDynamicMemberNames");
+
             if (Type == JsonObjectType.Object)
             {
                 return ObjectMembers.Keys;
@@ -82,8 +91,16 @@ namespace Jil.DeserializeDynamic
 
             return Enumerable.Empty<string>();
         }
+
+        static string ToString(System.Dynamic.GetMemberBinder binder)
+        {
+            return "[" + binder.Name + ", " + binder.ReturnType.FullName + ", " + binder.IgnoreCase + "]";
+        }
+
         public override bool TryGetMember(System.Dynamic.GetMemberBinder binder, out object result)
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryGetMember(" + ToString(binder) + ", out)");
+
             if (Type == JsonObjectType.Array)
             {
                 if (binder.Name == "Count" || binder.Name == "Length")
@@ -117,11 +134,15 @@ namespace Jil.DeserializeDynamic
                 return true;
             }
 
-            return val.InnerTryConvert(binder.ReturnType, out result);
+            var ret = val.InnerTryConvert(binder.ReturnType, out result);
+
+            return ret;
         }
 
         bool InnerTryConvert(Type returnType, out object result)
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": InnerTryConvert(" + returnType.FullName + ", out)");
+
             if (returnType == typeof(object))
             {
                 result = this;
@@ -469,11 +490,35 @@ namespace Jil.DeserializeDynamic
 
         public override bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryConvert(" + ToString(binder) + ", out)");
+
             return this.InnerTryConvert(binder.ReturnType, out result);
+        }
+
+        static string ToString(System.Dynamic.ConvertBinder binder)
+        {
+            return "[" + binder.Type + ", " + binder.ReturnType + ", " + binder.Explicit + "]";
+        }
+
+        static string ToString(System.Dynamic.InvokeMemberBinder binder)
+        {
+            return "[" + binder.Name + ", " + binder.ReturnType.FullName + ", " + binder.IgnoreCase + ", " + ToString(binder.CallInfo) + "]";
+        }
+
+        static string ToString(CallInfo ci)
+        {
+            return "[" + ci.ArgumentCount + ", [" + string.Join(", ", ci.ArgumentNames) + "]]";
+        }
+
+        static string ToString(object[] os)
+        {
+            return "[" + string.Join(", ", os) + "]";
         }
 
         public override bool TryInvokeMember(System.Dynamic.InvokeMemberBinder binder, object[] args, out object result)
         {
+            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryInvokeMember(" + ToString(binder) + ", " + ToString(args) + ", out)");
+
             if (Type == JsonObjectType.Object)
             {
                 if (binder.Name == "GetEnumerator" && args.Length == 0)

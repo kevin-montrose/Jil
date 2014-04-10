@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Benchmark
 {
-    interface IGenericEquality<T>
+    public interface IGenericEquality<T>
     {
         bool Equals(T obj);
         bool EqualsDynamic(dynamic obj);

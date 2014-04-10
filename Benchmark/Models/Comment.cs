@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Benchmark.Models
 {
-    enum PostType : byte
+    public enum PostType : byte
     {
         question = 1,
         answer = 2
     }
 
     [ProtoContract]
-    class Comment : IGenericEquality<Comment>
+    public class Comment : IGenericEquality<Comment>
     {
         [ProtoMember(1)]
         public int? comment_id { get; set; }

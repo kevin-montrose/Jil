@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Info : IGenericEquality<Info>
+    public class Info : IGenericEquality<Info>
     {
         [ProtoContract]
         public class Site : IGenericEquality<Site>

@@ -106,6 +106,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Benchmark\Benchmark.csproj">
+      <Project>{f4eb088a-3962-4444-8935-7d5b1c197019}</Project>
+      <Name>Benchmark</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Jil\Jil.csproj">
       <Project>{73d243e7-dd9b-4546-9b71-4ee8bf5ed6c3}</Project>
       <Name>Jil</Name>

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Benchmark.Models
 {
-    enum UserType : byte
+    public enum UserType : byte
     {
         unregistered = 2,
         registered = 3,
@@ -16,7 +16,7 @@ namespace Benchmark.Models
     }
     
     [ProtoContract]
-    class ShallowUser : IGenericEquality<ShallowUser>
+    public class ShallowUser : IGenericEquality<ShallowUser>
     {
         [ProtoMember(1)]
         public int? user_id { get; set; }

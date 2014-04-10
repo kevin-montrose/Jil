@@ -333,7 +333,7 @@ namespace Benchmark
         static dynamic JilDeserializeDynamic<T>(string data, T shouldMatch)
             where T : IGenericEquality<T>
         {
-            using(var str = new StringReader(data))
+            using (var str = new StringReader(data))
             {
                 var ret = JSON.DeserializeDynamic(str);
                 if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))

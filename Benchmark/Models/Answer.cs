@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Answer : IGenericEquality<Answer>
+    public class Answer : IGenericEquality<Answer>
     {
         [ProtoMember(1)]
         public int? question_id { get; set; }

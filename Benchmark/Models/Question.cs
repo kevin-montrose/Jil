@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Benchmark.Models
 {
     [ProtoContract]
-    class Question : IGenericEquality<Question>
+    public class Question : IGenericEquality<Question>
     {
         [ProtoContract]
         public class ClosedDetails : IGenericEquality<ClosedDetails>
@@ -67,11 +67,15 @@ namespace Benchmark.Models
 
             public bool EqualsDynamic(dynamic obj)
             {
+                var oq = obj.original_questions;
+                var oqI = (IEnumerable<dynamic>)oq;
+
                 return
                     this.by_users.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.by_users) &&
                     this.description.TrueEqualsString((string)obj.description) &&
                     this.on_hold.TrueEquals((bool?)obj.on_hold) &&
-                    this.original_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.original_questions) &&
+                    //this.original_questions.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.original_questions) &&
+                    this.original_questions.TrueEqualsListDynamic(oqI) && 
                     this.reason.TrueEqualsString((string)obj.reason);
             }
         }
