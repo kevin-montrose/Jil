@@ -4002,6 +4002,36 @@ namespace JilTests
             }
         }
 
+        class _Issue19
+        {
+            public bool B { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue19()
+        {
+            using (var str = new StringReader("{\"A\":true}"))
+            {
+                var res = JSON.Deserialize<_Issue19>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(false, res.B);
+            }
+
+            using (var str = new StringReader("{\"A\":true, \"B\":false}"))
+            {
+                var res = JSON.Deserialize<_Issue19>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(false, res.B);
+            }
+
+            using (var str = new StringReader("{\"A\":false, \"B\":true}"))
+            {
+                var res = JSON.Deserialize<_Issue19>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(true, res.B);
+            }
+        }
+
         //struct _AllFloatsStruct
         //{
         //    public float Float;
