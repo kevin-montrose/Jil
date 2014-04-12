@@ -17,16 +17,16 @@ namespace Jil.DeserializeDynamic
             return new JsonMetaObject(this, exp);
         }
 
-        private sealed class JsonMetaObject : DynamicMetaObject
+        sealed class JsonMetaObject : DynamicMetaObject
         {
             public JsonObject Outer { get { return (JsonObject)Value; } }
 
             public JsonMetaObject(JsonObject outer, Expression exp) : base(exp, BindingRestrictions.Empty, outer) { }
 
-            private static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
-            private static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
-            private static MethodInfo StringConcatArray = typeof(string).GetMethod("Concat", new[] { typeof(object[]) });
-            private static MethodInfo StringJoin = typeof(string).GetMethod("Join", new[] { typeof(string), typeof(object[]) });
+            static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
+            static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
+            static MethodInfo StringConcatArray = typeof(string).GetMethod("Concat", new[] { typeof(object[]) });
+            static MethodInfo StringJoin = typeof(string).GetMethod("Join", new[] { typeof(string), typeof(object[]) });
 
             public override DynamicMetaObject BindConvert(ConvertBinder binder)
             {
@@ -267,9 +267,14 @@ namespace Jil.DeserializeDynamic
 
                 return new DynamicMetaObject(retBlock, restrictions);
             }
+
+            public override IEnumerable<string> GetDynamicMemberNames()
+            {
+                return this.Outer.GetDynamicMemberNames();
+            }
         }
 
-        private static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+        static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
         bool InnerTryGetIndex(Type returnType, object[] indexes, out object result)
         {
             if (Type == JsonObjectType.Array)
@@ -328,7 +333,7 @@ namespace Jil.DeserializeDynamic
         }
 
         static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
-        /*public override IEnumerable<string> GetDynamicMemberNames()
+        IEnumerable<string> GetDynamicMemberNames()
         {
             System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": GetDynamicMemberNames");
 
@@ -343,9 +348,9 @@ namespace Jil.DeserializeDynamic
             }
 
             return Enumerable.Empty<string>();
-        }*/
+        }
 
-        private static MethodInfo InnerTryGetMemberMtd = typeof(JsonObject).GetMethod("InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryGetMemberMtd = typeof(JsonObject).GetMethod("InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryGetMember(string name, Type returnType, out object result)
         {
             if (Type == JsonObjectType.Array)
@@ -386,7 +391,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        private static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryConvert(Type returnType, out object result)
         {
             if (returnType == typeof(object))
@@ -734,8 +739,7 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        
-        private static MethodInfo InnerTryInvokeMemberMtd = typeof(JsonObject).GetMethod("InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryInvokeMemberMtd = typeof(JsonObject).GetMethod("InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryInvokeMember(string name, object[] args, out object result)
         {
             if (Type == JsonObjectType.Object)
