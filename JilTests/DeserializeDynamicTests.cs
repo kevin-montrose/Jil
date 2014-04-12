@@ -1126,5 +1126,23 @@ namespace JilTests
             Assert.AreEqual("hello world", (string)dyn.B);
             Assert.AreEqual(678, (int)dyn.C);
         }
+
+        [TestMethod]
+        public void Indexer()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("{\"A\":123.45, \"B\": \"hello world\", \"C\": 678}");
+                Assert.AreEqual(123.45, (double)dyn["A"]);
+                Assert.AreEqual("hello world", (string)dyn["B"]);
+                Assert.AreEqual(678, (int)dyn["C"]);
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("[123.45, \"hello world\", 678]");
+                Assert.AreEqual(123.45, (double)dyn[0]);
+                Assert.AreEqual("hello world", (string)dyn[1]);
+                Assert.AreEqual(678, (int)dyn[2]);
+            }
+        }
     }
 }

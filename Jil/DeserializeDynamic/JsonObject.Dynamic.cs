@@ -25,6 +25,9 @@ namespace Jil.DeserializeDynamic
 
             private static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
             private static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
+            private static MethodInfo StringConcatArray = typeof(string).GetMethod("Concat", new[] { typeof(object[]) });
+            private static MethodInfo StringJoin = typeof(string).GetMethod("Join", new[] { typeof(string), typeof(object[]) });
+
             public override DynamicMetaObject BindConvert(ConvertBinder binder)
             {
                 /*
@@ -83,7 +86,7 @@ namespace Jil.DeserializeDynamic
                  *      var thisEvaled = (JsonObject)<Expression>;
                  *      object res;
                  *      ReturnType finalResult;
-                 *      if(!Value.InnerTryGetMember(<MemberName>, out res))
+                 *      if(!Value.InnerTryGetMember(<MemberName>, ReturnType, out res))
                  *      {
                  *          throw new InvalidCastException("Unable to get dynamic member <MemberName> of type <ReturnType> from ["+thisRef+"]");
                  *      }
@@ -122,12 +125,82 @@ namespace Jil.DeserializeDynamic
 
                 return new DynamicMetaObject(retBlock, restrictions);
             }
+
+            public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
+            {
+                /* 
+                 * Effectively returns the following code:
+                 * {
+                 *      var thisEvaled = (JsonObject)<Expression>;
+                 *      object res;
+                 *      ReturnType finalResult;
+                 *      object[] indexesRef = new [] { <index 0>, <index 1>, ... };
+                 *      if(!Value.InnerTryGetIndex(ReturnType, indexesRef, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to get dynamic index ("+string.Join(", ", indexesRef)+") of type <ReturnType> from ["+thisRef+"]");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 */
+
+                var indexExprs = 
+                    indexes.Select(
+                        exp => 
+                        {
+                            var ret = exp.Expression;
+
+                            if (ret.Type.IsValueType)
+                            {
+                                return Expression.Convert(ret, typeof(object));
+                            }
+
+                            return ret;
+                        }
+                    );
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var res = Expression.Variable(typeof(object));
+                var indexesRef = Expression.Variable(typeof(object[]));
+                var indexesAssigned = Expression.Assign(indexesRef, Expression.NewArrayInit(typeof(object), indexExprs.ToArray()));
+                var tryGetIndexCall = Expression.Call(thisEvaled, InnerTryGetIndexMtd, Expression.Constant(binder.ReturnType), indexesRef, res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcatArray,
+                                Expression.NewArrayInit(
+                                    typeof(object),
+                                    Expression.Constant("Unable to get dynamic index ("),
+                                    Expression.Call(StringJoin, Expression.Constant(", "), indexesRef),
+                                    Expression.Constant("of type ["+binder.ReturnType.FullName+"] from ["),
+                                    thisRef,
+                                    Expression.Constant("]")
+                                )
+                            )
+                        )
+                    );
+
+                var notIf =
+                    Expression.IfThen(
+                        Expression.Not(tryGetIndexCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res, indexesRef }, thisAssigned, indexesAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
         }
 
-        /*public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
+        private static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool InnerTryGetIndex(Type returnType, object[] indexes, out object result)
         {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryGetIndex(" + ToString(binder) + ", " + ToString(indexes) + ", out)");
-
             if (Type == JsonObjectType.Array)
             {
                 if (indexes.Length != 1)
@@ -151,7 +224,7 @@ namespace Jil.DeserializeDynamic
                 }
 
                 var val = ArrayValue[ix];
-                return val.InnerTryConvert(binder.ReturnType, out result);
+                return val.InnerTryConvert(returnType, out result);
             }
 
             if (Type == JsonObjectType.Object)
@@ -176,14 +249,14 @@ namespace Jil.DeserializeDynamic
                     return false;
                 }
 
-                return rawValue.InnerTryConvert(binder.ReturnType, out result);
+                return rawValue.InnerTryConvert(returnType, out result);
             }
 
             result = null;
             return false;
         }
 
-        static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
+        /*static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
         public override IEnumerable<string> GetDynamicMemberNames()
         {
             System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": GetDynamicMemberNames");
