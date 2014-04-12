@@ -196,6 +196,77 @@ namespace Jil.DeserializeDynamic
 
                 return new DynamicMetaObject(retBlock, restrictions);
             }
+
+            public override DynamicMetaObject BindInvokeMember(InvokeMemberBinder binder, DynamicMetaObject[] args)
+            {
+                /* 
+                 * Effectively returns the following code:
+                 * {
+                 *      var thisEvaled = (JsonObject)<Expression>;
+                 *      object res;
+                 *      ReturnType finalResult;
+                 *      object[] argsRef = new [] { <args 0>, <args 1>, ... };
+                 *      if(!Value.InnerTryInvokeMember(<MemberName>, argsRef, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to invoke dynamic member <MemberName> with args ("+string.Join(", ", argsRef)+") on ["+thisRef+"]");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 */
+
+                var argsExprs = 
+                    args.Select(
+                        exp => 
+                        {
+                            var ret = exp.Expression;
+
+                            if (ret.Type.IsValueType)
+                            {
+                                return Expression.Convert(ret, typeof(object));
+                            }
+
+                            return ret;
+                        }
+                    );
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var argsRef = Expression.Variable(typeof(object[]));
+                var argsAssigned = Expression.Assign(argsRef, Expression.NewArrayInit(typeof(object), argsExprs.ToArray()));
+                var res = Expression.Variable(typeof(object));
+                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryInvokeMemberMtd, Expression.Constant(binder.Name), argsRef, res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcatArray,
+                                Expression.NewArrayInit(
+                                    typeof(object),
+                                    Expression.Constant("Unable to invoke dynamic member [" + binder.Name + "] with args ("),
+                                    Expression.Call(StringJoin, Expression.Constant(", "), argsRef),
+                                    Expression.Constant(") on ["),
+                                    thisEvaled,
+                                    Expression.Constant("]")
+                                )
+                            )
+                        )
+                    );
+
+                var notIf =
+                    Expression.IfThen(
+                        Expression.Not(tryInvokeMemberCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res, argsRef }, thisAssigned, argsAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
         }
 
         private static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -256,8 +327,8 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        /*static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
-        public override IEnumerable<string> GetDynamicMemberNames()
+        static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
+        /*public override IEnumerable<string> GetDynamicMemberNames()
         {
             System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": GetDynamicMemberNames");
 
@@ -664,24 +735,18 @@ namespace Jil.DeserializeDynamic
         }
 
         
-        /*public bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
+        private static MethodInfo InnerTryInvokeMemberMtd = typeof(JsonObject).GetMethod("InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        bool InnerTryInvokeMember(string name, object[] args, out object result)
         {
-            return this.InnerTryConvert(binder.ReturnType, out result);
-        }
-
-        public override bool TryInvokeMember(System.Dynamic.InvokeMemberBinder binder, object[] args, out object result)
-        {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryInvokeMember(" + ToString(binder) + ", " + ToString(args) + ", out)");
-
             if (Type == JsonObjectType.Object)
             {
-                if (binder.Name == "GetEnumerator" && args.Length == 0)
+                if (name == "GetEnumerator" && args.Length == 0)
                 {
                     result = ObjectMembers.GetEnumerator();
                     return true;
                 }
 
-                if(binder.Name == "ContainsKey" && args.Length == 1)
+                if(name == "ContainsKey" && args.Length == 1)
                 {
                     var key = args[0] as string;
                     if(key == null)
@@ -700,7 +765,7 @@ namespace Jil.DeserializeDynamic
 
             if (Type == JsonObjectType.Array)
             {
-                if (binder.Name == "GetEnumerator" && args.Length == 0)
+                if (name == "GetEnumerator" && args.Length == 0)
                 {
                     result = ArrayMembers.GetEnumerator();
                     return true;
@@ -712,6 +777,6 @@ namespace Jil.DeserializeDynamic
 
             result = null;
             return false;
-        }*/
+        }
     }
 }
