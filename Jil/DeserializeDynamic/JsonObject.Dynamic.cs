@@ -5,17 +5,78 @@ using System.Text;
 using System.Threading.Tasks;
 using Jil.Common;
 using System.Dynamic;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Jil.DeserializeDynamic
 {
-    sealed partial class JsonObject : DynamicObject
+    sealed partial class JsonObject : IDynamicMetaObjectProvider
     {
-        static string ToString(System.Dynamic.GetIndexBinder binder)
+        public DynamicMetaObject GetMetaObject(Expression exp)
         {
-            return "[" + binder.ReturnType + ", " + ToString(binder.CallInfo) + "]";
+            return new JsonMetaObject(this, exp);
         }
 
-        public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
+        private sealed class JsonMetaObject : DynamicMetaObject
+        {
+            public JsonObject Outer { get { return (JsonObject)Value; } }
+
+            public JsonMetaObject(JsonObject outer, Expression exp) : base(exp, BindingRestrictions.Empty, outer) { }
+
+            private static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
+            private static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
+            public override DynamicMetaObject BindConvert(ConvertBinder binder)
+            {
+                /*
+                 * Effectively, this returns an expression of the following code:
+                 * {
+                 *      ReturnType finalResult;
+                 *      object res;
+                 *      if(!Value.TryConvert(ReturnType, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to convert dynamic ["+Value+"] to "+ReturnType.FullName");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 * 
+                 * Unlike C#, block expression in LINQ do produce a value when evaluated.  It's the last expression executed.
+                 */
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+
+                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var res = Expression.Variable(typeof(object));
+                var tryConvertCall = Expression.Call(thisEvaled, InnerTryConvertMtd, Expression.Constant(binder.ReturnType), res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcat,
+                                Expression.Constant("Unable to convert dynamic ["),
+                                thisEvaled,
+                                Expression.Constant("] to " + binder.ReturnType.FullName)
+                            )
+                        )
+                    );
+
+                var notIf = 
+                    Expression.IfThen(
+                        Expression.Not(tryConvertCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+                
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res }, thisAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
+        }
+
+        /*public override bool TryGetIndex(System.Dynamic.GetIndexBinder binder, object[] indexes, out object result)
         {
             System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryGetIndex(" + ToString(binder) + ", " + ToString(indexes) + ", out)");
 
@@ -137,12 +198,11 @@ namespace Jil.DeserializeDynamic
             var ret = val.InnerTryConvert(binder.ReturnType, out result);
 
             return ret;
-        }
+        }*/
 
+        private static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryConvert(Type returnType, out object result)
         {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": InnerTryConvert(" + returnType.FullName + ", out)");
-
             if (returnType == typeof(object))
             {
                 result = this;
@@ -488,31 +548,10 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        public override bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
+        
+        /*public bool TryConvert(System.Dynamic.ConvertBinder binder, out object result)
         {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryConvert(" + ToString(binder) + ", out)");
-
             return this.InnerTryConvert(binder.ReturnType, out result);
-        }
-
-        static string ToString(System.Dynamic.ConvertBinder binder)
-        {
-            return "[" + binder.Type + ", " + binder.ReturnType + ", " + binder.Explicit + "]";
-        }
-
-        static string ToString(System.Dynamic.InvokeMemberBinder binder)
-        {
-            return "[" + binder.Name + ", " + binder.ReturnType.FullName + ", " + binder.IgnoreCase + ", " + ToString(binder.CallInfo) + "]";
-        }
-
-        static string ToString(CallInfo ci)
-        {
-            return "[" + ci.ArgumentCount + ", [" + string.Join(", ", ci.ArgumentNames) + "]]";
-        }
-
-        static string ToString(object[] os)
-        {
-            return "[" + string.Join(", ", os) + "]";
         }
 
         public override bool TryInvokeMember(System.Dynamic.InvokeMemberBinder binder, object[] args, out object result)
@@ -558,6 +597,6 @@ namespace Jil.DeserializeDynamic
 
             result = null;
             return false;
-        }
+        }*/
     }
 }

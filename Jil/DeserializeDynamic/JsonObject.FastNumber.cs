@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Jil.DeserializeDynamic
 {
-    sealed partial class JsonObject : DynamicObject
+    sealed partial class JsonObject : IDynamicMetaObjectProvider
     {
         bool FastNumberToDouble(out double result)
         {
