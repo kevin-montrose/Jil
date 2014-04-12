@@ -335,8 +335,6 @@ namespace Jil.DeserializeDynamic
         static readonly IEnumerable<string> ArrayMembers = new[] { "Length", "Count" };
         IEnumerable<string> GetDynamicMemberNames()
         {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": GetDynamicMemberNames");
-
             if (Type == JsonObjectType.Object)
             {
                 return ObjectMembers.Keys;

@@ -335,7 +335,7 @@ namespace Benchmark
         {
             using (var str = new StringReader(data))
             {
-                var ret = JSON.DeserializeDynamic(str);
+                var ret = JSON.DeserializeDynamic(str, Options.ISO8601);
                 if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))
                 {
                     return ret;
