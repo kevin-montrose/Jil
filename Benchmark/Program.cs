@@ -135,12 +135,22 @@ namespace Benchmark
                     .Plan("Serialization", () => data = serializeFunc(obj), TestRuns)
                     .GetResult();
 
+            if (serializeResult.Outcomes.Any(o => o.Exception != null))
+            {
+                throw new Exception("Serialization failed w/ " + serializerName);
+            }
+
             Console.WriteLine("\t" + serializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
 
             var deserializeResult =
                 testGroup
                     .Plan("Deserialization", () => deserializeFunc(data, obj), TestRuns)
                     .GetResult();
+
+            if (deserializeResult.Outcomes.Any(o => o.Exception != null))
+            {
+                throw new Exception("Deserialization failed w/ " + serializerName);
+            }
 
             Console.WriteLine("\t" + deserializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
 
@@ -234,15 +244,15 @@ namespace Benchmark
 
         static MethodInfo _NewtonsoftDeserializeDynamic = typeof(Program).GetMethod("NewtonsoftDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
         static dynamic NewtonsoftDeserializeDynamic<T>(string str, T shouldMatch)
-            where T : IGenericEquality<T>
+            //where T : IGenericEquality<T>
         {
             dynamic ret = JsonConvert.DeserializeObject(str);
-            if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
-            {
+            //if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
+            //{
                 return ret;
-            }
+            //}
 
-            throw new Exception("Deserialization failed");
+            //throw new Exception("Deserialization failed");
         }
 
         static MethodInfo _NewtonsoftDeserialize = typeof(Program).GetMethod("NewtonsoftDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -280,15 +290,15 @@ namespace Benchmark
 
         static MethodInfo _ServiceStackDeserializeDynamic = typeof(Program).GetMethod("ServiceStackDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
         static dynamic ServiceStackDeserializeDynamic<T>(string str, T shouldMatch)
-            where T : IGenericEquality<T>
+            //where T : IGenericEquality<T>
         {
             dynamic ret = ServiceStack.Text.JsonObject.Parse(str);
-            if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
-            {
+            //if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
+            //{
                 return ret;
-            }
+            //}
 
-            throw new Exception("Deserialization failed");
+            //throw new Exception("Deserialization failed");
         }
 
         static MethodInfo _ServiceStackDeserialize = typeof(Program).GetMethod("ServiceStackDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -331,17 +341,17 @@ namespace Benchmark
 
         static MethodInfo _JilDeserializeDynamic = typeof(Program).GetMethod("JilDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
         static dynamic JilDeserializeDynamic<T>(string data, T shouldMatch)
-            where T : IGenericEquality<T>
+            //where T : IGenericEquality<T>
         {
             using (var str = new StringReader(data))
             {
                 var ret = JSON.DeserializeDynamic(str, Options.ISO8601);
-                if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))
-                {
+                //if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))
+                //{
                     return ret;
-                }
+                //}
 
-                throw new Exception("Deserialization failed");
+                //throw new Exception("Deserialization failed");
             }
         }
 

@@ -14,6 +14,23 @@ namespace Benchmark
 
     static class ExtensionMethods
     {
+        static readonly char[] ASCII;
+
+        static ExtensionMethods()
+        {
+            var cs = new List<char>();
+
+            for (var i = 0; i <= byte.MaxValue; i++)
+            {
+                var c = (char)i;
+                if (char.IsControl(c)) continue;
+
+                cs.Add(c);
+            }
+
+            ASCII = cs.ToArray();
+        }
+
         public static bool TrueEqualsDictionary<K, V>(this Dictionary<K, V> a, Dictionary<K, V> b)
             where V : class, IGenericEquality<V>
         {
@@ -259,33 +276,9 @@ namespace Benchmark
 
                 if (t == typeof(char))
                 {
-                    // add a bias towards English-y text, it's more realistic
-                    int range;
-                    if (rand.Next(10) == 0)
-                    {
-                        range = 0xFFFF + 1;
-                    }
-                    else
-                    {
-                        range = 'z' + 1;
-                    }
+                    var roll = rand.Next(ASCII.Length);
 
-                    var ci = rand.Next(range);
-                    var asChar = (char)ci;
-
-                    while
-                        (
-                            char.IsHighSurrogate(asChar) ||
-                            char.IsLowSurrogate(asChar) ||
-                            char.IsSurrogate(asChar) ||
-                            !(char.IsLetterOrDigit(asChar) || char.IsPunctuation(asChar) || char.IsWhiteSpace(asChar))
-                        )
-                    {
-                        ci = rand.Next(range);
-                        asChar = (char)ci;
-                    }
-
-                    return asChar;
+                    return ASCII[roll];
                 }
 
                 if (t == typeof(bool))
