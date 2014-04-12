@@ -1117,5 +1117,14 @@ namespace JilTests
 
             Assert.IsTrue(eq);
         }
+
+        [TestMethod]
+        public void MemberAccess()
+        {
+            var dyn = JSON.DeserializeDynamic("{\"A\":123.45, \"B\": \"hello world\", \"C\": 678}");
+            Assert.AreEqual(123.45, (double)dyn.A);
+            Assert.AreEqual("hello world", (string)dyn.B);
+            Assert.AreEqual(678, (int)dyn.C);
+        }
     }
 }

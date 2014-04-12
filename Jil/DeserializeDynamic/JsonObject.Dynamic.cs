@@ -30,11 +30,12 @@ namespace Jil.DeserializeDynamic
                 /*
                  * Effectively, this returns an expression of the following code:
                  * {
+                 *      JsonObject thisEvaled = (JsonObject)<Expression>;
                  *      ReturnType finalResult;
                  *      object res;
-                 *      if(!Value.TryConvert(ReturnType, out res))
+                 *      if(!Value.InnerTryConvert(ReturnType, out res))
                  *      {
-                 *          throw new InvalidCastException("Unable to convert dynamic ["+Value+"] to "+ReturnType.FullName");
+                 *          throw new InvalidCastException("Unable to convert dynamic ["+thisEvaled+"] to "+ReturnType.FullName");
                  *      }
                  *      finalResult = (ReturnType)res;
                  * }
@@ -43,7 +44,6 @@ namespace Jil.DeserializeDynamic
                  */
 
                 var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
-
                 var thisEvaled = Expression.Variable(typeof(JsonObject));
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
@@ -69,6 +69,54 @@ namespace Jil.DeserializeDynamic
                     );
                 var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
                 
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res }, thisAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
+
+            public override DynamicMetaObject BindGetMember(GetMemberBinder binder)
+            {
+                /* 
+                 * Effectively returns the following code:
+                 * {
+                 *      var thisEvaled = (JsonObject)<Expression>;
+                 *      object res;
+                 *      ReturnType finalResult;
+                 *      if(!Value.InnerTryGetMember(<MemberName>, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to get dynamic member <MemberName> of type <ReturnType> from ["+thisRef+"]");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 */
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var res = Expression.Variable(typeof(object));
+                var tryGetMemberCall = Expression.Call(thisEvaled, InnerTryGetMemberMtd, Expression.Constant(binder.Name), Expression.Constant(binder.ReturnType), res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcat,
+                                Expression.Constant("Unable to get dynamic member ["+binder.Name+"] of type ["+binder.ReturnType.FullName+"] from ["),
+                                thisEvaled,
+                                Expression.Constant("]")
+                            )
+                        )
+                    );
+
+                var notIf =
+                    Expression.IfThen(
+                        Expression.Not(tryGetMemberCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+
                 var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res }, thisAssigned, notIf, finalAssign);
                 var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
 
@@ -151,20 +199,14 @@ namespace Jil.DeserializeDynamic
             }
 
             return Enumerable.Empty<string>();
-        }
+        }*/
 
-        static string ToString(System.Dynamic.GetMemberBinder binder)
+        private static MethodInfo InnerTryGetMemberMtd = typeof(JsonObject).GetMethod("InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        bool InnerTryGetMember(string name, Type returnType, out object result)
         {
-            return "[" + binder.Name + ", " + binder.ReturnType.FullName + ", " + binder.IgnoreCase + "]";
-        }
-
-        public override bool TryGetMember(System.Dynamic.GetMemberBinder binder, out object result)
-        {
-            System.Diagnostics.Debug.WriteLine(DateTime.UtcNow + ": TryGetMember(" + ToString(binder) + ", out)");
-
             if (Type == JsonObjectType.Array)
             {
-                if (binder.Name == "Count" || binder.Name == "Length")
+                if (name == "Count" || name == "Length")
                 {
                     result = ArrayValue.Count;
                     return true;
@@ -181,7 +223,7 @@ namespace Jil.DeserializeDynamic
             }
             
             JsonObject val;
-            if (!ObjectMembers.TryGetValue(binder.Name, out val))
+            if (!ObjectMembers.TryGetValue(name, out val))
             {
                 // for fetching a MEMBER, return null if we don't have it
                 // that was `var foo = obj.misssing_prop == null;` can work
@@ -195,10 +237,10 @@ namespace Jil.DeserializeDynamic
                 return true;
             }
 
-            var ret = val.InnerTryConvert(binder.ReturnType, out result);
+            var ret = val.InnerTryConvert(returnType, out result);
 
             return ret;
-        }*/
+        }
 
         private static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
         bool InnerTryConvert(Type returnType, out object result)
