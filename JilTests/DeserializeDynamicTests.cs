@@ -1484,5 +1484,21 @@ namespace JilTests
                 Assert.AreEqual(false, (bool)(dyn1 || dyn2 || false));
             }
         }
+
+        [TestMethod]
+        public void ShortCircuits()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                dynamic dyn2 = "what no";
+                Assert.AreEqual(true, (bool)(dyn1 || dyn2));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                dynamic dyn2 = "what no";
+                Assert.AreEqual(false, (bool)(dyn1 && dyn2));
+            }
+        }
     }
 }

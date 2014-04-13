@@ -30,6 +30,7 @@ namespace Jil.DeserializeDynamic
 
             static ParameterExpression ThisEvaled = Expression.Variable(typeof(JsonObject));
             static ParameterExpression Res = Expression.Variable(typeof(object));
+            static ParameterExpression ArgRef = Expression.Variable(typeof(object));
             static ConstantExpression UnableToConvertDynamic = Expression.Constant("Unable to convert dynamic [");
             static ConstantExpression CommaSpace = Expression.Constant(", ");
             static ConstantExpression CloseSquareBracket = Expression.Constant("]");
@@ -344,7 +345,7 @@ namespace Jil.DeserializeDynamic
                 var thisEvaled = ThisEvaled;
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
-                var argRef = Expression.Variable(typeof(object));
+                var argRef = ArgRef;
                 var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
                 var res = Res;
                 var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperation, Expression.Constant(binder.Operation), argRef, Expression.Constant(binder.ReturnType), res);
@@ -385,6 +386,42 @@ namespace Jil.DeserializeDynamic
         {
             switch(operand)
             {
+                case ExpressionType.And:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = false;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    break;
+
+                case ExpressionType.Or:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = true;
+                        return true;
+                    }
+                    break;
+
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                     if (!returnType.IsAssignableFrom(typeof(float)))
@@ -627,44 +664,6 @@ namespace Jil.DeserializeDynamic
                     if (Type == JsonObjectType.False)
                     {
                         result = (bool)rightHand;
-                        return true;
-                    }
-                    break;
-
-                case ExpressionType.And:
-                    // TODO: this eagerly evaulates b in `a && b`; if a is false, b shouldn't be evaluated
-                    if (!returnType.IsAssignableFrom(typeof(bool)))
-                    {
-                        result = null;
-                        return false;
-                    }
-                    if (Type == JsonObjectType.False)
-                    {
-                        result = false;
-                        return true;
-                    }
-                    if (Type == JsonObjectType.True)
-                    {
-                        result = (bool)rightHand;
-                        return true;
-                    }
-                    break;
-
-                case ExpressionType.Or:
-                    // TODO: this eagerly evaulates b in `a || b`; if a is true, b shouldn't be evaluated
-                    if (!returnType.IsAssignableFrom(typeof(bool)))
-                    {
-                        result = null;
-                        return false;
-                    }
-                    if (Type == JsonObjectType.False)
-                    {
-                        result = (bool)rightHand;
-                        return true;
-                    }
-                    if (Type == JsonObjectType.True)
-                    {
-                        result = true;
                         return true;
                     }
                     break;
