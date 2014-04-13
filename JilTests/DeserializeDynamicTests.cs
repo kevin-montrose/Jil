@@ -1342,5 +1342,87 @@ namespace JilTests
                 Assert.AreEqual(false, dyn1 != dyn2);
             }
         }
+
+        [TestMethod]
+        public void GreaterThan()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 > 1);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("1");
+                Assert.AreEqual(true, dyn1 > dyn2);
+            }
+        }
+
+        [TestMethod]
+        public void LessThan()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(false, dyn1 < 1);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("1");
+                Assert.AreEqual(false, dyn1 < dyn2);
+            }
+        }
+
+        [TestMethod]
+        public void GreaterThanOrEquals()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 >= 1);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 >= 123);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("1");
+                Assert.AreEqual(true, dyn1 >= dyn2);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 >= dyn2);
+            }
+        }
+
+        [TestMethod]
+        public void LessThanOrEquals()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(false, dyn1 <= 1);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 <= 123);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("1");
+                Assert.AreEqual(false, dyn1 <= dyn2);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 <= dyn2);
+            }
+        }
     }
 }

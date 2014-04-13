@@ -387,6 +387,11 @@ namespace Jil.DeserializeDynamic
             {
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
+                    if (!returnType.IsAssignableFrom(typeof(float)))
+                    {
+                        result = null;
+                        return false;
+                    }
                     if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
                     {
                         object lhsRef;
@@ -401,7 +406,12 @@ namespace Jil.DeserializeDynamic
                     }
                     break;
 
-                case ExpressionType.Divide: 
+                case ExpressionType.Divide:
+                    if (!returnType.IsAssignableFrom(typeof(float)))
+                    {
+                        result = null;
+                        return false;
+                    }
                     if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
                     {
                         object lhsRef;
@@ -468,16 +478,93 @@ namespace Jil.DeserializeDynamic
                     }
                     break;
 
-                case ExpressionType.GreaterThan: break;
+                case ExpressionType.GreaterThan:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
 
-                case ExpressionType.GreaterThanOrEqual: break;
+                            result = lhs > rhs;
+                            return true;
+                        }
+                    }
+                    break;
 
-                case ExpressionType.LessThan: break;
+                case ExpressionType.GreaterThanOrEqual:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
 
-                case ExpressionType.LessThanOrEqual: break;
+                            result = lhs >= rhs;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case ExpressionType.LessThan: 
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs < rhs;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case ExpressionType.LessThanOrEqual: 
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs <= rhs;
+                            return true;
+                        }
+                    }
+                    break;
 
                 case ExpressionType.Multiply:
-                case ExpressionType.MultiplyChecked: 
+                case ExpressionType.MultiplyChecked:
+                    if (!returnType.IsAssignableFrom(typeof(float)))
+                    {
+                        result = null;
+                        return false;
+                    }
                     if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
                     {
                         object lhsRef;
@@ -548,6 +635,11 @@ namespace Jil.DeserializeDynamic
 
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
+                    if (!returnType.IsAssignableFrom(typeof(float)))
+                    {
+                        result = null;
+                        return false;
+                    }
                     if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
                     {
                         object lhsRef;
