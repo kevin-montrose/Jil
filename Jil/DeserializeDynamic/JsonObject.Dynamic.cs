@@ -277,10 +277,118 @@ namespace Jil.DeserializeDynamic
                 return new DynamicMetaObject(retBlock, restrictions);
             }
 
+            public override DynamicMetaObject BindUnaryOperation(UnaryOperationBinder binder)
+            {
+                /* 
+                 * Effectively returns the following code:
+                 * {
+                 *      var thisEvaled = (JsonObject)<Expression>;
+                 *      object res;
+                 *      ReturnType finalResult;
+                 *      if(!Value.InnerTryUnaryOperation(ExpressionType, ReturnType, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to get dynamic member <MemberName> of type <ReturnType> from ["+thisRef+"]");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 */
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+                var thisEvaled = ThisEvaled;
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var res = Res;
+                var tryUnaryOperationCall = Expression.Call(thisEvaled, InnerTryUnaryOperationMtd, Expression.Constant(binder.Operation), Expression.Constant(binder.ReturnType), res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcat,
+                                Expression.Constant("Unable to perform dynamic unary operation [" + binder.Operation + "] of type [" + binder.ReturnType.FullName + "] from ["),
+                                thisEvaled,
+                                CloseSquareBracket
+                            )
+                        )
+                    );
+
+                var notIf =
+                    Expression.IfThen(
+                        Expression.Not(tryUnaryOperationCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res }, thisAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
+
             public override IEnumerable<string> GetDynamicMemberNames()
             {
                 return Outer.GetDynamicMemberNames();
             }
+        }
+
+        static MethodInfo InnerTryUnaryOperationMtd = typeof(JsonObject).GetMethod("InnerTryUnaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool InnerTryUnaryOperation(ExpressionType operand, Type returnType, out object result)
+        {
+            switch(operand)
+            {
+                case ExpressionType.UnaryPlus:
+                    if (Type == JsonObjectType.FastNumber || Type == JsonObjectType.Number)
+                    {
+                        return this.InnerTryConvert(returnType, out result);
+                    }
+                    break;
+
+                case ExpressionType.NegateChecked:
+                case ExpressionType.Negate:
+                    if (Type == JsonObjectType.FastNumber)
+                    {
+                        var negated = 
+                            new JsonObject
+                            {
+                                Type = JsonObjectType.FastNumber,
+
+                                FastNumberNegative = !this.FastNumberNegative,
+                                FastNumberPart1 = this.FastNumberPart1,
+                                FastNumberPart2 = this.FastNumberPart2,
+                                FastNumberPart2Length = this.FastNumberPart2Length,
+                                FastNumberPart3 = this.FastNumberPart3
+                            };
+
+                        return negated.InnerTryConvert(returnType, out result);
+                    }
+                    if (Type == JsonObjectType.Number)
+                    {
+                        var negated =
+                            new JsonObject
+                            {
+                                Type = JsonObjectType.Number,
+
+                                NumberValue = -this.NumberValue
+                            };
+
+                        return negated.InnerTryConvert(returnType, out result);
+                    }
+                    break;
+
+                case ExpressionType.Not:
+                    if (Type == JsonObjectType.True)
+                    {
+                        return JsonObject.False.InnerTryConvert(returnType, out result);
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        return JsonObject.True.InnerTryConvert(returnType, out result);
+                    }
+                    break;
+            }
+
+            result = null;
+            return false;
         }
 
         static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);

@@ -1144,5 +1144,47 @@ namespace JilTests
                 Assert.AreEqual(678, (int)dyn[2]);
             }
         }
+
+        [TestMethod]
+        public void UnaryPlus()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123.45");
+                Assert.AreEqual(123.45, (double)+dyn);
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(123, (int)+dyn);
+            }
+        }
+
+        [TestMethod]
+        public void Negate()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123.45");
+                Assert.AreEqual(-123.45, (double)-dyn);
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(-123, (int)-dyn);
+            }
+        }
+
+        [TestMethod]
+        public void Not()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(true, (bool)!dyn);
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(false, (bool)!dyn);
+            }
+        }
     }
 }
