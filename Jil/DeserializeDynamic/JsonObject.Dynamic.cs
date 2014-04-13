@@ -769,7 +769,7 @@ namespace Jil.DeserializeDynamic
             {
                 if (name == "GetEnumerator" && args.Length == 0)
                 {
-                    result = ArrayMembers.GetEnumerator();
+                    result = ArrayValue.GetEnumerator();
                     return true;
                 }
 

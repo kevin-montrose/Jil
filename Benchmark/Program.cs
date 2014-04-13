@@ -346,9 +346,65 @@ namespace Benchmark
             using (var str = new StringReader(data))
             {
                 var ret = JSON.DeserializeDynamic(str, Options.ISO8601);
+
+#if DEBUG
+                {
+                    var asComparable1 = shouldMatch as IGenericEquality<T>;
+
+                    if (asComparable1 != null)
+                    {
+                        if (!asComparable1.EqualsDynamic(ret))
+                        {
+                            throw new Exception("Results didn't match");
+                        }
+                    }
+                }
+
+                {
+                    if (shouldMatch is System.Collections.IList)
+                    {
+                        var e1 = (System.Collections.IEnumerator)((dynamic)shouldMatch).GetEnumerator();
+                        var e2 = (System.Collections.IEnumerator)ret.GetEnumerator();
+
+                        while (e1.MoveNext())
+                        {
+                            if (!e2.MoveNext())
+                            {
+                                throw new Exception("Results didn't match");
+                            }
+
+                            var i1 = (dynamic)e1.Current;
+                            var i2 = (dynamic)e2.Current;
+
+                            if (!i1.EqualsDynamic(i2))
+                            {
+                                throw new Exception("Results didn't match");
+                            }
+                        }
+                    }
+                }
+
+                {
+                    if (shouldMatch is System.Collections.IDictionary)
+                    {
+                        foreach (var kv in ((dynamic)shouldMatch))
+                        {
+                            var key = (string)kv.Key;
+                            var v1 = kv.Value;
+                            var v2 = ret[key];
+
+                            if (!v1.EqualsDynamic(v2))
+                            {
+                                throw new Exception("Results didn't match");
+                            }
+                        }
+                    }
+                }
+#endif
+
                 //if ((ret == null && shouldMatch == null) || shouldMatch.EqualsDynamic(ret))
                 //{
-                    return ret;
+                return ret;
                 //}
 
                 //throw new Exception("Deserialization failed");

@@ -382,6 +382,9 @@ namespace Benchmark
         {
             var inOrder = e.OrderBy(_ => _).ToList();
 
+            if (inOrder.Count == 0) return 0;
+            if (inOrder.Count == 1) return inOrder[0];
+
             if (inOrder.Count % 2 == 1)
             {
                 return inOrder[inOrder.Count / 2 + 1];
