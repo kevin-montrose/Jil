@@ -1246,5 +1246,53 @@ namespace JilTests
                 Assert.AreEqual(61, (int)(dyn1 / dyn2));
             }
         }
+
+        [TestMethod]
+        public void Equals()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn == 123);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(true, dyn1 == dyn2);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("\"hello\"");
+                Assert.AreEqual(true, dyn1 == "hello");
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("\"hello\"");
+                var dyn2 = JSON.DeserializeDynamic("\"hello\"");
+                Assert.AreEqual(true, dyn1 == dyn2);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, dyn1 == true);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                var dyn2 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, dyn1 == dyn2);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(true, dyn1 == false);
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                var dyn2 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(true, dyn1 == dyn2);
+            }
+        }
     }
 }

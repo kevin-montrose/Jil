@@ -347,7 +347,7 @@ namespace Jil.DeserializeDynamic
                 var argRef = Expression.Variable(typeof(object));
                 var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
                 var res = Res;
-                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperationMtd, Expression.Constant(binder.Operation), argRef, Expression.Constant(arg.RuntimeType ?? typeof(object)), res);
+                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperationMtd, Expression.Constant(binder.Operation), argRef, Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -416,7 +416,58 @@ namespace Jil.DeserializeDynamic
                     }
                     break;
 
-                case ExpressionType.Equal: break;
+                case ExpressionType.Equal:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+
+                    if (object.ReferenceEquals(rightHand, null))
+                    {
+                        result = false;
+                        return true;
+                    }
+                    if (object.ReferenceEquals(this, rightHand))
+                    {
+                        result = true;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.FastNumber || Type == JsonObjectType.Number)
+                    {
+                        object leftHand;
+                        if (InnerTryConvert(typeof(float), out leftHand))
+                        {
+                            var rhs = (float)rightHand;
+                            var lhs = (float)leftHand;
+
+                            result = lhs == rhs;
+                            return true;
+                        }
+                    }
+                    if (Type == JsonObjectType.String)
+                    {
+                        object leftHand;
+                        if (InnerTryConvert(typeof(string), out leftHand))
+                        {
+                            var rhs = (string)rightHand;
+                            var lhs = (string)leftHand;
+
+                            result = lhs == rhs;
+                            return true;
+                        }
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = !(bool)rightHand;
+                        return true;
+                    }
+                    break;
 
                 case ExpressionType.GreaterThan: break;
 
