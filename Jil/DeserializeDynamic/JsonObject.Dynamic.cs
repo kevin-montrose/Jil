@@ -325,10 +325,146 @@ namespace Jil.DeserializeDynamic
                 return new DynamicMetaObject(retBlock, restrictions);
             }
 
+            public override DynamicMetaObject BindBinaryOperation(BinaryOperationBinder binder, DynamicMetaObject arg)
+            {
+                /* Effectively returns the following code:
+                 * {
+                 *      var thisEvaled = (JsonObject)<Expression>;
+                 *      object res;
+                 *      ReturnType finalResult;
+                 *      if(!Value.InnerTryBinaryOperations(Operand, arg, ReturnType, out res))
+                 *      {
+                 *          throw new InvalidCastException("Unable to invoke dynamic binary operation [<Operation>] on ["+thisRef+"]");
+                 *      }
+                 *      finalResult = (ReturnType)res;
+                 * }
+                 */
+
+                var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
+                var thisEvaled = ThisEvaled;
+                var thisAssigned = Expression.Assign(thisEvaled, thisRef);
+                var finalResult = Expression.Variable(binder.ReturnType);
+                var argRef = Expression.Variable(typeof(object));
+                var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
+                var res = Res;
+                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperationMtd, Expression.Constant(binder.Operation), argRef, Expression.Constant(arg.RuntimeType ?? typeof(object)), res);
+                var throwExc =
+                    Expression.Throw(
+                        Expression.New(
+                            InvalidCastExceptionCons,
+                            Expression.Call(
+                                StringConcat,
+                                Expression.Constant("Unable to invoke dynamic binary operation [" + binder.Operation + "] on ["),
+                                thisEvaled,
+                                CloseSquareBracket
+                            )
+                        )
+                    );
+
+                var notIf =
+                    Expression.IfThen(
+                        Expression.Not(tryInvokeMemberCall),
+                        throwExc
+                    );
+                var finalAssign = Expression.Assign(finalResult, Expression.Convert(res, binder.ReturnType));
+
+                var retBlock = Expression.Block(new[] { thisEvaled, finalResult, res, argRef }, thisAssigned, argAssigned, notIf, finalAssign);
+                var restrictions = BindingRestrictions.GetTypeRestriction(Expression, LimitType);
+
+                return new DynamicMetaObject(retBlock, restrictions);
+            }
+
             public override IEnumerable<string> GetDynamicMemberNames()
             {
                 return Outer.GetDynamicMemberNames();
             }
+        }
+
+        static MethodInfo InnerTryBinaryOperationMtd = typeof(JsonObject).GetMethod("InnerTryBinaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool InnerTryBinaryOperation(ExpressionType operand, dynamic rightHand, Type returnType, out object result)
+        {
+            switch(operand)
+            {
+                case ExpressionType.Add:
+                case ExpressionType.AddChecked:
+                    if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs + rhs;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case ExpressionType.Divide: 
+                    if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs / rhs;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case ExpressionType.Equal: break;
+
+                case ExpressionType.GreaterThan: break;
+
+                case ExpressionType.GreaterThanOrEqual: break;
+
+                case ExpressionType.LessThan: break;
+
+                case ExpressionType.LessThanOrEqual: break;
+
+                case ExpressionType.Multiply:
+                case ExpressionType.MultiplyChecked: 
+                    if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs * rhs;
+                            return true;
+                        }
+                    }
+                    break;
+
+                case ExpressionType.NotEqual: break;
+
+                case ExpressionType.OrElse: break;
+
+                case ExpressionType.Subtract:
+                case ExpressionType.SubtractChecked:
+                    if(Type == JsonObjectType.Number || Type == JsonObjectType.FastNumber)
+                    {
+                        object lhsRef;
+                        if (InnerTryConvert(typeof(float), out lhsRef))
+                        {
+                            var lhs = (float)lhsRef;
+                            var rhs = (float)rightHand;
+
+                            result = lhs - rhs;
+                            return true;
+                        }
+                    }
+                    break;
+            }
+
+            result = null;
+            return false;
         }
 
         static MethodInfo InnerTryUnaryOperationMtd = typeof(JsonObject).GetMethod("InnerTryUnaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);

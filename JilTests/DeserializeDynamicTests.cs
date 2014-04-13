@@ -1186,5 +1186,65 @@ namespace JilTests
                 Assert.AreEqual(false, (bool)!dyn);
             }
         }
+
+        [TestMethod]
+        public void Add()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(456, (int)(dyn + 333));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("333");
+                Assert.AreEqual(456, (int)(dyn1 + dyn2));
+            }
+        }
+
+        [TestMethod]
+        public void Subtract()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(12, (int)(dyn - 111));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("111");
+                Assert.AreEqual(12, (int)(dyn1 - dyn2));
+            }
+        }
+
+        [TestMethod]
+        public void Multiply()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(246, (int)(dyn * 2));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("2");
+                Assert.AreEqual(246, (int)(dyn1 * dyn2));
+            }
+        }
+
+        [TestMethod]
+        public void Divide()
+        {
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                Assert.AreEqual(61, (int)(dyn / 2));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("123");
+                var dyn2 = JSON.DeserializeDynamic("2");
+                Assert.AreEqual(61, (int)(dyn1 / dyn2));
+            }
+        }
     }
 }
