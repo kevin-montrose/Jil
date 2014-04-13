@@ -422,7 +422,6 @@ namespace Jil.DeserializeDynamic
                         result = null;
                         return false;
                     }
-
                     if (object.ReferenceEquals(rightHand, null))
                     {
                         result = false;
@@ -493,7 +492,57 @@ namespace Jil.DeserializeDynamic
                     }
                     break;
 
-                case ExpressionType.NotEqual: break;
+                case ExpressionType.NotEqual:
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (object.ReferenceEquals(rightHand, null))
+                    {
+                        result = true;
+                        return true;
+                    }
+                    if (object.ReferenceEquals(this, rightHand))
+                    {
+                        result = false;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.FastNumber || Type == JsonObjectType.Number)
+                    {
+                        object leftHand;
+                        if (InnerTryConvert(typeof(float), out leftHand))
+                        {
+                            var rhs = (float)rightHand;
+                            var lhs = (float)leftHand;
+
+                            result = lhs != rhs;
+                            return true;
+                        }
+                    }
+                    if (Type == JsonObjectType.String)
+                    {
+                        object leftHand;
+                        if (InnerTryConvert(typeof(string), out leftHand))
+                        {
+                            var rhs = (string)rightHand;
+                            var lhs = (string)leftHand;
+
+                            result = lhs != rhs;
+                            return true;
+                        }
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = !(bool)rightHand;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    break;
 
                 case ExpressionType.OrElse: break;
 
