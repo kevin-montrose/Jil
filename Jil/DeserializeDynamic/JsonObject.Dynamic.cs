@@ -631,7 +631,43 @@ namespace Jil.DeserializeDynamic
                     }
                     break;
 
-                case ExpressionType.OrElse: break;
+                case ExpressionType.And:
+                    // TODO: this eagerly evaulates b in `a && b`; if a is false, b shouldn't be evaluated
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = false;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    break;
+
+                case ExpressionType.Or:
+                    // TODO: this eagerly evaulates b in `a || b`; if a is true, b shouldn't be evaluated
+                    if (!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    if (Type == JsonObjectType.False)
+                    {
+                        result = (bool)rightHand;
+                        return true;
+                    }
+                    if (Type == JsonObjectType.True)
+                    {
+                        result = true;
+                        return true;
+                    }
+                    break;
 
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
@@ -664,6 +700,24 @@ namespace Jil.DeserializeDynamic
         {
             switch(operand)
             {
+                case ExpressionType.IsFalse:
+                    if(!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    result = Type == JsonObjectType.False;
+                    return true;
+                
+                case ExpressionType.IsTrue:
+                    if(!returnType.IsAssignableFrom(typeof(bool)))
+                    {
+                        result = null;
+                        return false;
+                    }
+                    result = Type == JsonObjectType.True;
+                    return true;
+
                 case ExpressionType.UnaryPlus:
                     if (Type == JsonObjectType.FastNumber || Type == JsonObjectType.Number)
                     {

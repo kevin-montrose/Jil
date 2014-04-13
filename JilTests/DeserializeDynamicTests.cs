@@ -1424,5 +1424,65 @@ namespace JilTests
                 Assert.AreEqual(true, dyn1 <= dyn2);
             }
         }
+
+        [TestMethod]
+        public void And()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, (bool)(dyn1 && true));
+                Assert.AreEqual(false, (bool)(dyn1 && false));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                var dyn2 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, (bool)(dyn1 && dyn2));
+                Assert.AreEqual(true, (bool)(dyn1 && dyn2 && true));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(false, (bool)(dyn1 && true));
+                Assert.AreEqual(false, (bool)(dyn1 && false));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                var dyn2 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(false, (bool)(dyn1 && dyn2));
+                Assert.AreEqual(false, (bool)(dyn1 && dyn2 && false));
+            }
+        }
+
+        [TestMethod]
+        public void Or()
+        {
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, (bool)(dyn1 || true));
+                Assert.AreEqual(true, (bool)(dyn1 || false));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                var dyn2 = JSON.DeserializeDynamic("true");
+                Assert.AreEqual(true, (bool)(dyn1 || dyn2));
+                Assert.AreEqual(true, (bool)(dyn1 || dyn2 || true));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(true, (bool)(dyn1 || true));
+                Assert.AreEqual(false, (bool)(dyn1 || false));
+            }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("false");
+                var dyn2 = JSON.DeserializeDynamic("false");
+                Assert.AreEqual(false, (bool)(dyn1 || dyn2));
+                Assert.AreEqual(false, (bool)(dyn1 || dyn2 || false));
+            }
+        }
     }
 }
