@@ -108,7 +108,7 @@ namespace Jil.DeserializeDynamic
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
                 var res = Res;
-                var tryGetMemberCall = Expression.Call(thisEvaled, InnerTryGetMemberMtd, Expression.Constant(binder.Name), Expression.Constant(binder.ReturnType), res);
+                var tryGetMemberCall = Expression.Call(thisEvaled, InnerTryGetMember, Expression.Constant(binder.Name), Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -174,7 +174,7 @@ namespace Jil.DeserializeDynamic
                 var res = Res;
                 var indexesRef = IndexesRef;
                 var indexesAssigned = Expression.Assign(indexesRef, Expression.NewArrayInit(typeof(object), indexExprs));
-                var tryGetIndexCall = Expression.Call(thisEvaled, InnerTryGetIndexMtd, Expression.Constant(binder.ReturnType), indexesRef, res);
+                var tryGetIndexCall = Expression.Call(thisEvaled, InnerTryGetIndex, Expression.Constant(binder.ReturnType), indexesRef, res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -245,7 +245,7 @@ namespace Jil.DeserializeDynamic
                 var argsRef = IndexesRef;
                 var argsAssigned = Expression.Assign(argsRef, Expression.NewArrayInit(typeof(object), argExprs));
                 var res = Res;
-                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryInvokeMemberMtd, Expression.Constant(binder.Name), argsRef, res);
+                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryInvokeMember, Expression.Constant(binder.Name), argsRef, res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -298,7 +298,7 @@ namespace Jil.DeserializeDynamic
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
                 var res = Res;
-                var tryUnaryOperationCall = Expression.Call(thisEvaled, InnerTryUnaryOperationMtd, Expression.Constant(binder.Operation), Expression.Constant(binder.ReturnType), res);
+                var tryUnaryOperationCall = Expression.Call(thisEvaled, InnerTryUnaryOperation, Expression.Constant(binder.Operation), Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -347,7 +347,7 @@ namespace Jil.DeserializeDynamic
                 var argRef = Expression.Variable(typeof(object));
                 var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
                 var res = Res;
-                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperationMtd, Expression.Constant(binder.Operation), argRef, Expression.Constant(binder.ReturnType), res);
+                var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperation, Expression.Constant(binder.Operation), argRef, Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
                         Expression.New(
@@ -380,8 +380,8 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        static MethodInfo InnerTryBinaryOperationMtd = typeof(JsonObject).GetMethod("InnerTryBinaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
-        bool InnerTryBinaryOperation(ExpressionType operand, dynamic rightHand, Type returnType, out object result)
+        static MethodInfo InnerTryBinaryOperation = typeof(JsonObject).GetMethod("_InnerTryBinaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool _InnerTryBinaryOperation(ExpressionType operand, dynamic rightHand, Type returnType, out object result)
         {
             switch(operand)
             {
@@ -695,8 +695,8 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        static MethodInfo InnerTryUnaryOperationMtd = typeof(JsonObject).GetMethod("InnerTryUnaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
-        bool InnerTryUnaryOperation(ExpressionType operand, Type returnType, out object result)
+        static MethodInfo InnerTryUnaryOperation = typeof(JsonObject).GetMethod("_InnerTryUnaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool _InnerTryUnaryOperation(ExpressionType operand, Type returnType, out object result)
         {
             switch(operand)
             {
@@ -773,8 +773,8 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        static MethodInfo InnerTryGetIndexMtd = typeof(JsonObject).GetMethod("InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
-        bool InnerTryGetIndex(Type returnType, object[] indexes, out object result)
+        static MethodInfo InnerTryGetIndex = typeof(JsonObject).GetMethod("_InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+        bool _InnerTryGetIndex(Type returnType, object[] indexes, out object result)
         {
             if (Type == JsonObjectType.Array)
             {
@@ -847,8 +847,8 @@ namespace Jil.DeserializeDynamic
             return Enumerable.Empty<string>();
         }
 
-        static MethodInfo InnerTryGetMemberMtd = typeof(JsonObject).GetMethod("InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
-        bool InnerTryGetMember(string name, Type returnType, out object result)
+        static MethodInfo InnerTryGetMember = typeof(JsonObject).GetMethod("_InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        bool _InnerTryGetMember(string name, Type returnType, out object result)
         {
             if (Type == JsonObjectType.Array)
             {
@@ -1236,8 +1236,8 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        static MethodInfo InnerTryInvokeMemberMtd = typeof(JsonObject).GetMethod("InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
-        bool InnerTryInvokeMember(string name, object[] args, out object result)
+        static MethodInfo InnerTryInvokeMember = typeof(JsonObject).GetMethod("_InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        bool _InnerTryInvokeMember(string name, object[] args, out object result)
         {
             if (Type == JsonObjectType.Object)
             {
