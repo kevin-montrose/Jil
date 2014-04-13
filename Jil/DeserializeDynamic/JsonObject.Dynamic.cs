@@ -12,6 +12,8 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject : IDynamicMetaObjectProvider
     {
+        internal static bool CacheDynamicExpressions = true;
+
         public DynamicMetaObject GetMetaObject(Expression exp)
         {
             return new JsonMetaObject(this, exp);
@@ -27,6 +29,14 @@ namespace Jil.DeserializeDynamic
             static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
             static MethodInfo StringConcatArray = typeof(string).GetMethod("Concat", new[] { typeof(object[]) });
             static MethodInfo StringJoin = typeof(string).GetMethod("Join", new[] { typeof(string), typeof(object[]) });
+
+            static ParameterExpression ThisEvaled = Expression.Variable(typeof(JsonObject));
+            static ParameterExpression Res = Expression.Variable(typeof(object));
+            static ConstantExpression UnableToConvertDynamic = Expression.Constant("Unable to convert dynamic [");
+            static ConstantExpression CloseSquareBracket = Expression.Constant("]");
+            static ParameterExpression IndexesRef = Expression.Variable(typeof(object[]));
+            static ConstantExpression UnableToGetDynamicIndex = Expression.Constant("Unable to get dynamic index (");
+            static ConstantExpression CloseBraceOpenSquareBracket = Expression.Constant(") on [");
 
             public override DynamicMetaObject BindConvert(ConvertBinder binder)
             {
@@ -47,10 +57,10 @@ namespace Jil.DeserializeDynamic
                  */
 
                 var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
-                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisEvaled = CacheDynamicExpressions ? ThisEvaled : Expression.Variable(typeof(JsonObject));
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
-                var res = Expression.Variable(typeof(object));
+                var res = CacheDynamicExpressions ? Res : Expression.Variable(typeof(object));
                 var tryConvertCall = Expression.Call(thisEvaled, InnerTryConvertMtd, Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
@@ -58,7 +68,7 @@ namespace Jil.DeserializeDynamic
                             InvalidCastExceptionCons,
                             Expression.Call(
                                 StringConcat,
-                                Expression.Constant("Unable to convert dynamic ["),
+                                CacheDynamicExpressions ? UnableToConvertDynamic : Expression.Constant("Unable to convert dynamic ["),
                                 thisEvaled,
                                 Expression.Constant("] to " + binder.ReturnType.FullName)
                             )
@@ -95,10 +105,10 @@ namespace Jil.DeserializeDynamic
                  */
 
                 var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
-                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisEvaled = CacheDynamicExpressions ? ThisEvaled : Expression.Variable(typeof(JsonObject));
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
-                var res = Expression.Variable(typeof(object));
+                var res = CacheDynamicExpressions ? Res : Expression.Variable(typeof(object));
                 var tryGetMemberCall = Expression.Call(thisEvaled, InnerTryGetMemberMtd, Expression.Constant(binder.Name), Expression.Constant(binder.ReturnType), res);
                 var throwExc =
                     Expression.Throw(
@@ -108,7 +118,7 @@ namespace Jil.DeserializeDynamic
                                 StringConcat,
                                 Expression.Constant("Unable to get dynamic member ["+binder.Name+"] of type ["+binder.ReturnType.FullName+"] from ["),
                                 thisEvaled,
-                                Expression.Constant("]")
+                                CacheDynamicExpressions ? CloseSquareBracket : Expression.Constant("]")
                             )
                         )
                     );
@@ -159,11 +169,11 @@ namespace Jil.DeserializeDynamic
                     );
 
                 var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
-                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisEvaled = CacheDynamicExpressions ? ThisEvaled : Expression.Variable(typeof(JsonObject));
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
-                var res = Expression.Variable(typeof(object));
-                var indexesRef = Expression.Variable(typeof(object[]));
+                var res = CacheDynamicExpressions ? Res : Expression.Variable(typeof(object));
+                var indexesRef = CacheDynamicExpressions ? IndexesRef : Expression.Variable(typeof(object[]));
                 var indexesAssigned = Expression.Assign(indexesRef, Expression.NewArrayInit(typeof(object), indexExprs.ToArray()));
                 var tryGetIndexCall = Expression.Call(thisEvaled, InnerTryGetIndexMtd, Expression.Constant(binder.ReturnType), indexesRef, res);
                 var throwExc =
@@ -174,11 +184,11 @@ namespace Jil.DeserializeDynamic
                                 StringConcatArray,
                                 Expression.NewArrayInit(
                                     typeof(object),
-                                    Expression.Constant("Unable to get dynamic index ("),
+                                    CacheDynamicExpressions ? UnableToGetDynamicIndex : Expression.Constant("Unable to get dynamic index ("),
                                     Expression.Call(StringJoin, Expression.Constant(", "), indexesRef),
                                     Expression.Constant("of type ["+binder.ReturnType.FullName+"] from ["),
                                     thisRef,
-                                    Expression.Constant("]")
+                                    CacheDynamicExpressions ? CloseSquareBracket : Expression.Constant("]")
                                 )
                             )
                         )
@@ -230,10 +240,10 @@ namespace Jil.DeserializeDynamic
                     );
 
                 var thisRef = Expression.Type != typeof(JsonObject) ? Expression.Convert(Expression, typeof(JsonObject)) : Expression;
-                var thisEvaled = Expression.Variable(typeof(JsonObject));
+                var thisEvaled = CacheDynamicExpressions ? ThisEvaled : Expression.Variable(typeof(JsonObject));
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
-                var argsRef = Expression.Variable(typeof(object[]));
+                var argsRef = CacheDynamicExpressions ? IndexesRef : Expression.Variable(typeof(object[]));
                 var argsAssigned = Expression.Assign(argsRef, Expression.NewArrayInit(typeof(object), argsExprs.ToArray()));
                 var res = Expression.Variable(typeof(object));
                 var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryInvokeMemberMtd, Expression.Constant(binder.Name), argsRef, res);
@@ -247,9 +257,9 @@ namespace Jil.DeserializeDynamic
                                     typeof(object),
                                     Expression.Constant("Unable to invoke dynamic member [" + binder.Name + "] with args ("),
                                     Expression.Call(StringJoin, Expression.Constant(", "), argsRef),
-                                    Expression.Constant(") on ["),
+                                    CacheDynamicExpressions ? CloseBraceOpenSquareBracket : Expression.Constant(") on ["),
                                     thisEvaled,
-                                    Expression.Constant("]")
+                                    CacheDynamicExpressions ? CloseSquareBracket : Expression.Constant("]")
                                 )
                             )
                         )
