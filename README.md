@@ -50,6 +50,36 @@ with an earlier "throw away" deserialization.
 
 Jil currently **does not** support dynamic deserialization.
 
+### Dynamic Deserialization
+
+```
+    using(var input = new StringReader(myString))
+    {
+    	var result = JSON.DeserializeDynamic(input);
+    }
+```
+
+There is also a `DeserializeDynamic` method that works directly on strings.
+
+These methods return `dynamic`, and support the following operations:
+
+  - Casts
+    * ie. `(int)JSON.DeserializeDynamic("123")`
+  - Member access
+    * ie. `JSON.DeserializeDynamic(@"{""A"":123}").A`
+  - Indexers
+    * ie. `JSON.DeserializeDynamic(@"{""A"":123}")["A"]`
+    * or `JSON.DeserializeDynamic("[0, 1, 2]")[0]`
+  - Foreach loops
+    * ie. `foreach(var keyValue in JSON.DeserializeDynamic(@"{""A"":123}")) { ... }`
+      - in this example, `keyValue` is a dynamic with `Key` and `Value` properties
+    * or `foreach(var item in JSON.DeserializeDynamic("[0, 1, 2]")) { ... }`
+      - in this example, `item` is a `dynamic` and will have values 0, 1, and 2
+   - Common unary operators (+, -, and !)
+   - Common binary operators (&&, ||, +, -, *, /, ==, !=, <, <=, >, and >=)
+   - `.Length` & `.Count` on arrays
+   - `.ContainsKey(string)` on objects
+
 ## Supported Types
 
 Jil will only (de)serialize types that can be reasonably represented as [JSON](http://json.org).
