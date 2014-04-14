@@ -154,54 +154,6 @@ namespace Benchmark
 
             Console.WriteLine("\t" + deserializeResult.Outcomes.Select(s => s.Elapsed.TotalMilliseconds).Average() + "ms");
 
-#if DEBUG
-            if (serializerName == "Jil")
-            {
-                var equalCheckable = obj is IGenericEquality<T>;
-                if (equalCheckable)
-                {
-                    var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
-                    var jilCopy = JilDeserialize<T>((string)(object)data);
-
-                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, copy });
-                    _CheckEquality.MakeGenericMethod(typeof(T)).Invoke(null, new object[] { obj, jilCopy });
-                }
-                else
-                {
-                    var equalCheckableList = typeof(T).IsList();
-                    if (equalCheckableList)
-                    {
-                        var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
-                        var jilCopy = JilDeserialize<T>((string)(object)data);
-
-                        var checkMethod = _CheckEqualityList.MakeGenericMethod(typeof(T).GetListInterface().GetGenericArguments()[0]);
-                        checkMethod.Invoke(null, new object[] { obj, copy });
-                        checkMethod.Invoke(null, new object[] { obj, jilCopy });
-                    }
-                    else
-                    {
-
-                        var equalCheckableDict = typeof(T).IsDictionary();
-                        if (equalCheckableDict)
-                        {
-                            var copy = JsonConvert.DeserializeObject<T>((string)(object)data);
-                            var jilCopy = JilDeserialize<T>((string)(object)data);
-
-                            var checkMethod = _CheckEqualityDictionary.MakeGenericMethod(typeof(T).GetDictionaryInterface().GetGenericArguments()[1]);
-                            checkMethod.Invoke(null, new object[] { obj, copy });
-                            checkMethod.Invoke(null, new object[] { obj, jilCopy });
-                        }
-                        else
-                        {
-                            throw new Exception("Couldn't correctness-check Jil's serialization of a type: " + typeof(T));
-                        }
-                    }
-                }
-
-
-            }
-#endif
-
             return
                 serializeResult.Outcomes.Select(
                     o =>
@@ -290,15 +242,15 @@ namespace Benchmark
 
         static MethodInfo _ServiceStackDeserializeDynamic = typeof(Program).GetMethod("ServiceStackDeserializeDynamic", BindingFlags.NonPublic | BindingFlags.Static);
         static dynamic ServiceStackDeserializeDynamic<T>(string str, T shouldMatch)
-            //where T : IGenericEquality<T>
+            where T : IGenericEquality<T>
         {
             dynamic ret = ServiceStack.Text.JsonObject.Parse(str);
-            //if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
-            //{
+            if ((ret == null && shouldMatch == null) || shouldMatch.Equals(ret))
+            {
                 return ret;
-            //}
+            }
 
-            //throw new Exception("Deserialization failed");
+            throw new Exception("Deserialization failed");
         }
 
         static MethodInfo _ServiceStackDeserialize = typeof(Program).GetMethod("ServiceStackDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -412,7 +364,7 @@ namespace Benchmark
         }
 
         static MethodInfo _JilDeserialize = typeof(Program).GetMethod("JilDeserialize", BindingFlags.NonPublic | BindingFlags.Static);
-        static T JilDeserialize<T>(string data)
+        static T JilDeserialize<T>(string data, T shouldMatch)
         {
             using (var str = new StringReader(data))
             {
@@ -420,7 +372,16 @@ namespace Benchmark
             }
         }
 
-        static object GetJilDeserializer(Type forType, string defaultVal)
+        static object GetJilStaticDeserializer(Type forType, string defaultVal)
+        {
+            var mtd = _JilDeserialize.MakeGenericMethod(forType);
+            var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, forType);
+            var ret = Delegate.CreateDelegate(funcType, mtd);
+
+            return ret;
+        }
+
+        static object GetJilDynamicDeserializer(Type forType, string defaultVal)
         {
             var mtd = _JilDeserializeDynamic.MakeGenericMethod(forType);
             var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
@@ -432,14 +393,8 @@ namespace Benchmark
         static int[][] Permutations = 
             new int[][] 
             {
-                new [] {0, 1, 2},
-                new [] {0, 2, 1},
-                
-                new [] {1, 0, 2},
-                new [] {1, 2, 0},
-
-                new [] {2, 0, 1},
-                new [] {2, 1, 0},
+                new [] {0, 1},
+                new [] {1, 0}
             };
 
         [Flags]
@@ -460,13 +415,10 @@ namespace Benchmark
             {
                 var typeName = model.Name;
 
-                var newtonsoftSerializer = GetNewtonsoftSerializer(model);
-                var serviceStackSerializer = GetServiceStackSerializer(model);
                 var jilSerializer = GetJilSerializer(model);
 
-                var newtonsoftDeserializer = GetNewtonsoftDeserializer(model, "{}");
-                var serviceStackDeserializer = GetServiceStackDeserializer(model, "{}");
-                var jilDeserializer = GetJilDeserializer(model, "{}");
+                var jilStaticDeserializer = GetJilStaticDeserializer(model, "{}");
+                var jilDynamicDeserializer = GetJilDynamicDeserializer(model, "{}");
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -483,9 +435,8 @@ namespace Benchmark
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
-                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 0:name = "Jil Static"; serializer = jilSerializer; deserializer = jilStaticDeserializer; resultType = typeof(string); break;
+                            case 1: name = "Jil Dynamic"; serializer = jilSerializer; deserializer = jilDynamicDeserializer; resultType = typeof(string); break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -505,13 +456,10 @@ namespace Benchmark
 
                 var asList = typeof(List<>).MakeGenericType(model);
 
-                var newtonsoftSerializer = GetNewtonsoftSerializer(asList);
-                var serviceStackSerializer = GetServiceStackSerializer(asList);
                 var jilSerializer = GetJilSerializer(asList);
 
-                var newtonsoftDeserializer = GetNewtonsoftDeserializer(asList, "[]");
-                var serviceStackDeserializer = GetServiceStackDeserializer(asList, "[]");
-                var jilDeserializer = GetJilDeserializer(asList, "[]");
+                var jilStaticDeserializer = GetJilStaticDeserializer(asList, "[]");
+                var jilDynamicDeserializer = GetJilDynamicDeserializer(asList, "[]");
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -528,9 +476,8 @@ namespace Benchmark
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
-                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 0: name = "Jil Static"; serializer = jilSerializer; deserializer = jilStaticDeserializer; resultType = typeof(string); break;
+                            case 1: name = "Jil Dynamic"; serializer = jilSerializer; deserializer = jilDynamicDeserializer; resultType = typeof(string); break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -550,13 +497,10 @@ namespace Benchmark
 
                 var asDict = typeof(Dictionary<,>).MakeGenericType(typeof(string), model);
 
-                var newtonsoftSerializer = GetNewtonsoftSerializer(asDict);
-                var serviceStackSerializer = GetServiceStackSerializer(asDict);
                 var jilSerializer = GetJilSerializer(asDict);
 
-                var newtonsoftDeserializer = GetNewtonsoftDeserializer(asDict, "{}");
-                var serviceStackDeserializer = GetServiceStackDeserializer(asDict, "{}");
-                var jilDeserializer = GetJilDeserializer(asDict, "{}");
+                var jilStaticDeserializer = GetJilStaticDeserializer(asDict, "{}");
+                var jilDynamicDeserializer = GetJilDynamicDeserializer(asDict, "{}");
 
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
 
@@ -573,9 +517,8 @@ namespace Benchmark
 
                         switch (p)
                         {
-                            case 0: name = "Json.NET"; serializer = newtonsoftSerializer; deserializer = newtonsoftDeserializer; resultType = typeof(string); break;
-                            case 1: name = "ServiceStack.Text"; serializer = serviceStackSerializer; deserializer = serviceStackDeserializer; resultType = typeof(string); break;
-                            case 2: name = "Jil"; serializer = jilSerializer; deserializer = jilDeserializer; resultType = typeof(string); break;
+                            case 0: name = "Jil Static"; serializer = jilSerializer; deserializer = jilStaticDeserializer; resultType = typeof(string); break;
+                            case 1: name = "Jil Dynamic"; serializer = jilSerializer; deserializer = jilDynamicDeserializer; resultType = typeof(string); break;
                             default: throw new InvalidOperationException();
                         }
 
@@ -772,10 +715,8 @@ namespace Benchmark
             }
             Console.SetOut(oldOut);
 
-            Func<List<Result>, Func<Result, bool>, double> jil = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, Func<Result, bool>, double> jsonNet = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Json.NET")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, Func<Result, bool>, double> protobufNet = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Protobuf-net")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, Func<Result, bool>, double> serviceStackText = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("ServiceStack.Text")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jilStatic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Static")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jilDynamic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Dynamic")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
 
             {
                 Func<Result, bool> serialize = r => r.Serializer.Contains("(Serialize)");
@@ -784,26 +725,26 @@ namespace Benchmark
                 Console.WriteLine("===========");
 
                 Console.WriteLine("Single:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user, serialize), jsonNet(user, serialize), protobufNet(user, serialize), serviceStackText(user, serialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer, serialize), jsonNet(answer, serialize), protobufNet(answer, serialize), serviceStackText(answer, serialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question, serialize), jsonNet(question, serialize), protobufNet(question, serialize), serviceStackText(question, serialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(user, serialize), jilDynamic(user, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answer, serialize), jilDynamic(answer, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(question, serialize), jilDynamic(question, serialize));
 
                 Console.WriteLine();
 
                 Console.WriteLine("Lists:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList, serialize), jsonNet(userList, serialize), protobufNet(userList, serialize), serviceStackText(userList, serialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList, serialize), jsonNet(answerList, serialize), protobufNet(answerList, serialize), serviceStackText(answerList, serialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList, serialize), jsonNet(questionList, serialize), protobufNet(questionList, serialize), serviceStackText(questionList, serialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(userList, serialize), jilDynamic(userList, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answerList, serialize), jilDynamic(answerList, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(questionList, serialize), jilDynamic(questionList, serialize));
 
                 Console.WriteLine();
 
                 Console.WriteLine("Dictionaries of strings to:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict, serialize), jsonNet(userDict, serialize), protobufNet(userDict, serialize), serviceStackText(userDict, serialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict, serialize), jsonNet(answerDict, serialize), protobufNet(answerDict, serialize), serviceStackText(answerDict, serialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict, serialize), jsonNet(questionDict, serialize), protobufNet(questionDict, serialize), serviceStackText(questionDict, serialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(userDict, serialize), jilDynamic(userDict, serialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answerDict, serialize), jilDynamic(answerDict, serialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(questionDict, serialize), jilDynamic(questionDict, serialize));
             }
 
             Console.WriteLine();
@@ -815,26 +756,26 @@ namespace Benchmark
                 Console.WriteLine("=============");
 
                 Console.WriteLine("Single:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(user, deserialize), jsonNet(user, deserialize), protobufNet(user, deserialize), serviceStackText(user, deserialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answer, deserialize), jsonNet(answer, deserialize), protobufNet(answer, deserialize), serviceStackText(answer, deserialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(question, deserialize), jsonNet(question, deserialize), protobufNet(question, deserialize), serviceStackText(question, deserialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(user, deserialize), jilDynamic(user, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answer, deserialize), jilDynamic(answer, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(question, deserialize), jilDynamic(question, deserialize));
 
                 Console.WriteLine();
 
                 Console.WriteLine("Lists:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userList, deserialize), jsonNet(userList, deserialize), protobufNet(userList, deserialize), serviceStackText(userList, deserialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerList, deserialize), jsonNet(answerList, deserialize), protobufNet(answerList, deserialize), serviceStackText(answerList, deserialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionList, deserialize), jsonNet(questionList, deserialize), protobufNet(questionList, deserialize), serviceStackText(questionList, deserialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(userList, deserialize), jilDynamic(userList, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answerList, deserialize), jilDynamic(answerList, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(questionList, deserialize), jilDynamic(questionList, deserialize));
 
                 Console.WriteLine();
 
                 Console.WriteLine("Dictionaries of strings to:");
-                Console.WriteLine("Type\tJil MS\tJil\tJson.NET MS\tJson.NET\tprotobuf-net MS\tprotobuf-net\tServiceStack.Text MS\tServiceStack.Text");
-                Console.WriteLine("User\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(userDict, deserialize), jsonNet(userDict, deserialize), protobufNet(userDict, deserialize), serviceStackText(userDict, deserialize));
-                Console.WriteLine("Answer\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(answerDict, deserialize), jsonNet(answerDict, deserialize), protobufNet(answerDict, deserialize), serviceStackText(answerDict, deserialize));
-                Console.WriteLine("Question\t{0}\t\t{1}\t\t{2}\t\t{3}", jil(questionDict, deserialize), jsonNet(questionDict, deserialize), protobufNet(questionDict, deserialize), serviceStackText(questionDict, deserialize));
+                Console.WriteLine("Type\tJil Static MS\tJil Static\tJil Dynamic MS\tJil Dynamic");
+                Console.WriteLine("User\t{0}\t\t{1}", jilStatic(userDict, deserialize), jilDynamic(userDict, deserialize));
+                Console.WriteLine("Answer\t{0}\t\t{1}", jilStatic(answerDict, deserialize), jilDynamic(answerDict, deserialize));
+                Console.WriteLine("Question\t{0}\t\t{1}", jilStatic(questionDict, deserialize), jilDynamic(questionDict, deserialize));
             }
         }
 
