@@ -97,6 +97,11 @@ namespace Jil
         /// </summary>
         public static void Serialize<T>(T data, TextWriter output, Options options = null)
         {
+            if (typeof(T) == typeof(object))
+            {
+                SerializeDynamic(data, output, options);
+                return;
+            }
             options = options ?? Options.Default;
 
             switch (options.UseDateTimeFormat)
@@ -129,6 +134,9 @@ namespace Jil
         /// </summary>
         public static string Serialize<T>(T data, Options options = null)
         {
+            if (typeof(T) == typeof(object))
+                return SerializeDynamic(data, options);
+
             options = options ?? Options.Default;
 
             using (var str = new StringWriter(System.Globalization.CultureInfo.InvariantCulture))
@@ -526,6 +534,8 @@ namespace Jil
         /// </summary>
         public static T Deserialize<T>(TextReader reader, Options options = null)
         {
+            if (typeof(T) == typeof(object))
+                return DeserializeDynamic(reader, options);
             try
             {
 
@@ -578,6 +588,8 @@ namespace Jil
         /// </summary>
         public static T Deserialize<T>(string text, Options options = null)
         {
+            if (typeof(T) == typeof(object))
+                return DeserializeDynamic(text, options);
             using (var reader = new StringReader(text))
             {
                 return Deserialize<T>(reader, options);

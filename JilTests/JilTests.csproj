@@ -100,6 +100,7 @@
     <Compile Include="DeserializeDynamicTests.cs" />
     <Compile Include="DeserializeTests.cs" />
     <Compile Include="ExhaustiveTests.cs" />
+    <Compile Include="BadlySpecifiedTypeTests.cs" />
     <Compile Include="SerializeTests.cs" />
     <Compile Include="SpeedProofTests.cs" />
     <Compile Include="UtilsTests.cs" />
