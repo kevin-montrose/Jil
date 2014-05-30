@@ -3730,7 +3730,7 @@ namespace JilTests
                     Assert.IsNotNull(obj);
                 }
 
-                using (var str = new StringReader("{\"A\":1234"))
+                using (var str = new StringReader("{\"A\":1234}"))
                 {
                     var obj = JSON.Deserialize<object>(str);
 
@@ -3753,7 +3753,7 @@ namespace JilTests
                     Assert.IsNotNull(obj);
                 }
 
-                using (var str = new StringReader("{\"A\":1234"))
+                using (var str = new StringReader("{\"A\":1234}"))
                 {
                     var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
 
