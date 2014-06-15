@@ -912,8 +912,24 @@ namespace Jil.Deserialize
             return unescaped;
         }
 
+        public static bool UseQuickLowerLookup = true;
+
+        static readonly int[] QuickLowerLookup = new int[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         static int ToLowerChar(int c)
         {
+            if (UseQuickLowerLookup)
+            {
+                // Typically we're gonna be working with ASCII, in those cases there's only a tiny continuous range we have to map,
+                //    so avoid the whole cast and call business if we can
+                if (c <= 126)
+                {
+                    var ix = c - 65;
+                    if (ix < 0 || ix > 25) return c;
+
+                    return QuickLowerLookup[ix];
+                }
+            }
+
             return (int)char.ToLowerInvariant((char)c);
         }
     }

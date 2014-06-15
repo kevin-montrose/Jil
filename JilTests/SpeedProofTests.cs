@@ -762,7 +762,7 @@ namespace JilTests
                 toSerialize.Add(
                     new _AllocationlessDictionaries
                     {
-                        A = Enumerable.Range(0, 5 + rand.Next(5)).ToDictionary(_ => new string((""+_)[0], 5 + rand.Next(10)), _ => rand.Next())
+                        A = Enumerable.Range(0, 5 + rand.Next(5)).ToDictionary(_ => new string(("" + _)[0], 5 + rand.Next(10)), _ => rand.Next())
                     }
                 );
             }
@@ -929,7 +929,7 @@ namespace JilTests
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat:Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
                     }
 
                     {
@@ -1190,6 +1190,72 @@ namespace JilTests
             CompareTimes(toSerialize, Jil.Options.Default, hash, method, out hashTime, out methodTime);
 
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
+        }
+
+        enum _UseQuickLowerLookup
+        {
+            Hello,
+            World,
+            Fizz,
+            Buzz,
+            Baz,
+            Bar
+        }
+
+        [TestMethod]
+        public void UseQuickLowerLookup()
+        {
+            Func<TextReader, _UseQuickLowerLookup> quick;
+            Func<TextReader, _UseQuickLowerLookup> slow;
+
+            Assert.IsTrue(EnumMatcher<_UseQuickLowerLookup>.IsAvailable);
+
+            Exception ignored;
+            var inner = InlineDeserializerHelper.Build<_UseQuickLowerLookup>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+
+            {
+                quick =
+                    reader =>
+                    {
+                        var old = Jil.Deserialize.Methods.UseQuickLowerLookup;
+
+                        Jil.Deserialize.Methods.UseQuickLowerLookup = true;
+                        var ret = inner(reader);
+                        Jil.Deserialize.Methods.UseQuickLowerLookup = old;
+
+                        return ret;
+                    };
+            }
+
+            {
+                slow =
+                    reader =>
+                    {
+                        var old = Jil.Deserialize.Methods.UseQuickLowerLookup;
+
+                        Jil.Deserialize.Methods.UseQuickLowerLookup = false;
+                        var ret = inner(reader);
+                        Jil.Deserialize.Methods.UseQuickLowerLookup = old;
+
+                        return ret;
+                    };
+            }
+
+
+            var rand = new Random(197568075);
+
+            var toSerialize = new List<_UseQuickLowerLookup>();
+            for (var i = 0; i < 20000; i++)
+            {
+                toSerialize.Add(_RandEnum<_UseQuickLowerLookup>(rand));
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double quickTime, slowTime;
+            CompareTimes(toSerialize, Jil.Options.Default, quick, slow, out quickTime, out slowTime);
+
+            Assert.IsTrue(quickTime < slowTime, "hashTime = " + quickTime + ", slowTime = " + slowTime);
         }
 #endif
     }
