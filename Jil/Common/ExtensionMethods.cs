@@ -12,6 +12,19 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static string GetEnumValueName(this Type enumType, object enumVal)
+        {
+            var field = enumType.GetFields().Single(f => f.Name == Enum.GetName(enumType, enumVal));
+
+            var enumMember = field.GetCustomAttribute<System.Runtime.Serialization.EnumMemberAttribute>();
+            if (enumMember == null)
+            {
+                return Enum.GetName(enumType, enumVal);
+            }
+
+            return enumMember.Value;
+        }
+
         public static bool IsFlagsEnum(this Type enumType)
         {
             return enumType.GetCustomAttribute<FlagsAttribute>() != null;
@@ -417,7 +430,7 @@ namespace Jil.Common
 
             if (type.IsEnum)
             {
-                return "\"" + Enum.GetName(type, obj).JsonEscape(jsonp) + "\"";
+                return "\"" + type.GetEnumValueName(obj).JsonEscape(jsonp) + "\"";
             }
             
             var formattable = obj as IFormattable;

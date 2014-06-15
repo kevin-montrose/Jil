@@ -2700,7 +2700,7 @@ namespace Jil.Serialize
             {
                 var val = values[min + i];
                 var label = labels[(int)i];
-                var asStr = Enum.GetName(enumType, val);
+                var asStr = enumType.GetEnumValueName(val);
                 var escapedString = "\"" + asStr.JsonEscape(JSONP) + "\"";
 
                 Emit.MarkLabel(label);      // TextWriter?
@@ -2783,7 +2783,7 @@ namespace Jil.Serialize
 
             foreach (var val in Enum.GetValues(enumType).Cast<object>())
             {
-                var name = Enum.GetName(enumType, val);
+                var name = enumType.GetEnumValueName(val);
 
                 var escapeStr = "\"" + name.JsonEscape(JSONP) + "\"";
 
@@ -2835,7 +2835,7 @@ namespace Jil.Serialize
                 Emit.LoadConstant(0UL);                 // TextWriter? ulong ulong 0
                 Emit.UnsignedBranchIfNotEqual(notZero); // TextWriter? ulong
 
-                var zeroStr = "\"" + Enum.GetName(enumType, values[0UL]).JsonEscape(JSONP) + "\"";
+                var zeroStr = "\"" + enumType.GetEnumValueName(values[0UL]).JsonEscape(JSONP) + "\"";
                 WriteString(zeroStr);                   // TextWriter? ulong
                 Emit.Pop();                             // TextWriter?
                 if (popTextWriter)
@@ -2867,7 +2867,7 @@ namespace Jil.Serialize
                     var skipCommaSpace = Emit.DefineLabel();
 
                     var asULong = valObj.Key;
-                    var asStr = Enum.GetName(enumType, valObj.Value).JsonEscape(JSONP);
+                    var asStr = enumType.GetEnumValueName(valObj.Value).JsonEscape(JSONP);
 
                     Emit.LoadLocal(enumLoc);        // ulong
                     Emit.LoadConstant(asULong);     // ulong ulong

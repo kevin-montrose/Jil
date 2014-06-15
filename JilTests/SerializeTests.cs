@@ -6198,10 +6198,10 @@ namespace JilTests
                 JSON.Serialize(
                     new _Enumerables
                     {
-                        A = new [] { 1, 2, 3 },
-                        B = new Dictionary<int,IEnumerable<int>> { {1, new[] {2, 3} }, {2, new [] { 4, 5 }}},
-                        C = new List<IEnumerable<double>> { new [] { 1.1, 2.2, 3.3 }, new [] { 4.4, 5.5, 6.6 }},
-                        D = new [] { new [] { "hello", "world" }, new [] { "foo", "bar" } }
+                        A = new[] { 1, 2, 3 },
+                        B = new Dictionary<int, IEnumerable<int>> { { 1, new[] { 2, 3 } }, { 2, new[] { 4, 5 } } },
+                        C = new List<IEnumerable<double>> { new[] { 1.1, 2.2, 3.3 }, new[] { 4.4, 5.5, 6.6 } },
+                        D = new[] { new[] { "hello", "world" }, new[] { "foo", "bar" } }
                     },
                     str
                 );
@@ -6302,6 +6302,78 @@ namespace JilTests
             Assert.AreEqual(@"""A, C, D""", acd);
             var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
             Assert.AreEqual(@"""B, C, D""", bcd);
+        }
+
+        enum _EnumMemberAttributeOverride
+        {
+            [EnumMember(Value = "1")]
+            A,
+            [EnumMember(Value = "2")]
+            B,
+            [EnumMember(Value = "3")]
+            C
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeOverride()
+        {
+            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverride.A));
+            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverride.B));
+            Assert.AreEqual("\"3\"", JSON.Serialize(_EnumMemberAttributeOverride.C));
+        }
+
+        [Flags]
+        enum _EnumMemberAttributeOverrideFlags
+        {
+            [EnumMember(Value = "1")]
+            A = 1,
+            [EnumMember(Value = "2")]
+            B = 2,
+            [EnumMember(Value = "4")]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeOverrideFlags()
+        {
+            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A));
+            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B));
+            Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C));
+
+            Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B));
+            Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C));
+            Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+
+            Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+        }
+
+        [Flags]
+        enum _EnumMemberAttributeOverrideWithNoneFlags
+        {
+            [EnumMember(Value = "0")]
+            None = 0,
+            [EnumMember(Value = "1")]
+            A = 1,
+            [EnumMember(Value = "2")]
+            B = 2,
+            [EnumMember(Value = "4")]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeOverrideWithNoneFlags()
+        {
+            Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None));
+
+            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A));
+            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B));
+            Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C));
+
+            Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B));
+            Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C));
+            Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+
+            Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
         }
     }
 }
