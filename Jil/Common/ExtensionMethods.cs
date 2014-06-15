@@ -12,6 +12,11 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static bool IsFlagsEnum(this Type enumType)
+        {
+            return enumType.GetCustomAttribute<FlagsAttribute>() != null;
+        }
+
         public static bool IsGenericDictionary(this Type forType)
         {
             return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == typeof(IDictionary<,>);

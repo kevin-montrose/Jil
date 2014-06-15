@@ -6216,5 +6216,92 @@ namespace JilTests
                 Assert.AreEqual("[1,2,3]", res);
             }
         }
+
+        [Flags]
+        enum _FlagsEnum
+        {
+            A = 1,
+            B = 2,
+            C = 4,
+            D = 8
+        }
+
+        [TestMethod]
+        public void FlagsEnum()
+        {
+            var a = JSON.Serialize(_FlagsEnum.A);
+            Assert.AreEqual(@"""A""", a);
+            var b = JSON.Serialize(_FlagsEnum.B);
+            Assert.AreEqual(@"""B""", b);
+            var c = JSON.Serialize(_FlagsEnum.C);
+            Assert.AreEqual(@"""C""", c);
+            var d = JSON.Serialize(_FlagsEnum.D);
+            Assert.AreEqual(@"""D""", d);
+            var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B);
+            Assert.AreEqual(@"""A, B""", ab);
+            var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C);
+            Assert.AreEqual(@"""A, C""", ac);
+            var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D);
+            Assert.AreEqual(@"""A, D""", ad);
+            var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C);
+            Assert.AreEqual(@"""B, C""", bc);
+            var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D);
+            Assert.AreEqual(@"""B, D""", bd);
+            var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D);
+            Assert.AreEqual(@"""C, D""", cd);
+            var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C);
+            Assert.AreEqual(@"""A, B, C""", abc);
+            var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D);
+            Assert.AreEqual(@"""A, B, D""", abd);
+            var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D);
+            Assert.AreEqual(@"""A, C, D""", acd);
+            var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D);
+            Assert.AreEqual(@"""B, C, D""", bcd);
+        }
+
+        [Flags]
+        enum _FlagsEnumWithZero
+        {
+            None = 0,
+            A = 1,
+            B = 2,
+            C = 4,
+            D = 8
+        }
+
+        [TestMethod]
+        public void FlagsEnumWithZero()
+        {
+            var none = JSON.Serialize(_FlagsEnumWithZero.None);
+            Assert.AreEqual(@"""None""", none);
+            var a = JSON.Serialize(_FlagsEnumWithZero.A);
+            Assert.AreEqual(@"""A""", a);
+            var b = JSON.Serialize(_FlagsEnumWithZero.B);
+            Assert.AreEqual(@"""B""", b);
+            var c = JSON.Serialize(_FlagsEnumWithZero.C);
+            Assert.AreEqual(@"""C""", c);
+            var d = JSON.Serialize(_FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""D""", d);
+            var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B);
+            Assert.AreEqual(@"""A, B""", ab);
+            var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C);
+            Assert.AreEqual(@"""A, C""", ac);
+            var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""A, D""", ad);
+            var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
+            Assert.AreEqual(@"""B, C""", bc);
+            var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""B, D""", bd);
+            var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""C, D""", cd);
+            var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
+            Assert.AreEqual(@"""A, B, C""", abc);
+            var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""A, B, D""", abd);
+            var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""A, C, D""", acd);
+            var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+            Assert.AreEqual(@"""B, C, D""", bcd);
+        }
     }
 }

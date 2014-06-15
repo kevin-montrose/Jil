@@ -2814,6 +2814,99 @@ namespace Jil.Serialize
             }
         }
 
+        void WriteFlagsEnum(Type enumType, Dictionary<ulong, object> values, bool popTextWriter)
+        {
+            // top of stack
+            //   - enum
+            //   - TextWriter?
+
+            var hasZeroValue = values.ContainsKey(0UL);
+            var done = Emit.DefineLabel();
+            Sigil.Label notZero = null;
+
+            Emit.Convert<ulong>();      // TextWriter? ulong
+
+            // gotta special case this, since 0 & 0 == 0
+            if (hasZeroValue)
+            {
+                notZero = Emit.DefineLabel();
+
+                Emit.Duplicate();                       // TextWriter? ulong ulong
+                Emit.LoadConstant(0UL);                 // TextWriter? ulong ulong 0
+                Emit.UnsignedBranchIfNotEqual(notZero); // TextWriter? ulong
+
+                var zeroStr = "\"" + Enum.GetName(enumType, values[0UL]) + "\"";
+                WriteString(zeroStr);                   // TextWriter? ulong
+                Emit.Pop();                             // TextWriter?
+                if (popTextWriter)
+                {
+                    Emit.Pop();                         // --empty--
+                }
+                Emit.Branch(done);                      // --empty--
+            }
+
+            if (notZero != null)
+            {
+                Emit.MarkLabel(notZero);        // TextWriter? ulong
+            }
+
+            using (var enumLoc = Emit.DeclareLocal<ulong>())
+            using (var notFirst = Emit.DeclareLocal<bool>())
+            {
+                Emit.StoreLocal(enumLoc);       // TextWriter?
+                if (popTextWriter)
+                {
+                    Emit.Pop();                 // --empty--
+                }
+
+                WriteString("\"");              // --empty--
+
+                foreach (var valObj in values.Where(_ => _.Key != 0UL).OrderBy(_ => _.Key))
+                {
+                    var skip = Emit.DefineLabel();
+                    var skipCommaSpace = Emit.DefineLabel();
+
+                    var asULong = valObj.Key;
+                    var asStr = Enum.GetName(enumType, valObj.Value);
+
+                    Emit.LoadLocal(enumLoc);        // ulong
+                    Emit.LoadConstant(asULong);     // ulong ulong
+                    Emit.And();                     // ulong
+                    Emit.LoadConstant(0UL);         // ulong 0
+                    Emit.BranchIfEqual(skip);       // --empty--
+
+                    Emit.LoadLocal(notFirst);           // bool
+                    Emit.BranchIfFalse(skipCommaSpace); // --empty--
+                    WriteString(", ");                  // --empty--
+
+                    Emit.MarkLabel(skipCommaSpace);     // --emmpty-
+                    WriteString(asStr);                 // --empty--
+                    Emit.LoadConstant(true);            // bool
+                    Emit.StoreLocal(notFirst);          // --empty--
+
+                    // mask that field out so we can tell if the value in Flags isn't actually a known value
+                    Emit.LoadLocal(enumLoc);        // ulong
+                    Emit.LoadConstant(~asULong);    // ulong ulong
+                    Emit.And();                     // ulong
+                    Emit.StoreLocal(enumLoc);       // --empty--
+
+                    Emit.MarkLabel(skip);           // --empty--
+                }
+
+                WriteString("\"");
+
+                Emit.LoadLocal(enumLoc);    // ulong
+                Emit.LoadConstant(0UL);     // ulong 0
+                Emit.BranchIfEqual(done);   // --empty--
+
+                Emit.LoadConstant("Unexpected value for flags enumeration " + enumType.FullName);   // string
+                Emit.NewObject(typeof(InvalidOperationException), typeof(string));                  // InvalidOperationException
+                Emit.Throw();                                                                       // --empty--
+            }
+
+            Emit.MarkLabel(done);
+        }
+
         void WriteEnum(Type enumType, bool popTextWriter)
         {
             var allValues = Enum.GetValues(enumType);
@@ -2854,6 +2947,12 @@ namespace Jil.Serialize
             }
 
             var distinctValues = asUlongs.GroupBy(g => g.Item2).ToDictionary(g => g.Key, g => g.First().Item1);
+
+            if (enumType.IsFlagsEnum())
+            {
+                WriteFlagsEnum(enumType, distinctValues, popTextWriter);
+                return;
+            }
 
             if (ValuesAreContiguous(distinctValues))
             {
