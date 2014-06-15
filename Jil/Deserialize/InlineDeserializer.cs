@@ -495,10 +495,27 @@ namespace Jil.Deserialize
             Emit.CallVirtual(TextReader_Peek);      // int
         }
 
+        void ReadFlagsEnum(Type enumType)
+        {
+            ExpectQuote();                  // --empty--
+
+            var specific =Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
+
+            Emit.LoadArgument(0);           // TextReader
+            LoadStringBuilder();            // TextReader StringBuilder&
+            Emit.Call(specific);            // enum
+        }
+
         static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public);
         static readonly MethodInfo Enum_Parse = typeof(Enum).GetMethod("Parse", new[] { typeof(Type), typeof(string), typeof(bool) });
         void ReadEnum(Type enumType)
         {
+            if (enumType.IsFlagsEnum())
+            {
+                ReadFlagsEnum(enumType);
+                return;
+            }
+
             ExpectQuote();                          // --empty--
 
             Emit.LoadConstant(enumType);            // RuntimeTypeHandle

@@ -864,5 +864,49 @@ namespace Jil.Deserialize
             Console.WriteLine();
             return default(T);
         }
+
+        public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
+        static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
+            where TEnum : struct
+        {
+            commonSb = commonSb ?? new StringBuilder();
+
+            var ret = default(TEnum);
+
+            while (true)
+            {
+                var c = _ReadEncodedChar(reader);
+
+                // ignore this *particular* whitespace
+                if (c != ' ')
+                {
+                    // comma delimited
+                    if (c == ',' || c == '"')
+                    {
+                        var asStr = commonSb.ToString();
+                        TEnum parsed;
+                        if (!Enum.TryParse<TEnum>(asStr, true, out parsed))
+                        {
+                            throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
+                        }
+
+                        // sweet zombie jesus is this bad for perf
+                        ret = (TEnum)Enum.ToObject(typeof(TEnum), Convert.ToUInt64(ret) | Convert.ToUInt64(parsed));
+
+                        commonSb.Clear();
+
+                        if (c == '"') break;
+
+                        continue;
+                    }
+                    commonSb.Append(c);
+                }
+            }
+
+            // reset before returning
+            commonSb.Clear();
+
+            return ret;
+        }
     }
 }
