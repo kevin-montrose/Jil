@@ -15,6 +15,7 @@ namespace Jil.Deserialize
     {
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseHashWhenMatchingMembers = true;
+        public static bool UseHashWhenMatchingEnums = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -514,6 +515,16 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (AllowHashing && UseHashWhenMatchingEnums)
+            {
+                var couldBeHashed = (bool)typeof(EnumMatcher<>).MakeGenericType(enumType).GetField("IsAvailable").GetValue(null);
+                if (couldBeHashed)
+                {
+                    ReadEnumHashing(enumType);
+                    return;
+                }
+            }
+
             var specific = Methods.ParseEnum.MakeGenericMethod(enumType);
 
             ExpectQuote();                  // --empty--
@@ -521,6 +532,147 @@ namespace Jil.Deserialize
             CallReadEncodedString();        // string
             Emit.LoadArgument(0);           // TextReader
             Emit.Call(specific);            // enum
+        }
+
+        void ReadEnumHashing(Type enumType)
+        {
+            var underlyingType = Enum.GetUnderlyingType(enumType);
+
+            var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
+
+            var errorCase = Emit.DefineLabel();
+
+            var matcher = typeof(EnumMatcher<>).MakeGenericType(enumType);
+            var memberLookup = (Dictionary<string, object>)matcher.GetField("EnumLookup").GetValue(null);
+            var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
+
+            var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
+            var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
+            var mode = (EnumMatcherMode)matcher.GetField("Mode").GetValue(null);
+            var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
+
+            ExpectQuote();                      // --empty--
+            using (var bucket = Emit.DeclareLocal<int>())
+            using (var hash = Emit.DeclareLocal<uint>())
+            {
+                Emit.LoadArgument(0);           // TextReader
+                Emit.LoadLocalAddress(bucket);  // TextReader int*
+                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
+                Emit.Call(hashMtd);             // length
+                Emit.LoadLocal(hash);           // length hash
+                Emit.LoadLocal(bucket);         // length hash bucket
+            }
+            ExpectQuote();                      // length hash bucket
+
+            Emit.Switch(labels);            // length hash
+
+            // fallthrough case
+            Emit.Pop();                                                     // length
+            Emit.Pop();                                                     // --empty--
+
+            Emit.MarkLabel(errorCase);                                      // --empty--
+            Emit.LoadConstant("Unexpected value for " + enumType.Name);     // string
+            Emit.LoadArgument(0);                                           // string TextReader
+            Emit.NewObject<DeserializationException, string, TextReader>(); // DeserializationException
+            Emit.Throw();                                                   // --empty--
+
+            for (var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
+            {
+                var label = labels[i];
+                var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
+
+                // this bucket is empty
+                if (memberName == null)
+                {
+                    Emit.MarkLabel(label);  // length hash
+                    Emit.Pop();             // length
+                    Emit.Pop();             // --empty--
+                    Emit.Branch(errorCase); // --empty--
+                }
+                else
+                {
+                    var member = memberLookup[memberName];
+                    var hash = hashLookup[memberName];
+
+                    var isHashMatch = Emit.DefineLabel();
+                    var isLengthMatch = Emit.DefineLabel();
+
+                    Emit.MarkLabel(label);                  // length hash
+                    Emit.LoadConstant(hash);                // length hash expectedHash
+                    Emit.BranchIfEqual(isHashMatch);        // length
+
+                    // collision
+                    Emit.Pop();                             // --empty--
+                    Emit.Branch(errorCase);                 // --empty--
+
+                    Emit.MarkLabel(isHashMatch);
+                    Emit.LoadConstant(memberName.Length);   // length expectedLength
+                    Emit.BranchIfEqual(isLengthMatch);      // --empty--
+
+                    // collision
+                    Emit.Branch(errorCase);                 // --empty--
+
+                    Emit.MarkLabel(isLengthMatch);              // --empty--
+                    LoadConstantOfType(member, underlyingType); // primitive
+                    Emit.Branch(done);                          // primitive
+                }
+            }
+
+            Emit.MarkLabel(done);           // enum
+        }
+
+        void LoadConstantOfType(object val, Type type)
+        {
+            if (type == typeof(byte))
+            {
+                Emit.LoadConstant((byte)val);
+                return;
+            }
+
+            if (type == typeof(sbyte))
+            {
+                Emit.LoadConstant((sbyte)val);
+                return;
+            }
+
+            if (type == typeof(short))
+            {
+                Emit.LoadConstant((short)val);
+                return;
+            }
+
+            if (type == typeof(ushort))
+            {
+                Emit.LoadConstant((ushort)val);
+                return;
+            }
+
+            if (type == typeof(int))
+            {
+                Emit.LoadConstant((int)val);
+                return;
+            }
+
+            if (type == typeof(uint))
+            {
+                Emit.LoadConstant((uint)val);
+                return;
+            }
+
+            if (type == typeof(long))
+            {
+                Emit.LoadConstant((long)val);
+                return;
+            }
+
+            if (type == typeof(ulong))
+            {
+                Emit.LoadConstant((ulong)val);
+                return;
+            }
+
+            throw new ConstructionException("Unexpected type: " + type);
         }
 
         void ReadNullable(Type nullableType)

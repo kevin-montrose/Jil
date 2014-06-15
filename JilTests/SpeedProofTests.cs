@@ -1134,6 +1134,63 @@ namespace JilTests
                 Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = true;
             }
         }
+
+        enum _UseHashWhenMatchingEnums
+        {
+            Hello,
+            World,
+            Fizz,
+            Buzz,
+            Baz,
+            Bar
+        }
+
+        [TestMethod]
+        public void UseHashWhenMatchingEnums()
+        {
+            Func<TextReader, _UseHashWhenMatchingEnums> hash;
+            Func<TextReader, _UseHashWhenMatchingEnums> method;
+
+            Assert.IsTrue(EnumMatcher<_UseHashWhenMatchingEnums>.IsAvailable);
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    method = InlineDeserializerHelper.Build<_UseHashWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = true;
+            }
+
+            var rand = new Random(191112901);
+
+            var toSerialize = new List<_UseHashWhenMatchingEnums>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(_RandEnum<_UseHashWhenMatchingEnums>(rand));
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double hashTime, methodTime;
+            CompareTimes(toSerialize, Jil.Options.Default, hash, method, out hashTime, out methodTime);
+
+            Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
+        }
 #endif
     }
 }
