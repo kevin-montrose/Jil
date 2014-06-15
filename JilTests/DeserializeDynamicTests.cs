@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -1499,6 +1500,24 @@ namespace JilTests
                 dynamic dyn2 = "what no";
                 Assert.AreEqual(false, (bool)(dyn1 && dyn2));
             }
+        }
+
+        enum _EnumMemberAttributeOverride
+        {
+            [EnumMember(Value = "1")]
+            A = 1,
+            [EnumMember(Value = "2")]
+            B = 2,
+            [EnumMember(Value = "4")]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeOverride()
+        {
+            Assert.AreEqual(_EnumMemberAttributeOverride.A, (_EnumMemberAttributeOverride)JSON.DeserializeDynamic("\"1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverride.B, (_EnumMemberAttributeOverride)JSON.DeserializeDynamic("\"2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverride.C, (_EnumMemberAttributeOverride)JSON.DeserializeDynamic("\"4\""));
         }
     }
 }

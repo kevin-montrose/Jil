@@ -76,7 +76,7 @@
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousMemberMatcher.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
-    <Compile Include="Deserialize\EnumValues.cs" />
+    <Compile Include="Common\EnumValues.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\InterfaceImplementation.cs" />
     <Compile Include="Deserialize\MemberMatcher.cs" />

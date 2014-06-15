@@ -1091,8 +1091,7 @@ namespace Jil.DeserializeDynamic
                     }
                     if (returnType.IsEnum)
                     {
-                        result = Enum.Parse(returnType, StringValue, ignoreCase: true);
-                        return true;
+                        return EnumValues.TryParse(returnType, StringValue, out result);
                     }
                     if (returnType == typeof(Guid))
                     {
