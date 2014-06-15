@@ -1519,5 +1519,124 @@ namespace JilTests
             Assert.AreEqual(_EnumMemberAttributeOverride.B, (_EnumMemberAttributeOverride)JSON.DeserializeDynamic("\"2\""));
             Assert.AreEqual(_EnumMemberAttributeOverride.C, (_EnumMemberAttributeOverride)JSON.DeserializeDynamic("\"4\""));
         }
+
+        [Flags]
+        enum _FlagsEnum
+        {
+            A = 1,
+            B = 2,
+            C = 4
+        }
+
+        [TestMethod]
+        public void FlagsEnum()
+        {
+            Assert.AreEqual(_FlagsEnum.A, (_FlagsEnum)JSON.DeserializeDynamic("\"A\""));
+            Assert.AreEqual(_FlagsEnum.B, (_FlagsEnum)JSON.DeserializeDynamic("\"B\""));
+            Assert.AreEqual(_FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B, (_FlagsEnum)JSON.DeserializeDynamic("\"A, B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B, (_FlagsEnum)JSON.DeserializeDynamic("\"A,B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B, (_FlagsEnum)JSON.DeserializeDynamic("\"B, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B, (_FlagsEnum)JSON.DeserializeDynamic("\"B,A\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A, C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A,C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,A\""));
+
+            Assert.AreEqual(_FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B, C\""));
+            Assert.AreEqual(_FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B,C\""));
+            Assert.AreEqual(_FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, B\""));
+            Assert.AreEqual(_FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,B\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A, B, C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A, B,C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A,B, C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A,B,C\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A, C, B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A, C,B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A,C, B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"A,C,B\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B, A, C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B, A,C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B,A, C\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B,A,C\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B, C, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B, C,A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B,C, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"B,C,A\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, A, B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, A,B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,A, B\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,A,B\""));
+
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, B, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C, B,A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,B, A\""));
+            Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, (_FlagsEnum)JSON.DeserializeDynamic("\"C,B,A\""));
+        }
+
+        [Flags]
+        enum _EnumMemberAttributeOverrideFlags
+        {
+            [EnumMember(Value = "1")]
+            A = 1,
+            [EnumMember(Value = "2")]
+            B = 2,
+            [EnumMember(Value = "3")]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeOverrideFlags()
+        {
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.B, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3\""));
+
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,1\""));
+
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,1\""));
+
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,2\""));
+
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1, 2, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1, 2,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,2, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,2,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1, 3, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,3, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"1,3,2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 1, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 1,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,1, 3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,1,3\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 3, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2, 3,1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,3, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"2,3,1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 1, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 1,2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,1, 2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,1,2\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 2, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3, 2,1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,2, 1\""));
+            Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,2,1\""));
+        }
     }
 }

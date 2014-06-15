@@ -1091,6 +1091,11 @@ namespace Jil.DeserializeDynamic
                     }
                     if (returnType.IsEnum)
                     {
+                        if (returnType.IsFlagsEnum())
+                        {
+                            return ParseFlagsEnum(returnType, out result);
+                        }
+
                         return EnumValues.TryParse(returnType, StringValue, out result);
                     }
                     if (returnType == typeof(Guid))
@@ -1232,6 +1237,44 @@ namespace Jil.DeserializeDynamic
 
             result = null;
             return false;
+        }
+
+        bool ParseFlagsEnum(Type enumType, out object result)
+        {
+            result = Activator.CreateInstance(enumType);
+
+            var ix = 0;
+            int iy;
+            while (ix != -1)
+            {
+                iy = StringValue.IndexOf(',', ix);
+                var takeTil = iy != -1 ? iy : StringValue.Length;
+
+                var asStr = StringValue.Substring(ix, takeTil - ix);
+
+                object parsed;
+                if (!EnumValues.TryParse(enumType, asStr, out parsed))
+                {
+                    result = null;
+                    return false;
+                }
+
+                // sweet zombie jesus is this bad for perf
+                result = Enum.ToObject(enumType, Convert.ToUInt64(result) | Convert.ToUInt64(parsed));
+
+                ix = iy;
+
+                if (ix != -1)
+                {
+                    // skip ,
+                    ix++;
+
+                    // skip very specific whitespace
+                    while (StringValue[ix] == ' ' && ix < StringValue.Length) ix++;
+                }
+            }
+
+            return true;
         }
 
         static MethodInfo InnerTryInvokeMember = typeof(JsonObject).GetMethod("_InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
