@@ -2877,7 +2877,14 @@ namespace Jil.Serialize
 
                     Emit.LoadLocal(notFirst);           // bool
                     Emit.BranchIfFalse(skipCommaSpace); // --empty--
-                    WriteString(", ");                  // --empty--
+                    if (PrettyPrint)
+                    {
+                        WriteString(", ");              // --empty--
+                    }
+                    else
+                    {
+                        WriteString(",");               // --empty--
+                    }
 
                     Emit.MarkLabel(skipCommaSpace);     // --emmpty-
                     WriteString(asStr);                 // --empty--

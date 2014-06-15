@@ -6229,34 +6229,67 @@ namespace JilTests
         [TestMethod]
         public void FlagsEnum()
         {
-            var a = JSON.Serialize(_FlagsEnum.A);
-            Assert.AreEqual(@"""A""", a);
-            var b = JSON.Serialize(_FlagsEnum.B);
-            Assert.AreEqual(@"""B""", b);
-            var c = JSON.Serialize(_FlagsEnum.C);
-            Assert.AreEqual(@"""C""", c);
-            var d = JSON.Serialize(_FlagsEnum.D);
-            Assert.AreEqual(@"""D""", d);
-            var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B);
-            Assert.AreEqual(@"""A, B""", ab);
-            var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C);
-            Assert.AreEqual(@"""A, C""", ac);
-            var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D);
-            Assert.AreEqual(@"""A, D""", ad);
-            var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C);
-            Assert.AreEqual(@"""B, C""", bc);
-            var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D);
-            Assert.AreEqual(@"""B, D""", bd);
-            var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D);
-            Assert.AreEqual(@"""C, D""", cd);
-            var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C);
-            Assert.AreEqual(@"""A, B, C""", abc);
-            var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D);
-            Assert.AreEqual(@"""A, B, D""", abd);
-            var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D);
-            Assert.AreEqual(@"""A, C, D""", acd);
-            var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D);
-            Assert.AreEqual(@"""B, C, D""", bcd);
+            {
+                var a = JSON.Serialize(_FlagsEnum.A, Options.PrettyPrint);
+                Assert.AreEqual(@"""A""", a);
+                var b = JSON.Serialize(_FlagsEnum.B, Options.PrettyPrint);
+                Assert.AreEqual(@"""B""", b);
+                var c = JSON.Serialize(_FlagsEnum.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""C""", c);
+                var d = JSON.Serialize(_FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""D""", d);
+                var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B""", ab);
+                var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, C""", ac);
+                var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, D""", ad);
+                var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, C""", bc);
+                var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, D""", bd);
+                var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""C, D""", cd);
+                var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B, C""", abc);
+                var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B, D""", abd);
+                var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, C, D""", acd);
+                var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, C, D""", bcd);
+            }
+
+            {
+                var a = JSON.Serialize(_FlagsEnum.A);
+                Assert.AreEqual(@"""A""", a);
+                var b = JSON.Serialize(_FlagsEnum.B);
+                Assert.AreEqual(@"""B""", b);
+                var c = JSON.Serialize(_FlagsEnum.C);
+                Assert.AreEqual(@"""C""", c);
+                var d = JSON.Serialize(_FlagsEnum.D);
+                Assert.AreEqual(@"""D""", d);
+                var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B);
+                Assert.AreEqual(@"""A,B""", ab);
+                var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C);
+                Assert.AreEqual(@"""A,C""", ac);
+                var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D);
+                Assert.AreEqual(@"""A,D""", ad);
+                var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C);
+                Assert.AreEqual(@"""B,C""", bc);
+                var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D);
+                Assert.AreEqual(@"""B,D""", bd);
+                var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D);
+                Assert.AreEqual(@"""C,D""", cd);
+                var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C);
+                Assert.AreEqual(@"""A,B,C""", abc);
+                var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D);
+                Assert.AreEqual(@"""A,B,D""", abd);
+                var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D);
+                Assert.AreEqual(@"""A,C,D""", acd);
+                var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D);
+                Assert.AreEqual(@"""B,C,D""", bcd);
+            }
         }
 
         [Flags]
@@ -6272,36 +6305,71 @@ namespace JilTests
         [TestMethod]
         public void FlagsEnumWithZero()
         {
-            var none = JSON.Serialize(_FlagsEnumWithZero.None);
-            Assert.AreEqual(@"""None""", none);
-            var a = JSON.Serialize(_FlagsEnumWithZero.A);
-            Assert.AreEqual(@"""A""", a);
-            var b = JSON.Serialize(_FlagsEnumWithZero.B);
-            Assert.AreEqual(@"""B""", b);
-            var c = JSON.Serialize(_FlagsEnumWithZero.C);
-            Assert.AreEqual(@"""C""", c);
-            var d = JSON.Serialize(_FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""D""", d);
-            var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B);
-            Assert.AreEqual(@"""A, B""", ab);
-            var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C);
-            Assert.AreEqual(@"""A, C""", ac);
-            var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""A, D""", ad);
-            var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
-            Assert.AreEqual(@"""B, C""", bc);
-            var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""B, D""", bd);
-            var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""C, D""", cd);
-            var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
-            Assert.AreEqual(@"""A, B, C""", abc);
-            var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""A, B, D""", abd);
-            var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""A, C, D""", acd);
-            var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-            Assert.AreEqual(@"""B, C, D""", bcd);
+            {
+                var none = JSON.Serialize(_FlagsEnumWithZero.None, Options.PrettyPrint);
+                Assert.AreEqual(@"""None""", none);
+                var a = JSON.Serialize(_FlagsEnumWithZero.A, Options.PrettyPrint);
+                Assert.AreEqual(@"""A""", a);
+                var b = JSON.Serialize(_FlagsEnumWithZero.B, Options.PrettyPrint);
+                Assert.AreEqual(@"""B""", b);
+                var c = JSON.Serialize(_FlagsEnumWithZero.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""C""", c);
+                var d = JSON.Serialize(_FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""D""", d);
+                var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B""", ab);
+                var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, C""", ac);
+                var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, D""", ad);
+                var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, C""", bc);
+                var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, D""", bd);
+                var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""C, D""", cd);
+                var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B, C""", abc);
+                var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, B, D""", abd);
+                var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""A, C, D""", acd);
+                var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
+                Assert.AreEqual(@"""B, C, D""", bcd);
+            }
+
+            {
+                var none = JSON.Serialize(_FlagsEnumWithZero.None);
+                Assert.AreEqual(@"""None""", none);
+                var a = JSON.Serialize(_FlagsEnumWithZero.A);
+                Assert.AreEqual(@"""A""", a);
+                var b = JSON.Serialize(_FlagsEnumWithZero.B);
+                Assert.AreEqual(@"""B""", b);
+                var c = JSON.Serialize(_FlagsEnumWithZero.C);
+                Assert.AreEqual(@"""C""", c);
+                var d = JSON.Serialize(_FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""D""", d);
+                var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B);
+                Assert.AreEqual(@"""A,B""", ab);
+                var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C);
+                Assert.AreEqual(@"""A,C""", ac);
+                var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""A,D""", ad);
+                var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
+                Assert.AreEqual(@"""B,C""", bc);
+                var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""B,D""", bd);
+                var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""C,D""", cd);
+                var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
+                Assert.AreEqual(@"""A,B,C""", abc);
+                var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""A,B,D""", abd);
+                var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""A,C,D""", acd);
+                var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
+                Assert.AreEqual(@"""B,C,D""", bcd);
+            }
         }
 
         enum _EnumMemberAttributeOverride
@@ -6336,15 +6404,29 @@ namespace JilTests
         [TestMethod]
         public void EnumMemberAttributeOverrideFlags()
         {
-            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A));
-            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B));
-            Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C));
+            {
+                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A, Options.PrettyPrint));
+                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
+                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
 
-            Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B));
-            Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C));
-            Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+                Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
+                Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+                Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
 
-            Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+                Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+            }
+
+            {
+                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A));
+                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B));
+                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C));
+
+                Assert.AreEqual("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B));
+                Assert.AreEqual("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C));
+                Assert.AreEqual("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+
+                Assert.AreEqual("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+            }
         }
 
         [Flags]
@@ -6363,17 +6445,33 @@ namespace JilTests
         [TestMethod]
         public void EnumMemberAttributeOverrideWithNoneFlags()
         {
-            Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None));
+            {
+                Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None, Options.PrettyPrint));
 
-            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A));
-            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B));
-            Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A, Options.PrettyPrint));
+                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
+                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
 
-            Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B));
-            Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C));
-            Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
+                Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+                Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
 
-            Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+            }
+
+            {
+                Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None));
+
+                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A));
+                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B));
+                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C));
+
+                Assert.AreEqual("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B));
+                Assert.AreEqual("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.AreEqual("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+
+                Assert.AreEqual("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+            }
         }
     }
 }
