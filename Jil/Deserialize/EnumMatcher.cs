@@ -40,13 +40,13 @@ namespace Jil.Deserialize
         {
             switch (mode)
             {
-                case EnumMatcherMode.One: return Methods.MemberHash1;
-                case EnumMatcherMode.Two: return Methods.MemberHash2;
-                case EnumMatcherMode.Four: return Methods.MemberHash4;
-                case EnumMatcherMode.Eight: return Methods.MemberHash8;
-                case EnumMatcherMode.Sixteen: return Methods.MemberHash16;
-                case EnumMatcherMode.ThirtyTwo: return Methods.MemberHash32;
-                case EnumMatcherMode.SixtyFour: return Methods.MemberHash64;
+                case EnumMatcherMode.One: return Methods.EnumHash1;
+                case EnumMatcherMode.Two: return Methods.EnumHash2;
+                case EnumMatcherMode.Four: return Methods.EnumHash4;
+                case EnumMatcherMode.Eight: return Methods.EnumHash8;
+                case EnumMatcherMode.Sixteen: return Methods.EnumHash16;
+                case EnumMatcherMode.ThirtyTwo: return Methods.EnumHash32;
+                case EnumMatcherMode.SixtyFour: return Methods.EnumHash64;
                 default: throw new Exception("Unexpected EnumMatcherMode: " + mode);
             }
         }
