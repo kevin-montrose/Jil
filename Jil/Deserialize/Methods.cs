@@ -881,7 +881,7 @@ namespace Jil.Deserialize
         static bool TryParseEnum<TEnum>(string asStr, out TEnum parsed)
             where TEnum : struct
         {
-            return Enum.TryParse<TEnum>(asStr, true, out parsed);
+            return EnumValues<TEnum>.TryParse(asStr, out parsed);
         }
 
         public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
