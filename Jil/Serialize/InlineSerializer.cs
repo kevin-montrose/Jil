@@ -2835,7 +2835,7 @@ namespace Jil.Serialize
                 Emit.LoadConstant(0UL);                 // TextWriter? ulong ulong 0
                 Emit.UnsignedBranchIfNotEqual(notZero); // TextWriter? ulong
 
-                var zeroStr = "\"" + Enum.GetName(enumType, values[0UL]) + "\"";
+                var zeroStr = "\"" + Enum.GetName(enumType, values[0UL]).JsonEscape(JSONP) + "\"";
                 WriteString(zeroStr);                   // TextWriter? ulong
                 Emit.Pop();                             // TextWriter?
                 if (popTextWriter)
@@ -2867,7 +2867,7 @@ namespace Jil.Serialize
                     var skipCommaSpace = Emit.DefineLabel();
 
                     var asULong = valObj.Key;
-                    var asStr = Enum.GetName(enumType, valObj.Value);
+                    var asStr = Enum.GetName(enumType, valObj.Value).JsonEscape(JSONP);
 
                     Emit.LoadLocal(enumLoc);        // ulong
                     Emit.LoadConstant(asULong);     // ulong ulong
