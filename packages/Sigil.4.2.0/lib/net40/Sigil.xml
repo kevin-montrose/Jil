@@ -424,6 +424,13 @@
             When calling VarArgs methods, arglist should be set to the types of the extra parameters to be passed.
             </summary>
         </member>
+        <member name="M:Sigil.Emit`1.Call(System.Reflection.ConstructorInfo)">
+            <summary>
+            Calls the given constructor.  Pops its arguments in reverse order (left-most deepest in the stack).
+            
+            The `this` reference should appear before any parameters.
+            </summary>
+        </member>
         <member name="M:Sigil.Emit`1.CallIndirect(System.Reflection.CallingConventions)">
             <summary>
             Pops a pointer to a method, and then all it's arguments (in reverse order, left-most parameter is deepest on the stack) and calls
@@ -2873,6 +2880,13 @@
             To call overrides of instance methods, use CallVirtual.
             
             When calling VarArgs methods, arglist should be set to the types of the extra parameters to be passed.
+            </summary>
+        </member>
+        <member name="M:Sigil.NonGeneric.Emit.Call(System.Reflection.ConstructorInfo)">
+            <summary>
+            Calls the given constructor.  Pops its arguments in reverse order (left-most deepest in the stack).
+            
+            The `this` reference should appear before any parameters.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.CallIndirect(System.Reflection.CallingConventions)">
