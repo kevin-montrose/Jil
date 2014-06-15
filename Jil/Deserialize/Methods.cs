@@ -865,6 +865,25 @@ namespace Jil.Deserialize
             return default(T);
         }
 
+        public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
+        static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
+            where TEnum : struct
+        {
+            TEnum ret;
+            if (!TryParseEnum<TEnum>(asStr, out ret))
+            {
+                throw new DeserializationException("Unexpected value for " + typeof(TEnum).Name + ": " + asStr, reader);
+            }
+
+            return ret;
+        }
+
+        static bool TryParseEnum<TEnum>(string asStr, out TEnum parsed)
+            where TEnum : struct
+        {
+            return Enum.TryParse<TEnum>(asStr, true, out parsed);
+        }
+
         public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
             where TEnum : struct
@@ -885,7 +904,7 @@ namespace Jil.Deserialize
                     {
                         var asStr = commonSb.ToString();
                         TEnum parsed;
-                        if (!Enum.TryParse<TEnum>(asStr, true, out parsed))
+                        if (!TryParseEnum<TEnum>(asStr, out parsed))
                         {
                             throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
                         }

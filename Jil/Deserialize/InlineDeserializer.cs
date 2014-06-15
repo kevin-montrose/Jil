@@ -499,15 +499,13 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                  // --empty--
 
-            var specific =Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
+            var specific = Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
 
             Emit.LoadArgument(0);           // TextReader
             LoadStringBuilder();            // TextReader StringBuilder&
             Emit.Call(specific);            // enum
         }
 
-        static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Static | BindingFlags.Public);
-        static readonly MethodInfo Enum_Parse = typeof(Enum).GetMethod("Parse", new[] { typeof(Type), typeof(string), typeof(bool) });
         void ReadEnum(Type enumType)
         {
             if (enumType.IsFlagsEnum())
@@ -516,18 +514,13 @@ namespace Jil.Deserialize
                 return;
             }
 
-            ExpectQuote();                          // --empty--
+            var specific = Methods.ParseEnum.MakeGenericMethod(enumType);
 
-            Emit.LoadConstant(enumType);            // RuntimeTypeHandle
-            Emit.Call(Type_GetTypeFromHandle);      // Type
-
-            Emit.LoadArgument(0);                   // Type TextReader
-            CallReadEncodedString();                // Type string
-
-            Emit.LoadConstant(true);                // Type string bool
-
-            Emit.Call(Enum_Parse);                  // object
-            Emit.UnboxAny(enumType);                // enum
+            ExpectQuote();                  // --empty--
+            Emit.LoadArgument(0);           // TextReader
+            CallReadEncodedString();        // string
+            Emit.LoadArgument(0);           // TextReader
+            Emit.Call(specific);            // enum
         }
 
         void ReadNullable(Type nullableType)
