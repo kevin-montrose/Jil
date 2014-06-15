@@ -118,7 +118,7 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
 
 ## Benchmarks
 
-Jil aims to be the fastest general purpose JSON (serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
+Jil aims to be the fastest general purpose JSON (de)serializer for .NET.  Flexibility and "nice to have" features are explicitly discounted
 in the pursuit of speed.
 
 These benchmarks were run on a machine with the following specs:
