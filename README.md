@@ -92,6 +92,7 @@ The following types (and any user defined types composed of them) are supported:
     * See Configuration for further details
   - Nullable types
   - Enumerations
+    * Including \[Flags\]
   - Guids
     * Only the ["D" format](http://msdn.microsoft.com/en-us/library/97af8hh4.aspx)
   - IList&lt;T&gt; implementations
@@ -113,7 +114,7 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
   - Whether or not to include inherited members when serializing
-  - Whether or not to try to use hash functions when deserializing member names  
+  - Whether or not to try to use hash functions when deserializing member names and enumerations 
     * Collisions may be forced if input is malicious
 
 ## Benchmarks
