@@ -1259,8 +1259,6 @@ namespace Jil.DeserializeDynamic
                     return false;
                 }
 
-                // sweet zombie jesus is this bad for perf
-                //result = Enum.ToObject(enumType, Convert.ToUInt64(result) | Convert.ToUInt64(parsed));
                 result = FlagsEnumCombiner.Combine(enumType, result, parsed);
 
                 ix = iy;
