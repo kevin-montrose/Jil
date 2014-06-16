@@ -46,6 +46,25 @@ namespace JilTests
             return (T)Enum.Parse(typeof(T), retName);
         }
 
+        public static T _RandFlagEnum<T>(Random rand)
+            where T : struct
+        {
+            var ret = default(T);
+
+            var values = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+
+            var take = rand.Next(values.Length) + 1;
+
+            for (var i = 0; i < take; i++)
+            {
+                var val = values[rand.Next(values.Length)];
+
+                ret = (T)Enum.ToObject(typeof(T), Convert.ToUInt64(ret) | Convert.ToUInt64(val));
+            }
+
+            return ret;
+        }
+
         public static string _RandString(Random rand, int? maxLength = null)
         {
             var len = 1 + rand.Next(maxLength ?? 20);
@@ -1190,6 +1209,62 @@ namespace JilTests
             CompareTimes(toSerialize, Jil.Options.Default, hash, method, out hashTime, out methodTime);
 
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
+        }
+
+        [Flags]
+        enum _UseFastFlagEnumCombiner
+        {
+            Foo = 1,
+            Bar = 2,
+            Fizz = 4,
+            Buzz = 8
+        }
+
+        [TestMethod]
+        public void UseFastFlagEnumCombiner()
+        {
+            Func<TextReader, _UseFastFlagEnumCombiner> fast;
+            Func<TextReader, _UseFastFlagEnumCombiner> slow;
+
+            Exception ignored;
+            var inner = InlineDeserializerHelper.Build<_UseFastFlagEnumCombiner>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+
+            fast =
+                reader =>
+                {
+                    var old = Jil.Deserialize.Methods.UseFastFlagEnumCombiner;
+                    Jil.Deserialize.Methods.UseFastFlagEnumCombiner = true;
+                    var ret = inner(reader);
+                    Jil.Deserialize.Methods.UseFastFlagEnumCombiner = old;
+
+                    return ret;
+                };
+
+            slow =
+                reader =>
+                {
+                    var old = Jil.Deserialize.Methods.UseFastFlagEnumCombiner;
+                    Jil.Deserialize.Methods.UseFastFlagEnumCombiner = false;
+                    var ret = inner(reader);
+                    Jil.Deserialize.Methods.UseFastFlagEnumCombiner = old;
+
+                    return ret;
+                };
+
+            var rand = new Random(44027637);
+
+            var toSerialize = new List<_UseFastFlagEnumCombiner>();
+            for (var i = 0; i < 20000; i++)
+            {
+                toSerialize.Add(_RandFlagEnum<_UseFastFlagEnumCombiner>(rand));
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, slowTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, slow, out fastTime, out slowTime);
+
+            Assert.IsTrue(fastTime < slowTime, "fastTime = " + fastTime + ", slowTime = " + slowTime);
         }
 #endif
     }

@@ -885,6 +885,8 @@ namespace Jil.Deserialize
             return EnumValues<TEnum>.TryParse(asStr, out parsed);
         }
 
+        public static bool UseFastFlagEnumCombiner = true;
+
         public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
             where TEnum : struct
@@ -910,9 +912,15 @@ namespace Jil.Deserialize
                             throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
                         }
 
-                        // sweet zombie jesus is this bad for perf
-                        //ret = (TEnum)Enum.ToObject(typeof(TEnum), Convert.ToUInt64(ret) | Convert.ToUInt64(parsed));
-                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
+                        if (!UseFastFlagEnumCombiner)
+                        {
+                            // sweet zombie jesus is this bad for perf
+                            ret = (TEnum)Enum.ToObject(typeof(TEnum), Convert.ToUInt64(ret) | Convert.ToUInt64(parsed));
+                        }
+                        else
+                        {
+                            ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
+                        }
 
                         commonSb.Clear();
 
