@@ -911,7 +911,8 @@ namespace Jil.Deserialize
                         }
 
                         // sweet zombie jesus is this bad for perf
-                        ret = (TEnum)Enum.ToObject(typeof(TEnum), Convert.ToUInt64(ret) | Convert.ToUInt64(parsed));
+                        //ret = (TEnum)Enum.ToObject(typeof(TEnum), Convert.ToUInt64(ret) | Convert.ToUInt64(parsed));
+                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
 
                         commonSb.Clear();
 
