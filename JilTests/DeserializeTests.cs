@@ -4214,6 +4214,41 @@ namespace JilTests
             Assert.AreEqual(_CaseInsensitiveEnums.Fizz, JSON.Deserialize<_CaseInsensitiveEnums>("\"FIZZ\""));
         }
 
+        [TestMethod]
+        public void DynamicMembers()
+        {
+            var json = @"{
+                  ""index.analysis.analyzer.stem.tokenizer"" : ""standard"",
+                  ""index.analysis.analyzer.exact.filter.0"" : ""lowercase"",
+                  ""index.refresh_interval"" : ""1s"",
+                  ""index.analysis.analyzer.exact.type"" : ""custom"",
+                  ""test-dummy-obj"": { ""hello"": 123 }
+	        }";
+
+            var dyn = JSON.Deserialize<Dictionary<string, dynamic>>(json);
+            Assert.IsNotNull(dyn);
+            Assert.AreEqual(5, dyn.Count);
+            Assert.AreEqual("standard", (string)dyn["index.analysis.analyzer.stem.tokenizer"]);
+            Assert.AreEqual("lowercase", (string)dyn["index.analysis.analyzer.exact.filter.0"]);
+            Assert.AreEqual("1s", (string)dyn["index.refresh_interval"]);
+            Assert.AreEqual("custom", (string)dyn["index.analysis.analyzer.exact.type"]);
+            Assert.IsNotNull(dyn["test-dummy-obj"]);
+            var testDummyObj = dyn["test-dummy-obj"];
+
+            var count = 0;
+            foreach (var kv in testDummyObj)
+            {
+                var key = kv.Key;
+                var val = kv.Value;
+                count++;
+
+                Assert.AreEqual("hello", (string)key);
+                Assert.AreEqual(123, (int)val);
+            }
+
+            Assert.AreEqual(1, count);
+        }
+
         //struct _AllFloatsStruct
         //{
         //    public float Float;

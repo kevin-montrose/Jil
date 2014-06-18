@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -16,7 +17,7 @@ namespace Jil.DeserializeDynamic
         {
             var ret = new ObjectBuilder(options);
 
-            DeserializeMember(reader, ret);
+            _DeserializeMember(reader, ret);
 
             Methods.ConsumeWhiteSpace(reader);
             var c = reader.Peek();
@@ -25,7 +26,8 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        static void DeserializeMember(TextReader reader, ObjectBuilder builder)
+        public static MethodInfo DeserializeMember = typeof(DynamicDeserializer).GetMethod("_DeserializeMember", BindingFlags.NonPublic | BindingFlags.Static);
+        static void _DeserializeMember(TextReader reader, ObjectBuilder builder)
         {
             Methods.ConsumeWhiteSpace(reader);
 
@@ -113,7 +115,7 @@ namespace Jil.DeserializeDynamic
                     break;
                 }
 
-                DeserializeMember(reader, builder);
+                _DeserializeMember(reader, builder);
                 Methods.ConsumeWhiteSpace(reader);
                 c = reader.Read();
 
@@ -157,7 +159,7 @@ namespace Jil.DeserializeDynamic
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
                 if (c != ':') throw new DeserializationException("Expected :, found " + (char)c, reader);
 
-                DeserializeMember(reader, builder);
+                _DeserializeMember(reader, builder);
 
                 builder.EndObjectMember();
 

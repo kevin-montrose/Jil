@@ -1728,8 +1728,38 @@ namespace Jil.Deserialize
             }
         }
 
+        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(bool) });
+        static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
+        void ReadDynamic()
+        {
+            using (var dyn = Emit.DeclareLocal<Jil.DeserializeDynamic.ObjectBuilder>())
+            {
+                Emit.LoadArgument(0);                                                       // TextReader
+                Emit.LoadConstant(false);                                                   // TextReader bool
+                Emit.LoadConstant(false);                                                   // TextReader bool bool
+                Emit.LoadConstant(false);                                                   // TextReader bool bool bool
+                Emit.LoadConstant((byte)DateFormat);                                        // TextReader bool bool bool byte
+                Emit.LoadConstant(false);                                                   // TextReader bool bool bool byte bool
+                Emit.LoadConstant(AllowHashing);                                            // TextReader bool bool bool byte bool bool
+                Emit.NewObject(OptionsCons);                                                // TextReader Options
+                Emit.NewObject(ObjectBuilderCons);                                          // TextReader ObjectBuilder
+                Emit.StoreLocal(dyn);                                                       // TextReader
+                Emit.LoadLocal(dyn);                                                        // TextReader ObjectBuilder
+                Emit.Call(Jil.DeserializeDynamic.DynamicDeserializer.DeserializeMember);    // --empty--
+                Emit.LoadLocal(dyn);                                                        // ObjectBuilder
+                Emit.LoadField(Jil.DeserializeDynamic.ObjectBuilder._BeingBuilt);           // JsonObject
+            }
+        }
+
         void Build(Type forType, bool allowRecursion = true)
         {
+            // EXACT MATCH, this is the best way to detect `dynamic`
+            if (forType == typeof(object))
+            {
+                ReadDynamic();
+                return;
+            }
+
             if (forType.IsNullableType())
             {
                 ReadNullable(forType);
