@@ -189,7 +189,7 @@ Numbers can be found in [this Google Document](https://docs.google.com/spreadshe
 
 ## Tricks
 
-Jil has a lot of tricks to make it fast.  These may be interesting, even if Jil itself is too limitted for your use.
+Jil has a lot of tricks to make it fast.  These may be interesting, even if Jil itself is too limited for your use.
 
 ### Sigil
 
