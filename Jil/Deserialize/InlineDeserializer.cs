@@ -156,13 +156,13 @@ namespace Jil.Deserialize
             var gotN = Emit.DefineLabel();
             var done = Emit.DefineLabel();
 
-            RawReadChar(() => ThrowExpected("\"", "null")); // int
+            RawReadChar(() => ThrowExpected(c, "null")); // int
             Emit.Duplicate();                               // int int
             Emit.LoadConstant((int)c);                      // int int int
             Emit.BranchIfEqual(gotChar);                    // int 
             Emit.LoadConstant((int)'n');                    // int n
             Emit.BranchIfEqual(gotN);                       // --empty--
-            ThrowExpected("\"", "null");                    // --empty--
+            ThrowExpected(c, "null");                    // --empty--
 
             Emit.MarkLabel(gotChar);                        // int
             Emit.Pop();                                     // --empty--
