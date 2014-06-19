@@ -4461,7 +4461,7 @@ namespace JilTests
             var result = JSON.Deserialize<ClusterNodeInfo>(json, Options.SecondsSinceUnixEpochExcludeNulls);
             timer.Stop();
 
-            Assert.IsTrue(timer.ElapsedMilliseconds < 1000, "Took: " + timer.ElapsedMilliseconds + "ms");
+            Assert.IsTrue(timer.ElapsedMilliseconds < 3000, "Took: " + timer.ElapsedMilliseconds + "ms");
         }
 #endif
 

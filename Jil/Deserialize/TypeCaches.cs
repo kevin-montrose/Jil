@@ -9,89 +9,169 @@ namespace Jil.Deserialize
 {
     static class NewtonsoftStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
 
-        static NewtonsoftStyleTypeCache()
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class NewtonsoftStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
 
-        static NewtonsoftStyleNoHashingTypeCache()
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleNoHashingTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleNoHashingTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class MillisecondStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
 
-        static MillisecondStyleTypeCache()
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class MillisecondStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
 
-        static MillisecondStyleNoHashingTypeCache()
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleNoHashingTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleNoHashingTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class SecondStyleTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
 
-        static SecondStyleTypeCache()
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class SecondStyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
-
-        static SecondStyleNoHashingTypeCache()
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
+        
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleNoHashingTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleNoHashingTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class ISO8601StyleTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
-
-        static ISO8601StyleTypeCache()
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
+        
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601, allowHashing: true, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 
     static class ISO8601StyleNoHashingTypeCache<T>
     {
-        public static readonly Func<TextReader, T> Thunk;
-        public static readonly Exception ExceptionDuringBuild;
-
-        static ISO8601StyleNoHashingTypeCache()
+        static readonly object InitLock = new object();
+        static Func<TextReader, T> Thunk;
+        public static Exception ExceptionDuringBuild;
+        
+        public static Func<TextReader, T> Get()
         {
-            Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleNoHashingTypeCache<>), DateTimeFormat.ISO8601, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+            if (Thunk != null) return Thunk;
+
+            lock (InitLock)
+            {
+                if (Thunk != null) return Thunk;
+
+                Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleNoHashingTypeCache<>), DateTimeFormat.ISO8601, allowHashing: false, exceptionDuringBuild: out ExceptionDuringBuild);
+
+                return Thunk;
+            }
         }
     }
 }
