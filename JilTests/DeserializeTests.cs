@@ -4258,15 +4258,45 @@ namespace JilTests
 
         class __Issue25 {  /* nothing here .. yet */ }
 
+        static T Issue25DeserializeByExample<T>(T example, string json, Options opts)
+        {
+            return JSON.Deserialize<T>(json, opts);
+        }
+
         [TestMethod]
         public void Issue25()
         {
             var json = "{ \"Id\" : 17, \"Foo\" : { \"Bar\" : 17} }";
 
-            var res = JSON.Deserialize<_Issue25>(json);
+            {
+                var res = JSON.Deserialize<_Issue25>(json);
 
-            Assert.AreEqual(17, res.Id);
-            Assert.IsNotNull(res.Foo);
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNotNull(res.Foo);
+            }
+
+            {
+                var res = JSON.Deserialize<_Issue25>(json, new Options(allowHashFunction: false));
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNotNull(res.Foo);
+            }
+
+            {
+                var example = new { Id = 17, Foo = new { } };
+                var res = Issue25DeserializeByExample(example, json, Options.Default);
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNotNull(res.Foo);
+            }
+
+            {
+                var example = new { Id = 17, Foo = new { } };
+                var res = Issue25DeserializeByExample(example, json, new Options(allowHashFunction: false));
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNotNull(res.Foo);
+            }
         }
 #if !DEBUG
         #region SlowSpinUp Types
