@@ -4298,6 +4298,56 @@ namespace JilTests
                 Assert.IsNotNull(res.Foo);
             }
         }
+
+        class _NullEmptyMembers
+        {
+            public int Id { get; set; }
+            public __NullEmptyMembers Foo { get; set; }
+        }
+
+        class __NullEmptyMembers {  /* nothing here .. yet */ }
+
+        static T NullEmptyMembersDeserializeByExample<T>(T example, string json, Options opts)
+        {
+            return JSON.Deserialize<T>(json, opts);
+        }
+
+        [TestMethod]
+        public void NullEmptyMembers()
+        {
+            var json = "{ \"Id\" : 17, \"Foo\" : null }";
+
+            {
+                var res = JSON.Deserialize<_NullEmptyMembers>(json);
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNull(res.Foo);
+            }
+
+            {
+                var res = JSON.Deserialize<_NullEmptyMembers>(json, new Options(allowHashFunction: false));
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNull(res.Foo);
+            }
+
+            {
+                var example = new { Id = 17, Foo = new { } };
+                var res = NullEmptyMembersDeserializeByExample(example, json, Options.Default);
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNull(res.Foo);
+            }
+
+            {
+                var example = new { Id = 17, Foo = new { } };
+                var res = NullEmptyMembersDeserializeByExample(example, json, new Options(allowHashFunction: false));
+
+                Assert.AreEqual(17, res.Id);
+                Assert.IsNull(res.Foo);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
