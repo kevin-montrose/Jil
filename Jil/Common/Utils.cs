@@ -13,6 +13,8 @@ namespace Jil.Common
 {
     partial class Utils
     {
+        public const OptimizationOptions DelegateOptimizationOptions = OptimizationOptions.All & ~OptimizationOptions.EnableBranchPatching;
+
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;
 
@@ -442,7 +444,7 @@ namespace Jil.Common
                 emit.LoadLocal(retLoc);			// ulong[]
                 emit.Return();					// --empty--
 
-                var getAddrs = emit.CreateDelegate();
+                var getAddrs = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
                 var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).FirstOrDefault();
                 var consParameters = cons != null ? cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray() : null;
@@ -579,7 +581,7 @@ namespace Jil.Common
                 emit.LoadArgument(0);
                 emit.Call(mtd);
                 emit.Return();
-                cached = emit.CreateDelegate();
+                cached = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
                 lock (DynamicCastCache)
                 {
@@ -614,7 +616,7 @@ namespace Jil.Common
                 emit.Call(mtd);
                 emit.Return();
 
-                cached = emit.CreateDelegate();
+                cached = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
                 lock (StringDictionaryCache)
                 {
                     StringDictionaryCache[valType] = cached;
@@ -649,7 +651,7 @@ namespace Jil.Common
                 emit.Call(mtd);
                 emit.Return();
 
-                cached = emit.CreateDelegate();
+                cached = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
                 lock (EnumDictionaryCache)
                 {
                     EnumDictionaryCache[valType] = cached;

@@ -1852,7 +1852,7 @@ namespace Jil.Deserialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, ForType>>();
+            return Emit.CreateDelegate<Func<TextReader, ForType>>(Utils.DelegateOptimizationOptions);
         }
     }
 
@@ -1869,7 +1869,7 @@ namespace Jil.Deserialize
             emit.NewObject<DeserializationException, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<TextReader, ReturnType>>();
+            return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
         public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing, out Exception exceptionDuringBuild)

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sigil;
 using System.Reflection;
+using Jil.Common;
 
 namespace Jil.Serialize
 {
@@ -38,7 +39,7 @@ namespace Jil.Serialize
             emit.Call(serialize);
             emit.Return();
 
-            Thunk = emit.CreateDelegate();
+            Thunk = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
         }
     }
 }

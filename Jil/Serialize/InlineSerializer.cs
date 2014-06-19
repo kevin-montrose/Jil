@@ -3043,7 +3043,7 @@ namespace Jil.Serialize
             WriteObject(typeof(ForType));
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildListWithNewDelegate(bool doVerify)
@@ -3059,7 +3059,7 @@ namespace Jil.Serialize
             WriteList(typeof(ForType));
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate(bool doVerify)
@@ -3075,7 +3075,7 @@ namespace Jil.Serialize
             WriteEnumerable(typeof(ForType));
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(bool doVerify)
@@ -3091,7 +3091,7 @@ namespace Jil.Serialize
             WriteDictionary(typeof(ForType));
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate(bool doVerify)
@@ -3109,7 +3109,7 @@ namespace Jil.Serialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildNullableWithNewDelegate(bool doVerify)
@@ -3129,7 +3129,7 @@ namespace Jil.Serialize
             
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         Action<TextWriter, ForType, int> BuildEnumWithNewDelegate(bool doVerify)
@@ -3142,7 +3142,7 @@ namespace Jil.Serialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>();
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         internal Action<TextWriter, ForType, int> Build()
@@ -3203,7 +3203,7 @@ namespace Jil.Serialize
             emit.NewObject<Exception, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>();
+            return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)

@@ -63,7 +63,7 @@ namespace Jil.Common
                 emit.Return();                  // --empty--
             }
 
-            var parse = emit.CreateDelegate();
+            var parse = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
             lock (Cache)
             {

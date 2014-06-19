@@ -28,7 +28,7 @@ namespace Jil.Common
                 emit.Or();                  // enum
                 emit.Return();              // --empty--
 
-                Combine = emit.CreateDelegate();
+                Combine = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
             }
         }
     }
@@ -60,7 +60,7 @@ namespace Jil.Common
             emit.Box(enumType);         // object
             emit.Return();              // --empty--
 
-            var newDel = emit.CreateDelegate();
+            var newDel = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
             lock (Cache)
             {
