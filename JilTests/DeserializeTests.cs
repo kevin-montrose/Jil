@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -4248,6 +4249,221 @@ namespace JilTests
 
             Assert.AreEqual(1, count);
         }
+#if !DEBUG
+        #region SlowSpinUp Types
+
+        public class ClusterNodeInfo
+        {
+            [DataMember(Name = "cluster_name")]
+            public string ClusterName { get; internal set; }
+
+            [DataMember(Name = "nodes")]
+            public Dictionary<string, NodeInfo> Nodes { get; set; }
+        }
+
+        public class NodeInfo
+        {
+            [DataMember(Name = "name")]
+            public string Name { get; internal set; }
+
+            [DataMember(Name = "transport_address")]
+            public string TransportAddress { get; internal set; }
+
+            [DataMember(Name = "host")]
+            public string Hostname { get; internal set; }
+
+            [DataMember(Name = "version")]
+            public string Version { get; internal set; }
+
+            [DataMember(Name = "http_address")]
+            public string HttpAddress { get; internal set; }
+
+            [DataMember(Name = "settings")]
+            public Dictionary<string, dynamic> Settings { get; internal set; }
+
+            [DataMember(Name = "os")]
+            public OSInfo OS { get; internal set; }
+
+            [DataMember(Name = "process")]
+            public ProcessInfo Process { get; internal set; }
+
+            [DataMember(Name = "jvm")]
+            public JVMInfo JVM { get; internal set; }
+
+            [DataMember(Name = "thread_pool")]
+            public Dictionary<string, ThreadPoolThreadInfo> ThreadPool { get; internal set; }
+
+            [DataMember(Name = "network")]
+            public NetworkInfo Network { get; internal set; }
+
+            [DataMember(Name = "transport")]
+            public TransportInfo Transport { get; internal set; }
+
+            [DataMember(Name = "http")]
+            public HTTPInfo HTTP { get; internal set; }
+        }
+
+        public class OSInfo
+        {
+            [DataMember(Name = "refresh_interval")]
+            public int RefreshInterval { get; internal set; }
+
+            [DataMember(Name = "available_processors")]
+            public int AvailableProcessors { get; internal set; }
+
+            [DataMember(Name = "cpu")]
+            public OSCPUInfo Cpu { get; internal set; }
+            [DataMember(Name = "mem")]
+            public MemoryInfo Mem { get; internal set; }
+            [DataMember(Name = "swap")]
+            public MemoryInfo Swap { get; internal set; }
+
+            public class OSCPUInfo
+            {
+                [DataMember(Name = "vendor")]
+                public string Vendor { get; internal set; }
+                [DataMember(Name = "model")]
+                public string Model { get; internal set; }
+                [DataMember(Name = "mhz")]
+                public int Mhz { get; internal set; }
+                [DataMember(Name = "total_cores")]
+                public int TotalCores { get; internal set; }
+                [DataMember(Name = "total_sockets")]
+                public int TotalSockets { get; internal set; }
+                [DataMember(Name = "cores_per_socket")]
+                public int CoresPerSocket { get; internal set; }
+                [DataMember(Name = "cache_size")]
+                public string CacheSize { get; internal set; }
+                [DataMember(Name = "cache_size_in_bytes")]
+                public int CacheSizeInBytes { get; internal set; }
+            }
+
+            public class MemoryInfo
+            {
+                [DataMember(Name = "total")]
+                public string Total { get; internal set; }
+                [DataMember(Name = "total_in_bytes")]
+                public long TotalInBytes { get; internal set; }
+            }
+        }
+
+        public class ProcessInfo
+        {
+            [DataMember(Name = "refresh_interval")]
+            public int RefreshInterval { get; internal set; }
+            [DataMember(Name = "id")]
+            public long Id { get; internal set; }
+            [DataMember(Name = "max_file_descriptors")]
+            public int MaxFileDescriptors { get; internal set; }
+        }
+
+        public class JVMInfo
+        {
+            [DataMember(Name = "pid")]
+            public int PID { get; internal set; }
+            [DataMember(Name = "version")]
+            public string Version { get; internal set; }
+            [DataMember(Name = "vm_name")]
+            public string VMName { get; internal set; }
+            [DataMember(Name = "vm_version")]
+            public string VMVersion { get; internal set; }
+            [DataMember(Name = "vm_vendor")]
+            public string VMVendor { get; internal set; }
+            [DataMember(Name = "start_time")]
+            public long StartTime { get; internal set; }
+            [DataMember(Name = "mem")]
+            public JVMMemoryInfo Memory { get; internal set; }
+
+            public class JVMMemoryInfo
+            {
+                [DataMember(Name = "heap_init")]
+                public string HeapInit { get; internal set; }
+                [DataMember(Name = "heap_init_in_bytes")]
+                public long HeapInitInBytes { get; internal set; }
+                [DataMember(Name = "heap_max")]
+                public string HeapMax { get; internal set; }
+                [DataMember(Name = "heap_max_in_bytes")]
+                public long HeapMaxInBytes { get; internal set; }
+                [DataMember(Name = "non_heap_init")]
+                public string NonHeapInit { get; internal set; }
+                [DataMember(Name = "non_heap_init_in_bytes")]
+                public long NonHeapInitInBytes { get; internal set; }
+                [DataMember(Name = "non_heap_max")]
+                public string NonHeapMax { get; internal set; }
+                [DataMember(Name = "non_heap_max_in_bytes")]
+                public long NonHeapMaxInBytes { get; internal set; }
+                [DataMember(Name = "direct_max")]
+                public string DirectMax { get; internal set; }
+                [DataMember(Name = "direct_max_in_bytes")]
+                public long DirectMaxInBytes { get; internal set; }
+            }
+        }
+
+        public class ThreadPoolThreadInfo
+        {
+            [DataMember(Name = "type")]
+            public string Type { get; internal set; }
+            [DataMember(Name = "min")]
+            public int? Min { get; internal set; }
+            [DataMember(Name = "max")]
+            public int? Max { get; internal set; }
+            [DataMember(Name = "keep_alive")]
+            public string KeepAlive { get; internal set; }
+        }
+
+        public class NetworkInfo
+        {
+            [DataMember(Name = "refresh_interval")]
+            public int RefreshInterval { get; internal set; }
+            [DataMember(Name = "primary_interface")]
+            public NetworkInterfaceInfo PrimaryInterface { get; internal set; }
+
+            public class NetworkInterfaceInfo
+            {
+                [DataMember(Name = "address")]
+                public string Address { get; internal set; }
+                [DataMember(Name = "name")]
+                public string Name { get; internal set; }
+                [DataMember(Name = "mac_address")]
+                public string MacAddress { get; internal set; }
+            }
+        }
+
+        public class TransportInfo
+        {
+            [DataMember(Name = "bound_address")]
+            public string BoundAddress { get; internal set; }
+            [DataMember(Name = "publish_address")]
+            public string PublishAddress { get; internal set; }
+        }
+
+        public class HTTPInfo
+        {
+            [DataMember(Name = "bound_address")]
+            public string BoundAddress { get; internal set; }
+            [DataMember(Name = "publish_address")]
+            public string PublishAddress { get; internal set; }
+            [DataMember(Name = "max_content_length")]
+            public string MaxContentLength { get; internal set; }
+            [DataMember(Name = "max_content_length_in_bytes")]
+            public long MaxContentLengthInBytes { get; internal set; }
+        }
+
+        #endregion
+
+        [TestMethod]
+        public void SlowSpinUp()
+        {
+            var json = @"{""cluster_name"":""ml-elastic-cluster"",""nodes"":{""CHtYMjlNRJWGzVGGhxxN-w"":{""name"":""Jimmy Woo"",""transport_address"":""inet[/10.7.3.182:9300]"",""host"":""ny-mlelastic03.ds.stackexchange.com"",""ip"":""10.7.3.182"",""version"":""1.2.1"",""build"":""6c95b75"",""http_address"":""inet[/10.7.3.182:9200]"",""settings"":{""path"":{""data"":""/cassandra/elasticsearch/data"",""work"":""/tmp/elasticsearch"",""home"":""/usr/share/elasticsearch"",""conf"":""/etc/elasticsearch"",""logs"":""/cassandra/elasticsearch/log""},""pidfile"":""/var/run/elasticsearch/elasticsearch.pid"",""cluster"":{""name"":""ml-elastic-cluster""},""script"":{""disable_dynamic"":""false""},""discovery"":{""zen"":{""ping"":{""unicast"":{""hosts"":[""ny-mlelastic01"",""ny-mlelastic02"",""ny-mlelastic03""]},""multicast"":{""enabled"":""false""}}}},""name"":""Jimmy Woo""},""os"":{""refresh_interval_in_millis"":1000,""available_processors"":32,""cpu"":{""vendor"":""Intel"",""model"":""Xeon"",""mhz"":2600,""total_cores"":32,""total_sockets"":1,""cores_per_socket"":32,""cache_size_in_bytes"":20480},""mem"":{""total_in_bytes"":101392883712},""swap"":{""total_in_bytes"":137438945280}},""process"":{""refresh_interval_in_millis"":1000,""id"":36752,""max_file_descriptors"":65535,""mlockall"":false},""jvm"":{""pid"":36752,""version"":""1.7.0_51"",""vm_name"":""Java HotSpot(TM) 64-Bit Server VM"",""vm_version"":""24.51-b03"",""vm_vendor"":""Oracle Corporation"",""start_time_in_millis"":1403026987431,""mem"":{""heap_init_in_bytes"":268435456,""heap_max_in_bytes"":1037959168,""non_heap_init_in_bytes"":24313856,""non_heap_max_in_bytes"":136314880,""direct_max_in_bytes"":1037959168},""gc_collectors"":[""ParNew"",""ConcurrentMarkSweep""],""memory_pools"":[""Code Cache"",""Par Eden Space"",""Par Survivor Space"",""CMS Old Gen"",""CMS Perm Gen""]},""thread_pool"":{""generic"":{""type"":""cached"",""keep_alive"":""30s""},""index"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""200""},""snapshot_data"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""bench"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""get"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""snapshot"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""merge"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""suggest"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""bulk"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""50""},""optimize"":{""type"":""fixed"",""min"":1,""max"":1},""warmer"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""flush"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""search"":{""type"":""fixed"",""min"":96,""max"":96,""queue_size"":""1k""},""percolate"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""management"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""refresh"":{""type"":""scaling"",""min"":1,""max"":10,""keep_alive"":""5m""}},""network"":{""refresh_interval_in_millis"":5000,""primary_interface"":{""address"":""10.7.3.182"",""name"":""em4"",""mac_address"":""B8:CA:3A:70:A8:3D""}},""transport"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0%0:9300]"",""publish_address"":""inet[/10.7.3.182:9300]""},""http"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0%0:9200]"",""publish_address"":""inet[/10.7.3.182:9200]"",""max_content_length_in_bytes"":104857600},""plugins"":[]},""y2D2HmdTTIGSD8zc74Oz7g"":{""name"":""Tony Stark"",""transport_address"":""inet[/10.7.3.181:9300]"",""host"":""ny-mlelastic02.ds.stackexchange.com"",""ip"":""10.7.3.181"",""version"":""1.2.1"",""build"":""6c95b75"",""http_address"":""inet[/10.7.3.181:9200]"",""settings"":{""path"":{""data"":""/cassandra/elasticsearch/data"",""work"":""/tmp/elasticsearch"",""home"":""/usr/share/elasticsearch"",""conf"":""/etc/elasticsearch"",""logs"":""/cassandra/elasticsearch/log""},""pidfile"":""/var/run/elasticsearch/elasticsearch.pid"",""cluster"":{""name"":""ml-elastic-cluster""},""script"":{""disable_dynamic"":""false""},""discovery"":{""zen"":{""ping"":{""unicast"":{""hosts"":[""ny-mlelastic01"",""ny-mlelastic02"",""ny-mlelastic03""]},""multicast"":{""enabled"":""false""}}}},""name"":""Tony Stark""},""os"":{""refresh_interval_in_millis"":1000,""available_processors"":32,""cpu"":{""vendor"":""Intel"",""model"":""Xeon"",""mhz"":2600,""total_cores"":32,""total_sockets"":1,""cores_per_socket"":32,""cache_size_in_bytes"":20480},""mem"":{""total_in_bytes"":101392883712},""swap"":{""total_in_bytes"":137438945280}},""process"":{""refresh_interval_in_millis"":1000,""id"":13069,""max_file_descriptors"":65535,""mlockall"":false},""jvm"":{""pid"":13069,""version"":""1.7.0_51"",""vm_name"":""Java HotSpot(TM) 64-Bit Server VM"",""vm_version"":""24.51-b03"",""vm_vendor"":""Oracle Corporation"",""start_time_in_millis"":1403026959588,""mem"":{""heap_init_in_bytes"":268435456,""heap_max_in_bytes"":1037959168,""non_heap_init_in_bytes"":24313856,""non_heap_max_in_bytes"":136314880,""direct_max_in_bytes"":1037959168},""gc_collectors"":[""ParNew"",""ConcurrentMarkSweep""],""memory_pools"":[""Code Cache"",""Par Eden Space"",""Par Survivor Space"",""CMS Old Gen"",""CMS Perm Gen""]},""thread_pool"":{""generic"":{""type"":""cached"",""keep_alive"":""30s""},""index"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""200""},""snapshot_data"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""bench"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""get"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""snapshot"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""merge"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""suggest"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""bulk"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""50""},""optimize"":{""type"":""fixed"",""min"":1,""max"":1},""warmer"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""flush"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""search"":{""type"":""fixed"",""min"":96,""max"":96,""queue_size"":""1k""},""percolate"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""management"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""refresh"":{""type"":""scaling"",""min"":1,""max"":10,""keep_alive"":""5m""}},""network"":{""refresh_interval_in_millis"":5000,""primary_interface"":{""address"":""10.7.3.181"",""name"":""em4"",""mac_address"":""B8:CA:3A:70:AB:6D""}},""transport"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0%0:9300]"",""publish_address"":""inet[/10.7.3.181:9300]""},""http"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0%0:9200]"",""publish_address"":""inet[/10.7.3.181:9200]"",""max_content_length_in_bytes"":104857600},""plugins"":[]},""b3UvPCMmS-67jl6OWxFShw"":{""name"":""Invisible Girl"",""transport_address"":""inet[/10.7.3.180:9300]"",""host"":""ny-mlelastic01"",""ip"":""10.7.3.180"",""version"":""1.2.1"",""build"":""6c95b75"",""http_address"":""inet[/10.7.3.180:9200]"",""settings"":{""path"":{""data"":""/cassandra/elasticsearch/data"",""work"":""/tmp/elasticsearch"",""home"":""/usr/share/elasticsearch"",""conf"":""/etc/elasticsearch"",""logs"":""/cassandra/elasticsearch/log""},""pidfile"":""/var/run/elasticsearch/elasticsearch.pid"",""cluster"":{""name"":""ml-elastic-cluster""},""script"":{""disable_dynamic"":""false""},""discovery"":{""zen"":{""ping"":{""unicast"":{""hosts"":[""ny-mlelastic01"",""ny-mlelastic02"",""ny-mlelastic03""]},""multicast"":{""enabled"":""false""}}}},""name"":""Invisible Girl""},""os"":{""refresh_interval_in_millis"":1000,""available_processors"":32,""cpu"":{""vendor"":""Intel"",""model"":""Xeon"",""mhz"":2599,""total_cores"":32,""total_sockets"":1,""cores_per_socket"":32,""cache_size_in_bytes"":20480},""mem"":{""total_in_bytes"":101392883712},""swap"":{""total_in_bytes"":137438945280}},""process"":{""refresh_interval_in_millis"":1000,""id"":4764,""max_file_descriptors"":65535,""mlockall"":false},""jvm"":{""pid"":4764,""version"":""1.7.0_51"",""vm_name"":""Java HotSpot(TM) 64-Bit Server VM"",""vm_version"":""24.51-b03"",""vm_vendor"":""Oracle Corporation"",""start_time_in_millis"":1403026924332,""mem"":{""heap_init_in_bytes"":268435456,""heap_max_in_bytes"":1037959168,""non_heap_init_in_bytes"":24313856,""non_heap_max_in_bytes"":136314880,""direct_max_in_bytes"":1037959168},""gc_collectors"":[""ParNew"",""ConcurrentMarkSweep""],""memory_pools"":[""Code Cache"",""Par Eden Space"",""Par Survivor Space"",""CMS Old Gen"",""CMS Perm Gen""]},""thread_pool"":{""generic"":{""type"":""cached"",""keep_alive"":""30s""},""index"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""200""},""snapshot_data"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""bench"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""get"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""snapshot"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""merge"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""suggest"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""bulk"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""50""},""optimize"":{""type"":""fixed"",""min"":1,""max"":1},""warmer"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""flush"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""search"":{""type"":""fixed"",""min"":96,""max"":96,""queue_size"":""1k""},""percolate"":{""type"":""fixed"",""min"":32,""max"":32,""queue_size"":""1k""},""management"":{""type"":""scaling"",""min"":1,""max"":5,""keep_alive"":""5m""},""refresh"":{""type"":""scaling"",""min"":1,""max"":10,""keep_alive"":""5m""}},""network"":{""refresh_interval_in_millis"":5000,""primary_interface"":{""address"":""10.7.3.180"",""name"":""em4"",""mac_address"":""B8:CA:3A:70:D8:A5""}},""transport"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0:9300]"",""publish_address"":""inet[/10.7.3.180:9300]""},""http"":{""bound_address"":""inet[/0:0:0:0:0:0:0:0:9200]"",""publish_address"":""inet[/10.7.3.180:9200]"",""max_content_length_in_bytes"":104857600},""plugins"":[]}}}";
+
+            var timer = new Stopwatch();
+            timer.Start();
+            var result = JSON.Deserialize<ClusterNodeInfo>(json, Options.SecondsSinceUnixEpochExcludeNulls);
+            timer.Stop();
+
+            Assert.IsTrue(timer.ElapsedMilliseconds < 1000, "Took: " + timer.ElapsedMilliseconds + "ms");
+        }
+#endif
 
         //struct _AllFloatsStruct
         //{
