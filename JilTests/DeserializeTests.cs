@@ -4249,6 +4249,25 @@ namespace JilTests
 
             Assert.AreEqual(1, count);
         }
+
+        class _Issue25
+        {
+            public int Id { get; set; }
+            public __Issue25 Foo { get; set; }
+        }
+
+        class __Issue25 {  /* nothing here .. yet */ }
+
+        [TestMethod]
+        public void Issue25()
+        {
+            var json = "{ \"Id\" : 17, \"Foo\" : { \"Bar\" : 17} }";
+
+            var res = JSON.Deserialize<_Issue25>(json);
+
+            Assert.AreEqual(17, res.Id);
+            Assert.IsNotNull(res.Foo);
+        }
 #if !DEBUG
         #region SlowSpinUp Types
 
