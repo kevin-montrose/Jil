@@ -842,7 +842,13 @@ namespace Jil.Common
                 var curType = pending[0];
                 pending.RemoveAt(0);
 
-                if (curType.IsPrimitiveType()) continue;
+                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+
+                if (curType.IsNullableType())
+                {
+                    pending.Add(Nullable.GetUnderlyingType(curType));
+                    continue;
+                }
 
                 if (curType.IsListType())
                 {
