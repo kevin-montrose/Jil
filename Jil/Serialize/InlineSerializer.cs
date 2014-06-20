@@ -2978,6 +2978,10 @@ namespace Jil.Serialize
             foreach (var type in recursiveTypes)
             {
                 var cacheType = RecusionLookupType.MakeGenericType(type);
+
+                var loadMtd = cacheType.GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                loadMtd.Invoke(null, new object[0]);
+
                 var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
                 var loc = Emit.DeclareLocal(thunk.FieldType);
