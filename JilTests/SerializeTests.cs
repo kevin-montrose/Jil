@@ -6473,5 +6473,24 @@ namespace JilTests
                 Assert.AreEqual("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
             }
         }
+
+        class _ReuseTypeSerializers1
+        {
+            public class _ReuseTypeSerializers2
+            {
+                public string A { get; set; }
+                public int B { get; set; }
+            }
+
+            public _ReuseTypeSerializers2 A { get; set; }
+            public _ReuseTypeSerializers2 B { get; set; }
+        }
+
+        [TestMethod]
+        public void ReuseTypeSerializers()
+        {
+            var str = JSON.Serialize(new _ReuseTypeSerializers1 { A = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A="hello", B=123}, B = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "world", B=456 } });
+            Assert.AreEqual("{\"A\":{\"B\":123,\"A\":\"hello\"},\"B\":{\"B\":456,\"A\":\"world\"}}", str);
+        }
     }
 }

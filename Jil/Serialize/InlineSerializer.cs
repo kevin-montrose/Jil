@@ -3016,7 +3016,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildObjectWithNewDelegate(bool doVerify)
         {
-            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
              Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
@@ -3046,9 +3046,23 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
+        HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
+        {
+            List<Type> needPriming;
+            var ret = forType.FindRecursiveOrReusedTypes(out needPriming);
+
+            foreach (var primeType in needPriming)
+            {
+                var loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                loadMtd.Invoke(null, new object[0]);
+            }
+
+            return ret;
+        }
+
         Action<TextWriter, ForType, int> BuildListWithNewDelegate(bool doVerify)
         {
-            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
@@ -3064,7 +3078,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate(bool doVerify)
         {
-            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
@@ -3080,7 +3094,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(bool doVerify)
         {
-            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 
@@ -3114,7 +3128,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildNullableWithNewDelegate(bool doVerify)
         {
-            var recursiveTypes = typeof(ForType).FindRecursiveTypes();
+            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
             Emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: doVerify);
 

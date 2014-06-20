@@ -788,5 +788,77 @@ namespace Jil.Common
 
             return ret;
         }
+
+        public static List<Type> FindReusedTypes(Type rootType)
+        {
+            var pending = new Stack<Type>();
+            pending.Push(rootType);
+
+            var counts = new Dictionary<Type, int>();
+
+            Action<Type> pushIfNew =
+                type =>
+                {
+                    if (!counts.ContainsKey(type))
+                    {
+                        pending.Push(type);
+                    }
+                };
+
+            while (pending.Count > 0)
+            {
+                var curType = pending.Pop();
+
+                // these can't have members, bail
+                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+
+                if (curType.IsNullableType())
+                {
+                    var underlyingType = Nullable.GetUnderlyingType(curType);
+                    pushIfNew(underlyingType);
+
+                    continue;
+                }
+
+                if (curType.IsListType())
+                {
+                    var listI = curType.GetListInterface();
+                    var valType = listI.GetGenericArguments()[0];
+                    pushIfNew(valType);
+                    continue;
+                }
+
+                if (curType.IsDictionaryType())
+                {
+                    var dictI = curType.GetDictionaryInterface();
+                    var valType = dictI.GetGenericArguments()[1];
+                    pushIfNew(valType);
+                    continue;
+                }
+
+                if (curType.IsEnumerableType())
+                {
+                    var enumI = curType.GetEnumerableInterface();
+                    var valType = enumI.GetGenericArguments()[0];
+                    pushIfNew(valType);
+                    continue;
+                }
+
+                if (!counts.ContainsKey(curType)) counts[curType] = 0;
+                counts[curType]++;
+
+                foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    pushIfNew(field.FieldType);
+                }
+
+                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                {
+                    pushIfNew(prop.PropertyType);
+                }
+            }
+
+            return counts.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
+        }
     }
 }

@@ -1917,11 +1917,25 @@ namespace Jil.Deserialize
             ReadObject(forType);
         }
 
+        HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
+        {
+            List<Type> needPriming;
+            var ret = forType.FindRecursiveOrReusedTypes(out needPriming);
+
+            foreach (var primeType in needPriming)
+            {
+                var loadMtd = this.RecursionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                loadMtd.Invoke(null, new object[0]);
+            }
+
+            return ret;
+        }
+
         public Func<TextReader, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
-            RecursiveTypes = forType.FindRecursiveTypes();
+            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
             bool doVerify;
 #if DEBUG
