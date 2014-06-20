@@ -598,5 +598,60 @@ namespace JilTests
 
             Assert.IsTrue(success > fails);
         }
+
+        class _FindRecursiveTypes1
+        {
+            public _FindRecursiveTypes1 A { get; set; }
+            public string B { get; set; }
+        }
+
+        class _FindRecursiveTypes2
+        {
+            public class _FindRecursiveTypes3
+            {
+                public _FindRecursiveTypes3 A { get; set; }
+                public string B { get; set; }
+            }
+
+            public _FindRecursiveTypes3 A { get; set; }
+            public string B { get; set; }
+        }
+
+        class _FindRecursiveTypes4
+        {
+            public class _FindRecursiveTypes5
+            {
+                public _FindRecursiveTypes4 A { get; set; }
+                public int B { get; set; }
+            }
+
+            public class _FindRecursiveTypes6
+            {
+                public _FindRecursiveTypes4 A { get; set; }
+                public _FindRecursiveTypes5 B { get; set; }
+                public _FindRecursiveTypes6 C { get; set; }
+            }
+
+            public _FindRecursiveTypes5 A { get; set; }
+            public int B { get; set; }
+            public _FindRecursiveTypes6 C { get; set; }
+        }
+
+        [TestMethod]
+        public void FindRecursiveTypes()
+        {
+            var t1 = Utils.FindRecursiveTypes(typeof(_FindRecursiveTypes1)).ToList();
+            Assert.AreEqual(1, t1.Count);
+            Assert.AreEqual(typeof(_FindRecursiveTypes1), t1[0]);
+
+            var t2 = Utils.FindRecursiveTypes(typeof(_FindRecursiveTypes2)).ToList();
+            Assert.AreEqual(1, t2.Count);
+            Assert.AreEqual(typeof(_FindRecursiveTypes2._FindRecursiveTypes3), t2[0]);
+
+            var t3 = Utils.FindRecursiveTypes(typeof(_FindRecursiveTypes4)).ToList();
+            Assert.AreEqual(2, t3.Count);
+            Assert.IsTrue(t3.Any(t => t == typeof(_FindRecursiveTypes4)));
+            Assert.IsTrue(t3.Any(t => t == typeof(_FindRecursiveTypes4._FindRecursiveTypes6)));
+        }
     }
 }

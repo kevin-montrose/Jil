@@ -660,5 +660,133 @@ namespace Jil.Common
 
             return cached(inner);
         }
+
+        class CycleDetector<T>
+        {
+            public T Value { get; set; }
+
+            List<CycleDetector<T>> Childern = new List<CycleDetector<T>>();
+
+            public CycleDetector(T value)
+            {
+                Value = value;
+            }
+
+            public void AddChild(CycleDetector<T> child)
+            {
+                Childern.Add(child);
+            }
+
+            bool CanReachImpl(T lookingFor, HashSet<T> alreadySeen)
+            {
+                if (lookingFor.Equals(Value)) return true;
+
+                foreach (var child in Childern)
+                {
+                    // loop, but not the one we're looking for...
+                    if (alreadySeen.Contains(child.Value)) continue;
+
+                    var copy = new HashSet<T>(alreadySeen);
+                    copy.Add(Value);
+
+                    if (child.CanReachImpl(lookingFor, copy)) return true;
+                }
+
+                return false;
+            }
+
+            public bool CanReach(CycleDetector<T> otherNode)
+            {
+                return CanReachImpl(otherNode.Value, new HashSet<T>());
+            }
+        }
+
+        public static HashSet<Type> FindRecursiveTypes(Type rootType)
+        {
+            var lookup = new Dictionary<Type, CycleDetector<Type>>();
+
+            var pending = new Stack<CycleDetector<Type>>();
+            var ret = new HashSet<Type>();
+
+            Action<Type, CycleDetector<Type>> addIfReachable =
+                (seenType, curNode) =>
+                {
+                    CycleDetector<Type> olderNode;
+                    if (lookup.TryGetValue(seenType, out olderNode))
+                    {
+                        if (olderNode.CanReach(curNode))
+                        {
+                            ret.Add(seenType);
+                        }
+                    }
+                    else
+                    {
+                        olderNode = new CycleDetector<Type>(seenType);
+
+                        if (curNode != null)
+                        {
+                            curNode.AddChild(olderNode);
+                        }
+                        
+                        lookup[seenType] = olderNode;
+                        pending.Push(olderNode);
+                    }
+                };
+
+            addIfReachable(rootType, null);
+
+            while (pending.Count > 0)
+            {
+                var curNode = pending.Pop();
+                var curType = curNode.Value;
+
+                // these can't have members, bail
+                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+
+                if (curType.IsNullableType())
+                {
+                    var underlyingType = Nullable.GetUnderlyingType(curType);
+                    addIfReachable(underlyingType, curNode);
+
+                    continue;
+                }
+
+                if (curType.IsListType())
+                {
+                    var listI = curType.GetListInterface();
+                    var valType = listI.GetGenericArguments()[0];
+                    addIfReachable(valType, curNode);
+                    continue;
+                }
+
+                if (curType.IsDictionaryType())
+                {
+                    var dictI = curType.GetDictionaryInterface();
+                    var valType = dictI.GetGenericArguments()[1];
+                    addIfReachable(valType, curNode);
+                    continue;
+                }
+
+                if (curType.IsEnumerableType())
+                {
+                    var enumI = curType.GetEnumerableInterface();
+                    var valType = enumI.GetGenericArguments()[0];
+                    addIfReachable(valType, curNode);
+                    continue;
+                }
+
+                foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    addIfReachable(field.FieldType, curNode);
+                }
+
+                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                {
+                    addIfReachable(prop.PropertyType, curNode);
+                }
+            }
+
+            return ret;
+        }
     }
 }
