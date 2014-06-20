@@ -968,9 +968,6 @@ namespace Jil.Deserialize
         void LoadRecursiveTypeDelegate(Type recursiveType)
         {
             var typeCache = RecursionLookupType.MakeGenericType(recursiveType);
-            var loadMtd = typeCache.GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
-            loadMtd.Invoke(null, new object[0]);
-
             var thunk = typeCache.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
             Emit.LoadField(thunk);
         }
