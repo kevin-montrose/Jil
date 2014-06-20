@@ -661,18 +661,18 @@ namespace Jil.Common
             return cached(inner);
         }
 
-        class CycleDetector<T>
-        {
+        class Node<T>
+        { 
             public T Value { get; set; }
 
-            List<CycleDetector<T>> Childern = new List<CycleDetector<T>>();
+            List<Node<T>> Childern = new List<Node<T>>();
 
-            public CycleDetector(T value)
+            public Node(T value)
             {
                 Value = value;
             }
 
-            public void AddChild(CycleDetector<T> child)
+            public void AddChild(Node<T> child)
             {
                 Childern.Add(child);
             }
@@ -695,7 +695,7 @@ namespace Jil.Common
                 return false;
             }
 
-            public bool CanReach(CycleDetector<T> otherNode)
+            public bool CanReach(Node<T> otherNode)
             {
                 return CanReachImpl(otherNode.Value, new HashSet<T>());
             }
@@ -703,15 +703,15 @@ namespace Jil.Common
 
         public static HashSet<Type> FindRecursiveTypes(Type rootType)
         {
-            var lookup = new Dictionary<Type, CycleDetector<Type>>();
+            var lookup = new Dictionary<Type, Node<Type>>();
 
-            var pending = new Stack<CycleDetector<Type>>();
+            var pending = new Stack<Node<Type>>();
             var ret = new HashSet<Type>();
 
-            Action<Type, CycleDetector<Type>> addIfReachable =
+            Action<Type, Node<Type>> addIfReachable =
                 (seenType, curNode) =>
                 {
-                    CycleDetector<Type> olderNode;
+                    Node<Type> olderNode;
                     if (lookup.TryGetValue(seenType, out olderNode))
                     {
                         if (olderNode.CanReach(curNode))
@@ -721,7 +721,7 @@ namespace Jil.Common
                     }
                     else
                     {
-                        olderNode = new CycleDetector<Type>(seenType);
+                        olderNode = new Node<Type>(seenType);
 
                         if (curNode != null)
                         {
