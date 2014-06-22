@@ -29,11 +29,14 @@ namespace Jil.Common
 
     class FlagsEnumCombiner
     {
-        static readonly Hashtable Cache = new Hashtable();
+        delegate void CombineInPlaceDelegate(object newFlag, object accumFlag);
+
+        static readonly Hashtable CombineCache = new Hashtable();
+        static readonly Hashtable CombineInPlaceCache = new Hashtable();
 
         public static object Combine(Type enumType, object a, object b)
         {
-            var cached = (Func<object, object, object>)Cache[enumType];
+            var cached = (Func<object, object, object>)CombineCache[enumType];
             if (cached != null)
             {
                 return cached(a, b);
@@ -50,16 +53,51 @@ namespace Jil.Common
 
             var newDel = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
-            lock (Cache)
+            lock (CombineCache)
             {
-                cached = (Func<object, object, object>)Cache[enumType];
+                cached = (Func<object, object, object>)CombineCache[enumType];
                 if (cached == null)
                 {
-                    Cache[enumType] = cached = newDel;
+                    CombineCache[enumType] = cached = newDel;
                 }
             }
 
             return cached(a, b);
+        }
+
+        public static void CombineInPlace(Type enumType, object a, object b)
+        {
+            var cached = (CombineInPlaceDelegate)CombineInPlaceCache[enumType];
+            if (cached != null)
+            {
+                cached(a, b);
+                return;
+            }
+
+            var emit = Emit<CombineInPlaceDelegate>.NewDynamicMethod(doVerify: Utils.DoVerify);
+            emit.LoadArgument(1);               // object
+            emit.Unbox(enumType);               // enum&
+            emit.LoadArgument(0);               // enum& object
+            emit.UnboxAny(enumType);            // enum& enum
+            emit.LoadArgument(1);               // enum& enum object
+            emit.UnboxAny(enumType);            // enum& enum enum
+            emit.Or();                          // enum& enum
+            emit.StoreObject(enumType);         // --empty--
+            emit.Return();
+
+            var newDel = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
+
+            lock (CombineCache)
+            {
+                cached = (CombineInPlaceDelegate)CombineInPlaceCache[enumType];
+                if (cached == null)
+                {
+                    CombineInPlaceCache[enumType] = cached = newDel;
+                }
+            }
+
+            cached(a, b);
+            return;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject : IDynamicMetaObjectProvider
     {
+        public static bool UseInPlaceFlagsParsing = true;
+
         public DynamicMetaObject GetMetaObject(Expression exp)
         {
             return new JsonMetaObject(this, exp);
@@ -1241,6 +1243,11 @@ namespace Jil.DeserializeDynamic
 
         bool ParseFlagsEnum(Type enumType, out object result)
         {
+            if (UseInPlaceFlagsParsing)
+            {
+                return ParseFlagsEnumInPlace(enumType, out result);
+            }
+
             result = Activator.CreateInstance(enumType);
 
             var ix = 0;
@@ -1260,6 +1267,43 @@ namespace Jil.DeserializeDynamic
                 }
 
                 result = FlagsEnumCombiner.Combine(enumType, result, parsed);
+
+                ix = iy;
+
+                if (ix != -1)
+                {
+                    // skip ,
+                    ix++;
+
+                    // skip very specific whitespace
+                    while (StringValue[ix] == ' ' && ix < StringValue.Length) ix++;
+                }
+            }
+
+            return true;
+        }
+
+        bool ParseFlagsEnumInPlace(Type enumType, out object result)
+        {
+            result = Activator.CreateInstance(enumType);
+
+            var ix = 0;
+            int iy;
+            while (ix != -1)
+            {
+                iy = StringValue.IndexOf(',', ix);
+                var takeTil = iy != -1 ? iy : StringValue.Length;
+
+                var asStr = StringValue.Substring(ix, takeTil - ix);
+
+                object parsed;
+                if (!EnumValues.TryParse(enumType, asStr, out parsed))
+                {
+                    result = null;
+                    return false;
+                }
+
+                FlagsEnumCombiner.CombineInPlace(enumType, parsed, result);
 
                 ix = iy;
 
