@@ -15,14 +15,8 @@ namespace Jil.Common
 
         static FlagsEnumCombiner()
         {
-#if DEBUG
-            var doVerify = true;
-#else
-            var doVerify = false;
-#endif
-
             {
-                var emit = Emit<Func<TEnum, TEnum, TEnum>>.NewDynamicMethod(doVerify: doVerify);
+                var emit = Emit<Func<TEnum, TEnum, TEnum>>.NewDynamicMethod(doVerify: Utils.DoVerify);
                 emit.LoadArgument(0);       // enum
                 emit.LoadArgument(1);       // enum enum
                 emit.Or();                  // enum
@@ -45,13 +39,7 @@ namespace Jil.Common
                 return cached(a, b);
             }
 
-#if DEBUG
-            var doVerify = true;
-#else
-            var doVerify = false;
-#endif
-
-            var emit = Emit<Func<object, object, object>>.NewDynamicMethod(doVerify: doVerify);
+            var emit = Emit<Func<object, object, object>>.NewDynamicMethod(doVerify: Utils.DoVerify);
             emit.LoadArgument(0);       // object
             emit.UnboxAny(enumType);    // enum
             emit.LoadArgument(1);       // enum object

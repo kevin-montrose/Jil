@@ -13,6 +13,11 @@ namespace Jil.Common
 {
     partial class Utils
     {
+#if DEBUG
+        public const bool DoVerify = true;
+#else
+        public const bool DoVerify = false;
+#endif
         public const OptimizationOptions DelegateOptimizationOptions = OptimizationOptions.All & ~OptimizationOptions.EnableBranchPatching;
 
         private static readonly Dictionary<int, OpCode> OneByteOps;

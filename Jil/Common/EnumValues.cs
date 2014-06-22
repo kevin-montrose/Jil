@@ -42,13 +42,7 @@ namespace Jil.Common
             var invoke = (TryParseProxy)Cache[enumType];
             if (invoke != null) return invoke(str, out ret);
 
-#if DEBUG
-            var doVerify = true;
-#else
-            var doVerify = false;
-#endif
-
-            var emit = Emit<TryParseProxy>.NewDynamicMethod(doVerify: doVerify);
+            var emit = Emit<TryParseProxy>.NewDynamicMethod(doVerify: Utils.DoVerify);
             var specific = typeof(EnumValues<>).MakeGenericType(enumType).GetMethod("TryParse", BindingFlags.Public | BindingFlags.Static);
 
             using (var loc = emit.DeclareLocal(enumType))

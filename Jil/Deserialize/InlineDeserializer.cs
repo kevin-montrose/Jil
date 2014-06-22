@@ -1937,14 +1937,7 @@ namespace Jil.Deserialize
 
             RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
-            bool doVerify;
-#if DEBUG
-            doVerify = true;
-#else
-            doVerify = false;
-#endif
-
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: doVerify);
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: Utils.DoVerify);
 
             AddGlobalVariables();
 
