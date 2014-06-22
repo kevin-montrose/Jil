@@ -1226,7 +1226,7 @@ namespace JilTests
         public void UseFlagsEnumMakeDefault()
         {
             Func<TextReader, _UseFlagsEnumMakeDefault> makeDefault;
-            Func<TextReader, _UseFlagsEnumMakeDefault> activator;
+            Func<TextReader, _UseFlagsEnumMakeDefault> activator; 
 
             makeDefault =
                 reader =>
