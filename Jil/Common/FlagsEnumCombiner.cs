@@ -31,39 +31,7 @@ namespace Jil.Common
     {
         delegate void CombineInPlaceDelegate(object newFlag, object accumFlag);
 
-        static readonly Hashtable CombineCache = new Hashtable();
         static readonly Hashtable CombineInPlaceCache = new Hashtable();
-
-        public static object Combine(Type enumType, object a, object b)
-        {
-            var cached = (Func<object, object, object>)CombineCache[enumType];
-            if (cached != null)
-            {
-                return cached(a, b);
-            }
-
-            var emit = Emit<Func<object, object, object>>.NewDynamicMethod(doVerify: Utils.DoVerify);
-            emit.LoadArgument(0);       // object
-            emit.UnboxAny(enumType);    // enum
-            emit.LoadArgument(1);       // enum object
-            emit.UnboxAny(enumType);    // enum enum
-            emit.Or();                  // enum
-            emit.Box(enumType);         // object
-            emit.Return();              // --empty--
-
-            var newDel = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
-
-            lock (CombineCache)
-            {
-                cached = (Func<object, object, object>)CombineCache[enumType];
-                if (cached == null)
-                {
-                    CombineCache[enumType] = cached = newDel;
-                }
-            }
-
-            return cached(a, b);
-        }
 
         public static void CombineInPlace(Type enumType, object a, object b)
         {
@@ -87,7 +55,7 @@ namespace Jil.Common
 
             var newDel = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
-            lock (CombineCache)
+            lock (CombineInPlaceCache)
             {
                 cached = (CombineInPlaceDelegate)CombineInPlaceCache[enumType];
                 if (cached == null)

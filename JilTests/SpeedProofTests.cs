@@ -233,60 +233,6 @@ namespace JilTests
             bTimeMS = bTimer.ElapsedMilliseconds;
         }
 
-        [Flags]
-        enum _UseInPlaceFlagsParsing
-        {
-            Foo = 1,
-            Bar = 2,
-            Fizz = 4,
-            Bazz = 8,
-            Buzz = 16
-        }
-
-        [TestMethod]
-        public void UseInPlaceFlagsParsing()
-        {
-            Func<TextReader, _UseInPlaceFlagsParsing> inPlace;
-            Func<TextReader, _UseInPlaceFlagsParsing> boxy;
-
-            inPlace =
-                reader =>
-                {
-                    var old = Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing;
-                    Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing = true;
-                    var ret = JSON.DeserializeDynamic(reader);
-                    Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing = old;
-
-                    return (_UseInPlaceFlagsParsing)ret;
-                };
-
-            boxy =
-                reader =>
-                {
-                    var old = Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing;
-                    Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing = false;
-                    var ret = JSON.DeserializeDynamic(reader);
-                    Jil.DeserializeDynamic.JsonObject.UseInPlaceFlagsParsing = old;
-
-                    return (_UseInPlaceFlagsParsing)ret;
-                };
-
-            var rand = new Random(133953257);
-
-            var toSerialize = new List<_UseInPlaceFlagsParsing>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(_RandFlagEnum<_UseInPlaceFlagsParsing>(rand));
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double inPlaceTime, boxyTime;
-            CompareTimes(toSerialize, Jil.Options.Default, inPlace, boxy, out inPlaceTime, out boxyTime);
-
-            Assert.IsTrue(inPlaceTime < boxyTime, "inPlaceTime = " + inPlaceTime + ", boxyTime = " + boxyTime);
-        }
-
         // These tests make *no sense* in debug
 #if !DEBUG
 
