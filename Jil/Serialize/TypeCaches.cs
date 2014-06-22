@@ -13,7 +13,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -38,7 +38,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -63,7 +63,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -88,7 +88,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -113,7 +113,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -138,7 +138,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -163,7 +163,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -188,7 +188,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -213,7 +213,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -238,7 +238,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -263,7 +263,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -288,7 +288,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -313,7 +313,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -338,7 +338,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -363,7 +363,7 @@ namespace Jil.Serialize
     static class NewtonsoftStyleExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -388,7 +388,7 @@ namespace Jil.Serialize
     static class NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -413,7 +413,7 @@ namespace Jil.Serialize
     static class MillisecondsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -438,7 +438,7 @@ namespace Jil.Serialize
     static class MillisecondsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -463,7 +463,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -488,7 +488,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -513,7 +513,7 @@ namespace Jil.Serialize
     static class MillisecondsExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -538,7 +538,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -563,7 +563,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -588,7 +588,7 @@ namespace Jil.Serialize
     static class MillisecondsExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -613,7 +613,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -638,7 +638,7 @@ namespace Jil.Serialize
     static class MillisecondsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -663,7 +663,7 @@ namespace Jil.Serialize
     static class MillisecondsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -688,7 +688,7 @@ namespace Jil.Serialize
     static class MillisecondsExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -713,7 +713,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -738,7 +738,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -763,7 +763,7 @@ namespace Jil.Serialize
     static class MillisecondsExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -788,7 +788,7 @@ namespace Jil.Serialize
     static class MillisecondsPrettyPrintExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -813,7 +813,7 @@ namespace Jil.Serialize
     static class SecondsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -838,7 +838,7 @@ namespace Jil.Serialize
     static class SecondsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -863,7 +863,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -888,7 +888,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -913,7 +913,7 @@ namespace Jil.Serialize
     static class SecondsExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -938,7 +938,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -963,7 +963,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -988,7 +988,7 @@ namespace Jil.Serialize
     static class SecondsExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1013,7 +1013,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1038,7 +1038,7 @@ namespace Jil.Serialize
     static class SecondsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1063,7 +1063,7 @@ namespace Jil.Serialize
     static class SecondsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1088,7 +1088,7 @@ namespace Jil.Serialize
     static class SecondsExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1113,7 +1113,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1138,7 +1138,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1163,7 +1163,7 @@ namespace Jil.Serialize
     static class SecondsExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1188,7 +1188,7 @@ namespace Jil.Serialize
     static class SecondsPrettyPrintExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1213,7 +1213,7 @@ namespace Jil.Serialize
     static class ISO8601TypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1238,7 +1238,7 @@ namespace Jil.Serialize
     static class ISO8601JSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1263,7 +1263,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1288,7 +1288,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1313,7 +1313,7 @@ namespace Jil.Serialize
     static class ISO8601ExcludeNullsJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1338,7 +1338,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintJSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1363,7 +1363,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1388,7 +1388,7 @@ namespace Jil.Serialize
     static class ISO8601ExcludeNullsInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1413,7 +1413,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1438,7 +1438,7 @@ namespace Jil.Serialize
     static class ISO8601JSONPInheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1463,7 +1463,7 @@ namespace Jil.Serialize
     static class ISO8601InheritedTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1488,7 +1488,7 @@ namespace Jil.Serialize
     static class ISO8601ExcludeNullsJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1513,7 +1513,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintJSONPTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1538,7 +1538,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1563,7 +1563,7 @@ namespace Jil.Serialize
     static class ISO8601ExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1588,7 +1588,7 @@ namespace Jil.Serialize
     static class ISO8601PrettyPrintExcludeNullsTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Action<TextWriter, T, int> Thunk;
+        public static volatile Action<TextWriter, T, int> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()

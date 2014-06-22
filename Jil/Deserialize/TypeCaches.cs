@@ -10,7 +10,7 @@ namespace Jil.Deserialize
     static class NewtonsoftStyleTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -35,7 +35,7 @@ namespace Jil.Deserialize
     static class NewtonsoftStyleNoHashingTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -60,7 +60,7 @@ namespace Jil.Deserialize
     static class MillisecondStyleTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -85,7 +85,7 @@ namespace Jil.Deserialize
     static class MillisecondStyleNoHashingTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -110,7 +110,7 @@ namespace Jil.Deserialize
     static class SecondStyleTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -135,7 +135,7 @@ namespace Jil.Deserialize
     static class SecondStyleNoHashingTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -160,7 +160,7 @@ namespace Jil.Deserialize
     static class ISO8601StyleTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
@@ -185,7 +185,7 @@ namespace Jil.Deserialize
     static class ISO8601StyleNoHashingTypeCache<T>
     {
         static readonly object InitLock = new object();
-        public static Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
