@@ -31,7 +31,90 @@ namespace Jil.Common
     {
         delegate void CombineInPlaceDelegate(object newFlag, object accumFlag);
 
+        static readonly Hashtable MakeDefaultCache = new Hashtable();
         static readonly Hashtable CombineInPlaceCache = new Hashtable();
+
+        static void LoadConstantOfType(Emit<Func<object>> emit, object val, Type type)
+        {
+            if (type == typeof(byte))
+            {
+                emit.LoadConstant((byte)val);
+                return;
+            }
+
+            if (type == typeof(sbyte))
+            {
+                emit.LoadConstant((sbyte)val);
+                return;
+            }
+
+            if (type == typeof(short))
+            {
+                emit.LoadConstant((short)val);
+                return;
+            }
+
+            if (type == typeof(ushort))
+            {
+                emit.LoadConstant((ushort)val);
+                return;
+            }
+
+            if (type == typeof(int))
+            {
+                emit.LoadConstant((int)val);
+                return;
+            }
+
+            if (type == typeof(uint))
+            {
+                emit.LoadConstant((uint)val);
+                return;
+            }
+
+            if (type == typeof(long))
+            {
+                emit.LoadConstant((long)val);
+                return;
+            }
+
+            if (type == typeof(ulong))
+            {
+                emit.LoadConstant((ulong)val);
+                return;
+            }
+
+            throw new ConstructionException("Unexpected type: " + type);
+        }
+
+        public static object MakeDefault(Type enumType)
+        {
+            var cached = (Func<object>)MakeDefaultCache[enumType];
+            if (cached != null)
+            {
+                return cached();
+            }
+
+            var defaultVal = Activator.CreateInstance(enumType);
+            var emit = Emit<Func<object>>.NewDynamicMethod(doVerify: Utils.DoVerify);
+            
+            LoadConstantOfType(emit, defaultVal, Enum.GetUnderlyingType(enumType));
+            emit.Box(enumType);
+            emit.Return();
+
+            var newDel = emit.CreateDelegate();
+
+            lock (MakeDefaultCache)
+            {
+                cached = (Func<object>)MakeDefaultCache[enumType];
+                if (cached == null)
+                {
+                    MakeDefaultCache[enumType] = cached = newDel;
+                }
+            }
+
+            return cached();
+        }
 
         public static void CombineInPlace(Type enumType, object a, object b)
         {
@@ -65,7 +148,6 @@ namespace Jil.Common
             }
 
             cached(a, b);
-            return;
         }
     }
 }

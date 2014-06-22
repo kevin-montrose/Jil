@@ -1239,9 +1239,18 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
+        public static bool UseFlagsEnumMakeDefault = true;
+
         bool ParseFlagsEnum(Type enumType, out object result)
         {
-            result = Activator.CreateInstance(enumType);
+            if (UseFlagsEnumMakeDefault)
+            {
+                result = FlagsEnumCombiner.MakeDefault(enumType);
+            }
+            else
+            {
+                result = Activator.CreateInstance(enumType);
+            }
 
             var ix = 0;
             int iy;
