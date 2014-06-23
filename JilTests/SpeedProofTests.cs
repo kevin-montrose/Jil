@@ -1210,61 +1210,6 @@ namespace JilTests
 
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
         }
-
-        [Flags]
-        enum _UseFlagsEnumMakeDefault
-        {
-            Hello = 1,
-            World = 2,
-            Fizz = 4,
-            Buzz = 8,
-            Baz = 16,
-            Bar = 32
-        }
-
-        [TestMethod]
-        public void UseFlagsEnumMakeDefault()
-        {
-            Func<TextReader, _UseFlagsEnumMakeDefault> makeDefault;
-            Func<TextReader, _UseFlagsEnumMakeDefault> activator; 
-
-            makeDefault =
-                reader =>
-                {
-                    var old = Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault;
-                    Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault = true;
-                    var ret = JSON.DeserializeDynamic(reader);
-                    Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault = old;
-
-                    return (_UseFlagsEnumMakeDefault)ret;
-                };
-
-            activator =
-                reader =>
-                {
-                    var old = Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault;
-                    Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault = false;
-                    var ret = JSON.DeserializeDynamic(reader);
-                    Jil.DeserializeDynamic.JsonObject.UseFlagsEnumMakeDefault = old;
-
-                    return (_UseFlagsEnumMakeDefault)ret;
-                };
-
-            var rand = new Random(54106363);
-
-            var toSerialize = new List<_UseFlagsEnumMakeDefault>();
-            for (var i = 0; i < 4000; i++)
-            {
-                toSerialize.Add(_RandFlagEnum<_UseFlagsEnumMakeDefault>(rand));
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double makeDefaultTime, activatorTime;
-            CompareTimes(toSerialize, Jil.Options.Default, makeDefault, activator, out makeDefaultTime, out activatorTime);
-
-            Assert.IsTrue(makeDefaultTime < activatorTime, "makeDefaultTime = " + makeDefaultTime + ", activatorTime = " + activatorTime);
-        }
 #endif
     }
 }
