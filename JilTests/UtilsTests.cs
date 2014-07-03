@@ -691,5 +691,23 @@ namespace JilTests
             Assert.AreEqual(1, recurs.Count);
             Assert.AreEqual(typeof(_Inner2), recurs[0]);
         }
+
+        [TestMethod]
+        public void FindReusedTypes_ListList()
+        {
+            var reused = Utils.FindReusedTypes(typeof(_Outer<_Inner>));
+            Assert.AreEqual(2, reused.Count);
+            Assert.IsTrue(reused.Any(r => r == typeof(_Inner)));
+            Assert.IsTrue(reused.Any(r => r == typeof(List<_Inner>)));
+        }
+
+        [TestMethod]
+        public void FindReusedTypes_DictDict()
+        {
+            var reused = Utils.FindReusedTypes(typeof(_Outer2<_Inner2>));
+            Assert.AreEqual(2, reused.Count);
+            Assert.IsTrue(reused.Any(r => r == typeof(_Inner2)));
+            Assert.IsTrue(reused.Any(r => r == typeof(Dictionary<string, _Inner2>)));
+        }
     }
 }

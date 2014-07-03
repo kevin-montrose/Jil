@@ -833,7 +833,7 @@ namespace Jil.Common
             Action<Type> pushIfNew =
                 type =>
                 {
-                    if (!counts.ContainsKey(type))
+                    if (!counts.ContainsKey(type) || counts[type] < 2)
                     {
                         pending.Push(type);
                     }
@@ -845,6 +845,9 @@ namespace Jil.Common
 
                 // these can't have members, bail
                 if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+
+                if (!counts.ContainsKey(curType)) counts[curType] = 0;
+                counts[curType]++;
 
                 if (curType.IsNullableType())
                 {
@@ -877,9 +880,6 @@ namespace Jil.Common
                     pushIfNew(valType);
                     continue;
                 }
-
-                if (!counts.ContainsKey(curType)) counts[curType] = 0;
-                counts[curType]++;
 
                 foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
                 {
