@@ -2150,6 +2150,14 @@ namespace JilTests
             public string AlwaysNull { get; set; }
         }
 
+        public class _ConditionalSerialization4
+        {
+            [IgnoreDataMember]
+            public string Foo;
+
+            public string Bar;
+        }
+
         [TestMethod]
         public void ConditionalSerialization()
         {
@@ -2231,6 +2239,14 @@ namespace JilTests
                 {
                     Assert.Fail("a member with DataMemberIgnoreAttribute was serialized: " + res);
                 }
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new _ConditionalSerialization4 { Foo = "Ignored", Bar = "Included" };
+                JSON.Serialize(obj, str);
+                var res = str.ToString();
+                Assert.AreEqual("{\"Bar\":\"Included\"}", res);
             }
         }
 
