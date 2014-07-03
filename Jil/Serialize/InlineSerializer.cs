@@ -218,8 +218,9 @@ namespace Jil.Serialize
 
         private static bool ShouldSerializeMember(MemberInfo memberInfo)
         {
-            var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes(typeof(IgnoreDataMemberAttribute)) ?? new Attribute[0];
-            return !ignoreDataMemberAttributes.Any();
+            var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
+
+            return ignoreDataMemberAttributes.Count() == 0;
         }
 
         void WriteConstantMember(MemberInfo member, bool prependComma)
