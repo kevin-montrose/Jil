@@ -6526,5 +6526,42 @@ namespace JilTests
             var str = JSON.Serialize(new _ReuseTypeSerializers1 { A = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A="hello", B=123}, B = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "world", B=456 } });
             Assert.AreEqual("{\"A\":{\"B\":123,\"A\":\"hello\"},\"B\":{\"B\":456,\"A\":\"world\"}}", str);
         }
+
+        public class _ApiResult<T>
+        {
+            public int? total { get; private set; }
+            public int? page_size { get; private set; }
+            public int? page { get; private set; }
+            public string type { get; private set; }
+            public List<T> items { get; internal set; }
+            public int? quota_remaining { get; private set; }
+            public int? quota_max { get; private set; }
+            public int? backoff { get; private set; }
+            public int? error_id { get; private set; }
+            public string error_name { get; private set; }
+            public string error_message { get; private set; }
+            public bool? has_more { get; private set; }
+        }
+
+        class _FlagOption
+        {
+            public int? option_id { get; set; }
+            public bool? requires_comment { get; set; }
+            public bool? requires_site { get; set; }
+            public bool? requires_question_id { get; set; }
+            public string title { get; set; }
+            public string description { get; set; }
+            public List<_FlagOption> sub_options { get; set; }
+            public bool? has_flagged { get; set; }
+            public int? count { get; set; }
+            public string dialog_title { get; set; }
+        }
+
+        [TestMethod]
+        public void FlagOption()
+        {
+            var foo = JSON.Serialize(new _ApiResult<_FlagOption>());
+            Assert.IsNotNull(foo);
+        }
     }
 }

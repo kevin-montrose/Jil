@@ -716,6 +716,35 @@ namespace Jil.Common
             Action<Type, Node<Type>> addIfReachable =
                 (seenType, curNode) =>
                 {
+                    if (seenType.IsNullableType())
+                    {
+                        seenType = Nullable.GetUnderlyingType(seenType);
+                    }
+                    else 
+                    {
+                        if (seenType.IsListType())
+                        {
+                            var listI = seenType.GetListInterface();
+                            seenType = listI.GetGenericArguments()[0];
+                        }
+                        else
+                        {
+                            if (seenType.IsDictionaryType())
+                            {
+                                var dictI = seenType.GetDictionaryInterface();
+                                seenType = dictI.GetGenericArguments()[1];
+                            }
+                            else
+                            {
+                                if (seenType.IsEnumerableType())
+                                {
+                                    var enumI = seenType.GetEnumerableInterface();
+                                    seenType = enumI.GetGenericArguments()[0];
+                                }
+                            }
+                        }
+                    }
+
                     Node<Type> olderNode;
                     if (lookup.TryGetValue(seenType, out olderNode))
                     {

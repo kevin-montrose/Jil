@@ -653,5 +653,43 @@ namespace JilTests
             Assert.IsTrue(t3.Any(t => t == typeof(_FindRecursiveTypes4)));
             Assert.IsTrue(t3.Any(t => t == typeof(_FindRecursiveTypes4._FindRecursiveTypes6)));
         }
+
+        public class _Outer<T>
+        {
+            public List<T> items { get; internal set; }
+        }
+
+        class _Inner
+        {
+            public List<_Inner> sub_options { get; set; }
+        }
+
+        [TestMethod]
+        public void FindRecursiveTypes_ListList()
+        {
+            var recurs = Utils.FindRecursiveTypes(typeof(_Outer<_Inner>)).ToList();
+
+            Assert.AreEqual(1, recurs.Count);
+            Assert.AreEqual(typeof(_Inner), recurs[0]);
+        }
+
+        public class _Outer2<T>
+        {
+            public Dictionary<string, T> items { get; internal set; }
+        }
+
+        class _Inner2
+        {
+            public Dictionary<string, _Inner2> sub_options { get; set; }
+        }
+
+        [TestMethod]
+        public void FindRecursiveTypes_DictDict()
+        {
+            var recurs = Utils.FindRecursiveTypes(typeof(_Outer2<_Inner2>)).ToList();
+
+            Assert.AreEqual(1, recurs.Count);
+            Assert.AreEqual(typeof(_Inner2), recurs[0]);
+        }
     }
 }
