@@ -2229,16 +2229,7 @@ namespace JilTests
                 JSON.Serialize(obj, str, Options.Default);
 
                 var res = str.ToString();
-
-                if (!res.Contains("\"AlwaysNull\":null"))
-                {
-                    Assert.Fail(res);
-                }
-
-                if (res.Contains("\"Foo\":"))
-                {
-                    Assert.Fail("a member with DataMemberIgnoreAttribute was serialized: " + res);
-                }
+                Assert.AreEqual("{\"AlwaysNull\":null}", res);
             }
 
             using (var str = new StringWriter())
