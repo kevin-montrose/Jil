@@ -2142,6 +2142,14 @@ namespace JilTests
             }
         }
 
+        public class _ConditionalSerialization3
+        {
+            [IgnoreDataMember]
+            public string Foo { get; set; }
+
+            public string AlwaysNull { get; set; }
+        }
+
         [TestMethod]
         public void ConditionalSerialization()
         {
@@ -2203,6 +2211,25 @@ namespace JilTests
                     {
                         Assert.Fail(res);
                     }
+                }
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new _ConditionalSerialization3();
+
+                JSON.Serialize(obj, str, Options.Default);
+
+                var res = str.ToString();
+
+                if (!res.Contains("\"AlwaysNull\":null"))
+                {
+                    Assert.Fail(res);
+                }
+
+                if (res.Contains("\"Foo\":"))
+                {
+                    Assert.Fail("a member with DataMemberIgnoreAttribute was serialized: " + res);
                 }
             }
         }
