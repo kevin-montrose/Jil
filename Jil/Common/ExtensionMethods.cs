@@ -829,12 +829,10 @@ namespace Jil.Common
             return ret;
         }
 
-        public static HashSet<Type> FindRecursiveOrReusedTypes(this Type forType, out List<Type> needPriming)
+        public static HashSet<Type> FindRecursiveOrReusedTypes(this Type forType)
         {
             var recursive = Utils.FindRecursiveTypes(forType);
             var reusedTypes = Utils.FindReusedTypes(forType);
-
-            needPriming = reusedTypes;
 
             return new HashSet<Type>(recursive.Concat(reusedTypes));
         }

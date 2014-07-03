@@ -3056,10 +3056,8 @@ namespace Jil.Serialize
 
         HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
         {
-            List<Type> needPriming;
-            var ret = forType.FindRecursiveOrReusedTypes(out needPriming);
-
-            foreach (var primeType in needPriming)
+            var ret = forType.FindRecursiveOrReusedTypes();
+            foreach (var primeType in ret)
             {
                 var loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 loadMtd.Invoke(null, new object[0]);
