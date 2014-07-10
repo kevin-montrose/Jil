@@ -315,11 +315,25 @@ namespace Jil.Serialize
 
             if (inLocal == null)
             {
-                Emit.LoadArgument(1);       // TextWriter obj
+                if (member.DeclaringType.IsValueType)
+                {
+                    Emit.LoadArgumentAddress(1);    // TextWriter obj*
+                }
+                else
+                {
+                    Emit.LoadArgument(1);           // TextWriter obj
+                }
             }
             else
             {
-                Emit.LoadLocal(inLocal);    // TextWriter obj
+                if (inLocal.LocalType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(inLocal); // TextWriter obj*
+                }
+                else
+                {
+                    Emit.LoadLocal(inLocal);        // TextWriter obj
+                }
             }
 
             if (asField != null)

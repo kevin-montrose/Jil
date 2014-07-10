@@ -6573,11 +6573,29 @@ namespace JilTests
             }
         }
 
+        class _Issue27
+        {
+            public DateTimeOffset TestDate { get; set; }
+        }
+
         [TestMethod]
         public void Issue27()
-        { 
-            var str = Jil.JSON.Serialize(new { TestDate = new DateTimeOffset() });
-            Assert.IsNotNull(str);
+        {
+            {
+                var dto1 = new DateTimeOffset();
+                var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 });
+                var str2 = Jil.JSON.Serialize(new { TestDate = dto1 });
+                Assert.AreEqual(str1, str2);
+                Assert.AreEqual("{\"TestDate\":{\"DateTime\":\"\\/Date(-62135578800000)\\/\",\"UtcDateTime\":\"\\/Date(-62135596800000)\\/\",\"LocalDateTime\":\"\\/Date(-62135578800000)\\/\",\"Date\":\"\\/Date(-62135578800000)\\/\",\"Day\":1,\"DayOfWeek\":\"Monday\",\"DayOfYear\":1,\"Hour\":0,\"Millisecond\":0,\"Minute\":0,\"Month\":1,\"Offset\":{\"Ticks\":0,\"Days\":0,\"Hours\":0,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0,\"TotalHours\":0,\"TotalMilliseconds\":0,\"TotalMinutes\":0,\"TotalSeconds\":0},\"Second\":0,\"Ticks\":0,\"UtcTicks\":0,\"TimeOfDay\":{\"Ticks\":0,\"Days\":0,\"Hours\":0,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0,\"TotalHours\":0,\"TotalMilliseconds\":0,\"TotalMinutes\":0,\"TotalSeconds\":0},\"Year\":1}}", str1);
+            }
+
+            {
+                var dto1 = new DateTimeOffset();
+                var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 }, Options.ExcludeNulls);
+                var str2 = Jil.JSON.Serialize(new { TestDate = dto1 }, Options.ExcludeNulls);
+                Assert.AreEqual(str1, str2);
+                Assert.AreEqual("{\"TestDate\":{\"DateTime\":\"\\/Date(-62135578800000)\\/\",\"UtcDateTime\":\"\\/Date(-62135596800000)\\/\",\"LocalDateTime\":\"\\/Date(-62135578800000)\\/\",\"Date\":\"\\/Date(-62135578800000)\\/\",\"Day\":1,\"DayOfWeek\":\"Monday\",\"DayOfYear\":1,\"Hour\":0,\"Millisecond\":0,\"Minute\":0,\"Month\":1,\"Offset\":{\"Ticks\":0,\"Days\":0,\"Hours\":0,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0,\"TotalHours\":0,\"TotalMilliseconds\":0,\"TotalMinutes\":0,\"TotalSeconds\":0},\"Second\":0,\"Ticks\":0,\"UtcTicks\":0,\"TimeOfDay\":{\"Ticks\":0,\"Days\":0,\"Hours\":0,\"Milliseconds\":0,\"Minutes\":0,\"Seconds\":0,\"TotalDays\":0,\"TotalHours\":0,\"TotalMilliseconds\":0,\"TotalMinutes\":0,\"TotalSeconds\":0},\"Year\":1}}", str1);
+            }
         }
     }
 }
