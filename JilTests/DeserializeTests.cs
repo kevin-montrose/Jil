@@ -3693,6 +3693,11 @@ namespace JilTests
                     var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", Options.Default);
                     Assert.IsNotNull(obj);
                 }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234,\"B\":5678}", Options.Default);
+                    Assert.IsNotNull(obj);
+                }
             }
 
             {
@@ -3708,6 +3713,11 @@ namespace JilTests
 
                 {
                     var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", new Options(allowHashFunction: false));
+                    Assert.IsNotNull(obj);
+                }
+
+                {
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234,\"B\":5678}", new Options(allowHashFunction: false));
                     Assert.IsNotNull(obj);
                 }
             }
@@ -4296,6 +4306,36 @@ namespace JilTests
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
+            }
+        }
+
+        class _EmptyMembers { }
+
+        [TestMethod]
+        public void EmptyMembers()
+        {
+            {
+                var str1 = "{}";
+                var str2 = "{\"foo\":0}";
+                var str3 = "{\"foo\":0, \"bar\":0}";
+                var str4 = "{\"foo\":0, \"bar\":0, \"fizz\":0}";
+
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str1));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str2));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str3));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str4));
+            }
+
+            {
+                var str1 = "{}";
+                var str2 = "{\"foo\":0}";
+                var str3 = "{\"foo\":0, \"bar\":0}";
+                var str4 = "{\"foo\":0, \"bar\":0, \"fizz\":0}";
+
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str1, new Options(allowHashFunction: false)));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str2, new Options(allowHashFunction: false)));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str3, new Options(allowHashFunction: false)));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str4, new Options(allowHashFunction: false)));
             }
         }
 
