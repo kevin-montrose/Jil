@@ -1095,7 +1095,7 @@ namespace Jil.Deserialize
                         Emit.LoadObject(objType);   // objType
                     }
 
-                    SkipAllMembers(done, doneSkipChar);
+                    SkipAllMembers(done, doneSkipChar);// objType
 
                     return;
                 }
@@ -1316,7 +1316,7 @@ namespace Jil.Deserialize
                         Emit.LoadObject(objType);   // objType
                     }
 
-                    SkipAllMembers(done, doneSkipChar);
+                    SkipAllMembers(done, doneSkipChar); // objType
 
                     return;
                 }
@@ -1450,9 +1450,9 @@ namespace Jil.Deserialize
 
             if (propertyMap.Count == 0)
             {
-                Emit.NewObject(cons);       // objType
+                Emit.NewObject(cons);           // objType
 
-                SkipAllMembers(done, doneSkip);
+                SkipAllMembers(done, doneSkip); // objType
 
                 return;
             }
@@ -1640,7 +1640,7 @@ namespace Jil.Deserialize
 
                 var doneSkipping = Emit.DefineLabel();
                 
-                SkipAllMembers(doneSkipping, doneSkipChar);
+                SkipAllMembers(doneSkipping, doneSkipChar); // objType
 
                 return;
             }
