@@ -1009,6 +1009,32 @@ namespace Jil.Deserialize
             ReadObjectDictionaryLookup(objType);
         }
 
+        void SkipAllMembers(Sigil.Label done, Sigil.Label doneSkipChar)
+        {
+            var continueSkipping = Emit.DefineLabel();
+
+            Emit.MarkLabel(continueSkipping);   // objType
+            ConsumeWhiteSpace();                // objType
+            RawPeekChar();                      // objType char
+            Emit.LoadConstant('}');             // objType char '}'
+            Emit.BranchIfEqual(done);           // objType
+
+            ReadString();                       // objType string
+            Emit.Pop();                         // objType
+            ConsumeWhiteSpace();                // objType
+            ExpectChar(':');                    // objType
+            ConsumeWhiteSpace();                // objType
+            SkipObjectMember();                 // objType
+            Emit.Branch(continueSkipping);      // objType
+
+            Emit.MarkLabel(done);               // objType
+            Emit.LoadArgument(0);               // objType TextReader
+            Emit.CallVirtual(TextReader_Read);  // objType int
+            Emit.Pop();                         // objType
+
+            Emit.MarkLabel(doneSkipChar);   // objType(*?)
+        }
+
         void ReadObjectHashing(Type objType)
         {
             var done = Emit.DefineLabel();
@@ -1069,29 +1095,7 @@ namespace Jil.Deserialize
                         Emit.LoadObject(objType);   // objType
                     }
 
-                    var continueSkipping = Emit.DefineLabel();
-
-                    // now we need to skip all members
-                    Emit.MarkLabel(continueSkipping);   // objType
-                    ConsumeWhiteSpace();                // objType
-                    RawPeekChar();                      // objType char
-                    Emit.LoadConstant('}');             // objType char '}'
-                    Emit.BranchIfEqual(done);           // objType
-
-                    ReadString();                       // objType string
-                    Emit.Pop();                         // objType
-                    ConsumeWhiteSpace();                // objType
-                    ExpectChar(':');                    // objType
-                    ConsumeWhiteSpace();                // objType
-                    SkipObjectMember();                 // objType
-                    Emit.Branch(continueSkipping);      // objType
-
-                    Emit.MarkLabel(done);               // objType
-                    Emit.LoadArgument(0);               // objType TextReader
-                    Emit.CallVirtual(TextReader_Read);  // objType int
-                    Emit.Pop();                         // objType
-
-                    Emit.MarkLabel(doneSkipChar);   // objType(*?)
+                    SkipAllMembers(done, doneSkipChar);
 
                     return;
                 }
@@ -1312,29 +1316,7 @@ namespace Jil.Deserialize
                         Emit.LoadObject(objType);   // objType
                     }
 
-                    var continueSkipping = Emit.DefineLabel();
-
-                    // now we need to skip all members
-                    Emit.MarkLabel(continueSkipping);   // objType
-                    ConsumeWhiteSpace();                // objType
-                    RawPeekChar();                      // objType char
-                    Emit.LoadConstant('}');             // objType char '}'
-                    Emit.BranchIfEqual(done);           // objType
-
-                    ReadString();                       // objType string
-                    Emit.Pop();                         // objType
-                    ConsumeWhiteSpace();                // objType
-                    ExpectChar(':');                    // objType
-                    ConsumeWhiteSpace();                // objType
-                    SkipObjectMember();                 // objType
-                    Emit.Branch(continueSkipping);      // objType
-
-                    Emit.MarkLabel(done);               // objType
-                    Emit.LoadArgument(0);               // objType TextReader
-                    Emit.CallVirtual(TextReader_Read);  // objType int
-                    Emit.Pop();                         // objType
-
-                    Emit.MarkLabel(doneSkipChar);       // objType(*?)
+                    SkipAllMembers(done, doneSkipChar);
 
                     return;
                 }
@@ -1470,29 +1452,7 @@ namespace Jil.Deserialize
             {
                 Emit.NewObject(cons);       // objType
 
-                var continueSkipping = Emit.DefineLabel();
-
-                // now we need to skip all members
-                Emit.MarkLabel(continueSkipping);   // objType
-                ConsumeWhiteSpace();                // objType
-                RawPeekChar();                      // objType char
-                Emit.LoadConstant('}');             // objType char '}'
-                Emit.BranchIfEqual(done);           // objType
-
-                ReadString();                       // objType string
-                Emit.Pop();                         // objType
-                ConsumeWhiteSpace();                // objType
-                ExpectChar(':');                    // objType
-                ConsumeWhiteSpace();                // objType
-                SkipObjectMember();                 // objType
-                Emit.Branch(continueSkipping);      // objType
-
-                Emit.MarkLabel(done);               // objType
-                Emit.LoadArgument(0);               // objType TextReader
-                Emit.CallVirtual(TextReader_Read);  // objType int
-                Emit.Pop();                         // objType
-
-                Emit.MarkLabel(doneSkip);   // objType
+                SkipAllMembers(done, doneSkip);
 
                 return;
             }
@@ -1678,31 +1638,9 @@ namespace Jil.Deserialize
 
                 Emit.MarkLabel(doneNotNull);    // objType
 
-                var continueSkipping = Emit.DefineLabel();
-
                 var doneSkipping = Emit.DefineLabel();
-
-                // now we need to skip all members
-                Emit.MarkLabel(continueSkipping);   // objType
-                ConsumeWhiteSpace();                // objType
-                RawPeekChar();                      // objType char
-                Emit.LoadConstant('}');             // objType char '}'
-                Emit.BranchIfEqual(doneSkipping);           // objType
-
-                ReadString();                       // objType string
-                Emit.Pop();                         // objType
-                ConsumeWhiteSpace();                // objType
-                ExpectChar(':');                    // objType
-                ConsumeWhiteSpace();                // objType
-                SkipObjectMember();                 // objType
-                Emit.Branch(continueSkipping);      // objType
-
-                Emit.MarkLabel(doneSkipping);       // objType
-                Emit.LoadArgument(0);               // objType TextReader
-                Emit.CallVirtual(TextReader_Read);  // objType int
-                Emit.Pop();                         // objType
-
-                Emit.MarkLabel(doneSkipChar);
+                
+                SkipAllMembers(doneSkipping, doneSkipChar);
 
                 return;
             }
