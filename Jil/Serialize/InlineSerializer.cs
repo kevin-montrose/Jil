@@ -30,7 +30,8 @@ namespace Jil.Serialize
         internal const int RecursionLimit = 50;
 
         static Dictionary<char, string> CharacterEscapes = 
-            new Dictionary<char, string>{
+            new Dictionary<char, string>
+            {
                 { '\\',  @"\\" },
                 { '"', @"\""" },
                 { '\u0000', @"\u0000" },
@@ -696,6 +697,23 @@ namespace Jil.Serialize
             Emit.Call(Methods.CustomISO8601ToString);       // --empty--
         }
 
+        static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
+        void WriteDateTimeOffset()
+        {
+            // top of stack:
+            //  - DateTimeOffset
+            //  - TextWriter
+
+            using(var loc = Emit.DeclareLocal<DateTimeOffset>())
+            {
+                Emit.StoreLocal(loc);               // TextWriter
+                Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
+            }
+
+            Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
+            WriteDateTime();
+        }
+
         void WriteDateTime()
         {
             // top of stack:
@@ -755,6 +773,12 @@ namespace Jil.Serialize
             if (primitiveType == typeof(DateTime))
             {
                 WriteDateTime();
+                return;
+            }
+
+            if (primitiveType == typeof(DateTimeOffset))
+            {
+                WriteDateTimeOffset();
                 return;
             }
 
@@ -3021,7 +3045,7 @@ namespace Jil.Serialize
             var allTypes = serializingType.InvolvedTypes();
 
             var hasGuids = allTypes.Any(t => t == typeof(Guid));
-            var hasDateTime = allTypes.Any(t => t == typeof(DateTime));
+            var hasDateTime = allTypes.Any(t => t == typeof(DateTime) || t == typeof(DateTimeOffset));
             var hasInteger = allTypes.Any(t => t.IsIntegerNumberType());
 
             // Not going to use a buffer?  Don't allocate it

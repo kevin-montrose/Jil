@@ -640,6 +640,7 @@ namespace Jil.Common
                 t == typeof(ulong) ||
                 t == typeof(bool) ||
                 t == typeof(DateTime) ||
+                t == typeof(DateTimeOffset) ||
                 t == typeof(Guid);
         }
 
