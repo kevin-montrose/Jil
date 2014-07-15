@@ -1130,6 +1130,26 @@ namespace Jil.DeserializeDynamic
                                 return false;
                         }
                     }
+                    if (returnType == typeof(DateTimeOffset))
+                    {
+                        DateTime dt;
+                        bool ret;
+
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                                ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out dt);
+                                result = new DateTimeOffset(dt);
+                                return ret;
+                            case DateTimeFormat.ISO8601:
+                                ret = Methods.ReadISO8601DateTime(StringValue, out dt);
+                                result = new DateTimeOffset(dt);
+                                return ret;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.Object:
                     if (returnType == typeof(System.Collections.IEnumerable))
