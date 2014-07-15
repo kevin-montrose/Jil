@@ -88,7 +88,7 @@ The following types (and any user defined types composed of them) are supported:
   - Booleans
   - Integer numbers (int, long, byte, etc.)
   - Floating point numbers (float, double, and decimal)
-  - DateTimes
+  - DateTimes & DateTimeOffsets
     * See Configuration for further details
   - Nullable types
   - Enumerations
@@ -99,13 +99,13 @@ The following types (and any user defined types composed of them) are supported:
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
 Jil deserializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
-declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.datamemberattribute.name(v=vs.110).aspx) and [`IgnoreDataMemberAttribute`](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.ignoredatamemberattribute.aspx) are respected by Jil, as is the [ShouldSerializeXXX() pattern](http://msdn.microsoft.com/en-us/library/53b8022e(v=vs.110).aspx).
+declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.datamemberattribute.name(v=vs.110).aspx) and [`IgnoreDataMemberAttribute`](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.ignoredatamemberattribute.aspx) are respected by Jil, as is the [ShouldSerializeXXX() pattern](http://msdn.microsoft.com/en-us/library/53b8022e(v=vs.110).aspx).  For situations where `DataMemberAttribute` and `IgnoreDataMemberAttribute` cannot be used, Jil provides the [`JilDirectiveAttribute`](https://github.com/kevin-montrose/Jil/blob/master/Jil/JilDirectiveAttribute.cs) which provides equivalent functionality.
 
 ## Configuration
 
 Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options` parameter which controls:
 
-  - The format of DateTimes, one of
+  - The format of DateTimes & DateTimeOffsets, one of
     * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string, ie. "\/Date(##...##)\/"
 	* MillisecondsSinceUnixEpoch, a number, which can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 	* SecondsSinceUnixEpoch, a number, commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
