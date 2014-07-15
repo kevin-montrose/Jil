@@ -351,6 +351,13 @@ namespace Jil.Deserialize
             ExpectQuote();                  // Guid
         }
 
+        static readonly ConstructorInfo DateTimeOffsetConst = typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) });
+        void ReadDateTimeOffset()
+        {
+            ReadDate();                             // DateTime
+            Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
+        }
+
         void ReadDate()
         {
             switch (DateFormat)
@@ -460,6 +467,12 @@ namespace Jil.Deserialize
             if (primitiveType == typeof(DateTime))
             {
                 ReadDate();
+                return;
+            }
+
+            if (primitiveType == typeof(DateTimeOffset))
+            {
+                ReadDateTimeOffset();
                 return;
             }
 

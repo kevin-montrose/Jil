@@ -4388,6 +4388,70 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void DateTimeOffsets()
+        {
+            // ISO8601
+            using (var str = new StringReader("\"1900-01-01 12:30Z\""))
+            {
+                var dto = new DateTimeOffset(1900, 1, 1, 12, 30, 0, TimeSpan.Zero);
+                var res = JSON.Deserialize<DateTimeOffset>(str, Options.ISO8601);
+                Assert.AreEqual(dto, res);
+            }
+
+            // Newtsonsoft
+            {
+                var newtonsoft = 
+                    Newtonsoft.Json.JsonSerializer.Create(
+                        new Newtonsoft.Json.JsonSerializerSettings
+                        {
+                            DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat
+                        }
+                    );
+
+                var now = DateTime.UtcNow;
+                string newtonsoftStyle;
+                using(var str = new StringWriter())
+                {
+                   newtonsoft.Serialize(str, now);
+                   newtonsoftStyle = str.ToString();
+                }
+
+                using (var str = new StringReader(newtonsoftStyle))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.Default).UtcDateTime;
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
+                }
+            }
+
+            // Milliseconds
+            {
+                var now = DateTime.UtcNow;
+                var asStr = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
+
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.MillisecondsSinceUnixEpoch);
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
+                }
+            }
+
+            // Seconds
+            {
+                var now = DateTime.UtcNow;
+                var asStr = JSON.Serialize(now, Options.SecondsSinceUnixEpoch);
+
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.SecondsSinceUnixEpoch);
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromSeconds(1));
+                }
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
