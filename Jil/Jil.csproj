@@ -97,6 +97,7 @@
     </Compile>
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
+    <Compile Include="JilDirectiveAttribute.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

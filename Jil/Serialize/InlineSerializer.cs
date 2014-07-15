@@ -219,6 +219,9 @@ namespace Jil.Serialize
 
         private static bool ShouldSerializeMember(MemberInfo memberInfo)
         {
+            var jilDirectiveAttributes = memberInfo.GetCustomAttributes<JilDirectiveAttribute>();
+            if (jilDirectiveAttributes.Any(d => d.Ignore)) return false;
+
             var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
 
             return ignoreDataMemberAttributes.Count() == 0;

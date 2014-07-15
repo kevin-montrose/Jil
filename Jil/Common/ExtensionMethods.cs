@@ -42,11 +42,13 @@ namespace Jil.Common
 
         public static string GetSerializationName(this MemberInfo member)
         {
-            var attrs = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
+            var jilDirectiveAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+            if (jilDirectiveAttr != null && !string.IsNullOrEmpty(jilDirectiveAttr.Name)) return jilDirectiveAttr.Name;
 
-            if (attrs == null || string.IsNullOrEmpty(attrs.Name)) return member.Name;
+            var dataMemberAttr = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
+            if (dataMemberAttr != null && !string.IsNullOrEmpty(dataMemberAttr.Name)) return dataMemberAttr.Name;
 
-            return attrs.Name;
+            return member.Name;
         }
 
         public static bool IsLoadArgumentOpCode(this OpCode op)

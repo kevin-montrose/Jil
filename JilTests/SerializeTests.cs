@@ -455,6 +455,30 @@ namespace JilTests
             Assert.IsTrue(timer.ElapsedMilliseconds <= acceptableMS, "Took longer than " + acceptableMS + "ms to build a serializer for MobileFeed; unacceptable, was " + timer.ElapsedMilliseconds + "ms");
         }
 #endif
+        class _JilDirectiveAttributeTest
+        {
+            [JilDirective(Name="AOverride")]
+            public string A;
+            [JilDirective(Ignore = true)]
+            public string B;
+
+            [JilDirective(Name = null, Ignore = true)]
+            public string C;
+            [JilDirective(Name = "DOverride", Ignore = false)]
+            public string D;
+        }
+
+        [TestMethod]
+        public void JilDirectiveAttributeTest()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new _JilDirectiveAttributeTest { A = "123", B = "456", C = "789", D = "0AB" }, str);
+                var res = str.ToString();
+                Assert.AreEqual("{\"DOverride\":\"0AB\",\"AOverride\":\"123\"}", res);
+            }
+        }
+
 
         public class _SimpleObject
         {
