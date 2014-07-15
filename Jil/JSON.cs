@@ -23,10 +23,9 @@ namespace Jil
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
         /// 
-        /// Note that this lookup only happens on the *root object*, members of type System.Object will not
-        /// be serialized via a dynamic lookup.
+        /// Objects with participate in the DLR will 
         /// </summary>
-        public static void SerializeDynamic(object data, TextWriter output, Options options = null)
+        public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
             // Can't infer the type if we don't even have an object
             if (data == null)
