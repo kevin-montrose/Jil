@@ -14,8 +14,6 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
-        private static Hashtable SerializeDynamicLookup = new Hashtable();
-
         /// <summary>
         /// Serializes the given data to the provided TextWriter.
         /// 
@@ -41,19 +39,7 @@ namespace Jil
                 return;
             }
 
-            var type = data.GetType();
-            var invoke = (Action<object, TextWriter, Options>)SerializeDynamicLookup[type];
-            if (invoke == null)
-            {
-                invoke = (Action<object, TextWriter, Options>)typeof(SerializeDynamicThunk<>).MakeGenericType(type).GetField("Thunk", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).GetValue(null);
-
-                lock (SerializeDynamicLookup)
-                {
-                    SerializeDynamicLookup[type] = invoke;
-                }
-            }
-
-            invoke(data, output, options);
+            throw new NotImplementedException();
         }
 
         /// <summary>
