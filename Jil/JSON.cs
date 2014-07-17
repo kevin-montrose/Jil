@@ -1,4 +1,5 @@
 ﻿using Jil.Serialize;
+using Jil.SerializeDynamic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,22 +24,12 @@ namespace Jil
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
         /// 
-        /// Objects with participate in the DLR will 
+        /// Objects with participate in the DLR will be serialized appropriately, all other types
+        /// will be serialized via reflection.
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            // Can't infer the type if we don't even have an object
-            if (data == null)
-            {
-                if (!(options ?? Options.Default).ShouldExcludeNulls)
-                {
-                    output.Write("null");
-                }
-
-                return;
-            }
-
-            throw new NotImplementedException();
+            DynamicSerializer.Serialize(data, output, options);
         }
 
         /// <summary>

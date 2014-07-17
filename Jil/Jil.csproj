@@ -101,6 +101,7 @@
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializeDynamic\DynamicSerializer.cs" />
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\Methods.cs" />
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
