@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.CSharp.RuntimeBinder;
 using System.Runtime.CompilerServices;
+using Jil.Serialize;
 
 namespace Jil.SerializeDynamic
 {
@@ -53,6 +54,20 @@ namespace Jil.SerializeDynamic
             genericMtd.Invoke(null, new[] { val, stream, opts });
         }
 
+        static void SerializeSemiStatically(object val, TextWriter stream, Options opts)
+        {
+            var valType = val.GetType();
+            var mtd = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(valType);
+            
+            // TODO: actually properly grab a cache type, jeez
+            var cacheType = typeof(NewtonsoftStyleTypeCache<>);
+            var func = (Delegate)mtd.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
+            
+            // TODO: recursion and padding check yo!
+            func.DynamicInvoke(stream, val, 0);
+        }
+
+        public static readonly System.Reflection.MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(object obj, TextWriter stream, Options opts)
         {
             if (obj == null)
@@ -76,7 +91,7 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
-            throw new NotImplementedException();
+            SerializeSemiStatically(obj, stream, opts);
         }
     }
 }

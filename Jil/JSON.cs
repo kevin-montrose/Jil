@@ -29,11 +29,11 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            DynamicSerializer.Serialize(data, output, options);
+            DynamicSerializer.Serialize(data, output, options ?? Options.Default);
         }
 
         /// <summary>
-        /// Serializes the given data, returning the output as a string.
+        /// Serializes the given data, returning it as a string.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
         /// the produced JSON.  If omitted, Options.Default is used.
@@ -41,23 +41,11 @@ namespace Jil
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
         /// 
-        /// Note that this lookup only happens on the *root object*, members of type System.Object will not
-        /// be serialized via a dynamic lookup.
+        /// Objects with participate in the DLR will be serialized appropriately, all other types
+        /// will be serialized via reflection.
         /// </summary>
         public static string SerializeDynamic(object data, Options options = null)
         {
-            options = options ?? Options.Default;
-
-            if (data == null)
-            {
-                if (options.ShouldExcludeNulls)
-                {
-                    return "";
-                }
-
-                return "null";
-            }
-
             using (var str = new StringWriter())
             {
                 SerializeDynamic(data, str, options);

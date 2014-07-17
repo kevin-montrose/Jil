@@ -14,6 +14,22 @@ namespace JilTests
     public class DynamicSerializationTests
     {
         [TestMethod]
+        public void HeterogenousCollection()
+        {
+            using (var str = new StringWriter())
+            {
+                var dict = (dynamic)new ExpandoObject();
+                dict.Fizz = "Buzz";
+                var arr = new object[] { 123, "hello", new { Foo = "bar" }, dict };
+
+                JSON.SerializeDynamic(arr, str);
+                var res = str.ToString();
+
+                Assert.AreEqual("[123,\"hello\",{\"Foo\":\"bar\"},{\"Fizz\":\"Buzz\"}]", res);
+            }
+        }
+
+        [TestMethod]
         public void Objects()
         {
             using (var str = new StringWriter())

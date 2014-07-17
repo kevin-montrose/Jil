@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Jil.Common;
+using Jil.SerializeDynamic;
 
 namespace Jil.Serialize
 {
@@ -79,7 +80,9 @@ namespace Jil.Serialize
 
         private Emit Emit;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        private readonly bool CallOutOnPossibleDynamic;
+
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
@@ -87,6 +90,8 @@ namespace Jil.Serialize
             JSONP = jsonp;
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
+
+            CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -1198,6 +1203,8 @@ namespace Jil.Serialize
 
         void WriteObject(Type forType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(forType, inLocal)) return;
+
             if (!ExcludeNulls)
             {
                 WriteObjectWithNulls(forType, inLocal);
@@ -1794,6 +1801,8 @@ namespace Jil.Serialize
 
         void WriteList(Type listType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(listType, inLocal)) return;
+
             if (listType.IsArray && UseFastArrays)
             {
                 WriteArrayFast(listType, inLocal);
@@ -1811,6 +1820,8 @@ namespace Jil.Serialize
 
         void WriteEnumerable(Type enumerableType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(enumerableType, inLocal)) return;
+
             var elementType = enumerableType.GetEnumerableInterface().GetGenericArguments()[0];
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
@@ -1992,8 +2003,34 @@ namespace Jil.Serialize
             }
         }
 
+        bool DynamicCallOutCheck(Type onType, Sigil.Local inLocal)
+        {
+            if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
+            {
+                if (inLocal != null)
+                {
+                    Emit.LoadLocal(inLocal);        // object
+                }
+                else
+                {
+                    Emit.LoadArgument(1);           // object
+                }
+
+                Emit.LoadArgument(0);               // object TextWriter
+
+                var opts = typeof(Options).GetField("Default");
+                Emit.LoadField(opts);                       // object TextWriter Options
+                Emit.Call(DynamicSerializer.SerializeMtd);  // void
+                return true;
+            }
+
+            return false;
+        }
+
         void WriteDictionary(Type dictType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(dictType, inLocal)) return;
+
             if (!ExcludeNulls)
             {
                 WriteDictionaryWithNulls(dictType, inLocal);
@@ -3264,7 +3301,7 @@ namespace Jil.Serialize
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited);
+                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3276,6 +3313,13 @@ namespace Jil.Serialize
             }
 
             return ret;
+        }
+
+        public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        {
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
+            return obj.Build();
         }
     }
 }
