@@ -31,7 +31,7 @@ with an earlier "throw away" serialization.
 
 The suggested way to use Jil is with the generic `JSON.Serialize` method, however a slightly slower `JSON.SerializeDynamic` method
 is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branches
-when compared to `Serialize`, and the first invocation for a given type will do a small amount of additiona code generation.
+when compared to `Serialize`, and the first invocation for a given type will do a small amount of additional code generation.
 
 ### Deserializing
 
@@ -193,7 +193,7 @@ Jil has a lot of tricks to make it fast.  These may be interesting, even if Jil 
 
 ### Sigil
 
-Jil does a lot of IL generation to produce tight, focus code.  While possible with [ILGenerator](http://msdn.microsoft.com/en-us/library/system.reflection.emit.ilgenerator.aspx), Jil instead uses the [Sigil library](https://github.com/kevin-montrose/Sigil).
+Jil does a lot of IL generation to produce tight, focused code.  While possible with [ILGenerator](http://msdn.microsoft.com/en-us/library/system.reflection.emit.ilgenerator.aspx), Jil instead uses the [Sigil library](https://github.com/kevin-montrose/Sigil).
 Sigil automatically does a lot of the busy work you'd normally have to do manually to produce ideal IL.
 Using Sigil also makes hacking on Jil much more productive, as debuging IL generation without it is pretty slow going.
 
@@ -202,7 +202,7 @@ Using Sigil also makes hacking on Jil much more productive, as debuging IL gener
 Jil's internal serializers and deserializers are (in the absense of recursive types) monolithic, and per-type; avoiding extra runtime lookups, and giving
 .NET's JIT more context when generating machine code.
 
-The methods Jil create also do no Options checking at serialization time, Options are baked in at first use.  This means
+The methods Jil create also do no Options checking at serialization time; Options are baked in at first use.  This means
 that Jil may create up to 32 different serializers and 8 different deserializers for a single type (though in practice, many fewer).
 
 ### Optimizing Member Access Order
@@ -223,7 +223,7 @@ Members are divided up into 4 groups:
 
 Members within each group are ordered by the offset of the fields backing them (properties are decompiled to determine fields they use).
 
-This is a fairly naive implementation of this idea, there's almost more that could be squeezed out especially with regards to consistency of gains.
+This is a fairly naive implementation of this idea, there's almost certainly more that could be squeezed out especially with regards to consistency of gains.
 
 ### Don't Allocate If You Can Avoid It
 
@@ -238,9 +238,9 @@ Depending on the data being deserialized a `StringBuilder` may also be allocated
 
 ### Escaping Tricks
 
-JSON has escaping rules for `\`, `"`, and control characters.  These can be kind be time consuming to deal with, Jil avoids as much as possible in two ways.
+JSON has escaping rules for `\`, `"`, and control characters.  These can be kind of time consuming to deal with. Jil avoids it as much as possible in two ways.
 
-First, all known key names are once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L980).
+First, all known key names are determined once and baked into the generated delegates [like so](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L980).
 Known keys are member names and enumeration values.
 
 Second, rather than lookup encoded characters in a dictionary or a long series of branches Jil does explicit checks for `"` and `\` and turns the rest into
@@ -258,7 +258,7 @@ While number formatting in .NET is pretty fast, it has a lot of baggage to handl
 Since JSON has a strict definition of a number, a Write() implementation without configuration is noticeably faster.
 To go the extra mile, Jil contains [separate implementations for `int`, `uint`, `ulong`, and `long`](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L803).
 
-Jil __does not__ include custom `decimal`, `double`, or `single` Write() implementations, as despite my best efforts I haven't been able to beat the one's built into .NET.
+Jil __does not__ include custom `decimal`, `double`, or `single` Write() implementations, as despite my best efforts I haven't been able to beat the ones built into .NET.
 If you think you're up to the challenge, I'd be really interested in seeing code that *is* faster than the included implementations.
 
 ### Custom Date Formatting
@@ -274,7 +274,7 @@ Similarly to numbers, each of Jil's date formats has a custom Write() implementa
 
 Noticing a pattern?
 
-Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L18) (which is one of the reason's Jil only supports the D format).
+Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L18) (which is one of the reasons Jil only supports the D format).
 
 Fun fact about this method, I tested a more branch heavy version (which removed the byte lookup) which turned out to be considerably slower than the built-in method due to [branch prediction failures](http://stackoverflow.com/a/11227902/80572).
 Type 4 Guids being random makes for something quite close to the worst case for branch prediciton.
