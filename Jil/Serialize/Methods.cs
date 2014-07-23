@@ -13,6 +13,27 @@ namespace Jil.Serialize
 {
     static class Methods
     {
+        struct TwoDigits
+        {
+            public readonly char First;
+            public readonly char Second;
+
+            public TwoDigits(char first, char second)
+            {
+                First = first;
+                Second = second;
+            }
+        }
+
+        private static readonly TwoDigits[] DigitPairs;
+
+        static Methods()
+        {
+            DigitPairs = new TwoDigits[100];
+            for (var i=0; i < 100; ++i)
+                DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
+        }
+
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -853,35 +874,29 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
-            if (number == int.MinValue)
-            {
-                writer.Write("-2147483648");
-                return;
-            }
-
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-            if (copy < 0)
+            uint copy;
+            if (number >= 0)
+                copy = (uint)number;
+            else
             {
-                copy = -copy;
+                writer.Write('-');
+                copy = 1 + (uint)~number;
             }
 
             do
             {
-                var ix = copy % 10;
-                copy /= 10;
+                var ix = copy % 100;
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
+            if (buffer[ptr + 1] == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
