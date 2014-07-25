@@ -859,17 +859,18 @@ namespace Jil.Serialize
                 copy = 1 + (uint)~number;
             }
 
+            TwoDigits chars;
             do
             {
                 var ix = copy % 100;
                 copy /= 100;
 
-                var chars = DigitPairs[ix];
+                chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (buffer[ptr + 1] == '0')
+            if (chars.First == '0')
                 ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
@@ -994,14 +995,19 @@ namespace Jil.Serialize
 
             var copy = number;
 
+            TwoDigits chars;
             do
             {
-                var ix = copy % 10;
-                copy /= 10;
+                var ix = copy % 100;
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
+
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
