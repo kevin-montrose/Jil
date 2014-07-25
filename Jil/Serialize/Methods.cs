@@ -850,19 +850,25 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            uint copy;
+            if (number == int.MinValue)
+            {
+                writer.Write("-2147483648");
+                return;
+            }
+
+            int copy;
             if (number >= 0)
-                copy = (uint)number;
+                copy = number;
             else
             {
                 writer.Write('-');
-                copy = 1 + (uint)~number;
+                copy = -number;
             }
 
             TwoDigits chars;
             do
             {
-                var ix = copy % 100;
+                var ix = (copy % 100);
                 copy /= 100;
 
                 chars = DigitPairs[ix];
@@ -1016,35 +1022,36 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteLong(TextWriter writer, long number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
             if (number == long.MinValue)
             {
                 writer.Write("-9223372036854775808");
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
+            long copy;
+            if (number >= 0)
+                copy = number;
+            else
             {
-                copy = -copy;
+                writer.Write('-');
+                copy = -number;
             }
 
+            TwoDigits chars;
             do
             {
-                var ix = (int)(copy % 10);
-                copy /= 10;
+                var ix = (int) (copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
