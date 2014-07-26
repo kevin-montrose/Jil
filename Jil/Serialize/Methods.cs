@@ -13,6 +13,28 @@ namespace Jil.Serialize
 {
     static class Methods
     {
+        struct TwoDigits
+        {
+            public readonly char First;
+            public readonly char Second;
+
+            public TwoDigits(char first, char second)
+            {
+                First = first;
+                Second = second;
+            }
+        }
+
+        private static readonly TwoDigits[] DigitPairs;
+        static Methods()
+        {
+            DigitPairs = new TwoDigits[100];
+            for (var i = 0; i < 100; ++i)
+            {
+                DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
+            }
+        }
+
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -847,6 +869,41 @@ namespace Jil.Serialize
                     default: writer.Write(c); continue;
                 }
             }
+        }
+
+        internal static readonly MethodInfo CustomWriteInt_I33 = typeof(Methods).GetMethod("_CustomWriteInt_I33", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteInt_I33(TextWriter writer, int number, char[] buffer)
+        {
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
+            uint copy;
+            if (number >= 0)
+            {
+                copy = (uint)number;
+            }
+            else
+            {
+                writer.Write('-');
+                copy = (uint)(-number);
+            }
+
+            do
+            {
+                byte ix = (byte)(copy % 100);
+                copy /= 100;
+
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            } while (copy != 0);
+
+            if (buffer[ptr + 1] == '0')
+            {
+                ptr++;
+            }
+
+            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
         internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
