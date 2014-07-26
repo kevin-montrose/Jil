@@ -868,7 +868,7 @@ namespace Jil.Serialize
             TwoDigits chars;
             do
             {
-                var ix = (copy % 100);
+                var ix = copy % 100;
                 copy /= 100;
 
                 chars = DigitPairs[ix];
@@ -999,10 +999,11 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            TwoDigits chars;
-            do
+            var chars = DigitPairs[number % 100];
+            var copy = (int)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy != 0)
             {
                 var ix = copy % 100;
                 copy /= 100;
@@ -1010,7 +1011,7 @@ namespace Jil.Serialize
                 chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
-            } while (copy != 0);
+            };
 
             if (chars.First == '0')
                 ++ptr;
