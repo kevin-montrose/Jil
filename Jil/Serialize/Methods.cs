@@ -1063,16 +1063,32 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            do
+            var chars = DigitPairs[number % 100];
+            var copy64 = (long)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy64 > int.MaxValue)
             {
-                var ix = (int)(copy % 10);
-                copy /= 10;
+                var ix = (int)(copy64 % 100);
+                copy64 /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+            var copy32 = (int)copy64;
+            while (copy32 != 0)
+            {
+                var ix = (int)(copy32 % 100);
+                copy32 /= 100;
+
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
