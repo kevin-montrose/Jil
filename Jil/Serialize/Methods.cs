@@ -223,79 +223,53 @@ namespace Jil.Serialize
 
             dt = dt.ToUniversalTime();
 
-            int ix, val;
-            
+            uint val;
+
             // Year
-            val = dt.Year;
-            ix = val % 10;
-            val /= 10;
-            buffer[4] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[3] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[2] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[1] = (char)('0' + ix);
+            val = (uint)dt.Year;
+            var digits = DigitPairs[(byte)(val % 100)];
+            buffer[4] = digits.Second;
+            buffer[3] = digits.First;
+            digits = DigitPairs[(byte)(val / 100)];
+            buffer[2] = digits.Second;
+            buffer[1] = digits.First;
 
             // delimiter
             buffer[5] = '-';
 
             // Month
-            val = dt.Month;
-            ix = val % 10;
-            val /= 10;
-            buffer[7] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[6] = (char)('0' + ix);
+            digits = DigitPairs[dt.Month];
+            buffer[7] = digits.Second;
+            buffer[6] = digits.First;
 
             // Delimiter
             buffer[8] = '-';
 
             // Day
-            val = dt.Day;
-            ix = val % 10;
-            val /= 10;
-            buffer[10] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[9] = (char)('0' + ix);
+            digits = DigitPairs[dt.Day];
+            buffer[10] = digits.Second;
+            buffer[9] = digits.First;
 
             // Delimiter
             buffer[11] = 'T';
 
-            val = dt.Hour;
-            ix = val % 10;
-            val /= 10;
-            buffer[13] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[12] = (char)('0' + ix);
+            digits = DigitPairs[dt.Hour];
+            buffer[13] = digits.Second;
+            buffer[12] = digits.First;
 
             // Delimiter
             buffer[14] = ':';
 
-            val = dt.Minute;
-            ix = val % 10;
-            val /= 10;
-            buffer[16] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[15] = (char)('0' + ix);
+            digits = DigitPairs[dt.Minute];
+            buffer[16] = digits.Second;
+            buffer[15] = digits.First;
 
             // Delimiter
             buffer[17] = ':';
 
-            val = dt.Second;
-            ix = val % 10;
-            val /= 10;
-            buffer[19] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[18] = (char)('0' + ix);
+            digits = DigitPairs[dt.Second];
+            buffer[19] = digits.Second;
+            buffer[18] = digits.First;
 
             buffer[20] = 'Z';
             buffer[21] = '"';
