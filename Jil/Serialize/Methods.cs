@@ -871,41 +871,6 @@ namespace Jil.Serialize
             }
         }
 
-        internal static readonly MethodInfo CustomWriteInt_I33 = typeof(Methods).GetMethod("_CustomWriteInt_I33", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomWriteInt_I33(TextWriter writer, int number, char[] buffer)
-        {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            uint copy;
-            if (number >= 0)
-            {
-                copy = (uint)number;
-            }
-            else
-            {
-                writer.Write('-');
-                copy = (uint)(-number);
-            }
-
-            do
-            {
-                byte ix = (byte)(copy % 100);
-                copy /= 100;
-
-                var chars = DigitPairs[ix];
-                buffer[ptr--] = chars.Second;
-                buffer[ptr--] = chars.First;
-            } while (copy != 0);
-
-            if (buffer[ptr + 1] == '0')
-            {
-                ptr++;
-            }
-
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
-        }
-
         internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
@@ -922,6 +887,7 @@ namespace Jil.Serialize
             uint copy;
             if (number < 0)
             {
+                writer.Write('-');
                 copy = (uint)(-number);
             }
             else
@@ -931,18 +897,17 @@ namespace Jil.Serialize
 
             do
             {
-                // using a byte does lead to measurably (slightly) faster serialization
-                byte ix = (byte)(copy % 10);
-                copy /= 10;
+                byte ix = (byte)(copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
+            if (buffer[ptr + 1] == '0')
             {
-                buffer[ptr] = '-';
-                ptr--;
+                ptr++;
             }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
@@ -1069,13 +1034,18 @@ namespace Jil.Serialize
 
             do
             {
-                // using a byte does lead to measurably (slightly) faster serialization
-                byte ix = (byte)(copy % 10);
-                copy /= 10;
+                byte ix = (byte)(copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
+
+            if (buffer[ptr + 1] == '0')
+            {
+                ptr++;
+            }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1096,6 +1066,7 @@ namespace Jil.Serialize
             ulong copy;
             if (number < 0)
             {
+                writer.Write('-');
                 copy = (ulong)(-number);
             }
             else
@@ -1105,18 +1076,17 @@ namespace Jil.Serialize
 
             do
             {
-                // using a byte does lead to measurably (slightly) faster serialization
-                byte ix = (byte)(copy % 10);
-                copy /= 10;
+                byte ix = (byte)(copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
+            if (buffer[ptr + 1] == '0')
             {
-                buffer[ptr] = '-';
-                ptr--;
+                ptr++;
             }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
@@ -1132,13 +1102,18 @@ namespace Jil.Serialize
 
             do
             {
-                // using a byte does lead to measurably (slightly) faster serialization
-                byte ix = (byte)(copy % 10);
-                copy /= 10;
+                byte ix = (byte)(copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                var chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
+
+            if (buffer[ptr + 1] == '0')
+            {
+                ptr++;
+            }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }

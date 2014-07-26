@@ -1269,65 +1269,6 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
-
-        class _UseWriteCustomIntI33
-        {
-            public int A { get; set; }
-            public int B { get; set; }
-            public int[] C { get; set; }
-        }
-
-        [TestMethod]
-        public void UseWriteCustomIntI33()
-        {
-            Action<TextWriter, _UseWriteCustomIntI33, int> custom;
-            Action<TextWriter, _UseWriteCustomIntI33, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_UseWriteCustomIntI33>.UseWriteCustomIntI33 = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    custom = InlineSerializerHelper.Build<_UseWriteCustomIntI33>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_UseWriteCustomIntI33>.UseWriteCustomIntI33 = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseWriteCustomIntI33>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_UseWriteCustomIntI33>.UseWriteCustomIntI33 = true;
-            }
-
-            var rand = new Random(139426720);
-
-            var toSerialize = new List<_UseWriteCustomIntI33>();
-            for (var i = 0; i < 10000; i++)
-            {
-                toSerialize.Add(
-                    new _UseWriteCustomIntI33
-                    {
-                        A = rand.Next(),
-                        B = -rand.Next(),
-                        C = Enumerable.Range(0, rand.Next(1, 100)).Select(_ => rand.Next()).ToArray()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double customTime, normalTime;
-            CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
-
-            Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
-        }
 #endif
     }
 }
