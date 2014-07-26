@@ -396,6 +396,19 @@ namespace Jil.Deserialize
             }
         }
 
+        public static readonly MethodInfo ConsumeWhiteSpaceFast = typeof(Methods).GetMethod("_ConsumeWhiteSpaceFast", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ConsumeWhiteSpaceFast(TextReader reader)
+        {
+            int c;
+            while ((c = reader.Peek()) != -1)
+            {
+                if (!IsWhiteSpaceFast(c)) return;
+
+                reader.Read();
+            }
+        }
+
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ConsumeWhiteSpace(TextReader reader)
@@ -424,6 +437,26 @@ namespace Jil.Deserialize
                 c == 0x09 ||
                 c == 0x0A ||
                 c == 0x0D;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsWhiteSpaceFast(int c)
+        {
+            // per http://www.ietf.org/rfc/rfc4627.txt
+            // insignificant whitespace in JSON is defined as 
+            //  \u0020  - space
+            //  \u0009  - tab
+            //  \u000A  - new line
+            //  \u000D  - carriage return
+
+            return
+                c < 0x21 && 
+                (
+                    c == 0x20 ||
+                    c == 0x09 ||
+                    c == 0x0A ||
+                    c == 0x0D
+                );
         }
 
         public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
