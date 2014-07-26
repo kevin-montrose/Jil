@@ -24,7 +24,6 @@ namespace Jil.Serialize
         public static bool UseFastGuids = true;
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
-        public static bool UseIssue31CustomIntWriter = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -750,20 +749,6 @@ namespace Jil.Serialize
             throw new ConstructionException("Unexpected DateFormat: " + DateFormat);
         }
 
-        void CallCustomWriteInt()
-        {
-            // stack is: TextWriter int char[]
-
-            if (UseIssue31CustomIntWriter)
-            {
-                Emit.Call(Methods.CustomWriteInt_I31);  // --empty--
-            }
-            else
-            {
-                Emit.Call(Methods.CustomWriteInt);      // --empty--
-            }
-        }
-
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
         {
             if (primitiveType == typeof(char))
@@ -854,7 +839,7 @@ namespace Jil.Serialize
                 if (UseCustomIntegerToString)
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                    CallCustomWriteInt();                // --empty--
+                    Emit.Call(Methods.CustomWriteInt);   // --empty--
                 }
                 else
                 {
@@ -874,7 +859,7 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(int))
                 {
                     Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    CallCustomWriteInt();               // --empty--
+                    Emit.Call(Methods.CustomWriteInt);  // --empty--
 
                     return;
                 }

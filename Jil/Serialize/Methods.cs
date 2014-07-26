@@ -849,11 +849,11 @@ namespace Jil.Serialize
             }
         }
 
-        internal static readonly MethodInfo CustomWriteInt_I31 = typeof(Methods).GetMethod("_CustomWriteInt_I31", BindingFlags.Static | BindingFlags.NonPublic);
+        internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomWriteInt_I31(TextWriter writer, int number, char[] buffer)
+        static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
         {
-            // A version of _CustomWriteInt to investigate https://github.com/kevin-montrose/Jil/issues/31
+            // Gotta special case this, we can't negate it
             if (number == int.MinValue)
             {
                 writer.Write("-2147483648");
@@ -874,44 +874,8 @@ namespace Jil.Serialize
 
             do
             {
+                // using a byte does lead to measurably (slightly) faster serialization
                 byte ix = (byte)(copy % 10);
-                copy /= 10;
-
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
-
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
-
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
-        }
-
-        internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
-        {
-            // Gotta special case this, we can't negate it
-            if (number == int.MinValue)
-            {
-                writer.Write("-2147483648");
-                return;
-            }
-
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
-            {
-                copy = -copy;
-            }
-
-            do
-            {
-                var ix = copy % 10;
                 copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
@@ -1048,7 +1012,8 @@ namespace Jil.Serialize
 
             do
             {
-                var ix = copy % 10;
+                // using a byte does lead to measurably (slightly) faster serialization
+                byte ix = (byte)(copy % 10);
                 copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
@@ -1071,15 +1036,20 @@ namespace Jil.Serialize
 
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-            if (copy < 0)
+            ulong copy;
+            if (number < 0)
             {
-                copy = -copy;
+                copy = (ulong)(-number);
+            }
+            else
+            {
+                copy = (ulong)number;
             }
 
             do
             {
-                var ix = (int)(copy % 10);
+                // using a byte does lead to measurably (slightly) faster serialization
+                byte ix = (byte)(copy % 10);
                 copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
@@ -1105,7 +1075,8 @@ namespace Jil.Serialize
 
             do
             {
-                var ix = (int)(copy % 10);
+                // using a byte does lead to measurably (slightly) faster serialization
+                byte ix = (byte)(copy % 10);
                 copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
