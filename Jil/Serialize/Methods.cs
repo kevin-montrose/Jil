@@ -13,6 +13,27 @@ namespace Jil.Serialize
 {
     static class Methods
     {
+        struct TwoDigits
+        {
+            public readonly char First;
+            public readonly char Second;
+
+            public TwoDigits(char first, char second)
+            {
+                First = first;
+                Second = second;
+            }
+        }
+
+        private static readonly TwoDigits[] DigitPairs;
+
+        static Methods()
+        {
+            DigitPairs = new TwoDigits[100];
+            for (var i=0; i < 100; ++i)
+                DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
+        }
+
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -201,79 +222,53 @@ namespace Jil.Serialize
 
             dt = dt.ToUniversalTime();
 
-            int ix, val;
-            
+            int val;
+
             // Year
             val = dt.Year;
-            ix = val % 10;
-            val /= 10;
-            buffer[4] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[3] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[2] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[1] = (char)('0' + ix);
+            var digits = DigitPairs[val % 100];
+            buffer[4] = digits.Second;
+            buffer[3] = digits.First;
+            digits = DigitPairs[val / 100];
+            buffer[2] = digits.Second;
+            buffer[1] = digits.First;
 
             // delimiter
             buffer[5] = '-';
 
             // Month
-            val = dt.Month;
-            ix = val % 10;
-            val /= 10;
-            buffer[7] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[6] = (char)('0' + ix);
+            digits = DigitPairs[dt.Month];
+            buffer[7] = digits.Second;
+            buffer[6] = digits.First;
 
             // Delimiter
             buffer[8] = '-';
 
             // Day
-            val = dt.Day;
-            ix = val % 10;
-            val /= 10;
-            buffer[10] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[9] = (char)('0' + ix);
+            digits = DigitPairs[dt.Day];
+            buffer[10] = digits.Second;
+            buffer[9] = digits.First;
 
             // Delimiter
             buffer[11] = 'T';
 
-            val = dt.Hour;
-            ix = val % 10;
-            val /= 10;
-            buffer[13] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[12] = (char)('0' + ix);
+            digits = DigitPairs[dt.Hour];
+            buffer[13] = digits.Second;
+            buffer[12] = digits.First;
 
             // Delimiter
             buffer[14] = ':';
 
-            val = dt.Minute;
-            ix = val % 10;
-            val /= 10;
-            buffer[16] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[15] = (char)('0' + ix);
+            digits = DigitPairs[dt.Minute];
+            buffer[16] = digits.Second;
+            buffer[15] = digits.First;
 
             // Delimiter
             buffer[17] = ':';
 
-            val = dt.Second;
-            ix = val % 10;
-            val /= 10;
-            buffer[19] = (char)('0' + ix);
-            ix = val % 10;
-            val /= 10;
-            buffer[18] = (char)('0' + ix);
+            digits = DigitPairs[dt.Second];
+            buffer[19] = digits.Second;
+            buffer[18] = digits.First;
 
             buffer[20] = 'Z';
             buffer[21] = '"';
@@ -853,35 +848,36 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
             if (number == int.MinValue)
             {
                 writer.Write("-2147483648");
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
+            int copy;
+            if (number >= 0)
+                copy = number;
+            else
             {
-                copy = -copy;
+                writer.Write('-');
+                copy = -number;
             }
 
+            TwoDigits chars;
             do
             {
-                var ix = copy % 10;
-                copy /= 10;
+                var ix = copy % 100;
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1003,16 +999,22 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            do
+            var chars = DigitPairs[number % 100];
+            var copy = (int)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy != 0)
             {
-                var ix = copy % 10;
-                copy /= 10;
+                var ix = copy % 100;
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1021,35 +1023,36 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteLong(TextWriter writer, long number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
             if (number == long.MinValue)
             {
                 writer.Write("-9223372036854775808");
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            var copy = number;
-            if (copy < 0)
+            long copy;
+            if (number >= 0)
+                copy = number;
+            else
             {
-                copy = -copy;
+                writer.Write('-');
+                copy = -number;
             }
 
+            TwoDigits chars;
             do
             {
-                var ix = (int)(copy % 10);
-                copy /= 10;
+                var ix = (int) (copy % 100);
+                copy /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (number < 0)
-            {
-                buffer[ptr] = '-';
-                ptr--;
-            }
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1060,16 +1063,32 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            do
+            var chars = DigitPairs[number % 100];
+            var copy64 = (long)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy64 > int.MaxValue)
             {
-                var ix = (int)(copy % 10);
-                copy /= 10;
+                var ix = (int)(copy64 % 100);
+                copy64 /= 100;
 
-                buffer[ptr] = (char)('0' + ix);
-                ptr--;
-            } while (copy != 0);
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+            var copy32 = (int)copy64;
+            while (copy32 != 0)
+            {
+                var ix = (int)(copy32 % 100);
+                copy32 /= 100;
+
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
