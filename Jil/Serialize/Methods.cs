@@ -862,16 +862,20 @@ namespace Jil.Serialize
 
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-            if (copy < 0)
+            uint copy;
+            if (number < 0)
             {
-                copy = -copy;
+                copy = (uint)(-number);
+            }
+            else
+            {
+                copy = (uint)number;
             }
 
             do
             {
-                int ix;
-                copy = Math.DivRem(copy, 10, out ix);
+                byte ix = (byte)(copy % 10);
+                copy /= 10;
 
                 buffer[ptr] = (char)('0' + ix);
                 ptr--;
