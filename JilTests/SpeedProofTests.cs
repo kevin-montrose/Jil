@@ -1210,6 +1210,63 @@ namespace JilTests
 
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
         }
+
+        class _UseIssue31CustomIntWriter
+        {
+            public int A { get; set; }
+            public int[] B { get; set; }
+        }
+
+        [TestMethod]
+        public void UseIssue31CustomIntWriter()
+        {
+            Action<TextWriter, _UseIssue31CustomIntWriter, int> custom;
+            Action<TextWriter, _UseIssue31CustomIntWriter, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseIssue31CustomIntWriter>.UseIssue31CustomIntWriter = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    custom = InlineSerializerHelper.Build<_UseIssue31CustomIntWriter>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<_UseIssue31CustomIntWriter>.UseIssue31CustomIntWriter = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseIssue31CustomIntWriter>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseIssue31CustomIntWriter>.UseIssue31CustomIntWriter = true;
+            }
+
+            var rand = new Random(139426720);
+
+            var toSerialize = new List<_UseIssue31CustomIntWriter>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _UseIssue31CustomIntWriter
+                    {
+                        A = rand.Next(),
+                        B = Enumerable.Range(0, rand.Next(1, 100)).Select(_ => rand.Next()).ToArray()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double customTime, normalTime;
+            CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
+
+            Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

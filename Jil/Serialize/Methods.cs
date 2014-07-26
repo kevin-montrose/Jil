@@ -849,6 +849,43 @@ namespace Jil.Serialize
             }
         }
 
+        internal static readonly MethodInfo CustomWriteInt_I31 = typeof(Methods).GetMethod("_CustomWriteInt_I31", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteInt_I31(TextWriter writer, int number, char[] buffer)
+        {
+            // A version of _CustomWriteInt to investigate https://github.com/kevin-montrose/Jil/issues/31
+            if (number == int.MinValue)
+            {
+                writer.Write("-2147483648");
+                return;
+            }
+
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
+            var copy = number;
+            if (copy < 0)
+            {
+                copy = -copy;
+            }
+
+            do
+            {
+                int ix;
+                copy = Math.DivRem(copy, 10, out ix);
+
+                buffer[ptr] = (char)('0' + ix);
+                ptr--;
+            } while (copy != 0);
+
+            if (number < 0)
+            {
+                buffer[ptr] = '-';
+                ptr--;
+            }
+
+            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+        }
+
         internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
