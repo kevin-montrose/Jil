@@ -79,11 +79,11 @@ namespace Jil.SerializeDynamic
             return ret;
         }
 
-        static readonly Hashtable GetSerializerForCache = new Hashtable();
-        static Action<TextWriter, object, int> GetSerializerFor(Type type, Options opts)
+        static readonly Hashtable GetStaticSerializerForCache = new Hashtable();
+        static Action<TextWriter, object, int> GetStaticSerializerFor(Type type, Options opts)
         {
             var key = Tuple.Create(type, opts);
-            var ret = (Action<TextWriter, object, int>)GetSerializerForCache[key];
+            var ret = (Action<TextWriter, object, int>)GetStaticSerializerForCache[key];
             if (ret != null) return ret;
 
             var getStaticSerializer = GetInlineSerializerFor.MakeGenericMethod(type);
@@ -91,7 +91,7 @@ namespace Jil.SerializeDynamic
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
-            var optsFiled = OptionsLookup.GetFor(opts);
+            var optsFiled = OptionsLookup.GetOptionsFieldFor(opts);
             emit.LoadField(optsFiled);                              // Options
             emit.Call(getStaticSerializer);                         // Action<TextWriter, Type, int>
             emit.LoadArgument(0);                                   // Action<TextWriter, Type, int> TextWriter
@@ -110,12 +110,12 @@ namespace Jil.SerializeDynamic
             emit.Call(invoke);                                      // --empty--
             emit.Return();                                          // --empty--
 
-            lock (GetSerializerForCache)
+            lock (GetStaticSerializerForCache)
             {
-                ret = (Action<TextWriter, object, int>)GetSerializerForCache[key];
+                ret = (Action<TextWriter, object, int>)GetStaticSerializerForCache[key];
                 if (ret != null) return ret;
 
-                GetSerializerForCache[key] = ret = emit.CreateDelegate<Action<TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
+                GetStaticSerializerForCache[key] = ret = emit.CreateDelegate<Action<TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
             }
 
             return ret;
@@ -123,21 +123,21 @@ namespace Jil.SerializeDynamic
 
         static void SerializePrimitive(Type type,TextWriter stream, object val, Options opts, int depth)
         {
-            var del = GetSerializerFor(type, opts);
+            var del = GetStaticSerializerFor(type, opts);
             del(stream, val, depth);
         }
 
-        static void SerializeSemiStatically(object val, TextWriter stream, Options opts)
+        static void SerializeSemiStatically(TextWriter stream, object val, Options opts, int depth)
         {
             var valType = val.GetType();
-            var mtd = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(valType);
+            var builder = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(valType);
             
             // TODO: actually properly grab a cache type, jeez
             var cacheType = typeof(NewtonsoftStyleTypeCache<>);
-            var func = (Delegate)mtd.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
+            var func = (Delegate)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
             
             // TODO: recursion and padding check yo!
-            func.DynamicInvoke(stream, val, 0);
+            func.DynamicInvoke(stream, val, depth);
         }
 
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
@@ -164,7 +164,7 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
-            SerializeSemiStatically(obj, stream, opts);
+            SerializeSemiStatically(stream, obj, opts, depth);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Jil.SerializeDynamic
             }
         }
 
-        public static FieldInfo GetFor(Options opts)
+        public static FieldInfo GetOptionsFieldFor(Options opts)
         {
             return Lookup[opts];
         }
