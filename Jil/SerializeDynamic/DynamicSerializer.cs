@@ -132,8 +132,7 @@ namespace Jil.SerializeDynamic
             var valType = val.GetType();
             var builder = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(valType);
             
-            // TODO: actually properly grab a cache type, jeez
-            var cacheType = typeof(NewtonsoftStyleTypeCache<>);
+            var cacheType = OptionsLookup.GetTypeCacheFor(opts);
             var func = (Delegate)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
             
             // TODO: recursion and padding check yo!
