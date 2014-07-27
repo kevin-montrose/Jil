@@ -2007,20 +2007,26 @@ namespace Jil.Serialize
         {
             if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
             {
+                Emit.LoadArgument(0);               // TextWriter
+
                 if (inLocal != null)
                 {
-                    Emit.LoadLocal(inLocal);        // object
+                    Emit.LoadLocal(inLocal);        // TextWriter object
                 }
                 else
                 {
-                    Emit.LoadArgument(1);           // object
+                    Emit.LoadArgument(1);           // TextWriter object
                 }
 
-                Emit.LoadArgument(0);               // object TextWriter
-
+                // TODO: Load proper options
                 var opts = typeof(Options).GetField("Default");
-                Emit.LoadField(opts);                       // object TextWriter Options
+                Emit.LoadField(opts);                       // TextWriter object Options
+
+                // TODO: Load proper depth value
+                Emit.LoadConstant(0);                       // TextWriter object Options int
+                
                 Emit.Call(DynamicSerializer.SerializeMtd);  // void
+
                 return true;
             }
 

@@ -15,7 +15,7 @@ namespace Jil.SerializeDynamic
 {
     class DynamicSerializer
     {
-        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts)
+        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
         {
             stream.Write("{");
 
@@ -40,7 +40,7 @@ namespace Jil.SerializeDynamic
                 var val = callSite.Target.Invoke(callSite, dyn);
 
                 stream.Write("\"" + memberName.JsonEscape(jsonp: true) + "\":");
-                Serialize(val, stream, opts);
+                Serialize(stream, val, opts, depth++);
             }
 
             stream.Write("}");
@@ -68,7 +68,7 @@ namespace Jil.SerializeDynamic
         }
 
         public static readonly System.Reflection.MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
-        public static void Serialize(object obj, TextWriter stream, Options opts)
+        public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
             if (obj == null)
             {
@@ -87,7 +87,7 @@ namespace Jil.SerializeDynamic
             var dynObject = obj as IDynamicMetaObjectProvider;
             if (dynObject != null)
             {
-                SerializeDynamicObject(dynObject, stream, opts);
+                SerializeDynamicObject(dynObject, stream, opts, depth);
                 return;
             }
 

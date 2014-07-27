@@ -29,7 +29,7 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            DynamicSerializer.Serialize(data, output, options ?? Options.Default);
+            DynamicSerializer.Serialize(output, (object)data, options ?? Options.Default, 0);
         }
 
         /// <summary>
