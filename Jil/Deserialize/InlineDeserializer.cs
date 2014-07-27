@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseHashWhenMatchingMembers = true;
         public static bool UseHashWhenMatchingEnums = true;
+        public static bool UseFastConsumeWhiteSpace = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -482,7 +483,15 @@ namespace Jil.Deserialize
         void ConsumeWhiteSpace()
         {
             Emit.LoadArgument(0);                   // TextReader
-            Emit.Call(Methods.ConsumeWhiteSpace);   // --empty--
+
+            if (UseFastConsumeWhiteSpace)
+            {
+                Emit.Call(Methods.ConsumeWhiteSpaceFast);   // --empty --
+            }
+            else
+            {
+                Emit.Call(Methods.ConsumeWhiteSpace);       // --empty--
+            }
         }
 
         void ExpectEndOfStream()

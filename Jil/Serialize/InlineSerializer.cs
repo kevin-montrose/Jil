@@ -863,8 +863,8 @@ namespace Jil.Serialize
             {
                 if (primitiveType == typeof(int))
                 {
-                    Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.CustomWriteInt); // --empty--
+                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    Emit.Call(Methods.CustomWriteInt);  // --empty--
 
                     return;
                 }
