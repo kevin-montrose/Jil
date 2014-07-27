@@ -127,16 +127,77 @@ namespace Jil.SerializeDynamic
             del(stream, val, depth);
         }
 
+        static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();
+        static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod("_GetSemiStaticInlineSerializerFor", BindingFlags.NonPublic | BindingFlags.Static);
+        static Action<TextWriter, ForType, int> _GetSemiStaticInlineSerializerFor<ForType>(Options opts)
+        {
+            var type = typeof(ForType);
+
+            var key = Tuple.Create(typeof(ForType), opts);
+
+            var ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
+            if (ret != null) return ret;
+
+            var cacheType = OptionsLookup.GetTypeCacheFor(opts);
+            var builder = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(type);
+
+            lock (GetSemiStaticInlineSerializerForCache)
+            {
+                ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
+                if (ret != null) return ret;
+                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
+            }
+
+            return ret;
+        }
+
+        static Hashtable GetSemiStaticSerializerForCache = new Hashtable();
+        static Action<TextWriter, object, int> GetSemiStaticSerializerFor(Type type, Options opts)
+        {
+            var key = Tuple.Create(type, opts);
+            var ret = (Action<TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+            if (ret != null) return ret;
+
+            var getSemiStaticSerializer = GetSemiStaticInlineSerializerFor.MakeGenericMethod(type);
+            var invoke = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), type, typeof(int)).GetMethod("Invoke");
+
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
+
+            var optsFiled = OptionsLookup.GetOptionsFieldFor(opts);
+            emit.LoadField(optsFiled);                              // Options
+            emit.Call(getSemiStaticSerializer);                     // Action<TextWriter, Type, int>
+            emit.LoadArgument(0);                                   // Action<TextWriter, Type, int> TextWriter
+            emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter object
+
+            if (type.IsValueType)
+            {
+                emit.UnboxAny(type);                                // Action<TextWriter, Type, int> TextWriter type
+            }
+            else
+            {
+                emit.CastClass(type);                               // Action<TextWriter, Type, int> TextWriter type
+            }
+
+            emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter type int
+            emit.Call(invoke);                                      // --empty--
+            emit.Return();                                          // --empty--
+
+            lock (GetSemiStaticSerializerForCache)
+            {
+                ret = (Action<TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+                if (ret != null) return ret;
+
+                GetSemiStaticSerializerForCache[key] = ret = emit.CreateDelegate<Action<TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
+            }
+
+            return ret;
+        }
+
         static void SerializeSemiStatically(TextWriter stream, object val, Options opts, int depth)
         {
-            var valType = val.GetType();
-            var builder = InlineSerializerHelper.BuildWithDynamism.MakeGenericMethod(valType);
-            
-            var cacheType = OptionsLookup.GetTypeCacheFor(opts);
-            var func = (Delegate)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
-            
-            // TODO: recursion and padding check yo!
-            func.DynamicInvoke(stream, val, depth);
+            var serializer = GetSemiStaticSerializerFor(val.GetType(), opts);
+
+            serializer(stream, val, depth);
         }
 
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
