@@ -94,5 +94,46 @@ namespace Jil
                     AllowHashFunction
                 );
         }
+
+        /// <summary>
+        /// Returns a code that uniquely identifies this set of Options.
+        /// </summary>
+        public override int GetHashCode()
+        {
+            int dateTimeMask;
+            switch(UseDateTimeFormat)
+            {
+                case DateTimeFormat.ISO8601: dateTimeMask = 0x20; break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch: dateTimeMask = 0x40; break;
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: dateTimeMask = 0x80; break;
+                case DateTimeFormat.SecondsSinceUnixEpoch: dateTimeMask = 0x100; break;
+                default: throw new Exception("Unexpected DateTimeFormat "+UseDateTimeFormat);
+            }
+
+            return
+                (ShouldPrettyPrint ? 0x1 : 0x0) |
+                (ShouldExcludeNulls ? 0x2 : 0x0) |
+                (IsJSONP ? 0x4 : 0x0) |
+                (ShouldIncludeInherited ? 0x8 : 0x0) |
+                (AllowHashFunction ? 0x10 : 0x0) |
+                dateTimeMask;
+        }
+
+        /// <summary>
+        /// Returns true if two Options are equal, and false otherwise
+        /// </summary>
+        public override bool Equals(object obj)
+        {
+            var other = obj as Options;
+            if(other == null) return false;
+
+            return
+                other.UseDateTimeFormat == this.UseDateTimeFormat &&
+                other.ShouldPrettyPrint == this.ShouldPrettyPrint &&
+                other.ShouldExcludeNulls == this.ShouldExcludeNulls &&
+                other.IsJSONP == this.IsJSONP &&
+                other.ShouldIncludeInherited == this.ShouldIncludeInherited &&
+                other.AllowHashFunction == this.AllowHashFunction;
+        }
     }
 }
