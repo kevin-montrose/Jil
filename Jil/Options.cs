@@ -12,40 +12,72 @@ namespace Jil
     {
 #pragma warning disable 1591
         public static readonly Options Default = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
-        public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
-        public static readonly Options PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
+        public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options JSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
+        public static readonly Options NoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashFunction: false);
+        public static readonly Options PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
         public static readonly Options PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true);
+        public static readonly Options PrettyPrintNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, allowHashFunction: false);
+        public static readonly Options ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
+        public static readonly Options ExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options JSONPNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
         public static readonly Options PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options PrettyPrintExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options PrettyPrintJSONPNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
+        public static readonly Options ExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, allowHashFunction: false);
+        public static readonly Options PrettyPrintExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, allowHashFunction: false);
 
         public static readonly Options MillisecondsSinceUnixEpoch = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
-        public static readonly Options MillisecondsSinceUnixEpochExcludeNulls = new Options(excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
-        public static readonly Options MillisecondsSinceUnixEpochPrettyPrint = new Options(prettyPrint: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
-        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNulls = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrint = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true);
+        public static readonly Options MillisecondsSinceUnixEpochExcludeNulls = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options MillisecondsSinceUnixEpochJSONP = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options MillisecondsSinceUnixEpochExcludeNullsJSONP = new Options(excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintJSONP = new Options(prettyPrint: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true);
+        public static readonly Options MillisecondsSinceUnixEpochNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
+        public static readonly Options MillisecondsSinceUnixEpochExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochJSONPNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintJSONPNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, allowHashFunction: false);
+        public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, allowHashFunction: false);
 
         public static readonly Options ISO8601 = new Options(dateFormat: DateTimeFormat.ISO8601);
-        public static readonly Options ISO8601ExcludeNulls = new Options(excludeNulls: true, dateFormat: DateTimeFormat.ISO8601);
-        public static readonly Options ISO8601PrettyPrint = new Options(prettyPrint: true, dateFormat: DateTimeFormat.ISO8601);
-        public static readonly Options ISO8601PrettyPrintExcludeNulls = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601);
+        public static readonly Options ISO8601PrettyPrint = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true);
+        public static readonly Options ISO8601ExcludeNulls = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true);
         public static readonly Options ISO8601JSONP = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true);
-        public static readonly Options ISO8601ExcludeNullsJSONP = new Options(excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, jsonp: true);
-        public static readonly Options ISO8601PrettyPrintJSONP = new Options(prettyPrint: true, dateFormat: DateTimeFormat.ISO8601, jsonp: true);
-        public static readonly Options ISO8601PrettyPrintExcludeNullsJSONP = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, jsonp: true);
+        public static readonly Options ISO8601NoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, allowHashFunction: false);
+        public static readonly Options ISO8601PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true);
+        public static readonly Options ISO8601PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, jsonp: true);
+        public static readonly Options ISO8601PrettyPrintNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, allowHashFunction: false);
+        public static readonly Options ISO8601ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, jsonp: true);
+        public static readonly Options ISO8601ExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options ISO8601JSONPNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, allowHashFunction: false);
+        public static readonly Options ISO8601PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options ISO8601PrettyPrintExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options ISO8601PrettyPrintJSONPNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, allowHashFunction: false);
+        public static readonly Options ISO8601ExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, jsonp: true, allowHashFunction: false);
+        public static readonly Options ISO8601PrettyPrintExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, jsonp: true, allowHashFunction: false);
 
         public static readonly Options SecondsSinceUnixEpoch = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
-        public static readonly Options SecondsSinceUnixEpochExcludeNulls = new Options(excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
-        public static readonly Options SecondsSinceUnixEpochPrettyPrint = new Options(prettyPrint: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
-        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNulls = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrint = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true);
+        public static readonly Options SecondsSinceUnixEpochExcludeNulls = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true);
         public static readonly Options SecondsSinceUnixEpochJSONP = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONP = new Options(excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONP = new Options(prettyPrint: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(prettyPrint: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true);
+        public static readonly Options SecondsSinceUnixEpochNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, jsonp: true);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
+        public static readonly Options SecondsSinceUnixEpochExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochJSONPNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONPNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, allowHashFunction: false);
+        public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONPNoHashing = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, allowHashFunction: false);
 #pragma warning restore 1591
 
         internal bool ShouldPrettyPrint { get; private set; }

@@ -91,8 +91,8 @@ namespace Jil.SerializeDynamic
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
-            // TODO: get the proper options
-            emit.LoadField(typeof(Options).GetField("Default"));    // Options
+            var optsFiled = OptionsLookup.GetFor(opts);
+            emit.LoadField(optsFiled);                              // Options
             emit.Call(getStaticSerializer);                         // Action<TextWriter, Type, int>
             emit.LoadArgument(0);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter object
@@ -140,7 +140,7 @@ namespace Jil.SerializeDynamic
             func.DynamicInvoke(stream, val, 0);
         }
 
-        public static readonly System.Reflection.MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
+        public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
             if (obj == null)
