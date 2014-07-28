@@ -64,6 +64,12 @@ namespace JilTests
                 var res = dyn.ToString();
                 Assert.AreEqual(str, res);
             }
+
+            {
+                var dyn = JSON.DeserializeDynamic("\"how are you today?\"");
+                var str = dyn.ToString();
+                Assert.AreEqual("\"how are you today?\"", str);
+            }
         }
 
         [TestMethod]

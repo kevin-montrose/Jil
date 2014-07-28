@@ -232,6 +232,27 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static bool CanBeString(dynamic dyn, out string str)
+        {
+            try
+            {
+                str = (string)dyn;
+                return true;
+            }
+            catch { }
+
+            try
+            {
+                var c = (char)dyn;
+                str = c.ToString();
+                return true;
+            }
+            catch { }
+
+            str = null;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -284,6 +305,13 @@ namespace Jil.SerializeDynamic
                 if (CanGuid(dynObject, out guid))
                 {
                     Serialize(stream, guid, opts, depth);
+                    return;
+                }
+
+                string str;
+                if (CanBeString(dynObject, out str))
+                {
+                    Serialize(stream, str, opts, depth);
                     return;
                 }
 
