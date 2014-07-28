@@ -1299,6 +1299,12 @@ namespace Jil.DeserializeDynamic
         static MethodInfo InnerTryInvokeMember = typeof(JsonObject).GetMethod("_InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
         bool _InnerTryInvokeMember(string name, object[] args, out object result)
         {
+            if (name == "ToString" && args.Length == 0)
+            {
+                result = this.ToString();
+                return true;
+            }
+
             if (Type == JsonObjectType.Object)
             {
                 if (name == "GetEnumerator" && args.Length == 0)

@@ -14,6 +14,16 @@ namespace JilTests
     public class DynamicSerializationTests
     {
         [TestMethod]
+        public void ToStringJSON()
+        {
+            var dyn = JSON.DeserializeDynamic("{\"Hello\":[1,2,3],\"World\":1.23}");
+            var res = dyn.ToString();
+
+            // eh, this doesn't work yet; keep it around as a reminder
+            throw new NotImplementedException();
+        }
+
+        [TestMethod]
         public void HeterogenousCollection()
         {
             using (var str = new StringWriter())
