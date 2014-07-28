@@ -28,6 +28,7 @@ namespace Jil.SerializeDynamic
 
             var first = true;
 
+            // TODO: Pretty print and exclude null support
             foreach (var memberName in metaObj.GetDynamicMemberNames())
             {
                 if (!first)
@@ -122,6 +123,41 @@ namespace Jil.SerializeDynamic
             serializer(stream, val, depth);
         }
 
+        static bool CanBeInteger(dynamic dyn, out ulong integer, out bool negative)
+        {
+            try
+            {
+                var asLong = (long)dyn;
+
+                if (asLong < 0)
+                {
+                    asLong = -asLong;
+                    negative = true;
+                }
+                else
+                {
+                    negative = false;
+                }
+
+                integer = (ulong)asLong;
+                return true;
+            }
+            catch { }
+
+            try
+            {
+                integer = (ulong)dyn;
+                negative = false;
+
+                return true;
+            }
+            catch { }
+
+            integer = 0;
+            negative = false;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -136,6 +172,19 @@ namespace Jil.SerializeDynamic
             var dynObject = obj as IDynamicMetaObjectProvider;
             if (dynObject != null)
             {
+                ulong integer;
+                bool negative;
+                if(CanBeInteger(dynObject, out integer, out negative))
+                {
+                    if (negative)
+                    {
+                        stream.Write('-');
+                    }
+
+                    Serialize(stream, integer, opts, depth);
+                    return;
+                }
+
                 SerializeDynamicObject(dynObject, stream, opts, depth);
                 return;
             }

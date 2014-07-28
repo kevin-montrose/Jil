@@ -69,7 +69,9 @@ namespace Jil.DeserializeDynamic
                             Expression.Call(
                                 StringConcat,
                                 UnableToConvertDynamic,
-                                thisEvaled,
+                                // TODO: Figure out how to make this work... write now it's infinite recursion
+                                //thisEvaled,
+                                Expression.Constant("--foo--"),
                                 Expression.Constant("] to [" + binder.ReturnType.FullName + "]")
                             )
                         )

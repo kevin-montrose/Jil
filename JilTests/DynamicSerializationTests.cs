@@ -16,11 +16,23 @@ namespace JilTests
         [TestMethod]
         public void ToStringJSON()
         {
-            var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
-            var res = dyn.ToString();
+            {
+                var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
+                var res = dyn.ToString();
+                Assert.AreEqual("{\"Hello\":1}", res);
+            }
 
-            // eh, this doesn't work yet; keep it around as a reminder
-            throw new NotImplementedException();
+            {
+                var dyn1 = JSON.DeserializeDynamic(long.MaxValue.ToString());
+                var dyn2 = JSON.DeserializeDynamic(ulong.MaxValue.ToString());
+                var dyn3 = JSON.DeserializeDynamic(long.MinValue.ToString());
+                var res1 = dyn1.ToString();
+                var res2 = dyn2.ToString();
+                var res3 = dyn3.ToString();
+                Assert.AreEqual(long.MaxValue.ToString(), res1);
+                Assert.AreEqual(ulong.MaxValue.ToString(), res2);
+                Assert.AreEqual(long.MinValue.ToString(), res3);
+            }
         }
 
         [TestMethod]
