@@ -123,6 +123,19 @@ namespace Jil.SerializeDynamic
             serializer(stream, val, depth);
         }
 
+        static bool CanBeBool(dynamic dyn, out bool bit)
+        {
+            try
+            {
+                bit = (bool)dyn;
+                return true;
+            }
+            catch { }
+
+            bit = false;
+            return false;
+        }
+
         static bool CanBeInteger(dynamic dyn, out ulong integer, out bool negative)
         {
             try
@@ -199,6 +212,13 @@ namespace Jil.SerializeDynamic
             var dynObject = obj as IDynamicMetaObjectProvider;
             if (dynObject != null)
             {
+                bool bit;
+                if(CanBeBool(dynObject, out bit))
+                {
+                    Serialize(stream, bit, opts, depth);
+                    return;
+                }
+
                 ulong integer;
                 bool negative;
                 if(CanBeInteger(dynObject, out integer, out negative))

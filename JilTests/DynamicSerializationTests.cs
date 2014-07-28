@@ -39,6 +39,15 @@ namespace JilTests
                 var res = dyn.ToString();
                 Assert.AreEqual("1.23456", res);
             }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("true");
+                var dyn2 = JSON.DeserializeDynamic("false");
+                var res1 = dyn1.ToString();
+                var res2 = dyn2.ToString();
+                Assert.AreEqual("true", res1);
+                Assert.AreEqual("false", res2);
+            }
         }
 
         [TestMethod]
