@@ -158,6 +158,33 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static bool CanBeFloatingPoint(dynamic dyn, out double floatingPoint)
+        {
+            try
+            {
+                floatingPoint = (double)dyn;
+                return true;
+            }
+            catch { }
+
+            try
+            {
+                floatingPoint = (float)dyn;
+                return true;
+            }
+            catch { }
+
+            try
+            {
+                floatingPoint = (double)(decimal)dyn;
+                return true;
+            }
+            catch { }
+
+            floatingPoint = 0;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -182,6 +209,13 @@ namespace Jil.SerializeDynamic
                     }
 
                     Serialize(stream, integer, opts, depth);
+                    return;
+                }
+
+                double floatingPoint;
+                if (CanBeFloatingPoint(dynObject, out floatingPoint))
+                {
+                    Serialize(stream, floatingPoint, opts, depth);
                     return;
                 }
 

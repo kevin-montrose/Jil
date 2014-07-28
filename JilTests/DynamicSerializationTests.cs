@@ -33,6 +33,12 @@ namespace JilTests
                 Assert.AreEqual(ulong.MaxValue.ToString(), res2);
                 Assert.AreEqual(long.MinValue.ToString(), res3);
             }
+
+            {
+                var dyn = JSON.DeserializeDynamic("1.23456");
+                var res = dyn.ToString();
+                Assert.AreEqual("1.23456", res);
+            }
         }
 
         [TestMethod]
