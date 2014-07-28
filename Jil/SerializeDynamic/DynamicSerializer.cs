@@ -123,6 +123,24 @@ namespace Jil.SerializeDynamic
             serializer(stream, val, depth);
         }
 
+        static void SerializeList(TextWriter stream, IEnumerable e, Options opts, int depth)
+        {
+            bool isFirst = true;
+
+            stream.Write("[");
+            foreach (var i in e)
+            {
+                if (!isFirst)
+                {
+                    stream.Write(",");
+                }
+                isFirst = false;
+
+                Serialize(stream, i, opts, depth);
+            }
+            stream.Write("]");
+        }
+
         static bool CanBeBool(dynamic dyn, out bool bit)
         {
             try
@@ -253,6 +271,34 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static bool CanBeListAndNotDictionary(dynamic dyn, out IEnumerable enumerable)
+        {
+            try
+            {
+                enumerable = (IEnumerable)dyn;
+
+                // if either of these succeed, we're not really a "list"
+                try
+                {
+                    var asDict1 = (IDictionary<string, object>)dyn;
+                    return false;
+                }
+                catch { }
+                try
+                {
+                    var asDict2 = (IDictionary)dyn;
+                    return false;
+                }
+                catch { }
+
+                return true;
+            }
+            catch { }
+
+            enumerable = null;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -312,6 +358,13 @@ namespace Jil.SerializeDynamic
                 if (CanBeString(dynObject, out str))
                 {
                     Serialize(stream, str, opts, depth);
+                    return;
+                }
+
+                IEnumerable list;
+                if(CanBeListAndNotDictionary(dynObject, out list))
+                {
+                    SerializeList(stream, list, opts, depth);
                     return;
                 }
 

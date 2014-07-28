@@ -70,6 +70,18 @@ namespace JilTests
                 var str = dyn.ToString();
                 Assert.AreEqual("\"how are you today?\"", str);
             }
+
+            {
+                var dyn1 = JSON.DeserializeDynamic("[1,2,3]");
+                var dyn2 = JSON.DeserializeDynamic("[]");
+                var dyn3 = JSON.DeserializeDynamic("[1, \"hello\", {}, 456]");
+                var res1 = dyn1.ToString();
+                var res2 = dyn2.ToString();
+                var res3 = dyn3.ToString();
+                Assert.AreEqual("[1,2,3]", res1);
+                Assert.AreEqual("[]", res2);
+                Assert.AreEqual("[1,\"hello\",{},456]", res3);
+            }
         }
 
         [TestMethod]
