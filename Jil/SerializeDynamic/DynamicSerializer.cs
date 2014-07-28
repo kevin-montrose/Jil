@@ -219,6 +219,19 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static bool CanGuid(dynamic dyn, out Guid guid)
+        {
+            try
+            {
+                guid = (Guid)dyn;
+                return true;
+            }
+            catch { }
+
+            guid = Guid.Empty;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -264,6 +277,13 @@ namespace Jil.SerializeDynamic
                 if(CanBeDateTime(dynObject, out dt))
                 {
                     Serialize(stream, dt, opts, depth);
+                    return;
+                }
+
+                Guid guid;
+                if (CanGuid(dynObject, out guid))
+                {
+                    Serialize(stream, guid, opts, depth);
                     return;
                 }
 

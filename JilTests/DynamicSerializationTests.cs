@@ -56,6 +56,14 @@ namespace JilTests
                 var res = dyn.ToString();
                 Assert.AreEqual(str, res);
             }
+
+            {
+                var g = Guid.NewGuid();
+                var str = JSON.Serialize(g);
+                var dyn = JSON.DeserializeDynamic(str);
+                var res = dyn.ToString();
+                Assert.AreEqual(str, res);
+            }
         }
 
         [TestMethod]
