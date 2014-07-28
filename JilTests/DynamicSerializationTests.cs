@@ -48,6 +48,14 @@ namespace JilTests
                 Assert.AreEqual("true", res1);
                 Assert.AreEqual("false", res2);
             }
+
+            {
+                var now = DateTime.UtcNow;
+                var str = JSON.Serialize(now, Options.ISO8601);
+                var dyn = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var res = dyn.ToString();
+                Assert.AreEqual(str, res);
+            }
         }
 
         [TestMethod]

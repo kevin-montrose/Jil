@@ -198,6 +198,27 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static bool CanBeDateTime(dynamic dyn, out DateTime dt)
+        {
+            try
+            {
+                dt = (DateTime)dyn;
+                return true;
+            }
+            catch { }
+
+            try
+            {
+                var dto = (DateTimeOffset)dyn;
+                dt = dto.UtcDateTime;
+                return true;
+            }
+            catch { }
+
+            dt = DateTime.MinValue;
+            return false;
+        }
+
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
@@ -236,6 +257,13 @@ namespace Jil.SerializeDynamic
                 if (CanBeFloatingPoint(dynObject, out floatingPoint))
                 {
                     Serialize(stream, floatingPoint, opts, depth);
+                    return;
+                }
+
+                DateTime dt;
+                if(CanBeDateTime(dynObject, out dt))
+                {
+                    Serialize(stream, dt, opts, depth);
                     return;
                 }
 
