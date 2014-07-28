@@ -16,7 +16,7 @@ namespace JilTests
         [TestMethod]
         public void ToStringJSON()
         {
-            var dyn = JSON.DeserializeDynamic("{\"Hello\":[1,2,3],\"World\":1.23}");
+            var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
             var res = dyn.ToString();
 
             // eh, this doesn't work yet; keep it around as a reminder
