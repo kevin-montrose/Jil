@@ -30,8 +30,10 @@ namespace Jil.Serialize
         static Methods()
         {
             DigitPairs = new TwoDigits[100];
-            for (var i=0; i < 100; ++i)
+            for (var i = 0; i < 100; ++i)
+            {
                 DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
+            }
         }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
@@ -1014,7 +1016,9 @@ namespace Jil.Serialize
             };
 
             if (chars.First == '0')
-                ++ptr;
+            {
+                ptr++;
+            }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1088,7 +1092,9 @@ namespace Jil.Serialize
             };
 
             if (chars.First == '0')
-                ++ptr;
+            {
+                ptr++;
+            }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
