@@ -284,9 +284,31 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j=0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -349,9 +371,30 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -377,7 +420,7 @@ namespace Jil.Serialize
                     writer.Write(@"\u2029");
                     continue;
                 }
-
+                
                 // This is converted into an IL switch, so don't fret about lookup times
                 switch (c)
                 {
@@ -430,9 +473,31 @@ namespace Jil.Serialize
                 return;
             }
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -499,9 +564,30 @@ namespace Jil.Serialize
                 return;
             }
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -576,7 +662,27 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -637,7 +743,26 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -714,7 +839,26 @@ namespace Jil.Serialize
                 return;
             }
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -791,7 +935,27 @@ namespace Jil.Serialize
                 return;
             }
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
