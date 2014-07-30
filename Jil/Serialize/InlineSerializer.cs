@@ -2018,12 +2018,11 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);           // TextWriter object
                 }
 
-                // TODO: Load proper options
-                var opts = typeof(Options).GetField("Default");
-                Emit.LoadField(opts);                       // TextWriter object Options
+                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited);
+                var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
+                Emit.LoadField(optionsField);               // TextWriter object Options
 
-                // TODO: Load proper depth value
-                Emit.LoadConstant(0);                       // TextWriter object Options int
+                Emit.LoadArgument(2);                       // TextWriter object Options int
                 
                 Emit.Call(DynamicSerializer.SerializeMtd);  // void
 
