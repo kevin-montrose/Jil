@@ -188,6 +188,12 @@ namespace Jil.SerializeDynamic
 
         static void SerializeList(TextWriter stream, IEnumerable e, Options opts, int depth)
         {
+            var comma = ",";
+            if (opts.ShouldPrettyPrint)
+            {
+                comma = ", ";
+            }
+
             bool isFirst = true;
 
             stream.Write("[");
@@ -195,7 +201,7 @@ namespace Jil.SerializeDynamic
             {
                 if (!isFirst)
                 {
-                    stream.Write(",");
+                    stream.Write(comma);
                 }
                 isFirst = false;
 

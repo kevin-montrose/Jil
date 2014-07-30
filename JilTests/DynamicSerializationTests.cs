@@ -79,9 +79,21 @@ namespace JilTests
                 var res1 = dyn1.ToString();
                 var res2 = dyn2.ToString();
                 var res3 = dyn3.ToString();
-                Assert.AreEqual("[1,2,3]", res1);
-                Assert.AreEqual("[]", res2);
-                Assert.AreEqual("[1,\"hello\",{},456]", res3);
+                var shouldMatch1 = JSON.Serialize(new[] { 1, 2, 3 }, Options.ISO8601PrettyPrintNoHashing);
+                var shouldMatch2 = JSON.Serialize(new object[0], Options.ISO8601PrettyPrintNoHashing);
+                var shouldMatch3 =
+                    "[" +
+                    JSON.Serialize(1, Options.ISO8601PrettyPrintNoHashing) +
+                    ", " +
+                    JSON.Serialize("hello", Options.ISO8601PrettyPrintNoHashing) +
+                    ", " +
+                    JSON.Serialize(new { }, Options.ISO8601PrettyPrintNoHashing) +
+                    ", " +
+                    JSON.Serialize(456, Options.ISO8601PrettyPrintNoHashing) +
+                    "]";
+                Assert.AreEqual(shouldMatch1, res1);
+                Assert.AreEqual(shouldMatch2, res2);
+                Assert.AreEqual(shouldMatch3, res3);
             }
         }
 
