@@ -42,31 +42,75 @@ namespace Jil.SerializeDynamic
         static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
         static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
         {
-            stream.Write("{");
+            var quoteColon = "\":";
+            if (opts.ShouldPrettyPrint)
+            {
+                quoteColon = "\": ";
+            }
+
+            stream.Write('{');
+            depth++;
 
             var dynType = dyn.GetType();
             var metaObj = dyn.GetMetaObject(CachedParameterExp);
 
             var first = true;
-
-            // TODO: Pretty print and exclude null support
             foreach (var memberName in metaObj.GetDynamicMemberNames())
             {
-                if (!first)
-                {
-                    stream.Write(",");
-                }
-
-                first = false;
-
                 var getter = GetGetMember(dynType, memberName);
                 var val = getter(dyn);
 
-                stream.Write("\"" + memberName.JsonEscape(jsonp: true) + "\":");
+                if (val == null && opts.ShouldExcludeNulls) continue;
+
+                if (!first)
+                {
+                    stream.Write(',');
+                }
+                first = false;
+
+                if (opts.ShouldPrettyPrint)
+                {
+                    LineBreakAndIndent(stream, depth);
+                }
+
+                stream.Write('"');
+                stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
+                stream.Write(quoteColon);
+
                 Serialize(stream, val, opts, depth + 1);
             }
 
-            stream.Write("}");
+            depth--;
+            if (opts.ShouldPrettyPrint)
+            {
+                LineBreakAndIndent(stream, depth);
+            }
+
+            stream.Write('}');
+        }
+
+        static void LineBreakAndIndent(TextWriter stream, int depth)
+        {
+            stream.Write('\n');
+
+            switch(depth){
+                case 0: return;
+                case 1: stream.Write(' '); return;
+                case 2: stream.Write("  "); return;
+                case 3: stream.Write("   "); return;
+                case 4: stream.Write("    "); return;
+                case 5: stream.Write("     "); return;
+                case 6: stream.Write("      "); return;
+                case 7: stream.Write("       "); return;
+                case 8: stream.Write("        "); return;
+                case 9: stream.Write("         "); return;
+                case 10: stream.Write("          "); return;
+            }
+
+            for (var i = 0; i < depth; i++)
+            {
+                stream.Write(' ');
+            }
         }
 
         static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();

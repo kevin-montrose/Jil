@@ -19,7 +19,8 @@ namespace JilTests
             {
                 var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
                 var res = dyn.ToString();
-                Assert.AreEqual("{\"Hello\":1}", res);
+                var shouldMatch = JSON.Serialize(new { Hello = 1 }, Options.ISO8601PrettyPrintNoHashing);
+                Assert.AreEqual(shouldMatch, res);
             }
 
             {
