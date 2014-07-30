@@ -18,13 +18,34 @@ namespace Jil.SerializeDynamic
 {
     class DynamicSerializer
     {
+        static readonly Hashtable GetGetMemberCache = new Hashtable();
+        static Func<object, object> GetGetMember(Type type, string memberName)
+        {
+            var key = Tuple.Create(type, memberName);
+            var cached = (Func<object, object>)GetGetMemberCache[key];
+            if (cached != null) return cached;
+
+            var binder = (GetMemberBinder)Microsoft.CSharp.RuntimeBinder.Binder.GetMember(0, memberName, type, new[] { CSharpArgumentInfo.Create(0, null) });
+            var callSite = CallSite<Func<CallSite, object, object>>.Create(binder);
+
+            lock (GetGetMemberCache)
+            {
+                cached = (Func<object, object>)GetGetMemberCache[key];
+                if (cached != null) return cached;
+
+                GetGetMemberCache[key] = cached = (obj => callSite.Target.Invoke(callSite, obj));
+            }
+
+            return cached;
+        }
+
+        static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
         static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
         {
             stream.Write("{");
 
             var dynType = dyn.GetType();
-            var param = Expression.Parameter(typeof(object));
-            var metaObj = dyn.GetMetaObject(param);
+            var metaObj = dyn.GetMetaObject(CachedParameterExp);
 
             var first = true;
 
@@ -38,10 +59,8 @@ namespace Jil.SerializeDynamic
 
                 first = false;
 
-                var binder = (GetMemberBinder)Microsoft.CSharp.RuntimeBinder.Binder.GetMember(0, memberName, dynType, new[] { CSharpArgumentInfo.Create(0, null) });
-                var callSite = CallSite<Func<CallSite, object, object>>.Create(binder);
-
-                var val = callSite.Target.Invoke(callSite, dyn);
+                var getter = GetGetMember(dynType, memberName);
+                var val = getter(dyn);
 
                 stream.Write("\"" + memberName.JsonEscape(jsonp: true) + "\":");
                 Serialize(stream, val, opts, depth + 1);
