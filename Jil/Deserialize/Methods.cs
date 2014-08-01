@@ -13,9 +13,11 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        // .NET will expand a char[] allocation up to 32, don't bother trimming this unless you can get this down to 16
-        //    you'll just be making string parsing slower for no benefit
-        public const int CharBufferSize = 32;
+        // Having this as a large value avoids the use of StringBuilder in the _ReadEncodedStringWithBuffer
+        // method (possibly preferrably to this hardcoded value it has a use provided value or alternatively
+        // would be to pass the buffer in as a ref parameter so that it could expand based on actually sizes
+        // of string; avoiding the use of StringBuilder altogether)
+        public const int CharBufferSize = 1000;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -523,7 +525,7 @@ namespace Jil.Deserialize
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(new string(buffer, 0, ix));
+                        commonSb.Append(buffer, 0, ix);
                         break;
                     }
 
