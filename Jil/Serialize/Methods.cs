@@ -289,7 +289,7 @@ namespace Jil.Serialize
                 }
                 else
                 {
-                    fracEnd = 27;
+                    fracEnd = 26;
                 }
 
                 fracPart = remainingTicks % 100;
@@ -302,9 +302,14 @@ namespace Jil.Serialize
                 }
                 else
                 {
-                    if (fracEnd == 27)
+                    if (fracEnd == 26)
                     {
                         fracEnd = 24;
+                    }
+                    else
+                    {
+                        buffer[25] = '0';
+                        buffer[24] = '0';
                     }
                 }
 
@@ -321,6 +326,11 @@ namespace Jil.Serialize
                     if (fracEnd == 24)
                     {
                         fracEnd = 22;
+                    }
+                    else
+                    {
+                        buffer[23] = '0';
+                        buffer[22] = '0';
                     }
                 }
 
