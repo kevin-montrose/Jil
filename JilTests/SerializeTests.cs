@@ -6629,5 +6629,15 @@ namespace JilTests
                 Assert.AreEqual("{\"TestDate\":\"\\/Date(0)\\/\"}", str1);
             }
         }
+
+        [TestMethod]
+        public void Issue43()
+        {
+            var shouldMatch = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+            var remaining = TimeSpan.FromMilliseconds(0.534);
+            shouldMatch += remaining;
+            var dt = JSON.Deserialize<DateTime>("\"2014-08-08T14:04:01.4265339+00:00\"", Options.ISO8601);
+            Assert.AreEqual(shouldMatch, dt);
+        }
     }
 }
