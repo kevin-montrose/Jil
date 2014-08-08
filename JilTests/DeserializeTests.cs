@@ -4452,6 +4452,15 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue43()
+        {
+            var shouldMatch = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+            shouldMatch = new DateTime(shouldMatch.Ticks + 5339);
+            var dt = JSON.Deserialize<DateTime>("\"2014-08-08T14:04:01.4265339+00:00\"", Options.ISO8601);
+            Assert.AreEqual(shouldMatch, dt);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

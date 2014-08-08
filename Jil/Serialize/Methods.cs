@@ -214,10 +214,11 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomISO8601ToString(TextWriter writer, DateTime dt, char[] buffer)
         {
-            // "yyyy-mm-ddThh:mm:ssZ"
+            // "yyyy-mm-ddThh:mm:ss.fffffffZ"
             // 0123456789ABCDEFGHIJKL
             //
             // Yes, DateTime.Max is in fact guaranteed to have a 4 digit year (and no more)
+            // f of 7 digits allows for 1 Tick level resolution
 
             buffer[0] = '"';
 
@@ -271,10 +272,70 @@ namespace Jil.Serialize
             buffer[19] = digits.Second;
             buffer[18] = digits.First;
 
-            buffer[20] = 'Z';
-            buffer[21] = '"';
+            int fracEnd;
+            var remainingTicks = (dt - new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second)).Ticks;
+            if (remainingTicks > 0)
+            {
+                buffer[20] = '.';
 
-            writer.Write(buffer, 0, 22);
+                var fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[27] = digits.Second;
+                    buffer[26] = digits.First;
+                    fracEnd = 28;
+                }
+                else
+                {
+                    fracEnd = 27;
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[25] = digits.Second;
+                    buffer[24] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 27)
+                    {
+                        fracEnd = 24;
+                    }
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[23] = digits.Second;
+                    buffer[22] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 24)
+                    {
+                        fracEnd = 22;
+                    }
+                }
+
+                fracPart = remainingTicks;
+                buffer[21] = (char)('0' + fracPart);
+            }
+            else
+            {
+                fracEnd = 20;
+            }
+
+            buffer[fracEnd] = 'Z';
+            buffer[fracEnd + 1] = '"';
+
+            writer.Write(buffer, 0, fracEnd + 2);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInline = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInline", BindingFlags.NonPublic | BindingFlags.Static);

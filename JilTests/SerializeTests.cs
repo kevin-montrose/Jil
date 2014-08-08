@@ -6631,13 +6631,13 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void Issue43()
+        public void Issue42()
         {
-            var shouldMatch = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
-            var remaining = TimeSpan.FromMilliseconds(0.534);
-            shouldMatch += remaining;
-            var dt = JSON.Deserialize<DateTime>("\"2014-08-08T14:04:01.4265339+00:00\"", Options.ISO8601);
-            Assert.AreEqual(shouldMatch, dt);
+            var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+            dt = new DateTime(dt.Ticks + 5339); // 5339 = 0.5339 milliseconds
+
+            var str = JSON.Serialize(dt, Options.ISO8601);
+            Assert.AreEqual("\"2014-08-08T14:04:01.4265339Z\"", str);
         }
     }
 }
