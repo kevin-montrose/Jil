@@ -6629,5 +6629,168 @@ namespace JilTests
                 Assert.AreEqual("{\"TestDate\":\"\\/Date(0)\\/\"}", str1);
             }
         }
+
+        [TestMethod]
+        public void Issue42()
+        {
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5339, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4265339Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5330, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4265330Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5101, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4265101Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5011, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4265011Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 0511, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4260511Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 420, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 3511, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4203511Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 407, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 3511, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4073511Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 047, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 3511, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.0473511Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5300, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.42653Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5005, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4265005Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 0055, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4260055Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 420, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 0555, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4200555Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 400, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5555, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.4005555Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 01, 009, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5555, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:01.0095555Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 10, 089, DateTimeKind.Utc);
+                dt = new DateTime(dt.Ticks + 5555, DateTimeKind.Utc); // 5339 = 0.5339 milliseconds
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:10.0895555Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 10, 089, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:10.089Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 10, 90, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:10.090Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+
+            {
+                var dt = new DateTime(2014, 08, 08, 14, 04, 10, 100, DateTimeKind.Utc);
+
+                var str = JSON.Serialize(dt, Options.ISO8601);
+                var shouldMatch = "\"2014-08-08T14:04:10.1Z\"";
+                Assert.AreEqual(shouldMatch, str);
+            }
+        }
     }
 }
