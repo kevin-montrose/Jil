@@ -958,6 +958,124 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
+        internal static readonly MethodInfo CustomWriteInt_I37 = typeof(Methods).GetMethod("_CustomWriteInt_I37", BindingFlags.Static | BindingFlags.NonPublic);
+        static void _CustomWriteInt_I37(TextWriter writer, int num, char[] buffer)
+        {
+            const char zero = '0';
+
+            uint number;
+            if (num < 0)
+            {
+                writer.Write('-');
+                number = (uint)(-num);
+            }
+            else
+            {
+                number = (uint)num;
+            }
+
+            int numLen;
+
+            // Binary search for length of int
+            if (number >= 10000)
+            {
+                if (number >= 1000000)	// 1 million
+                {
+                    if (number >= 10000000)	// 10 million
+                    {
+                        if (number >= 100000000)	// 100 million
+                        {
+                            if (number < 1000000000)
+                            {
+                                numLen = 9;
+                                goto digit1;
+                            }
+                            else 
+                            { 
+                                numLen = 10;
+                                goto digit0;
+                            }
+                        }
+                        else
+                        {
+                            numLen = 8;
+                            goto digit2;
+                        }
+                    }
+                    else
+                    {
+                        numLen = 7;
+                        goto digit3;
+                    }
+                }
+                else
+                {
+                    if (number >= 100000)
+                    {
+                        numLen = 6;
+                        goto digit4;
+                    }
+                    else
+                    {
+                        numLen = 5;
+                        goto digit5;
+                    }
+                }
+            }
+            else
+            {
+                if (number >= 100)
+                {
+                    if (number >= 1000)
+                    {
+                        numLen = 4;
+                        goto digit6;
+                    }
+                    else
+                    {
+                        numLen = 3;
+                        goto digit7;
+                    }
+                }
+                else
+                {
+                    if (number >= 10)
+                    {
+                        numLen = 2;
+                        goto digit8;
+                    }
+                    else
+                    {
+                        numLen = 1;
+                        goto digit9;
+                    }
+                }
+            }
+
+            digit0:
+            buffer[0] = (char)(number / 1000000000 % 10 + zero);	// billions place
+            digit1:
+            buffer[1] = (char)(number / 100000000 % 10 + zero);
+            digit2:
+            buffer[2] = (char)(number / 10000000 % 10 + zero);
+            digit3:
+            buffer[3] = (char)(number / 1000000 % 10 + zero);	// millions place
+            digit4:
+            buffer[4] = (char)(number / 100000 % 10 + zero);
+            digit5:
+            buffer[5] = (char)(number / 10000 % 10 + zero);
+            digit6:
+            buffer[6] = (char)(number / 1000 % 10 + zero);
+            digit7:
+            buffer[7] = (char)(number / 100 % 10 + zero);
+            digit8:
+            buffer[8] = (char)(number / 10 % 10 + zero);
+            digit9:
+            buffer[9] = (char)(number % 10 + zero);
+
+            writer.Write(buffer, 10 - numLen, numLen);
+        }
+
         internal static readonly MethodInfo SwitchWriteInt = typeof(Methods).GetMethod("_SwitchWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool _SwitchWriteInt(TextWriter writer, int number)

@@ -839,7 +839,8 @@ namespace Jil.Serialize
                 if (UseCustomIntegerToString)
                 {
                     Emit.LoadLocal(CharBuffer);          // TextWriter int (ref char[])
-                    Emit.Call(Methods.CustomWriteInt);   // --empty--
+                    //Emit.Call(Methods.CustomWriteInt);   // --empty--
+                    Emit.Call(Methods.CustomWriteInt_I37);
                 }
                 else
                 {
@@ -859,7 +860,8 @@ namespace Jil.Serialize
                 if (primitiveType == typeof(int))
                 {
                     Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    Emit.Call(Methods.CustomWriteInt);  // --empty--
+                    //Emit.Call(Methods.CustomWriteInt);  // --empty--
+                    Emit.Call(Methods.CustomWriteInt_I37);
 
                     return;
                 }
