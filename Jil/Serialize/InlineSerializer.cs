@@ -762,6 +762,18 @@ namespace Jil.Serialize
             }
         }
 
+        void CallWriteUInt()
+        {
+            if (UseCustomWriteIntUnrolled)
+            {
+                Emit.Call(Methods.CustomWriteUIntUnrolled);
+            }
+            else
+            {
+                Emit.Call(Methods.CustomWriteUInt); // --empty--
+            }
+        }
+
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
         {
             if (primitiveType == typeof(char))
@@ -879,8 +891,8 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(uint))
                 {
-                    Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.CustomWriteUInt); // --empty--
+                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    CallWriteUInt();                    // --empty--
 
                     return;
                 }
