@@ -1269,6 +1269,61 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
+
+        class _Issue37
+        {
+            public List<int> A { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue37()
+        {
+            Action<TextWriter, _Issue37, int> unrolled;
+            Action<TextWriter, _Issue37, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_Issue37>.UseIssue37WriteInt = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    unrolled = InlineSerializerHelper.Build<_Issue37>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<_Issue37>.UseIssue37WriteInt = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_Issue37>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<_Issue37>.UseIssue37WriteInt = true;
+            }
+
+            var rand = new Random(89210872);
+
+            var toSerialize = new List<_Issue37>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(
+                    new _Issue37 
+                    { 
+                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => rand.Next(2) == 0 ? rand.Next() : -rand.Next()).ToList()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double unrolledTime, normalTime;
+            CompareTimes(toSerialize, unrolled, normal, out unrolledTime, out normalTime);
+
+            Assert.IsTrue(unrolledTime < normalTime, "unrolledTime = " + unrolledTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }
