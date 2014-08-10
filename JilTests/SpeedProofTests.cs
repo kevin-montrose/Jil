@@ -1219,65 +1219,6 @@ namespace JilTests
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
         }
 
-        class _UseFastConsumeWhiteSpace
-        {
-            public int A { get; set; }
-            public string B { get; set; }
-            public string C { get; set; }
-        }
-
-        [TestMethod]
-        public void UseFastConsumeWhiteSpace()
-        {
-            Func<TextReader, _UseFastConsumeWhiteSpace> fast;
-            Func<TextReader, _UseFastConsumeWhiteSpace> normal;
-
-            try
-            {
-                {
-                    InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = true;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    fast = InlineDeserializerHelper.Build<_UseFastConsumeWhiteSpace>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    normal = InlineDeserializerHelper.Build<_UseFastConsumeWhiteSpace>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = true;
-            }
-
-            var rand = new Random(47419928);
-
-            var toSerialize = new List<_UseFastConsumeWhiteSpace>();
-            for (var i = 0; i < 100000; i++)
-            {
-                toSerialize.Add(
-                    new _UseFastConsumeWhiteSpace
-                    {
-                        A = rand.Next(),
-                        B = _RandString(rand),
-                        C = _RandString(rand)
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double fastTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
-
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
-        }
-
         class _UseCustomWriteIntUnrolled
         {
             public List<int> A { get; set; }
