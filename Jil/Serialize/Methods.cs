@@ -1386,8 +1386,7 @@ namespace Jil.Serialize
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
-
-        internal static readonly MethodInfo CustomWriteLongUnrolled = typeof(Methods).GetMethod("_CustomWriteLongUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
+internal static readonly MethodInfo CustomWriteLongUnrolled = typeof(Methods).GetMethod("_CustomWriteLongUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteLongUnrolled(TextWriter writer, long num, char[] buffer)
         {
@@ -1635,7 +1634,7 @@ namespace Jil.Serialize
 
             writer.Write(buffer, 20 - numLen, numLen);
         }
-
+        
         internal static readonly MethodInfo CustomWriteULong = typeof(Methods).GetMethod("_CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
@@ -1660,6 +1659,237 @@ namespace Jil.Serialize
             }
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+        }
+
+        internal static readonly MethodInfo CustomWriteULongUnrolled = typeof(Methods).GetMethod("_CustomWriteULongUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteULongUnrolled(TextWriter writer, ulong number, char[] buffer)
+        {
+            TwoDigits digits;
+            int numLen;
+            byte ix;
+
+            // unroll the loop
+            if (number < 10)
+            {
+                numLen = 1;
+                goto digits10;
+            }
+            else
+            {
+                if (number < 100)
+                {
+                    numLen = 2;
+                    goto digits10;
+                }
+                else
+                {
+                    if (number < 1000)
+                    {
+                        numLen = 3;
+                        goto digits32;
+                    }
+                    else
+                    {
+                        if (number < 10000)
+                        {
+                            numLen = 4;
+                            goto digits32;
+                        }
+                        else
+                        {
+                            if (number < 100000)
+                            {
+                                numLen = 5;
+                                goto digits54;
+                            }
+                            else
+                            {
+                                if (number < 1000000)
+                                {
+                                    numLen = 6;
+                                    goto digits54;
+                                }
+                                else
+                                {
+                                    if (number < 10000000)
+                                    {
+                                        numLen = 7;
+                                        goto digits76;
+                                    }
+                                    else
+                                    {
+                                        if (number < 100000000)
+                                        {
+                                            numLen = 8;
+                                            goto digits76;
+                                        }
+                                        else
+                                        {
+                                            if (number < 1000000000)
+                                            {
+                                                numLen = 9;
+                                                goto digits98;
+                                            }
+                                            else
+                                            {
+                                                if (number < 10000000000)
+                                                {
+                                                    numLen = 10;
+                                                    goto digits98;
+                                                }
+                                                else
+                                                {
+                                                    if (number < 100000000000)
+                                                    {
+                                                        numLen = 11;
+                                                        goto digitsBA;
+                                                    }
+                                                    else
+                                                    {
+                                                        if (number < 1000000000000)
+                                                        {
+                                                            numLen = 12;
+                                                            goto digitsBA;
+                                                        }
+                                                        else
+                                                        {
+                                                            if (number < 10000000000000)
+                                                            {
+                                                                numLen = 13;
+                                                                goto digitsDC;
+                                                            }
+                                                            else
+                                                            {
+                                                                if (number < 100000000000000)
+                                                                {
+                                                                    numLen = 14;
+                                                                    goto digitsDC;
+                                                                }
+                                                                else
+                                                                {
+                                                                    if (number < 1000000000000000)
+                                                                    {
+                                                                        numLen = 15;
+                                                                        goto digitsFE;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if (number < 10000000000000000)
+                                                                        {
+                                                                            numLen = 16;
+                                                                            goto digitsFE;
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            if (number < 100000000000000000)
+                                                                            {
+                                                                                numLen = 17;
+                                                                                goto digitsHG;
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                if (number < 1000000000000000000)
+                                                                                {
+                                                                                    numLen = 18;
+                                                                                    goto digitsHG;
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    if (number < 10000000000000000000UL)
+                                                                                    {
+                                                                                        numLen = 19;
+                                                                                        goto digitsJI;
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        numLen = 20;
+                                                                                        goto digitsJI;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ulong is between 0 & 18,446,744,073,709,551,615
+            // so 1 to 20 digits
+            // 0123456789ABCDEFGHIJ
+
+            digitsJI: // [01,]000,000,000,000,000,000-[99,]000,000,000,000,000,000
+            ix = (byte)((number / 1000000000000000000UL) % 100);
+            digits = DigitPairs[ix];
+            buffer[0] = digits.First;
+            buffer[1] = digits.Second;
+
+            digitsHG: // [01]0,000,000,000,000,000-[99]0,000,000,000,000,000
+            ix = (byte)((number / 10000000000000000UL) % 100);
+            digits = DigitPairs[ix];
+            buffer[2] = digits.First;
+            buffer[3] = digits.Second;
+
+            digitsFE: // [0,1]00,000,000,000,000-[9,9]00,000,000,000,000
+            ix = (byte)((number / 100000000000000UL) % 100);
+            digits = DigitPairs[ix];
+            buffer[4] = digits.First;
+            buffer[5] = digits.Second;
+
+            digitsDC: // [01,]000,000,000,000-[99,]000,000,000,000
+            ix = (byte)((number / 1000000000000UL) % 100);
+            digits = DigitPairs[ix];
+            buffer[6] = digits.First;
+            buffer[7] = digits.Second;
+
+            digitsBA: // [01]0,000,000,000-[99]0,000,000,000
+            ix = (byte)((number / 10000000000UL) % 100);
+            digits = DigitPairs[ix];
+            buffer[8] = digits.First;
+            buffer[9] = digits.Second;
+
+            digits98: // [0,1]00,000,000-[9,9]00,000,000
+            ix = (byte)((number / 100000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[10] = digits.First;
+            buffer[11] = digits.Second;
+
+            digits76: // [01,]000,000-[99,]000,000
+            ix = (byte)((number / 1000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[12] = digits.First;
+            buffer[13] = digits.Second;
+
+            digits54: // [01]0,000-[99]0,000
+            ix = (byte)((number / 10000) % 100);
+            digits = DigitPairs[ix];
+            buffer[14] = digits.First;
+            buffer[15] = digits.Second;
+
+            digits32: // [0,1]00-[9,9]99
+            ix = (byte)((number / 100) % 100);
+            digits = DigitPairs[ix];
+            buffer[16] = digits.First;
+            buffer[17] = digits.Second;
+
+            digits10: // [00]-[99]
+            ix = (byte)(number % 100);
+            digits = DigitPairs[ix];
+            buffer[18] = digits.First;
+            buffer[19] = digits.Second;
+
+            writer.Write(buffer, 20 - numLen, numLen);
         }
 
         internal static readonly MethodInfo ProxyFloat = typeof(Methods).GetMethod("_ProxyFloat", BindingFlags.Static | BindingFlags.NonPublic);
