@@ -521,7 +521,7 @@ namespace Jil.Deserialize
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(new string(buffer, 0, ix));
+                        commonSb.Append(buffer, 0, ix);
                         break;
                     }
 
