@@ -42,11 +42,16 @@ namespace Jil
             }
 
             var type = data.GetType();
-            var invoke = (Action<object, TextWriter, Options>)SerializeDynamicLookup[type];
+            
+            Action<object, TextWriter, Options> invoke;
+            lock (SerializeDynamicLookup)
+            {
+                invoke = (Action<object, TextWriter, Options>)SerializeDynamicLookup[type];
+            }
+
             if (invoke == null)
             {
                 invoke = (Action<object, TextWriter, Options>)typeof(SerializeDynamicThunk<>).MakeGenericType(type).GetField("Thunk", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).GetValue(null);
-
                 lock (SerializeDynamicLookup)
                 {
                     SerializeDynamicLookup[type] = invoke;

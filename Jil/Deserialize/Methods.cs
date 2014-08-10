@@ -13,7 +13,12 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        public const int CharBufferSize = 33;
+        // Having this as a large value avoids the use of StringBuilder in the _ReadEncodedStringWithBuffer
+        // method (possibly preferrably to this hardcoded value it has a use provided value or alternatively
+        // would be to pass the buffer in as a ref parameter so that it could expand based on actually sizes
+        // of string; avoiding the use of StringBuilder altogether)
+        public const int CharBufferSize = 1000;
+        public const int ISO8601MaxSize = 33;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -521,7 +526,7 @@ namespace Jil.Deserialize
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(new string(buffer, 0, ix));
+                        commonSb.Append(buffer, 0, ix);
                         break;
                     }
 

@@ -8,15 +8,17 @@ using Jil.Common;
 using Sigil.NonGeneric;
 using System.Reflection;
 using System.Reflection.Emit;
+using Sigil;
 
 namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseHashWhenMatchingMembers = true;
+        public static bool UseHashWhenMatchingMembers = false;
         public static bool UseHashWhenMatchingEnums = true;
         public static bool UseFastConsumeWhiteSpace = true;
+        public static bool UseNameAutomata = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -1028,6 +1030,12 @@ namespace Jil.Deserialize
                 }
             }
 
+            if (UseNameAutomata)
+            {
+                ReadAutomata(objType);
+                return;
+            }
+
             ReadObjectDictionaryLookup(objType);
         }
 
@@ -1297,6 +1305,200 @@ namespace Jil.Deserialize
             }
         }
 
+        void ReadAutomata(Type objType)
+        {
+            var done = Emit.DefineLabel();
+            var doneSkipChar = Emit.DefineLabel();
+
+            if (!objType.IsValueType)
+            {
+                ExpectRawCharOrNull(
+                    '{',
+                    () => { },
+                    () =>
+                    {
+                        Emit.LoadNull();
+                        Emit.Branch(doneSkipChar);
+                    }
+                );
+            }
+            else
+            {
+                ExpectChar('{');
+            }
+
+            using (var loc = Emit.DeclareLocal(objType))
+            {
+                Action loadObj;
+                if (objType.IsValueType)
+                {
+                    Emit.LoadLocalAddress(loc);     // objType*
+                    Emit.InitializeObject(objType); // --empty--
+
+                    loadObj = () => Emit.LoadLocalAddress(loc);
+                }
+                else
+                {
+                    var cons = objType.GetConstructor(Type.EmptyTypes);
+
+                    if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
+
+                    Emit.NewObject(cons);   // objType
+                    Emit.StoreLocal(loc);   // --empty--
+
+                    loadObj = () => Emit.LoadLocal(loc);
+                }
+
+                var loopStart = Emit.DefineLabel();
+
+                var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
+
+                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+
+                // special case object w/ no deserializable properties
+                if (setters.Count == 0)
+                {
+                    loadObj();                      // objType(*?)
+
+                    if (objType.IsValueType)
+                    {
+                        Emit.LoadObject(objType);   // objType
+                    }
+
+                    SkipAllMembers(done, doneSkipChar); // objType
+
+                    return;
+                }
+
+                var orderedSetters =
+                    setters
+                    .OrderBy(kv => kv.Key)
+                    .Select((kv, i) => new {Index=i, Name=kv.Key, Setter=kv.Value, Label=Emit.DefineLabel()})
+                    .ToList();
+
+                var findSetterIdx = setterLookup.GetMethod("FindSetterIndex", new[] { typeof(TextReader) });
+
+                //var zz = invoker.Invoke(nameAutomata, new object[] { new StringReader("Hello") });
+                //Console.WriteLine(zz);
+
+                var inOrderLabels =
+                    orderedSetters
+                    .Select(o => o.Label)
+                    .ToArray();
+
+                //var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
+
+                //var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
+                //var orderInst = (Dictionary<string, int>)order.GetValue(null);
+                //var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+
+                //var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
+
+                ConsumeWhiteSpace();        // --empty--
+                loadObj();                  // objType(*?)
+                RawPeekChar();              // objType(*?) int 
+                Emit.LoadConstant('}');     // objType(*?) int '}'
+                Emit.BranchIfEqual(done);   // objType(*?)
+                ConsumeWhiteSpace();        // objType(*?)
+
+                ExpectQuote();              // objType(*?)
+                Emit.LoadArgument(0);       // objType(*?) TextReader
+                Emit.Call(findSetterIdx);  // objType(*?) int
+
+                ConsumeWhiteSpace();        // objType(*?) int
+                ExpectChar(':');            // objType(*?) int
+                ConsumeWhiteSpace();        // objType(*?) int
+
+                var readingMember = Emit.DefineLabel();
+                Emit.MarkLabel(readingMember);  // objType(*?) int
+
+                using (var oLoc = Emit.DeclareLocal<int>())
+                {
+                    var isMember = Emit.DefineLabel();
+
+                    Emit.Duplicate();// objType(*?) int int
+                    Emit.StoreLocal(oLoc);// objType(*?) int
+                    Emit.LoadConstant(0); // objType(*?) int int
+                    Emit.BranchIfGreaterOrEqual(isMember); // objType(*?)
+
+                    Emit.Pop();                     // --empty--
+                    SkipObjectMember();             // --empty--
+                    Emit.Branch(loopStart);         // --empty--
+
+                    Emit.MarkLabel(isMember);       // objType(*?)
+                    Emit.LoadLocal(oLoc);           // objType(*?) int
+                    Emit.Switch(inOrderLabels);     // objType(*?)
+
+                    // fallthrough case
+                    ThrowExpected("a member name"); // --empty--
+                }
+
+                foreach (var kv in orderedSetters)
+                {
+                    var label = kv.Label;
+                    var member = kv.Setter;
+                    var memberType = member.ReturnType();
+
+                    Emit.MarkLabel(label);      // objType(*?)
+                    Build(member.ReturnType()); // objType(*?) memberType
+
+                    if (member is FieldInfo)
+                    {
+                        Emit.StoreField((FieldInfo)member);             // --empty--
+                    }
+                    else
+                    {
+                        SetProperty((PropertyInfo)member);              // --empty--
+                    }
+
+                    Emit.Branch(loopStart);     // --empty--
+                }
+
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(loopStart);      // --empty--
+                ConsumeWhiteSpace();            // --empty--
+                loadObj();                      // objType(*?)
+                RawPeekChar();                  // objType(*?) int 
+                Emit.Duplicate();               // objType(*?) int int
+                Emit.LoadConstant(',');         // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);   // objType(*?) int
+                Emit.LoadConstant('}');         // objType(*?) int '}'
+                Emit.BranchIfEqual(done);       // objType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "}");
+
+                Emit.MarkLabel(nextItem);           // objType(*?) int
+                Emit.Pop();                         // objType(*?)
+                Emit.LoadArgument(0);               // objType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+                Emit.Pop();                         // objType(*?)
+                ConsumeWhiteSpace();
+
+                ExpectQuote();
+                Emit.LoadArgument(0);           // TextReader
+                Emit.Call(findSetterIdx);      // int
+                
+                ConsumeWhiteSpace();                // objType(*?) int
+                ExpectChar(':');                    // objType(*?) int
+                ConsumeWhiteSpace();                // objType(*?) int
+                Emit.Branch(readingMember);         // objType(*?) int
+            }
+
+            Emit.MarkLabel(done);               // objType(*?)
+            Emit.LoadArgument(0);               // objType(*?) TextReader
+            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+            Emit.Pop();                         // objType(*?)
+
+            Emit.MarkLabel(doneSkipChar);       // objType(*?)
+
+            if (objType.IsValueType)
+            {
+                Emit.LoadObject(objType);     // objType
+            }
+        }
+        
         void ReadObjectDictionaryLookup(Type objType)
         {
             var done = Emit.DefineLabel();
@@ -1375,8 +1577,8 @@ namespace Jil.Deserialize
                 RawPeekChar();              // objType(*?) int 
                 Emit.LoadConstant('}');     // objType(*?) int '}'
                 Emit.BranchIfEqual(done);   // objType(*?)
-                Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
+                Emit.LoadField(order);      // objType(*?) Dictionary<string, int>
+                Build(typeof(string));      // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
                 ExpectChar(':');            // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string

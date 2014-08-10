@@ -26,6 +26,7 @@ namespace Jil.Serialize
         }
 
         private static readonly TwoDigits[] DigitPairs;
+
         static Methods()
         {
             DigitPairs = new TwoDigits[100];
@@ -354,9 +355,31 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j=0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -419,9 +442,30 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -447,7 +491,7 @@ namespace Jil.Serialize
                     writer.Write(@"\u2029");
                     continue;
                 }
-
+                
                 // This is converted into an IL switch, so don't fret about lookup times
                 switch (c)
                 {
@@ -500,9 +544,31 @@ namespace Jil.Serialize
                 return;
             }
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -569,9 +635,30 @@ namespace Jil.Serialize
                 return;
             }
 
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write("\"");
+                writer.Write(str);
+                writer.Write("\"");
+                return;
+            }
+
             writer.Write("\"");
 
-            for (var i = 0; i < str.Length; i++)
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -646,7 +733,27 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -707,7 +814,26 @@ namespace Jil.Serialize
         {
             if (str == null) return;
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -784,7 +910,26 @@ namespace Jil.Serialize
                 return;
             }
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || c == '\u2028' || c == '\u2029' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -861,7 +1006,27 @@ namespace Jil.Serialize
                 return;
             }
 
-            for (var i = 0; i < str.Length; i++)
+            var i = 0;
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '\\' || c == '"' || (c >= '\u0000' && c <= '\u001F'))
+                    break;
+            }
+
+            if (i == str.Length)
+            {
+                writer.Write(str);
+                return;
+            }
+
+            for (var j = 0; j < i; ++j)
+            {
+                writer.Write(str[j]);
+            }
+
+            for (; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '\\')
@@ -920,40 +1085,36 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteInt(TextWriter writer, int number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
             if (number == int.MinValue)
             {
                 writer.Write("-2147483648");
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            uint copy;
-            if (number < 0)
-            {
-                writer.Write('-');
-                copy = (uint)(-number);
-            }
+            int copy;
+            if (number >= 0)
+                copy = number;
             else
             {
-                copy = (uint)number;
+                writer.Write('-');
+                copy = -number;
             }
 
+            TwoDigits chars;
             do
             {
-                byte ix = (byte)(copy % 100);
+                var ix = copy % 100;
                 copy /= 100;
 
-                var chars = DigitPairs[ix];
+                chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (buffer[ptr + 1] == '0')
-            {
-                ptr++;
-            }
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1206,19 +1367,21 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            do
+            var chars = DigitPairs[number % 100];
+            var copy = (int)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy != 0)
             {
-                byte ix = (byte)(copy % 100);
+                var ix = copy % 100;
                 copy /= 100;
 
-                var chars = DigitPairs[ix];
+                chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
-            } while (copy != 0);
+            };
 
-            if (buffer[ptr + 1] == '0')
+            if (chars.First == '0')
             {
                 ptr++;
             }
@@ -1349,40 +1512,36 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteLong(TextWriter writer, long number, char[] buffer)
         {
-            // Gotta special case this, we can't negate it
+            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+
             if (number == long.MinValue)
             {
                 writer.Write("-9223372036854775808");
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
-
-            ulong copy;
-            if (number < 0)
-            {
-                writer.Write('-');
-                copy = (ulong)(-number);
-            }
+            long copy;
+            if (number >= 0)
+                copy = number;
             else
             {
-                copy = (ulong)number;
+                writer.Write('-');
+                copy = -number;
             }
 
+            TwoDigits chars;
             do
             {
-                byte ix = (byte)(copy % 100);
+                var ix = (int) (copy % 100);
                 copy /= 100;
 
-                var chars = DigitPairs[ix];
+                chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
             } while (copy != 0);
 
-            if (buffer[ptr + 1] == '0')
-            {
-                ptr++;
-            }
+            if (chars.First == '0')
+                ++ptr;
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
@@ -1393,19 +1552,31 @@ namespace Jil.Serialize
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
 
-            var copy = number;
-
-            do
+            var chars = DigitPairs[number % 100];
+            var copy64 = (long)(number / 100);
+            buffer[ptr--] = chars.Second;
+            buffer[ptr--] = chars.First;
+            while (copy64 > int.MaxValue)
             {
-                byte ix = (byte)(copy % 100);
-                copy /= 100;
+                var ix = (int)(copy64 % 100);
+                copy64 /= 100;
 
-                var chars = DigitPairs[ix];
+                chars = DigitPairs[ix];
                 buffer[ptr--] = chars.Second;
                 buffer[ptr--] = chars.First;
-            } while (copy != 0);
+            };
+            var copy32 = (int)copy64;
+            while (copy32 != 0)
+            {
+                var ix = (int)(copy32 % 100);
+                copy32 /= 100;
 
-            if (buffer[ptr + 1] == '0')
+                chars = DigitPairs[ix];
+                buffer[ptr--] = chars.Second;
+                buffer[ptr--] = chars.First;
+            };
+
+            if (chars.First == '0')
             {
                 ptr++;
             }
