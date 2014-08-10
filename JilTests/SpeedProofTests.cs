@@ -1332,61 +1332,6 @@ namespace JilTests
 
             Assert.IsTrue(unrolledTime < normalTime, "unrolledTime = " + unrolledTime + ", normalTime = " + normalTime);
         }
-
-        class _UseCustomWriteIntUnrolled_Long
-        {
-            public List<long> A { get; set; }
-        }
-
-        [TestMethod]
-        public void UseCustomWriteIntUnrolled_Long()
-        {
-            Action<TextWriter, _UseCustomWriteIntUnrolled_Long, int> unrolled;
-            Action<TextWriter, _UseCustomWriteIntUnrolled_Long, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolled_Long>.UseCustomWriteIntUnrolled = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    unrolled = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolled_Long>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolled_Long>.UseCustomWriteIntUnrolled = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolled_Long>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_UseCustomWriteIntUnrolled_Long>.UseCustomWriteIntUnrolled = true;
-            }
-
-            var rand = new Random(208825353);
-
-            var toSerialize = new List<_UseCustomWriteIntUnrolled_Long>();
-            for (var i = 0; i < 1000; i++)
-            {
-                toSerialize.Add(
-                    new _UseCustomWriteIntUnrolled_Long
-                    {
-                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => _RandLong(rand)).ToList()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double unrolledTime, normalTime;
-            CompareTimes(toSerialize, unrolled, normal, out unrolledTime, out normalTime);
-
-            Assert.IsTrue(unrolledTime < normalTime, "unrolledTime = " + unrolledTime + ", normalTime = " + normalTime);
-        }
 #endif
     }
 }

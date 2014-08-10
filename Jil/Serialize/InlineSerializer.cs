@@ -776,26 +776,12 @@ namespace Jil.Serialize
 
         void CallWriteLong()
         {
-            if (UseCustomWriteIntUnrolled)
-            {
-                Emit.Call(Methods.CustomWriteLongUnrolled);
-            }
-            else
-            {
-                Emit.Call(Methods.CustomWriteLong);
-            }
+            Emit.Call(Methods.CustomWriteLong);
         }
 
         void CallWriteULong()
         {
-            if (UseCustomWriteIntUnrolled)
-            {
-                Emit.Call(Methods.CustomWriteULongUnrolled);
-            }
-            else
-            {
-                Emit.Call(Methods.CustomWriteULong);
-            }
+            Emit.Call(Methods.CustomWriteULong);
         }
 
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
