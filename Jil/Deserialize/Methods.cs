@@ -18,6 +18,7 @@ namespace Jil.Deserialize
         // would be to pass the buffer in as a ref parameter so that it could expand based on actually sizes
         // of string; avoiding the use of StringBuilder altogether)
         public const int CharBufferSize = 1000;
+        public const int ISO8601MaxSize = 33;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
