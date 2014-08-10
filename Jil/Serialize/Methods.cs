@@ -961,8 +961,6 @@ namespace Jil.Serialize
         internal static readonly MethodInfo CustomWriteInt_I37 = typeof(Methods).GetMethod("_CustomWriteInt_I37", BindingFlags.Static | BindingFlags.NonPublic);
         static void _CustomWriteInt_I37(TextWriter writer, int num, char[] buffer)
         {
-            const char zero = '0';
-
             uint number;
             if (num < 0)
             {
@@ -974,104 +972,117 @@ namespace Jil.Serialize
                 number = (uint)num;
             }
 
+            TwoDigits digits;
             int numLen;
+            byte ix;
 
-            // Binary search for length of int
-            if (number >= 10000)
+            if (number < 10)
             {
-                if (number >= 1000000)	// 1 million
-                {
-                    if (number >= 10000000)	// 10 million
-                    {
-                        if (number >= 100000000)	// 100 million
-                        {
-                            if (number < 1000000000)
-                            {
-                                numLen = 9;
-                                goto digit1;
-                            }
-                            else 
-                            { 
-                                numLen = 10;
-                                goto digit0;
-                            }
-                        }
-                        else
-                        {
-                            numLen = 8;
-                            goto digit2;
-                        }
-                    }
-                    else
-                    {
-                        numLen = 7;
-                        goto digit3;
-                    }
-                }
-                else
-                {
-                    if (number >= 100000)
-                    {
-                        numLen = 6;
-                        goto digit4;
-                    }
-                    else
-                    {
-                        numLen = 5;
-                        goto digit5;
-                    }
-                }
+                numLen = 1;
+                goto digits10;
             }
             else
             {
-                if (number >= 100)
+                if (number < 100)
                 {
-                    if (number >= 1000)
-                    {
-                        numLen = 4;
-                        goto digit6;
-                    }
-                    else
-                    {
-                        numLen = 3;
-                        goto digit7;
-                    }
+                    numLen = 2;
+                    goto digits10;
                 }
                 else
                 {
-                    if (number >= 10)
+                    if (number < 1000)
                     {
-                        numLen = 2;
-                        goto digit8;
+                        numLen = 3;
+                        goto digits32;
                     }
                     else
                     {
-                        numLen = 1;
-                        goto digit9;
+                        if (number < 10000)
+                        {
+                            numLen = 4;
+                            goto digits32;
+                        }
+                        else
+                        {
+                            if (number < 100000)
+                            {
+                                numLen = 5;
+                                goto digits54;
+                            }
+                            else
+                            {
+                                if (number < 1000000)
+                                {
+                                    numLen = 6;
+                                    goto digits54;
+                                }
+                                else
+                                {
+                                    if (number < 10000000)
+                                    {
+                                        numLen = 7;
+                                        goto digits76;
+                                    }
+                                    else
+                                    {
+                                        if (number < 100000000)
+                                        {
+                                            numLen = 8;
+                                            goto digits76;
+                                        }
+                                        else
+                                        {
+                                            if (number < 1000000000)
+                                            {
+                                                numLen = 9;
+                                                goto digits98;
+                                            }
+                                            else
+                                            {
+                                                numLen = 10;
+                                                goto digits98;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
 
-            digit0:
-            buffer[0] = (char)(number / 1000000000 % 10 + zero);	// billions place
-            digit1:
-            buffer[1] = (char)(number / 100000000 % 10 + zero);
-            digit2:
-            buffer[2] = (char)(number / 10000000 % 10 + zero);
-            digit3:
-            buffer[3] = (char)(number / 1000000 % 10 + zero);	// millions place
-            digit4:
-            buffer[4] = (char)(number / 100000 % 10 + zero);
-            digit5:
-            buffer[5] = (char)(number / 10000 % 10 + zero);
-            digit6:
-            buffer[6] = (char)(number / 1000 % 10 + zero);
-            digit7:
-            buffer[7] = (char)(number / 100 % 10 + zero);
-            digit8:
-            buffer[8] = (char)(number / 10 % 10 + zero);
-            digit9:
-            buffer[9] = (char)(number % 10 + zero);
+            // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
+            // so 1 to 10 digits
+
+            digits98: // [0,1]00,000,000-[9,9]00,000,000
+            ix = (byte)((number / 100000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[0] = digits.First;
+            buffer[1] = digits.Second;
+
+            digits76: // [01,]000,000-[99,]000,000
+            ix = (byte)((number / 1000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[2] = digits.First;
+            buffer[3] = digits.Second;
+
+            digits54: // [01]0,000-[99]0,000
+            ix = (byte)((number / 10000) % 100);
+            digits = DigitPairs[ix];
+            buffer[4] = digits.First;
+            buffer[5] = digits.Second;
+
+            digits32: // [0,1]00-[9,9]99
+            ix = (byte)((number / 100) % 100);
+            digits = DigitPairs[ix];
+            buffer[6] = digits.First;
+            buffer[7] = digits.Second;
+
+            digits10: // [00]-[99]
+            ix = (byte)(number % 100);
+            digits = DigitPairs[ix];
+            buffer[8] = digits.First;
+            buffer[9] = digits.Second;
 
             writer.Write(buffer, 10 - numLen, numLen);
         }

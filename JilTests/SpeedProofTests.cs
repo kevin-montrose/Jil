@@ -1307,7 +1307,7 @@ namespace JilTests
             var rand = new Random(89210872);
 
             var toSerialize = new List<_Issue37>();
-            for (var i = 0; i < 2000; i++)
+            for (var i = 0; i < 1000; i++)
             {
                 toSerialize.Add(
                     new _Issue37 
