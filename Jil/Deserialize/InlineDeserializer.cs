@@ -15,7 +15,7 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseHashWhenMatchingMembers = true;
+        public static bool UseHashWhenMatchingMembers = false;
         public static bool UseHashWhenMatchingEnums = true;
         public static bool UseFastConsumeWhiteSpace = true;
         public static bool UseNameAutomata = true;
