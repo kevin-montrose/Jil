@@ -758,7 +758,7 @@ namespace Jil.Serialize
             }
             else
             {
-                Emit.Call(Methods.CustomWriteInt);   // --empty--
+                Emit.Call(Methods.CustomWriteInt);
             }
         }
 
@@ -770,7 +770,19 @@ namespace Jil.Serialize
             }
             else
             {
-                Emit.Call(Methods.CustomWriteUInt); // --empty--
+                Emit.Call(Methods.CustomWriteUInt);
+            }
+        }
+
+        void CallWriteLong()
+        {
+            if (UseCustomWriteIntUnrolled)
+            {
+                Emit.Call(Methods.CustomWriteLongUnrolled);
+            }
+            else
+            {
+                Emit.Call(Methods.CustomWriteLong);
             }
         }
 
@@ -899,8 +911,8 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(long))
                 {
-                    Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    Emit.Call(Methods.CustomWriteLong); // --empty--
+                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    CallWriteLong();                    // --empty--
 
                     return;
                 }
