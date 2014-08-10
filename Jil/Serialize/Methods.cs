@@ -958,8 +958,8 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
-        internal static readonly MethodInfo CustomWriteInt_I37 = typeof(Methods).GetMethod("_CustomWriteInt_I37", BindingFlags.Static | BindingFlags.NonPublic);
-        static void _CustomWriteInt_I37(TextWriter writer, int num, char[] buffer)
+        internal static readonly MethodInfo CustomWriteIntUnrolled = typeof(Methods).GetMethod("_CustomWriteIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
+        static void _CustomWriteIntUnrolled(TextWriter writer, int num, char[] buffer)
         {
             uint number;
             if (num < 0)
@@ -976,6 +976,7 @@ namespace Jil.Serialize
             int numLen;
             byte ix;
 
+            // unroll the loop
             if (number < 10)
             {
                 numLen = 1;
