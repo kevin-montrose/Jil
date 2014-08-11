@@ -188,7 +188,7 @@ namespace Jil.Deserialize
             // skip a string
             if (leadChar == '"')
             {
-                SkipEncodedString(reader);
+                _SkipEncodedString(reader);
                 return;
             }
 
@@ -249,7 +249,7 @@ namespace Jil.Deserialize
                 reader.Read();
                 return;
             }
-            SkipEncodedString(reader);
+            _SkipEncodedString(reader);
             _ConsumeWhiteSpace(reader);
             var b = reader.Read();
             if (b != ':') throw new DeserializationException("Expected :", reader);
@@ -264,7 +264,7 @@ namespace Jil.Deserialize
                 if (c != ',') throw new DeserializationException("Expected ,", reader);
 
                 _ConsumeWhiteSpace(reader);
-                SkipEncodedString(reader);
+                _SkipEncodedString(reader);
                 _ConsumeWhiteSpace(reader);
                 var d = reader.Read();
                 if (d != ':') throw new DeserializationException("Expected :", reader);
@@ -299,8 +299,9 @@ namespace Jil.Deserialize
             }
         }
 
+        public static MethodInfo SkipEncodedString = typeof(Methods).GetMethod("_SkipEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SkipEncodedString(TextReader reader)
+        static void _SkipEncodedString(TextReader reader)
         {
             reader.Read();  // skip the "
 

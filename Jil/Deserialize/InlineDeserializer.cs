@@ -1032,13 +1032,13 @@ namespace Jil.Deserialize
             Emit.LoadConstant('}');             // objType char '}'
             Emit.BranchIfEqual(done);           // objType
 
-            ReadString();                       // objType string
-            Emit.Pop();                         // objType
-            ConsumeWhiteSpace();                // objType
-            ExpectChar(':');                    // objType
-            ConsumeWhiteSpace();                // objType
-            SkipObjectMember();                 // objType
-            Emit.Branch(continueSkipping);      // objType
+            Emit.LoadArgument(0);                   // objType TextReader
+            Emit.Call(Methods.SkipEncodedString);   // objType
+            ConsumeWhiteSpace();                    // objType
+            ExpectChar(':');                        // objType
+            ConsumeWhiteSpace();                    // objType
+            SkipObjectMember();                     // objType
+            Emit.Branch(continueSkipping);          // objType
 
             // second (and third, and fourth, and ...) does check for ,
             Emit.MarkLabel(continueSkipping);   // objType
@@ -1050,14 +1050,14 @@ namespace Jil.Deserialize
             // we Peek'd the }, we can just read for ','
             ExpectChar(',');                    // objType
 
-            ConsumeWhiteSpace();                // objType
-            ReadString();                       // objType string
-            Emit.Pop();                         // objType
-            ConsumeWhiteSpace();                // objType
-            ExpectChar(':');                    // objType
-            ConsumeWhiteSpace();                // objType
-            SkipObjectMember();                 // objType
-            Emit.Branch(continueSkipping);      // objType
+            ConsumeWhiteSpace();                    // objType
+            Emit.LoadArgument(0);                   // objType TextReader
+            Emit.Call(Methods.SkipEncodedString);   // objType
+            ConsumeWhiteSpace();                    // objType
+            ExpectChar(':');                        // objType
+            ConsumeWhiteSpace();                    // objType
+            SkipObjectMember();                     // objType
+            Emit.Branch(continueSkipping);          // objType
 
             Emit.MarkLabel(done);               // objType
             Emit.LoadArgument(0);               // objType TextReader
