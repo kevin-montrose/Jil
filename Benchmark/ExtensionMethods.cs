@@ -292,10 +292,22 @@ namespace Benchmark
             if (t == typeof(string))
             {
                 var len = rand.Next(500);
+
+                // not particularly great; but this is really just for proof of concept
+                var newRandSoAsToNotChangeExistingRandomOrdering = new Random(len);
+                var chanceOfAllowingSpecialCharacters = 0.1;
+                var allowSpecialCharacter =
+                    newRandSoAsToNotChangeExistingRandomOrdering.NextDouble() < chanceOfAllowingSpecialCharacters;
+
                 var c = new char[len];
                 for (var i = 0; i < c.Length; i++)
                 {
-                    c[i] = (char)typeof(char).RandomValue(rand, depth + 1);
+                    var cc = (char)typeof(char).RandomValue(rand, depth + 1);
+
+                    if (!allowSpecialCharacter && (cc == '"' || cc == '\\' || (cc >= '\u0000' && cc <= '\u001F')))
+                        c[i] = '_';
+                    else
+                        c[i] = cc;
                 }
 
                 return new string(c);
