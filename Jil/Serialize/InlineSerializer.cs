@@ -766,12 +766,21 @@ namespace Jil.Serialize
         {
             if (UseCustomWriteIntUnrolledSigned)
             {
+                Emit.Call(Methods.CustomWriteUIntUnrollSigned);
+            }
+            else
+            {
+                Emit.Call(Methods.CustomWriteUIntUnrolled);
+            }
+
+            /*if (UseCustomWriteIntUnrolledSigned)
+            {
                 Emit.Call(Methods.CustomWriteUIntUnrolled);
             }
             else
             {
                 Emit.Call(Methods.CustomWriteUInt);
-            }
+            }*/
         }
 
         void CallWriteLong()
