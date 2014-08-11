@@ -969,17 +969,6 @@ namespace Jil.Serialize
                 return;
             }
 
-            int number;
-            if (num < 0)
-            {
-                writer.Write('-');
-                number = (-num);
-            }
-            else
-            {
-                number = num;
-            }
-
             // Why signed integers?
             // Earlier versions of this code used unsigned integers, 
             //   but it turns out that's not ideal and here's why.
@@ -1010,6 +999,17 @@ namespace Jil.Serialize
             //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
             int numLen;
             sbyte ix;
+            int number;
+
+            if (num < 0)
+            {
+                writer.Write('-');
+                number = (-num);
+            }
+            else
+            {
+                number = num;
+            }
 
             TwoDigits digits;
 
