@@ -995,7 +995,7 @@ namespace Jil.Serialize
             // div         eax,ecx                      29 / 11
             // and         edx,###                       1 /  0.25
             //
-            // In theory div (usigned division) is faster tha idiv, and it probably is *but* cdq + cdq + movsx is
+            // In theory div (usigned division) is faster than idiv, and it probably is *but* cdq + cdq + movsx is
             //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
             int numLen;
             sbyte ix;
