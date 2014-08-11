@@ -1263,70 +1263,72 @@ namespace Jil.Serialize
         }
 
         internal static readonly MethodInfo CustomWriteUIntUnrollSigned = typeof(Methods).GetMethod("_CustomWriteUIntUnrollSigned", BindingFlags.Static | BindingFlags.NonPublic);
-        static void _CustomWriteUIntUnrollSigned(TextWriter writer, uint number, char[] buffer)
+        static void _CustomWriteUIntUnrollSigned(TextWriter writer, uint num, char[] buffer)
         {
             TwoDigits digits;
             int numLen;
             sbyte ix;
 
+            long number = num;
+
             // unroll the loop
-            if (number < 10)
+            if (num < 10)
             {
                 numLen = 1;
                 goto digits10;
             }
             else
             {
-                if (number < 100)
+                if (num < 100)
                 {
                     numLen = 2;
                     goto digits10;
                 }
                 else
                 {
-                    if (number < 1000)
+                    if (num < 1000)
                     {
                         numLen = 3;
                         goto digits32;
                     }
                     else
                     {
-                        if (number < 10000)
+                        if (num < 10000)
                         {
                             numLen = 4;
                             goto digits32;
                         }
                         else
                         {
-                            if (number < 100000)
+                            if (num < 100000)
                             {
                                 numLen = 5;
                                 goto digits54;
                             }
                             else
                             {
-                                if (number < 1000000)
+                                if (num < 1000000)
                                 {
                                     numLen = 6;
                                     goto digits54;
                                 }
                                 else
                                 {
-                                    if (number < 10000000)
+                                    if (num < 10000000)
                                     {
                                         numLen = 7;
                                         goto digits76;
                                     }
                                     else
                                     {
-                                        if (number < 100000000)
+                                        if (num < 100000000)
                                         {
                                             numLen = 8;
                                             goto digits76;
                                         }
                                         else
                                         {
-                                            if (number < 1000000000)
+                                            if (num < 1000000000)
                                             {
                                                 numLen = 9;
                                                 goto digits98;
