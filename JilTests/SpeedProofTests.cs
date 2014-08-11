@@ -1273,6 +1273,61 @@ namespace JilTests
 
             Assert.IsTrue(unrolledTime < normalTime, "unrolledTime = " + unrolledTime + ", normalTime = " + normalTime);
         }
+
+        class _UseCustomWriteIntUnrolledSigned
+        {
+            public List<int> A { get; set; }
+        }
+
+        [TestMethod]
+        public void UseCustomWriteIntUnrolledSigned()
+        {
+            Action<TextWriter, _UseCustomWriteIntUnrolledSigned, int> signed;
+            Action<TextWriter, _UseCustomWriteIntUnrolledSigned, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    signed = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = true;
+            }
+
+            var rand = new Random(27899810);
+
+            var toSerialize = new List<_UseCustomWriteIntUnrolledSigned>();
+            for (var i = 0; i < 1000; i++)
+            {
+                toSerialize.Add(
+                    new _UseCustomWriteIntUnrolledSigned
+                    {
+                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => rand.Next(2) == 0 ? rand.Next() : -rand.Next()).ToList()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double signedTime, normalTime;
+            CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
+
+            Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

@@ -25,6 +25,7 @@ namespace Jil.Serialize
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
         public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseCustomWriteIntUnrolledSigned = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -754,7 +755,14 @@ namespace Jil.Serialize
         {
             if (UseCustomWriteIntUnrolled)
             {
-                Emit.Call(Methods.CustomWriteIntUnrolled);
+                if (UseCustomWriteIntUnrolledSigned)
+                {
+                    Emit.Call(Methods.CustomWriteIntUnrollSigned);
+                }
+                else
+                {
+                    Emit.Call(Methods.CustomWriteIntUnrolled);
+                }
             }
             else
             {

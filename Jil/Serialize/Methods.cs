@@ -958,6 +958,137 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
+        internal static readonly MethodInfo CustomWriteIntUnrollSigned = typeof(Methods).GetMethod("_CustomWriteIntUnrollSigned", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteIntUnrollSigned(TextWriter writer, int num, char[] buffer)
+        {
+            int number;
+            if (num < 0)
+            {
+                writer.Write('-');
+                number = (-num);
+            }
+            else
+            {
+                number = num;
+            }
+
+            TwoDigits digits;
+            int numLen;
+            sbyte ix;
+
+            // unroll the loop
+            if (number < 10)
+            {
+                numLen = 1;
+                goto digits10;
+            }
+            else
+            {
+                if (number < 100)
+                {
+                    numLen = 2;
+                    goto digits10;
+                }
+                else
+                {
+                    if (number < 1000)
+                    {
+                        numLen = 3;
+                        goto digits32;
+                    }
+                    else
+                    {
+                        if (number < 10000)
+                        {
+                            numLen = 4;
+                            goto digits32;
+                        }
+                        else
+                        {
+                            if (number < 100000)
+                            {
+                                numLen = 5;
+                                goto digits54;
+                            }
+                            else
+                            {
+                                if (number < 1000000)
+                                {
+                                    numLen = 6;
+                                    goto digits54;
+                                }
+                                else
+                                {
+                                    if (number < 10000000)
+                                    {
+                                        numLen = 7;
+                                        goto digits76;
+                                    }
+                                    else
+                                    {
+                                        if (number < 100000000)
+                                        {
+                                            numLen = 8;
+                                            goto digits76;
+                                        }
+                                        else
+                                        {
+                                            if (number < 1000000000)
+                                            {
+                                                numLen = 9;
+                                                goto digits98;
+                                            }
+                                            else
+                                            {
+                                                numLen = 10;
+                                                goto digits98;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
+            // so 1 to 10 digits
+
+            digits98: // [0,1]00,000,000-[9,9]00,000,000
+            ix = (sbyte)((number / 100000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[0] = digits.First;
+            buffer[1] = digits.Second;
+
+            digits76: // [01,]000,000-[99,]000,000
+            ix = (sbyte)((number / 1000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[2] = digits.First;
+            buffer[3] = digits.Second;
+
+            digits54: // [01]0,000-[99]0,000
+            ix = (sbyte)((number / 10000) % 100);
+            digits = DigitPairs[ix];
+            buffer[4] = digits.First;
+            buffer[5] = digits.Second;
+
+            digits32: // [0,1]00-[9,9]99
+            ix = (sbyte)((number / 100) % 100);
+            digits = DigitPairs[ix];
+            buffer[6] = digits.First;
+            buffer[7] = digits.Second;
+
+            digits10: // [00]-[99]
+            ix = (sbyte)(number % 100);
+            digits = DigitPairs[ix];
+            buffer[8] = digits.First;
+            buffer[9] = digits.Second;
+
+            writer.Write(buffer, 10 - numLen, numLen);
+        }
+
         internal static readonly MethodInfo CustomWriteIntUnrolled = typeof(Methods).GetMethod("_CustomWriteIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteIntUnrolled(TextWriter writer, int num, char[] buffer)
