@@ -973,9 +973,38 @@ namespace Jil.Serialize
                 number = num;
             }
 
-            TwoDigits digits;
+            // Why signed integers?
+            // Earlier versions of this code used unsigned integers, 
+            //   but it turns out that's not ideal and here's why.
+            // 
+            // The signed version of the relevant code gets JIT'd down to:
+            // instr       operands                    latency/throughput (approx. worst case; Haswell)
+            // ========================================================================================
+            // mov         ecx,###                      2 /  0.5 
+            // cdq                                      1 /  -
+            // idiv        eax,ecx                     29 / 11
+            // mov         ecx,###                      2 /  0.5
+            // cdq                                      1 /  -
+            // idiv        eax,ecx                     29 / 11
+            // movsx       edx,dl                       - /  0.5
+            //
+            // The unsigned version gets JIT'd down to:
+            // instr       operands                    latency/throughput (approx. worst case; Haswell)
+            // ========================================================================================
+            // mov         ecx,###                       2 /  0.5
+            // xor         edx,edx                       1 /  0.25
+            // div         eax,ecx                      29 / 11
+            // mov         ecx,###                       2 /  0.5
+            // xor         edx,edx                       1 /  0.25
+            // div         eax,ecx                      29 / 11
+            // and         edx,###                       1 /  0.25
+            //
+            // In theory div (usigned division) is faster tha idiv, and it probably is *but* cdq + cdq + movsx is
+            //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
             int numLen;
             sbyte ix;
+
+            TwoDigits digits;
 
             // unroll the loop
             if (number < 10)
