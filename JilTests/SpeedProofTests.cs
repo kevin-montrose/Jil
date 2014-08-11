@@ -1241,7 +1241,7 @@ namespace JilTests
             try
             {
                 {
-                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = true;
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = true;
                     Exception ignored;
 
                     // Build the *actual* serializer method
@@ -1249,7 +1249,7 @@ namespace JilTests
                 }
 
                 {
-                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = false;
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = false;
                     Exception ignored;
 
                     // Build the *actual* serializer method
@@ -1258,7 +1258,7 @@ namespace JilTests
             }
             finally
             {
-                InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolledSigned = true;
+                InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = true;
             }
 
             var rand = new Random(27899810);
@@ -1280,62 +1280,6 @@ namespace JilTests
             CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
 
             Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
-        }
-
-        class _UseCustomWriteIntUnrolledSigned_UInt
-        {
-            public List<uint> A { get; set; }
-        }
-
-        [TestMethod]
-        public void UseCustomWriteIntUnrolledSigned_UInt()
-        {
-            Action<TextWriter, _UseCustomWriteIntUnrolledSigned_UInt, int> signed;
-            Action<TextWriter, _UseCustomWriteIntUnrolledSigned_UInt, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolledSigned_UInt>.UseCustomWriteIntUnrolledSigned = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    signed = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned_UInt>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolledSigned_UInt>.UseCustomWriteIntUnrolledSigned = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned_UInt>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_UseCustomWriteIntUnrolledSigned_UInt>.UseCustomWriteIntUnrolledSigned = true;
-            }
-
-            var rand = new Random(27899810);
-
-            var toSerialize = new List<_UseCustomWriteIntUnrolledSigned_UInt>();
-            for (var i = 0; i < 1000; i++)
-            {
-                toSerialize.Add(
-                    new _UseCustomWriteIntUnrolledSigned_UInt
-                    {
-                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => _RandUInt(rand)).ToList()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double signedTime, normalTime;
-            CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
-
-            //Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
-            throw new Exception("signedTime = " + signedTime + ", normalTime = " + normalTime);
         }
 #endif
     }
