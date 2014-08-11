@@ -24,7 +24,6 @@ namespace Jil.Serialize
         public static bool UseFastGuids = true;
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
-        public static bool UseCustomWriteIntUnrolled = true;
         public static bool UseCustomWriteIntUnrolledSigned = true;
 
         static string CharBuffer = "char_buffer";
@@ -753,16 +752,9 @@ namespace Jil.Serialize
 
         void CallWriteInt()
         {
-            if (UseCustomWriteIntUnrolled)
+            if (UseCustomWriteIntUnrolledSigned)
             {
-                if (UseCustomWriteIntUnrolledSigned)
-                {
-                    Emit.Call(Methods.CustomWriteIntUnrollSigned);
-                }
-                else
-                {
-                    Emit.Call(Methods.CustomWriteIntUnrolled);
-                }
+                Emit.Call(Methods.CustomWriteIntUnrollSigned);
             }
             else
             {
@@ -772,7 +764,7 @@ namespace Jil.Serialize
 
         void CallWriteUInt()
         {
-            if (UseCustomWriteIntUnrolled)
+            if (UseCustomWriteIntUnrolledSigned)
             {
                 Emit.Call(Methods.CustomWriteUIntUnrolled);
             }

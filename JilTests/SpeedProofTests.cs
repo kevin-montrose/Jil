@@ -1219,61 +1219,6 @@ namespace JilTests
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
         }
 
-        class _UseCustomWriteIntUnrolled
-        {
-            public List<int> A { get; set; }
-        }
-
-        [TestMethod]
-        public void UseCustomWriteIntUnrolled()
-        {
-            Action<TextWriter, _UseCustomWriteIntUnrolled, int> unrolled;
-            Action<TextWriter, _UseCustomWriteIntUnrolled, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolled>.UseCustomWriteIntUnrolled = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    unrolled = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolled>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_UseCustomWriteIntUnrolled>.UseCustomWriteIntUnrolled = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolled>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_UseCustomWriteIntUnrolled>.UseCustomWriteIntUnrolled = true;
-            }
-
-            var rand = new Random(89210872);
-
-            var toSerialize = new List<_UseCustomWriteIntUnrolled>();
-            for (var i = 0; i < 1000; i++)
-            {
-                toSerialize.Add(
-                    new _UseCustomWriteIntUnrolled 
-                    { 
-                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => rand.Next(2) == 0 ? rand.Next() : -rand.Next()).ToList()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double unrolledTime, normalTime;
-            CompareTimes(toSerialize, unrolled, normal, out unrolledTime, out normalTime);
-
-            Assert.IsTrue(unrolledTime < normalTime, "unrolledTime = " + unrolledTime + ", normalTime = " + normalTime);
-        }
-
         class _UseCustomWriteIntUnrolledSigned
         {
             public List<int> A { get; set; }
