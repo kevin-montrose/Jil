@@ -855,7 +855,7 @@ namespace Jil.Deserialize
             }
 
             finished:
-            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
         public static readonly MethodInfo BuildFailure = typeof(Methods).GetMethod("_BuildFailure", BindingFlags.NonPublic | BindingFlags.Static);
