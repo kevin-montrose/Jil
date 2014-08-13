@@ -4475,7 +4475,9 @@ namespace JilTests
             var text = "{\"T\":\"\\u003c\"}";
             var res = JSON.Deserialize<_Issue48>(text);
             Assert.IsNotNull(res);
-            Assert.AreEqual("\u003c", res.S);
+            Assert.IsNull(res.S);
+            var dyn = JSON.DeserializeDynamic(text);
+            Assert.AreEqual("\u003c", (string)dyn.T);
         }
 
 #if !DEBUG
