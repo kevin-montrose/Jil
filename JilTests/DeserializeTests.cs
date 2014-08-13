@@ -4461,6 +4461,23 @@ namespace JilTests
             Assert.AreEqual(shouldMatch, dt);
         }
 
+        public class _Issue48
+        {
+            public string S { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue48()
+        {
+            var res2 = JSON.Deserialize<string>("\"\\uabcd\"");
+            Assert.AreEqual("\uabcd", res2);
+
+            var text = "{\"T\":\"\\u003c\"}";
+            var res = JSON.Deserialize<_Issue48>(text);
+            Assert.IsNotNull(res);
+            Assert.AreEqual("\u003c", res.S);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
