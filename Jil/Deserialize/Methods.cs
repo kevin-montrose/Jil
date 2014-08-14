@@ -341,13 +341,13 @@ namespace Jil.Deserialize
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 var u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
             }
         }
 
@@ -960,7 +960,7 @@ namespace Jil.Deserialize
             }
 
             finished:
-            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
         public static readonly MethodInfo BuildFailure = typeof(Methods).GetMethod("_BuildFailure", BindingFlags.NonPublic | BindingFlags.Static);
