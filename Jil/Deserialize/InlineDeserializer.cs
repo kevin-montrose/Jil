@@ -16,9 +16,11 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseHashWhenMatchingMembers = true;
         public static bool UseHashWhenMatchingEnums = true;
+        public static bool UseCharArrayOverStringBuilder = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
+        const string CharArrayName = "char_array";
         
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
@@ -88,7 +90,17 @@ namespace Jil.Deserialize
             if (mayNeedStringBuilder)
             {
                 Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+
+                if (UseCharArrayOverStringBuilder)
+                {
+                    Emit.DeclareLocal<char[]>(CharArrayName);
+                }
             }
+        }
+
+        void LoadCharArray()
+        {
+            Emit.LoadLocalAddress(CharArrayName);
         }
 
         void LoadCharBuffer()
@@ -201,7 +213,12 @@ namespace Jil.Deserialize
             // Stack starts
             // TextReader
 
-            if (UsingCharBuffer)
+            if (UseCharArrayOverStringBuilder)
+            {
+                LoadCharArray();                                     // char[]
+                Emit.Call(Methods.ReadEncodedStringWithCharArray);   // string
+            }
+            else if (UsingCharBuffer)
             {
                 LoadCharBuffer();                           // TextReader char[]
                 LoadStringBuilder();                        // TextReader char[] StringBuilder
