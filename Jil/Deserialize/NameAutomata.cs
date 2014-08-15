@@ -21,7 +21,8 @@ namespace Jil.Deserialize
                 return errorValue;
             }
 
-            static char ReadHexQuad(TextReader reader)
+            // TODO: This is duplicated around the place, so should consolidate
+            public static char ReadHexQuad(TextReader reader)
             {
                 int unescaped;
                 int c;
@@ -72,10 +73,20 @@ namespace Jil.Deserialize
                 
                 return (char)unescaped;
             }
+
+            public static char ExpectUnicodeHexQuad(TextReader reader)
+            {
+                var c = reader.Read();
+                if (c != 'u')
+                    throw new DeserializationException("Escape sequence expected unicode hex quad", reader);
+
+                return ReadHexQuad(reader);
+            }
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
         static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int), typeof(T) });
+        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
 
         static void Recurse(Action<Action> addAction, Emit<Func<TextReader, T>> emit, Label failure, Local local_ch, Label marking, IList<Tuple<string, Action<Emit<Func<TextReader, T>>>>> nameValues, int pos)
         {
@@ -110,12 +121,28 @@ namespace Jil.Deserialize
                     {
                         if (marking != null)
                             emit.MarkLabel(marking);
-                        emit.LoadArgument(0);
-                        emit.CallVirtual(TextReader_Read);
-                        emit.StoreLocal(local_ch);
-                        emit.LoadLocal(local_ch);
-                        emit.LoadConstant(ch);
-                        emit.BranchIfEqual(next);
+                        emit.LoadArgument(0);                   // TextReader
+                        emit.CallVirtual(TextReader_Read);      // char
+                        emit.StoreLocal(local_ch);              //
+
+                        Action checkChar = () =>
+                        {
+                            emit.LoadLocal(local_ch);               // char
+                            emit.LoadConstant(ch);                  // char char
+                            emit.BranchIfEqual(next);               //
+                        };
+
+                        checkChar();
+
+                        emit.LoadLocal(local_ch);               // char
+                        emit.LoadConstant('\\');                // char char
+                        emit.UnsignedBranchIfNotEqual(failure); // 
+                        emit.LoadArgument(0);                   // TextReader
+                        emit.Call(Helper_ExpectUnicodeHexQuad); // char
+                        emit.StoreLocal(local_ch);              //
+
+                        checkChar();
+
                         emit.Branch(failure);
                     });
                 }
@@ -146,16 +173,33 @@ namespace Jil.Deserialize
 
                 addAction(() => emit.Branch(failure));
 
-                // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
-                foreach (var item in namesToFinish)
+                Action checkChars = () =>
                 {
-                    addAction(() =>
+                    // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
+                    foreach (var item in namesToFinish)
                     {
-                        emit.LoadLocal(local_ch);
-                        emit.LoadConstant((int)item.Item1);
-                        emit.BranchIfEqual(item.Item2);
-                    });
-                }
+                        addAction(() =>
+                        {
+                            emit.LoadLocal(local_ch);
+                            emit.LoadConstant((int)item.Item1);
+                            emit.BranchIfEqual(item.Item2);
+                        });
+                    }
+                };
+                
+                checkChars();
+
+                addAction(() =>
+                {
+                    emit.LoadLocal(local_ch);               // char
+                    emit.LoadConstant('\\');                // char char
+                    emit.UnsignedBranchIfNotEqual(failure); // 
+                    emit.LoadArgument(0);                   // TextReader
+                    emit.Call(Helper_ExpectUnicodeHexQuad); // char
+                    emit.StoreLocal(local_ch);              //
+                });
+
+                checkChars();
 
                 addAction(() =>
                 {
