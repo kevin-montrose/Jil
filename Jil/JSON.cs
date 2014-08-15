@@ -61,11 +61,17 @@ namespace Jil
         /// </summary>
         public static void Serialize<T>(T data, TextWriter output, Options options = null)
         {
+            if (output == null)
+            {
+                throw new ArgumentNullException("output");
+            }
+
             if (typeof(T) == typeof(object))
             {
                 SerializeDynamic(data, output, options);
                 return;
             }
+
             options = options ?? Options.Default;
 
             switch (options.UseDateTimeFormat)
@@ -99,7 +105,9 @@ namespace Jil
         public static string Serialize<T>(T data, Options options = null)
         {
             if (typeof(T) == typeof(object))
+            {
                 return SerializeDynamic(data, options);
+            }
 
             options = options ?? Options.Default;
 
@@ -498,8 +506,16 @@ namespace Jil
         /// </summary>
         public static T Deserialize<T>(TextReader reader, Options options = null)
         {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
             if (typeof(T) == typeof(object))
+            {
                 return DeserializeDynamic(reader, options);
+            }
+
             try
             {
 
@@ -552,8 +568,16 @@ namespace Jil
         /// </summary>
         public static T Deserialize<T>(string text, Options options = null)
         {
+            if (text == null)
+            {
+                throw new ArgumentNullException("text");
+            }
+
             if (typeof(T) == typeof(object))
+            {
                 return DeserializeDynamic(text, options);
+            }
+
             using (var reader = new StringReader(text))
             {
                 return Deserialize<T>(reader, options);

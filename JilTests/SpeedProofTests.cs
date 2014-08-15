@@ -15,6 +15,22 @@ namespace JilTests
     [TestClass]
     public class SpeedProofTests
     {
+        private static uint _RandUInt(Random rand)
+        {
+            var bytes = new byte[4];
+            rand.NextBytes(bytes);
+
+            return BitConverter.ToUInt32(bytes, 0);
+        }
+
+        private static long _RandLong(Random rand)
+        {
+            var bytes = new byte[8];
+            rand.NextBytes(bytes);
+
+            return BitConverter.ToInt64(bytes, 0);
+        }
+
         private static Guid _RandGuid(Random rand)
         {
             var bytes = new byte[16];
@@ -1211,63 +1227,59 @@ namespace JilTests
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
         }
 
-        class _UseFastConsumeWhiteSpace
+        class _UseCustomWriteIntUnrolledSigned
         {
-            public int A { get; set; }
-            public string B { get; set; }
-            public string C { get; set; }
+            public List<int> A { get; set; }
         }
 
         [TestMethod]
-        public void UseFastConsumeWhiteSpace()
+        public void UseCustomWriteIntUnrolledSigned()
         {
-            Func<TextReader, _UseFastConsumeWhiteSpace> fast;
-            Func<TextReader, _UseFastConsumeWhiteSpace> normal;
+            Action<TextWriter, _UseCustomWriteIntUnrolledSigned, int> signed;
+            Action<TextWriter, _UseCustomWriteIntUnrolledSigned, int> normal;
 
             try
             {
                 {
-                    InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = true;
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = true;
                     Exception ignored;
 
-                    // Build the *actual* deserializer method
-                    fast = InlineDeserializerHelper.Build<_UseFastConsumeWhiteSpace>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                    // Build the *actual* serializer method
+                    signed = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
                 }
 
                 {
-                    InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = false;
+                    InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = false;
                     Exception ignored;
 
-                    // Build the *actual* deserializer method
-                    normal = InlineDeserializerHelper.Build<_UseFastConsumeWhiteSpace>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_UseCustomWriteIntUnrolledSigned>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
                 }
             }
             finally
             {
-                InlineDeserializer<_UseFastConsumeWhiteSpace>.UseFastConsumeWhiteSpace = true;
+                InlineSerializer<_UseCustomWriteIntUnrolledSigned>.UseCustomWriteIntUnrolled = true;
             }
 
-            var rand = new Random(47419928);
+            var rand = new Random(27899810);
 
-            var toSerialize = new List<_UseFastConsumeWhiteSpace>();
-            for (var i = 0; i < 100000; i++)
+            var toSerialize = new List<_UseCustomWriteIntUnrolledSigned>();
+            for (var i = 0; i < 1000; i++)
             {
                 toSerialize.Add(
-                    new _UseFastConsumeWhiteSpace
+                    new _UseCustomWriteIntUnrolledSigned
                     {
-                        A = rand.Next(),
-                        B = _RandString(rand),
-                        C = _RandString(rand)
+                        A = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => rand.Next(2) == 0 ? rand.Next() : -rand.Next()).ToList()
                     }
                 );
             }
 
             toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
 
-            double fastTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+            double signedTime, normalTime;
+            CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
         }
 #endif
     }

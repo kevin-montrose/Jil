@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -55,7 +56,7 @@ namespace Jil.DeserializeDynamic
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(new string(buffer, 0, ix));
+                        commonSb.Append(buffer, 0, ix);
                         break;
                     }
 
@@ -270,7 +271,7 @@ namespace Jil.DeserializeDynamic
             }
 
             finished:
-            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
         public static double ReadDouble(char firstChar, TextReader reader, ref StringBuilder commonSb)

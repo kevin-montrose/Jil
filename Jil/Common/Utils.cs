@@ -894,5 +894,15 @@ namespace Jil.Common
 
             return counts.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
         }
+
+        public static string SafeConvertFromUtf32(int utf32)
+        {
+            if (utf32 > 0x10ffff || (utf32 >= 0x00d800 && utf32 <= 0x00dfff))
+            {
+                return ((char)utf32).ToString();
+            }
+
+            return char.ConvertFromUtf32(utf32);
+        }
     }
 }

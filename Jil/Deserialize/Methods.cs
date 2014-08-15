@@ -13,9 +13,7 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        // .NET will expand a char[] allocation up to 32, don't bother trimming this unless you can get this down to 16
-        //    you'll just be making string parsing slower for no benefit
-        public const int CharBufferSize = 32;
+        public const int CharBufferSize = 33;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -190,7 +188,7 @@ namespace Jil.Deserialize
             // skip a string
             if (leadChar == '"')
             {
-                SkipEncodedString(reader);
+                _SkipEncodedString(reader);
                 return;
             }
 
@@ -251,7 +249,7 @@ namespace Jil.Deserialize
                 reader.Read();
                 return;
             }
-            SkipEncodedString(reader);
+            _SkipEncodedString(reader);
             _ConsumeWhiteSpace(reader);
             var b = reader.Read();
             if (b != ':') throw new DeserializationException("Expected :", reader);
@@ -266,7 +264,7 @@ namespace Jil.Deserialize
                 if (c != ',') throw new DeserializationException("Expected ,", reader);
 
                 _ConsumeWhiteSpace(reader);
-                SkipEncodedString(reader);
+                _SkipEncodedString(reader);
                 _ConsumeWhiteSpace(reader);
                 var d = reader.Read();
                 if (d != ':') throw new DeserializationException("Expected :", reader);
@@ -301,8 +299,9 @@ namespace Jil.Deserialize
             }
         }
 
+        public static MethodInfo SkipEncodedString = typeof(Methods).GetMethod("_SkipEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SkipEncodedString(TextReader reader)
+        static void _SkipEncodedString(TextReader reader)
         {
             reader.Read();  // skip the "
 
@@ -341,13 +340,13 @@ namespace Jil.Deserialize
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 var u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
                 u = reader.Read();
-                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') && (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", reader);
             }
         }
 
@@ -396,19 +395,6 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ConsumeWhiteSpaceFast = typeof(Methods).GetMethod("_ConsumeWhiteSpaceFast", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _ConsumeWhiteSpaceFast(TextReader reader)
-        {
-            int c;
-            while ((c = reader.Peek()) != -1)
-            {
-                if (!IsWhiteSpaceFast(c)) return;
-
-                reader.Read();
-            }
-        }
-
         public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ConsumeWhiteSpace(TextReader reader)
@@ -437,26 +423,6 @@ namespace Jil.Deserialize
                 c == 0x09 ||
                 c == 0x0A ||
                 c == 0x0D;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsWhiteSpaceFast(int c)
-        {
-            // per http://www.ietf.org/rfc/rfc4627.txt
-            // insignificant whitespace in JSON is defined as 
-            //  \u0020  - space
-            //  \u0009  - tab
-            //  \u000A  - new line
-            //  \u000D  - carriage return
-
-            return
-                c < 0x21 && 
-                (
-                    c == 0x20 ||
-                    c == 0x09 ||
-                    c == 0x0A ||
-                    c == 0x0D
-                );
         }
 
         public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
@@ -523,7 +489,7 @@ namespace Jil.Deserialize
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(new string(buffer, 0, ix));
+                        commonSb.Append(buffer, 0, ix);
                         break;
                     }
 
@@ -889,7 +855,7 @@ namespace Jil.Deserialize
             }
 
             finished:
-            commonSb.Append(char.ConvertFromUtf32(encodedChar));
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
         public static readonly MethodInfo BuildFailure = typeof(Methods).GetMethod("_BuildFailure", BindingFlags.NonPublic | BindingFlags.Static);

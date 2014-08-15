@@ -4452,6 +4452,47 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue43()
+        {
+            var shouldMatch = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+            shouldMatch = new DateTime(shouldMatch.Ticks + 5339, DateTimeKind.Utc);
+            var dt = JSON.Deserialize<DateTime>("\"2014-08-08T14:04:01.4265339+00:00\"", Options.ISO8601);
+            Assert.AreEqual(shouldMatch, dt);
+        }
+
+        public class _Issue48
+        {
+            public string S { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue48()
+        {
+            var res2 = JSON.Deserialize<string>("\"\\uabcd\"");
+            Assert.AreEqual("\uabcd", res2);
+
+            var text = "{\"T\":\"\\u003c\"}";
+            var res = JSON.Deserialize<_Issue48>(text);
+            Assert.IsNotNull(res);
+            Assert.IsNull(res.S);
+            var dyn = JSON.DeserializeDynamic(text);
+            Assert.AreEqual("\u003c", (string)dyn.T);
+        }
+
+        [TestMethod]
+        public void IllegalUTF16Char()
+        {
+            // Ok, this is a pain
+            //   There are certain codepoints that are now valid unicode that char.ConvertFromUtf32 can't deal with
+            //   What tripped this was \uD83D which is now an emoji, but is considered an illegal surrogate
+            //   We have to deal with these somewhat gracefully, even if we can't really turn them into what they
+            //   should be...
+
+            var raw = JSON.Deserialize<string>("\"\\uD83D\"");
+            Assert.AreEqual(0xD83D, (int)raw[0]);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

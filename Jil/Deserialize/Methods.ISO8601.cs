@@ -47,7 +47,7 @@ namespace Jil.Deserialize
             // hhmm.fff*
             // hh:mm:ss.fff*
             // hhmmss.fff*
-            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 6)
+            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 7 because that's out to a Tick)
 
             // Here are the possible formats for timezones
             // Z
@@ -61,10 +61,9 @@ namespace Jil.Deserialize
             // they are concatenated to form a full instant, with T as a separator between date & time
             // i.e. <date>T<time><timezone>
             // the longest possible string:
-            // 9999-12-31T01:23:45.678901+01:23
-            // 0123456789ABCDEFGHIJKLMNOPQRS
+            // 9999-12-31T01:23:45.6789012+34:56
             //
-            // Maximum date size is 32 characters
+            // Maximum date size is 33 characters
 
             var ix = -1;
             int? tPos = null;
@@ -465,9 +464,9 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static TimeSpan ParseISO8601Time(TextReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
-            const double HoursToMilliseconds   = 3600000;
-            const double MinutesToMilliseconds =   60000;
-            const double SecondsToMilliseconds =    1000;
+            const long HoursToTicks   = 36000000000;
+            const long MinutesToTicks = 600000000;
+            const long SecondsToTicks = 10000000;
 
             // Here are the possible formats for times
             // hh
@@ -529,10 +528,10 @@ namespace Jil.Deserialize
 
                 if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
-                double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                hoursAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * HoursToMilliseconds;
+                long hoursAsTicks = hour * HoursToTicks;
+                hoursAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * HoursToTicks);
 
-                return TimeSpan.FromMilliseconds(hoursAsMilliseconds);
+                return TimeSpan.FromTicks(hoursAsTicks);
             }
 
             if (c == ':')
@@ -600,11 +599,11 @@ namespace Jil.Deserialize
 
                     if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    minsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * MinutesToMilliseconds;
+                    long hoursAsTicks = hour * HoursToTicks;
+                    long minsAsTicks = min * MinutesToTicks;
+                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
 
-                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
+                    return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
 
                 if (c != ':') throw new DeserializationException("Expected :", reader);
@@ -646,12 +645,12 @@ namespace Jil.Deserialize
 
                     if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    double secsAsMilliseconds = secs * SecondsToMilliseconds;
-                    secsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * SecondsToMilliseconds;
+                    long hoursAsTicks = hour * HoursToTicks;
+                    long minsAsTicks = min * MinutesToTicks;
+                    long secsAsTicks = secs * SecondsToTicks;
+                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
 
-                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
+                    return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
 
                 throw new DeserializationException("Expected ,, or .", reader);
@@ -707,11 +706,11 @@ namespace Jil.Deserialize
 
                     if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    minsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * MinutesToMilliseconds;
+                    long hoursAsTicks = hour * HoursToTicks;
+                    long minsAsTicks = min * MinutesToTicks;
+                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
 
-                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
+                    return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
 
                 if (c == ':') throw new DeserializationException("Unexpected separator in ISO8601 time", reader);
@@ -752,12 +751,12 @@ namespace Jil.Deserialize
 
                     if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader);
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    double secsAsMilliseconds = secs * SecondsToMilliseconds;
-                    secsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * SecondsToMilliseconds;
+                    long hoursAsTicks = hour * HoursToTicks;
+                    long minsAsTicks = min * MinutesToTicks;
+                    long secsAsTicks = secs * SecondsToTicks;
+                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
 
-                    return TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
+                    return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
 
                 throw new DeserializationException("Expected ,, or .", reader);

@@ -214,10 +214,11 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomISO8601ToString(TextWriter writer, DateTime dt, char[] buffer)
         {
-            // "yyyy-mm-ddThh:mm:ssZ"
+            // "yyyy-mm-ddThh:mm:ss.fffffffZ"
             // 0123456789ABCDEFGHIJKL
             //
             // Yes, DateTime.Max is in fact guaranteed to have a 4 digit year (and no more)
+            // f of 7 digits allows for 1 Tick level resolution
 
             buffer[0] = '"';
 
@@ -271,10 +272,80 @@ namespace Jil.Serialize
             buffer[19] = digits.Second;
             buffer[18] = digits.First;
 
-            buffer[20] = 'Z';
-            buffer[21] = '"';
+            int fracEnd;
+            var remainingTicks = (dt - new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second)).Ticks;
+            if (remainingTicks > 0)
+            {
+                buffer[20] = '.';
 
-            writer.Write(buffer, 0, 22);
+                var fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[27] = digits.Second;
+                    buffer[26] = digits.First;
+                    fracEnd = 28;
+                }
+                else
+                {
+                    fracEnd = 26;
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[25] = digits.Second;
+                    buffer[24] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 26)
+                    {
+                        fracEnd = 24;
+                    }
+                    else
+                    {
+                        buffer[25] = '0';
+                        buffer[24] = '0';
+                    }
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[23] = digits.Second;
+                    buffer[22] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 24)
+                    {
+                        fracEnd = 22;
+                    }
+                    else
+                    {
+                        buffer[23] = '0';
+                        buffer[22] = '0';
+                    }
+                }
+
+                fracPart = remainingTicks;
+                buffer[21] = (char)('0' + fracPart);
+            }
+            else
+            {
+                fracEnd = 20;
+            }
+
+            buffer[fracEnd] = 'Z';
+            buffer[fracEnd + 1] = '"';
+
+            writer.Write(buffer, 0, fracEnd + 2);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInline = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInline", BindingFlags.NonPublic | BindingFlags.Static);
@@ -887,6 +958,173 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
+        internal static readonly MethodInfo CustomWriteIntUnrolledSigned = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteIntUnrolledSigned(TextWriter writer, int num, char[] buffer)
+        {
+            // have to special case this, we can't negate it
+            if (num == int.MinValue)
+            {
+                writer.Write("-2147483648");
+                return;
+            }
+
+            // Why signed integers?
+            // Earlier versions of this code used unsigned integers, 
+            //   but it turns out that's not ideal and here's why.
+            // 
+            // The signed version of the relevant code gets JIT'd down to:
+            // instr       operands                    latency/throughput (approx. worst case; Haswell)
+            // ========================================================================================
+            // mov         ecx,###                      2 /  0.5 
+            // cdq                                      1 /  -
+            // idiv        eax,ecx                     29 / 11
+            // mov         ecx,###                      2 /  0.5
+            // cdq                                      1 /  -
+            // idiv        eax,ecx                     29 / 11
+            // movsx       edx,dl                       - /  0.5
+            //
+            // The unsigned version gets JIT'd down to:
+            // instr       operands                    latency/throughput (approx. worst case; Haswell)
+            // ========================================================================================
+            // mov         ecx,###                       2 /  0.5
+            // xor         edx,edx                       1 /  0.25
+            // div         eax,ecx                      29 / 11
+            // mov         ecx,###                       2 /  0.5
+            // xor         edx,edx                       1 /  0.25
+            // div         eax,ecx                      29 / 11
+            // and         edx,###                       1 /  0.25
+            //
+            // In theory div (usigned division) is faster than idiv, and it probably is *but* cdq + cdq + movsx is
+            //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
+            int numLen;
+            sbyte ix;
+            int number;
+
+            if (num < 0)
+            {
+                writer.Write('-');
+                number = (-num);
+            }
+            else
+            {
+                number = num;
+            }
+
+            TwoDigits digits;
+
+            // unroll the loop
+            if (number < 10)
+            {
+                numLen = 1;
+                goto digits10;
+            }
+            else
+            {
+                if (number < 100)
+                {
+                    numLen = 2;
+                    goto digits10;
+                }
+                else
+                {
+                    if (number < 1000)
+                    {
+                        numLen = 3;
+                        goto digits32;
+                    }
+                    else
+                    {
+                        if (number < 10000)
+                        {
+                            numLen = 4;
+                            goto digits32;
+                        }
+                        else
+                        {
+                            if (number < 100000)
+                            {
+                                numLen = 5;
+                                goto digits54;
+                            }
+                            else
+                            {
+                                if (number < 1000000)
+                                {
+                                    numLen = 6;
+                                    goto digits54;
+                                }
+                                else
+                                {
+                                    if (number < 10000000)
+                                    {
+                                        numLen = 7;
+                                        goto digits76;
+                                    }
+                                    else
+                                    {
+                                        if (number < 100000000)
+                                        {
+                                            numLen = 8;
+                                            goto digits76;
+                                        }
+                                        else
+                                        {
+                                            if (number < 1000000000)
+                                            {
+                                                numLen = 9;
+                                                goto digits98;
+                                            }
+                                            else
+                                            {
+                                                numLen = 10;
+                                                goto digits98;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
+            // so 1 to 10 digits
+
+            digits98: // [0,1]00,000,000-[9,9]00,000,000
+            ix = (sbyte)((number / 100000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[0] = digits.First;
+            buffer[1] = digits.Second;
+
+            digits76: // [01,]000,000-[99,]000,000
+            ix = (sbyte)((number / 1000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[2] = digits.First;
+            buffer[3] = digits.Second;
+
+            digits54: // [01]0,000-[99]0,000
+            ix = (sbyte)((number / 10000) % 100);
+            digits = DigitPairs[ix];
+            buffer[4] = digits.First;
+            buffer[5] = digits.Second;
+
+            digits32: // [0,1]00-[9,9]99
+            ix = (sbyte)((number / 100) % 100);
+            digits = DigitPairs[ix];
+            buffer[6] = digits.First;
+            buffer[7] = digits.Second;
+
+            digits10: // [00]-[99]
+            ix = (sbyte)(number % 100);
+            digits = DigitPairs[ix];
+            buffer[8] = digits.First;
+            buffer[9] = digits.Second;
+
+            writer.Write(buffer, 10 - numLen, numLen);
+        }
+
         internal static readonly MethodInfo SwitchWriteInt = typeof(Methods).GetMethod("_SwitchWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool _SwitchWriteInt(TextWriter writer, int number)
@@ -1024,6 +1262,125 @@ namespace Jil.Serialize
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
 
+        internal static readonly MethodInfo CustomWriteUIntUnrolled = typeof(Methods).GetMethod("_CustomWriteUIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
+        static void _CustomWriteUIntUnrolled(TextWriter writer, uint number, char[] buffer)
+        {
+            TwoDigits digits;
+            int numLen;
+            byte ix;
+
+            // unroll the loop
+            if (number < 10)
+            {
+                numLen = 1;
+                goto digits10;
+            }
+            else
+            {
+                if (number < 100)
+                {
+                    numLen = 2;
+                    goto digits10;
+                }
+                else
+                {
+                    if (number < 1000)
+                    {
+                        numLen = 3;
+                        goto digits32;
+                    }
+                    else
+                    {
+                        if (number < 10000)
+                        {
+                            numLen = 4;
+                            goto digits32;
+                        }
+                        else
+                        {
+                            if (number < 100000)
+                            {
+                                numLen = 5;
+                                goto digits54;
+                            }
+                            else
+                            {
+                                if (number < 1000000)
+                                {
+                                    numLen = 6;
+                                    goto digits54;
+                                }
+                                else
+                                {
+                                    if (number < 10000000)
+                                    {
+                                        numLen = 7;
+                                        goto digits76;
+                                    }
+                                    else
+                                    {
+                                        if (number < 100000000)
+                                        {
+                                            numLen = 8;
+                                            goto digits76;
+                                        }
+                                        else
+                                        {
+                                            if (number < 1000000000)
+                                            {
+                                                numLen = 9;
+                                                goto digits98;
+                                            }
+                                            else
+                                            {
+                                                numLen = 10;
+                                                goto digits98;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
+            // so 1 to 10 digits
+
+            digits98: // [0,1]00,000,000-[9,9]00,000,000
+            ix = (byte)((number / 100000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[0] = digits.First;
+            buffer[1] = digits.Second;
+
+            digits76: // [01,]000,000-[99,]000,000
+            ix = (byte)((number / 1000000) % 100);
+            digits = DigitPairs[ix];
+            buffer[2] = digits.First;
+            buffer[3] = digits.Second;
+
+            digits54: // [01]0,000-[99]0,000
+            ix = (byte)((number / 10000) % 100);
+            digits = DigitPairs[ix];
+            buffer[4] = digits.First;
+            buffer[5] = digits.Second;
+
+            digits32: // [0,1]00-[9,9]99
+            ix = (byte)((number / 100) % 100);
+            digits = DigitPairs[ix];
+            buffer[6] = digits.First;
+            buffer[7] = digits.Second;
+
+            digits10: // [00]-[99]
+            ix = (byte)(number % 100);
+            digits = DigitPairs[ix];
+            buffer[8] = digits.First;
+            buffer[9] = digits.Second;
+
+            writer.Write(buffer, 10 - numLen, numLen);
+        }
+
         internal static readonly MethodInfo CustomWriteLong = typeof(Methods).GetMethod("_CustomWriteLong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteLong(TextWriter writer, long number, char[] buffer)
@@ -1065,7 +1422,7 @@ namespace Jil.Serialize
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
-
+        
         internal static readonly MethodInfo CustomWriteULong = typeof(Methods).GetMethod("_CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
