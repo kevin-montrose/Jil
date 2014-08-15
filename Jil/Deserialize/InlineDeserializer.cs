@@ -299,24 +299,49 @@ namespace Jil.Deserialize
                 return;
             }
 
-            LoadStringBuilder();                    // TextReader StringBuilder
-
-            if (numberType == typeof(double))
+            if (UseCharArrayOverStringBuilder)
             {
-                Emit.Call(Methods.ReadDouble);   // double
-                return;
+                LoadCharArray();                    // TextReader StringBuilder
+
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingleCharArray);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    return;
+                }
             }
-
-            if (numberType == typeof(float))
+            else
             {
-                Emit.Call(Methods.ReadSingle);  // float
-                return;
-            }
+                LoadStringBuilder();                    // TextReader StringBuilder
 
-            if (numberType == typeof(decimal))
-            {
-                Emit.Call(Methods.ReadDecimal); // decimal
-                return;
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDouble);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingle);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimal); // decimal
+                    return;
+                }
             }
 
             throw new ConstructionException("Unexpected number type: " + numberType);
