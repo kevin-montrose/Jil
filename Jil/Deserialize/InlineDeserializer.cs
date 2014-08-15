@@ -215,18 +215,18 @@ namespace Jil.Deserialize
 
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharArray();                                     // char[]
-                Emit.Call(Methods.ReadEncodedStringWithCharArray);   // string
+                LoadCharArray();                                   // TextReader char[]
+                Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
             }
             else if (UsingCharBuffer)
             {
-                LoadCharBuffer();                           // TextReader char[]
-                LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
+                LoadCharBuffer();                               // TextReader char[]
+                LoadStringBuilder();                            // TextReader char[] StringBuilder
+                Emit.Call(Methods.ReadEncodedStringWithBuffer); // string
             }
             else
             {
-                LoadStringBuilder();                        // TextReader StringBuilder
+                LoadStringBuilder();                   // TextReader StringBuilder
                 Emit.Call(Methods.ReadEncodedString);  // string
             }
         }
@@ -301,7 +301,7 @@ namespace Jil.Deserialize
 
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharArray();                    // TextReader StringBuilder
+                LoadCharArray();                    // TextReader char[]
 
                 if (numberType == typeof(double))
                 {
