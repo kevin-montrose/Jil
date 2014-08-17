@@ -1,4 +1,5 @@
-﻿using Sigil;
+﻿using Jil.Common;
+using Sigil;
 using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
@@ -227,7 +228,7 @@ namespace Jil.Deserialize
             Action<Action> addAction =
                 action => stack.Push(action);
 
-            var emit = Emit<Func<TextReader, T>>.NewDynamicMethod();
+            var emit = Emit<Func<TextReader, T>>.NewDynamicMethod(doVerify: Utils.DoVerify);
 
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
@@ -244,9 +245,11 @@ namespace Jil.Deserialize
             Recurse(addAction, emit, failure, ch, null, sorted, 0);
 
             foreach (var action in stack)
+            {
                 action();
+            }
 
-            return emit.CreateDelegate();
+            return emit.CreateDelegate(Utils.DelegateOptimizationOptions);
         }
     }
 }
