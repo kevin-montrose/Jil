@@ -160,5 +160,230 @@ namespace JilTests
                 Assert.IsTrue((now - dt).Duration() < TimeSpan.FromMilliseconds(1));
             }
         }
+
+        #region PersonElasticMigration methods and types
+
+        static dynamic Describe(Type t, string memberName)
+        {
+            if (Nullable.GetUnderlyingType(t) != null)
+            {
+                return Describe(Nullable.GetUnderlyingType(t), memberName);
+            }
+
+            if (t == typeof(string) || t == typeof(Guid))
+            {
+                return new
+                {
+                    type = "string",
+                    index = memberName == "Id" ? "not_analyzed" : "no"
+                };
+            }
+
+            if (t == typeof(int))
+            {
+                return new
+                {
+                    type = "integer",
+                    index = "no"
+                };
+            }
+
+            if (t == typeof(long))
+            {
+                return new
+                {
+                    type = "long",
+                    index = "no"
+                };
+            }
+
+            if (t == typeof(float))
+            {
+                return new
+                {
+                    type = "float",
+                    index = "no"
+                };
+            }
+
+            if (t == typeof(DateTime))
+            {
+                return new
+                {
+                    type = "date",
+                    format = "dateOptionalTime",
+                    index = "no"
+                };
+            }
+
+            if (t.IsValueType) throw new Exception("Unexpected valuetype: " + t.Name);
+
+            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>))
+            {
+                return Describe(t.GetGenericArguments()[0], "--array--");
+            }
+
+            var ret = new Dictionary<string, dynamic>();
+            var properties = new Dictionary<string, dynamic>();
+            foreach (var prop in t.GetProperties())
+            {
+                var propName = prop.Name;
+                var propType = prop.PropertyType;
+                properties[propName] = Describe(propType, propName);
+            }
+
+            ret["properties"] = properties;
+            if (memberName == "--root--")
+            {
+                ret["dynamic"] = "strict";
+                ret["_all"] = new { enabled = false };
+            }
+            else
+            {
+                // can't specify type on the root; I guess object is implicit?
+                ret["type"] = "object";
+            }
+
+            return ret;
+        }
+
+        public class Person
+        {
+            public Guid Id { get; set; }
+            public MostRecentLocation MostRecentLocation { get; set; }
+            public List<Location> Locations { get; set; }
+            public List<InterestingTag> InterestingTags { get; set; }
+            public List<PersonIdentifier> Identifiers { get; set; }
+            public List<InterestingSite> InterestingSites { get; set; }
+            public List<TagView> TagViews { get; set; }
+            public List<DeveloperKind> DeveloperKinds { get; set; }
+            public List<Demographic> Demographics { get; set; }
+            public List<Education> Educations { get; set; }
+            public List<Industry> Industries { get; set; }
+            public List<Language> Languages { get; set; }
+            public List<WorkingHour> WorkingHours { get; set; }
+            public DateTime? LastSeen { get; set; }
+            public List<Merge> Merges { get; set; }
+        }
+
+        public class MostRecentLocation
+        {
+            public float Latitude { get; set; }
+            public float Longitude { get; set; }
+            public DateTime LastSeenDate { get; set; }
+        }
+
+        public class Location
+        {
+            public class LocationGeoPoint
+            {
+                public float Latitude { get; set; }
+                public float Longitude { get; set; }
+            }
+
+            public string CountryCode { get; set; }
+
+            public int LocType { get; set; }
+            public DateTime OnDate { get; set; }
+            public int SeenCount { get; set; }
+            public LocationGeoPoint GeoPoint { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        public class InterestingTag
+        {
+            public int SiteId { get; set; }
+            public int TagId { get; set; }
+            public float Confidence { get; set; }
+        }
+
+        public class PersonIdentifier
+        {
+            public string Id { get; set; }
+            public int IdType { get; set; }
+        }
+
+        public class InterestingSite
+        {
+            public int SiteId { get; set; }
+            public float InterestLevel { get; set; }
+        }
+
+        public class TagView
+        {
+            public int SiteId { get; set; }
+            public int TagId { get; set; }
+            public long TimesViewed { get; set; }
+        }
+
+        public class DeveloperKind
+        {
+            public int DevType { get; set; }
+            public float RelativeScore { get; set; }
+        }
+
+        public class Demographic
+        {
+            [JilDirective(Ignore = true)]
+            public Guid PersonId { get; set; }
+
+            public int DeviceTypeId { get; set; }
+            public int BrowserId { get; set; }
+            public int OsId { get; set; }
+
+            public DateTime OnDate { get; set; }
+            public int SeenCount { get; set; }
+        }
+
+        public class Education
+        {
+            public string Tld { get; set; }
+            public string Name { get; set; }
+
+            public DateTime OnDate { get; set; }
+            public int SeenCount { get; set; }
+
+            public int SourceId { get; set; }
+        }
+
+        public class Industry
+        {
+            public Guid PersonId { get; set; }
+            public int IndustryId { get; set; }
+            public DateTime OnDate { get; set; }
+            public int SeenCount { get; set; }
+        }
+
+        public class Language
+        {
+            public string LanguageCode { get; set; }
+
+            public int LangSource { get; set; }
+            public DateTime OnDate { get; set; }
+            public int SeenCount { get; set; }
+        }
+
+        public class WorkingHour
+        {
+            public int Hour { get; set; }
+            public long Count { get; set; }
+        }
+
+        public class Merge
+        {
+            public Guid DestroyedPersonId { get; set; }
+            public DateTime CreationDate { get; set; }
+        }
+
+#endregion
+
+        [TestMethod]
+        public void PersonElasticMigration()
+        {
+            var personDescribed = Describe(typeof(Person), "--root--");
+            var json = JSON.SerializeDynamic(personDescribed);
+            Assert.AreEqual("{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"MostRecentLocation\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"},\"LastSeenDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"},\"Locations\":{\"properties\":{\"CountryCode\":{\"index\":\"no\",\"type\":\"string\"},\"LocType\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"GeoPoint\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"}},\"type\":\"object\"},\"InterestingTags\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"Confidence\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Identifiers\":{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"IdType\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"InterestingSites\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"InterestLevel\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"TagViews\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"TimesViewed\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"DeveloperKinds\":{\"properties\":{\"DevType\":{\"index\":\"no\",\"type\":\"integer\"},\"RelativeScore\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Demographics\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"DeviceTypeId\":{\"index\":\"no\",\"type\":\"integer\"},\"BrowserId\":{\"index\":\"no\",\"type\":\"integer\"},\"OsId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Educations\":{\"properties\":{\"Tld\":{\"index\":\"no\",\"type\":\"string\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"SourceId\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Industries\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"IndustryId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Languages\":{\"properties\":{\"LanguageCode\":{\"index\":\"no\",\"type\":\"string\"},\"LangSource\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"WorkingHours\":{\"properties\":{\"Hour\":{\"index\":\"no\",\"type\":\"integer\"},\"Count\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"LastSeen\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"Merges\":{\"properties\":{\"DestroyedPersonId\":{\"index\":\"no\",\"type\":\"string\"},\"CreationDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"}},\"dynamic\":\"strict\",\"_all\":{\"enabled\":false}}", json);
+        }
     }
 }

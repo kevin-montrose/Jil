@@ -2040,6 +2040,9 @@ namespace Jil.Serialize
 
         bool DynamicCallOutCheck(Type onType, Sigil.Local inLocal)
         {
+            // Exact god-damn match
+            if (onType == typeof(ForType)) return false;
+
             if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
             {
                 Emit.LoadArgument(0);               // TextWriter
