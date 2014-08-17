@@ -81,6 +81,52 @@ namespace JilTests
             return ret;
         }
 
+        public static string _RandNoEncodingNeededString(Random rand, int? maxLength = null)
+        {
+            var simpleChars = new char[] { '.', ',', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '=', '+', '[', '{', ']', '}', '\\', '|', ' ' };
+
+            var len = 1 + rand.Next(maxLength ?? 20);
+
+            var ret = new char[len];
+
+            for (var i = 0; i < len; i++)
+            {
+                var c = (char)(rand.Next(byte.MaxValue + 1));
+                if (!(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || simpleChars.Contains(c)))
+                {
+                    i--;
+                    continue;
+                }
+
+                ret[i] = c;
+            }
+
+            return new string(ret);
+        }
+
+        public static string _RandEncodingNeededString(Random rand, int? maxLength = null)
+        {
+            var simpleChars = new char[] { '.', ',', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '=', '+', '[', '{', ']', '}', '\\', '|', ' ' };
+
+            var len = 1 + rand.Next(maxLength ?? 20);
+
+            var ret = new char[len];
+
+            for (var i = 0; i < len; i++)
+            {
+                var c = (char)(rand.Next(byte.MaxValue + 1));
+
+                ret[i] = c;
+            }
+
+            if (ret.All(c => (c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9' || simpleChars.Contains(c))))
+            {
+                return _RandEncodingNeededString(rand, maxLength);
+            }
+
+            return new string(ret);
+        }
+
         public static string _RandString(Random rand, int? maxLength = null)
         {
             var len = 1 + rand.Next(maxLength ?? 20);
@@ -1280,6 +1326,62 @@ namespace JilTests
             CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
 
             Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
+        }
+
+        [TestMethod]
+        public void UseOptimistictWriteString()
+        {
+            Action<TextWriter, string, int> optimistic;
+            Action<TextWriter, string, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<string>.UseOptimistictWriteString = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    optimistic = InlineSerializerHelper.Build<string>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<string>.UseOptimistictWriteString = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<string>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<string>.UseOptimistictWriteString = true;
+            }
+
+            var rand = new Random(57749508);
+
+            var toSerialize = new List<string>();
+            for (var i = 0; i < 50000; i++)
+            {
+                if (i % 2 == 0)
+                {
+                    toSerialize.Add(
+                        _RandEncodingNeededString(rand)
+                    );
+                }
+                else
+                {
+                    toSerialize.Add(
+                        _RandNoEncodingNeededString(rand)
+                    );
+                }
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double optimisticTime, normalTime;
+            CompareTimes(toSerialize, optimistic, normal, out optimisticTime, out normalTime);
+
+            Assert.IsTrue(optimisticTime < normalTime, "optimisticTime = " + optimisticTime + ", normalTime = " + normalTime);
         }
 #endif
     }
