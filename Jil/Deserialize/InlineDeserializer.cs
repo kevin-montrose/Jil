@@ -14,7 +14,6 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseHashWhenMatchingMembers = true;
         public static bool UseHashWhenMatchingEnums = true;
         public static bool UseNameAutomata = true;
 
@@ -992,7 +991,7 @@ namespace Jil.Deserialize
 
             if (isAnonymous)
             {
-                if (UseHashWhenMatchingMembers && AllowHashing)
+                if (AllowHashing)
                 {
                     var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
                     var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
@@ -1006,18 +1005,6 @@ namespace Jil.Deserialize
 
                 ReadAnonymousObjectDictionaryLookup(objType);
                 return;
-            }
-
-            if (UseHashWhenMatchingMembers && AllowHashing)
-            {
-                var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
-                var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
-
-                if (isAvailable)
-                {
-                    ReadObjectHashing(objType);
-                    return;
-                }
             }
 
             if (UseNameAutomata)

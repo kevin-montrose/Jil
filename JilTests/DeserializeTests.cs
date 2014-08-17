@@ -3474,7 +3474,6 @@ namespace JilTests
                 // (i.e. internval changes may render these tests invalid - i.e. they mightn't test
                 // the name automata)
 
-                Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseHashWhenMatchingMembers = false;
                 Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseNameAutomata = true;
 
                 // Hello
@@ -3629,7 +3628,6 @@ namespace JilTests
             }
             finally
             {
-                Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseHashWhenMatchingMembers = true;
                 Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseNameAutomata = true;
             }
         }

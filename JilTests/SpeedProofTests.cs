@@ -1016,66 +1016,6 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void UseHashWhenMatchingMembers()
-        {
-            Func<TextReader, _UseHashWhenMatchingMembers> hash;
-            Func<TextReader, _UseHashWhenMatchingMembers> dictionary;
-
-            Assert.IsTrue(MemberMatcher<_UseHashWhenMatchingMembers>.IsAvailable);
-
-            try
-            {
-                {
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseNameAutomata = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = false;
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseNameAutomata = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
-                InlineDeserializer<_UseHashWhenMatchingMembers>.UseNameAutomata = true;
-            }
-
-            var rand = new Random(67982477);
-
-            var toSerialize = new List<_UseHashWhenMatchingMembers>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(
-                    new _UseHashWhenMatchingMembers
-                    {
-                        accept_rate = rand.Next(),
-                        display_name = _RandString(rand),
-                        link = _RandString(rand),
-                        reputation = rand.Next(),
-                        user_id = rand.Next(),
-                        user_type = _RandEnum<_UseHashWhenMatchingMembers.UserType>(rand)
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double hashTime, dictionaryTime;
-            CompareTimes(toSerialize, Jil.Options.Default, hash, dictionary, out hashTime, out dictionaryTime);
-
-            Assert.IsTrue(hashTime < dictionaryTime, "hashTime = " + hashTime + ", dictionaryTime = " + dictionaryTime);
-        }
-
-        [TestMethod]
         public void DynamicDeserializer_UseFastNumberParsing()
         {
             try
@@ -1312,7 +1252,6 @@ namespace JilTests
             try
             {
                 {
-                    InlineDeserializer<_UseNameAutomata>.UseHashWhenMatchingMembers = false;
                     InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
                     Exception ignored;
 
@@ -1321,7 +1260,6 @@ namespace JilTests
                 }
 
                 {
-                    InlineDeserializer<_UseNameAutomata>.UseHashWhenMatchingMembers = false;
                     InlineDeserializer<_UseNameAutomata>.UseNameAutomata = false;
                     Exception ignored;
 
@@ -1331,7 +1269,6 @@ namespace JilTests
             }
             finally
             {
-                InlineDeserializer<_UseNameAutomata>.UseHashWhenMatchingMembers = true;
                 InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
             }
 
@@ -1359,74 +1296,6 @@ namespace JilTests
             CompareTimes(toSerialize, Jil.Options.Default, automata, dictionary, out automataTime, out dictionaryTime);
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
-        }
-
-        class _HashVsAutomata
-        {
-            public int? user_id { get; set; }
-            public string display_name { get; set; }
-            public int? reputation { get; set; }
-            public string link { get; set; }
-            public int? accept_rate { get; set; }
-        }
-
-        [TestMethod]
-        public void HashVsAutomata()
-        {
-            Func<TextReader, _HashVsAutomata> hash;
-            Func<TextReader, _HashVsAutomata> automata;
-
-            Assert.IsTrue(MemberMatcher<_HashVsAutomata>.IsAvailable);
-
-            try
-            {
-                {
-                    InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = true;
-                    InlineDeserializer<_HashVsAutomata>.UseNameAutomata = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    hash = InlineDeserializerHelper.Build<_HashVsAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = false;
-                    InlineDeserializer<_HashVsAutomata>.UseNameAutomata = true;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.Build<_HashVsAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = true;
-                InlineDeserializer<_HashVsAutomata>.UseNameAutomata = true;
-            }
-
-            var rand = new Random(51350777);
-
-            var toSerialize = new List<_HashVsAutomata>();
-            for (var i = 0; i < 10000; i++)
-            {
-                toSerialize.Add(
-                    new _HashVsAutomata
-                    {
-                        accept_rate = rand.Next(),
-                        display_name = _RandString(rand),
-                        link = _RandString(rand),
-                        reputation = rand.Next(),
-                        user_id = rand.Next()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double hashTime, automataTime;
-            CompareTimes(toSerialize, Jil.Options.Default, hash, automata, out hashTime, out automataTime);
-
-            Assert.IsTrue(automataTime < hashTime, "automataTime = " + automataTime + ", hashTime = " + hashTime);
         }
 #endif
     }
