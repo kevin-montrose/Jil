@@ -11,6 +11,6 @@ This file is modeled on the [Linux CREDITS file](https://github.com/torvalds/lin
 
 ====
 
-N: Kevin Montrose
-E: kevin.montrose@stackoverflow.com
-W: http://kevinmontrose.com/
+N: Kevin Montrose  
+E: kevin.montrose@stackoverflow.com  
+W: http://kevinmontrose.com/  
