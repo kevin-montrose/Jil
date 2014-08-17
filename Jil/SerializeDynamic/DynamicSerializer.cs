@@ -210,7 +210,27 @@ namespace Jil.SerializeDynamic
             stream.Write("]");
         }
 
-        static bool CanBeBool(dynamic dyn, out bool bit)
+        static readonly ConvertBinder BoolConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(bool), typeof(DynamicSerializer));
+        static bool CanBeBool(object dyn, out bool bit)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(BoolConvertBinder, out ret))
+                {
+                    bit = (bool)ret;
+                    return true;
+                }
+
+                bit = false;
+                return false;
+            }
+
+            return CanBeBoolDynamic(dyn, out bit);
+        }
+
+        static bool CanBeBoolDynamic(dynamic dyn, out bool bit)
         {
             try
             {
@@ -223,7 +243,48 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanBeInteger(dynamic dyn, out ulong integer, out bool negative)
+        static readonly ConvertBinder LongConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(long), typeof(DynamicSerializer));
+        static readonly ConvertBinder ULongConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(ulong), typeof(DynamicSerializer));
+        static bool CanBeInteger(object dyn, out ulong integer, out bool negative)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(LongConvertBinder, out ret))
+                {
+                    var asLong = (long)ret;
+                    if (asLong < 0)
+                    {
+                        asLong = -asLong;
+                        negative = true;
+                    }
+                    else
+                    {
+                        negative = false;
+                    }
+
+                    integer = (ulong)asLong;
+
+                    return true;
+                }
+
+                if (easyDyn.TryConvert(ULongConvertBinder, out ret))
+                {
+                    negative = false;
+                    integer = (ulong)ret;
+                    return true;
+                }
+
+                integer = 0;
+                negative = false;
+                return false;
+            }
+
+            return CanBeIntegerDynamic(dyn, out integer, out negative);
+        }
+
+        static bool CanBeIntegerDynamic(dynamic dyn, out ulong integer, out bool negative)
         {
             try
             {
@@ -236,10 +297,12 @@ namespace Jil.SerializeDynamic
                 }
                 else
                 {
+                    integer = (ulong)asLong;
                     negative = false;
                 }
 
                 integer = (ulong)asLong;
+
                 return true;
             }
             catch { }
@@ -258,7 +321,41 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanBeFloatingPoint(dynamic dyn, out double floatingPoint)
+        static readonly ConvertBinder FloatConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(float), typeof(DynamicSerializer));
+        static readonly ConvertBinder DoubleConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(double), typeof(DynamicSerializer));
+        static readonly ConvertBinder DecimalConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(decimal), typeof(DynamicSerializer));
+        static bool CanBeFloatingPoint(object dyn, out double floatingPoint)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(DoubleConvertBinder, out ret))
+                {
+                    floatingPoint = (double)ret;
+                    return true;
+                }
+
+                if (easyDyn.TryConvert(FloatConvertBinder, out ret))
+                {
+                    floatingPoint = (float)ret;
+                    return true;
+                }
+
+                if (easyDyn.TryConvert(DecimalConvertBinder, out ret))
+                {
+                    floatingPoint = (double)(decimal)ret;
+                    return true;
+                }
+
+                floatingPoint = 0;
+                return false;
+            }
+
+            return CanBeFloatingPointDynamic(dyn, out floatingPoint);
+        }
+
+        static bool CanBeFloatingPointDynamic(dynamic dyn, out double floatingPoint)
         {
             try
             {
@@ -285,7 +382,34 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanBeDateTime(dynamic dyn, out DateTime dt)
+        static readonly ConvertBinder DateTimeConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(DateTime), typeof(DynamicSerializer));
+        static readonly ConvertBinder DateTimeOffsetConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(DateTimeOffset), typeof(DynamicSerializer));
+        static bool CanBeDateTime(object dyn, out DateTime dt)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(DateTimeConvertBinder, out ret))
+                {
+                    dt = (DateTime)ret;
+                    return true;
+                }
+
+                if (easyDyn.TryConvert(DateTimeOffsetConvertBinder, out ret))
+                {
+                    dt = ((DateTimeOffset)ret).UtcDateTime;
+                    return true;
+                }
+
+                dt = DateTime.MinValue;
+                return false;
+            }
+
+            return CanBeDateTimeDynamic(dyn, out dt);
+        }
+
+        static bool CanBeDateTimeDynamic(dynamic dyn, out DateTime dt)
         {
             try
             {
@@ -306,7 +430,27 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanGuid(dynamic dyn, out Guid guid)
+        static readonly ConvertBinder GuidConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(Guid), typeof(DynamicSerializer));
+        static bool CanBeGuid(object dyn, out Guid guid)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(GuidConvertBinder, out ret))
+                {
+                    guid = (Guid)ret;
+                    return true;
+                }
+
+                guid = Guid.Empty;
+                return false;
+            }
+
+            return CanBeGuidDynamic(dyn, out guid);
+        }
+
+        static bool CanBeGuidDynamic(dynamic dyn, out Guid guid)
         {
             try
             {
@@ -319,7 +463,34 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanBeString(dynamic dyn, out string str)
+        static readonly ConvertBinder StringConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(string), typeof(DynamicSerializer));
+        static readonly ConvertBinder CharConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(char), typeof(DynamicSerializer));
+        static bool CanBeString(object dyn, out string str)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(StringConvertBinder, out ret))
+                {
+                    str = (string)ret;
+                    return true;
+                }
+
+                if (easyDyn.TryConvert(CharConvertBinder, out ret))
+                {
+                    str = ((char)ret).ToString();
+                    return true;
+                }
+
+                str = null;
+                return false;
+            }
+
+            return CanBeStringDynamic(dyn, out str);
+        }
+
+        static bool CanBeStringDynamic(dynamic dyn, out string str)
         {
             try
             {
@@ -340,7 +511,35 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        static bool CanBeListAndNotDictionary(dynamic dyn, out IEnumerable enumerable)
+        static readonly ConvertBinder IEnumerableConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(IEnumerable), typeof(DynamicSerializer));
+        static readonly ConvertBinder IDictionaryStringObjectConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(IDictionary<string, object>), typeof(DynamicSerializer));
+        static readonly ConvertBinder IDictionaryConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(IDictionary), typeof(DynamicSerializer));
+        static bool CanBeListAndNotDictionary(object dyn, out IEnumerable enumerable)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(IEnumerableConvertBinder, out ret))
+                {
+                    enumerable = (IEnumerable)ret;
+                }
+                else
+                {
+                    enumerable = null;
+                    return false;
+                }
+
+                if (easyDyn.TryConvert(IDictionaryStringObjectConvertBinder, out ret)) return false;
+                if (easyDyn.TryConvert(IDictionaryConvertBinder, out ret)) return false;
+
+                return true;
+            }
+
+            return CanBeListAndNotDictionaryDynamic(dyn, out enumerable);
+        }
+
+        static bool CanBeListAndNotDictionaryDynamic(dynamic dyn, out IEnumerable enumerable)
         {
             try
             {
@@ -415,7 +614,7 @@ namespace Jil.SerializeDynamic
                 }
 
                 Guid guid;
-                if (CanGuid(dynObject, out guid))
+                if (CanBeGuid(dynObject, out guid))
                 {
                     Serialize(stream, guid, opts, depth);
                     return;

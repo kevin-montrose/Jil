@@ -385,5 +385,53 @@ namespace JilTests
             var json = JSON.SerializeDynamic(personDescribed);
             Assert.AreEqual("{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"MostRecentLocation\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"},\"LastSeenDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"},\"Locations\":{\"properties\":{\"CountryCode\":{\"index\":\"no\",\"type\":\"string\"},\"LocType\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"GeoPoint\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"}},\"type\":\"object\"},\"InterestingTags\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"Confidence\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Identifiers\":{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"IdType\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"InterestingSites\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"InterestLevel\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"TagViews\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"TimesViewed\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"DeveloperKinds\":{\"properties\":{\"DevType\":{\"index\":\"no\",\"type\":\"integer\"},\"RelativeScore\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Demographics\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"DeviceTypeId\":{\"index\":\"no\",\"type\":\"integer\"},\"BrowserId\":{\"index\":\"no\",\"type\":\"integer\"},\"OsId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Educations\":{\"properties\":{\"Tld\":{\"index\":\"no\",\"type\":\"string\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"SourceId\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Industries\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"IndustryId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Languages\":{\"properties\":{\"LanguageCode\":{\"index\":\"no\",\"type\":\"string\"},\"LangSource\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"WorkingHours\":{\"properties\":{\"Hour\":{\"index\":\"no\",\"type\":\"integer\"},\"Count\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"LastSeen\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"Merges\":{\"properties\":{\"DestroyedPersonId\":{\"index\":\"no\",\"type\":\"string\"},\"CreationDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"}},\"dynamic\":\"strict\",\"_all\":{\"enabled\":false}}", json);
         }
+
+        class _DynamicObject : DynamicObject
+        {
+            private object ConvertableTo;
+
+            public _DynamicObject(object convertableTo)
+            {
+                ConvertableTo = convertableTo;
+            }
+
+            public override bool TryConvert(ConvertBinder binder, out object result)
+            {
+                if (binder.ReturnType.IsAssignableFrom(ConvertableTo.GetType()))
+                {
+                    result = ConvertableTo;
+                    return true;
+                }
+
+                result = null;
+                return false;
+            }
+        }
+
+        [TestMethod]
+        public void DynamicObject()
+        {
+            Assert.AreEqual("true", JSON.SerializeDynamic(new _DynamicObject(true)));
+            Assert.AreEqual("false", JSON.SerializeDynamic(new _DynamicObject(false)));
+            Assert.AreEqual("123", JSON.SerializeDynamic(new _DynamicObject(123UL)));
+            Assert.AreEqual("123", JSON.SerializeDynamic(new _DynamicObject(123L)));
+            Assert.AreEqual("-123", JSON.SerializeDynamic(new _DynamicObject(-123L)));
+            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159)));
+            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159f)).Substring(0, 7));
+            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159m)));
+            Assert.AreEqual("\"hello world\"", JSON.SerializeDynamic(new _DynamicObject("hello world")));
+            Assert.AreEqual("\"c\"", JSON.SerializeDynamic(new _DynamicObject('c')));
+
+            var now = DateTime.UtcNow;
+            Assert.AreEqual(JSON.Serialize(now), JSON.SerializeDynamic(new _DynamicObject(now)));
+
+            var nowOffset = DateTimeOffset.UtcNow;
+            Assert.AreEqual(JSON.Serialize(nowOffset), JSON.SerializeDynamic(new _DynamicObject(nowOffset)));
+
+            var g = Guid.NewGuid();
+            Assert.AreEqual("\"" + g + "\"", JSON.SerializeDynamic(new _DynamicObject(g)));
+
+            Assert.AreEqual("[1,2,3]", JSON.SerializeDynamic(new _DynamicObject(new[] { 1, 2, 3 })));
+        }
     }
 }
