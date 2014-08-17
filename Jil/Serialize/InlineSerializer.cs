@@ -25,6 +25,7 @@ namespace Jil.Serialize
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
         public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseUnsafe = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -2569,20 +2570,40 @@ namespace Jil.Serialize
 
         public MethodInfo GetWriteEncodedStringWithQuotesMethod()
         {
-            return
-                ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithNullsInline;
+            if (UseUnsafe)
+            {
+                return
+                    ExcludeNulls ?
+                        JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe :
+                        JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithNullsInlineUnsafe;
+            }
+            else
+            {
+                return
+                    ExcludeNulls ?
+                        JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
+                        JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithNullsInline;
+            }
         }
 
         
 
         MethodInfo GetWriteEncodedStringMethod()
         {
-            return
-                ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithoutNullsInline :
-                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONP : Methods.WriteEncodedStringWithNullsInline;
+            if (UseUnsafe)
+            {
+                return
+                    ExcludeNulls ?
+                        JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithoutNullsInlineUnsafe :
+                        JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithNullsInlineUnsafe;
+            }
+            else
+            {
+                return
+                    ExcludeNulls ?
+                        JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithoutNullsInline :
+                        JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONP : Methods.WriteEncodedStringWithNullsInline;
+            }
         }
 
         void WriteKeyValue(Type keyType, Type elementType)
