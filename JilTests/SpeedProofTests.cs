@@ -1360,19 +1360,20 @@ namespace JilTests
             var rand = new Random(57749508);
 
             var toSerialize = new List<string>();
-            for (var i = 0; i < 50000; i++)
+            for (var i = 0; i < 25000; i++)
             {
-                if (i % 2 == 0)
-                {
-                    toSerialize.Add(
-                        _RandEncodingNeededString(rand)
-                    );
-                }
-                else
-                {
                     toSerialize.Add(
                         _RandNoEncodingNeededString(rand)
                     );
+            }
+
+            for (var i = 0; i < 2; i++)
+            {
+                foreach (var noEncoding in toSerialize.ToList())
+                {
+                    var ix = rand.Next(noEncoding.Length);
+                    var withLineBreak = noEncoding.Insert(ix, "\n");
+                    toSerialize.Add(withLineBreak);
                 }
             }
 
