@@ -3465,6 +3465,174 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void NameAutomataEscapedSequences()
+        {
+            try
+            {
+                // TODO: should run the test more directly, rather than through these booleans.
+                // (i.e. internval changes may render these tests invalid - i.e. they mightn't test
+                // the name automata)
+
+                Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseNameAutomata = true;
+
+                // Hello
+                {
+                    using (var str = new StringReader("{\"\\u0048ello\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"H\\u0065llo\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"He\\u006Clo\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"He\\u006clo\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hel\\u006Co\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hel\\u006co\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hell\\u006F\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hell\\u006f\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"\\u0048\\u0065\\u006C\\u006C\\u006F\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"\\u0048\\u0065\\u006c\\u006c\\u006f\":\"foo\",\"World\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+                }
+
+                // World
+                {
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"\\u0057orld\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"W\\u006Frld\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"W\\u006frld\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"Wo\\u0072ld\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"Wor\\u006Cd\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"Worl\\u0064\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"\\u0057\\u006F\\u0072\\u006C\\u0064\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+
+                    using (var str = new StringReader("{\"Hello\":\"foo\",\"\\u0057\\u006f\\u0072\\u006c\\u0064\":\"bar\"}"))
+                    {
+                        var res = JSON.Deserialize<_HashEscapedSequences>(str);
+                        Assert.IsNotNull(res);
+                        Assert.AreEqual("foo", res.Hello);
+                        Assert.AreEqual("bar", res.World);
+                    }
+                }
+            }
+            finally
+            {
+                Jil.Deserialize.InlineDeserializer<_HashEscapedSequences>.UseNameAutomata = true;
+            }
+        }
+
+
         List<T> AnonObjectByExample<T>(T example, string str, bool allowHashing)
         {
             var opts = new Options(allowHashFunction: allowHashing, dateFormat: Jil.DateTimeFormat.ISO8601);

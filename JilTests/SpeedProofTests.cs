@@ -1016,63 +1016,6 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void UseHashWhenMatchingMembers()
-        {
-            Func<TextReader, _UseHashWhenMatchingMembers> hash;
-            Func<TextReader, _UseHashWhenMatchingMembers> dictionary;
-
-            Assert.IsTrue(MemberMatcher<_UseHashWhenMatchingMembers>.IsAvailable);
-
-            try
-            {
-                {
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    hash = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseHashWhenMatchingMembers>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_UseHashWhenMatchingMembers>.UseHashWhenMatchingMembers = true;
-            }
-
-            var rand = new Random(67982477);
-
-            var toSerialize = new List<_UseHashWhenMatchingMembers>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(
-                    new _UseHashWhenMatchingMembers
-                    {
-                        accept_rate = rand.Next(),
-                        display_name = _RandString(rand),
-                        link = _RandString(rand),
-                        reputation = rand.Next(),
-                        user_id = rand.Next(),
-                        user_type = _RandEnum<_UseHashWhenMatchingMembers.UserType>(rand)
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double hashTime, dictionaryTime;
-            CompareTimes(toSerialize, Jil.Options.Default, hash, dictionary, out hashTime, out dictionaryTime);
-
-            Assert.IsTrue(hashTime < dictionaryTime, "hashTime = " + hashTime + ", dictionaryTime = " + dictionaryTime);
-        }
-
-        [TestMethod]
         public void DynamicDeserializer_UseFastNumberParsing()
         {
             try
@@ -1280,6 +1223,79 @@ namespace JilTests
             CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
 
             Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
+        }
+
+        class _UseNameAutomata
+        {
+            public enum UserType : byte
+            {
+                unregistered = 2,
+                registered = 3,
+                moderator = 4,
+                does_not_exist = 255
+            }
+
+            public int? user_id { get; set; }
+            public string display_name { get; set; }
+            public int? reputation { get; set; }
+            public UserType? user_type { get; set; }
+            public string link { get; set; }
+            public int? accept_rate { get; set; }
+        }
+
+        [TestMethod]
+        public void UseNameAutomata()
+        {
+            Func<TextReader, _UseNameAutomata> automata;
+            Func<TextReader, _UseNameAutomata> dictionary;
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    automata = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseNameAutomata>.UseNameAutomata = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    dictionary = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
+            }
+
+            var rand = new Random(97031664);
+
+            var toSerialize = new List<_UseNameAutomata>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _UseNameAutomata
+                    {
+                        accept_rate = rand.Next(),
+                        display_name = _RandString(rand),
+                        link = _RandString(rand),
+                        reputation = rand.Next(),
+                        user_id = rand.Next(),
+                        user_type = _RandEnum<_UseNameAutomata.UserType>(rand)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double automataTime, dictionaryTime;
+            CompareTimes(toSerialize, Jil.Options.Default, automata, dictionary, out automataTime, out dictionaryTime);
+
+            Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 #endif
     }

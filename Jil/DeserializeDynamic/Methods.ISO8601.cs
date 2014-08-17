@@ -62,7 +62,7 @@ namespace Jil.DeserializeDynamic
             // Maximum date size is 32 characters
 
             dt = default(DateTime);
-            if (str.Length > 32)
+            if (str.Length > 33)
             {
                 return false;
             }
@@ -616,9 +616,9 @@ namespace Jil.DeserializeDynamic
 
         static bool _ParseISO8601Time(string str, int start, int stop, ref bool? hasSeparators, out TimeSpan ts)
         {
-            const double HoursToMilliseconds = 3600000;
-            const double MinutesToMilliseconds = 60000;
-            const double SecondsToMilliseconds = 1000;
+            const long HoursToTicks   = 36000000000;
+            const long MinutesToTicks = 600000000;
+            const long SecondsToTicks = 10000000;
 
             // Here are the possible formats for times
             // hh
@@ -683,10 +683,10 @@ namespace Jil.DeserializeDynamic
 
                 if (fracLength == 0) return false;
 
-                double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                hoursAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * HoursToMilliseconds;
+                long hoursAsTicks = hour * HoursToTicks;
+                hoursAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * HoursToTicks);
 
-                ts = TimeSpan.FromMilliseconds(hoursAsMilliseconds);
+                ts = TimeSpan.FromTicks(hoursAsTicks);
                 return true;
             }
 
@@ -756,11 +756,11 @@ namespace Jil.DeserializeDynamic
 
                     if (fracLength == 0) return false;
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    minsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * MinutesToMilliseconds;
+                    long hoursAsMilliseconds = hour * HoursToTicks;
+                    long minsAsMilliseconds = min * MinutesToTicks;
+                    minsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
 
-                    ts =TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
+                    ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
                 }
 
@@ -804,12 +804,12 @@ namespace Jil.DeserializeDynamic
 
                     if (fracLength == 0) return false;
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    double secsAsMilliseconds = secs * SecondsToMilliseconds;
-                    secsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * SecondsToMilliseconds;
+                    long hoursAsMilliseconds = hour * HoursToTicks;
+                    long minsAsMilliseconds = min * MinutesToTicks;
+                    long secsAsMilliseconds = secs * SecondsToTicks;
+                    secsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
 
-                    ts = TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
+                    ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
                 }
 
@@ -867,11 +867,11 @@ namespace Jil.DeserializeDynamic
 
                     if (fracLength == 0) return false;
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    minsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * MinutesToMilliseconds;
+                    long hoursAsMilliseconds = hour * HoursToTicks;
+                    long minsAsMilliseconds = min * MinutesToTicks;
+                    minsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
 
-                    ts = TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds);
+                    ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
                 }
 
@@ -914,12 +914,12 @@ namespace Jil.DeserializeDynamic
 
                     if (fracLength == 0) return false;
 
-                    double hoursAsMilliseconds = hour * HoursToMilliseconds;
-                    double minsAsMilliseconds = min * MinutesToMilliseconds;
-                    double secsAsMilliseconds = secs * SecondsToMilliseconds;
-                    secsAsMilliseconds += ((double)frac) / Math.Pow(10, fracLength) * SecondsToMilliseconds;
+                    long hoursAsMilliseconds = hour * HoursToTicks;
+                    long minsAsMilliseconds = min * MinutesToTicks;
+                    long secsAsMilliseconds = secs * SecondsToTicks;
+                    secsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
 
-                    ts = TimeSpan.FromMilliseconds(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
+                    ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
                 }
 

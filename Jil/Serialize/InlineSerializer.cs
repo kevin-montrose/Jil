@@ -2613,18 +2613,16 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithoutNullsInline :
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONP : Methods.WriteEncodedStringWithQuotesWithNullsInline;
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe :
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithNullsInlineUnsafe;
         }
-
-        
 
         MethodInfo GetWriteEncodedStringMethod()
         {
             return
                 ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONP : Methods.WriteEncodedStringWithoutNullsInline :
-                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONP : Methods.WriteEncodedStringWithNullsInline;
+                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithoutNullsInlineUnsafe :
+                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithNullsInlineUnsafe;
         }
 
         void WriteKeyValue(Type keyType, Type elementType)

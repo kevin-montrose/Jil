@@ -2008,5 +2008,15 @@ namespace JilTests
             Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,2, 1\""));
             Assert.AreEqual(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, (_EnumMemberAttributeOverrideFlags)JSON.DeserializeDynamic("\"3,2,1\""));
         }
+
+        [TestMethod]
+        public void LongDateTimes()
+        {
+            var shouldMatch = new DateTime(2014, 08, 08, 14, 04, 01, 426, DateTimeKind.Utc);
+            shouldMatch = new DateTime(shouldMatch.Ticks + 5339, DateTimeKind.Utc);
+            var dyn = JSON.DeserializeDynamic("\"2014-08-08T14:04:01.4265339+00:00\"", Options.ISO8601);
+            DateTime dt = dyn;
+            Assert.AreEqual(shouldMatch, dt);
+        }
     }
 }
