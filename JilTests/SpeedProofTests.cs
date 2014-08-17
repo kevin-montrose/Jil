@@ -1297,51 +1297,6 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
-
-        [TestMethod]
-        public void Unsafe()
-        {
-            Action<TextWriter, string, int> @unsafe;
-            Action<TextWriter, string, int> safe;
-
-            try
-            {
-                {
-                    InlineSerializer<string>.UseUnsafe = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    @unsafe = InlineSerializerHelper.Build<string>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<string>.UseUnsafe = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    safe = InlineSerializerHelper.Build<string>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<string>.UseUnsafe = true;
-            }
-
-            var rand = new Random(15863147);
-
-            var toSerialize = new List<string>();
-            for (var i = 0; i < 50000; i++)
-            {
-                toSerialize.Add(_RandString(rand, 100));
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double unsafeTime, safeTime;
-            CompareTimes(toSerialize, @unsafe, safe, out unsafeTime, out safeTime);
-
-            Assert.IsTrue(unsafeTime < safeTime, "unsafeTime = " + unsafeTime + ", safeTime = " + safeTime);
-        }
 #endif
     }
 }
