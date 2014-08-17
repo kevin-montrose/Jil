@@ -858,13 +858,6 @@ namespace Jil.Deserialize
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
-        public static readonly MethodInfo BuildFailure = typeof(Methods).GetMethod("_BuildFailure", BindingFlags.NonPublic | BindingFlags.Static);
-        static T _BuildFailure<T>(Type forType, Exception innerException)
-        {
-            Console.WriteLine();
-            return default(T);
-        }
-
         public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
             where TEnum : struct
