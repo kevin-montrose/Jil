@@ -377,8 +377,6 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
-            var objType = obj.GetType();
-
             var dynObject = obj as IDynamicMetaObjectProvider;
             if (dynObject != null)
             {
