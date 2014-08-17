@@ -577,7 +577,9 @@ namespace Jil.SerializeDynamic
             }
 
             var dynObject = obj as IDynamicMetaObjectProvider;
-            if (dynObject != null)
+            // we can treat ExpandoObject as a static IDictionary<string, object> and 
+            //   serialize much more quickly (no try/catch control flow)
+            if (dynObject != null && !(dynObject is ExpandoObject))
             {
                 bool bit;
                 if(CanBeBool(dynObject, out bit))

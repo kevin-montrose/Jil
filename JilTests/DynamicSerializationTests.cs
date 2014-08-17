@@ -433,5 +433,20 @@ namespace JilTests
 
             Assert.AreEqual("[1,2,3]", JSON.SerializeDynamic(new _DynamicObject(new[] { 1, 2, 3 })));
         }
+
+        [TestMethod]
+        public void ExpandoObject()
+        {
+            dynamic dyn = new ExpandoObject();
+            dyn.A = "B";
+            dyn.C = 123;
+            dyn.D = new { Foo = "Bar" };
+            dyn.E = new[] { 1, 2, 3, 4, 5, 6 };
+            dyn.F = new ExpandoObject();
+            dyn.F.A = "nope";
+
+            var res = JSON.SerializeDynamic(dyn);
+            Assert.AreEqual("{\"A\":\"B\",\"C\":123,\"D\":{\"Foo\":\"Bar\"},\"E\":[1,2,3,4,5,6],\"F\":{\"A\":\"nope\"}}", res);
+        }
     }
 }
