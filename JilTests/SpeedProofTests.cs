@@ -1360,6 +1360,74 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
+
+        class _HashVsAutomata
+        {
+            public int? user_id { get; set; }
+            public string display_name { get; set; }
+            public int? reputation { get; set; }
+            public string link { get; set; }
+            public int? accept_rate { get; set; }
+        }
+
+        [TestMethod]
+        public void HashVsAutomata()
+        {
+            Func<TextReader, _HashVsAutomata> hash;
+            Func<TextReader, _HashVsAutomata> automata;
+
+            Assert.IsTrue(MemberMatcher<_HashVsAutomata>.IsAvailable);
+
+            try
+            {
+                {
+                    InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = true;
+                    InlineDeserializer<_HashVsAutomata>.UseNameAutomata = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    hash = InlineDeserializerHelper.Build<_HashVsAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = false;
+                    InlineDeserializer<_HashVsAutomata>.UseNameAutomata = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    automata = InlineDeserializerHelper.Build<_HashVsAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_HashVsAutomata>.UseHashWhenMatchingMembers = true;
+                InlineDeserializer<_HashVsAutomata>.UseNameAutomata = true;
+            }
+
+            var rand = new Random(51350777);
+
+            var toSerialize = new List<_HashVsAutomata>();
+            for (var i = 0; i < 10000; i++)
+            {
+                toSerialize.Add(
+                    new _HashVsAutomata
+                    {
+                        accept_rate = rand.Next(),
+                        display_name = _RandString(rand),
+                        link = _RandString(rand),
+                        reputation = rand.Next(),
+                        user_id = rand.Next()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double hashTime, automataTime;
+            CompareTimes(toSerialize, Jil.Options.Default, hash, automata, out hashTime, out automataTime);
+
+            Assert.IsTrue(automataTime < hashTime, "automataTime = " + automataTime + ", hashTime = " + hashTime);
+        }
 #endif
     }
 }
