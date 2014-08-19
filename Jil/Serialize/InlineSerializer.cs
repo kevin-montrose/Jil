@@ -27,6 +27,7 @@ namespace Jil.Serialize
         public static bool UseCustomWriteIntUnrolled = true;
 
         static string CharBuffer = "char_buffer";
+        static string CharArray = "char_array";
         internal const int CharBufferSize = 36;
         internal const int RecursionLimit = 50;
 
@@ -795,6 +796,7 @@ namespace Jil.Serialize
 
             if (primitiveType == typeof(string))
             {
+                Emit.LoadLocalAddress(CharArray);
                 if (quotesNeedHandling)
                 {
                     Emit.Call(GetWriteEncodedStringWithQuotesMethod());
@@ -2426,6 +2428,7 @@ namespace Jil.Serialize
                     Emit.StoreLocal(str);   // kvp
                     Emit.LoadArgument(0);   // kvp TextWriter
                     Emit.LoadLocal(str);    // kvp TextWriter string
+                    Emit.LoadLocalAddress(CharArray);
 
                     Emit.Call(GetWriteEncodedStringMethod());   // kvp
                 }
@@ -2611,6 +2614,7 @@ namespace Jil.Serialize
                     Emit.StoreLocal(str);   // kvp
                     Emit.LoadArgument(0);   // kvp TextWriter
                     Emit.LoadLocal(str);    // kvp TextWriter string
+                    Emit.LoadLocalAddress(CharArray);
 
                     Emit.Call(GetWriteEncodedStringMethod()); // kvp
                 }
@@ -3074,6 +3078,8 @@ namespace Jil.Serialize
 
         void AddCharBuffer(Type serializingType)
         {
+            Emit.DeclareLocal<char[]>(CharArray);
+            
             // Don't tax the naive implementations by allocating a buffer they don't use
             if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting)) return;
 
