@@ -533,7 +533,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
@@ -542,7 +542,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
@@ -564,7 +564,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -577,7 +577,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
@@ -586,7 +586,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
@@ -595,7 +595,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -608,7 +608,7 @@ namespace Jil.Serialize
 
         internal static readonly MethodInfo WriteEncodedStringWithNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        static void _WriteEncodedStringWithNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
