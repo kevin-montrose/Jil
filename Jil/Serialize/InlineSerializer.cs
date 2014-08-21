@@ -207,7 +207,7 @@ namespace Jil.Serialize
             var props = forType.GetProperties(flags).Where(p => p.GetMethod != null);
             var fields = forType.GetFields(flags);
 
-            var members = props.Cast<MemberInfo>().Concat(fields).Where(ShouldSerializeMember);
+            var members = props.Cast<MemberInfo>().Concat(fields).Where(f => f.ShouldUseMember());
 
             if (forType.IsValueType)
             {
@@ -221,15 +221,6 @@ namespace Jil.Serialize
                     Utils.IdealMemberOrderForWriting(forType, recursiveTypes.Keys, members);
 
             return ret.ToList();
-        }
-
-        private static bool ShouldSerializeMember(MemberInfo memberInfo)
-        {
-            var jilDirectiveAttributes = memberInfo.GetCustomAttributes<JilDirectiveAttribute>();
-            if (jilDirectiveAttributes.Count() > 0) return !jilDirectiveAttributes.Any(d => d.Ignore);
-
-            var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
-            return ignoreDataMemberAttributes.Count() == 0;
         }
 
         void WriteConstantMember(MemberInfo member, bool prependComma)

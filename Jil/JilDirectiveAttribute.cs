@@ -19,7 +19,7 @@ namespace Jil
     public class JilDirectiveAttribute : Attribute
     {
         /// <summary>
-        /// If true, the decorated member will not be serialized.
+        /// If true, the decorated member will not be serialized or deserialized.
         /// </summary>
         public bool Ignore { get; set; }
         /// <summary>
