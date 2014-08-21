@@ -4661,6 +4661,30 @@ namespace JilTests
             Assert.AreEqual(0xD83D, (int)raw[0]);
         }
 
+        public class _Issue53
+        {
+            [JilDirective(Ignore = true)]
+            public DateTime NotSerializedProperty { get; set; }
+
+            [JilDirective(Name = "NotSerializedProperty")]
+            public string SerializedProperty { get; set; }
+        }
+
+
+        [TestMethod]
+        public void Issue53()
+        {
+            var empty = JSON.Deserialize<_Issue53>("{}");
+            Assert.IsNotNull(empty);
+            Assert.IsNull(empty.SerializedProperty);
+            Assert.AreEqual(default(DateTime), empty.NotSerializedProperty);
+
+            var data = JSON.Deserialize<_Issue53>("{\"NotSerializedProperty\":\"a value!\"}");
+            Assert.IsNotNull(data);
+            Assert.AreEqual("a value!", data.SerializedProperty);
+            Assert.AreEqual(default(DateTime), data.NotSerializedProperty);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
