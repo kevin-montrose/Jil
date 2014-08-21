@@ -2038,12 +2038,22 @@ namespace Jil.Serialize
             }
         }
 
-        bool DynamicCallOutCheck(Type onType, Sigil.Local inLocal)
+        bool ShouldDynamicCallOut(Type onType)
         {
             // Exact god-damn match
             if (onType == typeof(ForType)) return false;
 
             if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool DynamicCallOutCheck(Type onType, Sigil.Local inLocal)
+        {
+            if (ShouldDynamicCallOut(onType))
             {
                 Emit.LoadArgument(0);               // TextWriter
 
@@ -2058,11 +2068,13 @@ namespace Jil.Serialize
 
                 var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited);
                 var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
-                Emit.LoadField(optionsField);               // TextWriter object Options
 
-                Emit.LoadArgument(2);                       // TextWriter object Options int
-                
-                Emit.Call(DynamicSerializer.SerializeMtd);  // void
+                Emit.LoadField(optionsField);       // TextWriter object Options
+
+                Emit.LoadArgument(2);               // TextWriter object Options int
+
+                var serializeMtd = DynamicSerializer.SerializeMtd;
+                Emit.Call(serializeMtd);            // void
 
                 return true;
             }
@@ -3103,15 +3115,35 @@ namespace Jil.Serialize
 
             foreach (var type in recursiveTypes)
             {
-                var cacheType = RecusionLookupType.MakeGenericType(type);
-                var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+                if (ShouldDynamicCallOut(type))
+                {
+                    var recursiveSerializerCache = typeof(RecursiveSerializerCache<>).MakeGenericType(type);
+                    var getMtd = (MethodInfo)recursiveSerializerCache.GetField("GetFor").GetValue(null);
 
-                var loc = Emit.DeclareLocal(thunk.FieldType);
+                    var loc = Emit.DeclareLocal(getMtd.ReturnType);
+                    Emit.LoadConstant(this.PrettyPrint);        // bool
+                    Emit.LoadConstant(this.ExcludeNulls);       // bool bool
+                    Emit.LoadConstant(this.JSONP);              // bool bool bool
+                    Emit.LoadConstant((byte)this.DateFormat);   // bool bool bool byte
+                    Emit.LoadConstant(this.IncludeInherited);   // bool bool bool DateTimeFormat bool
+                    Emit.Call(getMtd);                          // Action<TextWriter, type, int>)
+                    Emit.StoreLocal(loc);                       // --empty--
 
-                Emit.LoadField(thunk);  // Action<TextWriter, type>
-                Emit.StoreLocal(loc);   // --empty--
+                    ret[type] = loc;
+                }
+                else
+                {
+                    // static case
+                    var cacheType = RecusionLookupType.MakeGenericType(type);
+                    var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
-                ret[type] = loc;
+                    var loc = Emit.DeclareLocal(thunk.FieldType);
+
+                    Emit.LoadField(thunk);  // Action<TextWriter, type, int>
+                    Emit.StoreLocal(loc);   // --empty--
+
+                    ret[type] = loc;
+                }
             }
 
             return ret;

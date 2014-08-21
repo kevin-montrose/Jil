@@ -448,5 +448,24 @@ namespace JilTests
             var res = JSON.SerializeDynamic(dyn);
             Assert.AreEqual("{\"A\":\"B\",\"C\":123,\"D\":{\"Foo\":\"Bar\"},\"E\":[1,2,3,4,5,6],\"F\":{\"A\":\"nope\"}}", res);
         }
+
+        [TestMethod]
+        public void MultipleAnonymousObjects()
+        {
+            {
+                var res = JSON.SerializeDynamic(new { foo = (object)new { baz1 = "1" }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
+                Assert.AreEqual("{\n \"foo\": {\n  \"baz1\": \"1\"\n },\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+            }
+
+            {
+                var res = JSON.SerializeDynamic(new { foo = new object[] { new { baz1 = "1" } }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
+                Assert.AreEqual("{\n \"foo\": [{\n  \"baz1\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+            }
+
+            {
+                var res = JSON.SerializeDynamic(new { foo = new List<object> { new { barz = "1" } }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
+                Assert.AreEqual("{\n \"foo\": [{\n  \"barz\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+            }
+        }
     }
 }

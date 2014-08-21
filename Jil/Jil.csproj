@@ -108,6 +108,7 @@
     <Compile Include="SerializeDynamic\DynamicSerializer.cs" />
     <Compile Include="SerializeDynamic\NullTypeCache.cs" />
     <Compile Include="SerializeDynamic\OptionsLookup.cs" />
+    <Compile Include="SerializeDynamic\RecursiveSerializerCache.cs" />
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\Methods.cs" />
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
