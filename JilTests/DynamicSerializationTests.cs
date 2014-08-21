@@ -450,7 +450,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void MultipleAnonymousObjects()
+        public void RecursiveObjects()
         {
             {
                 var res = JSON.SerializeDynamic(new { foo = (object)new { baz1 = "1" }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
