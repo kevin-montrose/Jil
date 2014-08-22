@@ -1107,12 +1107,12 @@ namespace Jil.Serialize
                 }
                 return;
             }
-
             var d012 = number % 1000 * 3;
-            var d543 = (number / 1000) % 1000 * 3;
 
+            int d543;
             if (number < 1000000)
             {
+                d543 = (number / 1000) * 3;
                 if (number >= 100000)
                 {
                     numLen = 6;
@@ -1125,11 +1125,12 @@ namespace Jil.Serialize
                     goto digit3;
                 }
             }
+            d543 = (number / 1000) % 1000 * 3;
 
-            var d876 = (number / 1000000) % 1000 * 3;
-
+            int d876;
             if (number < 1000000000)
             {
+                d876 = (number / 1000000) * 3;
                 if (number >= 100000000)
                 {
                     numLen = 9;
@@ -1142,6 +1143,7 @@ namespace Jil.Serialize
                     goto digit6;
                 }
             }
+            d876 = (number / 1000000) % 1000 * 3;
 
             numLen = 10;
 
@@ -1149,8 +1151,8 @@ namespace Jil.Serialize
             // so 1 to 10 digits
 
             // [01,]000,000-[99,]000,000
-            var d9 = number / 1000000000 * 3;
-            buffer[0] = DigitTriplets[d9 + 2];
+            var d9 = number / 1000000000;
+            buffer[0] = (char)('0' + d9);
             
         digit8:
             buffer[1] = DigitTriplets[d876];
