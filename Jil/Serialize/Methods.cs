@@ -1087,7 +1087,6 @@ namespace Jil.Serialize
             }
 
             int numLen;
-            int ix;
             int number;
 
             if (num < 0) {
@@ -1108,27 +1107,40 @@ namespace Jil.Serialize
                 }
                 return;
             }
-            else if (number < 1000000)
-            { 
-                if (number >= 100000) {
+
+            var d012 = number % 1000 * 3;
+            var d543 = (number / 1000) % 1000 * 3;
+
+            if (number < 1000000)
+            {
+                if (number >= 100000)
+                {
                     numLen = 6;
+                    goto digit5;
                 } else if (number >= 10000) {
                     numLen = 5;
+                    goto digit4;
                 } else {
                     numLen = 4;
+                    goto digit3;
                 }
-                goto digits543;
             }
-            else if (number < 1000000000)
+
+            var d876 = (number / 1000000) % 1000 * 3;
+
+            if (number < 1000000000)
             {
-                if (number >= 100000000) {
+                if (number >= 100000000)
+                {
                     numLen = 9;
+                    goto digit8;
                 } else if (number >= 10000000) {
                     numLen = 8;
+                    goto digit7;
                 } else  {
                     numLen = 7;
+                    goto digit6;
                 }
-                goto digits876;
             }
 
             numLen = 10;
@@ -1137,25 +1149,26 @@ namespace Jil.Serialize
             // so 1 to 10 digits
 
             // [01,]000,000-[99,]000,000
-            ix = number / 1000000000 * 3;
-            buffer[0] = DigitTriplets[ix + 2];
+            var d9 = number / 1000000000 * 3;
+            buffer[0] = DigitTriplets[d9 + 2];
+            
+        digit8:
+            buffer[1] = DigitTriplets[d876];
+        digit7:
+            buffer[2] = DigitTriplets[d876 + 1];
+        digit6:
+            buffer[3] = DigitTriplets[d876 + 2];
 
-        digits876: // [01]0,000-[99]0,000
-            ix = (number / 1000000) % 1000 * 3;
-            buffer[1] = DigitTriplets[ix];
-            buffer[2] = DigitTriplets[ix + 1];
-            buffer[3] = DigitTriplets[ix + 2];
+        digit5:
+            buffer[4] = DigitTriplets[d543];
+        digit4:
+            buffer[5] = DigitTriplets[d543 + 1];
+        digit3:
+            buffer[6] = DigitTriplets[d543 + 2];
 
-        digits543: // [0,1]00-[9,9]99
-            ix = (number / 1000) % 1000 * 3;
-            buffer[4] = DigitTriplets[ix];
-            buffer[5] = DigitTriplets[ix + 1];
-            buffer[6] = DigitTriplets[ix + 2];
-
-            ix = number % 1000 * 3;
-            buffer[7] = DigitTriplets[ix];
-            buffer[8] = DigitTriplets[ix + 1];
-            buffer[9] = DigitTriplets[ix + 2];
+            buffer[7] = DigitTriplets[d012];
+            buffer[8] = DigitTriplets[d012 + 1];
+            buffer[9] = DigitTriplets[d012 + 2];
 
             writer.Write(buffer, 10 - numLen, numLen);
         }
