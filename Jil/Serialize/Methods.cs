@@ -26,12 +26,21 @@ namespace Jil.Serialize
         }
 
         private static readonly TwoDigits[] DigitPairs;
+        private static readonly char[] DigitTriplets;
         static Methods()
         {
             DigitPairs = new TwoDigits[100];
             for (var i = 0; i < 100; ++i)
             {
                 DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
+            }
+
+            DigitTriplets = new char[1000 * 3];
+            for (var i = 0; i < 1000; ++i)
+            {
+                DigitTriplets[i * 3 + 0] = (char)('0' + i / 100 % 10);
+                DigitTriplets[i * 3 + 1] = (char)('0' + i / 10 % 10);
+                DigitTriplets[i * 3 + 2] = (char)('0' + i % 10);
             }
         }
 
@@ -1042,13 +1051,6 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteIntUnrolledSigned(TextWriter writer, int num, char[] buffer)
         {
-            // have to special case this, we can't negate it
-            if (num == int.MinValue)
-            {
-                writer.Write("-2147483648");
-                return;
-            }
-
             // Why signed integers?
             // Earlier versions of this code used unsigned integers, 
             //   but it turns out that's not ideal and here's why.
@@ -1077,130 +1079,83 @@ namespace Jil.Serialize
             //
             // In theory div (usigned division) is faster than idiv, and it probably is *but* cdq + cdq + movsx is
             //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
+            // have to special case this, we can't negate it
+            if (num == int.MinValue)
+            {
+                writer.Write("-2147483648");
+                return;
+            }
+
             int numLen;
-            sbyte ix;
+            int ix;
             int number;
 
-            if (num < 0)
-            {
+            if (num < 0) {
                 writer.Write('-');
-                number = (-num);
-            }
-            else
-            {
+                number = -num;
+            } else {
                 number = num;
             }
 
-            TwoDigits digits;
+            if (number < 1000)
+            {
+                if (number >= 100) {
+                    writer.Write(DigitTriplets, number * 3, 3);
+                } else if (number >= 10) {
+                    writer.Write(DigitTriplets, number * 3 + 1, 2);
+                } else {
+                    writer.Write(DigitTriplets, number * 3 + 2, 1);
+                }
+                return;
+            }
+            else if (number < 1000000)
+            { 
+                if (number >= 100000) {
+                    numLen = 6;
+                } else if (number >= 10000) {
+                    numLen = 5;
+                } else {
+                    numLen = 4;
+                }
+                goto digits543;
+            }
+            else if (number < 1000000000)
+            {
+                if (number >= 100000000) {
+                    numLen = 9;
+                } else if (number >= 10000000) {
+                    numLen = 8;
+                } else  {
+                    numLen = 7;
+                }
+                goto digits876;
+            }
 
-            // unroll the loop
-            if (number < 10)
-            {
-                numLen = 1;
-                goto digits10;
-            }
-            else
-            {
-                if (number < 100)
-                {
-                    numLen = 2;
-                    goto digits10;
-                }
-                else
-                {
-                    if (number < 1000)
-                    {
-                        numLen = 3;
-                        goto digits32;
-                    }
-                    else
-                    {
-                        if (number < 10000)
-                        {
-                            numLen = 4;
-                            goto digits32;
-                        }
-                        else
-                        {
-                            if (number < 100000)
-                            {
-                                numLen = 5;
-                                goto digits54;
-                            }
-                            else
-                            {
-                                if (number < 1000000)
-                                {
-                                    numLen = 6;
-                                    goto digits54;
-                                }
-                                else
-                                {
-                                    if (number < 10000000)
-                                    {
-                                        numLen = 7;
-                                        goto digits76;
-                                    }
-                                    else
-                                    {
-                                        if (number < 100000000)
-                                        {
-                                            numLen = 8;
-                                            goto digits76;
-                                        }
-                                        else
-                                        {
-                                            if (number < 1000000000)
-                                            {
-                                                numLen = 9;
-                                                goto digits98;
-                                            }
-                                            else
-                                            {
-                                                numLen = 10;
-                                                goto digits98;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            numLen = 10;
 
             // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
             // so 1 to 10 digits
 
-            digits98: // [0,1]00,000,000-[9,9]00,000,000
-            ix = (sbyte)((number / 100000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[0] = digits.First;
-            buffer[1] = digits.Second;
+            // [01,]000,000-[99,]000,000
+            ix = number / 1000000000 * 3;
+            buffer[0] = DigitTriplets[ix + 2];
 
-            digits76: // [01,]000,000-[99,]000,000
-            ix = (sbyte)((number / 1000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[2] = digits.First;
-            buffer[3] = digits.Second;
+        digits876: // [01]0,000-[99]0,000
+            ix = (number / 1000000) % 1000 * 3;
+            buffer[1] = DigitTriplets[ix];
+            buffer[2] = DigitTriplets[ix + 1];
+            buffer[3] = DigitTriplets[ix + 2];
 
-            digits54: // [01]0,000-[99]0,000
-            ix = (sbyte)((number / 10000) % 100);
-            digits = DigitPairs[ix];
-            buffer[4] = digits.First;
-            buffer[5] = digits.Second;
+        digits543: // [0,1]00-[9,9]99
+            ix = (number / 1000) % 1000 * 3;
+            buffer[4] = DigitTriplets[ix];
+            buffer[5] = DigitTriplets[ix + 1];
+            buffer[6] = DigitTriplets[ix + 2];
 
-            digits32: // [0,1]00-[9,9]99
-            ix = (sbyte)((number / 100) % 100);
-            digits = DigitPairs[ix];
-            buffer[6] = digits.First;
-            buffer[7] = digits.Second;
-
-            digits10: // [00]-[99]
-            ix = (sbyte)(number % 100);
-            digits = DigitPairs[ix];
-            buffer[8] = digits.First;
-            buffer[9] = digits.Second;
+            ix = number % 1000 * 3;
+            buffer[7] = DigitTriplets[ix];
+            buffer[8] = DigitTriplets[ix + 1];
+            buffer[9] = DigitTriplets[ix + 2];
 
             writer.Write(buffer, 10 - numLen, numLen);
         }
