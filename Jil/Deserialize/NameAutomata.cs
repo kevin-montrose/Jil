@@ -89,13 +89,41 @@ namespace Jil.Deserialize
         static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int), typeof(T) });
         static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
 
-        static void Recurse(Action<Action> addAction, Emit<Func<TextReader, T>> emit, Label failure, Local local_ch, Label marking, IList<Tuple<string, Action<Emit<Func<TextReader, T>>>>> nameValues, int pos)
+        class Data
+        {
+            public readonly Action<Action> AddAction;
+            public readonly Emit<Func<TextReader, T>> Emit;
+            public readonly Label Failure;
+            public readonly Local Local_ch;
+
+            public Data(Action<Action> addAction, Emit<Func<TextReader, T>> emit, Label failure, Local local_ch)
+            {
+                AddAction = addAction;
+                Emit = emit;
+                Failure = failure;
+                Local_ch = local_ch;
+            }
+        }
+
+        public class AutomataName
+        {
+            public readonly string Name;
+            public readonly Action<Emit<Func<TextReader, T>>> OnFound;
+
+            public AutomataName(string name, Action<Emit<Func<TextReader, T>>> onFound)
+            {
+                Name = name;
+                OnFound = onFound;
+            }
+        }
+
+        static void Recurse(Data d, IList<AutomataName> nameValues, int pos, Label onMatchChar)
         {
             var i = 0;
 
             var chars =
                 nameValues
-                .Select(nv => pos >= nv.Item1.Length ? -1 : nv.Item1[pos])
+                .Select(nv => pos >= nv.Name.Length ? -1 : nv.Name[pos])
                 .Distinct()
                 .ToList();
 
@@ -104,47 +132,45 @@ namespace Jil.Deserialize
                 var ch = chars[0];
                 if (ch == -1)
                 {
-                    addAction(() =>
+                    d.AddAction(() =>
                     {
-                        if (marking != null)
-                            emit.MarkLabel(marking);
-
-                        nameValues[0].Item2(emit);
-                        emit.Return();
+                        d.Emit.MarkLabel(onMatchChar);
+                        nameValues[0].OnFound(d.Emit);
+                        d.Emit.Return();
                     });
                 }
                 else
                 {
-                    var next = emit.DefineLabel("_" + nameValues[0].Item1.Substring(0, pos + 1));
-                    Recurse(addAction, emit, failure, local_ch, next, nameValues, pos + 1);
+                    var next = d.Emit.DefineLabel("_" + nameValues[0].Name.Substring(0, pos + 1));
+                    Recurse(d, nameValues, pos + 1, next);
 
-                    addAction(() =>
+                    d.AddAction(() =>
                     {
-                        if (marking != null)
-                            emit.MarkLabel(marking);
-                        emit.LoadArgument(0);                   // TextReader
-                        emit.CallVirtual(TextReader_Read);      // char
-                        emit.StoreLocal(local_ch);              //
+                        if (onMatchChar != null)
+                            d.Emit.MarkLabel(onMatchChar);
+                        d.Emit.LoadArgument(0);              // TextReader
+                        d.Emit.CallVirtual(TextReader_Read); // char
+                        d.Emit.StoreLocal(d.Local_ch);       //
 
                         Action checkChar = () =>
                         {
-                            emit.LoadLocal(local_ch);               // char
-                            emit.LoadConstant(ch);                  // char char
-                            emit.BranchIfEqual(next);               //
+                            d.Emit.LoadLocal(d.Local_ch);    // char
+                            d.Emit.LoadConstant(ch);         // char char
+                            d.Emit.BranchIfEqual(next);      //
                         };
 
                         checkChar();
 
-                        emit.LoadLocal(local_ch);               // char
-                        emit.LoadConstant('\\');                // char char
-                        emit.UnsignedBranchIfNotEqual(failure); // 
-                        emit.LoadArgument(0);                   // TextReader
-                        emit.Call(Helper_ExpectUnicodeHexQuad); // char
-                        emit.StoreLocal(local_ch);              //
+                        d.Emit.LoadLocal(d.Local_ch);               // char
+                        d.Emit.LoadConstant('\\');                  // char char
+                        d.Emit.UnsignedBranchIfNotEqual(d.Failure); // 
+                        d.Emit.LoadArgument(0);                     // TextReader
+                        d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
+                        d.Emit.StoreLocal(d.Local_ch);              //
 
                         checkChar();
 
-                        emit.Branch(failure);
+                        d.Emit.Branch(d.Failure);
                     });
                 }
             }
@@ -156,72 +182,77 @@ namespace Jil.Deserialize
                     .ToList();
                 while (i < nameValues.Count)
                 {
-                    var next = emit.DefineLabel("_" + nameValues[i].Item1.Substring(0, pos + 1));
+                    var next = d.Emit.DefineLabel("_" + nameValues[i].Name.Substring(0, pos + 1));
                     var j = i + 1;
                     var subset = (new[] { nameValues[i] }).ToList();
-                    var ch = nameValues[i].Item1[pos];
+                    var ch = nameValues[i].Name[pos];
                     while (j < nameValues.Count)
                     {
-                        if (ch != nameValues[j].Item1[pos])
+                        if (ch != nameValues[j].Name[pos])
                             break;
                         subset.Add(nameValues[j]);
                         ++j;
                     }
                     namesToFinish.Add(Tuple.Create(ch, next, subset));
-                    Recurse(addAction, emit, failure, local_ch, next, subset, pos + 1);
+                    Recurse(d, subset, pos + 1, next);
                     i = j;
                 }
 
-                addAction(() => emit.Branch(failure));
+                d.AddAction(() => d.Emit.Branch(d.Failure));
 
                 Action checkChars = () =>
                 {
                     // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
                     foreach (var item in namesToFinish)
                     {
-                        addAction(() =>
+                        d.AddAction(() =>
                         {
-                            emit.LoadLocal(local_ch);
-                            emit.LoadConstant((int)item.Item1);
-                            emit.BranchIfEqual(item.Item2);
+                            d.Emit.LoadLocal(d.Local_ch);
+                            d.Emit.LoadConstant((int)item.Item1);
+                            d.Emit.BranchIfEqual(item.Item2);
                         });
                     }
                 };
                 
                 checkChars();
 
-                addAction(() =>
+                d.AddAction(() =>
                 {
-                    emit.LoadLocal(local_ch);               // char
-                    emit.LoadConstant('\\');                // char char
-                    emit.UnsignedBranchIfNotEqual(failure); // 
-                    emit.LoadArgument(0);                   // TextReader
-                    emit.Call(Helper_ExpectUnicodeHexQuad); // char
-                    emit.StoreLocal(local_ch);              //
+                    d.Emit.LoadLocal(d.Local_ch);               // char
+                    d.Emit.LoadConstant('\\');                  // char char
+                    d.Emit.UnsignedBranchIfNotEqual(d.Failure); // 
+                    d.Emit.LoadArgument(0);                     // TextReader
+                    d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
+                    d.Emit.StoreLocal(d.Local_ch);              //
                 });
 
                 checkChars();
 
-                addAction(() =>
+                d.AddAction(() =>
                 {
-                    if (marking != null)
+                    if (onMatchChar != null)
                     {
-                        emit.MarkLabel(marking);
-                        marking = null;
+                        d.Emit.MarkLabel(onMatchChar);
+                        onMatchChar = null;
                     }
-                    emit.LoadArgument(0);
-                    emit.CallVirtual(TextReader_Read);
-                    emit.StoreLocal(local_ch);
+                    d.Emit.LoadArgument(0);
+                    d.Emit.CallVirtual(TextReader_Read);
+                    d.Emit.StoreLocal(d.Local_ch);
                 });
             }
         }
 
-        public static Func<TextReader, T> Create(IList<Tuple<string, Action<Emit<Func<TextReader, T>>>>> names, Action<Emit<Func<TextReader, T>>> errorValue)
+        public static AutomataName CreateName(string name, Action<Emit<Func<TextReader, T>>> onFound)
+        {
+            return new AutomataName(name, onFound);
+        }
+
+        public static Func<TextReader, T> Create(IList<AutomataName> names, Action<Emit<Func<TextReader, T>>> errorValue)
         {
             var sorted =
                 names
-                .Select(kv => Tuple.Create(kv.Item1 + '\"', kv.Item2))
-                .OrderBy(kv => kv.Item1)
+                .Select(kv => new AutomataName(kv.Name + '\"', kv.OnFound))
+                .OrderBy(kv => kv.Name)
                 .ToList();
 
             var stack = new Stack<Action>();
@@ -242,7 +273,9 @@ namespace Jil.Deserialize
                 emit.Return();
             });
 
-            Recurse(addAction, emit, failure, ch, null, sorted, 0);
+            var d = new Data(addAction, emit, failure, ch);
+
+            Recurse(d, sorted, 0, null);
 
             foreach (var action in stack)
             {

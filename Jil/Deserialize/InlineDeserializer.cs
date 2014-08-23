@@ -1355,21 +1355,10 @@ namespace Jil.Deserialize
 
                 var findSetterIdx = setterLookup.GetMethod("FindSetterIndex", new[] { typeof(TextReader) });
 
-                //var zz = invoker.Invoke(nameAutomata, new object[] { new StringReader("Hello") });
-                //Console.WriteLine(zz);
-
                 var inOrderLabels =
                     orderedSetters
                     .Select(o => o.Label)
                     .ToArray();
-
-                //var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
-
-                //var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
-                //var orderInst = (Dictionary<string, int>)order.GetValue(null);
-                //var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
-
-                //var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
 
                 ConsumeWhiteSpace();        // --empty--
                 loadObj();                  // objType(*?)
