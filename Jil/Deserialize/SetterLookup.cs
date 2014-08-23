@@ -36,8 +36,8 @@ namespace Jil.Deserialize
             var forType = typeof(ForType);
             var flags = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public;
 
-            var fields = forType.GetFields(flags);
-            var props = forType.GetProperties(flags).Where(p => p.SetMethod != null);
+            var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
+            var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
 
             return
                 fields.Cast<MemberInfo>()

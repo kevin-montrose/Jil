@@ -1,4 +1,5 @@
 ﻿using Jil.Serialize;
+using Jil.SerializeDynamic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,8 +15,6 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
-        private static Hashtable SerializeDynamicLookup = new Hashtable();
-
         /// <summary>
         /// Serializes the given data to the provided TextWriter.
         /// 
@@ -25,39 +24,16 @@ namespace Jil
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
         /// 
-        /// Note that this lookup only happens on the *root object*, members of type System.Object will not
-        /// be serialized via a dynamic lookup.
+        /// Objects with participate in the DLR will be serialized appropriately, all other types
+        /// will be serialized via reflection.
         /// </summary>
-        public static void SerializeDynamic(object data, TextWriter output, Options options = null)
+        public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            // Can't infer the type if we don't even have an object
-            if (data == null)
-            {
-                if (!(options ?? Options.Default).ShouldExcludeNulls)
-                {
-                    output.Write("null");
-                }
-
-                return;
-            }
-
-            var type = data.GetType();
-            var invoke = (Action<object, TextWriter, Options>)SerializeDynamicLookup[type];
-            if (invoke == null)
-            {
-                invoke = (Action<object, TextWriter, Options>)typeof(SerializeDynamicThunk<>).MakeGenericType(type).GetField("Thunk", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public).GetValue(null);
-
-                lock (SerializeDynamicLookup)
-                {
-                    SerializeDynamicLookup[type] = invoke;
-                }
-            }
-
-            invoke(data, output, options);
+            DynamicSerializer.Serialize(output, (object)data, options ?? Options.Default, 0);
         }
 
         /// <summary>
-        /// Serializes the given data, returning the output as a string.
+        /// Serializes the given data, returning it as a string.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
         /// the produced JSON.  If omitted, Options.Default is used.
@@ -65,23 +41,11 @@ namespace Jil
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
         /// 
-        /// Note that this lookup only happens on the *root object*, members of type System.Object will not
-        /// be serialized via a dynamic lookup.
+        /// Objects with participate in the DLR will be serialized appropriately, all other types
+        /// will be serialized via reflection.
         /// </summary>
         public static string SerializeDynamic(object data, Options options = null)
         {
-            options = options ?? Options.Default;
-
-            if (data == null)
-            {
-                if (options.ShouldExcludeNulls)
-                {
-                    return "";
-                }
-
-                return "null";
-            }
-
             using (var str = new StringWriter())
             {
                 SerializeDynamic(data, str, options);

@@ -6792,5 +6792,28 @@ namespace JilTests
                 Assert.AreEqual(shouldMatch, str);
             }
         }
+
+        public class _Issue53
+        {
+            [JilDirective(Ignore = true)]
+            public DateTime NotSerializedProperty { get; set; }
+
+            [JilDirective(Name = "NotSerializedProperty")]
+            public string SerializedProperty { get; set; }
+        }
+
+
+        [TestMethod]
+        public void Issue53()
+        {
+            var empty = JSON.Serialize(new _Issue53 { }, Options.ExcludeNulls);
+            Assert.AreEqual("{}", empty);
+
+            var data1 = JSON.Serialize(new _Issue53 { SerializedProperty = "a value!" }, Options.ExcludeNulls);
+            Assert.AreEqual("{\"NotSerializedProperty\":\"a value!\"}", data1);
+
+            var data2 = JSON.Serialize(new _Issue53 { NotSerializedProperty = DateTime.UtcNow }, Options.ExcludeNulls);
+            Assert.AreEqual("{}", data2);
+        }
     }
 }

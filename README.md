@@ -23,15 +23,17 @@ A fast JSON (de)serializer, built on [Sigil](https://github.com/kevin-montrose/S
     }
 ```
 
-There is also a `Serialize` method that works directly on strings.
+There is also a `Serialize` method that returns a string.
 
 The first time Jil is used to serialize a given configuration and type pair, it will spend extra time building the serializer.
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" serialization.
 
-The suggested way to use Jil is with the generic `JSON.Serialize` method, however a slightly slower `JSON.SerializeDynamic` method
-is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branches
-when compared to `Serialize`, and the first invocation for a given type will do a small amount of additional code generation.
+### Dynamic Serialization
+
+If you need to serialize compile-time unknown types (including subclasses, and virtual properties) you should use `JSON.SerializeDynamic` instead.
+`JSON.SerializeDynamic` does not require a generic type parameter, and can cope with subclasses, `object`/`dynamic` members, and [DLR](http://msdn.microsoft.com/en-us/library/dd233052(v=vs.110).aspx) participating 
+types such as [ExpandoObject](http://msdn.microsoft.com/en-us/library/system.dynamic.expandoobject(v=vs.110).aspx) and [DynamicObject](http://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject(v=vs.110).aspx).
 
 ### Deserializing
 
@@ -42,7 +44,7 @@ when compared to `Serialize`, and the first invocation for a given type will do 
     }
 ```
 
-There is also a `Deserialize` method that works directly on strings.
+There is also a `Deserialize` method that takes a string as input.
 
 The first time Jil is used to deserialize a given configuration and type pair, it will spend extra time building the deserializer.
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"

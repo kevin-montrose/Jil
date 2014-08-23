@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Jil.Common;
+using Jil.SerializeDynamic;
 
 namespace Jil.Serialize
 {
@@ -80,7 +81,9 @@ namespace Jil.Serialize
 
         private Emit Emit;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        private readonly bool CallOutOnPossibleDynamic;
+
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
@@ -88,6 +91,8 @@ namespace Jil.Serialize
             JSONP = jsonp;
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
+
+            CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -202,7 +207,7 @@ namespace Jil.Serialize
             var props = forType.GetProperties(flags).Where(p => p.GetMethod != null);
             var fields = forType.GetFields(flags);
 
-            var members = props.Cast<MemberInfo>().Concat(fields).Where(ShouldSerializeMember);
+            var members = props.Cast<MemberInfo>().Concat(fields).Where(f => f.ShouldUseMember());
 
             if (forType.IsValueType)
             {
@@ -216,15 +221,6 @@ namespace Jil.Serialize
                     Utils.IdealMemberOrderForWriting(forType, recursiveTypes.Keys, members);
 
             return ret.ToList();
-        }
-
-        private static bool ShouldSerializeMember(MemberInfo memberInfo)
-        {
-            var jilDirectiveAttributes = memberInfo.GetCustomAttributes<JilDirectiveAttribute>();
-            if (jilDirectiveAttributes.Count() > 0) return !jilDirectiveAttributes.Any(d => d.Ignore);
-
-            var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
-            return ignoreDataMemberAttributes.Count() == 0;
         }
 
         void WriteConstantMember(MemberInfo member, bool prependComma)
@@ -1233,6 +1229,8 @@ namespace Jil.Serialize
 
         void WriteObject(Type forType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(forType, inLocal)) return;
+
             if (!ExcludeNulls)
             {
                 WriteObjectWithNulls(forType, inLocal);
@@ -1829,6 +1827,8 @@ namespace Jil.Serialize
 
         void WriteList(Type listType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(listType, inLocal)) return;
+
             if (listType.IsArray && UseFastArrays)
             {
                 WriteArrayFast(listType, inLocal);
@@ -1846,6 +1846,8 @@ namespace Jil.Serialize
 
         void WriteEnumerable(Type enumerableType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(enumerableType, inLocal)) return;
+
             var elementType = enumerableType.GetEnumerableInterface().GetGenericArguments()[0];
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
@@ -2027,8 +2029,54 @@ namespace Jil.Serialize
             }
         }
 
+        bool ShouldDynamicCallOut(Type onType)
+        {
+            // Exact god-damn match
+            if (onType == typeof(ForType)) return false;
+
+            if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool DynamicCallOutCheck(Type onType, Sigil.Local inLocal)
+        {
+            if (ShouldDynamicCallOut(onType))
+            {
+                Emit.LoadArgument(0);               // TextWriter
+
+                if (inLocal != null)
+                {
+                    Emit.LoadLocal(inLocal);        // TextWriter object
+                }
+                else
+                {
+                    Emit.LoadArgument(1);           // TextWriter object
+                }
+
+                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited);
+                var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
+
+                Emit.LoadField(optionsField);       // TextWriter object Options
+
+                Emit.LoadArgument(2);               // TextWriter object Options int
+
+                var serializeMtd = DynamicSerializer.SerializeMtd;
+                Emit.Call(serializeMtd);            // void
+
+                return true;
+            }
+
+            return false;
+        }
+
         void WriteDictionary(Type dictType, Sigil.Local inLocal = null)
         {
+            if (DynamicCallOutCheck(dictType, inLocal)) return;
+
             if (!ExcludeNulls)
             {
                 WriteDictionaryWithNulls(dictType, inLocal);
@@ -3058,15 +3106,35 @@ namespace Jil.Serialize
 
             foreach (var type in recursiveTypes)
             {
-                var cacheType = RecusionLookupType.MakeGenericType(type);
-                var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+                if (ShouldDynamicCallOut(type))
+                {
+                    var recursiveSerializerCache = typeof(RecursiveSerializerCache<>).MakeGenericType(type);
+                    var getMtd = (MethodInfo)recursiveSerializerCache.GetField("GetFor").GetValue(null);
 
-                var loc = Emit.DeclareLocal(thunk.FieldType);
+                    var loc = Emit.DeclareLocal(getMtd.ReturnType);
+                    Emit.LoadConstant(this.PrettyPrint);        // bool
+                    Emit.LoadConstant(this.ExcludeNulls);       // bool bool
+                    Emit.LoadConstant(this.JSONP);              // bool bool bool
+                    Emit.LoadConstant((byte)this.DateFormat);   // bool bool bool byte
+                    Emit.LoadConstant(this.IncludeInherited);   // bool bool bool DateTimeFormat bool
+                    Emit.Call(getMtd);                          // Action<TextWriter, type, int>)
+                    Emit.StoreLocal(loc);                       // --empty--
 
-                Emit.LoadField(thunk);  // Action<TextWriter, type>
-                Emit.StoreLocal(loc);   // --empty--
+                    ret[type] = loc;
+                }
+                else
+                {
+                    // static case
+                    var cacheType = RecusionLookupType.MakeGenericType(type);
+                    var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
-                ret[type] = loc;
+                    var loc = Emit.DeclareLocal(thunk.FieldType);
+
+                    Emit.LoadField(thunk);  // Action<TextWriter, type, int>
+                    Emit.StoreLocal(loc);   // --empty--
+
+                    ret[type] = loc;
+                }
             }
 
             return ret;
@@ -3297,7 +3365,7 @@ namespace Jil.Serialize
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited);
+                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3309,6 +3377,13 @@ namespace Jil.Serialize
             }
 
             return ret;
+        }
+
+        public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        {
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
+            return obj.Build();
         }
     }
 }
