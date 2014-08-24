@@ -348,171 +348,210 @@ namespace Jil.Serialize
             writer.Write(buffer, 0, fracEnd + 2);
         }
 
-        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(TextWriter writer, string strRef)
-        {
-            if (strRef == null) return;
 
-            writer.Write("\"");
+        private static int WriteHexQuads(char c, int i, ref char[] buffer)
+        {
+            var b = buffer;
+            // This is converted into an IL switch, so don't fret about lookup times
+            switch (c)
+            {
+                case '\u0000': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; break;
+                case '\u0001': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; break;
+                case '\u0002': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '2'; break;
+                case '\u0003': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '3'; break;
+                case '\u0004': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '4'; break;
+                case '\u0005': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '5'; break;
+                case '\u0006': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '6'; break;
+                case '\u0007': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '7'; break;
+                case '\u0008': b[++i] = '\\'; b[++i] = 'b'; break;
+                case '\u0009': b[++i] = '\\'; b[++i] = 't'; break;
+                case '\u000A': b[++i] = '\\'; b[++i] = 'n'; break;
+                case '\u000B': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'B'; break;
+                case '\u000C': b[++i] = '\\'; b[++i] = 'f'; break;
+                case '\u000D': b[++i] = '\\'; b[++i] = 'r'; break;
+                case '\u000E': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'E'; break;
+                case '\u000F': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'F'; break;
+                case '\u0010': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '0'; break;
+                case '\u0011': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '1'; break;
+                case '\u0012': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '2'; break;
+                case '\u0013': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '3'; break;
+                case '\u0014': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '4'; break;
+                case '\u0015': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '5'; break;
+                case '\u0016': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '6'; break;
+                case '\u0017': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '7'; break;
+                case '\u0018': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '8'; break;
+                case '\u0019': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '9'; break;
+                case '\u001A': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'A'; break;
+                case '\u001B': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'B'; break;
+                case '\u001C': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'B'; break;
+                case '\u001D': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'D'; break;
+                case '\u001E': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'E'; break;
+                case '\u001F': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'F'; break;
+                default: throw new ApplicationException();
+            }
+
+            return i;
+        }
+
+        private unsafe static int WriteEncodedStringWithInitializedBuffer(string strRef, int i, ref char[] buffer)
+        {
+            var b = buffer;
 
             fixed (char* strFixed = strRef)
             {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while(len > 0)
+                var checkLength = b.Length - 10;
+                for (var j = 0; j < strRef.Length; ++j)
                 {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
+                    if (strFixed[j] > '\u001F')
                     {
-                        writer.Write(@"\\");
-                        continue;
+                        switch (strFixed[j])
+                        {
+                            case '\\': b[++i] = '\\'; b[++i] = '\\'; break;
+                            case '"': b[++i] = '\\'; b[++i] = '"'; break;
+                            default: b[++i] = strFixed[j]; break;
+                        }
+                    }
+                    else
+                    {
+                        i = WriteHexQuads(strFixed[j], i, ref b);
                     }
 
-                    if (c == '"')
+                    if (i > checkLength)
                     {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
+                        var newBuffer = new char[b.Length * 2];
+                        Array.Copy(b, newBuffer, b.Length);
+                        b = newBuffer;
+                        buffer = b;
+                        checkLength = b.Length - 10;
                     }
                 }
             }
 
-            writer.Write("\"");
+            return i;
+        }
+
+        private unsafe static int WriteEncodedStringWithInitializedBufferJSONP(string strRef, int i, ref char[] buffer)
+        {
+            var b = buffer;
+
+            fixed (char* strFixed = strRef)
+            {
+                var checkLength = b.Length - 10;
+                for (var j = 0; j < strRef.Length; ++j)
+                {
+                    if (strFixed[j] > '\u001F')
+                    {
+                        switch (strFixed[j])
+                        {
+                            case '\\': b[++i] = '\\'; b[++i] = '\\'; break;
+                            case '"': b[++i] = '\\'; b[++i] = '"'; break;
+                            case '\u2028': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '2'; b[++i] = '0'; b[++i] = '2'; b[++i] = '8'; break;
+                            case '\u2029': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '2'; b[++i] = '0'; b[++i] = '2'; b[++i] = '9'; break;
+                            default: b[++i] = strFixed[j]; break;
+                        }
+                    }
+                    else
+                    {
+                        i = WriteHexQuads(strFixed[j], i, ref b);
+                    }
+
+                    if (i > checkLength)
+                    {
+                        var newBuffer = new char[b.Length * 2];
+                        Array.Copy(b, newBuffer, b.Length);
+                        b = newBuffer;
+                        buffer = b;
+                        checkLength = b.Length - 10;
+                    }
+                }
+            }
+
+            return i;
+        }
+
+        private static char[] WriteEncodedString(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (buffer == null)
+            {
+                buffer = new char[128];
+            }
+
+            var i = WriteEncodedStringWithInitializedBuffer(strRef, -1, ref buffer);
+
+            writer.Write(buffer, 0, i + 1);
+
+            return buffer;
+        }
+
+        private static char[] WriteEncodedStringJSONP(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (buffer == null)
+            {
+                buffer = new char[128];
+            }
+
+            var i = WriteEncodedStringWithInitializedBufferJSONP(strRef, -1, ref buffer);
+
+            writer.Write(buffer, 0, i + 1);
+
+            return buffer;
+        }
+
+        private static char[] WriteEncodedStringWithQuotes(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (buffer == null)
+            {
+                buffer = new char[128];
+            }
+
+            var i = -1;
+            buffer[++i] = '\"';
+            i = WriteEncodedStringWithInitializedBuffer(strRef, i, ref buffer);
+            buffer[++i] = '\"';
+
+            writer.Write(buffer, 0, i + 1);
+
+            return buffer;
+        }
+
+        private static char[] WriteEncodedStringWithQuotesJSONP(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (buffer == null)
+            {
+                buffer = new char[128];
+            }
+
+            var i = -1;
+            buffer[++i] = '\"';
+            i = WriteEncodedStringWithInitializedBufferJSONP(strRef, i, ref buffer);
+            buffer[++i] = '\"';
+
+            writer.Write(buffer, 0, i + 1);
+
+            return buffer;
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
+        {
+            if (strRef == null) return;
+
+            buffer = WriteEncodedStringWithQuotes(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
-            writer.Write("\"");
-
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    if (c == '\u2028')
-                    {
-                        writer.Write(@"\u2028");
-                        continue;
-                    }
-
-                    if (c == '\u2029')
-                    {
-                        writer.Write(@"\u2029");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
-
-            writer.Write("\"");
+            buffer = WriteEncodedStringWithQuotesJSONP(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithQuotesWithNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -520,78 +559,12 @@ namespace Jil.Serialize
                 return;
             }
 
-            writer.Write("\"");
-
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
-
-            writer.Write("\"");
+            buffer = WriteEncodedStringWithQuotes(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -599,244 +572,30 @@ namespace Jil.Serialize
                 return;
             }
 
-            writer.Write("\"");
-
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    if (c == '\u2028')
-                    {
-                        writer.Write(@"\u2028");
-                        continue;
-                    }
-
-                    if (c == '\u2029')
-                    {
-                        writer.Write(@"\u2029");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
-
-            writer.Write("\"");
+            buffer = WriteEncodedStringWithQuotesJSONP(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithoutNullsInlineUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithoutNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
+            buffer = WriteEncodedString(writer, strRef, buffer);
         }
-        
+
         internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithoutNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null) return;
 
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    if (c == '\u2028')
-                    {
-                        writer.Write(@"\u2028");
-                        continue;
-                    }
-
-                    if (c == '\u2029')
-                    {
-                        writer.Write(@"\u2029");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
+            buffer = WriteEncodedStringJSONP(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithNullsInlineJSONPUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineJSONPUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithNullsInlineJSONPUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -844,86 +603,12 @@ namespace Jil.Serialize
                 return;
             }
 
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    if (c == '\u2028')
-                    {
-                        writer.Write(@"\u2028");
-                        continue;
-                    }
-
-                    if (c == '\u2029')
-                    {
-                        writer.Write(@"\u2029");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
+            buffer = WriteEncodedStringJSONP(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo WriteEncodedStringWithNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void _WriteEncodedStringWithNullsInlineUnsafe(TextWriter writer, string strRef)
+        static void _WriteEncodedStringWithNullsInlineUnsafe(TextWriter writer, string strRef, ref char[] buffer)
         {
             if (strRef == null)
             {
@@ -931,69 +616,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            fixed (char* strFixed = strRef)
-            {
-                char* str = strFixed;
-                char c;
-                var len = strRef.Length;
-
-                while (len > 0)
-                {
-                    c = *str;
-                    str++;
-                    len--;
-
-                    if (c == '\\')
-                    {
-                        writer.Write(@"\\");
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        writer.Write("\\\"");
-                        continue;
-                    }
-
-                    // This is converted into an IL switch, so don't fret about lookup times
-                    switch (c)
-                    {
-                        case '\u0000': writer.Write(@"\u0000"); continue;
-                        case '\u0001': writer.Write(@"\u0001"); continue;
-                        case '\u0002': writer.Write(@"\u0002"); continue;
-                        case '\u0003': writer.Write(@"\u0003"); continue;
-                        case '\u0004': writer.Write(@"\u0004"); continue;
-                        case '\u0005': writer.Write(@"\u0005"); continue;
-                        case '\u0006': writer.Write(@"\u0006"); continue;
-                        case '\u0007': writer.Write(@"\u0007"); continue;
-                        case '\u0008': writer.Write(@"\b"); continue;
-                        case '\u0009': writer.Write(@"\t"); continue;
-                        case '\u000A': writer.Write(@"\n"); continue;
-                        case '\u000B': writer.Write(@"\u000B"); continue;
-                        case '\u000C': writer.Write(@"\f"); continue;
-                        case '\u000D': writer.Write(@"\r"); continue;
-                        case '\u000E': writer.Write(@"\u000E"); continue;
-                        case '\u000F': writer.Write(@"\u000F"); continue;
-                        case '\u0010': writer.Write(@"\u0010"); continue;
-                        case '\u0011': writer.Write(@"\u0011"); continue;
-                        case '\u0012': writer.Write(@"\u0012"); continue;
-                        case '\u0013': writer.Write(@"\u0013"); continue;
-                        case '\u0014': writer.Write(@"\u0014"); continue;
-                        case '\u0015': writer.Write(@"\u0015"); continue;
-                        case '\u0016': writer.Write(@"\u0016"); continue;
-                        case '\u0017': writer.Write(@"\u0017"); continue;
-                        case '\u0018': writer.Write(@"\u0018"); continue;
-                        case '\u0019': writer.Write(@"\u0019"); continue;
-                        case '\u001A': writer.Write(@"\u001A"); continue;
-                        case '\u001B': writer.Write(@"\u001B"); continue;
-                        case '\u001C': writer.Write(@"\u001C"); continue;
-                        case '\u001D': writer.Write(@"\u001D"); continue;
-                        case '\u001E': writer.Write(@"\u001E"); continue;
-                        case '\u001F': writer.Write(@"\u001F"); continue;
-                        default: writer.Write(c); continue;
-                    }
-                }
-            }
+            buffer = WriteEncodedString(writer, strRef, buffer);
         }
 
         internal static readonly MethodInfo CustomWriteInt = typeof(Methods).GetMethod("_CustomWriteInt", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1170,7 +793,7 @@ namespace Jil.Serialize
             }
 
             // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
-            // so 1 to 10 digits
+        // so 1 to 10 digits
 
             digits98: // [0,1]00,000,000-[9,9]00,000,000
             ix = (sbyte)((number / 100000000) % 100);
@@ -1178,25 +801,25 @@ namespace Jil.Serialize
             buffer[0] = digits.First;
             buffer[1] = digits.Second;
 
-            digits76: // [01,]000,000-[99,]000,000
+        digits76: // [01,]000,000-[99,]000,000
             ix = (sbyte)((number / 1000000) % 100);
             digits = DigitPairs[ix];
             buffer[2] = digits.First;
             buffer[3] = digits.Second;
 
-            digits54: // [01]0,000-[99]0,000
+        digits54: // [01]0,000-[99]0,000
             ix = (sbyte)((number / 10000) % 100);
             digits = DigitPairs[ix];
             buffer[4] = digits.First;
             buffer[5] = digits.Second;
 
-            digits32: // [0,1]00-[9,9]99
+        digits32: // [0,1]00-[9,9]99
             ix = (sbyte)((number / 100) % 100);
             digits = DigitPairs[ix];
             buffer[6] = digits.First;
             buffer[7] = digits.Second;
 
-            digits10: // [00]-[99]
+        digits10: // [00]-[99]
             ix = (sbyte)(number % 100);
             digits = DigitPairs[ix];
             buffer[8] = digits.First;
@@ -1426,7 +1049,7 @@ namespace Jil.Serialize
             }
 
             // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
-            // so 1 to 10 digits
+        // so 1 to 10 digits
 
             digits98: // [0,1]00,000,000-[9,9]00,000,000
             ix = (byte)((number / 100000000) % 100);
@@ -1434,25 +1057,25 @@ namespace Jil.Serialize
             buffer[0] = digits.First;
             buffer[1] = digits.Second;
 
-            digits76: // [01,]000,000-[99,]000,000
+        digits76: // [01,]000,000-[99,]000,000
             ix = (byte)((number / 1000000) % 100);
             digits = DigitPairs[ix];
             buffer[2] = digits.First;
             buffer[3] = digits.Second;
 
-            digits54: // [01]0,000-[99]0,000
+        digits54: // [01]0,000-[99]0,000
             ix = (byte)((number / 10000) % 100);
             digits = DigitPairs[ix];
             buffer[4] = digits.First;
             buffer[5] = digits.Second;
 
-            digits32: // [0,1]00-[9,9]99
+        digits32: // [0,1]00-[9,9]99
             ix = (byte)((number / 100) % 100);
             digits = DigitPairs[ix];
             buffer[6] = digits.First;
             buffer[7] = digits.Second;
 
-            digits10: // [00]-[99]
+        digits10: // [00]-[99]
             ix = (byte)(number % 100);
             digits = DigitPairs[ix];
             buffer[8] = digits.First;
@@ -1502,7 +1125,7 @@ namespace Jil.Serialize
 
             writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
         }
-        
+
         internal static readonly MethodInfo CustomWriteULong = typeof(Methods).GetMethod("_CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
