@@ -2618,8 +2618,15 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);
         }
 
+        public static bool UseOldWriteEncoded = true;
+
         public MethodInfo GetWriteEncodedStringWithQuotesMethod()
         {
+            if (ExcludeNulls && JSONP && UseOldWriteEncoded)
+            {
+                return Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafeOld;
+            }
+
             return
                 ExcludeNulls ?
                     JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe :
