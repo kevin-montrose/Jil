@@ -1229,118 +1229,105 @@ namespace Jil.Serialize
         internal static readonly MethodInfo CustomWriteUIntUnrolled = typeof(Methods).GetMethod("_CustomWriteUIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
         static void _CustomWriteUIntUnrolled(TextWriter writer, uint number, char[] buffer)
         {
-            TwoDigits digits;
             int numLen;
-            byte ix;
 
-            // unroll the loop
-            if (number < 10)
+            if (number < 1000)
             {
-                numLen = 1;
-                goto digits10;
-            }
-            else
-            {
-                if (number < 100)
+                if (number >= 100)
                 {
-                    numLen = 2;
-                    goto digits10;
+                    writer.Write(DigitTriplets, (int)(number * 3), 3);
                 }
                 else
                 {
-                    if (number < 1000)
+                    if (number >= 10)
                     {
-                        numLen = 3;
-                        goto digits32;
+                        writer.Write(DigitTriplets, (int)(number * 3 + 1), 2);
                     }
                     else
                     {
-                        if (number < 10000)
-                        {
-                            numLen = 4;
-                            goto digits32;
-                        }
-                        else
-                        {
-                            if (number < 100000)
-                            {
-                                numLen = 5;
-                                goto digits54;
-                            }
-                            else
-                            {
-                                if (number < 1000000)
-                                {
-                                    numLen = 6;
-                                    goto digits54;
-                                }
-                                else
-                                {
-                                    if (number < 10000000)
-                                    {
-                                        numLen = 7;
-                                        goto digits76;
-                                    }
-                                    else
-                                    {
-                                        if (number < 100000000)
-                                        {
-                                            numLen = 8;
-                                            goto digits76;
-                                        }
-                                        else
-                                        {
-                                            if (number < 1000000000)
-                                            {
-                                                numLen = 9;
-                                                goto digits98;
-                                            }
-                                            else
-                                            {
-                                                numLen = 10;
-                                                goto digits98;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        writer.Write(DigitTriplets, (int)(number * 3 + 2), 1);
+                    }
+                }
+                return;
+            }
+            var d012 = number % 1000 * 3;
+
+            uint d543;
+            if (number < 1000000)
+            {
+                d543 = (number / 1000) * 3;
+                if (number >= 100000)
+                {
+                    numLen = 6;
+                    goto digit5;
+                }
+                else
+                {
+                    if (number >= 10000)
+                    {
+                        numLen = 5;
+                        goto digit4;
+                    }
+                    else
+                    {
+                        numLen = 4;
+                        goto digit3;
                     }
                 }
             }
+            d543 = (number / 1000) % 1000 * 3;
+
+            uint d876;
+            if (number < 1000000000)
+            {
+                d876 = (number / 1000000) * 3;
+                if (number >= 100000000)
+                {
+                    numLen = 9;
+                    goto digit8;
+                }
+                else
+                {
+                    if (number >= 10000000)
+                    {
+                        numLen = 8;
+                        goto digit7;
+                    }
+                    else
+                    {
+                        numLen = 7;
+                        goto digit6;
+                    }
+                }
+            }
+            d876 = (number / 1000000) % 1000 * 3;
+
+            numLen = 10;
 
             // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
             // so 1 to 10 digits
 
-            digits98: // [0,1]00,000,000-[9,9]00,000,000
-            ix = (byte)((number / 100000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[0] = digits.First;
-            buffer[1] = digits.Second;
+            // [01,]000,000-[99,]000,000
+            var d9 = number / 1000000000;
+            buffer[0] = (char)('0' + d9);
+            
+            digit8:
+            buffer[1] = DigitTriplets[d876];
+            digit7:
+            buffer[2] = DigitTriplets[d876 + 1];
+            digit6:
+            buffer[3] = DigitTriplets[d876 + 2];
 
-            digits76: // [01,]000,000-[99,]000,000
-            ix = (byte)((number / 1000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[2] = digits.First;
-            buffer[3] = digits.Second;
+            digit5:
+            buffer[4] = DigitTriplets[d543];
+            digit4:
+            buffer[5] = DigitTriplets[d543 + 1];
+            digit3:
+            buffer[6] = DigitTriplets[d543 + 2];
 
-            digits54: // [01]0,000-[99]0,000
-            ix = (byte)((number / 10000) % 100);
-            digits = DigitPairs[ix];
-            buffer[4] = digits.First;
-            buffer[5] = digits.Second;
-
-            digits32: // [0,1]00-[9,9]99
-            ix = (byte)((number / 100) % 100);
-            digits = DigitPairs[ix];
-            buffer[6] = digits.First;
-            buffer[7] = digits.Second;
-
-            digits10: // [00]-[99]
-            ix = (byte)(number % 100);
-            digits = DigitPairs[ix];
-            buffer[8] = digits.First;
-            buffer[9] = digits.Second;
+            buffer[7] = DigitTriplets[d012];
+            buffer[8] = DigitTriplets[d012 + 1];
+            buffer[9] = DigitTriplets[d012 + 2];
 
             writer.Write(buffer, 10 - numLen, numLen);
         }
