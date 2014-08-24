@@ -1051,173 +1051,6 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteIntUnrolledSigned(TextWriter writer, int num, char[] buffer)
         {
-            // have to special case this, we can't negate it
-            if (num == int.MinValue)
-            {
-                writer.Write("-2147483648");
-                return;
-            }
-
-            // Why signed integers?
-            // Earlier versions of this code used unsigned integers, 
-            //   but it turns out that's not ideal and here's why.
-            // 
-            // The signed version of the relevant code gets JIT'd down to:
-            // instr       operands                    latency/throughput (approx. worst case; Haswell)
-            // ========================================================================================
-            // mov         ecx,###                      2 /  0.5 
-            // cdq                                      1 /  -
-            // idiv        eax,ecx                     29 / 11
-            // mov         ecx,###                      2 /  0.5
-            // cdq                                      1 /  -
-            // idiv        eax,ecx                     29 / 11
-            // movsx       edx,dl                       - /  0.5
-            //
-            // The unsigned version gets JIT'd down to:
-            // instr       operands                    latency/throughput (approx. worst case; Haswell)
-            // ========================================================================================
-            // mov         ecx,###                       2 /  0.5
-            // xor         edx,edx                       1 /  0.25
-            // div         eax,ecx                      29 / 11
-            // mov         ecx,###                       2 /  0.5
-            // xor         edx,edx                       1 /  0.25
-            // div         eax,ecx                      29 / 11
-            // and         edx,###                       1 /  0.25
-            //
-            // In theory div (usigned division) is faster than idiv, and it probably is *but* cdq + cdq + movsx is
-            //   faster than xor + xor + and; in practice it's fast *enough* to make up the difference.
-            int numLen;
-            sbyte ix;
-            int number;
-
-            if (num < 0)
-            {
-                writer.Write('-');
-                number = (-num);
-            }
-            else
-            {
-                number = num;
-            }
-
-            TwoDigits digits;
-
-            // unroll the loop
-            if (number < 10)
-            {
-                numLen = 1;
-                goto digits10;
-            }
-            else
-            {
-                if (number < 100)
-                {
-                    numLen = 2;
-                    goto digits10;
-                }
-                else
-                {
-                    if (number < 1000)
-                    {
-                        numLen = 3;
-                        goto digits32;
-                    }
-                    else
-                    {
-                        if (number < 10000)
-                        {
-                            numLen = 4;
-                            goto digits32;
-                        }
-                        else
-                        {
-                            if (number < 100000)
-                            {
-                                numLen = 5;
-                                goto digits54;
-                            }
-                            else
-                            {
-                                if (number < 1000000)
-                                {
-                                    numLen = 6;
-                                    goto digits54;
-                                }
-                                else
-                                {
-                                    if (number < 10000000)
-                                    {
-                                        numLen = 7;
-                                        goto digits76;
-                                    }
-                                    else
-                                    {
-                                        if (number < 100000000)
-                                        {
-                                            numLen = 8;
-                                            goto digits76;
-                                        }
-                                        else
-                                        {
-                                            if (number < 1000000000)
-                                            {
-                                                numLen = 9;
-                                                goto digits98;
-                                            }
-                                            else
-                                            {
-                                                numLen = 10;
-                                                goto digits98;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // uint is between 0 & 4,294,967,295 (in practice we only get to int.MaxValue, but that's the same # of digits)
-            // so 1 to 10 digits
-
-            digits98: // [0,1]00,000,000-[9,9]00,000,000
-            ix = (sbyte)((number / 100000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[0] = digits.First;
-            buffer[1] = digits.Second;
-
-            digits76: // [01,]000,000-[99,]000,000
-            ix = (sbyte)((number / 1000000) % 100);
-            digits = DigitPairs[ix];
-            buffer[2] = digits.First;
-            buffer[3] = digits.Second;
-
-            digits54: // [01]0,000-[99]0,000
-            ix = (sbyte)((number / 10000) % 100);
-            digits = DigitPairs[ix];
-            buffer[4] = digits.First;
-            buffer[5] = digits.Second;
-
-            digits32: // [0,1]00-[9,9]99
-            ix = (sbyte)((number / 100) % 100);
-            digits = DigitPairs[ix];
-            buffer[6] = digits.First;
-            buffer[7] = digits.Second;
-
-            digits10: // [00]-[99]
-            ix = (sbyte)(number % 100);
-            digits = DigitPairs[ix];
-            buffer[8] = digits.First;
-            buffer[9] = digits.Second;
-
-            writer.Write(buffer, 10 - numLen, numLen);
-        }
-
-        internal static readonly MethodInfo CustomWriteIntUnrolledSigned_I54 = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned_I54", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomWriteIntUnrolledSigned_I54(TextWriter writer, int num, char[] buffer)
-        {
             // Why signed integers?
             // Earlier versions of this code used unsigned integers, 
             //   but it turns out that's not ideal and here's why.
@@ -1256,21 +1089,32 @@ namespace Jil.Serialize
             int numLen;
             int number;
 
-            if (num < 0) {
+            if (num < 0) 
+            {
                 writer.Write('-');
                 number = -num;
-            } else {
+            }
+            else 
+            {
                 number = num;
             }
 
             if (number < 1000)
             {
-                if (number >= 100) {
+                if (number >= 100)
+                {
                     writer.Write(DigitTriplets, number * 3, 3);
-                } else if (number >= 10) {
-                    writer.Write(DigitTriplets, number * 3 + 1, 2);
-                } else {
-                    writer.Write(DigitTriplets, number * 3 + 2, 1);
+                }
+                else
+                {
+                    if (number >= 10)
+                    {
+                        writer.Write(DigitTriplets, number * 3 + 1, 2);
+                    }
+                    else
+                    {
+                        writer.Write(DigitTriplets, number * 3 + 2, 1);
+                    }
                 }
                 return;
             }
@@ -1284,12 +1128,19 @@ namespace Jil.Serialize
                 {
                     numLen = 6;
                     goto digit5;
-                } else if (number >= 10000) {
-                    numLen = 5;
-                    goto digit4;
-                } else {
-                    numLen = 4;
-                    goto digit3;
+                }
+                else
+                {
+                    if (number >= 10000)
+                    {
+                        numLen = 5;
+                        goto digit4;
+                    }
+                    else
+                    {
+                        numLen = 4;
+                        goto digit3;
+                    }
                 }
             }
             d543 = (number / 1000) % 1000 * 3;
@@ -1302,12 +1153,19 @@ namespace Jil.Serialize
                 {
                     numLen = 9;
                     goto digit8;
-                } else if (number >= 10000000) {
-                    numLen = 8;
-                    goto digit7;
-                } else  {
-                    numLen = 7;
-                    goto digit6;
+                }
+                else
+                {
+                    if (number >= 10000000)
+                    {
+                        numLen = 8;
+                        goto digit7;
+                    }
+                    else
+                    {
+                        numLen = 7;
+                        goto digit6;
+                    }
                 }
             }
             d876 = (number / 1000000) % 1000 * 3;

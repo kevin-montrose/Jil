@@ -1297,61 +1297,6 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
-
-        class _UseIssue54CustomWriteInt
-        {
-            public List<int> Ints { get; set; }
-        }
-
-        [TestMethod]
-        public void UseIssue54CustomWriteInt()
-        {
-            Action<TextWriter, _UseIssue54CustomWriteInt, int> i54;
-            Action<TextWriter, _UseIssue54CustomWriteInt, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_UseIssue54CustomWriteInt>.UseIssue54CustomWriteInt = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    i54 = InlineSerializerHelper.Build<_UseIssue54CustomWriteInt>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_UseIssue54CustomWriteInt>.UseIssue54CustomWriteInt = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_UseIssue54CustomWriteInt>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_UseIssue54CustomWriteInt>.UseIssue54CustomWriteInt = true;
-            }
-
-            var rand = new Random(103954942);
-
-            var toSerialize = new List<_UseIssue54CustomWriteInt>();
-            for (var i = 0; i < 1000; i++)
-            {
-                toSerialize.Add(
-                    new _UseIssue54CustomWriteInt
-                    {
-                        Ints = Enumerable.Range(0, rand.Next(1, 1000)).Select(_ => rand.Next(2) == 0 ? rand.Next() : -rand.Next()).ToList()
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double i54Time, normalTime;
-            CompareTimes(toSerialize, i54, normal, out i54Time, out normalTime);
-
-            Assert.IsTrue(i54Time < normalTime, "i54Time = " + i54Time + ", normalTime = " + normalTime);
-        }
 #endif
     }
 }

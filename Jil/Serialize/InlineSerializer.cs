@@ -746,20 +746,11 @@ namespace Jil.Serialize
             throw new ConstructionException("Unexpected DateFormat: " + DateFormat);
         }
 
-        public static bool UseIssue54CustomWriteInt = true;
-
         void CallWriteInt()
         {
             if (UseCustomWriteIntUnrolled)
             {
-                if (UseIssue54CustomWriteInt)
-                {
-                    Emit.Call(Methods.CustomWriteIntUnrolledSigned_I54);
-                }
-                else
-                {
-                    Emit.Call(Methods.CustomWriteIntUnrolledSigned);
-                }
+                Emit.Call(Methods.CustomWriteIntUnrolledSigned);
             }
             else
             {
