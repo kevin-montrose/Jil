@@ -320,69 +320,6 @@ namespace JilTests
             Console.WriteLine(msg);
         }
 
-        public class _SkipNumberFormatting
-        {
-            public byte A;
-            public sbyte B;
-            public short C;
-            public ushort D;
-            public int E;
-        }
-
-        [TestMethod]
-        public void SkipNumberFormatting()
-        {
-            Action<TextWriter, _SkipNumberFormatting, int> skipping;
-            Action<TextWriter, _SkipNumberFormatting, int> normal;
-
-            try
-            {
-                {
-                    InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    skipping = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = false;
-                    Exception ignored;
-
-                    // Build the *actual* serializer method
-                    normal = InlineSerializerHelper.Build<_SkipNumberFormatting>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineSerializer<_SkipNumberFormatting>.SkipNumberFormatting = true;
-            }
-
-            var rand = new Random(141090045);
-
-            var toSerialize = new List<_SkipNumberFormatting>();
-            for (var i = 0; i < 10000; i++)
-            {
-                toSerialize.Add(
-                    new _SkipNumberFormatting
-                    {
-                        A = (byte)rand.Next(101),
-                        B = (sbyte)rand.Next(101),
-                        C = (short)rand.Next(101),
-                        D = (ushort)rand.Next(101),
-                        E = rand.Next(101),
-                    }
-                );
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double skippingTime, normalTime;
-            CompareTimes(toSerialize, skipping, normal, out skippingTime, out normalTime);
-
-            Assert.IsTrue(skippingTime < normalTime, "skippingTime = " + skippingTime + ", normalTime = " + normalTime);
-        }
-
         public class _UseCustomIntegerToString
         {
             public byte A;

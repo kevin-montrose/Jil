@@ -16,7 +16,6 @@ namespace Jil.Serialize
     class InlineSerializer<ForType>
     {
         public static bool ReorderMembers = true;
-        public static bool SkipNumberFormatting = true;
         public static bool UseCustomIntegerToString = true;
         public static bool SkipDateTimeMathMethods = true;
         public static bool UseCustomISODateFormatting = true;
@@ -846,41 +845,6 @@ namespace Jil.Serialize
             {
                 Emit.Convert<int>();            // TextWriter int
                 primitiveType = typeof(int);
-            }
-
-            if (primitiveType == typeof(int) && SkipNumberFormatting)
-            {
-                var done = Emit.DefineLabel();
-
-                // stack is:
-                // TextWriter int
-
-                using (var loc = Emit.DeclareLocal<int>())
-                {
-                    Emit.StoreLocal(loc);   // TextWriter
-                    Emit.LoadLocal(loc);    // TextWriter int
-
-                    Emit.Call(Methods.SwitchWriteInt);      // bool
-                    Emit.BranchIfTrue(done);                // --empty--
-
-                    Emit.LoadArgument(0);   // TextWriter
-                    Emit.LoadLocal(loc);    // TextWriter int
-                }
-
-                if (UseCustomIntegerToString)
-                {
-                    Emit.LoadLocal(CharBuffer);          // TextWriter int char[]
-                    CallWriteInt();                      // --empty--
-                }
-                else
-                {
-                    var writeInt = typeof(TextWriter).GetMethod("Write", new[] { typeof(int) });
-                    Emit.CallVirtual(writeInt);     // --empty--
-                }
-
-                Emit.MarkLabel(done);           // --empty--
-
-                return;
             }
 
             var isIntegerType = primitiveType == typeof(int) || primitiveType == typeof(uint) || primitiveType == typeof(long) || primitiveType == typeof(ulong);
