@@ -94,15 +94,32 @@ namespace Jil.Deserialize
         {
             public readonly Action<Action> AddAction;
             public readonly Emit<Func<TextReader, T>> Emit;
+            public readonly Action<Emit<Func<TextReader, T>>> DoReturn;
+            public readonly Label Start;
             public readonly Label Failure;
             public readonly Local Local_ch;
+            public readonly bool SkipTrailingWhitespace;
+            public readonly bool FoldMultipleValues;
 
-            public Data(Action<Action> addAction, Emit<Func<TextReader, T>> emit, Label failure, Local local_ch)
+            public Data
+                ( Action<Action> addAction
+                , Emit<Func<TextReader, T>> emit
+                , Action<Emit<Func<TextReader, T>>> doReturn
+                , Label start
+                , Label failure
+                , Local local_ch
+                , bool skipTrailingWhitespace
+                , bool foldMultipleValues
+                )
             {
                 AddAction = addAction;
                 Emit = emit;
+                DoReturn = doReturn;
+                Start = start;
                 Failure = failure;
                 Local_ch = local_ch;
+                SkipTrailingWhitespace = skipTrailingWhitespace;
+                FoldMultipleValues = foldMultipleValues;
             }
         }
 
@@ -125,9 +142,20 @@ namespace Jil.Deserialize
             {
                 d.Emit.MarkLabel(onMatchChar);
                 nameValue.OnFound(d.Emit);
-                d.Emit.Return();
+                d.DoReturn(d.Emit);
             });
         }
+
+        private static void FoldName(Data d, AutomataName nameValue, Label foldName)
+        {
+            d.AddAction(() =>
+            {
+                d.Emit.MarkLabel(foldName);
+                nameValue.OnFound(d.Emit);
+                d.Emit.Branch(d.Start);
+            });
+        }
+
 
         static void NextChar(Data d, IList<AutomataName> nameValues, int pos, Label onMatchChar)
         {
@@ -136,10 +164,7 @@ namespace Jil.Deserialize
                 .GroupBy(nv => pos >= nv.Name.Length ? -1 : nv.Name[pos])
                 .ToList();
 
-            var namesToFinish =
-                Enumerable
-                .Repeat(Tuple.Create(default(char), default(Label), new[] { default(AutomataName) }.ToList()), 0)
-                .ToList();
+            var namesToFinish = new List<Tuple<char, Label>>();
             foreach(var charGroup in chars)
             {
                 var ch = charGroup.Key;
@@ -150,58 +175,60 @@ namespace Jil.Deserialize
                     {
                         throw new ApplicationException("");
                     }
-                    var completeName = d.Emit.DefineLabel("_" + items[0].Name + "'complete");
-                    namesToFinish.Add(Tuple.Create('"', completeName, items));
+
+                    var completeName = d.Emit.DefineLabel("complete_" + items[0].Name);
                     FinishName(d, items[0], completeName);
+                    namesToFinish.Add(Tuple.Create('"', completeName));
+
+                    if (d.SkipTrailingWhitespace)
+                        namesToFinish.Add(Tuple.Create(' ', onMatchChar));
+
+                    if (d.FoldMultipleValues)
+                    {
+                        var foldName = d.Emit.DefineLabel("fold_" + items[0].Name);
+                        FoldName(d, items[0], foldName);
+                        namesToFinish.Add(Tuple.Create(',', foldName));
+                    }
                 }
                 else
                 {
                     var next = d.Emit.DefineLabel("_" + items[0].Name.Substring(0, pos + 1));
-                    namesToFinish.Add(Tuple.Create((char)ch, next, items));
+                    namesToFinish.Add(Tuple.Create((char)ch, next));
                     NextChar(d, items, pos + 1, next);
                 }
             }
 
-            d.AddAction(() => d.Emit.Branch(d.Failure));
-
-            Action checkChars = () =>
+            d.AddAction(() =>
             {
-                // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
-                foreach (var item in namesToFinish)
+                d.Emit.MarkLabel(onMatchChar);
+
+                d.Emit.LoadArgument(0);
+                d.Emit.CallVirtual(TextReader_Read);
+                d.Emit.StoreLocal(d.Local_ch);
+
+                Action checkChars = () =>
                 {
-                    d.AddAction(() =>
+                    // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
+                    foreach (var item in namesToFinish)
                     {
                         d.Emit.LoadLocal(d.Local_ch);
                         d.Emit.LoadConstant((int)item.Item1);
                         d.Emit.BranchIfEqual(item.Item2);
-                    });
-                }
-            };
-                
-            checkChars();
+                    }
+                };
 
-            d.AddAction(() =>
-            {
+                checkChars();
+
                 d.Emit.LoadLocal(d.Local_ch);               // char
                 d.Emit.LoadConstant('\\');                  // char char
                 d.Emit.UnsignedBranchIfNotEqual(d.Failure); // 
                 d.Emit.LoadArgument(0);                     // TextReader
                 d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
                 d.Emit.StoreLocal(d.Local_ch);              //
-            });
 
-            checkChars();
+                checkChars();
 
-            d.AddAction(() =>
-            {
-                if (onMatchChar != null)
-                {
-                    d.Emit.MarkLabel(onMatchChar);
-                    onMatchChar = null;
-                }
-                d.Emit.LoadArgument(0);
-                d.Emit.CallVirtual(TextReader_Read);
-                d.Emit.StoreLocal(d.Local_ch);
+                d.Emit.Branch(d.Failure);
             });
         }
 
@@ -210,11 +237,10 @@ namespace Jil.Deserialize
             return new AutomataName(name, onFound);
         }
 
-        public static Func<TextReader, T> Create(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> errorValue)
+        public static Func<TextReader, T> CreateFold(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> initialize, Action<Emit<Func<TextReader, T>>> doReturn, Action<Emit<Func<TextReader, T>>> errorValue, bool skipTrailingWhitespace, bool foldMultipleValues)
         {
             var sorted =
                 names
-                //.Select(kv => CreateName(kv.Name+'"', kv.OnFound))
                 .OrderBy(kv => kv.Name)
                 .ToList();
 
@@ -223,6 +249,8 @@ namespace Jil.Deserialize
                 action => stack.Push(action);
 
             var emit = Emit<Func<TextReader, T>>.NewDynamicMethod(doVerify: Utils.DoVerify);
+
+            initialize(emit);
 
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
@@ -236,9 +264,10 @@ namespace Jil.Deserialize
                 emit.Return();
             });
 
-            var d = new Data(addAction, emit, failure, ch);
+            var start = emit.DefineLabel("start");
+            var d = new Data(addAction, emit, doReturn, start, failure, ch, skipTrailingWhitespace, foldMultipleValues);
 
-            NextChar(d, sorted, 0, null);
+            NextChar(d, sorted, 0, start);
 
             foreach (var action in stack)
             {
@@ -246,6 +275,11 @@ namespace Jil.Deserialize
             }
 
             return emit.CreateDelegate(Utils.DelegateOptimizationOptions);
+        }
+
+        public static Func<TextReader, T> Create(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> errorValue)
+        {
+            return CreateFold(names, _ => { }, emit => emit.Return(), errorValue, false, false);
         }
     }
 }
