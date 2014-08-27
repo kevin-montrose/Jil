@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseHashWhenMatchingEnums = true;
         public static bool UseNameAutomata = true;
+        public static bool UseNameAutomataForEnums = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -525,6 +526,18 @@ namespace Jil.Deserialize
             if (enumType.IsFlagsEnum())
             {
                 ReadFlagsEnum(enumType);
+                return;
+            }
+            
+            if (UseNameAutomataForEnums)
+            {
+                var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
+                var getEnumValue = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
+
+                ExpectQuote();
+                Emit.LoadArgument(0);     // TextReader
+                Emit.Call(getEnumValue);  // emum
+
                 return;
             }
 
