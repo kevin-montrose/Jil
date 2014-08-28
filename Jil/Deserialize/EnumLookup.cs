@@ -18,7 +18,10 @@ namespace Jil.Deserialize
         {
             var enumValues = GetEnumValues();
 
-            _getEnumValue = CreateFindEnum(enumValues);
+            _getEnumValue =
+                typeof(EnumType).IsFlagsEnum()
+                    ? CreateFindFlagsEnum(enumValues)
+                    : CreateFindEnum(enumValues);
         }
 
         private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
@@ -40,8 +43,53 @@ namespace Jil.Deserialize
                 .Select(name => NameAutomata<EnumType>.CreateName(name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
                 .ToList();
 
-            return NameAutomata<EnumType>.Create(nameToResults, emit => emit.LoadConstant(-1), false);
+            return
+                NameAutomata<EnumType>.Create(
+                    nameToResults,
+                    emit => emit.LoadConstant(-1), // TODO: throw exception!
+                    false);
         }
+
+        private static Func<TextReader, EnumType> CreateFindFlagsEnum(IReadOnlyList<Tuple<string, object>> names)
+        {
+            var underlyingType = Enum.GetUnderlyingType(typeof(EnumType));
+
+            var resultValue = "result_value";
+
+            var nameToResults =
+                names
+                .Select(name =>
+                    NameAutomata<EnumType>.CreateName(
+                        name.Item1,
+                        emit =>
+                        {
+                            LoadConstantOfType(emit, name.Item2, underlyingType);
+                            emit.LoadLocal(resultValue);
+                            emit.Or();
+                            emit.StoreLocal(resultValue);
+                        }))
+                .ToList();
+
+
+            return NameAutomata<EnumType>.CreateFold(
+                nameToResults,
+                emit =>
+                {
+                    emit.DeclareLocal(underlyingType, resultValue);
+                    LoadConstantOfType(emit, 0, underlyingType);
+                    emit.StoreLocal(resultValue);
+                },
+                emit =>
+                {
+                    emit.LoadLocal(resultValue);
+                    emit.Return();
+                },
+                emit => emit.LoadConstant(-1), // TODO: throw exception!
+                true,
+                true,
+                false);
+        }
+
 
         static void LoadConstantOfType(Sigil.Emit<Func<TextReader, EnumType>> Emit, object val, Type type)
         {

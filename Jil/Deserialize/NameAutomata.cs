@@ -98,7 +98,7 @@ namespace Jil.Deserialize
             public readonly Label Start;
             public readonly Label Failure;
             public readonly Local Local_ch;
-            public readonly bool SkipTrailingWhitespace;
+            public readonly bool SkipWhitespace;
             public readonly bool FoldMultipleValues;
             public readonly bool CaseSensitive;
 
@@ -109,7 +109,7 @@ namespace Jil.Deserialize
                 , Label start
                 , Label failure
                 , Local local_ch
-                , bool skipTrailingWhitespace
+                , bool skipWhitespace
                 , bool foldMultipleValues
                 , bool caseSensitive
                 )
@@ -120,7 +120,7 @@ namespace Jil.Deserialize
                 Start = start;
                 Failure = failure;
                 Local_ch = local_ch;
-                SkipTrailingWhitespace = skipTrailingWhitespace;
+                SkipWhitespace = skipWhitespace;
                 FoldMultipleValues = foldMultipleValues;
                 CaseSensitive = caseSensitive;
             }
@@ -182,7 +182,7 @@ namespace Jil.Deserialize
                     FinishName(d, items[0], completeName);
                     namesToFinish.Add(Tuple.Create('"', completeName));
 
-                    if (d.SkipTrailingWhitespace)
+                    if (d.SkipWhitespace)
                         namesToFinish.Add(Tuple.Create(' ', onMatchChar));
 
                     if (d.FoldMultipleValues)
@@ -194,6 +194,9 @@ namespace Jil.Deserialize
                 }
                 else
                 {
+                    if (d.SkipWhitespace && pos == 0)
+                        namesToFinish.Add(Tuple.Create(' ', onMatchChar));
+
                     var next = d.Emit.DefineLabel("_" + items[0].Name.Substring(0, pos + 1));
                     if (d.CaseSensitive)
                     {
@@ -249,7 +252,7 @@ namespace Jil.Deserialize
             return new AutomataName(name, onFound);
         }
 
-        public static Func<TextReader, T> CreateFold(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> initialize, Action<Emit<Func<TextReader, T>>> doReturn, Action<Emit<Func<TextReader, T>>> errorValue, bool skipTrailingWhitespace, bool foldMultipleValues, bool caseSensitive)
+        public static Func<TextReader, T> CreateFold(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> initialize, Action<Emit<Func<TextReader, T>>> doReturn, Action<Emit<Func<TextReader, T>>> errorValue, bool skipWhitespace, bool foldMultipleValues, bool caseSensitive)
         {
             var sorted =
                 names
@@ -277,7 +280,7 @@ namespace Jil.Deserialize
             });
 
             var start = emit.DefineLabel("start");
-            var d = new Data(addAction, emit, doReturn, start, failure, ch, skipTrailingWhitespace, foldMultipleValues, caseSensitive);
+            var d = new Data(addAction, emit, doReturn, start, failure, ch, skipWhitespace, foldMultipleValues, caseSensitive);
 
             NextChar(d, sorted, 0, start);
 

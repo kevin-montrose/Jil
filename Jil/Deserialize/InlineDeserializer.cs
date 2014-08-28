@@ -523,12 +523,6 @@ namespace Jil.Deserialize
 
         void ReadEnum(Type enumType)
         {
-            if (enumType.IsFlagsEnum())
-            {
-                ReadFlagsEnum(enumType);
-                return;
-            }
-            
             if (UseNameAutomataForEnums)
             {
                 var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
@@ -538,6 +532,12 @@ namespace Jil.Deserialize
                 Emit.LoadArgument(0);     // TextReader
                 Emit.Call(getEnumValue);  // emum
 
+                return;
+            }
+
+            if (enumType.IsFlagsEnum())
+            {
+                ReadFlagsEnum(enumType);
                 return;
             }
 
