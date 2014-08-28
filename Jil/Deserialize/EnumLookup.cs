@@ -23,9 +23,10 @@ namespace Jil.Deserialize
 
         private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
         {
-            return
-                Enum.GetNames(typeof(EnumType))
-                .Select(name => Tuple.Create(name, Enum.Parse(typeof(EnumType), name)))
+            return 
+                Enum.GetValues(typeof(EnumType))
+                .Cast<object>()
+                .Select(enumVal => Tuple.Create(typeof(EnumType).GetEnumValueName(enumVal), enumVal))
                 .ToList()
                 .AsReadOnly();
         }
