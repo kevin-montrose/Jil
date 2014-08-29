@@ -1004,6 +1004,12 @@ namespace Jil.Deserialize
 
             if (isAnonymous)
             {
+                if (UseNameAutomata)
+                {
+                    ReadAnonymousObjectAutomata(objType);
+                    return;
+                }
+
                 if (AllowHashing)
                 {
                     var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
@@ -1022,7 +1028,7 @@ namespace Jil.Deserialize
 
             if (UseNameAutomata)
             {
-                ReadAutomata(objType);
+                ReadObjectAutomata(objType);
                 return;
             }
             
@@ -1295,7 +1301,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadAutomata(Type objType)
+        void ReadObjectAutomata(Type objType)
         {
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
@@ -1962,6 +1968,154 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
 
             foreach(var kv in propertyMap.OrderBy(o => o.Value.Item2))
+            {
+                var local = localMap[kv.Key];
+                Emit.LoadLocal(local);
+            }
+
+            Emit.NewObject(cons);               // objType
+            Emit.Branch(done);                  // objType
+
+            Emit.MarkLabel(doneNull);           // --empty--
+            Emit.LoadNull();                    // null
+
+            Emit.MarkLabel(done);               // objType
+
+            // free up all those locals for use again
+            foreach (var kv in localMap)
+            {
+                kv.Value.Dispose();
+            }
+        }
+
+        void ReadAnonymousObjectAutomata(Type objType)
+        {
+            var doneNotNull = Emit.DefineLabel();
+            var doneNull = Emit.DefineLabel();
+
+            ExpectRawCharOrNull(
+                '{',
+                () => { },
+                () =>
+                {
+                    Emit.Branch(doneNull);
+                }
+            );
+
+            var cons = objType.GetConstructors().Single();
+
+            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
+            var findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            if (propertyMap.Count == 0)
+            {
+                var doneSkipChar = Emit.DefineLabel();
+
+                Emit.NewObject(cons);           // objType
+                Emit.Branch(doneNotNull);       // objType
+
+                Emit.MarkLabel(doneNull);       // null
+                Emit.LoadNull();                // null
+                Emit.Branch(doneSkipChar);
+
+                Emit.MarkLabel(doneNotNull);    // objType
+
+                var doneSkipping = Emit.DefineLabel();
+
+                SkipAllMembers(doneSkipping, doneSkipChar); // objType
+
+                return;
+            }
+
+            var localMap = new Dictionary<string, Sigil.Local>();
+            foreach (var kv in propertyMap)
+            {
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+            }
+
+            var labels =
+                propertyMap
+                .ToDictionary(d => d.Key, d => Emit.DefineLabel());
+
+            var inOrderLabels =
+                propertyMap
+                .OrderBy(l => l.Value.Item2)
+                .Select(l => labels[l.Key])
+                .ToArray();
+
+            var loopStart = Emit.DefineLabel();
+
+            ConsumeWhiteSpace();        // --empty--
+            RawPeekChar();              // int 
+            Emit.LoadConstant('}');     // int '}'
+            Emit.BranchIfEqual(doneNotNull);   // --empty--
+
+            ExpectQuote();                              // --empty--
+            Emit.LoadArgument(0);                       // TextReader
+            Emit.Call(findConstructorParameterIndex);   // int
+
+            ConsumeWhiteSpace();        // int
+            ExpectChar(':');            // int
+            ConsumeWhiteSpace();        // int
+
+            var readingMember = Emit.DefineLabel();
+            Emit.MarkLabel(readingMember);  // int
+
+            Emit.Switch(inOrderLabels);     // --empty--
+            SkipObjectMember();             // --empty--
+
+            foreach (var kv in labels)
+            {
+                var label = kv.Value;
+                var local = localMap[kv.Key];
+
+                Emit.MarkLabel(label);  // --empty--
+                Build(local.LocalType); // localType
+
+                Emit.StoreLocal(local); // --empty--
+
+                Emit.Branch(loopStart); // --empty--
+            }
+
+            var nextItem = Emit.DefineLabel();
+
+            Emit.MarkLabel(loopStart);      // --empty--
+            ConsumeWhiteSpace();            // --empty--
+            RawPeekChar();                  // int 
+            Emit.Duplicate();               // int int
+            Emit.LoadConstant(',');         // int int ','
+            Emit.BranchIfEqual(nextItem);   // int
+            Emit.LoadConstant('}');         // int '}'
+            Emit.BranchIfEqual(doneNotNull);       // --empty--
+
+            // didn't get what we expected
+            ThrowExpected(",", "}");
+
+            Emit.MarkLabel(nextItem);           // int
+            Emit.Pop();                         // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+            ConsumeWhiteSpace();                // --empty--
+
+            ExpectQuote();                              // --empty--
+            Emit.LoadArgument(0);                       // TextReader
+            Emit.Call(findConstructorParameterIndex);   // int
+
+            ConsumeWhiteSpace();                // int
+            ExpectChar(':');                    // int
+            ConsumeWhiteSpace();                // int
+            Emit.Branch(readingMember);         // int
+
+            Emit.MarkLabel(doneNotNull);               // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+
+            var done = Emit.DefineLabel();
+
+            foreach (var kv in propertyMap.OrderBy(o => o.Value.Item2))
             {
                 var local = localMap[kv.Key];
                 Emit.LoadLocal(local);
