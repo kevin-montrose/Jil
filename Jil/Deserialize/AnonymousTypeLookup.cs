@@ -13,6 +13,9 @@ namespace Jil.Deserialize
         public static Dictionary<string, Tuple<Type, int>> ParametersToTypeAndIndex;
         private static Func<TextReader, int> _findConstructorParameterIndex;
 
+        // Still used in ReadAnonymousObjectDictionaryLookup (can be removed if NameAutomata method is always used)
+        public static Dictionary<string, int> Lookup;
+ 
         static AnonymousTypeLookup()
         {
             ParametersToTypeAndIndex = Utils.GetAnonymousNameToConstructorMap(typeof(ForType));
@@ -23,6 +26,9 @@ namespace Jil.Deserialize
                 .Select(kv => kv.Key);
 
             _findConstructorParameterIndex = CreateFindMember(orderedNames);
+
+            // Still used in ReadAnonymousObjectDictionaryLookup (can be removed if NameAutomata method is always used)
+            Lookup = ParametersToTypeAndIndex.ToDictionary(d => d.Key, d => d.Value.Item2);
         }
 
         private static Func<TextReader, int> CreateFindMember(IEnumerable<string> names)
