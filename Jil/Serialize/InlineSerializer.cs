@@ -953,6 +953,8 @@ namespace Jil.Serialize
                 Emit.LoadLocalAddress(loc); // TextWriter Guid*
             }
 
+            // Can't use "Typesafe.Method((Guid g) => g.ToString());" here because it returns the virtual method
+            // ToString() from 'object' which fails as Call() is being used rather than CallVirtual().
             var toString = typeof(Guid).GetMethod("ToString", Type.EmptyTypes);
 
             // non-virtual, since we're calling the correct method directly
