@@ -97,5 +97,29 @@ namespace Jil.Common
         {
             return Property(example).GetMethod;
         }
+
+        private static FieldInfo ToField(MemberInfo member)
+        {
+            var field = member as FieldInfo;
+            if (field == null)
+                throw new ArgumentException("The member was not a field");
+            return field;
+        }
+
+        public static FieldInfo Field<R>(Expression<Func<R>> example)
+        {
+            return ToField(Member(example));
+        }
+
+        public static FieldInfo Field<T, R>(Expression<Func<T, R>> example)
+        {
+            return ToField(Member(example));
+        }
+
+        public static FieldInfo Field<T1, T2, R>(Expression<Func<T1, T2, R>> example)
+        {
+            return ToField(Member(example));
+        }
+
     }
 }

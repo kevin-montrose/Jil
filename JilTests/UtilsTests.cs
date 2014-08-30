@@ -26,17 +26,15 @@ namespace JilTests
         [TestMethod]
         public void FieldOffsetsInMemory()
         {
-            Func<string, FieldInfo> get = str => typeof(_FieldOffsetsInMemory).GetField(str);
-
             var offset = Utils.FieldOffsetsInMemory(typeof(_FieldOffsetsInMemory));
-
+            
             Assert.IsNotNull(offset);
-            Assert.IsTrue(offset.ContainsKey(get("Foo")));
-            Assert.IsTrue(offset.ContainsKey(get("Bar")));
-            Assert.IsTrue(offset.ContainsKey(get("Fizz")));
-            Assert.IsTrue(offset.ContainsKey(get("Buzz")));
-            Assert.IsTrue(offset.ContainsKey(get("Hello")));
-            Assert.IsTrue(offset.ContainsKey(get("World")));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.Foo)));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.Bar)));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.Fizz)));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.Buzz)));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.Hello)));
+            Assert.IsTrue(offset.ContainsKey(Typesafe.Field((_FieldOffsetsInMemory fom) => fom.World)));
         }
 
 #pragma warning disable 0649
@@ -72,7 +70,7 @@ namespace JilTests
         public void PropertyFieldUsage()
         {
             var use = Utils.PropertyFieldUsage(typeof(_PropertyFieldUsage));
-
+            
             Assert.IsNotNull(use);
             Assert.AreEqual(1, use[Typesafe.Property((_PropertyFieldUsage pfu) => pfu.Foo)].Count);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[Typesafe.Property((_PropertyFieldUsage pfu) => pfu.Foo)][0]);
@@ -365,6 +363,10 @@ namespace JilTests
         [TestMethod]
         public void ConstantFields()
         {
+            // Can use "Typesafe.Field(() => _ConstantFields.xxx)" as they just transform down to ConstantExpression
+            // (which shows that these tests are kind of dubious, as GetConstantJSONStringEquivalent() is just getting
+            // out the constant from the field anyway...)
+
             Assert.AreEqual("\" \"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("C1"), false));
             Assert.AreEqual("\"\\\"\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("C2"), false));
 
