@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        public static MethodInfo DeserializeMember = typeof(DynamicDeserializer).GetMethod("_DeserializeMember", BindingFlags.NonPublic | BindingFlags.Static);
+        public static MethodInfo DeserializeMember = Typesafe.Method(() => DynamicDeserializer._DeserializeMember(default(TextReader), default(ObjectBuilder)));
         static void _DeserializeMember(TextReader reader, ObjectBuilder builder)
         {
             Methods.ConsumeWhiteSpace(reader);

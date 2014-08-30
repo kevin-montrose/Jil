@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\ConstructionException.cs" />
+    <Compile Include="Common\Typesafe.cs" />
     <Compile Include="DateTimeFormat.cs" />
     <Compile Include="DeserializationException.cs" />
     <Compile Include="DeserializeDynamic\DynamicDeserializer.cs" />

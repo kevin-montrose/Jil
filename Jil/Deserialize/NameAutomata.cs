@@ -85,9 +85,9 @@ namespace Jil.Deserialize
             }
         }
 
-        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int), typeof(T) });
-        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
+        static MethodInfo TextReader_Read = Typesafe.Method((TextReader tr) => tr.Read());
+        static MethodInfo Helper_Consume = Typesafe.Method(() => Helper.Consume(default(TextReader), default(int), default(T)));
+        static MethodInfo Helper_ExpectUnicodeHexQuad = Typesafe.Method(() => Helper.ExpectUnicodeHexQuad(default(TextReader)));
 
         static void Recurse(Action<Action> addAction, Emit<Func<TextReader, T>> emit, Label failure, Local local_ch, Label marking, IList<Tuple<string, Action<Emit<Func<TextReader, T>>>>> nameValues, int pos)
         {

@@ -24,9 +24,9 @@ namespace Jil.DeserializeDynamic
             public JsonMetaObject(JsonObject outer, Expression exp) : base(exp, BindingRestrictions.Empty, outer) { }
 
             static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
-            static MethodInfo StringConcat = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object), typeof(object) });
-            static MethodInfo StringConcatArray = typeof(string).GetMethod("Concat", new[] { typeof(object[]) });
-            static MethodInfo StringJoin = typeof(string).GetMethod("Join", new[] { typeof(string), typeof(object[]) });
+            static MethodInfo StringConcat = Typesafe.Method(() => String.Concat(default(object), default(object), default(object)));
+            static MethodInfo StringConcatArray = Typesafe.Method(() => String.Concat(default(object[])));
+            static MethodInfo StringJoin = Typesafe.Method(() => String.Join(default(string), default(object[])));
 
             static ParameterExpression ThisEvaled = Expression.Variable(typeof(JsonObject));
             static ParameterExpression Res = Expression.Variable(typeof(object));
@@ -694,7 +694,7 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        static MethodInfo InnerTryUnaryOperation = typeof(JsonObject).GetMethod("_InnerTryUnaryOperation", BindingFlags.Instance | BindingFlags.NonPublic);
+        static MethodInfo InnerTryUnaryOperation = Typesafe.Method((JsonObject jo, object o) => jo._InnerTryUnaryOperation(default(ExpressionType), default(Type), out o));
         bool _InnerTryUnaryOperation(ExpressionType operand, Type returnType, out object result)
         {
             switch(operand)
@@ -772,7 +772,7 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        static MethodInfo InnerTryGetIndex = typeof(JsonObject).GetMethod("_InnerTryGetIndex", BindingFlags.Instance | BindingFlags.NonPublic);
+        static MethodInfo InnerTryGetIndex = Typesafe.Method((JsonObject jo, object o) => jo._InnerTryGetIndex(default(Type), default(object[]), out o));
         bool _InnerTryGetIndex(Type returnType, object[] indexes, out object result)
         {
             if (Type == JsonObjectType.Array)
@@ -846,7 +846,7 @@ namespace Jil.DeserializeDynamic
             return Enumerable.Empty<string>();
         }
 
-        static MethodInfo InnerTryGetMember = typeof(JsonObject).GetMethod("_InnerTryGetMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryGetMember = Typesafe.Method((JsonObject jo, object o) => jo._InnerTryGetMember(default(string), default(Type), out o));
         bool _InnerTryGetMember(string name, Type returnType, out object result)
         {
             if (Type == JsonObjectType.Array)
@@ -887,7 +887,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        static MethodInfo InnerTryConvertMtd = typeof(JsonObject).GetMethod("InnerTryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryConvertMtd = Typesafe.Method((JsonObject jo, object o) => jo.InnerTryConvert(default(Type), out o));
         bool InnerTryConvert(Type returnType, out object result)
         {
             if (returnType == typeof(object))
@@ -1296,7 +1296,7 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
-        static MethodInfo InnerTryInvokeMember = typeof(JsonObject).GetMethod("_InnerTryInvokeMember", BindingFlags.NonPublic | BindingFlags.Instance);
+        static MethodInfo InnerTryInvokeMember = Typesafe.Method((JsonObject jo, object o) => jo._InnerTryInvokeMember(default(string), default(object[]), out o));
         bool _InnerTryInvokeMember(string name, object[] args, out object result)
         {
             if (name == "ToString" && args.Length == 0)

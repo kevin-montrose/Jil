@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -23,7 +24,7 @@ namespace Jil.Deserialize
     //      * *except* for long, where we accumulate into a ulong and do the special checked; because there's no larger type
     static partial class Methods
     {
-        public static readonly MethodInfo DiscardNewtonsoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardNewtonsoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo DiscardNewtonsoftTimeZoneOffset = Typesafe.Method(() => _DiscardNewtonsoftTimeZoneOffset(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _DiscardNewtonsoftTimeZoneOffset(TextReader reader)
         {
@@ -74,7 +75,7 @@ namespace Jil.Deserialize
             if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59", reader);
         }
 
-        public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt8 = Typesafe.Method(() => _ReadUInt8(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8(TextReader reader)
         {
@@ -114,7 +115,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt8 = Typesafe.Method(() => _ReadInt8(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static sbyte _ReadInt8(TextReader reader)
         {
@@ -164,7 +165,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadInt16 = typeof(Methods).GetMethod("_ReadInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt16 = Typesafe.Method(() => _ReadInt16(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static short _ReadInt16(TextReader reader)
         {
@@ -230,7 +231,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadUInt16 = typeof(Methods).GetMethod("_ReadUInt16", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt16 = Typesafe.Method(() => _ReadUInt16(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static ushort _ReadUInt16(TextReader reader)
         {
@@ -288,7 +289,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadInt32 = typeof(Methods).GetMethod("_ReadInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt32 = Typesafe.Method(() => _ReadInt32(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int _ReadInt32(TextReader reader)
         {
@@ -394,7 +395,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadUInt32 = typeof(Methods).GetMethod("_ReadUInt32", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt32 = Typesafe.Method(() => _ReadUInt32(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static uint _ReadUInt32(TextReader reader)
         {
@@ -492,7 +493,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadInt64 = typeof(Methods).GetMethod("_ReadInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadInt64 = Typesafe.Method(() => _ReadInt64(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static long _ReadInt64(TextReader reader)
         {
@@ -677,7 +678,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadUInt64 = typeof(Methods).GetMethod("_ReadUInt64", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadUInt64 = Typesafe.Method(() => _ReadUInt64(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static ulong _ReadUInt64(TextReader reader)
         {
@@ -857,7 +858,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadDouble = Typesafe.Method((StringBuilder sb) => _ReadDouble(default(TextReader), ref sb));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double _ReadDouble(TextReader reader, ref StringBuilder commonSb)
         {
@@ -939,7 +940,7 @@ namespace Jil.Deserialize
             return result;
         }
 
-        public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadSingle = Typesafe.Method((StringBuilder sb) => _ReadSingle(default(TextReader), ref sb));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
         {
@@ -1021,7 +1022,7 @@ namespace Jil.Deserialize
             return result;
         }
 
-        public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadDecimal = Typesafe.Method((StringBuilder sb) => _ReadDecimal(default(TextReader), ref sb));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {

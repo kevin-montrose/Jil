@@ -108,7 +108,7 @@ namespace Jil.Serialize
             }
         }
 
-        static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
+        static MethodInfo TextWriter_WriteString = Typesafe.Method((TextWriter tw) => tw.Write(default(string)));
         void WriteString(string str)
         {
             Emit.LoadArgument(0);
@@ -494,7 +494,7 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -507,7 +507,7 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
                 var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
@@ -552,7 +552,7 @@ namespace Jil.Serialize
 
         void WriteMillisecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -565,7 +565,7 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
                 var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
@@ -606,7 +606,7 @@ namespace Jil.Serialize
 
         void WriteSecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -619,7 +619,7 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = typeof(DateTime).GetMethod("Subtract", new[] { typeof(DateTime) });
+                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
 
                 var totalS = typeof(TimeSpan).GetProperty("TotalSeconds");
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
@@ -665,11 +665,11 @@ namespace Jil.Serialize
             //  - DateTime
             //  - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
 
             if (!UseCustomISODateFormatting)
             {
-                var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
+                var toString = Typesafe.Method((DateTime dt) => dt.ToString(default(string)));
 
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
@@ -971,7 +971,7 @@ namespace Jil.Serialize
             //  - char
             //  - TextWriter
 
-            var writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
+            var writeChar = Typesafe.Method((TextWriter tw) => tw.Write(default(char)));
 
             var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
 

@@ -101,7 +101,7 @@ namespace Jil.Deserialize
             Emit.LoadLocalAddress(StringBuilderName);
         }
 
-        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
+        static MethodInfo TextReader_Read = Typesafe.Method((TextReader tr) => tr.Read());
         void RawReadChar(Action endOfStream)
         {
             var haveChar = Emit.DefineLabel();
@@ -502,7 +502,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(success);        // --empty--
         }
 
-        static readonly MethodInfo TextReader_Peek = typeof(TextReader).GetMethod("Peek", BindingFlags.Public | BindingFlags.Instance);
+        static readonly MethodInfo TextReader_Peek = Typesafe.Method((TextReader tr) => tr.Peek());
         void RawPeekChar()
         {
             Emit.LoadArgument(0);                   // TextReader
