@@ -508,7 +508,7 @@ namespace Jil.Serialize
             if (!SkipDateTimeMathMethods)
             {
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
-                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
+                var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
@@ -537,7 +537,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = typeof(DateTime).GetProperty("Ticks");
+            var getTicks = Typesafe.Property((DateTime dt) => dt.Ticks);
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -566,7 +566,7 @@ namespace Jil.Serialize
             if (!SkipDateTimeMathMethods)
             {
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
-                var totalMs = typeof(TimeSpan).GetProperty("TotalMilliseconds");
+                var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
@@ -593,7 +593,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = typeof(DateTime).GetProperty("Ticks");
+            var getTicks = Typesafe.Property((DateTime ts) => ts.Ticks); 
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -621,7 +621,7 @@ namespace Jil.Serialize
             {
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
 
-                var totalS = typeof(TimeSpan).GetProperty("TotalSeconds");
+                var totalS = Typesafe.Property((TimeSpan ts) => ts.TotalSeconds);
                 var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
@@ -648,7 +648,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = typeof(DateTime).GetProperty("Ticks");
+            var getTicks = Typesafe.Property((DateTime ts) => ts.Ticks);
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -695,7 +695,7 @@ namespace Jil.Serialize
             Emit.Call(Methods.CustomISO8601ToString);       // --empty--
         }
 
-        static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_UtcDateTime = Typesafe.PropertyGet((DateTimeOffset dto) => dto.UtcDateTime);
         void WriteDateTimeOffset()
         {
             // top of stack:
