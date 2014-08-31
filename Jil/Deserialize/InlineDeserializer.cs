@@ -101,7 +101,7 @@ namespace Jil.Deserialize
             Emit.LoadLocalAddress(StringBuilderName);
         }
 
-        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
+        static MethodInfo TextReader_Read = TypedReflection.Method((TextReader tr) => tr.Read());
         void RawReadChar(Action endOfStream)
         {
             var haveChar = Emit.DefineLabel();
@@ -351,7 +351,7 @@ namespace Jil.Deserialize
             ExpectQuote();                  // Guid
         }
 
-        static readonly ConstructorInfo DateTimeOffsetConst = typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) });
+        static readonly ConstructorInfo DateTimeOffsetConst = TypedReflection.Constructor(() => new DateTimeOffset(default(DateTime)));
         void ReadDateTimeOffset()
         {
             ReadDate();                             // DateTime
@@ -502,7 +502,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(success);        // --empty--
         }
 
-        static readonly MethodInfo TextReader_Peek = typeof(TextReader).GetMethod("Peek", BindingFlags.Public | BindingFlags.Instance);
+        static readonly MethodInfo TextReader_Peek = TypedReflection.Method((TextReader tr) => tr.Peek());
         void RawPeekChar()
         {
             Emit.LoadArgument(0);                   // TextReader
@@ -1980,8 +1980,8 @@ namespace Jil.Deserialize
             }
         }
 
-        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(bool) });
-        static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
+        static ConstructorInfo OptionsCons = TypedReflection.Constructor(() => new Options(default(bool), default(bool), default(bool), default(DateTimeFormat), default(bool), default(bool)));
+        static ConstructorInfo ObjectBuilderCons = TypedReflection.Constructor(() => new Jil.DeserializeDynamic.ObjectBuilder(default(Options)));
         void ReadDynamic()
         {
             using (var dyn = Emit.DeclareLocal<Jil.DeserializeDynamic.ObjectBuilder>())

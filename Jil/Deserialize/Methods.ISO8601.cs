@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Jil.Deserialize
 {
     partial class Methods
     {
-        public static readonly MethodInfo ReadISO8601Date = typeof(Methods).GetMethod("_ReadISO8601Date", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadISO8601Date = TypedReflection.Method(() => Methods._ReadISO8601Date(default(TextReader), default(char[])));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime _ReadISO8601Date(TextReader reader, char[] buffer)
         {

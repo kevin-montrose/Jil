@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -24,7 +25,7 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        public static FieldInfo _BeingBuilt = typeof(ObjectBuilder).GetField("BeingBuilt");
+        public static FieldInfo _BeingBuilt = TypedReflection.Field((ObjectBuilder ob) => ob.BeingBuilt);
         public JsonObject BeingBuilt;
 
         public ObjectBuilder(Options options)

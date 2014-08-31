@@ -58,7 +58,7 @@ namespace Jil.Deserialize
             public byte B15;
         }
 
-        public static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadGuid = TypedReflection.Method(() => Methods._ReadGuid(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Guid _ReadGuid(TextReader reader)
         {
@@ -169,7 +169,7 @@ namespace Jil.Deserialize
             return (byte)(a * 16 + b);
         }
 
-        public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo Skip = TypedReflection.Method(() => Methods._Skip(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _Skip(TextReader reader)
         {
@@ -299,7 +299,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static MethodInfo SkipEncodedString = typeof(Methods).GetMethod("_SkipEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
+        public static MethodInfo SkipEncodedString = TypedReflection.Method(() => Methods._SkipEncodedString(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _SkipEncodedString(TextReader reader)
         {
@@ -395,7 +395,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ConsumeWhiteSpace = TypedReflection.Method(() => Methods._ConsumeWhiteSpace(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ConsumeWhiteSpace(TextReader reader)
         {
@@ -425,7 +425,7 @@ namespace Jil.Deserialize
                 c == 0x0D;
         }
 
-        public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadEncodedString = TypedReflection.Method((StringBuilder sb) => Methods._ReadEncodedString(default(TextReader), ref sb));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedString(TextReader reader, ref StringBuilder commonSb)
         {
@@ -476,7 +476,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadEncodedStringWithBuffer = TypedReflection.Method((StringBuilder sb) => Methods._ReadEncodedStringWithBuffer(default(TextReader), default(char[]), ref sb));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
         {
@@ -584,7 +584,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadEncodedChar = typeof(Methods).GetMethod("_ReadEncodedChar", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo ReadEncodedChar = TypedReflection.Method(() => Methods._ReadEncodedChar(default(TextReader)));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static char _ReadEncodedChar(TextReader reader)
         {
