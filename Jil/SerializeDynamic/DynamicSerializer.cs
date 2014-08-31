@@ -567,7 +567,7 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        public static readonly MethodInfo SerializeMtd = Typesafe.Method(() => Serialize(default(TextWriter), default(object), default(Options), default(int)));
+        public static readonly MethodInfo SerializeMtd = TypedReflection.Method(() => Serialize(default(TextWriter), default(object), default(Options), default(int)));
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
             if (obj == null)

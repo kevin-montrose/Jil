@@ -27,7 +27,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        public static MethodInfo DeserializeMember = Typesafe.Method(() => DynamicDeserializer._DeserializeMember(default(TextReader), default(ObjectBuilder)));
+        public static MethodInfo DeserializeMember = TypedReflection.Method(() => DynamicDeserializer._DeserializeMember(default(TextReader), default(ObjectBuilder)));
         static void _DeserializeMember(TextReader reader, ObjectBuilder builder)
         {
             Methods.ConsumeWhiteSpace(reader);

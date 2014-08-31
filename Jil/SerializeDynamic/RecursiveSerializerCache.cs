@@ -15,7 +15,7 @@ namespace Jil.SerializeDynamic
     {
         static readonly Hashtable Cache = new Hashtable();
 
-        public static readonly MethodInfo GetFor = Typesafe.Method(() => _GetFor(default(bool), default(bool), default(bool), default(DateTimeFormat), default(bool)));
+        public static readonly MethodInfo GetFor = TypedReflection.Method(() => _GetFor(default(bool), default(bool), default(bool), default(DateTimeFormat), default(bool)));
         static Action<TextWriter, T, int> _GetFor(
                 bool prettyPrint, 
                 bool excludeNulls, 

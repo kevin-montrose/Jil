@@ -108,7 +108,7 @@ namespace Jil.Serialize
             }
         }
 
-        static MethodInfo TextWriter_WriteString = Typesafe.Method((TextWriter tw) => tw.Write(default(string)));
+        static MethodInfo TextWriter_WriteString = TypedReflection.Method((TextWriter tw) => tw.Write(default(string)));
         void WriteString(string str)
         {
             Emit.LoadArgument(0);
@@ -494,7 +494,7 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
+            var toUniversalTime = TypedReflection.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -507,9 +507,9 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
-                var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
-                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
+                var subtractMtd = TypedReflection.Method((DateTime dt) => dt.Subtract(default(DateTime)));
+                var totalMs = TypedReflection.Property((TimeSpan ts) => ts.TotalMilliseconds);
+                var dtCons = TypedReflection.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
@@ -537,7 +537,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = Typesafe.Property((DateTime dt) => dt.Ticks);
+            var getTicks = TypedReflection.Property((DateTime dt) => dt.Ticks);
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -552,7 +552,7 @@ namespace Jil.Serialize
 
         void WriteMillisecondsStyleDateTime()
         {
-            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
+            var toUniversalTime = TypedReflection.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -565,9 +565,9 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
-                var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
-                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
+                var subtractMtd = TypedReflection.Method((DateTime dt) => dt.Subtract(default(DateTime)));
+                var totalMs = TypedReflection.Property((TimeSpan ts) => ts.TotalMilliseconds);
+                var dtCons = TypedReflection.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
@@ -593,7 +593,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = Typesafe.Property((DateTime ts) => ts.Ticks); 
+            var getTicks = TypedReflection.Property((DateTime ts) => ts.Ticks); 
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -606,7 +606,7 @@ namespace Jil.Serialize
 
         void WriteSecondsStyleDateTime()
         {
-            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
+            var toUniversalTime = TypedReflection.Method((DateTime dt) => dt.ToUniversalTime());
 
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
@@ -619,10 +619,10 @@ namespace Jil.Serialize
 
             if (!SkipDateTimeMathMethods)
             {
-                var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
+                var subtractMtd = TypedReflection.Method((DateTime dt) => dt.Subtract(default(DateTime)));
 
-                var totalS = Typesafe.Property((TimeSpan ts) => ts.TotalSeconds);
-                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
+                var totalS = TypedReflection.Property((TimeSpan ts) => ts.TotalSeconds);
+                var dtCons = TypedReflection.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
@@ -648,7 +648,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var getTicks = Typesafe.Property((DateTime ts) => ts.Ticks);
+            var getTicks = TypedReflection.Property((DateTime ts) => ts.Ticks);
 
             LoadProperty(getTicks);                         // TextWriter long
             Emit.LoadConstant(621355968000000000L);         // TextWriter long (Unix Epoch Ticks long)
@@ -665,11 +665,11 @@ namespace Jil.Serialize
             //  - DateTime
             //  - TextWriter
 
-            var toUniversalTime = Typesafe.Method((DateTime dt) => dt.ToUniversalTime());
+            var toUniversalTime = TypedReflection.Method((DateTime dt) => dt.ToUniversalTime());
 
             if (!UseCustomISODateFormatting)
             {
-                var toString = Typesafe.Method((DateTime dt) => dt.ToString(default(string)));
+                var toString = TypedReflection.Method((DateTime dt) => dt.ToString(default(string)));
 
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
@@ -695,7 +695,7 @@ namespace Jil.Serialize
             Emit.Call(Methods.CustomISO8601ToString);       // --empty--
         }
 
-        static readonly MethodInfo DateTimeOffset_UtcDateTime = Typesafe.PropertyGet((DateTimeOffset dto) => dto.UtcDateTime);
+        static readonly MethodInfo DateTimeOffset_UtcDateTime = TypedReflection.PropertyGet((DateTimeOffset dto) => dto.UtcDateTime);
         void WriteDateTimeOffset()
         {
             // top of stack:
@@ -973,7 +973,7 @@ namespace Jil.Serialize
             //  - char
             //  - TextWriter
 
-            var writeChar = Typesafe.Method((TextWriter tw) => tw.Write(default(char)));
+            var writeChar = TypedReflection.Method((TextWriter tw) => tw.Write(default(char)));
 
             var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
 

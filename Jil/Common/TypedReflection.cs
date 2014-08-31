@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Common
 {
-    static class Typesafe
+    static class TypedReflection
     {
         private static MethodInfo GetMethod(LambdaExpression example)
         {

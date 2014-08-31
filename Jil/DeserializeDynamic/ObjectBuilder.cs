@@ -25,7 +25,7 @@ namespace Jil.DeserializeDynamic
             }
         }
 
-        public static FieldInfo _BeingBuilt = Typesafe.Field((ObjectBuilder ob) => ob.BeingBuilt);
+        public static FieldInfo _BeingBuilt = TypedReflection.Field((ObjectBuilder ob) => ob.BeingBuilt);
         public JsonObject BeingBuilt;
 
         public ObjectBuilder(Options options)

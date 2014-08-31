@@ -12,7 +12,7 @@ namespace Jil.Deserialize
 {
     partial class Methods
     {
-        public static readonly MethodInfo ReadISO8601Date = Typesafe.Method(() => Methods._ReadISO8601Date(default(TextReader), default(char[])));
+        public static readonly MethodInfo ReadISO8601Date = TypedReflection.Method(() => Methods._ReadISO8601Date(default(TextReader), default(char[])));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime _ReadISO8601Date(TextReader reader, char[] buffer)
         {
