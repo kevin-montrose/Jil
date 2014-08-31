@@ -23,7 +23,7 @@ namespace Jil.DeserializeDynamic
 
             public JsonMetaObject(JsonObject outer, Expression exp) : base(exp, BindingRestrictions.Empty, outer) { }
 
-            static ConstructorInfo InvalidCastExceptionCons = typeof(InvalidCastException).GetConstructor(new[] { typeof(string) });
+            static ConstructorInfo InvalidCastExceptionCons = Typesafe.Constructor(() => new InvalidCastException(default(string)));
             static MethodInfo StringConcat = Typesafe.Method(() => String.Concat(default(object), default(object), default(object)));
             static MethodInfo StringConcatArray = Typesafe.Method(() => String.Concat(default(object[])));
             static MethodInfo StringJoin = Typesafe.Method(() => String.Join(default(string), default(object[])));

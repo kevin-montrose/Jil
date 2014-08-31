@@ -509,7 +509,7 @@ namespace Jil.Serialize
             {
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
                 var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
-                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
@@ -567,7 +567,7 @@ namespace Jil.Serialize
             {
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
                 var totalMs = Typesafe.Property((TimeSpan ts) => ts.TotalMilliseconds);
-                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1
@@ -622,7 +622,7 @@ namespace Jil.Serialize
                 var subtractMtd = Typesafe.Method((DateTime dt) => dt.Subtract(default(DateTime)));
 
                 var totalS = Typesafe.Property((TimeSpan ts) => ts.TotalSeconds);
-                var dtCons = typeof(DateTime).GetConstructor(new[] { typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(int), typeof(DateTimeKind) });
+                var dtCons = Typesafe.Constructor(() => new DateTime(default(int), default(int), default(int), default(int), default(int), default(int), default(DateTimeKind)));
 
                 Emit.LoadConstant(1970);                    // TextWriter DateTime* 1970
                 Emit.LoadConstant(1);                       // TextWriter DateTime* 1970 1

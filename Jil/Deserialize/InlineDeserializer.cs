@@ -351,7 +351,7 @@ namespace Jil.Deserialize
             ExpectQuote();                  // Guid
         }
 
-        static readonly ConstructorInfo DateTimeOffsetConst = typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) });
+        static readonly ConstructorInfo DateTimeOffsetConst = Typesafe.Constructor(() => new DateTimeOffset(default(DateTime)));
         void ReadDateTimeOffset()
         {
             ReadDate();                             // DateTime
@@ -1980,8 +1980,8 @@ namespace Jil.Deserialize
             }
         }
 
-        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(bool) });
-        static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
+        static ConstructorInfo OptionsCons = Typesafe.Constructor(() => new Options(default(bool), default(bool), default(bool), default(DateTimeFormat), default(bool), default(bool)));
+        static ConstructorInfo ObjectBuilderCons = Typesafe.Constructor(() => new Jil.DeserializeDynamic.ObjectBuilder(default(Options)));
         void ReadDynamic()
         {
             using (var dyn = Emit.DeclareLocal<Jil.DeserializeDynamic.ObjectBuilder>())
