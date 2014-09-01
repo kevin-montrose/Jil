@@ -4685,6 +4685,43 @@ namespace JilTests
             Assert.AreEqual(default(DateTime), data.NotSerializedProperty);
         }
 
+        enum _BadEnum1 { A, B };
+        enum _BadEnum2 { A, B };
+
+        [TestMethod]
+        public void BadEnum()
+        {
+            try
+            {
+                Jil.Deserialize.InlineDeserializer<_BadEnum1>.UseNameAutomataForEnums = false;
+                var e = JSON.Deserialize<_BadEnum1>("\"C\"");
+                Assert.Fail("Should have failed, instead got: " + e);
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Unexpected value for _BadEnum1: C", e.Message);
+            }
+            finally
+            {
+                Jil.Deserialize.InlineDeserializer<_BadEnum1>.UseNameAutomataForEnums = true;
+            }
+
+            try
+            {
+                Jil.Deserialize.InlineDeserializer<_BadEnum2>.UseNameAutomataForEnums = true;
+                var e = JSON.Deserialize<_BadEnum2>("\"C\"");
+                Assert.Fail("Should have failed, instead got: " + e);
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Unexpected value for _BadEnum2: C", e.Message);
+            }
+            finally
+            {
+                Jil.Deserialize.InlineDeserializer<_BadEnum2>.UseNameAutomataForEnums = true;
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
