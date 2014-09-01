@@ -82,7 +82,6 @@
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Common\EnumValues.cs" />
     <Compile Include="Deserialize\EnumLookup.cs" />
-    <Compile Include="Deserialize\EnumMatcher.cs" />
     <Compile Include="Common\FlagsEnumCombiner.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\InterfaceImplementation.cs" />

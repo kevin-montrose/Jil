@@ -3633,9 +3633,9 @@ namespace JilTests
         }
 
 
-        List<T> AnonObjectByExample<T>(T example, string str, bool allowHashing)
+        List<T> AnonObjectByExample<T>(T example, string str)
         {
-            var opts = new Options(allowHashFunction: allowHashing, dateFormat: Jil.DateTimeFormat.ISO8601);
+            var opts = new Options(dateFormat: Jil.DateTimeFormat.ISO8601);
             return JSON.Deserialize<List<T>>(str, opts);
         }
 
@@ -3645,7 +3645,7 @@ namespace JilTests
             {
                 var example = new { A = 1 };
 
-                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]", false);
+                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]");
                 Assert.AreEqual(3, a.Count);
                 Assert.IsNull(a[0]);
                 Assert.IsNotNull(a[1]);
@@ -3656,7 +3656,7 @@ namespace JilTests
             {
                 var example = new { A = 1 };
 
-                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]", true);
+                var a = AnonObjectByExample(example, "[null, {\"A\":1234}, null]");
                 Assert.AreEqual(3, a.Count);
                 Assert.IsNull(a[0]);
                 Assert.IsNotNull(a[1]);
@@ -3685,7 +3685,7 @@ namespace JilTests
 
                 const string str = "[{\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}]";
 
-                var res = AnonObjectByExample(example, str, false);
+                var res = AnonObjectByExample(example, str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(3, res.Count);
                 var first = res[0];
@@ -3723,7 +3723,7 @@ namespace JilTests
 
                 const string str = "[{\"A\":1, \"B\": 2, \"C\": 3, \"E\": 4, \"F\": 5, \"G\": 6, \"H\": 7, \"I\": 8}]";
 
-                var res = AnonObjectByExample(example, str, false);
+                var res = AnonObjectByExample(example, str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(1, res.Count);
                 var first = res[0];
@@ -3755,7 +3755,7 @@ namespace JilTests
 
                 const string str = "[{\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}, {\"A\":1234, \"B\": 123.45, \"C\": 678.90, \"E\": \"hello world\", \"F\": \"c\", \"G\": \"EB29803F-A68D-4647-8512-5F0EE906CC90\", \"H\": \"1999-12-31\", \"I\": [1,2,3,4,5,6,7,8,9,10]}]";
 
-                var res = AnonObjectByExample(example, str, true);
+                var res = AnonObjectByExample(example, str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(3, res.Count);
                 var first = res[0];
@@ -3793,7 +3793,7 @@ namespace JilTests
 
                 const string str = "[{\"A\":1, \"B\": 2, \"C\": 3, \"E\": 4, \"F\": 5, \"G\": 6, \"H\": 7, \"I\": 8}]";
 
-                var res = AnonObjectByExample(example, str, true);
+                var res = AnonObjectByExample(example, str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(1, res.Count);
                 var first = res[0];
@@ -3870,22 +3870,22 @@ namespace JilTests
 
             {
                 {
-                    var obj = _EmptyAnonymousObject(ex, "null", new Options(allowHashFunction: false));
+                    var obj = _EmptyAnonymousObject(ex, "null", new Options());
                     Assert.IsNull(obj);
                 }
 
                 {
-                    var obj = _EmptyAnonymousObject(ex, "{}", new Options(allowHashFunction: false));
+                    var obj = _EmptyAnonymousObject(ex, "{}", new Options());
                     Assert.IsNotNull(obj);
                 }
 
                 {
-                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", new Options(allowHashFunction: false));
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234}", new Options());
                     Assert.IsNotNull(obj);
                 }
 
                 {
-                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234,\"B\":5678}", new Options(allowHashFunction: false));
+                    var obj = _EmptyAnonymousObject(ex, "{\"A\":1234,\"B\":5678}", new Options());
                     Assert.IsNotNull(obj);
                 }
             }
@@ -3920,21 +3920,21 @@ namespace JilTests
             {
                 using (var str = new StringReader("null"))
                 {
-                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+                    var obj = JSON.Deserialize<object>(str, new Options());
 
                     Assert.IsNull(obj);
                 }
 
                 using (var str = new StringReader("{}"))
                 {
-                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+                    var obj = JSON.Deserialize<object>(str, new Options());
 
                     Assert.IsNotNull(obj);
                 }
 
                 using (var str = new StringReader("{\"A\":1234}"))
                 {
-                    var obj = JSON.Deserialize<object>(str, new Options(allowHashFunction: false));
+                    var obj = JSON.Deserialize<object>(str, new Options());
 
                     Assert.IsNotNull(obj);
                 }
@@ -3969,7 +3969,7 @@ namespace JilTests
 
             try
             {
-                JSON.Deserialize<_MissingConstructor>("null", new Options(allowHashFunction: false));
+                JSON.Deserialize<_MissingConstructor>("null", new Options());
                 Assert.Fail();
             }
             catch (DeserializationException e)
@@ -4454,7 +4454,7 @@ namespace JilTests
             }
 
             {
-                var res = JSON.Deserialize<_Issue25>(json, new Options(allowHashFunction: false));
+                var res = JSON.Deserialize<_Issue25>(json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
@@ -4470,7 +4470,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = Issue25DeserializeByExample(example, json, new Options(allowHashFunction: false));
+                var res = Issue25DeserializeByExample(example, json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
@@ -4500,10 +4500,10 @@ namespace JilTests
                 var str3 = "{\"foo\":0, \"bar\":0}";
                 var str4 = "{\"foo\":0, \"bar\":0, \"fizz\":0}";
 
-                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str1, new Options(allowHashFunction: false)));
-                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str2, new Options(allowHashFunction: false)));
-                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str3, new Options(allowHashFunction: false)));
-                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str4, new Options(allowHashFunction: false)));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str1, new Options()));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str2, new Options()));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str3, new Options()));
+                Assert.IsNotNull(JSON.Deserialize<_EmptyMembers>(str4, new Options()));
             }
         }
 
@@ -4533,7 +4533,7 @@ namespace JilTests
             }
 
             {
-                var res = JSON.Deserialize<_NullEmptyMembers>(json, new Options(allowHashFunction: false));
+                var res = JSON.Deserialize<_NullEmptyMembers>(json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNull(res.Foo);
@@ -4549,7 +4549,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = NullEmptyMembersDeserializeByExample(example, json, new Options(allowHashFunction: false));
+                var res = NullEmptyMembersDeserializeByExample(example, json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNull(res.Foo);

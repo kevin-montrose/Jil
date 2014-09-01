@@ -518,39 +518,21 @@ namespace Jil
 
             try
             {
-
                 options = options ?? Options.Default;
 
-                if (options.AllowHashFunction)
+                switch (options.UseDateTimeFormat)
                 {
-                    switch (options.UseDateTimeFormat)
-                    {
-                        case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.SecondsSinceUnixEpoch:
-                            return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.ISO8601:
-                            return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader);
-                        default: throw new InvalidOperationException("Unexpected Options: " + options);
-                    }
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader);
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader);
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader);
+                    case DateTimeFormat.ISO8601:
+                        return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader);
+                    default: throw new InvalidOperationException("Unexpected Options: " + options);
                 }
-                else
-                {
-                    switch (options.UseDateTimeFormat)
-                    {
-                        case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.NewtonsoftStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.MillisecondStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.SecondsSinceUnixEpoch:
-                            return Jil.Deserialize.SecondStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.ISO8601:
-                            return Jil.Deserialize.ISO8601StyleNoHashingTypeCache<T>.Get()(reader);
-                        default: throw new InvalidOperationException("Unexpected Options: " + options);
-                    }
-                }
+
             }
             catch (Exception e)
             {

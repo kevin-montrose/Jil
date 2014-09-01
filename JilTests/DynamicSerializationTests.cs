@@ -19,7 +19,7 @@ namespace JilTests
             {
                 var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
                 var res = dyn.ToString();
-                var shouldMatch = JSON.Serialize(new { Hello = 1 }, Options.ISO8601PrettyPrintNoHashing);
+                var shouldMatch = JSON.Serialize(new { Hello = 1 }, Options.ISO8601PrettyPrint);
                 Assert.AreEqual(shouldMatch, res);
             }
 
@@ -79,17 +79,17 @@ namespace JilTests
                 var res1 = dyn1.ToString();
                 var res2 = dyn2.ToString();
                 var res3 = dyn3.ToString();
-                var shouldMatch1 = JSON.Serialize(new[] { 1, 2, 3 }, Options.ISO8601PrettyPrintNoHashing);
-                var shouldMatch2 = JSON.Serialize(new object[0], Options.ISO8601PrettyPrintNoHashing);
+                var shouldMatch1 = JSON.Serialize(new[] { 1, 2, 3 }, Options.ISO8601PrettyPrint);
+                var shouldMatch2 = JSON.Serialize(new object[0], Options.ISO8601PrettyPrint);
                 var shouldMatch3 =
                     "[" +
-                    JSON.Serialize(1, Options.ISO8601PrettyPrintNoHashing) +
+                    JSON.Serialize(1, Options.ISO8601PrettyPrint) +
                     ", " +
-                    JSON.Serialize("hello", Options.ISO8601PrettyPrintNoHashing) +
+                    JSON.Serialize("hello", Options.ISO8601PrettyPrint) +
                     ", " +
-                    JSON.Serialize(new { }, Options.ISO8601PrettyPrintNoHashing) +
+                    JSON.Serialize(new { }, Options.ISO8601PrettyPrint) +
                     ", " +
-                    JSON.Serialize(456, Options.ISO8601PrettyPrintNoHashing) +
+                    JSON.Serialize(456, Options.ISO8601PrettyPrint) +
                     "]";
                 Assert.AreEqual(shouldMatch1, res1);
                 Assert.AreEqual(shouldMatch2, res2);
