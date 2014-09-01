@@ -4722,6 +4722,21 @@ namespace JilTests
             }
         }
 
+        enum _EnumEscapes
+        {
+            Foo,
+            Bar,
+            Résumé
+        }
+
+        [TestMethod]
+        public void EnumEscapes()
+        {
+            Assert.AreEqual(_EnumEscapes.Foo, JSON.Deserialize<_EnumEscapes>(@"""F\u006f\u006F"""));
+            Assert.AreEqual(_EnumEscapes.Bar, JSON.Deserialize<_EnumEscapes>(@"""\u0042\u0061\u0072"""));
+            Assert.AreEqual(_EnumEscapes.Résumé, JSON.Deserialize<_EnumEscapes>(@"""R\u00e9sum\u00E9"""));
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
