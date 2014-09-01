@@ -24,94 +24,15 @@ namespace Jil.Deserialize
                 }
             }
 
-            // TODO: This is duplicated around the place, so should consolidate
-            public static char ReadHexQuad(TextReader reader)
-            {
-                int unescaped;
-                int c;
-
-                c = reader.Read();
-                if (c >= '0' && c <= '9')
-                {
-                    unescaped = 4096 * (c - '0');
-                }
-                else if (c >= 'A' && c <= 'F')
-                {
-                    unescaped = 4096 * (10 + c - 'A');
-                }
-                else if (c >= 'a' && c <= 'f')
-                {
-                    unescaped = 4096 * (10 + c - 'a');
-                }
-                else
-                {
-                    throw new DeserializationException("Expected hex digit, found: " + c, reader);
-                }
-
-                c = reader.Read();
-                if (c >= '0' && c <= '9')
-                {
-                    unescaped += 256 * (c - '0');
-                }
-                else if (c >= 'A' && c <= 'F')
-                {
-                    unescaped += 256 * (10 + c - 'A');
-                }
-                else if (c >= 'a' && c <= 'f')
-                {
-                    unescaped += 256 * (10 + c - 'a');
-                }
-                else
-                {
-                    throw new DeserializationException("Expected hex digit, found: " + c, reader);
-                }
-
-                c = reader.Read();
-                if (c >= '0' && c <= '9')
-                {
-                    unescaped += 16 * (c - '0');
-                }
-                else if (c >= 'A' && c <= 'F')
-                {
-                    unescaped += 16 * (10 + c - 'A');
-                }
-                else if (c >= 'a' && c <= 'f')
-                {
-                    unescaped += 16 * (10 + c - 'a');
-                }
-                else
-                {
-                    throw new DeserializationException("Expected hex digit, found: " + c, reader);
-                }
-
-                c = reader.Read();
-                if (c >= '0' && c <= '9')
-                {
-                    unescaped += c - '0';
-                }
-                else if (c >= 'A' && c <= 'F')
-                {
-                    unescaped += 10 + c - 'A';
-                }
-                else if (c >= 'a' && c <= 'f')
-                {
-                    unescaped += 10 + c - 'a';
-                }
-                else
-                {
-                    throw new DeserializationException("Expected hex digit, found: " + c, reader);
-                }
-
-                return (char)unescaped;
-            }
-
             public static char ExpectUnicodeHexQuad(TextReader reader)
             {
                 var c = reader.Read();
                 if (c != 'u')
+                {
                     throw new DeserializationException("Escape sequence expected unicode hex quad", reader);
+                }
 
-                return ReadHexQuad(reader);
+                return (char)Methods.ReadHexQuad(reader);
             }
         }
 
