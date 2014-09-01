@@ -55,7 +55,7 @@ namespace Jil.Deserialize
                 .Select((name, index) => NameAutomata<int>.CreateName(name, emit => emit.LoadConstant(index)))
                 .ToList();
 
-            return NameAutomata<int>.Create(nameToResults, emit => emit.LoadConstant(-1), true);
+            return NameAutomata<int>.Create(nameToResults, true, defaultValue: -1);
         }
 
         // probably not the best place for this; but sufficent I guess...

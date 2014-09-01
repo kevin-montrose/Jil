@@ -16,11 +16,12 @@ namespace Jil.Deserialize
     {
         public static class Helper
         {
-            public static T Consume(TextReader tr, int ch, T errorValue)
+            public static void Consume(TextReader tr, int ch)
             {
                 while (ch != '\"' && ch != -1)
+                {
                     ch = tr.Read();
-                return errorValue;
+                }
             }
 
             // TODO: This is duplicated around the place, so should consolidate
@@ -115,7 +116,7 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int), typeof(T) });
+        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int) });
         static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
 
         class Data
@@ -280,7 +281,7 @@ namespace Jil.Deserialize
             return new AutomataName(name, onFound);
         }
 
-        public static Func<TextReader, T> CreateFold(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> initialize, Action<Emit<Func<TextReader, T>>> doReturn, Action<Emit<Func<TextReader, T>>> errorValue, bool skipWhitespace, bool foldMultipleValues, bool caseSensitive)
+        public static Func<TextReader, T> CreateFold(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> initialize, Action<Emit<Func<TextReader, T>>> doReturn, bool skipWhitespace, bool foldMultipleValues, bool caseSensitive, object defaultValue)
         {
             var sorted =
                 names
@@ -297,15 +298,48 @@ namespace Jil.Deserialize
 
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
-            addAction(() =>
+
+            if (defaultValue == null)
             {
-                emit.MarkLabel(failure);
-                emit.LoadArgument(0);
-                emit.LoadLocal(ch);
-                errorValue(emit);
-                emit.Call(Helper_Consume);
-                emit.Return();
-            });
+                // no default? throw a deserialization exception
+                addAction(
+                    () =>
+                    {
+                        emit.MarkLabel(failure);
+
+                        emit.LoadArgument(0);
+                        emit.LoadLocal(ch);
+                        emit.Call(Helper_Consume);
+
+                        emit.LoadConstant("Unexpected value for " + typeof(T).Name);
+                        emit.LoadArgument(0);
+                        emit.NewObject<DeserializationException, string, TextReader>();
+                        emit.Throw();
+                    }
+                );
+            }
+            else
+            {
+                addAction(
+                    () =>
+                    {
+                        emit.MarkLabel(failure);
+
+                        emit.LoadArgument(0);
+                        emit.LoadLocal(ch);
+                        emit.Call(Helper_Consume);
+
+                        // strip of the ? if it exists
+                        var type = typeof(T);
+                        type = Nullable.GetUnderlyingType(type) ?? type;
+
+                        Utils.LoadConstantOfType(emit, defaultValue, type);
+
+                        emit.Return();
+                    }
+                );
+
+            }
 
             var start = emit.DefineLabel("start");
             var d = new Data(addAction, emit, doReturn, start, failure, ch, skipWhitespace, foldMultipleValues, caseSensitive);
@@ -320,9 +354,9 @@ namespace Jil.Deserialize
             return emit.CreateDelegate(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, T> Create(IEnumerable<AutomataName> names, Action<Emit<Func<TextReader, T>>> errorValue, bool caseSensitive)
+        public static Func<TextReader, T> Create(IEnumerable<AutomataName> names, bool caseSensitive, object defaultValue)
         {
-            return CreateFold(names, _ => { }, emit => emit.Return(), errorValue, false, false, caseSensitive);
+            return CreateFold(names, _ => { }, emit => emit.Return(), false, false, caseSensitive, defaultValue);
         }
     }
 }

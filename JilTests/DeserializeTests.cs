@@ -4714,7 +4714,7 @@ namespace JilTests
             }
             catch (DeserializationException e)
             {
-                Assert.AreEqual("Unexpected value for _BadEnum2: C", e.Message);
+                Assert.AreEqual("Unexpected value for _BadEnum2", e.Message);
             }
             finally
             {

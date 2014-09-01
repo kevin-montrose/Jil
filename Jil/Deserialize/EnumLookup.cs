@@ -46,12 +46,8 @@ namespace Jil.Deserialize
             return
                 NameAutomata<EnumType>.Create(
                     nameToResults,
-                    emit =>
-                    {
-                        emit.LoadConstant(-1); // TODO: throw exception!
-                        emit.Convert(underlyingType);
-                    },
-                    false
+                    false,
+                    defaultValue: null
                 );
         }
 
@@ -76,27 +72,25 @@ namespace Jil.Deserialize
                 .ToList();
 
 
-            return NameAutomata<EnumType>.CreateFold(
-                nameToResults,
-                emit =>
-                {
-                    emit.DeclareLocal(underlyingType, resultValue);
-                    LoadConstantOfType(emit, 0, underlyingType);
-                    emit.StoreLocal(resultValue);
-                },
-                emit =>
-                {
-                    emit.LoadLocal(resultValue);
-                    emit.Return();
-                },
-                emit => 
-                {
-                    emit.LoadConstant(-1); // TODO: throw exception!
-                    emit.Convert(underlyingType);
-                },
-                true,
-                true,
-                false);
+            return 
+                NameAutomata<EnumType>.CreateFold(
+                    nameToResults,
+                    emit =>
+                    {
+                        emit.DeclareLocal(underlyingType, resultValue);
+                        LoadConstantOfType(emit, 0, underlyingType);
+                        emit.StoreLocal(resultValue);
+                    },
+                    emit =>
+                    {
+                        emit.LoadLocal(resultValue);
+                        emit.Return();
+                    },
+                    true,
+                    true,
+                    false,
+                    defaultValue: null
+                );
         }
 
 
