@@ -52,11 +52,10 @@ namespace Jil.Deserialize
         {
             var nameToResults =
                 names
-                .Select((name, index) =>
-                    new Tuple<string, Action<Emit<Func<TextReader, int>>>>(name, emit => emit.LoadConstant(index)))
+                .Select((name, index) => NameAutomata<int>.CreateName(name, emit => emit.LoadConstant(index)))
                 .ToList();
 
-            return NameAutomata<int>.Create(nameToResults, emit => emit.LoadConstant(-1));
+            return NameAutomata<int>.Create(nameToResults, emit => emit.LoadConstant(-1), true);
         }
 
         // probably not the best place for this; but sufficent I guess...

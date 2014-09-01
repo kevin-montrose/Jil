@@ -17,14 +17,12 @@ namespace Jil.Deserialize
         public static Dictionary<string, uint> HashLookup;
         public static MemberMatcherMode Mode;
 
-        public static Dictionary<string, int> Lookup;
         public static Dictionary<string, Tuple<Type, int>> ParametersToTypeAndIndex;
 
         static AnonymousMemberMatcher()
         {
             IsAvailable = MakeMemberMatcher(out MemberLookup, out BucketLookup, out HashLookup, out Mode);
 
-            Lookup = AnonymousTypeLookup<ForType>.Lookup;
             ParametersToTypeAndIndex = AnonymousTypeLookup<ForType>.ParametersToTypeAndIndex;
         }
 

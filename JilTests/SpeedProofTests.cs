@@ -1072,6 +1072,7 @@ namespace JilTests
             {
                 {
                     InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = true;
+                    InlineDeserializer<_UseHashWhenMatchingEnums>.UseNameAutomataForEnums = false;
                     Exception ignored;
 
                     // Build the *actual* deserializer method
@@ -1080,6 +1081,7 @@ namespace JilTests
 
                 {
                     InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = false;
+                    InlineDeserializer<_UseHashWhenMatchingEnums>.UseNameAutomataForEnums = true;
                     Exception ignored;
 
                     // Build the *actual* deserializer method
@@ -1089,12 +1091,13 @@ namespace JilTests
             finally
             {
                 InlineDeserializer<_UseHashWhenMatchingEnums>.UseHashWhenMatchingEnums = true;
+                InlineDeserializer<_UseHashWhenMatchingEnums>.UseNameAutomataForEnums = true;
             }
 
             var rand = new Random(191112901);
 
             var toSerialize = new List<_UseHashWhenMatchingEnums>();
-            for (var i = 0; i < 2000; i++)
+            for (var i = 0; i < 10000; i++)
             {
                 toSerialize.Add(_RandEnum<_UseHashWhenMatchingEnums>(rand));
             }
@@ -1105,6 +1108,63 @@ namespace JilTests
             CompareTimes(toSerialize, Jil.Options.Default, hash, method, out hashTime, out methodTime);
 
             Assert.IsTrue(hashTime < methodTime, "hashTime = " + hashTime + ", methodTime = " + methodTime);
+        }
+
+        enum _UseNameAutomataWhenMatchingEnums
+        {
+            Hello,
+            World,
+            Fizz,
+            Buzz,
+            Baz,
+            Bar
+        }
+
+        [TestMethod]
+        public void UseNameAutomataWhenMatchingEnums()
+        {
+            Func<TextReader, _UseNameAutomataWhenMatchingEnums> automata;
+            Func<TextReader, _UseNameAutomataWhenMatchingEnums> method;
+
+            Assert.IsTrue(EnumMatcher<_UseNameAutomataWhenMatchingEnums>.IsAvailable);
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    automata = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    method = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, allowHashing: true, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseHashWhenMatchingEnums = true;
+            }
+
+            var rand = new Random(191112901);
+
+            var toSerialize = new List<_UseNameAutomataWhenMatchingEnums>();
+            for (var i = 0; i < 2000; i++)
+            {
+                toSerialize.Add(_RandEnum<_UseNameAutomataWhenMatchingEnums>(rand));
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double automataTime, methodTime;
+            CompareTimes(toSerialize, Jil.Options.Default, automata, method, out automataTime, out methodTime);
+
+            Assert.IsTrue(automataTime < methodTime, "automataTime = " + automataTime + ", methodTime = " + methodTime);
         }
 
         class _UseCustomWriteIntUnrolledSigned
