@@ -294,9 +294,9 @@ Non-sequential enumerations are handled with a long series of branches.
 
 Just like Jil maintains many different methods for writing integer types, it also maintains [different methods for reading them](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.ReadNumbers.cs).  These methods omit unnecessary sign checks, overflow checks, and culture-specific formatting support.
 
-### Hash Based Member Name Lookups
+### Automata Based Member Name Lookups
 
-Rather than read a member name into a string or buffer when deserializing, Jil will try to hash it one character at a time and use the remainder operator and a jump table instead.  Jil uses [variants](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.Hashes.cs) of the [Fowler–Noll–Vo hash function](http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) for this purpose, and falls back to Dictionary lookups if it fails.
+Rather than read a member name into a string or buffer when deserializing, Jil will try to match it one character at a time using an [automata](http://en.wikipedia.org/wiki/Automata_theory).
 
 
 
