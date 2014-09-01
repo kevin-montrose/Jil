@@ -46,8 +46,13 @@ namespace Jil.Deserialize
             return
                 NameAutomata<EnumType>.Create(
                     nameToResults,
-                    emit => emit.LoadConstant(-1), // TODO: throw exception!
-                    false);
+                    emit =>
+                    {
+                        emit.LoadConstant(-1); // TODO: throw exception!
+                        emit.Convert(underlyingType);
+                    },
+                    false
+                );
         }
 
         private static Func<TextReader, EnumType> CreateFindFlagsEnum(IReadOnlyList<Tuple<string, object>> names)
@@ -84,7 +89,11 @@ namespace Jil.Deserialize
                     emit.LoadLocal(resultValue);
                     emit.Return();
                 },
-                emit => emit.LoadConstant(-1), // TODO: throw exception!
+                emit => 
+                {
+                    emit.LoadConstant(-1); // TODO: throw exception!
+                    emit.Convert(underlyingType);
+                },
                 true,
                 true,
                 false);
