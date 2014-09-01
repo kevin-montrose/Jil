@@ -30,49 +30,77 @@ namespace Jil.Deserialize
                 int c;
 
                 c = reader.Read();
-                if (c >= '0' && c <= '9') {
+                if (c >= '0' && c <= '9')
+                {
                     unescaped = 4096 * (c - '0');
-                } else if (c >= 'A' && c <= 'F') {
+                }
+                else if (c >= 'A' && c <= 'F')
+                {
                     unescaped = 4096 * (10 + c - 'A');
-                } else if (c >= 'a' && c <= 'f') {
+                }
+                else if (c >= 'a' && c <= 'f')
+                {
                     unescaped = 4096 * (10 + c - 'a');
-                } else {
+                }
+                else
+                {
                     throw new DeserializationException("Expected hex digit, found: " + c, reader);
                 }
 
                 c = reader.Read();
-                if (c >= '0' && c <= '9') {
+                if (c >= '0' && c <= '9')
+                {
                     unescaped += 256 * (c - '0');
-                } else if (c >= 'A' && c <= 'F') {
+                }
+                else if (c >= 'A' && c <= 'F')
+                {
                     unescaped += 256 * (10 + c - 'A');
-                } else if (c >= 'a' && c <= 'f') {
+                }
+                else if (c >= 'a' && c <= 'f')
+                {
                     unescaped += 256 * (10 + c - 'a');
-                } else {
+                }
+                else
+                {
                     throw new DeserializationException("Expected hex digit, found: " + c, reader);
                 }
 
                 c = reader.Read();
-                if (c >= '0' && c <= '9') {
+                if (c >= '0' && c <= '9')
+                {
                     unescaped += 16 * (c - '0');
-                } else if (c >= 'A' && c <= 'F') {
+                }
+                else if (c >= 'A' && c <= 'F')
+                {
                     unescaped += 16 * (10 + c - 'A');
-                } else if (c >= 'a' && c <= 'f') {
+                }
+                else if (c >= 'a' && c <= 'f')
+                {
                     unescaped += 16 * (10 + c - 'a');
-                } else {
+                }
+                else
+                {
                     throw new DeserializationException("Expected hex digit, found: " + c, reader);
                 }
 
                 c = reader.Read();
-                if (c >= '0' && c <= '9') {
+                if (c >= '0' && c <= '9')
+                {
                     unescaped += c - '0';
-                } else if (c >= 'A' && c <= 'F') {
+                }
+                else if (c >= 'A' && c <= 'F')
+                {
                     unescaped += 10 + c - 'A';
-                } else if (c >= 'a' && c <= 'f') {
+                }
+                else if (c >= 'a' && c <= 'f')
+                {
                     unescaped += 10 + c - 'a';
-                } else {
+                }
+                else
+                {
                     throw new DeserializationException("Expected hex digit, found: " + c, reader);
                 }
-                
+
                 return (char)unescaped;
             }
 
@@ -103,7 +131,7 @@ namespace Jil.Deserialize
             public readonly bool CaseSensitive;
 
             public Data
-                ( Action<Action> addAction
+                (Action<Action> addAction
                 , Emit<Func<TextReader, T>> emit
                 , Action<Emit<Func<TextReader, T>>> doReturn
                 , Label start
@@ -141,7 +169,7 @@ namespace Jil.Deserialize
 
         static void FinishName(Data d, AutomataName nameValue, Label onMatchChar)
         {
-            d.AddAction(() => 
+            d.AddAction(() =>
             {
                 d.Emit.MarkLabel(onMatchChar);
                 nameValue.OnFound(d.Emit);
@@ -167,7 +195,7 @@ namespace Jil.Deserialize
                 .ToList();
 
             var namesToFinish = new List<Tuple<char, Label>>();
-            foreach(var charGroup in chars)
+            foreach (var charGroup in chars)
             {
                 var ch = charGroup.Key;
                 var items = charGroup.ToList();
