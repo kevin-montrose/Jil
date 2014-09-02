@@ -9,8 +9,9 @@ namespace Jil.Deserialize
 {
     sealed class CustomStringBuilder
     {
-        const int StringArrayStartSize = 4;
-        const int CharArrayStartSize = 16;
+        const int StringArrayStartSize = 2;
+        const int CharArrayStartSize = 2;
+        const int SingleCharArrayStartSize = 4;
         static readonly int[] EmptyIxs = new[] { -1 };
 
         int OverallIx = 0;
@@ -22,6 +23,10 @@ namespace Jil.Deserialize
         int CharPtr = -1;
         int[] CharIxs;
         char[][] Chars;
+
+        int SingleCharPtr = -1;
+        int[] SingleCharIxs;
+        char[] SingleChars;
 
         public CustomStringBuilder() { }
 
@@ -73,6 +78,30 @@ namespace Jil.Deserialize
             }
         }
 
+        void IncreaseSingleCharPtr()
+        {
+            if (SingleChars == null)
+            {
+                SingleChars = new char[SingleCharArrayStartSize];
+                SingleCharIxs = new int[SingleCharArrayStartSize];
+                SingleCharPtr = 0;
+                return;
+            }
+
+            SingleCharPtr++;
+            if (SingleChars.Length == SingleCharPtr)
+            {
+                var oldLen = SingleChars.Length;
+                var newLen = oldLen * 2;
+                var newChars = new char[newLen];
+                var newCharIxs = new int[newLen];
+                Array.Copy(SingleChars, newChars, oldLen);
+                Array.Copy(SingleCharIxs, newCharIxs, oldLen);
+                SingleChars = newChars;
+                SingleCharIxs = newCharIxs;
+            }
+        }
+
         public void Append(string str)
         {
             IncreaseStringPtr();
@@ -85,10 +114,10 @@ namespace Jil.Deserialize
 
         public void Append(char c)
         {
-            IncreaseCharPtr();
+            IncreaseSingleCharPtr();
 
-            Chars[CharPtr] = new char[] { c };
-            CharIxs[CharPtr] = OverallIx;
+            SingleChars[SingleCharPtr] = c;
+            SingleCharIxs[SingleCharPtr] = OverallIx;
 
             OverallIx++;
         }
@@ -110,12 +139,25 @@ namespace Jil.Deserialize
         {
             var strPtr = 0;
             var charPtr = 0;
+            var singleCharPtr = 0;
 
             var charIxs = CharIxs ?? EmptyIxs;
             var strIxs = StringIxs ?? EmptyIxs;
+            var singleCharIxs = SingleCharIxs ?? EmptyIxs;
 
             for (var ix = 0; ix < OverallIx; ix++)
             {
+                if (singleCharIxs[singleCharPtr] == ix)
+                {
+                    var toWrite = SingleChars[singleCharPtr];
+                    writer.Write(toWrite);
+                    if (singleCharPtr + 1 != singleCharIxs.Length)
+                    {
+                        singleCharPtr++;
+                    }
+                    continue;
+                }
+
                 if (charIxs[charPtr] == ix)
                 {
                     var toWrite = Chars[charPtr];
@@ -162,6 +204,7 @@ namespace Jil.Deserialize
             OverallIx = 0;
             CharPtr = -1;
             StringPtr = -1;
+            SingleCharPtr = -1;
         }
     }
 }
