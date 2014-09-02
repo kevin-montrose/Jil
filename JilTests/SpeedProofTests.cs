@@ -31,6 +31,14 @@ namespace JilTests
             return BitConverter.ToInt64(bytes, 0);
         }
 
+        private static ulong _RandULong(Random rand)
+        {
+            var bytes = new byte[8];
+            rand.NextBytes(bytes);
+
+            return BitConverter.ToUInt64(bytes, 0);
+        }
+
         private static Guid _RandGuid(Random rand)
         {
             var bytes = new byte[16];
@@ -1234,6 +1242,124 @@ namespace JilTests
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 
+        enum _UseCustomStringBuilderEnum
+        {
+            Foo,
+            Bar,
+            Fizz,
+            Buzz
+        }
+
+        class _UseCustomStringBuilder
+        {
+            public byte A { get; set; }
+            public sbyte B { get; set; }
+            public short C { get; set; }
+            public ushort D { get; set; }
+            public int E { get; set; }
+            public uint F { get; set; }
+            public long G { get; set; }
+            public ulong H { get; set; }
+            public float I { get; set; }
+            public double J { get; set; }
+            public decimal K { get; set; }
+            public _UseCustomStringBuilderEnum L { get; set; }
+            public string M { get; set; }
+            public char N { get; set; }
+
+            public byte[] AA { get; set; }
+            public sbyte[] BB { get; set; }
+            public short[] CC { get; set; }
+            public ushort[] DD { get; set; }
+            public int[] EE { get; set; }
+            public uint[] FF { get; set; }
+            public long[] GG { get; set; }
+            public ulong[] HH { get; set; }
+            public float[] II { get; set; }
+            public double[] JJ { get; set; }
+            public decimal[] KK { get; set; }
+            public _UseCustomStringBuilderEnum[] LL { get; set; }
+            public string[] MM { get; set; }
+            public char[] NN { get; set; }
+        }
+
+        [TestMethod]
+        public void UseCustomStringBuilder()
+        {
+            Func<TextReader, _UseCustomStringBuilder> custom;
+            Func<TextReader, _UseCustomStringBuilder> builtin;
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseCustomStringBuilder>.UseCustomStringBuilder = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    custom = InlineDeserializerHelper.Build<_UseCustomStringBuilder>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseCustomStringBuilder>.UseCustomStringBuilder = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    builtin = InlineDeserializerHelper.Build<_UseCustomStringBuilder>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseCustomStringBuilder>.UseCustomStringBuilder = true;
+            }
+
+            var rand = new Random(80827103);
+
+            var toSerialize = new List<_UseCustomStringBuilder>();
+            for (var i = 0; i < 100; i++)
+            {
+                toSerialize.Add(
+                    new _UseCustomStringBuilder
+                    {
+                        A = (byte)rand.Next(byte.MaxValue+1),
+                        B = (sbyte)rand.Next(sbyte.MaxValue + 1),
+                        C = (short)rand.Next(short.MaxValue + 1),
+                        D = (ushort)rand.Next(ushort.MaxValue + 1),
+                        E = (int)rand.Next(int.MaxValue),
+                        F = _RandUInt(rand),
+                        G = _RandLong(rand),
+                        H = _RandULong(rand),
+                        I = (float)rand.NextDouble(),
+                        J = rand.NextDouble(),
+                        K = (decimal)rand.NextDouble(),
+                        L = _RandEnum<_UseCustomStringBuilderEnum>(rand),
+                        M = _RandString(rand, 100),
+                        N = (char)rand.Next(char.MaxValue + 1),
+
+                        AA = Enumerable.Range(0, 50).Select(_ => (byte)rand.Next(byte.MaxValue + 1)).ToArray(),
+                        BB = Enumerable.Range(0, 50).Select(_ => (sbyte)rand.Next(sbyte.MaxValue + 1)).ToArray(),
+                        CC = Enumerable.Range(0, 50).Select(_ => (short)rand.Next(short.MaxValue + 1)).ToArray(),
+                        DD = Enumerable.Range(0, 50).Select(_ => (ushort)rand.Next(ushort.MaxValue + 1)).ToArray(),
+                        EE = Enumerable.Range(0, 50).Select(_ => (int)rand.Next(int.MaxValue)).ToArray(),
+                        FF = Enumerable.Range(0, 50).Select(_ => _RandUInt(rand)).ToArray(),
+                        GG = Enumerable.Range(0, 50).Select(_ => _RandLong(rand)).ToArray(),
+                        HH = Enumerable.Range(0, 50).Select(_ => _RandULong(rand)).ToArray(),
+                        II = Enumerable.Range(0, 50).Select(_ => (float)rand.NextDouble()).ToArray(),
+                        JJ = Enumerable.Range(0, 50).Select(_ => rand.NextDouble()).ToArray(),
+                        KK = Enumerable.Range(0, 50).Select(_ => (decimal)rand.NextDouble()).ToArray(),
+                        LL = Enumerable.Range(0, 50).Select(_ => _RandEnum<_UseCustomStringBuilderEnum>(rand)).ToArray(),
+                        MM = Enumerable.Range(0, 50).Select(_ => _RandString(rand, 100)).ToArray(),
+                        NN = Enumerable.Range(0, 50).Select(_ => (char)rand.Next(char.MaxValue + 1)).ToArray(),
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double customTime, builtinTime;
+            CompareTimes(toSerialize, Jil.Options.Default, custom, builtin, out customTime, out builtinTime);
+
+            Assert.IsTrue(customTime < builtinTime, "customTime = " + customTime + ", builtinTime = " + builtinTime);
+        }
 #endif
     }
 }
