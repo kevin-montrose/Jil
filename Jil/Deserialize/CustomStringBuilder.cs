@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,7 @@ namespace Jil.Deserialize
         int BufferIx;
         char[] Buffer;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void AssureSpace(int neededSpace)
         {
             if (Buffer == null)
@@ -29,6 +31,7 @@ namespace Jil.Deserialize
             Buffer = newBuffer;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Append(string str)
         {
             var newChars = str.Length;
@@ -52,6 +55,7 @@ namespace Jil.Deserialize
             BufferIx += str.Length;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Append(char c)
         {
             AssureSpace(1);
@@ -60,6 +64,7 @@ namespace Jil.Deserialize
             BufferIx++;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Append(char[] chars, int start, int len)
         {
             var newChars = len;
@@ -83,11 +88,13 @@ namespace Jil.Deserialize
             BufferIx += len;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteTo(TextWriter writer)
         {
             writer.Write(Buffer, 0, BufferIx);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe string StaticToString()
         {
             return new string(Buffer, 0, BufferIx);
@@ -98,6 +105,7 @@ namespace Jil.Deserialize
             return StaticToString();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
             BufferIx = 0;
