@@ -680,12 +680,32 @@ namespace JilTests
         public void CustomStringBuilder()
         {
             var sb = new Jil.Deserialize.CustomStringBuilder();
+            sb.Append("a");
+            sb.Append("ab");
+            sb.Append("abc");
+            sb.Append("abcd");
+            sb.Append("abcdef");
+            sb.Append("abcdefg");
+            sb.Append("abcdefgh");
+            sb.Append("abcdefghi");
+            sb.Append("abcdefghij");
+            sb.Append("abcdefghijk");
+            sb.Append("abcdefghijkl");
             sb.Append("hello world");
             sb.Append('c');
-            sb.Append(Enumerable.Range(0, 10).Select(_ => 'a').ToArray(), 0, 10);
+            sb.Append('\0');
+            for (var i = 0; i < 16; i++)
+            {
+                sb.Append(Enumerable.Range(0, 16).Select(_ => 'a').ToArray(), 0, 16);
+            }
+
+            for (var i = 0; i < 8; i++)
+            {
+                sb.Append(Enumerable.Range(0, 16).Select(_ => 'b').ToArray(), 0, 8 + i);
+            }
 
             var str = sb.StaticToString();
-            Assert.AreEqual("hello worldcaaaaaaaaaa", str);
+            Assert.AreEqual("aababcabcdabcdefabcdefgabcdefghabcdefghiabcdefghijabcdefghijkabcdefghijklhello worldc\0aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", str);
         }
     }
 }

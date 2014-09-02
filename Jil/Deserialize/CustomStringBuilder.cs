@@ -10,11 +10,13 @@ namespace Jil.Deserialize
 {
     struct CustomStringBuilder
     {
-        const int BufferSizeShift = 2;
+        const int LongSizeShift = 2;
 
         int BufferIx;
         char[] Buffer;
 
+        // This method only works if the two arrays are 8-byte/4-char/1-long aligned (ie. size is a multiple; .NET handles
+        //   putting them in the right alignment, we just have to guarantee the size)
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void ArrayCopyAligned(char[] smaller, char[] larger)
         {
@@ -24,7 +26,7 @@ namespace Jil.Deserialize
                 var fromPtr = (long*)fromPtrFixed;
                 var intoPtr = (long*)intoPtrFixed;
 
-                var longLen = smaller.Length >> BufferSizeShift;
+                var longLen = smaller.Length >> LongSizeShift;
 
                 while (longLen > 0)
                 {
@@ -36,12 +38,59 @@ namespace Jil.Deserialize
             }
         }
 
+        // This can handle arbitrary arrays, but is slower than ArrayCopyAligned
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static unsafe void ArrayCopy(char* fromPtrFixed, int fromLength, char* intoPtrFixed)
+        {
+            var fromPtr = fromPtrFixed;
+            var intoPtr = intoPtrFixed;
+
+            var copyLongs = fromLength >> LongSizeShift;
+            var fromLongPtr = (long*)fromPtr;
+            var intoLongPtr = (long*)intoPtr;
+            while (copyLongs > 0)
+            {
+                *intoLongPtr = *fromLongPtr;
+                intoLongPtr++;
+                fromLongPtr++;
+                copyLongs--;
+            }
+
+            var copyInt = (fromLength & 0x2) != 0;
+            var copyChar = (fromLength & 0x1) != 0;
+            if (copyInt)
+            {
+                var fromIntPtr = (int*)fromLongPtr;
+                var intoIntPtr = (int*)intoLongPtr;
+                *intoIntPtr = *fromIntPtr;
+                fromIntPtr++;
+                intoIntPtr++;
+
+                if (copyChar)
+                {
+                    var fromCharPtr = (char*)fromIntPtr;
+                    var intoCharPtr = (char*)intoIntPtr;
+                    *intoCharPtr = *fromCharPtr;
+                }
+            }
+            else
+            {
+                if (copyChar)
+                {
+                    var fromCharPtr = (char*)fromLongPtr;
+                    var intoCharPtr = (char*)intoLongPtr;
+                    *intoCharPtr = *fromCharPtr;
+                }
+            }
+        }
+
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void AssureSpace(int neededSpace)
         {
             if (Buffer == null)
             {
-                Buffer = new char[((neededSpace >> BufferSizeShift) + 1) << BufferSizeShift];
+                Buffer = new char[((neededSpace >> LongSizeShift) + 1) << LongSizeShift];
                 return;
             }
 
@@ -49,7 +98,7 @@ namespace Jil.Deserialize
 
             if (Buffer.Length > desiredSize) return;
 
-            var newBuffer = new char[((desiredSize >> BufferSizeShift) + 1) << BufferSizeShift];
+            var newBuffer = new char[((desiredSize >> LongSizeShift) + 1) << LongSizeShift];
             ArrayCopyAligned(Buffer, newBuffer);
             Buffer = newBuffer;
         }
@@ -63,16 +112,8 @@ namespace Jil.Deserialize
             fixed (char* fixedBufferPtr = Buffer)
             fixed (char* fixedStrPtr = str)
             {
-                var bufferPtr = fixedBufferPtr + BufferIx;
-                var strPtr = fixedStrPtr;
-
-                while (newChars > 0)
-                {
-                    *bufferPtr = *strPtr;
-                    bufferPtr++;
-                    strPtr++;
-                    newChars--;
-                }
+                var copyInto = fixedBufferPtr + BufferIx;
+                ArrayCopy(fixedStrPtr, newChars, copyInto);
             }
 
             BufferIx += str.Length;
@@ -99,13 +140,7 @@ namespace Jil.Deserialize
                 var bufferPtr = fixedBufferPtr + BufferIx;
                 var strPtr = fixedCharsPtr + start;
 
-                while (newChars > 0)
-                {
-                    *bufferPtr = *strPtr;
-                    bufferPtr++;
-                    strPtr++;
-                    newChars--;
-                }
+                ArrayCopy(strPtr, len, bufferPtr);
             }
 
             BufferIx += len;
@@ -119,6 +154,8 @@ namespace Jil.Deserialize
 
         public override string ToString()
         {
+            if (Buffer == null) return "";
+
             return StaticToString();
         }
 
