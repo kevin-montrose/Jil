@@ -565,40 +565,6 @@ namespace JilTests
         }
 #endif
 
-        class _MemberMatcher
-        {
-            public string Hello { get; set; }
-            public string World { get; set; }
-            public string Fizz { get; set; }
-            public string Buzz { get; set; }
-            public string Foo { get; set; }
-            public string Bar { get; set; }
-        }
-
-        [TestMethod]
-        public void MemberMatcher()
-        {
-            Assert.IsTrue(Jil.Deserialize.MemberMatcher<_MemberMatcher>.IsAvailable);
-            Assert.AreEqual(6, Jil.Deserialize.MemberMatcher<_MemberMatcher>.HashLookup.Count);
-
-            var allTestTypes = Assembly.GetAssembly(this.GetType()).GetTypes().Where(t => t.Name.StartsWith("_")).ToList();
-
-            var fails = 0;
-            var success = 0;
-
-            foreach (var type in allTestTypes)
-            {
-                var matcher = typeof(Jil.Deserialize.MemberMatcher<>).MakeGenericType(type);
-                if (matcher.ContainsGenericParameters) continue;
-
-                var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
-                if (!isAvailable) fails++;
-                if (isAvailable) success++;
-            }
-
-            Assert.IsTrue(success > fails);
-        }
-
         class _FindRecursiveTypes1
         {
             public _FindRecursiveTypes1 A { get; set; }

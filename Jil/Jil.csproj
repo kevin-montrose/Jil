@@ -78,18 +78,13 @@
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
-    <Compile Include="Deserialize\AnonymousMemberMatcher.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Common\EnumValues.cs" />
-    <Compile Include="Deserialize\EnumMatcher.cs" />
+    <Compile Include="Deserialize\EnumLookup.cs" />
     <Compile Include="Common\FlagsEnumCombiner.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\InterfaceImplementation.cs" />
-    <Compile Include="Deserialize\MemberMatcher.cs" />
     <Compile Include="Deserialize\Methods.cs" />
-    <Compile Include="Deserialize\Methods.Hashes.cs">
-      <DependentUpon>Methods.cs</DependentUpon>
-    </Compile>
     <Compile Include="Deserialize\Methods.ReadNumbers.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>

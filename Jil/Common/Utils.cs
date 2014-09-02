@@ -1,4 +1,5 @@
 ﻿using Sigil;
+using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -903,6 +904,352 @@ namespace Jil.Common
             }
 
             return char.ConvertFromUtf32(utf32);
+        }
+
+        public static bool LoadConstantOfType<T>(Emit<T> emit, object val, Type type)
+        {
+            if (type == typeof(byte))
+            {
+                try
+                {
+                    var v = (byte)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (byte?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(sbyte))
+            {
+                try
+                {
+                    var v = (sbyte)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (sbyte?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(short))
+            {
+                try
+                {
+                    var v = (short)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (short?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(ushort))
+            {
+                try
+                {
+                    var v = (ushort)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (ushort?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(int))
+            {
+                try
+                {
+                    var v = (int)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (int?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(uint))
+            {
+                try
+                {
+                    var v = (uint)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (uint?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(long))
+            {
+                try
+                {
+                    var v = (long)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (long?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(ulong))
+            {
+                try
+                {
+                    var v = (ulong)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (ulong?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            return false;
+        }
+
+        public static bool LoadConstantOfType(Emit emit, object val, Type type)
+        {
+            if (type == typeof(byte))
+            {
+                try
+                {
+                    var v = (byte)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (byte?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(sbyte))
+            {
+                try
+                {
+                    var v = (sbyte)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (sbyte?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(short))
+            {
+                try
+                {
+                    var v = (short)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (short?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(ushort))
+            {
+                try
+                {
+                    var v = (ushort)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (ushort?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(int))
+            {
+                try
+                {
+                    var v = (int)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (int?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(uint))
+            {
+                try
+                {
+                    var v = (uint)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (uint?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(long))
+            {
+                try
+                {
+                    var v = (long)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (long?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            if (type == typeof(ulong))
+            {
+                try
+                {
+                    var v = (ulong)val;
+                    emit.LoadConstant(v);
+                    return true;
+                }
+                catch { }
+
+                try
+                {
+                    var v = (ulong?)val;
+                    emit.LoadConstant(v.Value);
+                    return true;
+                }
+                catch { }
+
+                return false;
+            }
+
+            return false;
         }
     }
 }

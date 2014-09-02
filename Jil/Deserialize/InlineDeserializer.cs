@@ -14,8 +14,8 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseHashWhenMatchingEnums = true;
         public static bool UseNameAutomata = true;
+        public static bool UseNameAutomataForEnums = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -23,15 +23,13 @@ namespace Jil.Deserialize
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
 
-        bool AllowHashing;
         bool UsingCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
 
-        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat, bool allowHashing)
+        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat)
         {
-            AllowHashing = allowHashing;
             RecursionLookupType = recursionLookupType;
             DateFormat = dateFormat;
         }
@@ -522,20 +520,22 @@ namespace Jil.Deserialize
 
         void ReadEnum(Type enumType)
         {
+            if (UseNameAutomataForEnums)
+            {
+                var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
+                var getEnumValue = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
+
+                ExpectQuote();
+                Emit.LoadArgument(0);     // TextReader
+                Emit.Call(getEnumValue);  // emum
+
+                return;
+            }
+
             if (enumType.IsFlagsEnum())
             {
                 ReadFlagsEnum(enumType);
                 return;
-            }
-
-            if (AllowHashing && UseHashWhenMatchingEnums)
-            {
-                var couldBeHashed = (bool)typeof(EnumMatcher<>).MakeGenericType(enumType).GetField("IsAvailable").GetValue(null);
-                if (couldBeHashed)
-                {
-                    ReadEnumHashing(enumType);
-                    return;
-                }
             }
 
             var specific = Methods.ParseEnum.MakeGenericMethod(enumType);
@@ -545,94 +545,6 @@ namespace Jil.Deserialize
             CallReadEncodedString();        // string
             Emit.LoadArgument(0);           // TextReader
             Emit.Call(specific);            // enum
-        }
-
-        void ReadEnumHashing(Type enumType)
-        {
-            var underlyingType = Enum.GetUnderlyingType(enumType);
-
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
-
-            var errorCase = Emit.DefineLabel();
-
-            var matcher = typeof(EnumMatcher<>).MakeGenericType(enumType);
-            var memberLookup = (Dictionary<string, object>)matcher.GetField("EnumLookup").GetValue(null);
-            var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
-
-            var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
-            var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
-            var mode = (EnumMatcherMode)matcher.GetField("Mode").GetValue(null);
-            var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
-
-            ExpectQuote();                      // --empty--
-            using (var bucket = Emit.DeclareLocal<int>())
-            using (var hash = Emit.DeclareLocal<uint>())
-            {
-                Emit.LoadArgument(0);           // TextReader
-                Emit.LoadLocalAddress(bucket);  // TextReader int*
-                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
-                Emit.Call(hashMtd);             // length
-                Emit.LoadLocal(hash);           // length hash
-                Emit.LoadLocal(bucket);         // length hash bucket
-            }
-            ExpectQuote();                      // length hash bucket
-
-            Emit.Switch(labels);            // length hash
-
-            // fallthrough case
-            Emit.Pop();                                                     // length
-            Emit.Pop();                                                     // --empty--
-
-            Emit.MarkLabel(errorCase);                                      // --empty--
-            Emit.LoadConstant("Unexpected value for " + enumType.Name);     // string
-            Emit.LoadArgument(0);                                           // string TextReader
-            Emit.NewObject<DeserializationException, string, TextReader>(); // DeserializationException
-            Emit.Throw();                                                   // --empty--
-
-            for (var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
-            {
-                var label = labels[i];
-                var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
-
-                // this bucket is empty
-                if (memberName == null)
-                {
-                    Emit.MarkLabel(label);  // length hash
-                    Emit.Pop();             // length
-                    Emit.Pop();             // --empty--
-                    Emit.Branch(errorCase); // --empty--
-                }
-                else
-                {
-                    var member = memberLookup[memberName];
-                    var hash = hashLookup[memberName];
-
-                    var isHashMatch = Emit.DefineLabel();
-                    var isLengthMatch = Emit.DefineLabel();
-
-                    Emit.MarkLabel(label);                  // length hash
-                    Emit.LoadConstant(hash);                // length hash expectedHash
-                    Emit.BranchIfEqual(isHashMatch);        // length
-
-                    // collision
-                    Emit.Pop();                             // --empty--
-                    Emit.Branch(errorCase);                 // --empty--
-
-                    Emit.MarkLabel(isHashMatch);
-                    Emit.LoadConstant(memberName.Length);   // length expectedLength
-                    Emit.BranchIfEqual(isLengthMatch);      // --empty--
-
-                    // collision
-                    Emit.Branch(errorCase);                 // --empty--
-
-                    Emit.MarkLabel(isLengthMatch);              // --empty--
-                    LoadConstantOfType(member, underlyingType); // primitive
-                    Emit.Branch(done);                          // primitive
-                }
-            }
-
-            Emit.MarkLabel(done);           // enum
         }
 
         void LoadConstantOfType(object val, Type type)
@@ -991,16 +903,10 @@ namespace Jil.Deserialize
 
             if (isAnonymous)
             {
-                if (AllowHashing)
+                if (UseNameAutomata)
                 {
-                    var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
-                    var isAvailable = (bool)matcher.GetField("IsAvailable").GetValue(null);
-
-                    if (isAvailable)
-                    {
-                        ReadAnonymousObjectHashing(objType);
-                        return;
-                    }
+                    ReadAnonymousObjectAutomata(objType);
+                    return;
                 }
 
                 ReadAnonymousObjectDictionaryLookup(objType);
@@ -1009,7 +915,7 @@ namespace Jil.Deserialize
 
             if (UseNameAutomata)
             {
-                ReadAutomata(objType);
+                ReadObjectAutomata(objType);
                 return;
             }
             
@@ -1061,228 +967,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(doneSkipChar);   // objType(*?)
         }
 
-        void ReadObjectHashing(Type objType)
-        {
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
-
-            if (!objType.IsValueType)
-            {
-                ExpectRawCharOrNull(
-                    '{',
-                    () => { },
-                    () =>
-                    {
-                        Emit.LoadNull();
-                        Emit.Branch(doneSkipChar);
-                    }
-                );
-            }
-            else
-            {
-                ExpectChar('{');
-            }
-
-            using (var loc = Emit.DeclareLocal(objType))
-            {
-                Action loadObj;
-                if (objType.IsValueType)
-                {
-                    Emit.LoadLocalAddress(loc);     // objType*
-                    Emit.InitializeObject(objType); // --empty--
-
-                    loadObj = () => Emit.LoadLocalAddress(loc);
-                }
-                else
-                {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
-
-                    if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
-
-                    Emit.NewObject(cons);   // objType
-                    Emit.StoreLocal(loc);   // --empty--
-
-                    loadObj = () => Emit.LoadLocal(loc);
-                }
-
-                var loopStart = Emit.DefineLabel();
-
-                var matcher = typeof(MemberMatcher<>).MakeGenericType(objType);
-                var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
-                var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
-
-                // special case object w/ no deserializable properties
-                if (bucketLookup.Count == 0)
-                {
-                    loadObj();                      // objType(*?)
-
-                    if (objType.IsValueType)
-                    {
-                        Emit.LoadObject(objType);   // objType
-                    }
-
-                    SkipAllMembers(done, doneSkipChar);// objType
-
-                    return;
-                }
-
-                var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
-                var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
-                var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
-                var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
-
-                ConsumeWhiteSpace();        // --empty--
-                loadObj();                  // objType(*?)
-                RawPeekChar();              // objType(*?) int 
-                Emit.LoadConstant('}');     // objType(*?) int '}'
-                Emit.BranchIfEqual(done);   // objType(*?)
-                
-                ExpectQuote();                  // objType(*?)
-                Emit.LoadArgument(0);           // objType(*?) TextReader
-                using (var bucket = Emit.DeclareLocal<int>())
-                using (var hash = Emit.DeclareLocal<uint>())
-                {
-                    Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
-                    Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
-                    Emit.Call(hashMtd);             // objType(*?) length
-                    Emit.LoadLocal(hash);           // objType(*?) length hash
-                    Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
-                }
-                ExpectQuote();
-                
-                ConsumeWhiteSpace();        // objType(*?) length hash bucket
-                ExpectChar(':');            // objType(*?) length hash bucket
-                ConsumeWhiteSpace();        // objType(*?) length hash bucket
-
-                var readingMember = Emit.DefineLabel();
-                Emit.MarkLabel(readingMember);  // objType(*?) length hash bucket
-
-                Emit.Switch(labels);            // objType(*?) length hash
-
-                // fallthrough case
-                Emit.Pop();                     // objType(*?) length
-                Emit.Pop();                     // objType(*?)
-                Emit.Pop();                     // --empty--
-                SkipObjectMember();             // --empty--
-                Emit.Branch(loopStart);
-
-                for(var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
-                {
-                    var label = labels[i];
-                    var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
-
-                    // this bucket is empty
-                    if (memberName == null)
-                    {
-                        Emit.MarkLabel(label);  // objType(*?) length hash
-                        Emit.Pop();             // objType(*?) length
-                        Emit.Pop();             // objType(*?)
-                        Emit.Pop();             // --empty--
-                        SkipObjectMember();     // --empty--
-                        Emit.Branch(loopStart); // --empty--
-                    }
-                    else
-                    {
-                        var member = memberLookup[memberName];
-                        var hash = hashLookup[memberName];
-                        var memberType = member.ReturnType();
-
-                        var isHashMatch = Emit.DefineLabel();
-                        var isLengthMatch = Emit.DefineLabel();
-
-                        Emit.MarkLabel(label);                  // objType(*?) length hash
-                        Emit.LoadConstant(hash);                // objType(*?) length hash expectedHash
-                        Emit.BranchIfEqual(isHashMatch);        // objType(*?) length
-                        
-                        // collision
-                        Emit.Pop();                             // objType(*?)
-                        Emit.Pop();                             // --empty--
-                        SkipObjectMember();                     // --empty--
-                        Emit.Branch(loopStart);                 // --empty--
-                        
-                        Emit.MarkLabel(isHashMatch);
-                        Emit.LoadConstant(memberName.Length);   // objType(*?) length expectedLength
-                        Emit.BranchIfEqual(isLengthMatch);      // objType(*?)
-
-                        // collision
-                        Emit.Pop();                             // --empty--
-                        SkipObjectMember();                     // --empty--
-                        Emit.Branch(loopStart);                 // --empty--
-
-                        Emit.MarkLabel(isLengthMatch);          // objType(*?)
-                        Build(member.ReturnType());             // objType(*?) memberType
-
-                        if (member is FieldInfo)
-                        {
-                            Emit.StoreField((FieldInfo)member);             // --empty--
-                        }
-                        else
-                        {
-                            SetProperty((PropertyInfo)member);              // --empty--
-                        }
-
-                        Emit.Branch(loopStart);     // --empty--
-                    }
-                }
-
-                var nextItem = Emit.DefineLabel();
-
-                Emit.MarkLabel(loopStart);      // --empty--
-                ConsumeWhiteSpace();            // --empty--
-                loadObj();                      // objType(*?)
-                RawPeekChar();                  // objType(*?) int 
-                Emit.Duplicate();               // objType(*?) int int
-                Emit.LoadConstant(',');         // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);   // objType(*?) int
-                Emit.LoadConstant('}');         // objType(*?) int '}'
-                Emit.BranchIfEqual(done);       // objType(*?)
-
-                // didn't get what we expected
-                ThrowExpected(",", "}");
-
-                Emit.MarkLabel(nextItem);           // objType(*?) int
-                
-                // skip the , & any whitespace
-                Emit.Pop();                         // objType(*?)
-                Emit.LoadArgument(0);               // objType(*?) TextReader
-                Emit.CallVirtual(TextReader_Read);  // objType(*?) int
-                Emit.Pop();                         // objType(*?)
-                ConsumeWhiteSpace();                // objType(*?)
-                
-                ExpectQuote();                      // objType(*?)
-                Emit.LoadArgument(0);               // objType(*?) TextReader
-                using (var bucket = Emit.DeclareLocal<int>())
-                using (var hash = Emit.DeclareLocal<uint>())
-                {
-                    Emit.LoadLocalAddress(bucket);  // objType(*?) TextReader int*
-                    Emit.LoadLocalAddress(hash);    // objType(*?) TextReader int* uint*
-                    Emit.Call(hashMtd);             // objType(*?) length
-                    Emit.LoadLocal(hash);           // objType(*?) length hash
-                    Emit.LoadLocal(bucket);         // objType(*?) length hash bucket
-                }
-                ExpectQuote();
-
-                ConsumeWhiteSpace();        // objType(*?) length hash bucket
-                ExpectChar(':');            // objType(*?) length hash bucket
-                ConsumeWhiteSpace();        // objType(*?) length hash bucket
-
-                Emit.Branch(readingMember); // objType(*?) length hash bucket
-            }
-
-            Emit.MarkLabel(done);               // objType(*?)
-            Emit.LoadArgument(0);               // objType(*?) TextReader
-            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
-            Emit.Pop();                         // objType(*?)
-
-            Emit.MarkLabel(doneSkipChar);       // objType(*?)
-
-            if (objType.IsValueType)
-            {
-                Emit.LoadObject(objType);     // objType
-            }
-        }
-
-        void ReadAutomata(Type objType)
+        void ReadObjectAutomata(Type objType)
         {
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
@@ -1355,21 +1040,10 @@ namespace Jil.Deserialize
 
                 var findSetterIdx = setterLookup.GetMethod("FindSetterIndex", new[] { typeof(TextReader) });
 
-                //var zz = invoker.Invoke(nameAutomata, new object[] { new StringReader("Hello") });
-                //Console.WriteLine(zz);
-
                 var inOrderLabels =
                     orderedSetters
                     .Select(o => o.Label)
                     .ToArray();
-
-                //var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
-
-                //var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
-                //var orderInst = (Dictionary<string, int>)order.GetValue(null);
-                //var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
-
-                //var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
 
                 ConsumeWhiteSpace();        // --empty--
                 loadObj();                  // objType(*?)
@@ -1646,186 +1320,6 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadAnonymousObjectHashing(Type objType)
-        {
-            var done = Emit.DefineLabel();
-            var doneSkip = Emit.DefineLabel();
-
-            ExpectRawCharOrNull(
-                '{',
-                () => { },
-                () =>
-                {
-                    Emit.LoadNull();        // null
-                    Emit.Branch(doneSkip);  // null
-                }
-            );
-
-            var loopStart = Emit.DefineLabel();
-
-            var matcher = typeof(AnonymousMemberMatcher<>).MakeGenericType(objType);
-            var propertyMap = (Dictionary<string, Tuple<Type, int>>)matcher.GetField("ParametersToTypeAndIndex").GetValue(null);
-
-            var cons = objType.GetConstructors(BindingFlags.Public | BindingFlags.Instance).Single();
-
-            if (propertyMap.Count == 0)
-            {
-                Emit.NewObject(cons);           // objType
-
-                SkipAllMembers(done, doneSkip); // objType
-
-                return;
-            }
-
-            var locals = propertyMap.ToDictionary(kv => kv.Key, kv => Emit.DeclareLocal(kv.Value.Item1));
-            var memberLookup = (Dictionary<string, MemberInfo>)matcher.GetField("MemberLookup").GetValue(null);
-            var bucketLookup = (Dictionary<string, int>)matcher.GetField("BucketLookup").GetValue(null);
-            var hashLookup = (Dictionary<string, uint>)matcher.GetField("HashLookup").GetValue(null);
-            var labels = Enumerable.Range(0, bucketLookup.Max(kv => kv.Value) + 1).Select(s => Emit.DefineLabel()).ToArray();
-            var mode = (MemberMatcherMode)matcher.GetField("Mode").GetValue(null);
-            var hashMtd = (MethodInfo)matcher.GetMethod("GetHashMethod").Invoke(null, new object[] { mode });
-
-            ConsumeWhiteSpace();        // --empty--
-            RawPeekChar();              // int 
-            Emit.LoadConstant('}');     // int '}'
-            Emit.BranchIfEqual(done);   // --empty--
-
-            ExpectQuote();                  // --empty--
-            Emit.LoadArgument(0);           // TextReader
-            using (var bucket = Emit.DeclareLocal<int>())
-            using (var hash = Emit.DeclareLocal<uint>())
-            {
-                Emit.LoadLocalAddress(bucket);  // TextReader int*
-                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
-                Emit.Call(hashMtd);             // length
-                Emit.LoadLocal(hash);           // length hash
-                Emit.LoadLocal(bucket);         // length hash bucket
-            }
-            ExpectQuote();                  // length hash bucket
-
-            ConsumeWhiteSpace();        // length hash bucket
-            ExpectChar(':');            // length hash bucket
-            ConsumeWhiteSpace();        // length hash bucket
-
-            var readingMember = Emit.DefineLabel();
-            Emit.MarkLabel(readingMember);  // length hash bucket
-
-            Emit.Switch(labels);            // length hash
-
-            // fallthrough case
-            Emit.Pop();                     // length
-            Emit.Pop();                     // --empty--
-            SkipObjectMember();             // --empty--
-            Emit.Branch(loopStart);         // --empty--
-
-            for (var i = 0; i <= bucketLookup.Max(kv => kv.Value); i++)
-            {
-                var label = labels[i];
-                var memberName = bucketLookup.Where(kv => kv.Value == i).Select(kv => kv.Key).SingleOrDefault();
-
-                // this bucket is empty
-                if (memberName == null)
-                {
-                    Emit.MarkLabel(label);  // length hash
-                    Emit.Pop();             // length
-                    Emit.Pop();             // --empty--
-                    SkipObjectMember();     // --empty--
-                    Emit.Branch(loopStart); // --empty--
-                }
-                else
-                {
-                    var member = memberLookup[memberName];
-                    var hash = hashLookup[memberName];
-                    var memberType = member.ReturnType();
-                    var local = locals[memberName];
-
-                    var isHashMatch = Emit.DefineLabel();
-                    var isLengthMatch = Emit.DefineLabel();
-
-                    Emit.MarkLabel(label);                  // length hash
-                    Emit.LoadConstant(hash);                // length hash expectedHash
-                    Emit.BranchIfEqual(isHashMatch);        // length
-
-                    // collision
-                    Emit.Pop();                             // --empty--
-                    SkipObjectMember();                     // --empty--
-                    Emit.Branch(loopStart);                 // --empty--
-
-                    Emit.MarkLabel(isHashMatch);            // length
-                    Emit.LoadConstant(memberName.Length);   // length expectedLength
-                    Emit.BranchIfEqual(isLengthMatch);      // --empty--
-
-                    // collision
-                    SkipObjectMember();                     // --empty--
-                    Emit.Branch(loopStart);                 // --empty--
-
-                    Emit.MarkLabel(isLengthMatch);          // --empty--
-                    Build(member.ReturnType());             // memberType
-                    Emit.StoreLocal(local);                 // --empty--
-
-                    Emit.Branch(loopStart);     // --empty--
-                }
-            }
-
-            var nextItem = Emit.DefineLabel();
-
-            Emit.MarkLabel(loopStart);      // --empty--
-            ConsumeWhiteSpace();            // --empty--
-            RawPeekChar();                  // int 
-            Emit.Duplicate();               // int int
-            Emit.LoadConstant(',');         // int int ','
-            Emit.BranchIfEqual(nextItem);   // int
-            Emit.LoadConstant('}');         // int '}'
-            Emit.BranchIfEqual(done);       // --empty--
-
-            // didn't get what we expected
-            ThrowExpected(",", "}");
-
-            // skip the , & any whitespace
-            Emit.MarkLabel(nextItem);           // int
-            Emit.Pop();                         // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
-            Emit.Pop();                         // --empty--
-            ConsumeWhiteSpace();                // --empty--
-
-            ExpectQuote();                      // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            using (var bucket = Emit.DeclareLocal<int>())
-            using (var hash = Emit.DeclareLocal<uint>())
-            {
-                Emit.LoadLocalAddress(bucket);  // TextReader int*
-                Emit.LoadLocalAddress(hash);    // TextReader int* uint*
-                Emit.Call(hashMtd);             // length
-                Emit.LoadLocal(hash);           // length hash
-                Emit.LoadLocal(bucket);         // length hash bucket
-            }
-            ExpectQuote();
-
-            ConsumeWhiteSpace();        // length hash bucket
-            ExpectChar(':');            // length hash bucket
-            ConsumeWhiteSpace();        // length hash bucket
-
-            Emit.Branch(readingMember); // length hash bucket
-
-            Emit.MarkLabel(done);               // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
-            Emit.Pop();                         // --empty--
-
-            foreach (var propName in propertyMap.OrderBy(kv => kv.Value.Item2).Select(p => p.Key))
-            {
-                var local = locals[propName];
-                Emit.LoadLocal(local);
-                local.Dispose();
-            }
-
-            // stack is full of parameters
-            Emit.NewObject(cons);           // objType
-
-            Emit.MarkLabel(doneSkip);       // objType
-        }
-
         void ReadAnonymousObjectDictionaryLookup(Type objType)
         {
             var doneNotNull = Emit.DefineLabel();
@@ -1980,7 +1474,155 @@ namespace Jil.Deserialize
             }
         }
 
-        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(bool) });
+        void ReadAnonymousObjectAutomata(Type objType)
+        {
+            var doneNotNull = Emit.DefineLabel();
+            var doneNull = Emit.DefineLabel();
+
+            ExpectRawCharOrNull(
+                '{',
+                () => { },
+                () =>
+                {
+                    Emit.Branch(doneNull);
+                }
+            );
+
+            var cons = objType.GetConstructors().Single();
+
+            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
+            var findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            if (propertyMap.Count == 0)
+            {
+                var doneSkipChar = Emit.DefineLabel();
+
+                Emit.NewObject(cons);           // objType
+                Emit.Branch(doneNotNull);       // objType
+
+                Emit.MarkLabel(doneNull);       // null
+                Emit.LoadNull();                // null
+                Emit.Branch(doneSkipChar);
+
+                Emit.MarkLabel(doneNotNull);    // objType
+
+                var doneSkipping = Emit.DefineLabel();
+
+                SkipAllMembers(doneSkipping, doneSkipChar); // objType
+
+                return;
+            }
+
+            var localMap = new Dictionary<string, Sigil.Local>();
+            foreach (var kv in propertyMap)
+            {
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+            }
+
+            var labels =
+                propertyMap
+                .ToDictionary(d => d.Key, d => Emit.DefineLabel());
+
+            var inOrderLabels =
+                propertyMap
+                .OrderBy(l => l.Value.Item2)
+                .Select(l => labels[l.Key])
+                .ToArray();
+
+            var loopStart = Emit.DefineLabel();
+
+            ConsumeWhiteSpace();        // --empty--
+            RawPeekChar();              // int 
+            Emit.LoadConstant('}');     // int '}'
+            Emit.BranchIfEqual(doneNotNull);   // --empty--
+
+            ExpectQuote();                              // --empty--
+            Emit.LoadArgument(0);                       // TextReader
+            Emit.Call(findConstructorParameterIndex);   // int
+
+            ConsumeWhiteSpace();        // int
+            ExpectChar(':');            // int
+            ConsumeWhiteSpace();        // int
+
+            var readingMember = Emit.DefineLabel();
+            Emit.MarkLabel(readingMember);  // int
+
+            Emit.Switch(inOrderLabels);     // --empty--
+            SkipObjectMember();             // --empty--
+
+            foreach (var kv in labels)
+            {
+                var label = kv.Value;
+                var local = localMap[kv.Key];
+
+                Emit.MarkLabel(label);  // --empty--
+                Build(local.LocalType); // localType
+
+                Emit.StoreLocal(local); // --empty--
+
+                Emit.Branch(loopStart); // --empty--
+            }
+
+            var nextItem = Emit.DefineLabel();
+
+            Emit.MarkLabel(loopStart);      // --empty--
+            ConsumeWhiteSpace();            // --empty--
+            RawPeekChar();                  // int 
+            Emit.Duplicate();               // int int
+            Emit.LoadConstant(',');         // int int ','
+            Emit.BranchIfEqual(nextItem);   // int
+            Emit.LoadConstant('}');         // int '}'
+            Emit.BranchIfEqual(doneNotNull);       // --empty--
+
+            // didn't get what we expected
+            ThrowExpected(",", "}");
+
+            Emit.MarkLabel(nextItem);           // int
+            Emit.Pop();                         // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+            ConsumeWhiteSpace();                // --empty--
+
+            ExpectQuote();                              // --empty--
+            Emit.LoadArgument(0);                       // TextReader
+            Emit.Call(findConstructorParameterIndex);   // int
+
+            ConsumeWhiteSpace();                // int
+            ExpectChar(':');                    // int
+            ConsumeWhiteSpace();                // int
+            Emit.Branch(readingMember);         // int
+
+            Emit.MarkLabel(doneNotNull);               // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.CallVirtual(TextReader_Read);  // int
+            Emit.Pop();                         // --empty--
+
+            var done = Emit.DefineLabel();
+
+            foreach (var kv in propertyMap.OrderBy(o => o.Value.Item2))
+            {
+                var local = localMap[kv.Key];
+                Emit.LoadLocal(local);
+            }
+
+            Emit.NewObject(cons);               // objType
+            Emit.Branch(done);                  // objType
+
+            Emit.MarkLabel(doneNull);           // --empty--
+            Emit.LoadNull();                    // null
+
+            Emit.MarkLabel(done);               // objType
+
+            // free up all those locals for use again
+            foreach (var kv in localMap)
+            {
+                kv.Value.Dispose();
+            }
+        }
+
+        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool) });
         static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
         void ReadDynamic()
         {
@@ -1992,7 +1634,6 @@ namespace Jil.Deserialize
                 Emit.LoadConstant(false);                                                   // TextReader bool bool bool
                 Emit.LoadConstant((byte)DateFormat);                                        // TextReader bool bool bool byte
                 Emit.LoadConstant(false);                                                   // TextReader bool bool bool byte bool
-                Emit.LoadConstant(AllowHashing);                                            // TextReader bool bool bool byte bool bool
                 Emit.NewObject(OptionsCons);                                                // TextReader Options
                 Emit.NewObject(ObjectBuilderCons);                                          // TextReader ObjectBuilder
                 Emit.StoreLocal(dyn);                                                       // TextReader
@@ -2129,9 +1770,9 @@ namespace Jil.Deserialize
             return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, bool allowHashing, out Exception exceptionDuringBuild)
+        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
-            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat, allowHashing);
+            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
             Func<TextReader, ReturnType> ret;
             try
