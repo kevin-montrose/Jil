@@ -11,6 +11,8 @@ namespace Jil.Deserialize
     struct CustomStringBuilder
     {
         const int LongSizeShift = 2;
+        const int NeedsIntCopy = 0x2;
+        const int NeedsCharCopy = 0x1;
 
         int BufferIx;
         char[] Buffer;
@@ -56,8 +58,8 @@ namespace Jil.Deserialize
                 copyLongs--;
             }
 
-            var copyInt = (fromLength & 0x2) != 0;
-            var copyChar = (fromLength & 0x1) != 0;
+            var copyInt = (fromLength & NeedsIntCopy) != 0;
+            var copyChar = (fromLength & NeedsCharCopy) != 0;
             if (copyInt)
             {
                 var fromIntPtr = (int*)fromLongPtr;
