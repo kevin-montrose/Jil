@@ -675,5 +675,17 @@ namespace JilTests
             Assert.IsTrue(reused.Any(r => r == typeof(_Inner2)));
             Assert.IsTrue(reused.Any(r => r == typeof(Dictionary<string, _Inner2>)));
         }
+
+        [TestMethod]
+        public void CustomStringBuilder()
+        {
+            var sb = new Jil.Deserialize.CustomStringBuilder();
+            sb.Append("hello world");
+            sb.Append('c');
+            sb.Append(Enumerable.Range(0, 10).Select(_ => 'a').ToArray(), 0, 10);
+
+            var str = sb.StaticToString();
+            Assert.AreEqual("hello worldcaaaaaaaaaa", str);
+        }
     }
 }
