@@ -476,6 +476,57 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        public static readonly MethodInfo ReadEncodedStringCustom = typeof(Methods).GetMethod("_ReadEncodedStringCustom", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static string _ReadEncodedStringCustom(TextReader reader, ref CustomStringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                if (first == '"')
+                {
+                    break;
+                }
+
+                if (first != '\\')
+                {
+                    commonSb.Append((char)first);
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                switch (second)
+                {
+                    case '"': commonSb.Append('"'); continue;
+                    case '\\': commonSb.Append('\\'); continue;
+                    case '/': commonSb.Append('/'); continue;
+                    case 'b': commonSb.Append('\b'); continue;
+                    case 'f': commonSb.Append('\f'); continue;
+                    case 'n': commonSb.Append('\n'); continue;
+                    case 'r': commonSb.Append('\r'); continue;
+                    case 't': commonSb.Append('\t'); continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                ReadHexQuadToCustomBuilder(reader, commonSb);
+            }
+
+            var ret = commonSb.ToString();
+
+            // leave this clean for the next use
+            commonSb.Clear();
+
+            return ret;
+        }
+
         public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
@@ -577,6 +628,114 @@ namespace Jil.Deserialize
             }
 
             var ret = commonSb.ToString();
+
+            // leave this clean for the next use
+            commonSb.Clear();
+
+            return ret;
+        }
+
+        public static readonly MethodInfo ReadEncodedStringWithBufferCustom = typeof(Methods).GetMethod("_ReadEncodedStringWithBufferCustom", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static string _ReadEncodedStringWithBufferCustom(TextReader reader, char[] buffer, ref CustomStringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
+
+            {
+                var ix = 0;
+
+                while (ix <= CharBufferSize)
+                {
+                    if (ix == CharBufferSize)
+                    {
+                        commonSb.Append(buffer, 0, ix);
+                        break;
+                    }
+
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                    // we didn't have to use anything but the buffer, make a string and return it!
+                    if (first == '"')
+                    {
+                        // avoid an allocation here
+                        if (ix == 0) return "";
+
+                        return new string(buffer, 0, ix);
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[ix] = (char)first;
+                        ix++;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                    switch (second)
+                    {
+                        case '"': buffer[ix] = '"'; ix++; continue;
+                        case '\\': buffer[ix] = '\\'; ix++; continue;
+                        case '/': buffer[ix] = '/'; ix++; continue;
+                        case 'b': buffer[ix] = '\b'; ix++; continue;
+                        case 'f': buffer[ix] = '\f'; ix++; continue;
+                        case 'n': buffer[ix] = '\n'; ix++; continue;
+                        case 'r': buffer[ix] = '\r'; ix++; continue;
+                        case 't': buffer[ix] = '\t'; ix++; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                    commonSb.Append(buffer, 0, ix);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    ReadHexQuadToCustomBuilder(reader, commonSb);
+                    break;
+                }
+            }
+
+            // fall through to using a StringBuilder
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                if (first == '"')
+                {
+                    break;
+                }
+
+                if (first != '\\')
+                {
+                    commonSb.Append((char)first);
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                switch (second)
+                {
+                    case '"': commonSb.Append('"'); continue;
+                    case '\\': commonSb.Append('\\'); continue;
+                    case '/': commonSb.Append('/'); continue;
+                    case 'b': commonSb.Append('\b'); continue;
+                    case 'f': commonSb.Append('\f'); continue;
+                    case 'n': commonSb.Append('\n'); continue;
+                    case 'r': commonSb.Append('\r'); continue;
+                    case 't': commonSb.Append('\t'); continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                ReadHexQuadToCustomBuilder(reader, commonSb);
+            }
+
+            var ret = commonSb.StaticToString();
 
             // leave this clean for the next use
             commonSb.Clear();
@@ -982,6 +1141,130 @@ namespace Jil.Deserialize
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ReadHexQuadToCustomBuilder(TextReader reader, CustomStringBuilder commonSb)
+        {
+            var encodedChar = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char2;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char2:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char3;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char3:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char4:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            finished:
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
+        }
+
         public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
             where TEnum : struct
@@ -1006,6 +1289,49 @@ namespace Jil.Deserialize
             where TEnum : struct
         {
             commonSb = commonSb ?? new StringBuilder();
+
+            var ret = default(TEnum);
+
+            while (true)
+            {
+                var c = _ReadEncodedChar(reader);
+
+                // ignore this *particular* whitespace
+                if (c != ' ')
+                {
+                    // comma delimited
+                    if (c == ',' || c == '"')
+                    {
+                        var asStr = commonSb.ToString();
+                        TEnum parsed;
+                        if (!TryParseEnum<TEnum>(asStr, out parsed))
+                        {
+                            throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
+                        }
+
+                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
+
+                        commonSb.Clear();
+
+                        if (c == '"') break;
+
+                        continue;
+                    }
+                    commonSb.Append(c);
+                }
+            }
+
+            // reset before returning
+            commonSb.Clear();
+
+            return ret;
+        }
+
+        public static readonly MethodInfo ReadFlagsEnumCustom = typeof(Methods).GetMethod("_ReadFlagsEnumCustom", BindingFlags.NonPublic | BindingFlags.Static);
+        static TEnum _ReadFlagsEnumCustom<TEnum>(TextReader reader, ref CustomStringBuilder commonSb)
+            where TEnum : struct
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
 
             var ret = default(TEnum);
 

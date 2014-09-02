@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
+        public static bool UseCustomStringBuilder = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -85,7 +86,14 @@ namespace Jil.Deserialize
 
             if (mayNeedStringBuilder)
             {
-                Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+                if (UseCustomStringBuilder)
+                {
+                    Emit.DeclareLocal<CustomStringBuilder>(StringBuilderName);
+                }
+                else
+                {
+                    Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+                }
             }
         }
 
@@ -202,13 +210,27 @@ namespace Jil.Deserialize
             if (UsingCharBuffer)
             {
                 LoadCharBuffer();                           // TextReader char[]
-                LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
+                LoadStringBuilder();                        // TextReader char[] (Custom)StringBuilder
+                if (UseCustomStringBuilder)
+                {
+                    Emit.Call(Methods.ReadEncodedStringWithBufferCustom);   // string
+                }
+                else
+                {
+                    Emit.Call(Methods.ReadEncodedStringWithBuffer);         // string
+                }
             }
             else
             {
                 LoadStringBuilder();                        // TextReader StringBuilder
-                Emit.Call(Methods.ReadEncodedString);  // string
+                if (UseCustomStringBuilder)
+                {
+                    Emit.Call(Methods.ReadEncodedStringCustom); // string
+                }
+                else
+                {
+                    Emit.Call(Methods.ReadEncodedString);       // string
+                }
             }
         }
 
@@ -284,19 +306,40 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(double))
             {
-                Emit.Call(Methods.ReadDouble);   // double
+                if (UseCustomStringBuilder)
+                {
+                    Emit.Call(Methods.ReadDoubleCustom);    // double
+                }
+                else
+                {
+                    Emit.Call(Methods.ReadDouble);          // double
+                }
                 return;
             }
 
             if (numberType == typeof(float))
             {
-                Emit.Call(Methods.ReadSingle);  // float
+                if (UseCustomStringBuilder)
+                {
+                    Emit.Call(Methods.ReadSingleCustom);    // float
+                }
+                else
+                {
+                    Emit.Call(Methods.ReadSingle);          // float
+                }
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.Call(Methods.ReadDecimal); // decimal
+                if (UseCustomStringBuilder)
+                {
+                    Emit.Call(Methods.ReadDecimalCustom);   // decimal
+                }
+                else
+                {
+                    Emit.Call(Methods.ReadDecimal);         // decimal
+                }
                 return;
             }
 
@@ -511,11 +554,16 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                  // --empty--
 
-            var specific = Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
-
             Emit.LoadArgument(0);           // TextReader
             LoadStringBuilder();            // TextReader StringBuilder&
-            Emit.Call(specific);            // enum
+            if (UseCustomStringBuilder)
+            {
+            }
+            else
+            {
+                var specific = Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
+                Emit.Call(specific);            // enum
+            }
         }
 
         void ReadEnum(Type enumType)

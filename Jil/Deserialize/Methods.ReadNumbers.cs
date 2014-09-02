@@ -939,6 +939,88 @@ namespace Jil.Deserialize
             return result;
         }
 
+        public static readonly MethodInfo ReadDoubleCustom = typeof(Methods).GetMethod("_ReadDoubleCustom", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double _ReadDoubleCustom(TextReader reader, ref CustomStringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+                storeChar:
+                commonSb.Append((char)c);
+                reader.Read();
+                prev = c;
+            }
+
+            var result = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
+        }
+
         public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
@@ -1021,11 +1103,175 @@ namespace Jil.Deserialize
             return result;
         }
 
+        public static readonly MethodInfo ReadSingleCustom = typeof(Methods).GetMethod("_ReadSingleCustom", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float _ReadSingleCustom(TextReader reader, ref CustomStringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+                storeChar:
+                commonSb.Append((char)c);
+                reader.Read();
+                prev = c;
+            }
+
+            var result = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
+        }
+
         public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+                storeChar:
+                commonSb.Append((char)c);
+                reader.Read();
+                prev = c;
+            }
+
+            var result = decimal.Parse(commonSb.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
+        }
+
+        public static readonly MethodInfo ReadDecimalCustom = typeof(Methods).GetMethod("_ReadDecimalCustom", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalCustom(TextReader reader, ref CustomStringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new CustomStringBuilder();
 
             int c;
 
