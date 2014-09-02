@@ -57,8 +57,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Sigil">
-      <HintPath>..\packages\Sigil.4.2.1\lib\net45\Sigil.dll</HintPath>
+    <Reference Include="Sigil, Version=4.2.2.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sigil.4.2.2\lib\net45\Sigil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
@@ -102,6 +103,7 @@
   <ItemGroup>
     <Compile Include="DeserializeDynamicTests.cs" />
     <Compile Include="DeserializeTests.cs" />
+    <Compile Include="DynamicSerializationTests.cs" />
     <Compile Include="ExhaustiveTests.cs" />
     <Compile Include="BadlySpecifiedTypeTests.cs" />
     <Compile Include="SerializeTests.cs" />

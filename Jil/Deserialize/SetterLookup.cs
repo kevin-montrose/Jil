@@ -5,30 +5,68 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Jil.Common;
+using System.IO;
+using Sigil;
 
 namespace Jil.Deserialize
 {
     static class SetterLookup<ForType>
     {
+        private static readonly IReadOnlyList<Tuple<string, MemberInfo>> _nameOrderedSetters;
+        private static Func<TextReader, int> _findMember;
+
         public static Dictionary<string, int> Lookup;
 
         static SetterLookup()
         {
-            var setters = GetSetters();
-            var asList = setters.Select(s => s.Key).OrderBy(_ => _).ToList();
+            _nameOrderedSetters = GetOrderedSetters();
 
-            Lookup = asList.ToDictionary(d => d, d => asList.IndexOf(d));
+            var setters = GetSetters();
+
+            Lookup =
+                _nameOrderedSetters
+                .Select((setter, index) => Tuple.Create(setter.Item1, index))
+                .ToDictionary(kv => kv.Item1, kv => kv.Item2);
+
+            _findMember = CreateFindMember(_nameOrderedSetters.Select(setter => setter.Item1));
+        }
+
+        private static IReadOnlyList<Tuple<string, MemberInfo>> GetOrderedSetters()
+        {
+            var forType = typeof(ForType);
+            var flags = BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public;
+
+            var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
+            var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
+
+            return
+                fields.Cast<MemberInfo>()
+                .Concat(props.Cast<MemberInfo>())
+                .Select(member => Tuple.Create(member.GetSerializationName(), member))
+                .OrderBy(info => info.Item1)
+                .ToList()
+                .AsReadOnly();
+        }
+
+        private static Func<TextReader, int> CreateFindMember(IEnumerable<string> names)
+        {
+            var nameToResults =
+                names
+                .Select((name, index) => NameAutomata<int>.CreateName(name, emit => emit.LoadConstant(index)))
+                .ToList();
+
+            return NameAutomata<int>.Create(nameToResults, true, defaultValue: -1);
+        }
+
+        // probably not the best place for this; but sufficent I guess...
+        public static int FindSetterIndex(TextReader reader)
+        {
+            return _findMember(reader);
         }
 
         public static Dictionary<string, MemberInfo> GetSetters()
         {
-            var forType = typeof(ForType);
-            var fields = forType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public);
-            var props = forType.GetProperties(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public).Where(p => p.SetMethod != null);
-
-            var members = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>());
-
-            return members.ToDictionary(m => m.GetSerializationName(), m => m);
+            return _nameOrderedSetters.ToDictionary(m => m.Item1, m => m.Item2);
         }
     }
 }

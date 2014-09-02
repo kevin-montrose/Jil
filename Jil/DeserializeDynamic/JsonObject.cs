@@ -106,5 +106,10 @@ namespace Jil.DeserializeDynamic
 
             throw new InvalidOperationException();
         }
+
+        public override string ToString()
+        {
+            return JSON.SerializeDynamic(this, Options.ISO8601PrettyPrint);
+        }
     }
 }

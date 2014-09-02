@@ -23,15 +23,17 @@ A fast JSON (de)serializer, built on [Sigil](https://github.com/kevin-montrose/S
     }
 ```
 
-There is also a `Serialize` method that works directly on strings.
+There is also a `Serialize` method that returns a string.
 
 The first time Jil is used to serialize a given configuration and type pair, it will spend extra time building the serializer.
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" serialization.
 
-The suggested way to use Jil is with the generic `JSON.Serialize` method, however a slightly slower `JSON.SerializeDynamic` method
-is also available which does not require types to be known at compile time.  `SerializeDynamic` always does a few extra lookups and branches
-when compared to `Serialize`, and the first invocation for a given type will do a small amount of additional code generation.
+### Dynamic Serialization
+
+If you need to serialize compile-time unknown types (including subclasses, and virtual properties) you should use `JSON.SerializeDynamic` instead.
+`JSON.SerializeDynamic` does not require a generic type parameter, and can cope with subclasses, `object`/`dynamic` members, and [DLR](http://msdn.microsoft.com/en-us/library/dd233052(v=vs.110).aspx) participating 
+types such as [ExpandoObject](http://msdn.microsoft.com/en-us/library/system.dynamic.expandoobject(v=vs.110).aspx) and [DynamicObject](http://msdn.microsoft.com/en-us/library/system.dynamic.dynamicobject(v=vs.110).aspx).
 
 ### Deserializing
 
@@ -42,7 +44,7 @@ when compared to `Serialize`, and the first invocation for a given type will do 
     }
 ```
 
-There is also a `Deserialize` method that works directly on strings.
+There is also a `Deserialize` method that takes a string as input.
 
 The first time Jil is used to deserialize a given configuration and type pair, it will spend extra time building the deserializer.
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
@@ -292,9 +294,9 @@ Non-sequential enumerations are handled with a long series of branches.
 
 Just like Jil maintains many different methods for writing integer types, it also maintains [different methods for reading them](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.ReadNumbers.cs).  These methods omit unnecessary sign checks, overflow checks, and culture-specific formatting support.
 
-### Hash Based Member Name Lookups
+### Automata Based Member Name Lookups
 
-Rather than read a member name into a string or buffer when deserializing, Jil will try to hash it one character at a time and use the remainder operator and a jump table instead.  Jil uses [variants](https://github.com/kevin-montrose/Jil/blob/44aef95ecb762b34827ec22967ea263056b96434/Jil/Deserialize/Methods.Hashes.cs) of the [Fowler–Noll–Vo hash function](http://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function) for this purpose, and falls back to Dictionary lookups if it fails.
+Rather than read a member name into a string or buffer when deserializing, Jil will try to match it one character at a time using an [automata](http://en.wikipedia.org/wiki/Automata_theory).
 
 
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -459,6 +460,15 @@ namespace Jil.Common
                 t == typeof(ulong) ||
                 t == typeof(bool) ||
                 t.IsEnum;
+        }
+
+        public static bool ShouldUseMember(this MemberInfo memberInfo)
+        {
+            var jilDirectiveAttributes = memberInfo.GetCustomAttributes<JilDirectiveAttribute>();
+            if (jilDirectiveAttributes.Count() > 0) return !jilDirectiveAttributes.Any(d => d.Ignore);
+
+            var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
+            return ignoreDataMemberAttributes.Count() == 0;
         }
 
         public static MethodInfo ShouldSerializeMethod(this PropertyInfo prop, Type serializingType)
