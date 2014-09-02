@@ -519,7 +519,7 @@ namespace Jil.Deserialize
                 ReadHexQuadToCustomBuilder(reader, commonSb);
             }
 
-            var ret = commonSb.ToString();
+            var ret = commonSb.StaticToString();
 
             // leave this clean for the next use
             commonSb.Clear();
@@ -1345,7 +1345,7 @@ namespace Jil.Deserialize
                     // comma delimited
                     if (c == ',' || c == '"')
                     {
-                        var asStr = commonSb.ToString();
+                        var asStr = commonSb.StaticToString();
                         TEnum parsed;
                         if (!TryParseEnum<TEnum>(asStr, out parsed))
                         {

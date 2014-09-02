@@ -1016,7 +1016,7 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
-            var result = double.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            var result = double.Parse(commonSb.StaticToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();
             return result;
         }
@@ -1180,7 +1180,7 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
-            var result = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
+            var result = float.Parse(commonSb.StaticToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();
             return result;
         }
@@ -1344,7 +1344,7 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
-            var result = decimal.Parse(commonSb.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
+            var result = decimal.Parse(commonSb.StaticToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
             commonSb.Clear();
             return result;
         }

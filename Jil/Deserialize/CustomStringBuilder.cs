@@ -28,6 +28,8 @@ namespace Jil.Deserialize
         int[] SingleCharIxs;
         char[] SingleChars;
 
+        int Length;
+
         public CustomStringBuilder() { }
 
         void IncreaseStringPtr()
@@ -110,6 +112,7 @@ namespace Jil.Deserialize
             StringIxs[StringPtr] = OverallIx;
             
             OverallIx++;
+            Length += str.Length;
         }
 
         public void Append(char c)
@@ -120,6 +123,7 @@ namespace Jil.Deserialize
             SingleCharIxs[SingleCharPtr] = OverallIx;
 
             OverallIx++;
+            Length++;
         }
 
         public void Append(char[] chars, int start, int len)
@@ -133,6 +137,7 @@ namespace Jil.Deserialize
             CharIxs[CharPtr] = OverallIx;
             
             OverallIx++;
+            Length += len;
         }
 
         public void WriteTo(TextWriter writer)
@@ -184,14 +189,88 @@ namespace Jil.Deserialize
             }
         }
 
-        public string StaticToString()
+        unsafe void Copy(char* into, char[] val)
         {
-            using (var text = new StringWriter())
+            fixed (char* fixedVal = val)
             {
-                WriteTo(text);
-
-                return text.ToString();
+                var len = val.Length;
+                for (var i = 0; i < len; i++)
+                {
+                    *into = val[i];
+                    into++;
+                }
             }
+        }
+
+        unsafe void Copy(char* into, string val)
+        {
+            fixed (char* fixedVal = val)
+            {
+                var len = val.Length;
+                for (var i = 0; i < len; i++)
+                {
+                    *into = val[i];
+                    into++;
+                }
+            }
+        }
+
+        public unsafe string StaticToString()
+        {
+            var ret = stackalloc char[Length];
+
+            var strPtr = 0;
+            var charPtr = 0;
+            var singleCharPtr = 0;
+
+            var charIxs = CharIxs ?? EmptyIxs;
+            var strIxs = StringIxs ?? EmptyIxs;
+            var singleCharIxs = SingleCharIxs ?? EmptyIxs;
+
+            var retPtr = ret;
+
+            for (var ix = 0; ix < OverallIx; ix++)
+            {
+                if (singleCharIxs[singleCharPtr] == ix)
+                {
+                    var toWrite = SingleChars[singleCharPtr];
+                    *retPtr = toWrite;
+                    retPtr++;
+                    if (singleCharPtr + 1 != singleCharIxs.Length)
+                    {
+                        singleCharPtr++;
+                    }
+                    continue;
+                }
+
+                if (charIxs[charPtr] == ix)
+                {
+                    var toWrite = Chars[charPtr];
+                    Copy(retPtr, toWrite);
+                    retPtr += toWrite.Length;
+                    if (charPtr + 1 != charIxs.Length)
+                    {
+                        charPtr++;
+                    }
+                    continue;
+                }
+
+                if (strIxs[strPtr] == ix)
+                {
+                    var toWrite = Strings[strPtr];
+                    Copy(retPtr, toWrite);
+                    retPtr += toWrite.Length;
+                    if (strPtr + 1 != strIxs.Length)
+                    {
+                        strPtr++;
+                    }
+                    continue;
+                }
+
+                throw new Exception("Shouldn't be possible");
+            }
+
+            return new string(ret, 0, Length);
         }
 
         public override string ToString()
@@ -202,6 +281,7 @@ namespace Jil.Deserialize
         public void Clear()
         {
             OverallIx = 0;
+            Length = 0;
             CharPtr = -1;
             StringPtr = -1;
             SingleCharPtr = -1;
