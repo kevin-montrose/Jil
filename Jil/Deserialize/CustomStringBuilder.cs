@@ -149,7 +149,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe string StaticToString()
+        public string StaticToString()
         {
             return new string(Buffer, 0, BufferIx);
         }
