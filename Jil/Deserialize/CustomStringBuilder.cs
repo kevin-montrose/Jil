@@ -24,9 +24,11 @@ namespace Jil.Deserialize
                 return;
             }
 
-            if (Buffer.Length > BufferIx + neededSpace) return;
+            var desiredSize = BufferIx + neededSpace;
 
-            var newBuffer = new char[(((BufferIx + neededSpace) >> InitialBufferSizeShift) + 1) << InitialBufferSizeShift];
+            if (Buffer.Length > desiredSize) return;
+
+            var newBuffer = new char[((desiredSize >> InitialBufferSizeShift) + 1) << InitialBufferSizeShift];
             Array.Copy(Buffer, newBuffer, Buffer.Length);
             Buffer = newBuffer;
         }
