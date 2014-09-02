@@ -7,30 +7,28 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
-    sealed class CustomStringBuilder
+    struct CustomStringBuilder
     {
         const int StringArrayStartSize = 2;
         const int CharArrayStartSize = 2;
         const int SingleCharArrayStartSize = 4;
         static readonly int[] EmptyIxs = new[] { -1 };
 
-        int OverallIx = 0;
+        int OverallIx;
 
-        int StringPtr = -1;
+        int StringPtr;
         int[] StringIxs;
         string[] Strings;
 
-        int CharPtr = -1;
+        int CharPtr;
         int[] CharIxs;
         char[][] Chars;
 
-        int SingleCharPtr = -1;
+        int SingleCharPtr;
         int[] SingleCharIxs;
         char[] SingleChars;
 
         int Length;
-
-        public CustomStringBuilder() { }
 
         void IncreaseStringPtr()
         {

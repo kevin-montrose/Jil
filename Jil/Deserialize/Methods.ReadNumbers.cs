@@ -943,7 +943,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double _ReadDoubleCustom(TextReader reader, ref CustomStringBuilder commonSb)
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             int c;
 
@@ -1017,7 +1017,6 @@ namespace Jil.Deserialize
             }
 
             var result = double.Parse(commonSb.StaticToString(), CultureInfo.InvariantCulture);
-            commonSb.Clear();
             return result;
         }
 
@@ -1107,7 +1106,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingleCustom(TextReader reader, ref CustomStringBuilder commonSb)
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             int c;
 
@@ -1181,7 +1180,6 @@ namespace Jil.Deserialize
             }
 
             var result = float.Parse(commonSb.StaticToString(), CultureInfo.InvariantCulture);
-            commonSb.Clear();
             return result;
         }
 
@@ -1271,7 +1269,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimalCustom(TextReader reader, ref CustomStringBuilder commonSb)
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             int c;
 
@@ -1345,7 +1343,6 @@ namespace Jil.Deserialize
             }
 
             var result = decimal.Parse(commonSb.StaticToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
-            commonSb.Clear();
             return result;
         }
 

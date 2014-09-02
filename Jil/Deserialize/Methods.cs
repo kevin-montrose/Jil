@@ -480,7 +480,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringCustom(TextReader reader, ref CustomStringBuilder commonSb)
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             while (true)
             {
@@ -516,13 +516,10 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                ReadHexQuadToCustomBuilder(reader, commonSb);
+                ReadHexQuadToCustomBuilder(reader, ref commonSb);
             }
 
             var ret = commonSb.StaticToString();
-
-            // leave this clean for the next use
-            commonSb.Clear();
 
             return ret;
         }
@@ -639,7 +636,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBufferCustom(TextReader reader, char[] buffer, ref CustomStringBuilder commonSb)
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             {
                 var ix = 0;
@@ -691,7 +688,7 @@ namespace Jil.Deserialize
                     commonSb.Append(buffer, 0, ix);
 
                     // now we're in an escape sequence, we expect 4 hex #s; always
-                    ReadHexQuadToCustomBuilder(reader, commonSb);
+                    ReadHexQuadToCustomBuilder(reader, ref commonSb);
                     break;
                 }
             }
@@ -732,13 +729,10 @@ namespace Jil.Deserialize
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
-                ReadHexQuadToCustomBuilder(reader, commonSb);
+                ReadHexQuadToCustomBuilder(reader, ref commonSb);
             }
 
             var ret = commonSb.StaticToString();
-
-            // leave this clean for the next use
-            commonSb.Clear();
 
             return ret;
         }
@@ -1142,7 +1136,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ReadHexQuadToCustomBuilder(TextReader reader, CustomStringBuilder commonSb)
+        static void ReadHexQuadToCustomBuilder(TextReader reader, ref CustomStringBuilder commonSb)
         {
             var encodedChar = 0;
 
@@ -1331,7 +1325,7 @@ namespace Jil.Deserialize
         static TEnum _ReadFlagsEnumCustom<TEnum>(TextReader reader, ref CustomStringBuilder commonSb)
             where TEnum : struct
         {
-            commonSb = commonSb ?? new CustomStringBuilder();
+            commonSb.Clear();
 
             var ret = default(TEnum);
 
@@ -1363,9 +1357,6 @@ namespace Jil.Deserialize
                     commonSb.Append(c);
                 }
             }
-
-            // reset before returning
-            commonSb.Clear();
 
             return ret;
         }
