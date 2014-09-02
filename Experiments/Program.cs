@@ -650,7 +650,7 @@ namespace Experiments
         {
             var watch = new Stopwatch();
             watch.Start();
-            for (var i = 0; i < 1000000; i++)
+            for (var i = 0; i < 100000; i++)
             {
                 act();
             }
@@ -676,26 +676,14 @@ namespace Experiments
                 var fromPtr = (long*)fromPtrFixed;
                 var intoPtr = (long*)intoPtrFixed;
 
-                var len = from.Length >> 3;
-                var remainder = from.Length & 0x3;
+                var longLen = from.Length >> 2;
                 
-                while (len > 0)
+                while (longLen > 0)
                 {
                     *intoPtr = *fromPtr;
                     fromPtr++;
                     intoPtr++;
-                    len--;
-                }
-
-                var fromCharPtr = (char*)fromPtr;
-                var intoCharPtr = (char*)intoPtr;
-
-                while (remainder > 0)
-                {
-                    *intoCharPtr = *fromCharPtr;
-                    fromCharPtr++;
-                    intoCharPtr++;
-                    remainder--;
+                    longLen--;
                 }
             }
         }
@@ -732,15 +720,47 @@ namespace Experiments
             Console.WriteLine("\tMedian: " + median + "ms");
         }
 
+        static List<Tuple<char[], char[]>> MakeBuffers()
+        {
+            var ret = new List<Tuple<char[], char[]>>();
+
+            for (var i = 4; i <= 128; i+=4)
+            {
+                ret.Add(Tuple.Create(Enumerable.Range(0, i).Select(_ => (char)_).ToArray(), new char[128]));
+            }
+
+            return ret;
+        }
+
         static void Main(string[] args)
         {
-            var safeBuff = Enumerable.Range(0, 64).Select(_ => (char)_).ToArray();
-            var safeCopyInto = new char[128];
-            Action safe = () => { CopySafe(safeBuff, safeCopyInto); EqualityCheck(safeBuff, safeCopyInto); };
+            var safeBuffers = MakeBuffers();
+            Action safe = 
+                () => 
+                {
+                    for (var i = 0; i < safeBuffers.Count; i++)
+                    {
+                        var safeBuff = safeBuffers[i].Item1;
+                        var safeCopyInto = safeBuffers[i].Item2;
 
-            var unsafeBuff = Enumerable.Range(0, 64).Select(_ => (char)_).ToArray();
-            var unsafeCopyInto = new char[128];
-            Action @unsafe = () => { CopyUnsafe(unsafeBuff, unsafeCopyInto); EqualityCheck(safeBuff, safeCopyInto); };
+                        CopySafe(safeBuff, safeCopyInto);
+                        EqualityCheck(safeBuff, safeCopyInto);
+                    }
+                };
+
+            var unsafeBuffers = MakeBuffers();
+            Action @unsafe =
+                () =>
+                {
+                    for (var i = 0; i < unsafeBuffers.Count; i++)
+                    {
+                        var unsafeBuff = unsafeBuffers[i].Item1;
+                        var unsafeCopyInto = unsafeBuffers[i].Item2;
+
+                        CopyUnsafe(unsafeBuff, unsafeCopyInto);
+                        EqualityCheck(unsafeBuff, unsafeCopyInto);
+                    }
+                };
 
             var safeTimes = new List<double>();
             var unsafeTimes = new List<double>();
