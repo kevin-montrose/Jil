@@ -10,13 +10,13 @@ namespace Jil.Deserialize
 {
     struct CustomStringBuilder
     {
-        const int BufferSizeShift = sizeof(long) / sizeof(char);
+        const int BufferSizeShift = 2;
 
         int BufferIx;
         char[] Buffer;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static unsafe void ArrayCopyFast(char[] smaller, char[] larger)
+        static unsafe void ArrayCopyAligned(char[] smaller, char[] larger)
         {
             fixed (char* fromPtrFixed = smaller)
             fixed (char* intoPtrFixed = larger)
@@ -50,7 +50,7 @@ namespace Jil.Deserialize
             if (Buffer.Length > desiredSize) return;
 
             var newBuffer = new char[((desiredSize >> BufferSizeShift) + 1) << BufferSizeShift];
-            Array.Copy(Buffer, newBuffer, Buffer.Length);
+            ArrayCopyAligned(Buffer, newBuffer);
             Buffer = newBuffer;
         }
 
@@ -109,12 +109,6 @@ namespace Jil.Deserialize
             }
 
             BufferIx += len;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteTo(TextWriter writer)
-        {
-            writer.Write(Buffer, 0, BufferIx);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
