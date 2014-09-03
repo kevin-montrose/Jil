@@ -4407,6 +4407,31 @@ namespace JilTests
             Assert.AreEqual(_EnumEscapes.Résumé, JSON.Deserialize<_EnumEscapes>(@"""R\u00e9sum\u00E9"""));
         }
 
+        class _DeserializeNonGenericClass
+        {
+            public string A { get; set; }
+            public int B { get; set; }
+        }
+
+        struct _DeserializeNonGenericStruct
+        {
+            public string A { get; set; }
+            public int B { get; set; }
+        }
+
+        [TestMethod]
+        public void DeserializeNonGeneric()
+        {
+            var a = (_DeserializeNonGenericClass)JSON.Deserialize("{\"A\":\"hello world\", \"B\":123}", typeof(_DeserializeNonGenericClass));
+            Assert.IsNotNull(a);
+            Assert.AreEqual("hello world", a.A);
+            Assert.AreEqual(123, a.B);
+
+            var b = (_DeserializeNonGenericStruct)JSON.Deserialize("{\"A\":\"hello world\", \"B\":123}", typeof(_DeserializeNonGenericStruct));
+            Assert.AreEqual("hello world", b.A);
+            Assert.AreEqual(123, b.B);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
