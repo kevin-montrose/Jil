@@ -1770,13 +1770,13 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public Func<TextReader, ForType> BuildWithNewDelegate()
+        public Func<TextReader, object, ResultValue<ForType>> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
             RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: Utils.DoVerify);
+            Emit = Emit.NewDynamicMethod(typeof(ResultValue<ForType>), new[] { typeof(TextReader), typeof(object) }, doVerify: Utils.DoVerify);
 
             AddGlobalVariables();
 
@@ -1790,33 +1790,49 @@ namespace Jil.Deserialize
             // We also must confirm that we read everything, again otherwise we might accept garbage as valid
             ExpectEndOfStream();
 
+            Emit.LoadNull();
+
+            Emit.NewObject<ResultValue<ForType>, ForType, object>();
+
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, ForType>>(Utils.DelegateOptimizationOptions);
+            return Emit.CreateDelegate<Func<TextReader, object, ResultValue<ForType>>>(Utils.DelegateOptimizationOptions);
         }
     }
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        static Func<TextReader, object, ResultValue<ReturnType>> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader) });
+            var emit = Emit.NewDynamicMethod(typeof(ResultValue<ReturnType>), new[] { typeof(TextReader), typeof(object) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
             emit.LoadField(stashField);
             emit.NewObject<DeserializationException, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate<Func<TextReader, object, ResultValue<ReturnType>>>(Utils.DelegateOptimizationOptions);
         }
 
         public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
+            var cookie = default(object);
+            var cookieFunc = CookieBuild<ReturnType>(typeCacheType, dateFormat, out exceptionDuringBuild);
+            return rt =>
+            {
+                var cookieResult = cookieFunc(rt, cookie);
+                cookie = cookieResult.Cookie;
+                return cookieResult.Result;
+            };
+        }
+
+        public static Func<TextReader, object, ResultValue<ReturnType>> CookieBuild<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
-            Func<TextReader, ReturnType> ret;
+            Func<TextReader, object, ResultValue<ReturnType>> ret;
             try
             {
                 ret = obj.BuildWithNewDelegate();
