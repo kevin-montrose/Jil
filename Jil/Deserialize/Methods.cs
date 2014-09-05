@@ -14,7 +14,7 @@ namespace Jil.Deserialize
     static partial class Methods
     {
         public const int DynamicCharBufferInitialSize = 128;
-        public const int CharBufferSize = 33;
+        public const int ISO8601MaxSize = 33;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -580,7 +580,7 @@ namespace Jil.Deserialize
 
             return (char)unescaped;
         }
-
+        /*
         public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
@@ -688,7 +688,7 @@ namespace Jil.Deserialize
 
             return ret;
         }
-
+        */
         public static readonly MethodInfo ReadEncodedChar = typeof(Methods).GetMethod("_ReadEncodedChar", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static char _ReadEncodedChar(TextReader reader)
@@ -1085,68 +1085,6 @@ namespace Jil.Deserialize
 
             finished:
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
-        }
-
-        public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
-        static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
-            where TEnum : struct
-        {
-            TEnum ret;
-            if (!TryParseEnum<TEnum>(asStr, out ret))
-            {
-                throw new DeserializationException("Unexpected value for " + typeof(TEnum).Name + ": " + asStr, reader);
-            }
-
-            return ret;
-        }
-
-        static bool TryParseEnum<TEnum>(string asStr, out TEnum parsed)
-            where TEnum : struct
-        {
-            return EnumValues<TEnum>.TryParse(asStr, out parsed);
-        }
-
-        public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
-        static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
-            where TEnum : struct
-        {
-            commonSb = commonSb ?? new StringBuilder();
-
-            var ret = default(TEnum);
-
-            while (true)
-            {
-                var c = _ReadEncodedChar(reader);
-
-                // ignore this *particular* whitespace
-                if (c != ' ')
-                {
-                    // comma delimited
-                    if (c == ',' || c == '"')
-                    {
-                        var asStr = commonSb.ToString();
-                        TEnum parsed;
-                        if (!TryParseEnum<TEnum>(asStr, out parsed))
-                        {
-                            throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
-                        }
-
-                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
-
-                        commonSb.Clear();
-
-                        if (c == '"') break;
-
-                        continue;
-                    }
-                    commonSb.Append(c);
-                }
-            }
-
-            // reset before returning
-            commonSb.Clear();
-
-            return ret;
         }
     }
 }
