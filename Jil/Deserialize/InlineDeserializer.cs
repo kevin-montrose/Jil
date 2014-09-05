@@ -1376,16 +1376,13 @@ namespace Jil.Deserialize
             return emit.CreateDelegate<Func<TextReader, object, ResultValue<ReturnType>>>(Utils.DelegateOptimizationOptions);
         }
 
-        [ThreadStatic]
-        private static object cookie;
-
         public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
             var cookieFunc = CookieBuild<ReturnType>(typeCacheType, dateFormat, out exceptionDuringBuild);
             return rt =>
             {
-                var cookieResult = cookieFunc(rt, cookie);
-                cookie = cookieResult.Cookie;
+                var cookieResult = cookieFunc(rt, BufferPersistence.ThreadStaticBuffer);
+                BufferPersistence.ThreadStaticBuffer = (char[])cookieResult.Cookie;
                 return cookieResult.Result;
             };
         }

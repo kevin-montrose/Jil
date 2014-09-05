@@ -26,9 +26,7 @@ namespace Jil.Serialize
         public static bool PropagateConstants = true;
         public static bool UseCustomWriteIntUnrolled = true;
 
-        static string CharBuffer = "char_buffer";
         static string CharArray = "char_array";
-        internal const int CharBufferSize = 36;
         internal const int RecursionLimit = 50;
 
         static Dictionary<char, string> CharacterEscapes = 
@@ -692,7 +690,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            Emit.LoadLocal(CharBuffer);                     // TextWriter DateTime char[]
+            Emit.LoadLocal(CharArray);                     // TextWriter DateTime char[]
             Emit.Call(Methods.CustomISO8601ToString);       // --empty--
         }
 
@@ -855,7 +853,7 @@ namespace Jil.Serialize
             {
                 if (primitiveType == typeof(int))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    Emit.LoadLocal(CharArray);         // TextWriter int char[]
                     CallWriteInt();                     // --empty--
 
                     return;
@@ -863,7 +861,7 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(uint))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    Emit.LoadLocal(CharArray);         // TextWriter int char[]
                     CallWriteUInt();                    // --empty--
 
                     return;
@@ -871,7 +869,7 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(long))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    Emit.LoadLocal(CharArray);         // TextWriter int char[]
                     CallWriteLong();                    // --empty--
 
                     return;
@@ -879,7 +877,7 @@ namespace Jil.Serialize
 
                 if (primitiveType == typeof(ulong))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
+                    Emit.LoadLocal(CharArray);         // TextWriter int char[]
                     CallWriteULong();                   // --empty--
 
                     return;
@@ -922,7 +920,7 @@ namespace Jil.Serialize
                 WriteString("\"");          // TextWriter Guid
             }
 
-            Emit.LoadLocal(CharBuffer);     // TextWriter Guid char[]
+            Emit.LoadLocal(CharArray);     // TextWriter Guid char[]
 
             Emit.Call(Methods.WriteGuid);   // --empty--
             
@@ -3072,28 +3070,28 @@ namespace Jil.Serialize
 
         void AddCharBuffer(Type serializingType)
         {
-            Emit.DeclareLocal<char[]>(CharArray);
+            var charArray = Emit.DeclareLocal<char[]>(CharArray);
+            var charArrayReady = Emit.DefineLabel();
 
-            // Don't tax the naive implementations by allocating a buffer they don't use
-            if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting)) return;
-
-            var allTypes = serializingType.InvolvedTypes();
-
-            var hasGuids = allTypes.Any(t => t == typeof(Guid));
-            var hasDateTime = allTypes.Any(t => t == typeof(DateTime) || t == typeof(DateTimeOffset));
-            var hasInteger = allTypes.Any(t => t.IsIntegerNumberType());
-
-            // Not going to use a buffer?  Don't allocate it
-            if (!hasGuids && !hasDateTime && !hasInteger)
-            {
-                return;
-            }
-
-            Emit.DeclareLocal<char[]>(CharBuffer);
-            Emit.LoadConstant(CharBufferSize);
-            Emit.NewArray<char>();
-            Emit.StoreLocal(CharBuffer);
+            var threadStaticBuffer = typeof(BufferPersistence).GetField("ThreadStaticBuffer");
+            Emit.LoadField(threadStaticBuffer);         // char[]
+            Emit.Duplicate();                           // char[] char[]
+            Emit.StoreLocal(charArray);                 // char[]
+            Emit.LoadNull();                            // char[] null
+            Emit.CompareEqual();
+            Emit.BranchIfFalse(charArrayReady);
+            Emit.LoadConstant(BufferPersistence.ThreadStaticBufferInitialSize);  // int
+            Emit.NewArray<char>();                                               // char[]
+            Emit.StoreLocal(CharArray);                                          // --empty--
+            Emit.MarkLabel(charArrayReady);
         }
+
+        void StoreCharBuffer()
+        {
+            var threadStaticBuffer = typeof(BufferPersistence).GetField("ThreadStaticBuffer");
+            Emit.LoadLocal(CharArray);
+            Emit.StoreField(threadStaticBuffer);
+        }        
 
         Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
         {
@@ -3122,6 +3120,9 @@ namespace Jil.Serialize
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
             WriteObject(typeof(ForType));
+
+            StoreCharBuffer();
+
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
@@ -3150,6 +3151,9 @@ namespace Jil.Serialize
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
             WriteList(typeof(ForType));
+
+            StoreCharBuffer();
+
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
@@ -3166,6 +3170,9 @@ namespace Jil.Serialize
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
             WriteEnumerable(typeof(ForType));
+
+            StoreCharBuffer();
+
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
@@ -3182,6 +3189,9 @@ namespace Jil.Serialize
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
             WriteDictionary(typeof(ForType));
+
+            StoreCharBuffer();
+
             Emit.Return();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
@@ -3199,6 +3209,8 @@ namespace Jil.Serialize
             Emit.LoadArgument(1);
 
             WritePrimitive(typeof(ForType), quotesNeedHandling: true);
+
+            StoreCharBuffer();
 
             Emit.Return();
 
@@ -3219,6 +3231,8 @@ namespace Jil.Serialize
             Emit.LoadArgument(1);
 
             WriteNullable(typeof(ForType), quotesNeedHandling: true);
+
+            StoreCharBuffer();
             
             Emit.Return();
 

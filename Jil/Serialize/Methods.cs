@@ -726,7 +726,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = buffer.Length - 1;
 
             uint copy;
             if (number < 0)
@@ -754,7 +754,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, buffer.Length - 1 - ptr);
         }
 
         internal static readonly MethodInfo CustomWriteIntUnrolledSigned = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned", BindingFlags.Static | BindingFlags.NonPublic);
@@ -914,7 +914,7 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteUInt(TextWriter writer, uint number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = buffer.Length - 1;
 
             var copy = number;
 
@@ -933,7 +933,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, buffer.Length - 1 - ptr);
         }
 
         internal static readonly MethodInfo CustomWriteUIntUnrolled = typeof(Methods).GetMethod("_CustomWriteUIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1053,7 +1053,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = buffer.Length - 1;
 
             ulong copy;
             if (number < 0)
@@ -1081,14 +1081,14 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, buffer.Length - 1 - ptr);
         }
         
         internal static readonly MethodInfo CustomWriteULong = typeof(Methods).GetMethod("_CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = buffer.Length - 1;
 
             var copy = number;
 
@@ -1107,7 +1107,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, buffer.Length - 1 - ptr);
         }
 
         internal static readonly MethodInfo ProxyFloat = typeof(Methods).GetMethod("_ProxyFloat", BindingFlags.Static | BindingFlags.NonPublic);
