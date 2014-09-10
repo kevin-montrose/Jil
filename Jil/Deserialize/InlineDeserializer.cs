@@ -135,7 +135,8 @@ namespace Jil.Deserialize
         {
             var gotChar = Emit.DefineLabel();
 
-            RawReadChar(() => ThrowExpected(c));    // int
+            Emit.LoadArgument(0);                   // TextReader
+            Emit.CallVirtual(TextReader_Read);      // int
             Emit.LoadConstant((int)c);              // int int
             Emit.BranchIfEqual(gotChar);            // --empty--
             ThrowExpected(c);                       // --empty--
