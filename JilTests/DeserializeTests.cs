@@ -1268,7 +1268,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Expected digit", e.Message);
+                    Assert.AreEqual("Not enough character for ISO8601 timezone offset", e.Message);
                 }
             }
 
