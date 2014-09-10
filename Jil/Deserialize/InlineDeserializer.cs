@@ -143,9 +143,25 @@ namespace Jil.Deserialize
             Emit.MarkLabel(gotChar);                // --empty--
         }
 
+        void CheckChar(char c)
+        {
+            var gotChar = Emit.DefineLabel();
+
+            Emit.LoadConstant((int)c);              // int int
+            Emit.BranchIfEqual(gotChar);            // --empty--
+            ThrowExpected(c);                       // --empty--
+
+            Emit.MarkLabel(gotChar);                // --empty--
+        }
+
         void ExpectQuote()
         {
             ExpectChar('"');
+        }
+
+        void CheckQuote()
+        {
+            CheckChar('"');
         }
 
         void ExpectRawCharOrNull(char c, Action ifChar, Action ifNull)
@@ -481,6 +497,12 @@ namespace Jil.Deserialize
         {
             Emit.LoadArgument(0);                   // TextReader
             Emit.Call(Methods.ConsumeWhiteSpace);       // --empty--
+        }
+
+        void ReadSkipWhitespace()
+        {
+            Emit.LoadArgument(0);                   // TextReader
+            Emit.Call(Methods.ReadSkipWhitespace);  // int
         }
 
         void ExpectEndOfStream()
@@ -824,8 +846,8 @@ namespace Jil.Deserialize
                         Build(keyType);         // dictType(*?) enum
                     }
                 }
-                ConsumeWhiteSpace();        // dictType(*?) (integer|string|enum)
-                ExpectChar(':');            // dictType(*?) (integer|string|enum)
+                ReadSkipWhitespace();        // dictType(*?) (integer|string|enum)
+                CheckChar(':');            // dictType(*?) (integer|string|enum)
                 ConsumeWhiteSpace();        // dictType(*?) (integer|string|enum)
                 Build(valType);             // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);   // --empty--
@@ -868,8 +890,8 @@ namespace Jil.Deserialize
                         Build(keyType);         // dictType(*?) enum
                     }
                 }
-                ConsumeWhiteSpace();                // dictType(*?) (integer|string|enum)
-                ExpectChar(':');                    // dictType(*?) (integer|string|enum)
+                ReadSkipWhitespace();               // dictType(*?) (integer|string|enum)
+                CheckChar(':');                     // dictType(*?) (integer|string|enum)
                 ConsumeWhiteSpace();                // dictType(*?) (integer|string|enum)
                 Build(valType);                     // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);           // --empty--
@@ -934,8 +956,8 @@ namespace Jil.Deserialize
 
             Emit.LoadArgument(0);                   // objType TextReader
             Emit.Call(Methods.SkipEncodedString);   // objType
-            ConsumeWhiteSpace();                    // objType
-            ExpectChar(':');                        // objType
+            ReadSkipWhitespace();                   // objType
+            CheckChar(':');                         // objType
             ConsumeWhiteSpace();                    // objType
             SkipObjectMember();                     // objType
             Emit.Branch(continueSkipping);          // objType
@@ -953,8 +975,8 @@ namespace Jil.Deserialize
             ConsumeWhiteSpace();                    // objType
             Emit.LoadArgument(0);                   // objType TextReader
             Emit.Call(Methods.SkipEncodedString);   // objType
-            ConsumeWhiteSpace();                    // objType
-            ExpectChar(':');                        // objType
+            ReadSkipWhitespace();                   // objType
+            CheckChar(':');                         // objType
             ConsumeWhiteSpace();                    // objType
             SkipObjectMember();                     // objType
             Emit.Branch(continueSkipping);          // objType
@@ -1050,14 +1072,14 @@ namespace Jil.Deserialize
                 RawPeekChar();              // objType(*?) int 
                 Emit.LoadConstant('}');     // objType(*?) int '}'
                 Emit.BranchIfEqual(done);   // objType(*?)
-                ConsumeWhiteSpace();        // objType(*?)
+                ReadSkipWhitespace();       // objType(*?)
 
-                ExpectQuote();              // objType(*?)
+                CheckQuote();               // objType(*?)
                 Emit.LoadArgument(0);       // objType(*?) TextReader
                 Emit.Call(findSetterIdx);  // objType(*?) int
 
-                ConsumeWhiteSpace();        // objType(*?) int
-                ExpectChar(':');            // objType(*?) int
+                ReadSkipWhitespace();        // objType(*?) int
+                CheckChar(':');            // objType(*?) int
                 ConsumeWhiteSpace();        // objType(*?) int
 
                 var readingMember = Emit.DefineLabel();
@@ -1125,14 +1147,14 @@ namespace Jil.Deserialize
                 Emit.LoadArgument(0);               // objType(*?) TextReader
                 Emit.CallVirtual(TextReader_Read);  // objType(*?) int
                 Emit.Pop();                         // objType(*?)
-                ConsumeWhiteSpace();
+                ReadSkipWhitespace();
 
-                ExpectQuote();
+                CheckQuote();
                 Emit.LoadArgument(0);           // TextReader
                 Emit.Call(findSetterIdx);      // int
 
-                ConsumeWhiteSpace();                // objType(*?) int
-                ExpectChar(':');                    // objType(*?) int
+                ReadSkipWhitespace();               // objType(*?) int
+                CheckChar(':');                     // objType(*?) int
                 ConsumeWhiteSpace();                // objType(*?) int
                 Emit.Branch(readingMember);         // objType(*?) int
             }
@@ -1230,8 +1252,8 @@ namespace Jil.Deserialize
                 Emit.BranchIfEqual(done);   // objType(*?)
                 Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
                 Build(typeof(string));      // obType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
-                ExpectChar(':');            // objType(*?) Dictionary<string, int> string
+                ReadSkipWhitespace();       // objType(*?) Dictionary<string, int> string
+                CheckChar(':');             // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
 
                 var readingMember = Emit.DefineLabel();
@@ -1301,8 +1323,8 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();
                 Emit.LoadField(order);              // objType(*?) Dictionary<string, int> string
                 Build(typeof(string));              // objType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
-                ExpectChar(':');                    // objType(*?) Dictionary<string, int> string
+                ReadSkipWhitespace();               // objType(*?) Dictionary<string, int> string
+                CheckChar(':');                     // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
                 Emit.Branch(readingMember);         // objType(*?) Dictionary<string, int> string
             }
@@ -1380,8 +1402,8 @@ namespace Jil.Deserialize
             Emit.BranchIfEqual(doneNotNull);   // --empty--
             Emit.LoadField(order);      // Dictionary<string, int> string
             Build(typeof(string));      // Dictionary<string, int> string
-            ConsumeWhiteSpace();        // Dictionary<string, int> string
-            ExpectChar(':');            // Dictionary<string, int> string
+            ReadSkipWhitespace();       // Dictionary<string, int> string
+            CheckChar(':');             // Dictionary<string, int> string
             ConsumeWhiteSpace();        // Dictionary<string, int> string
 
             var readingMember = Emit.DefineLabel();
@@ -1441,8 +1463,8 @@ namespace Jil.Deserialize
             ConsumeWhiteSpace();                // --empty--
             Emit.LoadField(order);              // Dictionary<string, int> string
             Build(typeof(string));              // Dictionary<string, int> string
-            ConsumeWhiteSpace();                // Dictionary<string, int> string
-            ExpectChar(':');                    // Dictionary<string, int> string
+            ReadSkipWhitespace();               // Dictionary<string, int> string
+            CheckChar(':');                     // Dictionary<string, int> string
             ConsumeWhiteSpace();                // Dictionary<string, int> string
             Emit.Branch(readingMember);         // Dictionary<string, int> string
 
@@ -1541,8 +1563,8 @@ namespace Jil.Deserialize
             Emit.LoadArgument(0);                       // TextReader
             Emit.Call(findConstructorParameterIndex);   // int
 
-            ConsumeWhiteSpace();        // int
-            ExpectChar(':');            // int
+            ReadSkipWhitespace();       // int
+            CheckChar(':');             // int
             ConsumeWhiteSpace();        // int
 
             var readingMember = Emit.DefineLabel();
@@ -1583,14 +1605,14 @@ namespace Jil.Deserialize
             Emit.LoadArgument(0);               // TextReader
             Emit.CallVirtual(TextReader_Read);  // int
             Emit.Pop();                         // --empty--
-            ConsumeWhiteSpace();                // --empty--
+            ReadSkipWhitespace();               // --empty--
 
-            ExpectQuote();                              // --empty--
+            CheckQuote();                               // --empty--
             Emit.LoadArgument(0);                       // TextReader
             Emit.Call(findConstructorParameterIndex);   // int
 
-            ConsumeWhiteSpace();                // int
-            ExpectChar(':');                    // int
+            ReadSkipWhitespace();               // int
+            CheckChar(':');                     // int
             ConsumeWhiteSpace();                // int
             Emit.Branch(readingMember);         // int
 
