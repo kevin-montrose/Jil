@@ -852,22 +852,18 @@ namespace Jil.Deserialize
                 var nextItem = Emit.DefineLabel();
 
                 Emit.MarkLabel(loopStart);      // --empty--
-                ConsumeWhiteSpace();            // --empty--
                 loadDict();                     // dictType(*?)
-                RawPeekChar();                  // dictType(*?) int 
+                ReadSkipWhitespace();           // dictType(*?) int 
                 Emit.Duplicate();               // dictType(*?) int int
                 Emit.LoadConstant(',');         // dictType(*?) int int ','
                 Emit.BranchIfEqual(nextItem);   // dictType(*?) int
                 Emit.LoadConstant('}');         // dictType(*?) int '}'
-                Emit.BranchIfEqual(done);       // dictType(*?)
+                Emit.BranchIfEqual(doneSkipChar); // dictType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
 
                 Emit.MarkLabel(nextItem);           // dictType(*?) int
-                Emit.Pop();                         // dictType(*?)
-                Emit.LoadArgument(0);               // dictType(*?) TextReader
-                Emit.CallVirtual(TextReader_Read);  // dictType(*?) int
                 Emit.Pop();                         // dictType(*?)
                 ConsumeWhiteSpace();                // dictType(*?)
                 if (keyType == typeof(string))
