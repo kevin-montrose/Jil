@@ -830,6 +830,8 @@ namespace Jil.Deserialize
                 hasSeparators = false;
             }
 
+            if (stop - start + 1 < 2) throw new DeserializationException("Not enough character for ISO8601 timezone offset", reader);
+
             var mins = 0;
             c = buffer[start];
             if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader);
