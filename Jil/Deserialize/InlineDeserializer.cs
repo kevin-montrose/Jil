@@ -1484,6 +1484,8 @@ namespace Jil.Deserialize
         void ReadAnonymousObjectAutomata(Type objType)
         {
             var doneNotNull = Emit.DefineLabel();
+            var doneNotNullPopSkipChar = Emit.DefineLabel();
+            var doneNotNullSkipChar = Emit.DefineLabel();
             var doneNull = Emit.DefineLabel();
 
             ExpectRawCharOrNull(
@@ -1539,12 +1541,12 @@ namespace Jil.Deserialize
 
             var loopStart = Emit.DefineLabel();
 
-            ConsumeWhiteSpace();        // --empty--
-            RawPeekChar();              // int 
+            ReadSkipWhitespace();       // int 
+            Emit.Duplicate();
             Emit.LoadConstant('}');     // int '}'
-            Emit.BranchIfEqual(doneNotNull);   // --empty--
+            Emit.BranchIfEqual(doneNotNullPopSkipChar);   // --empty--
 
-            ExpectQuote();                              // --empty--
+            CheckQuote();                               // --empty--
             Emit.LoadArgument(0);                       // TextReader
             Emit.Call(findConstructorParameterIndex);   // int
 
@@ -1574,21 +1576,17 @@ namespace Jil.Deserialize
             var nextItem = Emit.DefineLabel();
 
             Emit.MarkLabel(loopStart);      // --empty--
-            ConsumeWhiteSpace();            // --empty--
-            RawPeekChar();                  // int 
+            ReadSkipWhitespace();           // --empty--
             Emit.Duplicate();               // int int
             Emit.LoadConstant(',');         // int int ','
             Emit.BranchIfEqual(nextItem);   // int
             Emit.LoadConstant('}');         // int '}'
-            Emit.BranchIfEqual(doneNotNull);       // --empty--
+            Emit.BranchIfEqual(doneNotNullSkipChar);// --empty--
 
             // didn't get what we expected
             ThrowExpected(",", "}");
 
             Emit.MarkLabel(nextItem);           // int
-            Emit.Pop();                         // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
             Emit.Pop();                         // --empty--
             ReadSkipWhitespace();               // --empty--
 
@@ -1601,10 +1599,14 @@ namespace Jil.Deserialize
             ConsumeWhiteSpace();                // int
             Emit.Branch(readingMember);         // int
 
-            Emit.MarkLabel(doneNotNull);               // --empty--
+            Emit.MarkLabel(doneNotNull);        // --empty--
             Emit.LoadArgument(0);               // TextReader
             Emit.CallVirtual(TextReader_Read);  // int
+
+            Emit.MarkLabel(doneNotNullPopSkipChar);
             Emit.Pop();                         // --empty--
+
+            Emit.MarkLabel(doneNotNullSkipChar);// --empty--
 
             var done = Emit.DefineLabel();
 
