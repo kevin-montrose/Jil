@@ -325,7 +325,6 @@ namespace JilTests
             var msg = "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime;
 
             Assert.IsTrue(reorderedTime < normalOrderTime, msg);
-            Console.WriteLine(msg);
         }
 
         public class _UseCustomIntegerToString
