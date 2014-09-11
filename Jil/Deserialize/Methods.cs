@@ -13,7 +13,8 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
-        public const int CharBufferSize = 33;
+        public const int DynamicCharBufferInitialSize = 128;
+        public const int ISO8601MaxSize = 33;
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -487,6 +488,110 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        public static readonly MethodInfo ReadEncodedStringWithCharArray = typeof(Methods).GetMethod("_ReadEncodedStringWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static string _ReadEncodedStringWithCharArray(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+
+            while (true)
+            {
+                while (idx < buffer.Length - 1)
+                {
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                    if (first == '"')
+                    {
+                        goto complete;
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[idx++] = (char)first;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                    switch (second)
+                    {
+                        case '"': buffer[idx++] = '"'; continue;
+                        case '\\': buffer[idx++] = '\\'; continue;
+                        case '/': buffer[idx++] = '/'; continue;
+                        case 'b': buffer[idx++] = '\b'; continue;
+                        case 'f': buffer[idx++] = '\f'; continue;
+                        case 'n': buffer[idx++] = '\n'; continue;
+                        case 'r': buffer[idx++] = '\r'; continue;
+                        case 't': buffer[idx++] = '\t'; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    buffer[idx++] = ReadHexQuad2(reader);
+                }
+                var biggerBuffer = new char[buffer.Length * 2];
+                Array.Copy(buffer, biggerBuffer, buffer.Length);
+                buffer = biggerBuffer;
+            }
+
+            complete: return new string(buffer, 0, idx);
+        }
+
+        static char ReadHexQuad2(TextReader reader)
+        {
+            int unescaped;
+            int c;
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped = (c - '0') << 12;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped = (10 + c - 'A') << 12;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped = (10 + c - 'a') << 12;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 8;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 8;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 8;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 4;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 4;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 4;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= c - '0';
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= 10 + c - 'A';
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= 10 + c - 'a';
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            return (char)unescaped;
+        }
+        /*
         public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
@@ -594,7 +699,7 @@ namespace Jil.Deserialize
 
             return ret;
         }
-
+        */
         public static readonly MethodInfo ReadEncodedChar = typeof(Methods).GetMethod("_ReadEncodedChar", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static char _ReadEncodedChar(TextReader reader)
@@ -991,68 +1096,6 @@ namespace Jil.Deserialize
 
             finished:
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
-        }
-
-        public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
-        static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
-            where TEnum : struct
-        {
-            TEnum ret;
-            if (!TryParseEnum<TEnum>(asStr, out ret))
-            {
-                throw new DeserializationException("Unexpected value for " + typeof(TEnum).Name + ": " + asStr, reader);
-            }
-
-            return ret;
-        }
-
-        static bool TryParseEnum<TEnum>(string asStr, out TEnum parsed)
-            where TEnum : struct
-        {
-            return EnumValues<TEnum>.TryParse(asStr, out parsed);
-        }
-
-        public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
-        static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
-            where TEnum : struct
-        {
-            commonSb = commonSb ?? new StringBuilder();
-
-            var ret = default(TEnum);
-
-            while (true)
-            {
-                var c = _ReadEncodedChar(reader);
-
-                // ignore this *particular* whitespace
-                if (c != ' ')
-                {
-                    // comma delimited
-                    if (c == ',' || c == '"')
-                    {
-                        var asStr = commonSb.ToString();
-                        TEnum parsed;
-                        if (!TryParseEnum<TEnum>(asStr, out parsed))
-                        {
-                            throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, reader);
-                        }
-
-                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
-
-                        commonSb.Clear();
-
-                        if (c == '"') break;
-
-                        continue;
-                    }
-                    commonSb.Append(c);
-                }
-            }
-
-            // reset before returning
-            commonSb.Clear();
-
-            return ret;
         }
     }
 }

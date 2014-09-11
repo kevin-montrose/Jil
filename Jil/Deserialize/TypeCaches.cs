@@ -7,6 +7,18 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
+    struct ResultValue<TResult>
+    {
+        public ResultValue(TResult result, object cookie)
+        {
+            Result = result;
+            Cookie = cookie;
+        }
+
+        public TResult Result;
+        public object Cookie;
+    }
+
     static class NewtonsoftStyleTypeCache<T>
     {
         static readonly object InitLock = new object();

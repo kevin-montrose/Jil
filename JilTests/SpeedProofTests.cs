@@ -827,113 +827,7 @@ namespace JilTests
 
             Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
-
-        class _AlwaysUseCharBufferForStrings
-        {
-            public enum Enums { Hello, World, Foo, Bar };
-
-            public string A { get; set; }
-            public string B { get; set; }
-        }
-
-        [TestMethod]
-        public void AlwaysUseCharBufferForStrings()
-        {
-            // objects
-            {
-                Func<TextReader, _AlwaysUseCharBufferForStrings> fast;
-                Func<TextReader, _AlwaysUseCharBufferForStrings> normal;
-
-                try
-                {
-                    {
-                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
-                        Exception ignored;
-
-                        // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                    }
-
-                    {
-                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
-                        Exception ignored;
-
-                        // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                    }
-                }
-                finally
-                {
-                    InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
-                }
-
-                var rand = new Random(23450051);
-
-                var toSerialize = new List<_AlwaysUseCharBufferForStrings>();
-                for (var i = 0; i < 2000; i++)
-                {
-                    toSerialize.Add(
-                        new _AlwaysUseCharBufferForStrings
-                        {
-                            A = _RandString(rand, 32),
-                            B = _RandString(rand, 64)
-                        }
-                    );
-                }
-
-                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-                double fastTime, normalTime;
-                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
-
-                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
-            }
-
-            // strings
-            {
-                Func<TextReader, string> fast;
-                Func<TextReader, string> normal;
-
-                try
-                {
-                    {
-                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
-                        Exception ignored;
-
-                        // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                    }
-
-                    {
-                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
-                        Exception ignored;
-
-                        // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                    }
-                }
-                finally
-                {
-                    InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
-                }
-
-                var rand = new Random(49139290);
-
-                var toSerialize = new List<string>();
-                for (var i = 0; i < 2000; i++)
-                {
-                    toSerialize.Add(_RandString(rand, 32));
-                }
-
-                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-                double fastTime, normalTime;
-                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
-
-                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
-            }
-        }
-
+        
         class _UseHashWhenMatchingMembers
         {
             public enum UserType : byte
@@ -1050,62 +944,6 @@ namespace JilTests
             }
         }
 
-        enum _UseNameAutomataWhenMatchingEnums
-        {
-            Hello,
-            World,
-            Fizz,
-            Buzz,
-            Baz,
-            Bar
-        }
-
-        [TestMethod]
-        public void UseNameAutomataWhenMatchingEnums()
-        {
-            Func<TextReader, _UseNameAutomataWhenMatchingEnums> automata;
-            Func<TextReader, _UseNameAutomataWhenMatchingEnums> method;
-
-
-            try
-            {
-                {
-                    InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = true;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    method = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = true;
-            }
-
-            var rand = new Random(191112901);
-
-            var toSerialize = new List<_UseNameAutomataWhenMatchingEnums>();
-            for (var i = 0; i < 2000; i++)
-            {
-                toSerialize.Add(_RandEnum<_UseNameAutomataWhenMatchingEnums>(rand));
-            }
-
-            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
-
-            double automataTime, methodTime;
-            CompareTimes(toSerialize, Jil.Options.Default, automata, method, out automataTime, out methodTime);
-
-            Assert.IsTrue(automataTime < methodTime, "automataTime = " + automataTime + ", methodTime = " + methodTime);
-        }
-
         class _UseCustomWriteIntUnrolledSigned
         {
             public List<int> A { get; set; }
@@ -1161,79 +999,60 @@ namespace JilTests
             Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
         }
 
-        class _UseNameAutomata
+        class _NewWriteEncodedString
         {
-            public enum UserType : byte
-            {
-                unregistered = 2,
-                registered = 3,
-                moderator = 4,
-                does_not_exist = 255
-            }
-
-            public int? user_id { get; set; }
-            public string display_name { get; set; }
-            public int? reputation { get; set; }
-            public UserType? user_type { get; set; }
-            public string link { get; set; }
-            public int? accept_rate { get; set; }
+            public string Foo { get; set; }
         }
 
         [TestMethod]
-        public void UseNameAutomata()
+        public void NewWriteEncodedString()
         {
-            Func<TextReader, _UseNameAutomata> automata;
-            Func<TextReader, _UseNameAutomata> dictionary;
+            Action<TextWriter, List<_NewWriteEncodedString>, int> newVersion;
+            Action<TextWriter, List<_NewWriteEncodedString>, int> oldVersion;
 
             try
             {
                 {
-                    InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
+                    InlineSerializer<List<_NewWriteEncodedString>>.UseOldWriteEncoded = false;
                     Exception ignored;
 
-                    // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    // Build the *actual* serializer method
+                    newVersion = InlineSerializerHelper.Build<List<_NewWriteEncodedString>>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
                 }
 
                 {
-                    InlineDeserializer<_UseNameAutomata>.UseNameAutomata = false;
+                    InlineSerializer<List<_NewWriteEncodedString>>.UseOldWriteEncoded = true;
                     Exception ignored;
 
-                    // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    // Build the *actual* serializer method
+                    oldVersion = InlineSerializerHelper.Build<List<_NewWriteEncodedString>>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
                 }
             }
             finally
             {
-                InlineDeserializer<_UseNameAutomata>.UseNameAutomata = true;
+                InlineSerializer<List<_NewWriteEncodedString>>.UseOldWriteEncoded = true;
             }
 
-            var rand = new Random(97031664);
+            var rand = new Random(163983052);
 
-            var toSerialize = new List<_UseNameAutomata>();
-            for (var i = 0; i < 10000; i++)
+            var toSerialize = new List<_NewWriteEncodedString>();
+            for (var i = 0; i < 100000; i++)
             {
                 toSerialize.Add(
-                    new _UseNameAutomata
+                    new _NewWriteEncodedString
                     {
-                        accept_rate = rand.Next(),
-                        display_name = _RandString(rand),
-                        link = _RandString(rand),
-                        reputation = rand.Next(),
-                        user_id = rand.Next(),
-                        user_type = _RandEnum<_UseNameAutomata.UserType>(rand)
+                        Foo = _RandString(rand)
                     }
                 );
             }
 
             toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
 
-            double automataTime, dictionaryTime;
-            CompareTimes(toSerialize, Jil.Options.Default, automata, dictionary, out automataTime, out dictionaryTime);
+            double newTime, oldTime;
+            CompareTimes(new [] {toSerialize}.ToList(), newVersion, oldVersion, out newTime, out oldTime);
 
-            Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
+            Assert.IsTrue(newTime < oldTime, "newTime = " + newTime + ", oldTime = " + oldTime);
         }
-
 #endif
     }
 }

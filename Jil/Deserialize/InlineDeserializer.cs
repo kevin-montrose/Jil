@@ -8,22 +8,17 @@ using Jil.Common;
 using Sigil.NonGeneric;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Diagnostics;
 
 namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
-        public static bool AlwaysUseCharBufferForStrings = true;
-        public static bool UseNameAutomata = true;
-        public static bool UseNameAutomataForEnums = true;
-
-        const string CharBufferName = "char_buffer";
-        const string StringBuilderName = "string_builder";
+        const string CharArrayName = "char_array";
         
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
 
-        bool UsingCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
@@ -52,51 +47,33 @@ namespace Jil.Deserialize
             }
         }
 
-        void AddGlobalVariables()
+        void InitializeCharArray()
         {
-            var involvedTypes = typeof(ForType).InvolvedTypes();
-
-            var hasStringyTypes = 
-                involvedTypes.Contains(typeof(string)) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
-
-            var needsCharBuffer = (AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
-
-            if (needsCharBuffer)
-            {
-                UsingCharBuffer = true;
-
-                Emit.DeclareLocal<char[]>(CharBufferName);
-
-                Emit.LoadConstant(Methods.CharBufferSize);  // int
-                Emit.NewArray<char>();                      // char[]
-                Emit.StoreLocal(CharBufferName);            // --empty--
-            }
-
-            // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
-            //   but we can save the slot on the stack in rare cases
-            var mayNeedStringBuilder =
-                involvedTypes.Contains(typeof(string)) ||
-                involvedTypes.Contains(typeof(float)) ||
-                involvedTypes.Contains(typeof(double)) ||
-                involvedTypes.Contains(typeof(decimal)) ||
-                involvedTypes.Any(t => t.IsEnum) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
-
-            if (mayNeedStringBuilder)
-            {
-                Emit.DeclareLocal<StringBuilder>(StringBuilderName);
-            }
+            var initializeCharArray = Emit.DefineLabel();
+            var charArrayReady = Emit.DefineLabel();
+            Emit.DeclareLocal<char[]>(CharArrayName);
+            Emit.LoadArgument(1);                       // object
+            Emit.LoadNull();                            // char[] null
+            Emit.BranchIfEqual(initializeCharArray);
+            Emit.LoadArgument(1);                       // object
+            Emit.CastClass(typeof(char[]));             // char[]
+            Emit.StoreLocal(CharArrayName);             //
+            Emit.Branch(charArrayReady);                //
+            Emit.MarkLabel(initializeCharArray);        //
+            Emit.LoadConstant(Methods.DynamicCharBufferInitialSize);  // int
+            Emit.NewArray<char>();                      // char[]
+            Emit.StoreLocal(CharArrayName);             // --empty--
+            Emit.MarkLabel(charArrayReady);
         }
 
-        void LoadCharBuffer()
+        void LoadCharArrayAddress()
         {
-            Emit.LoadLocal(CharBufferName);
+            Emit.LoadLocalAddress(CharArrayName);
         }
 
-        void LoadStringBuilder()
+        void LoadCharArrayX()
         {
-            Emit.LoadLocalAddress(StringBuilderName);
+            Emit.LoadLocal(CharArrayName);
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
@@ -215,18 +192,8 @@ namespace Jil.Deserialize
         {
             // Stack starts
             // TextReader
-
-            if (UsingCharBuffer)
-            {
-                LoadCharBuffer();                           // TextReader char[]
-                LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
-            }
-            else
-            {
-                LoadStringBuilder();                        // TextReader StringBuilder
-                Emit.Call(Methods.ReadEncodedString);  // string
-            }
+            LoadCharArrayAddress();                                   // TextReader char[]
+            Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
         }
 
         void ReadString()
@@ -297,23 +264,23 @@ namespace Jil.Deserialize
                 return;
             }
 
-            LoadStringBuilder();                    // TextReader StringBuilder
+            LoadCharArrayAddress();                    // TextReader char[]
 
             if (numberType == typeof(double))
             {
-                Emit.Call(Methods.ReadDouble);   // double
+                Emit.Call(Methods.ReadDoubleCharArray);   // double
                 return;
             }
 
             if (numberType == typeof(float))
             {
-                Emit.Call(Methods.ReadSingle);  // float
+                Emit.Call(Methods.ReadSingleCharArray);  // float
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.Call(Methods.ReadDecimal); // decimal
+                Emit.Call(Methods.ReadDecimalCharArray); // decimal
                 return;
             }
 
@@ -448,7 +415,7 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                      // --empty--
             Emit.LoadArgument(0);               // TextReader
-            LoadCharBuffer();
+            LoadCharArrayX();
             Emit.Call(Methods.ReadISO8601Date); // DateTime
             ExpectQuote();                      // DateTime
         }
@@ -530,44 +497,16 @@ namespace Jil.Deserialize
             Emit.CallVirtual(TextReader_Peek);      // int
         }
 
-        void ReadFlagsEnum(Type enumType)
-        {
-            ExpectQuote();                  // --empty--
-
-            var specific = Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
-
-            Emit.LoadArgument(0);           // TextReader
-            LoadStringBuilder();            // TextReader StringBuilder&
-            Emit.Call(specific);            // enum
-        }
-
         void ReadEnum(Type enumType)
         {
-            if (UseNameAutomataForEnums)
-            {
-                var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
-                var getEnumValue = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
+            var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
+            var getEnumValue = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
 
-                ExpectQuote();
-                Emit.LoadArgument(0);     // TextReader
-                Emit.Call(getEnumValue);  // emum
+            ExpectQuote();
+            Emit.LoadArgument(0);     // TextReader
+            Emit.Call(getEnumValue);  // emum
 
-                return;
-            }
-
-            if (enumType.IsFlagsEnum())
-            {
-                ReadFlagsEnum(enumType);
-                return;
-            }
-
-            var specific = Methods.ParseEnum.MakeGenericMethod(enumType);
-
-            ExpectQuote();                  // --empty--
-            Emit.LoadArgument(0);           // TextReader
-            CallReadEncodedString();        // string
-            Emit.LoadArgument(0);           // TextReader
-            Emit.Call(specific);            // enum
+            return;
         }
 
         void LoadConstantOfType(object val, Type type)
@@ -915,26 +854,13 @@ namespace Jil.Deserialize
         void ReadObject(Type objType)
         {
             var isAnonymous = objType.IsAnonymouseClass();
-
             if (isAnonymous)
             {
-                if (UseNameAutomata)
-                {
-                    ReadAnonymousObjectAutomata(objType);
-                    return;
-                }
-
-                ReadAnonymousObjectDictionaryLookup(objType);
+                ReadAnonymousObjectAutomata(objType);
                 return;
             }
 
-            if (UseNameAutomata)
-            {
-                ReadObjectAutomata(objType);
-                return;
-            }
-            
-            ReadObjectDictionaryLookup(objType);
+            ReadObjectAutomata(objType);
         }
 
         void SkipAllMembers(Sigil.Label done, Sigil.Label doneSkipChar)
@@ -1158,326 +1084,6 @@ namespace Jil.Deserialize
             if (objType.IsValueType)
             {
                 Emit.LoadObject(objType);     // objType
-            }
-        }
-
-        void ReadObjectDictionaryLookup(Type objType)
-        {
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
-
-            if (!objType.IsValueType)
-            {
-                ExpectRawCharOrNull(
-                    '{',
-                    () => { },
-                    () =>
-                    {
-                        Emit.LoadNull();
-                        Emit.Branch(doneSkipChar);
-                    }
-                );
-            }
-            else
-            {
-                ExpectChar('{');
-            }
-
-            using (var loc = Emit.DeclareLocal(objType))
-            {
-                Action loadObj;
-                if (objType.IsValueType)
-                {
-                    Emit.LoadLocalAddress(loc);     // objType*
-                    Emit.InitializeObject(objType); // --empty--
-
-                    loadObj = () => Emit.LoadLocalAddress(loc);
-                }
-                else
-                {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
-
-                    if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
-
-                    Emit.NewObject(cons);   // objType
-                    Emit.StoreLocal(loc);   // --empty--
-
-                    loadObj = () => Emit.LoadLocal(loc);
-                }
-
-                var loopStart = Emit.DefineLabel();
-
-                var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
-
-                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
-
-                // special case object w/ no deserializable properties
-                if (setters.Count == 0)
-                {
-                    loadObj();                      // objType(*?)
-
-                    if (objType.IsValueType)
-                    {
-                        Emit.LoadObject(objType);   // objType
-                    }
-
-                    SkipAllMembers(done, doneSkipChar); // objType
-
-                    return;
-                }
-
-                var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
-
-                var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
-                var orderInst = (Dictionary<string, int>)order.GetValue(null);
-                var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
-
-                var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
-
-                ConsumeWhiteSpace();        // --empty--
-                loadObj();                  // objType(*?)
-                RawPeekChar();              // objType(*?) int 
-                Emit.LoadConstant('}');     // objType(*?) int '}'
-                Emit.BranchIfEqual(done);   // objType(*?)
-                Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
-                ReadSkipWhitespace();       // objType(*?) Dictionary<string, int> string
-                CheckChar(':');             // objType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
-
-                var readingMember = Emit.DefineLabel();
-                Emit.MarkLabel(readingMember);  // objType(*?) Dictionary<string, int> string
-
-                using(var oLoc = Emit.DeclareLocal<int>())
-                {
-                    var isMember = Emit.DefineLabel();
-
-                    Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string int*
-                    Emit.Call(tryGetValue);         // objType(*?) bool
-                    Emit.BranchIfTrue(isMember);    // objType(*?)
-
-                    Emit.Pop();                     // --empty--
-                    SkipObjectMember();             // --empty--
-                    Emit.Branch(loopStart);         // --empty--
-
-                    Emit.MarkLabel(isMember);       // objType(*?)
-                    Emit.LoadLocal(oLoc);           // objType(*?) int
-                    Emit.Switch(inOrderLabels);     // objType(*?)
-
-                    // fallthrough case
-                    ThrowExpected("a member name"); // --empty--
-                }
-
-                foreach (var kv in labels)
-                {
-                    var label = kv.Value;
-                    var member = setters[kv.Key];
-                    var memberType = member.ReturnType();
-
-                    Emit.MarkLabel(label);      // objType(*?)
-                    Build(member.ReturnType()); // objType(*?) memberType
-
-                    if (member is FieldInfo)
-                    {
-                        Emit.StoreField((FieldInfo)member);             // --empty--
-                    }
-                    else
-                    {
-                        SetProperty((PropertyInfo)member);              // --empty--
-                    }
-
-                    Emit.Branch(loopStart);     // --empty--
-                }
-
-                var nextItem = Emit.DefineLabel();
-
-                Emit.MarkLabel(loopStart);      // --empty--
-                loadObj();                      // objType(*?)
-                ReadSkipWhitespace();                  // objType(*?) int 
-                Emit.Duplicate();               // objType(*?) int int
-                Emit.LoadConstant(',');         // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);   // objType(*?) int
-                Emit.LoadConstant('}');         // objType(*?) int '}'
-                Emit.BranchIfEqual(doneSkipChar);       // objType(*?)
-
-                // didn't get what we expected
-                ThrowExpected(",", "}");
-
-                Emit.MarkLabel(nextItem);           // objType(*?) int
-                Emit.Pop();                         // objType(*?)
-                ConsumeWhiteSpace();
-                Emit.LoadField(order);              // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));              // objType(*?) Dictionary<string, int> string
-                ReadSkipWhitespace();               // objType(*?) Dictionary<string, int> string
-                CheckChar(':');                     // objType(*?) Dictionary<string, int> string
-                ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
-                Emit.Branch(readingMember);         // objType(*?) Dictionary<string, int> string
-            }
-
-            Emit.MarkLabel(done);               // objType(*?)
-            Emit.LoadArgument(0);               // objType(*?) TextReader
-            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
-            Emit.Pop();                         // objType(*?)
-
-            Emit.MarkLabel(doneSkipChar);       // objType(*?)
-
-            if(objType.IsValueType)
-            {
-                Emit.LoadObject(objType);     // objType
-            }
-        }
-
-        void ReadAnonymousObjectDictionaryLookup(Type objType)
-        {
-            var doneNotNull = Emit.DefineLabel();
-            var doneNull = Emit.DefineLabel();
-
-            ExpectRawCharOrNull(
-                '{',
-                () => { },
-                () =>
-                {
-                    Emit.Branch(doneNull);
-                }
-            );
-
-            var cons = objType.GetConstructors().Single();
-
-            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
-            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
-
-            if (propertyMap.Count == 0)
-            {
-                var doneSkipChar = Emit.DefineLabel();
-
-                Emit.NewObject(cons);           // objType
-                Emit.Branch(doneNotNull);       // objType
-
-                Emit.MarkLabel(doneNull);       // null
-                Emit.LoadNull();                // null
-                Emit.Branch(doneSkipChar);
-
-                Emit.MarkLabel(doneNotNull);    // objType
-
-                var doneSkipping = Emit.DefineLabel();
-                
-                SkipAllMembers(doneSkipping, doneSkipChar); // objType
-
-                return;
-            }
-
-            var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
-            var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
-            var orderInst = (Dictionary<string, int>)order.GetValue(null);
-
-            var localMap = new Dictionary<string, Sigil.Local>();
-            foreach (var kv in propertyMap)
-            {
-                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
-            }
-
-            var labels = orderInst.ToDictionary(d => d.Key, d => Emit.DefineLabel());
-            var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
-
-            var loopStart = Emit.DefineLabel();
-
-            ConsumeWhiteSpace();        // --empty--
-            RawPeekChar();              // int 
-            Emit.LoadConstant('}');     // int '}'
-            Emit.BranchIfEqual(doneNotNull);   // --empty--
-            Emit.LoadField(order);      // Dictionary<string, int> string
-            Build(typeof(string));      // Dictionary<string, int> string
-            ReadSkipWhitespace();       // Dictionary<string, int> string
-            CheckChar(':');             // Dictionary<string, int> string
-            ConsumeWhiteSpace();        // Dictionary<string, int> string
-
-            var readingMember = Emit.DefineLabel();
-            Emit.MarkLabel(readingMember);  // Dictionary<string, int> string
-
-            using (var oLoc = Emit.DeclareLocal<int>())
-            {
-                var isMember = Emit.DefineLabel();
-
-                Emit.LoadLocalAddress(oLoc);    // Dictionary<string, int> string int*
-                Emit.Call(tryGetValue);         // bool
-                Emit.BranchIfTrue(isMember);    // --empty--
-
-                SkipObjectMember();             // --empty--
-                Emit.Branch(loopStart);         // --empty--
-
-                Emit.MarkLabel(isMember);       // --empty--
-                Emit.LoadLocal(oLoc);           // int
-                Emit.Switch(inOrderLabels);     // --empty--
-
-                // fallthrough case
-                ThrowExpected("a member name"); // --empty--
-            }
-
-            foreach (var kv in labels)
-            {
-                var label = kv.Value;
-                var local = localMap[kv.Key];
-
-                Emit.MarkLabel(label);  // --empty--
-                Build(local.LocalType); // localType
-
-                Emit.StoreLocal(local); // --empty--
-
-                Emit.Branch(loopStart); // --empty--
-            }
-
-            var nextItem = Emit.DefineLabel();
-
-            Emit.MarkLabel(loopStart);      // --empty--
-            ConsumeWhiteSpace();            // --empty--
-            RawPeekChar();                  // int 
-            Emit.Duplicate();               // int int
-            Emit.LoadConstant(',');         // int int ','
-            Emit.BranchIfEqual(nextItem);   // int
-            Emit.LoadConstant('}');         // int '}'
-            Emit.BranchIfEqual(doneNotNull);       // --empty--
-
-            // didn't get what we expected
-            ThrowExpected(",", "}");
-
-            Emit.MarkLabel(nextItem);           // int
-            Emit.Pop();                         // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
-            Emit.Pop();                         // --empty--
-            ConsumeWhiteSpace();                // --empty--
-            Emit.LoadField(order);              // Dictionary<string, int> string
-            Build(typeof(string));              // Dictionary<string, int> string
-            ReadSkipWhitespace();               // Dictionary<string, int> string
-            CheckChar(':');                     // Dictionary<string, int> string
-            ConsumeWhiteSpace();                // Dictionary<string, int> string
-            Emit.Branch(readingMember);         // Dictionary<string, int> string
-
-            Emit.MarkLabel(doneNotNull);               // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
-            Emit.Pop();                         // --empty--
-
-            var done = Emit.DefineLabel();
-
-            foreach(var kv in propertyMap.OrderBy(o => o.Value.Item2))
-            {
-                var local = localMap[kv.Key];
-                Emit.LoadLocal(local);
-            }
-
-            Emit.NewObject(cons);               // objType
-            Emit.Branch(done);                  // objType
-
-            Emit.MarkLabel(doneNull);           // --empty--
-            Emit.LoadNull();                    // null
-
-            Emit.MarkLabel(done);               // objType
-
-            // free up all those locals for use again
-            foreach (var kv in localMap)
-            {
-                kv.Value.Dispose();
             }
         }
 
@@ -1737,15 +1343,15 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public Func<TextReader, ForType> BuildWithNewDelegate()
+        public Func<TextReader, object, ResultValue<ForType>> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
             RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: Utils.DoVerify);
+            Emit = Emit.NewDynamicMethod(typeof(ResultValue<ForType>), new[] { typeof(TextReader), typeof(object) }, doVerify: Utils.DoVerify);
 
-            AddGlobalVariables();
+            InitializeCharArray();
 
             ConsumeWhiteSpace();
 
@@ -1757,33 +1363,48 @@ namespace Jil.Deserialize
             // We also must confirm that we read everything, again otherwise we might accept garbage as valid
             ExpectEndOfStream();
 
+            Emit.LoadLocal(CharArrayName);
+
+            Emit.NewObject<ResultValue<ForType>, ForType, object>();
+
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, ForType>>(Utils.DelegateOptimizationOptions);
+            return Emit.CreateDelegate<Func<TextReader, object, ResultValue<ForType>>>(Utils.DelegateOptimizationOptions);
         }
     }
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        static Func<TextReader, object, ResultValue<ReturnType>> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader) });
+            var emit = Emit.NewDynamicMethod(typeof(ResultValue<ReturnType>), new[] { typeof(TextReader), typeof(object) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
             emit.LoadField(stashField);
             emit.NewObject<DeserializationException, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate<Func<TextReader, object, ResultValue<ReturnType>>>(Utils.DelegateOptimizationOptions);
         }
 
         public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
+            var cookieFunc = CookieBuild<ReturnType>(typeCacheType, dateFormat, out exceptionDuringBuild);
+            return rt =>
+            {
+                var cookieResult = cookieFunc(rt, BufferPersistence.ThreadStaticBuffer);
+                BufferPersistence.ThreadStaticBuffer = (char[])cookieResult.Cookie;
+                return cookieResult.Result;
+            };
+        }
+
+        public static Func<TextReader, object, ResultValue<ReturnType>> CookieBuild<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
-            Func<TextReader, ReturnType> ret;
+            Func<TextReader, object, ResultValue<ReturnType>> ret;
             try
             {
                 ret = obj.BuildWithNewDelegate();

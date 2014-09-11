@@ -1125,7 +1125,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.CharBufferSize + " characters or less", e.Message);
+                    Assert.AreEqual("ISO8601 date is too long, expected " + Jil.Deserialize.Methods.ISO8601MaxSize + " characters or less", e.Message);
                 }
             }
 
@@ -4363,32 +4363,12 @@ namespace JilTests
         {
             try
             {
-                Jil.Deserialize.InlineDeserializer<_BadEnum1>.UseNameAutomataForEnums = false;
-                var e = JSON.Deserialize<_BadEnum1>("\"C\"");
-                Assert.Fail("Should have failed, instead got: " + e);
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("Unexpected value for _BadEnum1: C", e.Message);
-            }
-            finally
-            {
-                Jil.Deserialize.InlineDeserializer<_BadEnum1>.UseNameAutomataForEnums = true;
-            }
-
-            try
-            {
-                Jil.Deserialize.InlineDeserializer<_BadEnum2>.UseNameAutomataForEnums = true;
                 var e = JSON.Deserialize<_BadEnum2>("\"C\"");
                 Assert.Fail("Should have failed, instead got: " + e);
             }
             catch (DeserializationException e)
             {
                 Assert.AreEqual("Unexpected value for _BadEnum2", e.Message);
-            }
-            finally
-            {
-                Jil.Deserialize.InlineDeserializer<_BadEnum2>.UseNameAutomataForEnums = true;
             }
         }
 
