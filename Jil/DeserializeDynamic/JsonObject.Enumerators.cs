@@ -10,13 +10,23 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject
     {
-        sealed class ArrayEnumeratorWrapper : DynamicObject, IEnumerator
+        sealed class ArrayEnumeratorWrapper : DynamicObject, IEnumerator, IEnumerator<JsonObject>, IDisposable
         {
             List<JsonObject>.Enumerator Wrapped;
 
-            public ArrayEnumeratorWrapper(List<JsonObject>.Enumerator wrapped)
+            private ArrayEnumeratorWrapper(List<JsonObject>.Enumerator wrapped)
             {
                 Wrapped = wrapped;
+            }
+
+            public static IEnumerator MakeAsIEnumerator(List<JsonObject>.Enumerator wrapped)
+            {
+                return new ArrayEnumeratorWrapper(wrapped);
+            }
+
+            public static IEnumerator<JsonObject> MakeAsIEnumeratorOfT(List<JsonObject>.Enumerator wrapped)
+            {
+                return new ArrayEnumeratorWrapper(wrapped);
             }
 
             public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
@@ -28,28 +38,27 @@ namespace Jil.DeserializeDynamic
                     case "Dispose":
                         if (args.Length == 0)
                         {
-                            Wrapped.Dispose();
+                            this.Dispose();
                             return true;
                         }
                         return false;
                     case "Equals":
                         if (args.Length == 1)
                         {
-                            result = Wrapped.Equals(args[0]);
+                            result = this.Equals(args[0]);
                             return true;
                         }
                         return false;
                     case "GetHashCode":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.GetHashCode();
+                            result = this.GetHashCode();
                             return true;
                         }
                         return false;
                     case "GetType":
                         if (args.Length == 0)
                         {
-                            // Do *not* proxy this call, but *do* respond to it
                             result = this.GetType();
                             return true;
                         }
@@ -57,21 +66,21 @@ namespace Jil.DeserializeDynamic
                     case "MoveNext":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.MoveNext();
+                            result = this.MoveNext();
                             return true;
                         }
                         return false;
                     case "ToString":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.ToString();
+                            result = this.ToString();
                             return true;
                         }
                         return false;
                     case "Reset":
                         if (args.Length == 0)
                         {
-                            ((IEnumerator)Wrapped).Reset();
+                            this.Reset();
                             return true;
                         }
                         return false;
@@ -92,7 +101,7 @@ namespace Jil.DeserializeDynamic
 
                 if (binder.Name == "Current")
                 {
-                    result = Wrapped.Current;
+                    result = this.Current;
                     return true;
                 }
 
@@ -113,9 +122,34 @@ namespace Jil.DeserializeDynamic
             {
                 ((IEnumerator)Wrapped).Reset();
             }
+
+            JsonObject IEnumerator<JsonObject>.Current
+            {
+                get { return Wrapped.Current; }
+            }
+
+            public void Dispose()
+            {
+                Wrapped.Dispose();
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Wrapped.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return Wrapped.GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return Wrapped.ToString();
+            }
         }
 
-        sealed class ObjectEnumeratorWrapper : DynamicObject, IEnumerator
+        sealed class ObjectEnumeratorWrapper : DynamicObject, IEnumerator, IEnumerator<object>, IDisposable, IDictionaryEnumerator
         {
             sealed class KeyValuePairWrapper : DynamicObject
             {
@@ -193,9 +227,24 @@ namespace Jil.DeserializeDynamic
 
             Dictionary<string, JsonObject>.Enumerator Wrapped;
 
-            public ObjectEnumeratorWrapper(Dictionary<string, JsonObject>.Enumerator wrapped)
+            private ObjectEnumeratorWrapper(Dictionary<string, JsonObject>.Enumerator wrapped)
             {
                 Wrapped = wrapped;
+            }
+
+            public static IEnumerator MakeAsIEnumerator(Dictionary<string, JsonObject>.Enumerator wrapped)
+            {
+                return new ObjectEnumeratorWrapper(wrapped);
+            }
+
+            public static IEnumerator<object> MakeAsIEnumeratorOfT(Dictionary<string, JsonObject>.Enumerator wrapped)
+            {
+                return new ObjectEnumeratorWrapper(wrapped);
+            }
+
+            public static IDictionaryEnumerator MakeAsIDictionaryEnumerator(Dictionary<string, JsonObject>.Enumerator wrapped)
+            {
+                return new ObjectEnumeratorWrapper(wrapped);
             }
 
             public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
@@ -207,7 +256,7 @@ namespace Jil.DeserializeDynamic
                     case "Dispose":
                         if (args.Length == 0)
                         {
-                            Wrapped.Dispose();
+                            this.Dispose();
                             return true;
                         }
                         result = null;
@@ -215,21 +264,20 @@ namespace Jil.DeserializeDynamic
                     case "Equals":
                         if (args.Length == 1)
                         {
-                            result = Wrapped.Equals(args[0]);
+                            result = this.Equals(args[0]);
                             return true;
                         }
                         return false;
                     case "GetHashCode":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.GetHashCode();
+                            result = this.GetHashCode();
                             return true;
                         }
                         return false;
                     case "GetType":
                         if (args.Length == 0)
                         {
-                            // Do *not* proxy this call, but *do* respond to it
                             result = this.GetType();
                             return true;
                         }
@@ -238,21 +286,21 @@ namespace Jil.DeserializeDynamic
                     case "MoveNext":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.MoveNext();
+                            result = this.MoveNext();
                             return true;
                         }
                         return false;
                     case "ToString":
                         if (args.Length == 0)
                         {
-                            result = Wrapped.ToString();
+                            result = this.ToString();
                             return true;
                         }
                         return false;
                     case "Reset":
                         if (args.Length == 0)
                         {
-                            ((IEnumerator)Wrapped).Reset();
+                            this.Reset();
                             return true;
                         }
                         return false;
@@ -273,16 +321,16 @@ namespace Jil.DeserializeDynamic
                 switch (binder.Name)
                 {
                     case "Current":
-                        result = new KeyValuePairWrapper(Wrapped.Current);
+                        result = this.Current;
                         return true;
                     case "Entry":
-                        result = ((IDictionaryEnumerator)Wrapped).Entry;
+                        result = this.Entry;
                         return true;
                     case "Key":
-                        result = ((IDictionaryEnumerator)Wrapped).Key;
+                        result = this.Key;
                         return true;
                     case "Value":
-                        result = ((IDictionaryEnumerator)Wrapped).Value;
+                        result = this.Value;
                         return true;
                     default:
                         return false;
@@ -303,35 +351,105 @@ namespace Jil.DeserializeDynamic
             {
                 ((IEnumerator)Wrapped).Reset();
             }
+
+            object IEnumerator<object>.Current
+            {
+                get { return new KeyValuePairWrapper(Wrapped.Current); }
+            }
+
+            public void Dispose()
+            {
+                Wrapped.Dispose();
+            }
+
+            public DictionaryEntry Entry
+            {
+                get { return ((IDictionaryEnumerator)Wrapped).Entry; }
+            }
+
+            public object Key
+            {
+                get { return ((IDictionaryEnumerator)Wrapped).Key; }
+            }
+
+            public object Value
+            {
+                get { return ((IDictionaryEnumerator)Wrapped).Value; }
+            }
+
+            public override bool Equals(object obj)
+            {
+                return Wrapped.Equals(obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return Wrapped.GetHashCode();
+            }
+
+            public override string ToString()
+            {
+                return Wrapped.ToString();
+            }
         }
 
-        sealed class EnumerableObjectWrapper : IEnumerable
+        sealed class EnumerableObjectWrapper : IEnumerable, IEnumerable<object>
         {
             Dictionary<string, JsonObject> Wrapped;
 
-            public EnumerableObjectWrapper(Dictionary<string, JsonObject> wrapped)
+            private EnumerableObjectWrapper(Dictionary<string, JsonObject> wrapped)
             {
                 Wrapped = wrapped;
             }
 
+            public static IEnumerable MakeAsIEnumerable(Dictionary<string, JsonObject> wrapped) 
+            {
+                return new EnumerableObjectWrapper(wrapped);
+            }
+
+            public static IEnumerable<object> MakeAsIEnumerableOfT(Dictionary<string, JsonObject> wrapped)
+            {
+                return new EnumerableObjectWrapper(wrapped);
+            }
+
             public IEnumerator GetEnumerator()
             {
-                return new ObjectEnumeratorWrapper(Wrapped.GetEnumerator());
+                return ObjectEnumeratorWrapper.MakeAsIEnumerator(Wrapped.GetEnumerator());
+            }
+
+            IEnumerator<object> IEnumerable<object>.GetEnumerator()
+            {
+                return ObjectEnumeratorWrapper.MakeAsIEnumeratorOfT(Wrapped.GetEnumerator());
             }
         }
 
-        sealed class EnumerableArrayWrapper : IEnumerable
+        sealed class EnumerableArrayWrapper : IEnumerable, IEnumerable<object>
         {
             List<JsonObject> Wrapped;
 
-            public EnumerableArrayWrapper(List<JsonObject> wrapped)
+            private EnumerableArrayWrapper(List<JsonObject> wrapped)
             {
                 Wrapped = wrapped;
             }
 
+            public static IEnumerable MakeAsIEnumerable(List<JsonObject> wrapped)
+            {
+                return new EnumerableArrayWrapper(wrapped);
+            }
+
+            public static IEnumerable<object> MakeAsIEnumerableOfT(List<JsonObject> wrapped)
+            {
+                return new EnumerableArrayWrapper(wrapped);
+            }
+
             public IEnumerator GetEnumerator()
             {
-                return new ArrayEnumeratorWrapper(Wrapped.GetEnumerator());
+                return ArrayEnumeratorWrapper.MakeAsIEnumerator(Wrapped.GetEnumerator());
+            }
+
+            IEnumerator<object> IEnumerable<object>.GetEnumerator()
+            {
+                return ArrayEnumeratorWrapper.MakeAsIEnumeratorOfT(Wrapped.GetEnumerator());
             }
         }
     }
