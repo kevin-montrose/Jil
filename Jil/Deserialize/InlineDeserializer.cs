@@ -13,12 +13,14 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
+        public static bool UseCharArrayOverStringBuilder = true;
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
+        const string CharArrayName = "char_array";
         
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
@@ -86,7 +88,17 @@ namespace Jil.Deserialize
             if (mayNeedStringBuilder)
             {
                 Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+
+                if (UseCharArrayOverStringBuilder)
+                {
+                    Emit.DeclareLocal<char[]>(CharArrayName);
+                }
             }
+        }
+
+        void LoadCharArray()
+        {
+            Emit.LoadLocalAddress(CharArrayName);
         }
 
         void LoadCharBuffer()
@@ -216,15 +228,20 @@ namespace Jil.Deserialize
             // Stack starts
             // TextReader
 
-            if (UsingCharBuffer)
+            if (UseCharArrayOverStringBuilder)
             {
-                LoadCharBuffer();                           // TextReader char[]
-                LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
+                LoadCharArray();                                   // TextReader char[]
+                Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
+            }
+            else if (UsingCharBuffer)
+            {
+                LoadCharBuffer();                               // TextReader char[]
+                LoadStringBuilder();                            // TextReader char[] StringBuilder
+                Emit.Call(Methods.ReadEncodedStringWithBuffer); // string
             }
             else
             {
-                LoadStringBuilder();                        // TextReader StringBuilder
+                LoadStringBuilder();                   // TextReader StringBuilder
                 Emit.Call(Methods.ReadEncodedString);  // string
             }
         }
@@ -297,24 +314,49 @@ namespace Jil.Deserialize
                 return;
             }
 
-            LoadStringBuilder();                    // TextReader StringBuilder
-
-            if (numberType == typeof(double))
+            if (UseCharArrayOverStringBuilder)
             {
-                Emit.Call(Methods.ReadDouble);   // double
-                return;
+                LoadCharArray();                    // TextReader char[]
+
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingleCharArray);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    return;
+                }
             }
-
-            if (numberType == typeof(float))
+            else
             {
-                Emit.Call(Methods.ReadSingle);  // float
-                return;
-            }
+                LoadStringBuilder();                    // TextReader StringBuilder
 
-            if (numberType == typeof(decimal))
-            {
-                Emit.Call(Methods.ReadDecimal); // decimal
-                return;
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDouble);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingle);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimal); // decimal
+                    return;
+                }
             }
 
             throw new ConstructionException("Unexpected number type: " + numberType);
