@@ -1011,7 +1011,7 @@ namespace Jil.Deserialize
                 }
 
                 storeChar:
-                commonSb.Append((char)c);
+                commonSb.AppendSmall((char)c);
                 reader.Read();
                 prev = c;
             }
@@ -1174,7 +1174,7 @@ namespace Jil.Deserialize
                 }
 
                 storeChar:
-                commonSb.Append((char)c);
+                commonSb.AppendSmall((char)c);
                 reader.Read();
                 prev = c;
             }
@@ -1337,7 +1337,7 @@ namespace Jil.Deserialize
                 }
 
                 storeChar:
-                commonSb.Append((char)c);
+                commonSb.AppendSmall((char)c);
                 reader.Read();
                 prev = c;
             }

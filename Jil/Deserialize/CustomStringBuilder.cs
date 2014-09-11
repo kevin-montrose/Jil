@@ -10,10 +10,6 @@ namespace Jil.Deserialize
 {
     struct CustomStringBuilder
     {
-        const int LongSizeShift = 2;
-        const int NeedsIntCopy = 0x2;
-        const int NeedsCharCopy = 0x1;
-
         int BufferIx;
         char[] Buffer;
 
@@ -22,6 +18,8 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void ArrayCopyAligned(char[] smaller, char[] larger)
         {
+            const int LongSizeShift = 2;
+
             fixed (char* fromPtrFixed = smaller)
             fixed (char* intoPtrFixed = larger)
             {
@@ -44,6 +42,10 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void ArrayCopy(char* fromPtrFixed, int fromLength, char* intoPtrFixed)
         {
+            const int LongSizeShift = 2;
+            const int NeedsIntCopy = 0x2;
+            const int NeedsCharCopy = 0x1;
+
             var fromPtr = fromPtrFixed;
             var intoPtr = intoPtrFixed;
 
@@ -86,13 +88,14 @@ namespace Jil.Deserialize
             }
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void AssureSpace(int neededSpace)
+        void AssureSpaceSmall(int neededSpace)
         {
+            const int GrowthShift = 2;  // this grows by 4 char (8 byte) increments
+
             if (Buffer == null)
             {
-                Buffer = new char[((neededSpace >> LongSizeShift) + 1) << LongSizeShift];
+                Buffer = new char[((neededSpace >> GrowthShift) + 1) << GrowthShift];
                 return;
             }
 
@@ -100,16 +103,36 @@ namespace Jil.Deserialize
 
             if (Buffer.Length > desiredSize) return;
 
-            var newBuffer = new char[((desiredSize >> LongSizeShift) + 1) << LongSizeShift];
+            var newBuffer = new char[((desiredSize >> GrowthShift) + 1) << GrowthShift];
             ArrayCopyAligned(Buffer, newBuffer);
             Buffer = newBuffer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Append(string str)
+        void AssureSpaceLarge(int neededSpace)
+        {
+            const int GrowthShift = 7;  // this grows by 128 char (256 byte) increments
+
+            if (Buffer == null)
+            {
+                Buffer = new char[((neededSpace >> GrowthShift) + 1) << GrowthShift];
+                return;
+            }
+
+            var desiredSize = BufferIx + neededSpace;
+
+            if (Buffer.Length > desiredSize) return;
+
+            var newBuffer = new char[((desiredSize >> GrowthShift) + 1) << GrowthShift];
+            ArrayCopyAligned(Buffer, newBuffer);
+            Buffer = newBuffer;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void AppendSmall(string str)
         {
             var newChars = str.Length;
-            AssureSpace(newChars);
+            AssureSpaceSmall(newChars);
 
             fixed (char* fixedBufferPtr = Buffer)
             fixed (char* fixedStrPtr = str)
@@ -122,19 +145,44 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Append(char c)
+        public void AppendSmall(char c)
         {
-            AssureSpace(1);
+            AssureSpaceSmall(1);
 
             Buffer[BufferIx] = c;
             BufferIx++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Append(char[] chars, int start, int len)
+        public unsafe void AppendLarge(string str)
+        {
+            var newChars = str.Length;
+            AssureSpaceLarge(newChars);
+
+            fixed (char* fixedBufferPtr = Buffer)
+            fixed (char* fixedStrPtr = str)
+            {
+                var copyInto = fixedBufferPtr + BufferIx;
+                ArrayCopy(fixedStrPtr, newChars, copyInto);
+            }
+
+            BufferIx += str.Length;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AppendLarge(char c)
+        {
+            AssureSpaceLarge(1);
+
+            Buffer[BufferIx] = c;
+            BufferIx++;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void AppendLarge(char[] chars, int start, int len)
         {
             var newChars = len;
-            AssureSpace(newChars);
+            AssureSpaceLarge(newChars);
 
             fixed (char* fixedBufferPtr = Buffer)
             fixed (char* fixedCharsPtr = chars)

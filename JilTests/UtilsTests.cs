@@ -680,28 +680,28 @@ namespace JilTests
         public void CustomStringBuilder()
         {
             var sb = new Jil.Deserialize.CustomStringBuilder();
-            sb.Append("a");
-            sb.Append("ab");
-            sb.Append("abc");
-            sb.Append("abcd");
-            sb.Append("abcdef");
-            sb.Append("abcdefg");
-            sb.Append("abcdefgh");
-            sb.Append("abcdefghi");
-            sb.Append("abcdefghij");
-            sb.Append("abcdefghijk");
-            sb.Append("abcdefghijkl");
-            sb.Append("hello world");
-            sb.Append('c');
-            sb.Append('\0');
+            sb.AppendSmall("a");
+            sb.AppendSmall("ab");
+            sb.AppendSmall("abc");
+            sb.AppendSmall("abcd");
+            sb.AppendSmall("abcdef");
+            sb.AppendSmall("abcdefg");
+            sb.AppendSmall("abcdefgh");
+            sb.AppendSmall("abcdefghi");
+            sb.AppendSmall("abcdefghij");
+            sb.AppendSmall("abcdefghijk");
+            sb.AppendSmall("abcdefghijkl");
+            sb.AppendSmall("hello world");
+            sb.AppendSmall('c');
+            sb.AppendSmall('\0');
             for (var i = 0; i < 16; i++)
             {
-                sb.Append(Enumerable.Range(0, 16).Select(_ => 'a').ToArray(), 0, 16);
+                sb.AppendLarge(Enumerable.Range(0, 16).Select(_ => 'a').ToArray(), 0, 16);
             }
 
             for (var i = 0; i < 8; i++)
             {
-                sb.Append(Enumerable.Range(0, 16).Select(_ => 'b').ToArray(), 0, 8 + i);
+                sb.AppendLarge(Enumerable.Range(0, 16).Select(_ => 'b').ToArray(), 0, 8 + i);
             }
 
             var str = sb.StaticToString();

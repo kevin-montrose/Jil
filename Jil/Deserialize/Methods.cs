@@ -505,7 +505,7 @@ namespace Jil.Deserialize
 
                 if (first != '\\')
                 {
-                    commonSb.Append((char)first);
+                    commonSb.AppendLarge((char)first);
                     continue;
                 }
 
@@ -514,14 +514,14 @@ namespace Jil.Deserialize
 
                 switch (second)
                 {
-                    case '"': commonSb.Append('"'); continue;
-                    case '\\': commonSb.Append('\\'); continue;
-                    case '/': commonSb.Append('/'); continue;
-                    case 'b': commonSb.Append('\b'); continue;
-                    case 'f': commonSb.Append('\f'); continue;
-                    case 'n': commonSb.Append('\n'); continue;
-                    case 'r': commonSb.Append('\r'); continue;
-                    case 't': commonSb.Append('\t'); continue;
+                    case '"': commonSb.AppendLarge('"'); continue;
+                    case '\\': commonSb.AppendLarge('\\'); continue;
+                    case '/': commonSb.AppendLarge('/'); continue;
+                    case 'b': commonSb.AppendLarge('\b'); continue;
+                    case 'f': commonSb.AppendLarge('\f'); continue;
+                    case 'n': commonSb.AppendLarge('\n'); continue;
+                    case 'r': commonSb.AppendLarge('\r'); continue;
+                    case 't': commonSb.AppendLarge('\t'); continue;
                 }
 
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
@@ -656,7 +656,7 @@ namespace Jil.Deserialize
                 {
                     if (ix == CharBufferSize)
                     {
-                        commonSb.Append(buffer, 0, ix);
+                        commonSb.AppendLarge(buffer, 0, ix);
                         break;
                     }
 
@@ -696,7 +696,7 @@ namespace Jil.Deserialize
 
                     if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
 
-                    commonSb.Append(buffer, 0, ix);
+                    commonSb.AppendLarge(buffer, 0, ix);
 
                     // now we're in an escape sequence, we expect 4 hex #s; always
                     ReadHexQuadToCustomBuilder(reader, ref commonSb);
@@ -718,7 +718,7 @@ namespace Jil.Deserialize
 
                 if (first != '\\')
                 {
-                    commonSb.Append((char)first);
+                    commonSb.AppendLarge((char)first);
                     continue;
                 }
 
@@ -727,14 +727,14 @@ namespace Jil.Deserialize
 
                 switch (second)
                 {
-                    case '"': commonSb.Append('"'); continue;
-                    case '\\': commonSb.Append('\\'); continue;
-                    case '/': commonSb.Append('/'); continue;
-                    case 'b': commonSb.Append('\b'); continue;
-                    case 'f': commonSb.Append('\f'); continue;
-                    case 'n': commonSb.Append('\n'); continue;
-                    case 'r': commonSb.Append('\r'); continue;
-                    case 't': commonSb.Append('\t'); continue;
+                    case '"': commonSb.AppendLarge('"'); continue;
+                    case '\\': commonSb.AppendLarge('\\'); continue;
+                    case '/': commonSb.AppendLarge('/'); continue;
+                    case 'b': commonSb.AppendLarge('\b'); continue;
+                    case 'f': commonSb.AppendLarge('\f'); continue;
+                    case 'n': commonSb.AppendLarge('\n'); continue;
+                    case 'r': commonSb.AppendLarge('\r'); continue;
+                    case 't': commonSb.AppendLarge('\t'); continue;
                 }
 
                 if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
@@ -1267,7 +1267,7 @@ namespace Jil.Deserialize
             }
 
             finished:
-            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
+            commonSb.AppendLarge(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
         public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
@@ -1365,7 +1365,7 @@ namespace Jil.Deserialize
 
                         continue;
                     }
-                    commonSb.Append(c);
+                    commonSb.AppendLarge(c);
                 }
             }
 
