@@ -2018,5 +2018,62 @@ namespace JilTests
             DateTime dt = dyn;
             Assert.AreEqual(shouldMatch, dt);
         }
+
+        [TestMethod]
+        public void Issue61()
+        {
+            using (var str = new StringReader("{\"hello\":123, \"world\":456, \"foo\":789}"))
+            {
+                bool hello, world, foo;
+                hello = world = foo = false;
+
+                var res = JSON.DeserializeDynamic(str);
+                foreach (var kv in res)
+                {
+                    string key = kv.Key;
+                    dynamic val = kv.Value;
+
+                    if(key == "hello") 
+                    {
+                        if (hello)
+                        {
+                            Assert.Fail("hello seen twice");
+                        }
+                        hello = true;
+
+                        Assert.AreEqual(123, (int)val);
+                        continue;
+                    }
+
+                    if (key == "world")
+                    {
+                        if (world)
+                        {
+                            Assert.Fail("world seen twice");
+                        }
+                        world = true;
+
+                        Assert.AreEqual(456, (int)val);
+                        continue;
+                    }
+
+                    if (key == "foo")
+                    {
+                        if (foo)
+                        {
+                            Assert.Fail("foo seen twice");
+                        }
+                        foo = true;
+
+                        Assert.AreEqual(789, (int)val);
+                        continue;
+                    }
+                }
+
+                Assert.IsTrue(hello);
+                Assert.IsTrue(world);
+                Assert.IsTrue(foo);
+            }
+        }
     }
 }
