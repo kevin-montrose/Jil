@@ -1123,22 +1123,18 @@ namespace Jil.Deserialize
                 var nextItem = Emit.DefineLabel();
 
                 Emit.MarkLabel(loopStart);      // --empty--
-                ConsumeWhiteSpace();            // --empty--
                 loadObj();                      // objType(*?)
-                RawPeekChar();                  // objType(*?) int 
+                ReadSkipWhitespace();           // objType(*?) int 
                 Emit.Duplicate();               // objType(*?) int int
                 Emit.LoadConstant(',');         // objType(*?) int int ','
                 Emit.BranchIfEqual(nextItem);   // objType(*?) int
                 Emit.LoadConstant('}');         // objType(*?) int '}'
-                Emit.BranchIfEqual(done);       // objType(*?)
+                Emit.BranchIfEqual(doneSkipChar);// objType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
 
                 Emit.MarkLabel(nextItem);           // objType(*?) int
-                Emit.Pop();                         // objType(*?)
-                Emit.LoadArgument(0);               // objType(*?) TextReader
-                Emit.CallVirtual(TextReader_Read);  // objType(*?) int
                 Emit.Pop();                         // objType(*?)
                 ReadSkipWhitespace();
 
