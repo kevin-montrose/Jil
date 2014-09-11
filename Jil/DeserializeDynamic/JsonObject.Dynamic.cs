@@ -12,6 +12,169 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject : IDynamicMetaObjectProvider
     {
+        class ObjectEnumeratorWrapper : DynamicObject
+        {
+            class KeyValuePairWrapper : DynamicObject
+            {
+                KeyValuePair<string, JsonObject> Wrapped;
+
+                public KeyValuePairWrapper(KeyValuePair<string, JsonObject> wrapped)
+                {
+                    Wrapped = wrapped;
+                }
+
+                public override bool TryGetMember(GetMemberBinder binder, out object result)
+                {
+                    result = null;
+
+                    switch (binder.Name)
+                    {
+                        case "Key":
+                            result = Wrapped.Key;
+                            return true;
+                        case "Value":
+                            result = Wrapped.Value;
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+
+                public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+                {
+                    result = null;
+                    
+                    switch(binder.Name)
+                    {
+                        case "Equals":
+                            if (args.Length == 1)
+                            {
+                                result = Wrapped.Equals(args[0]);
+                                return true;
+                            }
+                            return false;
+                        case "GetHashCode":
+                            if (args.Length == 0)
+                            {
+                                result = Wrapped.GetHashCode();
+                                return true;
+                            }
+                            return false;
+                        case "GetType":
+                            if (args.Length == 0)
+                            {
+                                // Do *not* proxy this call, but *do* respond to it
+                                result = this.GetType();
+                                return true;
+                            }
+                            return false;
+                        case "ToString":
+                            if (args.Length == 0)
+                            {
+                                result = Wrapped.ToString();
+                                return true;
+                            }
+
+                            return false;
+                        default:
+                            return false;
+                    }
+                }
+            }
+
+            Dictionary<string, JsonObject>.Enumerator Wrapped;
+
+            public ObjectEnumeratorWrapper(Dictionary<string, JsonObject>.Enumerator wrapped)
+            {
+                Wrapped = wrapped;
+            }
+
+            public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+            {
+                result = null;
+
+                switch(binder.Name)
+                {
+                    case "Dispose":
+                        if (args.Length == 0)
+                        {
+                            Wrapped.Dispose();
+                            return true;
+                        }
+                        result = null;
+                        return false;
+                    case "Equals":
+                        if (args.Length == 1)
+                        {
+                            result = Wrapped.Equals(args[0]);
+                            return true;
+                        }
+                        return false;
+                    case "GetHashCode":
+                        if (args.Length == 0)
+                        {
+                            result = Wrapped.GetHashCode();
+                            return true;
+                        }
+                        return false;
+                    case "GetType":
+                        if (args.Length == 0)
+                        {
+                            // Do *not* proxy this call, but *do* respond to it
+                            result = this.GetType();
+                            return true;
+                        }
+
+                        return false;
+                    case "MoveNext":
+                        if (args.Length == 0)
+                        {
+                            result = Wrapped.MoveNext();
+                            return true;
+                        }
+                        return false;
+                    case "ToString":
+                        if (args.Length == 0)
+                        {
+                            result = Wrapped.ToString();
+                            return true;
+                        }
+                        return false;
+                    case "Reset":
+                        if (args.Length == 0)
+                        {
+                            ((System.Collections.IEnumerator)Wrapped).Reset();
+                            return true;
+                        }
+                        return false;
+                    default: 
+                        return false;
+                }
+            }
+
+            public override bool TryGetMember(GetMemberBinder binder, out object result)
+            {
+                result = null;
+                switch(binder.Name)
+                {
+                    case "Current":
+                        result = new KeyValuePairWrapper(Wrapped.Current);
+                        return true;
+                    case "Entry":
+                        result = ((System.Collections.IDictionaryEnumerator)Wrapped).Entry;
+                        return true;
+                    case "Key":
+                        result = ((System.Collections.IDictionaryEnumerator)Wrapped).Key;
+                        return true;
+                    case "Value":
+                        result = ((System.Collections.IDictionaryEnumerator)Wrapped).Value;
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
         public DynamicMetaObject GetMetaObject(Expression exp)
         {
             return new JsonMetaObject(this, exp);
@@ -1309,7 +1472,7 @@ namespace Jil.DeserializeDynamic
             {
                 if (name == "GetEnumerator" && args.Length == 0)
                 {
-                    result = ObjectMembers.GetEnumerator();
+                    result = new ObjectEnumeratorWrapper(ObjectMembers.GetEnumerator());
                     return true;
                 }
 
