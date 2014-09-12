@@ -18,13 +18,14 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int, T> Thunk;
+        public static Func<TextReader, T> ZeroDepthThunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
         {
             Load();
-            return Thunk;
+            return ZeroDepthThunk;
         }
 
         public static void Load()
@@ -38,7 +39,8 @@ namespace Jil.Deserialize
 
                 var options = new TOptions();
 
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuild);
+                Thunk = InlineDeserializerHelper.BuildThunk<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuild);
+                ZeroDepthThunk = tr => Thunk(tr, 0);
             }
         }
     }
