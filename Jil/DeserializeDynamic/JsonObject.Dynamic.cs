@@ -1154,7 +1154,7 @@ namespace Jil.DeserializeDynamic
                 case JsonObjectType.Object:
                     if (returnType == typeof(System.Collections.IEnumerable))
                     {
-                        result = ObjectMembers;
+                        result = EnumerableObjectWrapper.MakeAsIEnumerable(ObjectMembers);
                         return true;
                     }
 
@@ -1211,7 +1211,7 @@ namespace Jil.DeserializeDynamic
                 case JsonObjectType.Array:
                     if (returnType == typeof(System.Collections.IEnumerable))
                     {
-                        result = ArrayValue;
+                        result = EnumerableArrayWrapper.MakeAsIEnumerable(ArrayValue);
                         return true;
                     }
 
@@ -1221,7 +1221,7 @@ namespace Jil.DeserializeDynamic
 
                         if (castTo == typeof(object))
                         {
-                            result = ArrayValue;
+                            result = EnumerableArrayWrapper.MakeAsIEnumerableOfT(ArrayValue);
                             return true;
                         }
 
@@ -1309,7 +1309,7 @@ namespace Jil.DeserializeDynamic
             {
                 if (name == "GetEnumerator" && args.Length == 0)
                 {
-                    result = ObjectMembers.GetEnumerator();
+                    result = ObjectEnumeratorWrapper.MakeAsIEnumerator(ObjectMembers.GetEnumerator());
                     return true;
                 }
 
@@ -1334,7 +1334,7 @@ namespace Jil.DeserializeDynamic
             {
                 if (name == "GetEnumerator" && args.Length == 0)
                 {
-                    result = ArrayValue.GetEnumerator();
+                    result = ArrayEnumeratorWrapper.MakeAsIEnumerator(ArrayValue.GetEnumerator());
                     return true;
                 }
 
