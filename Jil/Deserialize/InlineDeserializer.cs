@@ -56,6 +56,8 @@ namespace Jil.Deserialize
 
         void AddGlobalVariables()
         {
+            var createStringArray = false;
+
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
             var hasStringyTypes = 
@@ -66,13 +68,20 @@ namespace Jil.Deserialize
 
             if (needsCharBuffer)
             {
-                UsingCharBuffer = true;
+                if (UseCharArrayOverStringBuilder)
+                {
+                    createStringArray = true;
+                }
+                else
+                {
+                    UsingCharBuffer = true;
 
-                Emit.DeclareLocal<char[]>(CharBufferName);
+                    Emit.DeclareLocal<char[]>(CharBufferName);
 
-                Emit.LoadConstant(Methods.CharBufferSize);  // int
-                Emit.NewArray<char>();                      // char[]
-                Emit.StoreLocal(CharBufferName);            // --empty--
+                    Emit.LoadConstant(Methods.CharBufferSize);  // int
+                    Emit.NewArray<char>();                      // char[]
+                    Emit.StoreLocal(CharBufferName);            // --empty--
+                }
             }
 
             // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
@@ -87,12 +96,19 @@ namespace Jil.Deserialize
 
             if (mayNeedStringBuilder)
             {
-                Emit.DeclareLocal<StringBuilder>(StringBuilderName);
-
                 if (UseCharArrayOverStringBuilder)
                 {
-                    Emit.DeclareLocal<char[]>(CharArrayName);
+                    createStringArray = true;
                 }
+                else
+                {
+                    Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+                }
+            }
+
+            if (createStringArray)
+            {
+                Emit.DeclareLocal<char[]>(CharArrayName);
             }
         }
 
@@ -490,9 +506,18 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                      // --empty--
             Emit.LoadArgument(0);               // TextReader
-            LoadCharBuffer();
-            Emit.Call(Methods.ReadISO8601Date); // DateTime
-            ExpectQuote();                      // DateTime
+            if (UseCharArrayOverStringBuilder)
+            {
+                LoadCharArray();
+                Emit.Call(Methods.ReadISO8601DateWithCharArray); // DateTime
+                ExpectQuote();                      // DateTime
+            }
+            else
+            {
+                LoadCharBuffer();
+                Emit.Call(Methods.ReadISO8601Date); // DateTime
+                ExpectQuote();                      // DateTime
+            }
         }
 
         void ReadPrimitive(Type primitiveType)
