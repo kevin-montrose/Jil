@@ -70,6 +70,9 @@
     <Compile Include="DeserializeDynamic\JsonObject.Dynamic.cs">
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
+    <Compile Include="DeserializeDynamic\JsonObject.Enumerators.cs">
+      <DependentUpon>JsonObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeserializeDynamic\JsonObject.FastNumber.cs">
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
@@ -80,6 +83,7 @@
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Common\EnumValues.cs" />
+    <Compile Include="Deserialize\DeserializeIndirect.cs" />
     <Compile Include="Deserialize\EnumLookup.cs" />
     <Compile Include="Common\FlagsEnumCombiner.cs" />
     <Compile Include="Deserialize\InlineDeserializer.cs" />

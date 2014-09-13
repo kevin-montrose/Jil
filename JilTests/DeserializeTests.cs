@@ -1268,7 +1268,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Expected digit", e.Message);
+                    Assert.AreEqual("Not enough character for ISO8601 timezone offset", e.Message);
                 }
             }
 
@@ -4405,6 +4405,31 @@ namespace JilTests
             Assert.AreEqual(_EnumEscapes.Foo, JSON.Deserialize<_EnumEscapes>(@"""F\u006f\u006F"""));
             Assert.AreEqual(_EnumEscapes.Bar, JSON.Deserialize<_EnumEscapes>(@"""\u0042\u0061\u0072"""));
             Assert.AreEqual(_EnumEscapes.Résumé, JSON.Deserialize<_EnumEscapes>(@"""R\u00e9sum\u00E9"""));
+        }
+
+        class _DeserializeNonGenericClass
+        {
+            public string A { get; set; }
+            public int B { get; set; }
+        }
+
+        struct _DeserializeNonGenericStruct
+        {
+            public string A { get; set; }
+            public int B { get; set; }
+        }
+
+        [TestMethod]
+        public void DeserializeNonGeneric()
+        {
+            var a = (_DeserializeNonGenericClass)JSON.Deserialize("{\"A\":\"hello world\", \"B\":123}", typeof(_DeserializeNonGenericClass));
+            Assert.IsNotNull(a);
+            Assert.AreEqual("hello world", a.A);
+            Assert.AreEqual(123, a.B);
+
+            var b = (_DeserializeNonGenericStruct)JSON.Deserialize("{\"A\":\"hello world\", \"B\":123}", typeof(_DeserializeNonGenericStruct));
+            Assert.AreEqual("hello world", b.A);
+            Assert.AreEqual(123, b.B);
         }
 
 #if !DEBUG
