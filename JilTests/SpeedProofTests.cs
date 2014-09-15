@@ -850,7 +850,7 @@ namespace JilTests
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
 
                     {
@@ -858,7 +858,7 @@ namespace JilTests
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
                 }
                 finally
@@ -900,7 +900,7 @@ namespace JilTests
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        fast = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
 
                     {
@@ -908,7 +908,7 @@ namespace JilTests
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        normal = InlineDeserializerHelper.Build<string>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
                 }
                 finally
@@ -1073,7 +1073,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    automata = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<NewtonsoftStyle, _UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
 
                 {
@@ -1081,7 +1081,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    method = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    method = InlineDeserializerHelper.Build<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<NewtonsoftStyle, _UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
             }
             finally
@@ -1191,7 +1191,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    automata = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
 
                 {
@@ -1199,7 +1199,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    dictionary = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    dictionary = InlineDeserializerHelper.Build<_UseNameAutomata>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
             }
             finally

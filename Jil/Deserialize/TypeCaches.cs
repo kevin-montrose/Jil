@@ -7,18 +7,25 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
-    static class NewtonsoftStyleTypeCache<T>
+    interface IDeserializeOptions
+    {
+        DateTimeFormat DateFormat { get; }
+    }
+
+    static class TypeCache<TOptions, T>
+        where TOptions : IDeserializeOptions, new()
     {
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int, T> Thunk;
+        public static Func<TextReader, T> ZeroDepthThunk;
         public static Exception ExceptionDuringBuild;
 
         public static Func<TextReader, T> Get()
         {
             Load();
-            return Thunk;
+            return ZeroDepthThunk;
         }
 
         public static void Load()
@@ -30,92 +37,31 @@ namespace Jil.Deserialize
                 if (Thunk != null || BeingBuilt) return;
                 BeingBuilt = true;
 
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
+                var options = new TOptions();
+
+                Thunk = InlineDeserializerHelper.BuildThunk<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuild);
+                ZeroDepthThunk = tr => Thunk(tr, 0);
             }
         }
     }
-
-    static class MillisecondStyleTypeCache<T>
+    
+    class NewtonsoftStyle : IDeserializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-
-        public static volatile Func<TextReader, T> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Func<TextReader, T> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
     }
 
-    static class SecondStyleTypeCache<T>
+    class MillisecondStyle : IDeserializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-
-        public static volatile Func<TextReader, T> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Func<TextReader, T> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
     }
 
-    static class ISO8601StyleTypeCache<T>
+    class SecondStyle : IDeserializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+    }
 
-        public static volatile Func<TextReader, T> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Func<TextReader, T> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+    class ISO8601Style : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
     }
 }
