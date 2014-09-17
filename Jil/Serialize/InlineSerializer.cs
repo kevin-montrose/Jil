@@ -25,6 +25,7 @@ namespace Jil.Serialize
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
         public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseBufferedStringWriting = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -792,11 +793,27 @@ namespace Jil.Serialize
             {
                 if (quotesNeedHandling)
                 {
-                    Emit.Call(GetWriteEncodedStringWithQuotesMethod());
+                    if (UseBufferedStringWriting)
+                    {
+                        Emit.LoadLocal(CharBuffer);
+                        Emit.Call(GetWriteEncodedStringWithQuotesMethodBuffered());
+                    }
+                    else
+                    {
+                        Emit.Call(GetWriteEncodedStringWithQuotesMethod());
+                    }
                 }
                 else
                 {
-                    Emit.Call(GetWriteEncodedStringMethod());
+                    if (UseBufferedStringWriting)
+                    {
+                        Emit.LoadLocal(CharBuffer);
+                        Emit.Call(GetWriteEncodedStringMethodBuffered());
+                    }
+                    else
+                    {
+                        Emit.Call(GetWriteEncodedStringMethod());
+                    }
                 }
                 
                 return;
@@ -2439,7 +2456,15 @@ namespace Jil.Serialize
                     Emit.LoadArgument(0);   // kvp TextWriter
                     Emit.LoadLocal(str);    // kvp TextWriter string
 
-                    Emit.Call(GetWriteEncodedStringMethod());   // kvp
+                    if (UseBufferedStringWriting)
+                    {
+                        Emit.LoadLocal(CharBuffer);
+                        Emit.Call(GetWriteEncodedStringMethodBuffered());   // kvp
+                    }
+                    else
+                    {
+                        Emit.Call(GetWriteEncodedStringMethod());   // kvp
+                    }
                 }
 
                 if (PrettyPrint)
@@ -2587,12 +2612,28 @@ namespace Jil.Serialize
                     JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithNullsInlineUnsafe;
         }
 
+        public MethodInfo GetWriteEncodedStringWithQuotesMethodBuffered()
+        {
+            return
+                ExcludeNulls ?
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPBuffered : Methods.WriteEncodedStringWithQuotesWithoutNullsInlineBuffered :
+                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONPBuffered : Methods.WriteEncodedStringWithQuotesWithNullsInlineBuffered;
+        }
+
         MethodInfo GetWriteEncodedStringMethod()
         {
             return
                 ExcludeNulls ?
                     JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithoutNullsInlineUnsafe :
                     JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithNullsInlineUnsafe;
+        }
+
+        MethodInfo GetWriteEncodedStringMethodBuffered()
+        {
+            return
+                ExcludeNulls ?
+                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONPBuffered : Methods.WriteEncodedStringWithoutNullsInlineBuffered :
+                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONPBuffered : Methods.WriteEncodedStringWithNullsInlineBuffered;
         }
 
         void WriteKeyValue(Type keyType, Type elementType)
@@ -2624,7 +2665,15 @@ namespace Jil.Serialize
                     Emit.LoadArgument(0);   // kvp TextWriter
                     Emit.LoadLocal(str);    // kvp TextWriter string
 
-                    Emit.Call(GetWriteEncodedStringMethod()); // kvp
+                    if (UseBufferedStringWriting)
+                    {
+                        Emit.LoadLocal(CharBuffer);
+                        Emit.Call(GetWriteEncodedStringMethodBuffered()); // kvp
+                    }
+                    else
+                    {
+                        Emit.Call(GetWriteEncodedStringMethod()); // kvp
+                    }
                 }
 
                 if (PrettyPrint)
@@ -3062,16 +3111,17 @@ namespace Jil.Serialize
         void AddCharBuffer(Type serializingType)
         {
             // Don't tax the naive implementations by allocating a buffer they don't use
-            if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting)) return;
+            if (!(UseCustomIntegerToString || UseFastGuids || UseCustomISODateFormatting || UseBufferedStringWriting)) return;
 
             var allTypes = serializingType.InvolvedTypes();
 
             var hasGuids = allTypes.Any(t => t == typeof(Guid));
             var hasDateTime = allTypes.Any(t => t == typeof(DateTime) || t == typeof(DateTimeOffset));
             var hasInteger = allTypes.Any(t => t.IsIntegerNumberType());
+            var hasString = allTypes.Any(t => t == typeof(string));
 
             // Not going to use a buffer?  Don't allocate it
-            if (!hasGuids && !hasDateTime && !hasInteger)
+            if (!hasGuids && !hasDateTime && !hasInteger && !hasString)
             {
                 return;
             }
