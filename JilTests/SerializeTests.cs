@@ -786,6 +786,27 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void IReadOnlyDictionary()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    (IReadOnlyDictionary<string, int>)new Dictionary<string, int>
+                    {
+                        { "hello world", 123 },
+                        { "fizz buzz", 456 },
+                        { "indeed", 789 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
+            }
+        }
+
 #pragma warning disable 0649
         public class _List
         {
@@ -801,6 +822,26 @@ namespace JilTests
             {
                 JSON.Serialize(
                     new[]
+                    {
+                        new _List { Key = "whatever", Val = 123 },
+                        new _List { Key = "indeed", Val = 456 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
+            }
+        }
+
+        [TestMethod]
+        public void IReadOnlyList()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    (IReadOnlyList<_List>)new[]
                     {
                         new _List { Key = "whatever", Val = 123 },
                         new _List { Key = "indeed", Val = 456 }
