@@ -1757,7 +1757,7 @@ namespace Jil.Deserialize
 
             // Final, special, case for IEnumerable<X> if *not* a List
             // We can make this work by just acting like it *is* a List<X>
-            if (forType.IsGenericEnumerable())
+            if (forType.IsGenericEnumerable() || forType.IsGenericReadOnlyList())
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
