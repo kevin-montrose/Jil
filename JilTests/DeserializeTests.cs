@@ -3822,6 +3822,24 @@ namespace JilTests
             }
         }
 
+        class _IReadOnlyListMember
+        {
+            public IReadOnlyList<string> A { get; set; }
+        }
+
+        [TestMethod]
+        public void IReadOnlyListMember()
+        {
+            using (var str = new StringReader("{\"A\":[\"abcd\", \"efgh\"]}"))
+            {
+                var res = JSON.Deserialize<_IReadOnlyListMember>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(2, res.A.Count());
+                Assert.AreEqual("abcd", res.A.ElementAt(0));
+                Assert.AreEqual("efgh", res.A.ElementAt(1));
+            }
+        }
+
         [TestMethod]
         public void Interface()
         {

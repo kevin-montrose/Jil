@@ -31,14 +31,29 @@ namespace Jil.Common
             return enumType.GetCustomAttribute<FlagsAttribute>() != null;
         }
 
+        public static bool IsGenericContainer(this Type forType, Type containerType)
+        {
+            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == containerType;
+        }
+
         public static bool IsGenericDictionary(this Type forType)
         {
-            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == typeof(IDictionary<,>);
+            return IsGenericContainer(forType, typeof(IDictionary<,>));
         }
 
         public static bool IsGenericEnumerable(this Type forType)
         {
-            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == typeof(IEnumerable<>);
+            return IsGenericContainer(forType, typeof(IEnumerable<>));
+        }
+
+        public static bool IsGenericReadOnlyList(this Type forType)
+        {
+            return IsGenericContainer(forType, typeof(IReadOnlyList<>));
+        }
+
+        public static bool IsGenericReadOnlyDictionary(this Type forType)
+        {
+            return IsGenericContainer(forType, typeof(IReadOnlyDictionary<,>));
         }
 
         public static string GetSerializationName(this MemberInfo member)
@@ -505,65 +520,88 @@ namespace Jil.Common
             return Nullable.GetUnderlyingType(t);
         }
 
-        public static bool IsListType(this Type t)
+        public static bool IsContainerType(this Type t, Type containerType)
         {
             try
             {
                 return
-                    (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ||
-                    t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+                    (t.IsGenericType && t.GetGenericTypeDefinition() == containerType) ||
+                    t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == containerType);
             }
             catch (Exception) { return false; }
+        }
+
+        public static bool IsListType(this Type t)
+        {
+            return t.IsContainerType(typeof(IList<>));
+        }
+
+        public static bool IsCollectionType(this Type t)
+        {
+            return t.IsContainerType(typeof(ICollection<>));
         }
 
         public static bool IsEnumerableType(this Type t)
         {
-            try
-            {
-                return
-                    (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)) ||
-                    t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
-            }
-            catch (Exception) { return false; }
+            return t.IsContainerType(typeof(IEnumerable<>));
+        }
+
+        public static bool IsReadOnlyListType(this Type t)
+        {
+            return t.IsContainerType(typeof(IReadOnlyList<>));
+        }
+
+        public static bool IsReadOnlyDictionaryType(this Type t)
+        {
+            return t.IsContainerType(typeof(IReadOnlyDictionary<,>));
         }
 
         public static Type GetListInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+            return t.GetContainerInterface(typeof(IList<>));
+        }
+
+        public static Type GetReadOnlyListInterface(this Type t)
+        {
+            return t.GetContainerInterface(typeof(IReadOnlyList<>));
         }
 
         public static Type GetEnumerableInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            return t.GetContainerInterface(typeof(IEnumerable<>));
         }
 
         public static Type GetCollectionInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ICollection<>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ICollection<>));
+            return t.GetContainerInterface(typeof(ICollection<>));
+        }
+
+        public static Type GetReadOnlyCollectionInterface(this Type t)
+        {
+            return t.GetContainerInterface(typeof(IReadOnlyCollection<>));
         }
 
         public static bool IsDictionaryType(this Type t)
         {
+            return t.IsContainerType(typeof(IDictionary<,>));
+        }
+
+        public static Type GetContainerInterface(this Type t, Type containerType)
+        {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ||
-                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+                (t.IsGenericType && t.GetGenericTypeDefinition() == containerType)
+                    ? t
+                    : t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == containerType);
         }
 
         public static Type GetDictionaryInterface(this Type t)
         {
-            return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ?
-                t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+            return t.GetContainerInterface(typeof(IDictionary<,>));
+        }
+
+        public static Type GetReadOnlyDictionaryInterface(this Type t)
+        {
+            return t.GetContainerInterface(typeof(IReadOnlyDictionary<,>));
         }
 
         public static bool IsExactlyDictionaryType(this Type t)
