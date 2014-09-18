@@ -487,6 +487,120 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        public static readonly MethodInfo ReadEncodedStringBuffered = typeof(Methods).GetMethod("_ReadEncodedStringBuffered", BindingFlags.Static | BindingFlags.NonPublic);
+        static string _ReadEncodedStringBuffered(TextReader reader, char[] buffer, ref StringBuilder builder)
+        {
+            var idx = 0;
+
+            while (true)
+            {
+                while (idx < buffer.Length - 1)
+                {
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                    if (first == '"')
+                    {
+                        goto complete;
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[idx++] = (char)first;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                    switch (second)
+                    {
+                        case '"': buffer[idx++] = '"'; continue;
+                        case '\\': buffer[idx++] = '\\'; continue;
+                        case '/': buffer[idx++] = '/'; continue;
+                        case 'b': buffer[idx++] = '\b'; continue;
+                        case 'f': buffer[idx++] = '\f'; continue;
+                        case 'n': buffer[idx++] = '\n'; continue;
+                        case 'r': buffer[idx++] = '\r'; continue;
+                        case 't': buffer[idx++] = '\t'; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    buffer[idx++] = ReadHexQuad2(reader);
+                }
+
+                if (builder == null)
+                    builder = new StringBuilder();
+
+                builder.Append(buffer, 0, idx);
+                idx = 0;
+            }
+
+        complete: 
+            if (builder == null || builder.Length == 0)
+                return new string(buffer, 0, idx);
+
+            builder.Append(buffer, 0, idx);
+            var result = builder.ToString();
+            builder.Clear();
+            return result;
+        }
+
+        static char ReadHexQuad2(TextReader reader)
+        {
+            int unescaped;
+            int c;
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped = (c - '0') << 12;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped = (10 + c - 'A') << 12;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped = (10 + c - 'a') << 12;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 8;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 8;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 8;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 4;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 4;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 4;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= c - '0';
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= 10 + c - 'A';
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= 10 + c - 'a';
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            return (char)unescaped;
+        }
+
+
         public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
