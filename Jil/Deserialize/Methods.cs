@@ -494,7 +494,7 @@ namespace Jil.Deserialize
 
             while (true)
             {
-                while (idx < buffer.Length - 1)
+                while (idx < buffer.Length)
                 {
                     var first = reader.Read();
                     if (first == -1) throw new DeserializationException("Expected any character", reader);
