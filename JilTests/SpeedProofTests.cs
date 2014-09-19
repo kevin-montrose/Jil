@@ -846,6 +846,7 @@ namespace JilTests
                 try
                 {
                     {
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = false;
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
                         Exception ignored;
 
@@ -854,6 +855,7 @@ namespace JilTests
                     }
 
                     {
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = false;
                         InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
                         Exception ignored;
 
@@ -863,7 +865,62 @@ namespace JilTests
                 }
                 finally
                 {
+                    InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = true;
                     InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+                }
+
+                var rand = new Random(23450051);
+
+                var toSerialize = new List<_AlwaysUseCharBufferForStrings>();
+                for (var i = 0; i < 2000; i++)
+                {
+                    toSerialize.Add(
+                        new _AlwaysUseCharBufferForStrings
+                        {
+                            A = _RandString(rand, 32),
+                            B = _RandString(rand, 64)
+                        }
+                    );
+                }
+
+                toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+                double fastTime, normalTime;
+                CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            }
+        }
+
+        [TestMethod]
+        public void AlwaysUseCharBufferWithStringBuilder()
+        {
+            // objects
+            {
+                Func<TextReader, _AlwaysUseCharBufferForStrings> fast;
+                Func<TextReader, _AlwaysUseCharBufferForStrings> normal;
+
+                try
+                {
+                    {
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = true;
+                        Exception ignored;
+
+                        // Build the *actual* deserializer method
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    }
+
+                    {
+                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = false;
+                        Exception ignored;
+
+                        // Build the *actual* deserializer method
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    }
+                }
+                finally
+                {
+                    InlineDeserializer<_AlwaysUseCharBufferForStrings>.UseCharBufferWithStringBuilder = true;
                 }
 
                 var rand = new Random(23450051);

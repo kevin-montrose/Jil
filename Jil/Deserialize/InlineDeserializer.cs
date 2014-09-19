@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
+        public static bool UseCharBufferWithStringBuilder = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -60,7 +61,16 @@ namespace Jil.Deserialize
                 involvedTypes.Contains(typeof(string)) ||
                 involvedTypes.Any(t => t.IsUserDefinedType());
 
-            var needsCharBuffer = (AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+            var hasBufferedNumberTypes =
+                involvedTypes.Contains(typeof(float)) ||
+                involvedTypes.Contains(typeof(double)) ||
+                involvedTypes.Contains(typeof(Decimal));
+
+            var needsCharBuffer =
+                (AlwaysUseCharBufferForStrings && hasStringyTypes)
+                || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601)
+                || (UseCharBufferWithStringBuilder && (hasStringyTypes || hasBufferedNumberTypes))
+                || !UseNameAutomataForEnums;
 
             if (needsCharBuffer)
             {
@@ -216,7 +226,13 @@ namespace Jil.Deserialize
             // Stack starts
             // TextReader
 
-            if (UsingCharBuffer)
+            if (UseCharBufferWithStringBuilder)
+            {
+                LoadCharBuffer();                           // TextReader char[]
+                LoadStringBuilder();                        // TextReader char[] StringBuilder
+                Emit.Call(Methods.ReadEncodedStringBuffered);   // string
+            }
+            else if (UsingCharBuffer)
             {
                 LoadCharBuffer();                           // TextReader char[]
                 LoadStringBuilder();                        // TextReader char[] StringBuilder
@@ -297,23 +313,51 @@ namespace Jil.Deserialize
                 return;
             }
 
-            LoadStringBuilder();                    // TextReader StringBuilder
-
             if (numberType == typeof(double))
             {
-                Emit.Call(Methods.ReadDouble);   // double
+                if (UseCharBufferWithStringBuilder)
+                {
+                    LoadCharBuffer();                      // TextReader char[] 
+                    LoadStringBuilder();                   // TextReader char[] StringBuilder
+                    Emit.Call(Methods.ReadDoubleBuffered); // double
+                }
+                else
+                {
+                    LoadStringBuilder();             // TextReader StringBuilder
+                    Emit.Call(Methods.ReadDouble);   // double
+                }
                 return;
             }
 
             if (numberType == typeof(float))
             {
-                Emit.Call(Methods.ReadSingle);  // float
+                if (UseCharBufferWithStringBuilder)
+                {
+                    LoadCharBuffer();                      // TextReader char[] 
+                    LoadStringBuilder();                   // TextReader char[] StringBuilder
+                    Emit.Call(Methods.ReadSingleBuffered); // double
+                }
+                else
+                {
+                    LoadStringBuilder();            // TextReader StringBuilder
+                    Emit.Call(Methods.ReadSingle);  // float
+                }
                 return;
             }
 
             if (numberType == typeof(decimal))
             {
-                Emit.Call(Methods.ReadDecimal); // decimal
+                if (UseCharBufferWithStringBuilder)
+                {
+                    LoadCharBuffer();                       // TextReader char[] 
+                    LoadStringBuilder();                    // TextReader char[] StringBuilder
+                    Emit.Call(Methods.ReadDecimalBuffered); // decimal
+                }
+                else
+                {
+                    LoadStringBuilder();            // TextReader StringBuilder
+                    Emit.Call(Methods.ReadDecimal); // decimal
+                }
                 return;
             }
 
