@@ -28,6 +28,14 @@ namespace Jil.Deserialize
 
         Emit Emit;
 
+        enum State
+        {
+            Init,
+            CreateBuilders,
+            ExecuteBuilders,
+        }
+        private State _state = State.Init;
+
         public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat)
         {
             RecursionLookupType = recursionLookupType;
@@ -623,11 +631,16 @@ namespace Jil.Deserialize
             throw new ConstructionException("Unexpected type: " + type);
         }
 
-        void ReadNullable(Type nullableType)
+        Action ReadNullable(Type nullableType)
         {
             var underlying = Nullable.GetUnderlyingType(nullableType);
             var underlyingBuilder = CreateBuilder(underlying);
 
+            return () => ReadNullable(nullableType, underlying, underlyingBuilder);
+        }
+
+        void ReadNullable(Type nullableType, Type underlying, Action underlyingBuilder)
+        {
             var nullableConst = nullableType.GetConstructor(new[] { underlying });
 
             var maybeNull = Emit.DefineLabel();
@@ -657,11 +670,16 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadList(Type listType)
+        Action ReadList(Type listType)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
             var elementTypeBuilder = CreateBuilder(elementType);
 
+            return () => ReadList(listType, elementType, elementTypeBuilder);
+        }
+
+        void ReadList(Type listType, Type elementType, Action elementTypeBuilder)
+        {
             if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 listType = typeof(List<>).MakeGenericType(elementType);
@@ -765,7 +783,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadDictionary(Type dictType)
+        Action ReadDictionary(Type dictType)
         {
             var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
@@ -773,6 +791,11 @@ namespace Jil.Deserialize
             var valTypeBuilder = CreateBuilder(valType);
             var stringBuilder = CreateBuilder(typeof(string));
 
+            return () => ReadDictionary(dictType, keyType, valType, keyTypeBuilder, valTypeBuilder, stringBuilder);
+        }
+
+        void ReadDictionary(Type dictType, Type keyType, Type valType, Action keyTypeBuilder, Action valTypeBuilder, Action stringBuilder)
+        {
             var keyIsString = keyType == typeof(string);
             var keyIsInteger = keyType.IsIntegerNumberType();
             var keyIsEnum = keyType.IsEnum;
@@ -917,7 +940,7 @@ namespace Jil.Deserialize
             Emit.LoadField(thunk);
         }
 
-        void ReadObject(Type objType)
+        Action ReadObject(Type objType)
         {
             var isAnonymous = objType.IsAnonymouseClass();
 
@@ -925,21 +948,18 @@ namespace Jil.Deserialize
             {
                 if (UseNameAutomata)
                 {
-                    ReadAnonymousObjectAutomata(objType);
-                    return;
+                    return ReadAnonymousObjectAutomata(objType);
                 }
 
-                ReadAnonymousObjectDictionaryLookup(objType);
-                return;
+                return ReadAnonymousObjectDictionaryLookup(objType);
             }
 
             if (UseNameAutomata)
             {
-                ReadObjectAutomata(objType);
-                return;
+                return ReadObjectAutomata(objType);
             }
             
-            ReadObjectDictionaryLookup(objType);
+            return ReadObjectDictionaryLookup(objType);
         }
 
         void SkipAllMembers(Sigil.Label done, Sigil.Label doneSkipChar)
@@ -987,7 +1007,7 @@ namespace Jil.Deserialize
             Emit.MarkLabel(doneSkipChar);   // objType(*?)
         }
 
-        void ReadObjectAutomata(Type objType)
+        Action ReadObjectAutomata(Type objType)
         {
             var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
 
@@ -996,16 +1016,19 @@ namespace Jil.Deserialize
             var orderedSetters =
                 setters
                 .OrderBy(kv => kv.Key)
-                .Select((kv, i) => new
-                {
-                    Index   = i,
-                    Name    = kv.Key,
-                    Setter  = kv.Value,
-                    Builder = CreateBuilder(kv.Value.ReturnType()),
-                    Label   = Emit.DefineLabel()
-                })
+                .Select((kv, i) => Tuple.Create(kv.Value, CreateBuilder(kv.Value.ReturnType())))
                 .ToList();
-            
+
+            return () => ReadObjectAutomata(objType, setterLookup, setters, orderedSetters);
+        }
+
+        void ReadObjectAutomata(Type objType, Type setterLookup, Dictionary<string, MemberInfo> setters, IReadOnlyList<Tuple<MemberInfo, Action>> builders)
+        {
+            var orderedSetters =
+                builders
+                .Select(t => Tuple.Create(t.Item1, t.Item2, Emit.DefineLabel()))
+                .ToList();
+
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
@@ -1070,7 +1093,7 @@ namespace Jil.Deserialize
 
                 var inOrderLabels =
                     orderedSetters
-                    .Select(o => o.Label)
+                    .Select(o => o.Item3)
                     .ToArray();
 
                 ConsumeWhiteSpace();        // --empty--
@@ -1114,12 +1137,11 @@ namespace Jil.Deserialize
 
                 foreach (var kv in orderedSetters)
                 {
-                    var label = kv.Label;
-                    var member = kv.Setter;
-                    var memberType = member.ReturnType();
+                    var label = kv.Item3;
+                    var member = kv.Item1;
 
-                    Emit.MarkLabel(label);      // objType(*?)
-                    kv.Builder();               // objType(*?) memberType
+                    Emit.MarkLabel(label);    // objType(*?)
+                    kv.Item2();               // objType(*?) memberType
 
                     if (member is FieldInfo)
                     {
@@ -1174,7 +1196,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadObjectDictionaryLookup(Type objType)
+        Action ReadObjectDictionaryLookup(Type objType)
         {
             var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
 
@@ -1182,8 +1204,17 @@ namespace Jil.Deserialize
             var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
             var orderInst = (Dictionary<string, int>)order.GetValue(null);
 
-            var labels = setters.ToDictionary(d => d.Key, d => new { Label = Emit.DefineLabel(), Builder = CreateBuilder(d.Value.ReturnType()) });
+            var builders = setters.ToDictionary(d => d.Key, d => CreateBuilder(d.Value.ReturnType()));
             var stringBuilder = CreateBuilder(typeof(string));
+
+            return () => ReadObjectDictionaryLookup(objType, setters, order, orderInst, builders, stringBuilder);
+        }
+
+        void ReadObjectDictionaryLookup(Type objType, Dictionary<string, MemberInfo> setters, FieldInfo order, Dictionary<string, int> orderInst, Dictionary<string, Action> builders, Action stringBuilder)
+        {
+            var labels =
+                builders
+                .ToDictionary(d => d.Key, d => Tuple.Create(Emit.DefineLabel(), d.Value));
 
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
@@ -1248,7 +1279,7 @@ namespace Jil.Deserialize
                 var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
 
 
-                var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value.Label).ToArray();
+                var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value.Item1).ToArray();
 
                 ConsumeWhiteSpace();        // --empty--
                 loadObj();                  // objType(*?)
@@ -1290,8 +1321,8 @@ namespace Jil.Deserialize
                     var member = setters[kv.Key];
                     var memberType = member.ReturnType();
 
-                    Emit.MarkLabel(label.Label);      // objType(*?)
-                    label.Builder();                    // objType(*?) memberType
+                    Emit.MarkLabel(label.Item1);      // objType(*?)
+                    label.Item2();                    // objType(*?) memberType
 
                     if (member is FieldInfo)
                     {
@@ -1343,8 +1374,23 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadAnonymousObjectDictionaryLookup(Type objType)
+        Action ReadAnonymousObjectDictionaryLookup(Type objType)
         {
+            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+            var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
+            var orderInst = (Dictionary<string, int>)order.GetValue(null);
+            var labels = orderInst.ToDictionary(d => d.Key, d => CreateBuilder(propertyMap[d.Key].Item1));
+
+            return () => ReadAnonymousObjectDictionaryLookup(objType, propertyMap, order, orderInst, labels);
+        }
+
+        void ReadAnonymousObjectDictionaryLookup(Type objType, Dictionary<string, Tuple<Type, int>> propertyMap, FieldInfo order, Dictionary<string, int> orderInst, Dictionary<string, Action> builders)
+        {
+            var labels =
+                builders
+                .ToDictionary(d => d.Key, d => Tuple.Create(Emit.DefineLabel(), d.Value));
+
             var stringBuilder = CreateBuilder(typeof(string));
 
             var doneNotNull = Emit.DefineLabel();
@@ -1361,10 +1407,8 @@ namespace Jil.Deserialize
 
             var cons = objType.GetConstructors().Single();
 
-            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
-            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
 
-            if (propertyMap.Count == 0)
+            if (labels.Count == 0)
             {
                 var doneSkipChar = Emit.DefineLabel();
 
@@ -1384,9 +1428,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
             var tryGetValue = typeof(Dictionary<string, int>).GetMethod("TryGetValue");
-            var orderInst = (Dictionary<string, int>)order.GetValue(null);
 
             var localMap = new Dictionary<string, Sigil.Local>();
             foreach (var kv in propertyMap)
@@ -1394,8 +1436,7 @@ namespace Jil.Deserialize
                 localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
             }
 
-            var labels = orderInst.ToDictionary(d => d.Key, d => new { Label = Emit.DefineLabel(), Builder = CreateBuilder(localMap[d.Key].LocalType)});
-            var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value.Label).ToArray();
+            var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value.Item1).ToArray();
 
             var loopStart = Emit.DefineLabel();
 
@@ -1436,8 +1477,8 @@ namespace Jil.Deserialize
                 var label = kv.Value;
                 var local = localMap[kv.Key];
 
-                Emit.MarkLabel(label.Label);  // --empty--
-                label.Builder();              // localType
+                Emit.MarkLabel(label.Item1);  // --empty--
+                label.Item2();              // localType
 
                 Emit.StoreLocal(local); // --empty--
 
@@ -1499,12 +1540,37 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadAnonymousObjectAutomata(Type objType)
+        Action ReadAnonymousObjectAutomata(Type objType)
         {
+            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
+            var findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
+
+            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
+
+            var labels =
+                propertyMap
+                .ToDictionary(d => d.Key, d => Tuple.Create(d.Value.Item1, d.Value.Item2, CreateBuilder(d.Value.Item1)));
+
+            return () => ReadAnonymousObjectAutomata(objType, findConstructorParameterIndex, labels);
+        }
+
+        void ReadAnonymousObjectAutomata(Type objType, MethodInfo findConstructorParameterIndex, Dictionary<string, Tuple<Type, int, Action>> propertyMapBuilders)
+        {
+            var propertyMap =
+                propertyMapBuilders
+                .ToDictionary(d => d.Key, d => Tuple.Create(d.Value.Item1, d.Value.Item2, Emit.DefineLabel(), d.Value.Item3));
+
+            var localMap = new Dictionary<string, Sigil.Local>();
+            foreach (var kv in propertyMap)
+            {
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+            }
+
             var doneNotNull = Emit.DefineLabel();
             var doneNotNullPopSkipChar = Emit.DefineLabel();
             var doneNotNullSkipChar = Emit.DefineLabel();
             var doneNull = Emit.DefineLabel();
+            var cons = objType.GetConstructors().Single();
 
             ExpectRawCharOrNull(
                 '{',
@@ -1514,12 +1580,6 @@ namespace Jil.Deserialize
                     Emit.Branch(doneNull);
                 }
             );
-
-            var cons = objType.GetConstructors().Single();
-
-            var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
-            var findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
-            var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
 
             if (propertyMap.Count == 0)
             {
@@ -1541,22 +1601,6 @@ namespace Jil.Deserialize
                 return;
             }
 
-            var localMap = new Dictionary<string, Sigil.Local>();
-            foreach (var kv in propertyMap)
-            {
-                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
-            }
-
-            var labels =
-                propertyMap
-                .ToDictionary(d => d.Key, d => new { Label = Emit.DefineLabel(), Builder = CreateBuilder(localMap[d.Key].LocalType) });
-
-            var inOrderLabels =
-                propertyMap
-                .OrderBy(l => l.Value.Item2)
-                .Select(l => labels[l.Key].Label)
-                .ToArray();
-
             var loopStart = Emit.DefineLabel();
 
             ReadSkipWhitespace();       // int 
@@ -1575,16 +1619,22 @@ namespace Jil.Deserialize
             var readingMember = Emit.DefineLabel();
             Emit.MarkLabel(readingMember);  // int
 
+            var inOrderLabels =
+                propertyMap
+                .OrderBy(l => l.Value.Item2)
+                .Select(l => l.Value.Item3)
+                .ToArray();
+
             Emit.Switch(inOrderLabels);     // --empty--
             SkipObjectMember();             // --empty--
 
-            foreach (var kv in labels)
+            foreach (var kv in propertyMap)
             {
                 var label = kv.Value;
                 var local = localMap[kv.Key];
 
-                Emit.MarkLabel(label.Label);  // --empty--
-                label.Builder();              // localType
+                Emit.MarkLabel(label.Item3);  // --empty--
+                label.Item4();              // localType
 
                 Emit.StoreLocal(local); // --empty--
 
@@ -1673,6 +1723,9 @@ namespace Jil.Deserialize
 
         Action CreateBuilder(Type forType, bool allowRecursion = true)
         {
+            if (_state != State.CreateBuilders)
+                throw new ConstructionException("Logic error: Wrong state");
+
             // EXACT MATCH, this is the best way to detect `dynamic`
             if (forType == typeof(object))
             {
@@ -1681,7 +1734,7 @@ namespace Jil.Deserialize
 
             if (forType.IsNullableType())
             {
-                return () => ReadNullable(forType);
+                return ReadNullable(forType);
             }
 
             if (forType.IsPrimitiveType())
@@ -1691,12 +1744,12 @@ namespace Jil.Deserialize
 
             if (forType.IsDictionaryType())
             {
-                return () => ReadDictionary(forType);
+                return ReadDictionary(forType);
             }
 
             if (forType.IsListType())
             {
-                return () => ReadList(forType);
+                return ReadList(forType);
             }
 
             // Final, special, case for IEnumerable<X> if *not* a List
@@ -1705,7 +1758,7 @@ namespace Jil.Deserialize
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
-                return () => ReadList(fakeList);
+                return ReadList(fakeList);
             }
 
             if (forType.IsEnum)
@@ -1731,10 +1784,10 @@ namespace Jil.Deserialize
                 var interfaceImpl = typeof(InterfaceImplementation<>).MakeGenericType(forType);
                 var interfaceImplType = (Type)interfaceImpl.GetField("Proxy").GetValue(null);
 
-                return () => ReadObject(interfaceImplType);
+                return ReadObject(interfaceImplType);
             }
 
-            return () => ReadObject(forType);
+            return ReadObject(forType);
         }
 
         HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
@@ -1761,7 +1814,9 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
+            _state = State.CreateBuilders;
             var builder = CreateBuilder(forType, allowRecursion: false);
+            _state = State.ExecuteBuilders;
             builder();
 
             // we have to consume this, otherwise we might succeed with invalid JSON
