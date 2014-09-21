@@ -12,18 +12,18 @@ namespace Jil.Deserialize
     {
         const int InitialSize = 32;
 
-        private T[] _emptyArray;
+        private static T[] _emptyArray = new T[0];
         private T[] _data;
         private int _index;
 
-        public void Init()
+        public void Reset()
         {
-            _data = new T[InitialSize];
             _index = 0;
         }
 
-        public void Reset()
+        public void Init()
         {
+            _data = _emptyArray;
             _index = 0;
         }
 
@@ -31,9 +31,16 @@ namespace Jil.Deserialize
         {
             if (_index == _data.Length)
             {
-                var newData = new T[_data.Length * 2];
-                _data.CopyTo(newData, 0);
-                _data = newData;
+                if (_index == 0)
+                {
+                    _data = new T[InitialSize];
+                }
+                else
+                {
+                    var newData = new T[_data.Length * 2];
+                    _data.CopyTo(newData, 0);
+                    _data = newData;
+                }
             }
             _data[_index] = item;
             _index++;
@@ -43,8 +50,6 @@ namespace Jil.Deserialize
         {
             if (_index == 0)
             {
-                if (_emptyArray == null)
-                    _emptyArray = new T[0];
                 return _emptyArray;
             }
 
