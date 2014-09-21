@@ -107,7 +107,7 @@ namespace JilTests
             return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
         }
 
-        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, T> a, Func<TextReader, T> b, out double aTimeMS, out double bTimeMS)
+        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
         {
             var asStrings = toSerialize.Select(o => Jil.JSON.Serialize(o, opts)).ToList();
 
@@ -122,7 +122,7 @@ namespace JilTests
                     {
                         using (var str = new StringReader(asStrings[i]))
                         {
-                            a(str);
+                            a(str, 0);
                         }
                     }
                     aTimer.Stop();
@@ -136,7 +136,7 @@ namespace JilTests
                     {
                         using (var str = new StringReader(asStrings[i]))
                         {
-                            b(str);
+                            b(str, 0);
                         }
                     }
                     bTimer.Stop();
@@ -840,8 +840,8 @@ namespace JilTests
         {
             // objects
             {
-                Func<TextReader, _AlwaysUseCharBufferForStrings> fast;
-                Func<TextReader, _AlwaysUseCharBufferForStrings> normal;
+                Func<TextReader, int, _AlwaysUseCharBufferForStrings> fast;
+                Func<TextReader, int, _AlwaysUseCharBufferForStrings> normal;
 
                 try
                 {
@@ -890,8 +890,8 @@ namespace JilTests
 
             // strings
             {
-                Func<TextReader, string> fast;
-                Func<TextReader, string> normal;
+                Func<TextReader, int, string> fast;
+                Func<TextReader, int, string> normal;
 
                 try
                 {
@@ -956,8 +956,8 @@ namespace JilTests
         {
             try
             {
-                Func<TextReader, double> fast =
-                    txt =>
+                Func<TextReader, int, double> fast =
+                    (txt, _) =>
                     {
                         Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = true;
 
@@ -965,8 +965,8 @@ namespace JilTests
 
                         return (double)ret;
                     };
-                Func<TextReader, double> normal =
-                    txt =>
+                Func<TextReader, int, double> normal =
+                    (txt, _) =>
                     {
                         Jil.DeserializeDynamic.DynamicDeserializer.UseFastNumberParsing = false;
 
@@ -1006,8 +1006,8 @@ namespace JilTests
         {
             try
             {
-                Func<TextReader, int> fast =
-                    txt =>
+                Func<TextReader, int, int> fast =
+                    (txt, _) =>
                     {
                         Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = true;
 
@@ -1015,8 +1015,8 @@ namespace JilTests
 
                         return (int)ret;
                     };
-                Func<TextReader, int> normal =
-                    txt =>
+                Func<TextReader, int, int> normal =
+                    (txt, _) =>
                     {
                         Jil.DeserializeDynamic.DynamicDeserializer.UseFastIntegerConversion = false;
 
@@ -1062,8 +1062,8 @@ namespace JilTests
         [TestMethod]
         public void UseNameAutomataWhenMatchingEnums()
         {
-            Func<TextReader, _UseNameAutomataWhenMatchingEnums> automata;
-            Func<TextReader, _UseNameAutomataWhenMatchingEnums> method;
+            Func<TextReader, int, _UseNameAutomataWhenMatchingEnums> automata;
+            Func<TextReader, int, _UseNameAutomataWhenMatchingEnums> method;
 
 
             try
@@ -1181,8 +1181,8 @@ namespace JilTests
         [TestMethod]
         public void UseNameAutomata()
         {
-            Func<TextReader, _UseNameAutomata> automata;
-            Func<TextReader, _UseNameAutomata> dictionary;
+            Func<TextReader, int, _UseNameAutomata> automata;
+            Func<TextReader, int, _UseNameAutomata> dictionary;
 
             try
             {
