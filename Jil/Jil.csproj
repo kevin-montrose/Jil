@@ -83,6 +83,7 @@
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Common\EnumValues.cs" />
+    <Compile Include="Deserialize\ArrayBuilder.cs" />
     <Compile Include="Deserialize\DeserializeIndirect.cs" />
     <Compile Include="Deserialize\EnumLookup.cs" />
     <Compile Include="Common\FlagsEnumCombiner.cs" />

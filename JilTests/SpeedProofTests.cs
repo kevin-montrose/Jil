@@ -630,6 +630,169 @@ namespace JilTests
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
+        class _UseArraySharing1
+        {
+            public int[] A;
+        }
+
+        [TestMethod]
+        public void UseArraySharing1a()
+        {
+            Exception ignored;
+
+            Func<TextReader, _UseArraySharing1> fast;
+            Func<TextReader, _UseArraySharing1> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseArraySharing1>.ArraysShareBuildingList = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineDeserializerHelper.Build<_UseArraySharing1>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseArraySharing1>.ArraysShareBuildingList = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineDeserializerHelper.Build<_UseArraySharing1>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseArraySharing1>.ArraysShareBuildingList = true;
+            }
+
+            var createData = InlineSerializerHelper.Build<_UseArraySharing1>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+            var rand = new Random(2323284);
+
+            var arraySharingObject = new _UseArraySharing1();
+            arraySharingObject.A = new int[10];
+            for (var i = 0; i < 10; ++i)
+            {
+                arraySharingObject.A[i] = rand.Next();
+            }
+
+            var toSerialize =
+                Enumerable
+                .Repeat(arraySharingObject, 10000)
+                .ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
+
+        [TestMethod]
+        public void UseArraySharing1b()
+        {
+            Exception ignored;
+
+            Func<TextReader, List<_UseArraySharing1>> fast;
+            Func<TextReader, List<_UseArraySharing1>> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<List<_UseArraySharing1>>.ArraysShareBuildingList = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineDeserializerHelper.Build<List<_UseArraySharing1>>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<List<_UseArraySharing1>>.ArraysShareBuildingList = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineDeserializerHelper.Build<List<_UseArraySharing1>>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<List<_UseArraySharing1>>.ArraysShareBuildingList = true;
+            }
+
+            var rand = new Random(2323284);
+
+            var arraySharingObject = new _UseArraySharing1();
+            arraySharingObject.A = new int[10];
+            for (var i = 0; i < 10; ++i)
+            {
+                arraySharingObject.A[i] = rand.Next();
+            }
+
+            var toSerialize =
+                Enumerable
+                .Repeat(arraySharingObject, 10000)
+                .ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(new List<List<_UseArraySharing1>> {toSerialize}, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
+
+        class _UseArraySharing2
+        {
+            public int[][] A;
+        }
+
+        [TestMethod]
+        public void UseArraySharing2()
+        {
+            Exception ignored;
+
+            Func<TextReader, _UseArraySharing2> fast;
+            Func<TextReader, _UseArraySharing2> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseArraySharing2>.ArraysShareBuildingList = true;
+
+                    // Build the *actual* serializer method
+                    fast = InlineDeserializerHelper.Build<_UseArraySharing2>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseArraySharing2>.ArraysShareBuildingList = false;
+
+                    // Build the *actual* serializer method
+                    normal = InlineDeserializerHelper.Build<_UseArraySharing2>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseArraySharing1>.ArraysShareBuildingList = true;
+            }
+
+            var createData = InlineSerializerHelper.Build<_UseArraySharing2>(typeof(Jil.Serialize.NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, jsonp: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+            var rand = new Random(2323284);
+
+            var arraySharingObject = new _UseArraySharing2();
+            arraySharingObject.A = new int[10][];
+            for (var i=0; i < 10; ++i)
+            {
+                arraySharingObject.A[i] = new int[100];
+                for (var j=0; j < 100; ++j)
+                {
+                    arraySharingObject.A[i][j] = rand.Next();
+                }
+            }
+
+            var toSerialize =
+                Enumerable
+                .Repeat(arraySharingObject, 100)
+                .ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
+
         class _UseFastGuids
         {
             public Guid A;

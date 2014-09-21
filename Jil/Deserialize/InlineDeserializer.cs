@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
+        public static bool ArraysShareBuildingList = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -781,6 +782,141 @@ namespace Jil.Deserialize
                     Emit.Call(toArray);             // elementType[]
                 }
             }
+        }
+
+        Action ReadListSharing(Type listType)
+        {
+            var isValueType = listType.IsValueType;
+
+            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var elementTypeBuilder = CreateBuilder(elementType);
+
+            var isArray = listType.IsArray;
+            if (isArray)
+            {
+                listType = typeof(ArrayBuilder<>).MakeGenericType(elementType);
+            }
+            else if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                listType = typeof(List<>).MakeGenericType(elementType);
+            }
+
+            var addMtd = listType.GetMethod("Add");
+
+            Sigil.Local loc = null;
+            if (isArray)
+            {
+                loc = Emit.DeclareLocal(listType);
+                Emit.LoadLocalAddress(loc);         // listType*
+                Emit.InitializeObject(listType);    // --empty--
+                Emit.LoadLocalAddress(loc);         // listType*
+                var init = listType.GetMethod("Init");
+                Emit.Call(init);                    // --empty--
+            }
+
+            return () =>
+            {
+                var doRead = Emit.DefineLabel();
+                var done = Emit.DefineLabel();
+                var doneSkipChar = Emit.DefineLabel();
+
+                Action loadList;
+
+                if (!isValueType)
+                {
+                    if (isArray)
+                    {
+                        loadList = () => Emit.LoadLocalAddress(loc);
+                    }
+                    else
+                    {
+                        loc = Emit.DeclareLocal(listType);
+                        loadList = () => Emit.LoadLocal(loc);
+                    }
+
+                    ExpectRawCharOrNull(
+                        '[',
+                        () => { },
+                        () =>
+                        {
+                            Emit.LoadNull();
+                            Emit.Branch(doneSkipChar);
+                        }
+                    );
+                    Emit.Branch(doRead);
+                }
+                else
+                {
+                    loc = Emit.DeclareLocal(listType);
+                    loadList = () => Emit.LoadLocalAddress(loc);
+
+                    ExpectChar('[');
+                }
+
+                Emit.MarkLabel(doRead);                 // --empty--
+                if (isValueType)
+                {
+                    Emit.LoadLocalAddress(loc);         // listType*
+                    Emit.InitializeObject(listType);    // --empty--
+                }
+                else if (!isArray)
+                {
+                    Emit.NewObject(listType.GetConstructor(Type.EmptyTypes));   // listType
+                    Emit.StoreLocal(loc);                                       // --empty--
+                }
+
+                // first step unrolled, cause ',' isn't legal
+                ConsumeWhiteSpace();                            // --empty--
+                loadList();                                     // listType
+                RawPeekChar();                                  // listType int 
+                Emit.LoadConstant(']');                         // listType int ']'
+                Emit.BranchIfEqual(done);                       // listType(*?)
+                elementTypeBuilder();                           // listType(*?) elementType
+                Emit.CallVirtual(addMtd);                       // --empty--
+
+                var startLoop = Emit.DefineLabel();
+                var nextItem = Emit.DefineLabel();
+
+                Emit.MarkLabel(startLoop);                      // --empty--
+                loadList();                                     // listType(*?)
+                ReadSkipWhitespace();                           // listType(*?) int
+                Emit.Duplicate();                               // listType(*?) int int
+                Emit.LoadConstant(',');                         // listType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);                   // listType(*?) int
+                Emit.LoadConstant(']');                         // listType(*?) int ']'
+                Emit.BranchIfEqual(doneSkipChar);               // listType(*?)
+
+                // didn't get what we expected
+                ThrowExpected(",", "]");
+
+                Emit.MarkLabel(nextItem);           // listType(*?) int
+                Emit.Pop();                         // listType(*?)
+                ConsumeWhiteSpace();                // listType(*?)
+                elementTypeBuilder();               // listType(*?) elementType
+                Emit.CallVirtual(addMtd);           // --empty--
+                Emit.Branch(startLoop);             // --empty--
+
+                Emit.MarkLabel(done);               // listType(*?)
+                Emit.LoadArgument(0);               // listType(*?) TextReader
+                Emit.CallVirtual(TextReader_Read);  // listType(*?) int
+                Emit.Pop();                         // listType(*?)
+
+                Emit.MarkLabel(doneSkipChar);       // listType(*?)
+
+                if (isArray)
+                {
+                    var toArray = listType.GetMethod("ToArray");
+                    Emit.Call(toArray);             // elementType[]
+
+                    loadList();                     // elementType[] listType(*?)
+                    var reset = listType.GetMethod("Reset");
+                    Emit.Call(reset);               // elementType[]
+                }
+                else
+                {
+                    loc.Dispose();
+                }
+            };
         }
 
         Action ReadDictionary(Type dictType)
@@ -1749,7 +1885,14 @@ namespace Jil.Deserialize
 
             if (forType.IsListType())
             {
-                return ReadList(forType);
+                if (ArraysShareBuildingList)
+                {
+                    return ReadListSharing(forType);
+                }
+                else
+                {
+                    return ReadList(forType);
+                }
             }
 
             // Final, special, case for IEnumerable<X> if *not* a List
