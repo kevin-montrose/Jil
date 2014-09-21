@@ -4447,6 +4447,20 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void ExpectedEndOfStream()
+        {
+            try
+            {
+                JSON.Deserialize<string>("\"hello world\"       {");
+                Assert.Fail("should have failed");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected end of stream", e.Message);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
