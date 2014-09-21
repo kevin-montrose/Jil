@@ -510,10 +510,13 @@ namespace Jil.Deserialize
         {
             var success = Emit.DefineLabel();
 
-            Emit.LoadArgument(0);           // TextReader
-            Emit.Call(TextReader_Read);     // int
-            Emit.LoadConstant(-1);          // int -1
-            Emit.BranchIfEqual(success);    // --empty--
+            Emit.LoadArgument(1);                   // int
+            Emit.LoadConstant(0);                   // int
+            Emit.UnsignedBranchIfNotEqual(success); // --empty --
+            Emit.LoadArgument(0);                           // TextReader
+            Emit.CallVirtual(TextReader_Read);              // int
+            Emit.LoadConstant(-1);                          // int -1
+            Emit.BranchIfEqual(success);                    // --empty--
 
             Emit.LoadConstant("Expected end of stream");                    // string
             Emit.LoadArgument(0);                                           // string TextReader
@@ -1717,11 +1720,14 @@ namespace Jil.Deserialize
 
             if (allowRecursion && RecursiveTypes.Contains(forType))
             {
-                var funcType = typeof(Func<,>).MakeGenericType(typeof(TextReader), forType);
+                var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
                 var funcInvoke = funcType.GetMethod("Invoke");
 
-                LoadRecursiveTypeDelegate(forType); // Func<TextReader, memberType>
-                Emit.LoadArgument(0);               // Func<TextReader, memberType> TextReader
+                LoadRecursiveTypeDelegate(forType); // Func<TextReader, int, memberType>
+                Emit.LoadArgument(0);               // Func<TextReader, int, memberType> TextReader
+                Emit.LoadArgument(1);               // Func<TextReader, int, memberType> TextReader int
+                Emit.LoadConstant(1);               // Func<TextReader, int, memberType> TextReader int int
+                Emit.Add();                         // Func<TextReader, int, memberType> TextReader int
                 Emit.Call(funcInvoke);              // memberType
                 return;
             }
@@ -1750,13 +1756,13 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public Func<TextReader, ForType> BuildWithNewDelegate()
+        public Func<TextReader, int, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
             RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: Utils.DoVerify);
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: Utils.DoVerify);
 
             AddGlobalVariables();
 
@@ -1772,31 +1778,31 @@ namespace Jil.Deserialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, ForType>>(Utils.DelegateOptimizationOptions);
+            return Emit.CreateDelegate<Func<TextReader, int, ForType>>(Utils.DelegateOptimizationOptions);
         }
     }
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader) });
+            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
             emit.LoadField(stashField);
             emit.NewObject<DeserializationException, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate<Func<TextReader, int, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
-            Func<TextReader, ReturnType> ret;
+            Func<TextReader, int, ReturnType> ret;
             try
             {
                 ret = obj.BuildWithNewDelegate();
