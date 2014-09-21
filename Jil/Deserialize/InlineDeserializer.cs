@@ -673,10 +673,13 @@ namespace Jil.Deserialize
 
             var isArray = listType.IsArray;
 
+            Sigil.Label doneSkipCharNull = null;
+
             if (isArray)
             {
                 listType = typeof(List<>).MakeGenericType(elementType);
                 addMtd = listType.GetMethod("Add");
+                doneSkipCharNull = Emit.DefineLabel();
             }
 
             using (var loc = Emit.DeclareLocal(listType))
@@ -693,7 +696,15 @@ namespace Jil.Deserialize
                         () =>
                         {
                             Emit.LoadNull();
-                            Emit.Branch(doneSkipChar);
+
+                            if (isArray)
+                            {
+                                Emit.Branch(doneSkipCharNull);
+                            }
+                            else
+                            {
+                                Emit.Branch(doneSkipChar);
+                            }
                         }
                     );
                     Emit.Branch(doRead);
@@ -759,6 +770,8 @@ namespace Jil.Deserialize
                 {
                     var toArray = listType.GetMethod("ToArray");
                     Emit.Call(toArray);             // elementType[]
+
+                    Emit.MarkLabel(doneSkipCharNull);
                 }
             }
         }
