@@ -827,7 +827,7 @@ namespace JilTests
             Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
 
-        class _AlwaysUseCharBufferForStrings
+        class _AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder
         {
             public enum Enums { Hello, World, Foo, Bar };
 
@@ -836,43 +836,46 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void AlwaysUseCharBufferForStrings()
+        public void AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder()
         {
             // objects
             {
-                Func<TextReader, int, _AlwaysUseCharBufferForStrings> fast;
-                Func<TextReader, int, _AlwaysUseCharBufferForStrings> normal;
+                Func<TextReader, int, _AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder> fast;
+                Func<TextReader, int, _AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder> normal;
 
                 try
                 {
                     {
-                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+                        InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.AlwaysUseCharBufferForStrings = false;
+                        InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.UseCharArrayOverStringBuilder = true;
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        fast = InlineDeserializerHelper.Build<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
 
                     {
-                        InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = false;
+                        InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.AlwaysUseCharBufferForStrings = true;
+                        InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.UseCharArrayOverStringBuilder = false;
                         Exception ignored;
 
                         // Build the *actual* deserializer method
-                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharBufferForStrings>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                        normal = InlineDeserializerHelper.Build<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                     }
                 }
                 finally
                 {
-                    InlineDeserializer<_AlwaysUseCharBufferForStrings>.AlwaysUseCharBufferForStrings = true;
+                    InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.AlwaysUseCharBufferForStrings = true;
+                    InlineDeserializer<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>.UseCharArrayOverStringBuilder = true;
                 }
 
                 var rand = new Random(23450051);
 
-                var toSerialize = new List<_AlwaysUseCharBufferForStrings>();
+                var toSerialize = new List<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>();
                 for (var i = 0; i < 2000; i++)
                 {
                     toSerialize.Add(
-                        new _AlwaysUseCharBufferForStrings
+                        new _AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder
                         {
                             A = _RandString(rand, 32),
                             B = _RandString(rand, 64)
@@ -896,7 +899,8 @@ namespace JilTests
                 try
                 {
                     {
-                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
+                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
+                        InlineDeserializer<string>.UseCharArrayOverStringBuilder = true;
                         Exception ignored;
 
                         // Build the *actual* deserializer method
@@ -904,7 +908,8 @@ namespace JilTests
                     }
 
                     {
-                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = false;
+                        InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
+                        InlineDeserializer<string>.UseCharArrayOverStringBuilder = false;
                         Exception ignored;
 
                         // Build the *actual* deserializer method
@@ -914,6 +919,7 @@ namespace JilTests
                 finally
                 {
                     InlineDeserializer<string>.AlwaysUseCharBufferForStrings = true;
+                    InlineDeserializer<string>.UseCharArrayOverStringBuilder = true;
                 }
 
                 var rand = new Random(49139290);

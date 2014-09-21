@@ -939,6 +939,94 @@ namespace Jil.Deserialize
             return result;
         }
 
+        public static readonly MethodInfo ReadDoubleCharArray = typeof(Methods).GetMethod("_ReadDoubleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double _ReadDoubleCharArray(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+            storeChar:
+                buffer[idx++] = (char)c;
+                if (idx >= buffer.Length)
+                {
+                    var biggerBuffer = new char[buffer.Length * 2];
+                    Array.Copy(buffer, biggerBuffer, buffer.Length);
+                    buffer = biggerBuffer;
+                }
+                reader.Read();
+                prev = c;
+            }
+
+            var result = double.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
+            return result;
+        }
+
         public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
@@ -1018,6 +1106,94 @@ namespace Jil.Deserialize
 
             var result = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
             commonSb.Clear();
+            return result;
+        }
+
+        public static readonly MethodInfo ReadSingleCharArray = typeof(Methods).GetMethod("_ReadSingleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static float _ReadSingleCharArray(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+            storeChar:
+                buffer[idx++] = (char)c;
+                if (idx >= buffer.Length)
+                {
+                    var biggerBuffer = new char[buffer.Length * 2];
+                    Array.Copy(buffer, biggerBuffer, buffer.Length);
+                    buffer = biggerBuffer;
+                }
+                reader.Read();
+                prev = c;
+            }
+
+            var result = float.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
             return result;
         }
 
@@ -1102,6 +1278,95 @@ namespace Jil.Deserialize
             commonSb.Clear();
             return result;
         }
+
+        public static readonly MethodInfo ReadDecimalCharArray = typeof(Methods).GetMethod("_ReadDecimalCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalCharArray(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", reader);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, reader);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", reader);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+            storeChar:
+                buffer[idx++] = (char)c;
+                if (idx >= buffer.Length)
+                {
+                    var biggerBuffer = new char[buffer.Length * 2];
+                    Array.Copy(buffer, biggerBuffer, buffer.Length);
+                    buffer = biggerBuffer;
+                }
+                reader.Read();
+                prev = c;
+            }
+
+            var result = decimal.Parse(new string(buffer, 0, idx), NumberStyles.Float, CultureInfo.InvariantCulture);
+            return result;
+        }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void AssertNotFollowedByDigit(TextReader reader)

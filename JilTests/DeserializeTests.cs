@@ -4476,7 +4476,6 @@ namespace JilTests
                 Assert.AreEqual("Expected end of stream", e.Message);
             }
         }
-
 #if !DEBUG
         #region SlowSpinUp Types
 
