@@ -13,13 +13,12 @@ namespace Jil.Deserialize
         static volatile bool BeingBuilt = false;
 
         public static volatile Func<TextReader, int, T> Thunk;
-        public static volatile Func<TextReader, T> ZeroThunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
-            return ZeroThunk;
+            return Thunk;
         }
 
         public static void Load()
@@ -32,7 +31,6 @@ namespace Jil.Deserialize
                 BeingBuilt = true;
 
                 Thunk = InlineDeserializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
-                ZeroThunk = reader => Thunk(reader, 0);
             }
         }
     }
@@ -42,14 +40,13 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> ZeroThunk;
         public static volatile Func<TextReader, int, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
-            return ZeroThunk;
+            return Thunk;
         }
 
         public static void Load()
@@ -62,7 +59,6 @@ namespace Jil.Deserialize
                 BeingBuilt = true;
 
                 Thunk = InlineDeserializerHelper.Build<T>(typeof(MillisecondStyleTypeCache<>), DateTimeFormat.MillisecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
-                ZeroThunk = reader => Thunk(reader, 0);
             }
         }
     }
@@ -72,14 +68,13 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> ZeroThunk;
         public static volatile Func<TextReader, int, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
-            return ZeroThunk;
+            return Thunk;
         }
 
         public static void Load()
@@ -92,7 +87,6 @@ namespace Jil.Deserialize
                 BeingBuilt = true;
 
                 Thunk = InlineDeserializerHelper.Build<T>(typeof(SecondStyleTypeCache<>), DateTimeFormat.SecondsSinceUnixEpoch, exceptionDuringBuild: out ExceptionDuringBuild);
-                ZeroThunk = reader => Thunk(reader, 0);
             }
         }
     }
@@ -103,13 +97,12 @@ namespace Jil.Deserialize
         static volatile bool BeingBuilt = false;
 
         public static volatile Func<TextReader, int,  T> Thunk;
-        public static volatile Func<TextReader, T> ZeroThunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
-            return ZeroThunk;
+            return Thunk;
         }
 
         public static void Load()
@@ -122,7 +115,6 @@ namespace Jil.Deserialize
                 BeingBuilt = true;
 
                 Thunk = InlineDeserializerHelper.Build<T>(typeof(ISO8601StyleTypeCache<>), DateTimeFormat.ISO8601, exceptionDuringBuild: out ExceptionDuringBuild);
-                ZeroThunk = reader => Thunk(reader, 0);
             }
         }
     }

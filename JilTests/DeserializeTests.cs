@@ -4447,12 +4447,28 @@ namespace JilTests
             }
         }
 
+        class _ExpectedEndOfStream
+        {
+            public _ExpectedEndOfStream Other { get; set; }
+            public string Foo { get; set; }
+        }
+
         [TestMethod]
         public void ExpectedEndOfStream()
         {
             try
             {
                 JSON.Deserialize<string>("\"hello world\"       {");
+                Assert.Fail("should have failed");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected end of stream", e.Message);
+            }
+
+            try
+            {
+                JSON.Deserialize<_ExpectedEndOfStream>("{\"Other\":{\"Foo\":\"do a thing!\"}, \"Foo\":\"another thing!\"}   dfsfsd");
                 Assert.Fail("should have failed");
             }
             catch (DeserializationException e)

@@ -576,13 +576,13 @@ namespace Jil
                 switch (options.UseDateTimeFormat)
                 {
                     case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                        return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader);
+                        return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader, 0);
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                        return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader);
+                        return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader, 0);
                     case DateTimeFormat.SecondsSinceUnixEpoch:
-                        return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader);
+                        return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader, 0);
                     case DateTimeFormat.ISO8601:
-                        return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader);
+                        return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader, 0);
                     default: throw new InvalidOperationException("Unexpected Options: " + options);
                 }
 
