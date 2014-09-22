@@ -15,7 +15,7 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime _ReadISO8601DateWithCharArray(TextReader reader, ref char[] buffer)
         {
-            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+            InitDynamicBuffer(ref buffer);
             return _ReadISO8601Date(reader, buffer);
         }
 

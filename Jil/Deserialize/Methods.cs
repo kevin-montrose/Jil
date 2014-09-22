@@ -16,6 +16,20 @@ namespace Jil.Deserialize
         public const int DynamicCharBufferInitialSize = 128;
         public const int CharBufferSize = 33;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void InitDynamicBuffer(ref char[] dynBuffer)
+        {
+            dynBuffer = dynBuffer ?? new char[DynamicCharBufferInitialSize];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void GrowDynamicBuffer(ref char[] dynBuffer)
+        {
+            var biggerBuffer = new char[dynBuffer.Length * 2];
+            Array.Copy(dynBuffer, biggerBuffer, dynBuffer.Length);
+            dynBuffer = biggerBuffer;
+        }
+
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
         {
@@ -492,7 +506,7 @@ namespace Jil.Deserialize
         static string _ReadEncodedStringWithCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
-            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+            InitDynamicBuffer(ref buffer);
 
             while (true)
             {
@@ -532,9 +546,8 @@ namespace Jil.Deserialize
                     // now we're in an escape sequence, we expect 4 hex #s; always
                     buffer[idx++] = ReadHexQuad2(reader);
                 }
-                var biggerBuffer = new char[buffer.Length * 2];
-                Array.Copy(buffer, biggerBuffer, buffer.Length);
-                buffer = biggerBuffer;
+
+                GrowDynamicBuffer(ref buffer);
             }
 
             complete: return new string(buffer, 0, idx);

@@ -872,7 +872,7 @@ namespace JilTests
                 var rand = new Random(23450051);
 
                 var toSerialize = new List<_AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder>();
-                for (var i = 0; i < 2000; i++)
+                for (var i = 0; i < 10000; i++)
                 {
                     toSerialize.Add(
                         new _AlwaysUseCharArrayInsteadOfCharBufferAndStringBuilder
@@ -925,7 +925,7 @@ namespace JilTests
                 var rand = new Random(49139290);
 
                 var toSerialize = new List<string>();
-                for (var i = 0; i < 2000; i++)
+                for (var i = 0; i < 10000; i++)
                 {
                     toSerialize.Add(_RandString(rand, 32));
                 }

@@ -944,7 +944,7 @@ namespace Jil.Deserialize
         static double _ReadDoubleCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
-            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+            InitDynamicBuffer(ref buffer);
 
             int c;
 
@@ -1011,13 +1011,11 @@ namespace Jil.Deserialize
                     afterFirstDigit = true;
                 }
 
-            storeChar:
+                storeChar:
                 buffer[idx++] = (char)c;
                 if (idx >= buffer.Length)
                 {
-                    var biggerBuffer = new char[buffer.Length * 2];
-                    Array.Copy(buffer, biggerBuffer, buffer.Length);
-                    buffer = biggerBuffer;
+                    GrowDynamicBuffer(ref buffer);
                 }
                 reader.Read();
                 prev = c;
@@ -1114,7 +1112,7 @@ namespace Jil.Deserialize
         static float _ReadSingleCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
-            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+            InitDynamicBuffer(ref buffer);
 
             int c;
 
@@ -1181,13 +1179,11 @@ namespace Jil.Deserialize
                     afterFirstDigit = true;
                 }
 
-            storeChar:
+                storeChar:
                 buffer[idx++] = (char)c;
                 if (idx >= buffer.Length)
                 {
-                    var biggerBuffer = new char[buffer.Length * 2];
-                    Array.Copy(buffer, biggerBuffer, buffer.Length);
-                    buffer = biggerBuffer;
+                    GrowDynamicBuffer(ref buffer);
                 }
                 reader.Read();
                 prev = c;
@@ -1284,7 +1280,7 @@ namespace Jil.Deserialize
         static decimal _ReadDecimalCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
-            buffer = buffer ?? new char[DynamicCharBufferInitialSize];
+            InitDynamicBuffer(ref buffer);
 
             int c;
 
@@ -1351,13 +1347,11 @@ namespace Jil.Deserialize
                     afterFirstDigit = true;
                 }
 
-            storeChar:
+                storeChar:
                 buffer[idx++] = (char)c;
                 if (idx >= buffer.Length)
                 {
-                    var biggerBuffer = new char[buffer.Length * 2];
-                    Array.Copy(buffer, biggerBuffer, buffer.Length);
-                    buffer = biggerBuffer;
+                    GrowDynamicBuffer(ref buffer);
                 }
                 reader.Read();
                 prev = c;
