@@ -861,6 +861,7 @@ namespace Jil.Deserialize
             var elementTypeBuilder = CreateBuilder(elementType);
 
             var isArray = listType.IsArray;
+
             if (isArray)
             {
                 listType = typeof(ArrayBuilder<>).MakeGenericType(elementType);
@@ -888,6 +889,7 @@ namespace Jil.Deserialize
                 var doRead = Emit.DefineLabel();
                 var done = Emit.DefineLabel();
                 var doneSkipChar = Emit.DefineLabel();
+                Sigil.Label doneSkipCharNull = null;
 
                 Action loadList;
 
@@ -895,6 +897,7 @@ namespace Jil.Deserialize
                 {
                     if (isArray)
                     {
+                        doneSkipCharNull = Emit.DefineLabel();
                         loadList = () => Emit.LoadLocalAddress(loc);
                     }
                     else
@@ -909,7 +912,14 @@ namespace Jil.Deserialize
                         () =>
                         {
                             Emit.LoadNull();
-                            Emit.Branch(doneSkipChar);
+                            if (isArray)
+                            {
+                                Emit.Branch(doneSkipCharNull);
+                            }
+                            else
+                            {
+                                Emit.Branch(doneSkipChar);
+                            }
                         }
                     );
                     Emit.Branch(doRead);
@@ -980,6 +990,8 @@ namespace Jil.Deserialize
                     loadList();                     // elementType[] listType(*?)
                     var reset = listType.GetMethod("Reset");
                     Emit.Call(reset);               // elementType[]
+
+                    Emit.MarkLabel(doneSkipCharNull);
                 }
                 else
                 {
