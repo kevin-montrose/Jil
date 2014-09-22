@@ -11,6 +11,13 @@ namespace Jil.Serialize
 
     struct ThunkWriter
     {
+        StringBuilder Builder;
+
+        public void Init()
+        {
+            Builder = new StringBuilder();
+        }
+
         public void Write(float f)
         {
             Write(f.ToString(CultureInfo.InvariantCulture));
@@ -28,22 +35,22 @@ namespace Jil.Serialize
 
         public void Write(char[] ch, int startIx, int len)
         {
-            throw new NotImplementedException();
+            Builder.Append(ch, startIx, len);
         }
 
         public void Write(char ch)
         {
-            throw new NotImplementedException();
+            Builder.Append(ch);
         }
 
         public void Write(string str)
         {
-            throw new NotImplementedException();
+            Builder.Append(str);
         }
 
         public string StaticToString()
         {
-            throw new NotImplementedException();
+            return Builder.ToString();
         }
     }
 }

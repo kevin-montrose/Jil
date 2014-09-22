@@ -3524,6 +3524,8 @@ namespace Jil.Serialize
                     (data, depth) =>
                     {
                         var writer = new ThunkWriter();
+                        writer.Init();
+
                         thunk(ref writer, data, depth);
 
                         return writer.StaticToString();
