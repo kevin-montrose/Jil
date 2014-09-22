@@ -117,7 +117,7 @@ namespace Jil
 
             // TODO: Actually start using this crazy crap
 
-            options = options ?? Options.Default;
+            /*options = options ?? Options.Default;
 
             switch (options.UseDateTimeFormat)
             {
@@ -134,7 +134,7 @@ namespace Jil
                     return ISO8601ToString(data, options);
 
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
-            }
+            }*/
         }
 
         static void NewtonsoftStyle<T>(T data, TextWriter output, Options options)
