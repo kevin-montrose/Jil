@@ -10,6 +10,16 @@ namespace Jil.Serialize
 
     struct ThunkWriter
     {
+        public void Write(char ch)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Write(string str)
+        {
+            throw new NotImplementedException();
+        }
+
         public string StaticToString()
         {
             throw new NotImplementedException();
