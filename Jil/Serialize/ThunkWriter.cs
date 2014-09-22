@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,6 +11,26 @@ namespace Jil.Serialize
 
     struct ThunkWriter
     {
+        public void Write(float f)
+        {
+            Write(f.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Write(double d)
+        {
+            Write(d.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Write(decimal m)
+        {
+            Write(m.ToString(CultureInfo.InvariantCulture));
+        }
+
+        public void Write(char[] ch, int startIx, int len)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Write(char ch)
         {
             throw new NotImplementedException();

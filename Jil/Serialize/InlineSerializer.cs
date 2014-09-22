@@ -713,8 +713,8 @@ namespace Jil.Serialize
                 return;
             }
 
-            Emit.LoadLocal(CharBuffer);                     // TextWriter DateTime char[]
-            Emit.Call(Methods.CustomISO8601ToString);       // --empty--
+            Emit.LoadLocal(CharBuffer);                                     // TextWriter DateTime char[]
+            Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));  // --empty--
         }
 
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
@@ -771,11 +771,11 @@ namespace Jil.Serialize
         {
             if (UseCustomWriteIntUnrolled)
             {
-                Emit.Call(Methods.CustomWriteIntUnrolledSigned);
+                Emit.Call(Methods.GetCustomWriteIntUnrolledSigned(BuildingToString));
             }
             else
             {
-                Emit.Call(Methods.CustomWriteInt);
+                Emit.Call(Methods.GetCustomWriteInt(BuildingToString));
             }
         }
 
@@ -783,22 +783,22 @@ namespace Jil.Serialize
         {
             if (UseCustomWriteIntUnrolled)
             {
-                Emit.Call(Methods.CustomWriteUIntUnrolled);
+                Emit.Call(Methods.GetCustomWriteUIntUnrolled(BuildingToString));
             }
             else
             {
-                Emit.Call(Methods.CustomWriteUInt);
+                Emit.Call(Methods.GetCustomWriteUInt(BuildingToString));
             }
         }
 
         void CallWriteLong()
         {
-            Emit.Call(Methods.CustomWriteLong);
+            Emit.Call(Methods.GetCustomWriteLong(BuildingToString));
         }
 
         void CallWriteULong()
         {
-            Emit.Call(Methods.CustomWriteULong);
+            Emit.Call(Methods.GetCustomWriteULong(BuildingToString));
         }
 
         void WritePrimitive(Type primitiveType, bool quotesNeedHandling)
@@ -911,19 +911,19 @@ namespace Jil.Serialize
             MethodInfo proxyMethod;
             if (primitiveType == typeof(float))
             {
-                proxyMethod = Methods.ProxyFloat;
+                proxyMethod = Methods.GetProxyFloat(BuildingToString);
             }
             else
             {
                 if (primitiveType == typeof(double))
                 {
-                    proxyMethod = Methods.ProxyDouble;
+                    proxyMethod = Methods.GetProxyDouble(BuildingToString);
                 }
                 else
                 {
                     if (primitiveType == typeof(decimal))
                     {
-                        proxyMethod = Methods.ProxyDecimal;
+                        proxyMethod = Methods.GetProxyDecimal(BuildingToString);
                     }
                     else
                     {
@@ -939,16 +939,15 @@ namespace Jil.Serialize
         {
             if (quotesNeedHandling)
             {
-                WriteString("\"");          // TextWriter Guid
+                WriteString("\"");                              // TextWriter Guid
             }
 
-            Emit.LoadLocal(CharBuffer);     // TextWriter Guid char[]
-
-            Emit.Call(Methods.WriteGuid);   // --empty--
+            Emit.LoadLocal(CharBuffer);                         // TextWriter Guid char[]
+            Emit.Call(Methods.GetWriteGuid(BuildingToString));  // --empty--
             
             if (quotesNeedHandling)
             {
-                WriteString("\"");          // --empty--
+                WriteString("\"");                              // --empty--
             }
         }
 
@@ -2636,16 +2635,16 @@ namespace Jil.Serialize
         {
             return
                 ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe :
-                    JSONP ? Methods.WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithQuotesWithNullsInlineUnsafe;
+                    JSONP ? Methods.GetWriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(BuildingToString) :
+                    JSONP ? Methods.GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithQuotesWithNullsInlineUnsafe(BuildingToString);
         }
 
         MethodInfo GetWriteEncodedStringMethod()
         {
             return
                 ExcludeNulls ?
-                    JSONP ? Methods.WriteEncodedStringWithoutNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithoutNullsInlineUnsafe :
-                    JSONP ? Methods.WriteEncodedStringWithNullsInlineJSONPUnsafe : Methods.WriteEncodedStringWithNullsInlineUnsafe;
+                    JSONP ? Methods.GetWriteEncodedStringWithoutNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithoutNullsInlineUnsafe(BuildingToString) :
+                    JSONP ? Methods.GetWriteEncodedStringWithNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithNullsInlineUnsafe(BuildingToString);
         }
 
         void WriteKeyValue(Type keyType, Type elementType)

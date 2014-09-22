@@ -110,6 +110,12 @@
     <Compile Include="SerializeDynamic\RecursiveSerializerCache.cs" />
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\Methods.cs" />
+    <Compile Include="Serialize\Methods.Get.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Serialize\Methods.ThunkWriter.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
     <Compile Include="Serialize\ThunkWriter.cs" />
     <Compile Include="Serialize\TypeCaches.cs" />
