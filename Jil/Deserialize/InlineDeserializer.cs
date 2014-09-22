@@ -14,7 +14,6 @@ namespace Jil.Deserialize
     class InlineDeserializer<ForType>
     {
         public static bool UseCharArrayOverStringBuilder = true;
-        public static bool AlwaysUseCharBufferForStrings = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
 
@@ -59,9 +58,12 @@ namespace Jil.Deserialize
 
             var hasStringyTypes = 
                 involvedTypes.Contains(typeof(string)) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
+                involvedTypes.Any(t => t.IsUserDefinedType());  // for member names
 
-            var needsCharBuffer = true;//(AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+            var needsCharBuffer = 
+                hasStringyTypes ||
+                involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
+                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {

@@ -762,6 +762,11 @@ namespace Jil.Common
             return Activator.CreateInstance(t);
         }
 
+        public static bool IsNumberType(this Type t)
+        {
+            return t.IsIntegerNumberType() || t.IsFloatingPointNumberType();
+        }
+
         public static bool IsIntegerNumberType(this Type t)
         {
             return
