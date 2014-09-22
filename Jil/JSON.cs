@@ -499,6 +499,59 @@ namespace Jil
         }
 
         /// <summary>
+        /// Deserializes JSON from the given TextReader as the passed type.
+        /// 
+        /// This is equivalent to calling Deserialize&lt;T&gt;(TextReader, Options), except
+        /// without requiring a generic parameter.  For true dynamic deserialization, you 
+        /// should use DeserializeDynamic instead.
+        /// 
+        /// Pass an Options object to specify the particulars (such as DateTime formats) of
+        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// </summary>
+        public static object Deserialize(TextReader reader, Type type, Options options = null)
+        {
+            if(reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            if(type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+
+            if (type == typeof(object))
+            {
+                return DeserializeDynamic(reader, options);
+            }
+
+            return Jil.Deserialize.DeserializeIndirect.Deserialize(reader, type, options);
+        }
+
+        /// <summary>
+        /// Deserializes JSON from the given string as the passed type.
+        /// 
+        /// This is equivalent to calling Deserialize&lt;T&gt;(string, Options), except
+        /// without requiring a generic parameter.  For true dynamic deserialization, you 
+        /// should use DeserializeDynamic instead.
+        /// 
+        /// Pass an Options object to specify the particulars (such as DateTime formats) of
+        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// </summary>
+        public static object Deserialize(string text, Type type, Options options = null)
+        {
+            if (text == null)
+            {
+                throw new ArgumentNullException("text");
+            }
+
+            using (var reader = new StringReader(text))
+            {
+                return Deserialize(reader, type, options);
+            }
+        }
+
+        /// <summary>
         /// Deserializes JSON from the given TextReader.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of
@@ -518,39 +571,21 @@ namespace Jil
 
             try
             {
-
                 options = options ?? Options.Default;
 
-                if (options.AllowHashFunction)
+                switch (options.UseDateTimeFormat)
                 {
-                    switch (options.UseDateTimeFormat)
-                    {
-                        case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.SecondsSinceUnixEpoch:
-                            return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.ISO8601:
-                            return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader);
-                        default: throw new InvalidOperationException("Unexpected Options: " + options);
-                    }
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.NewtonsoftStyleTypeCache<T>.Get()(reader, 0);
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.MillisecondStyleTypeCache<T>.Get()(reader, 0);
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        return Jil.Deserialize.SecondStyleTypeCache<T>.Get()(reader, 0);
+                    case DateTimeFormat.ISO8601:
+                        return Jil.Deserialize.ISO8601StyleTypeCache<T>.Get()(reader, 0);
+                    default: throw new InvalidOperationException("Unexpected Options: " + options);
                 }
-                else
-                {
-                    switch (options.UseDateTimeFormat)
-                    {
-                        case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.NewtonsoftStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                            return Jil.Deserialize.MillisecondStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.SecondsSinceUnixEpoch:
-                            return Jil.Deserialize.SecondStyleNoHashingTypeCache<T>.Get()(reader);
-                        case DateTimeFormat.ISO8601:
-                            return Jil.Deserialize.ISO8601StyleNoHashingTypeCache<T>.Get()(reader);
-                        default: throw new InvalidOperationException("Unexpected Options: " + options);
-                    }
-                }
+
             }
             catch (Exception e)
             {

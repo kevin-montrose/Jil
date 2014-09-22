@@ -13,7 +13,25 @@ namespace Jil.Deserialize
 {
     static partial class Methods
     {
+        public const int DynamicCharBufferInitialSize = 128;
         public const int CharBufferSize = 33;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void InitDynamicBuffer(ref char[] dynBuffer)
+        {
+            dynBuffer = dynBuffer ?? new char[DynamicCharBufferInitialSize];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void GrowDynamicBuffer(ref char[] dynBuffer)
+        {
+            var newLen = dynBuffer.Length * 2;
+            if (newLen < DynamicCharBufferInitialSize) newLen = DynamicCharBufferInitialSize;
+
+            var biggerBuffer = new char[newLen];
+            Array.Copy(dynBuffer, biggerBuffer, dynBuffer.Length);
+            dynBuffer = biggerBuffer;
+        }
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
@@ -173,12 +191,14 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _Skip(TextReader reader)
         {
-            var leadChar = reader.Peek();
+            SkipWithLeadChar(reader, reader.Read());
+        }
 
+        static void SkipWithLeadChar(TextReader reader, int leadChar)
+        {
             // skip null
             if (leadChar == 'n')
             {
-                reader.Read();
                 if (reader.Read() != 'u') throw new DeserializationException("Expected u", reader);
                 if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
                 if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
@@ -188,35 +208,34 @@ namespace Jil.Deserialize
             // skip a string
             if (leadChar == '"')
             {
-                _SkipEncodedString(reader);
+                SkipEncodedStringWithLeadChar(reader, leadChar);
                 return;
             }
 
             // skip an object
             if (leadChar == '{')
             {
-                SkipObject(reader);
+                SkipObject(reader, leadChar);
                 return;
             }
 
             // skip a list
             if (leadChar == '[')
             {
-                SkipList(reader);
+                SkipList(reader, leadChar);
                 return;
             }
 
             // skip a number
             if ((leadChar >= '0' && leadChar <= '9') || leadChar == '-')
             {
-                SkipNumber(reader);
+                SkipNumber(reader, leadChar);
                 return;
             }
 
             // skip false
             if (leadChar == 'f')
             {
-                reader.Read();
                 if (reader.Read() != 'a') throw new DeserializationException("Expected a", reader);
                 if (reader.Read() != 'l') throw new DeserializationException("Expected l", reader);
                 if (reader.Read() != 's') throw new DeserializationException("Expected s", reader);
@@ -227,7 +246,6 @@ namespace Jil.Deserialize
             // skip true
             if (leadChar == 't')
             {
-                reader.Read();
                 if (reader.Read() != 'r') throw new DeserializationException("Expected r", reader);
                 if (reader.Read() != 'u') throw new DeserializationException("Expected u", reader);
                 if (reader.Read() != 'e') throw new DeserializationException("Expected e", reader);
@@ -238,64 +256,59 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SkipObject(TextReader reader)
+        static void SkipObject(TextReader reader, int leadChar)
         {
-            reader.Read();  // skip the {
+            if (leadChar != '{') throw new DeserializationException("Expected {", reader);
 
-            _ConsumeWhiteSpace(reader);
-            var a = reader.Peek();
-            if (a == '}')
+            int c;
+
+            c = _ReadSkipWhitespace(reader);
+            if (c == '}')
             {
-                reader.Read();
                 return;
             }
-            _SkipEncodedString(reader);
-            _ConsumeWhiteSpace(reader);
-            var b = reader.Read();
-            if (b != ':') throw new DeserializationException("Expected :", reader);
-            _ConsumeWhiteSpace(reader);
-            _Skip(reader);
+            SkipEncodedStringWithLeadChar(reader, c);
+            c = _ReadSkipWhitespace(reader);
+            if (c != ':') throw new DeserializationException("Expected :", reader);
+            c = _ReadSkipWhitespace(reader);
+            SkipWithLeadChar(reader, c);
 
             while (true)
             {
-                _ConsumeWhiteSpace(reader);
-                var c = reader.Read();
+                c = _ReadSkipWhitespace(reader);
                 if (c == '}') return;
                 if (c != ',') throw new DeserializationException("Expected ,", reader);
 
-                _ConsumeWhiteSpace(reader);
-                _SkipEncodedString(reader);
-                _ConsumeWhiteSpace(reader);
-                var d = reader.Read();
-                if (d != ':') throw new DeserializationException("Expected :", reader);
-                _ConsumeWhiteSpace(reader);
-                _Skip(reader);
+                c = _ReadSkipWhitespace(reader);
+                SkipEncodedStringWithLeadChar(reader, c);
+                c = _ReadSkipWhitespace(reader);
+                if (c != ':') throw new DeserializationException("Expected :", reader);
+                c = _ReadSkipWhitespace(reader);
+                SkipWithLeadChar(reader, c);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SkipList(TextReader reader)
+        static void SkipList(TextReader reader, int leadChar)
         {
-            reader.Read();  // skip the [
+            if (leadChar != '[') throw new DeserializationException("Expected [", reader);
 
-            _ConsumeWhiteSpace(reader);
-            var a = reader.Peek();
-            if (a == ']')
+            int c;
+
+            c = _ReadSkipWhitespace(reader);
+            if (c == ']')
             {
-                reader.Read();
                 return;
             }
-            _ConsumeWhiteSpace(reader);
-            _Skip(reader);
+            SkipWithLeadChar(reader, c);
 
             while (true)
             {
-                _ConsumeWhiteSpace(reader);
-                var b = reader.Read();
-                if (b == ']') return;
-                if (b != ',') throw new DeserializationException("Expected ], or ,", reader);
-                _ConsumeWhiteSpace(reader);
-                _Skip(reader);
+                c = _ReadSkipWhitespace(reader);
+                if (c == ']') return;
+                if (c != ',') throw new DeserializationException("Expected ], or ,", reader);
+                c = _ReadSkipWhitespace(reader);
+                SkipWithLeadChar(reader, c);
             }
         }
 
@@ -303,7 +316,13 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _SkipEncodedString(TextReader reader)
         {
-            reader.Read();  // skip the "
+            SkipEncodedStringWithLeadChar(reader, reader.Read());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipEncodedStringWithLeadChar(TextReader reader, int leadChar)
+        {
+            if (leadChar != '"') throw new DeserializationException("Expected \"", reader);
 
             while (true)
             {
@@ -351,9 +370,9 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void SkipNumber(TextReader reader)
+        static void SkipNumber(TextReader reader, int leadChar)
         {
-            reader.Read();  // ditch the start of the number
+            // leadChar should be a start of the number
 
             var seenDecimal = false;
             var seenExponent = false;
@@ -406,6 +425,16 @@ namespace Jil.Deserialize
 
                 reader.Read();
             }
+        }
+
+        public static readonly MethodInfo ReadSkipWhitespace = typeof(Methods).GetMethod("_ReadSkipWhitespace", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _ReadSkipWhitespace(TextReader reader)
+        {
+            int c;
+            do { c = reader.Read(); }
+            while (IsWhiteSpace(c));
+            return c;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -474,6 +503,109 @@ namespace Jil.Deserialize
             commonSb.Clear();
 
             return ret;
+        }
+
+        public static readonly MethodInfo ReadEncodedStringWithCharArray = typeof(Methods).GetMethod("_ReadEncodedStringWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static string _ReadEncodedStringWithCharArray(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            InitDynamicBuffer(ref buffer);
+
+            while (true)
+            {
+                while (idx < buffer.Length - 1)
+                {
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", reader);
+
+                    if (first == '"')
+                    {
+                        goto complete;
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[idx++] = (char)first;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", reader);
+
+                    switch (second)
+                    {
+                        case '"': buffer[idx++] = '"'; continue;
+                        case '\\': buffer[idx++] = '\\'; continue;
+                        case '/': buffer[idx++] = '/'; continue;
+                        case 'b': buffer[idx++] = '\b'; continue;
+                        case 'f': buffer[idx++] = '\f'; continue;
+                        case 'n': buffer[idx++] = '\n'; continue;
+                        case 'r': buffer[idx++] = '\r'; continue;
+                        case 't': buffer[idx++] = '\t'; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    buffer[idx++] = ReadHexQuad2(reader);
+                }
+
+                GrowDynamicBuffer(ref buffer);
+            }
+
+            complete: return new string(buffer, 0, idx);
+        }
+
+        static char ReadHexQuad2(TextReader reader)
+        {
+            int unescaped;
+            int c;
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped = (c - '0') << 12;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped = (10 + c - 'A') << 12;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped = (10 + c - 'a') << 12;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 8;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 8;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 8;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= (c - '0') << 4;
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= (10 + c - 'A') << 4;
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= (10 + c - 'a') << 4;
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9') {
+                unescaped |= c - '0';
+            } else if (c >= 'A' && c <= 'F') {
+                unescaped |= 10 + c - 'A';
+            } else if (c >= 'a' && c <= 'f') {
+                unescaped |= 10 + c - 'a';
+            } else {
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            return (char)unescaped;
         }
 
         public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
@@ -732,6 +864,130 @@ namespace Jil.Deserialize
             if (ret < char.MinValue || ret > char.MaxValue) throw new DeserializationException("Encoded character out of System.Char range, found: " + ret, reader);
 
             return (char)ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ReadHexQuad(TextReader reader)
+        {
+            int unescaped = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char2:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char3:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            char4:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+            }
+
+            finished:
+            return unescaped;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

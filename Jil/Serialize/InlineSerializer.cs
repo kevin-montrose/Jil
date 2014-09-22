@@ -2822,55 +2822,10 @@ namespace Jil.Serialize
 
         void LoadConstantOfType(object val, Type type)
         {
-            if (type == typeof(byte))
+            if (!Utils.LoadConstantOfType(Emit, val, type))
             {
-                Emit.LoadConstant((byte)val);
-                return;
+                throw new ConstructionException("Unexpected type: " + type);
             }
-
-            if (type == typeof(sbyte))
-            {
-                Emit.LoadConstant((sbyte)val);
-                return;
-            }
-
-            if (type == typeof(short))
-            {
-                Emit.LoadConstant((short)val);
-                return;
-            }
-
-            if (type == typeof(ushort))
-            {
-                Emit.LoadConstant((ushort)val);
-                return;
-            }
-
-            if (type == typeof(int))
-            {
-                Emit.LoadConstant((int)val);
-                return;
-            }
-
-            if (type == typeof(uint))
-            {
-                Emit.LoadConstant((uint)val);
-                return;
-            }
-
-            if (type == typeof(long))
-            {
-                Emit.LoadConstant((long)val);
-                return;
-            }
-
-            if (type == typeof(ulong))
-            {
-                Emit.LoadConstant((ulong)val);
-                return;
-            }
-
-            throw new ConstructionException("Unexpected type: " + type);
         }
         
         void WriteDiscontiguousEnumeration(Type enumType, bool popTextWriter)

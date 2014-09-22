@@ -11,6 +11,14 @@ namespace Jil.Deserialize
 {
     partial class Methods
     {
+        public static readonly MethodInfo ReadISO8601DateWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTime _ReadISO8601DateWithCharArray(TextReader reader, ref char[] buffer)
+        {
+            InitDynamicBuffer(ref buffer);
+            return _ReadISO8601Date(reader, buffer);
+        }
+
         public static readonly MethodInfo ReadISO8601Date = typeof(Methods).GetMethod("_ReadISO8601Date", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime _ReadISO8601Date(TextReader reader, char[] buffer)
@@ -829,6 +837,8 @@ namespace Jil.Deserialize
 
                 hasSeparators = false;
             }
+
+            if (stop - start + 1 < 2) throw new DeserializationException("Not enough character for ISO8601 timezone offset", reader);
 
             var mins = 0;
             c = buffer[start];
