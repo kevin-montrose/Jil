@@ -25,7 +25,10 @@ namespace Jil.Deserialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void GrowDynamicBuffer(ref char[] dynBuffer)
         {
-            var biggerBuffer = new char[dynBuffer.Length * 2];
+            var newLen = dynBuffer.Length * 2;
+            if (newLen < DynamicCharBufferInitialSize) newLen = DynamicCharBufferInitialSize;
+
+            var biggerBuffer = new char[newLen];
             Array.Copy(dynBuffer, biggerBuffer, dynBuffer.Length);
             dynBuffer = biggerBuffer;
         }

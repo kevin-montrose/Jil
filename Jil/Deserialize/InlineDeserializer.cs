@@ -20,7 +20,6 @@ namespace Jil.Deserialize
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
-        const string CharArrayName = "char_array";
         
         readonly Type RecursionLookupType;
         readonly DateTimeFormat DateFormat;
@@ -56,32 +55,23 @@ namespace Jil.Deserialize
 
         void AddGlobalVariables()
         {
-            var createStringArray = false;
-
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
             var hasStringyTypes = 
                 involvedTypes.Contains(typeof(string)) ||
                 involvedTypes.Any(t => t.IsUserDefinedType());
 
-            var needsCharBuffer = (AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+            var needsCharBuffer = true;//(AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {
-                if (UseCharArrayOverStringBuilder)
-                {
-                    createStringArray = true;
-                }
-                else
-                {
-                    UsingCharBuffer = true;
+                UsingCharBuffer = true;
 
-                    Emit.DeclareLocal<char[]>(CharBufferName);
+                Emit.DeclareLocal<char[]>(CharBufferName);
 
-                    Emit.LoadConstant(Methods.CharBufferSize);  // int
-                    Emit.NewArray<char>();                      // char[]
-                    Emit.StoreLocal(CharBufferName);            // --empty--
-                }
+                Emit.LoadConstant(Methods.CharBufferSize);  // int
+                Emit.NewArray<char>();                      // char[]
+                Emit.StoreLocal(CharBufferName);            // --empty--
             }
 
             // we can't know, for sure, that a StringBuilder will be needed w/o seeing the data
@@ -96,25 +86,16 @@ namespace Jil.Deserialize
 
             if (mayNeedStringBuilder)
             {
-                if (UseCharArrayOverStringBuilder)
-                {
-                    createStringArray = true;
-                }
-                else
+                if (!UseCharArrayOverStringBuilder)
                 {
                     Emit.DeclareLocal<StringBuilder>(StringBuilderName);
                 }
             }
-
-            if (createStringArray)
-            {
-                Emit.DeclareLocal<char[]>(CharArrayName);
-            }
         }
 
-        void LoadCharArray()
+        void LoadCharBufferAddress()
         {
-            Emit.LoadLocalAddress(CharArrayName);
+            Emit.LoadLocalAddress(CharBufferName);
         }
 
         void LoadCharBuffer()
@@ -246,7 +227,7 @@ namespace Jil.Deserialize
 
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharArray();                                   // TextReader char[]
+                LoadCharBufferAddress();                                   // TextReader char[]
                 Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
             }
             else
@@ -335,7 +316,7 @@ namespace Jil.Deserialize
 
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharArray();                    // TextReader char[]
+                LoadCharBufferAddress();                    // TextReader char[]
 
                 if (numberType == typeof(double))
                 {
@@ -511,7 +492,7 @@ namespace Jil.Deserialize
             Emit.LoadArgument(0);               // TextReader
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharArray();
+                LoadCharBufferAddress();
                 Emit.Call(Methods.ReadISO8601DateWithCharArray); // DateTime
                 ExpectQuote();                      // DateTime
             }
