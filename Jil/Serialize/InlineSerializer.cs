@@ -82,7 +82,9 @@ namespace Jil.Serialize
 
         private readonly bool CallOutOnPossibleDynamic;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic)
+        private readonly bool BuildingToString;
+
+        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecusionLookupType = recusionLookupType;
             PrettyPrint = pretty;
@@ -92,6 +94,8 @@ namespace Jil.Serialize
             IncludeInherited = includeInherited;
 
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
+
+            BuildingToString = buildToString;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -3261,6 +3265,11 @@ namespace Jil.Serialize
 
             return BuildObjectWithNewDelegate();
         }
+
+        internal StringThunkDelegate<ForType> BuildToString()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     static class InlineSerializerHelper
@@ -3279,12 +3288,26 @@ namespace Jil.Serialize
             return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
+        static Func<BuildForType, int, string> BuildAlwaysFailsWithToString<BuildForType>(Type typeCacheType)
+        {
+            var specificTypeCache = typeCacheType.MakeGenericType(typeof(BuildForType));
+            var stashField = specificTypeCache.GetField("StringThunkExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
+
+            var emit = Emit.NewDynamicMethod(typeof(string), new[] { typeof(BuildForType), typeof(int) });
+            emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
+            emit.LoadField(stashField);
+            emit.NewObject<Exception, string, Exception>();
+            emit.Throw();
+
+            return emit.CreateDelegate<Func<BuildForType, int, string>>(Utils.DelegateOptimizationOptions);
+        }
+
         public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false);
+                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3301,13 +3324,36 @@ namespace Jil.Serialize
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
         private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
         {
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
+            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true, false);
             return obj.Build();
         }
 
-        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static Func<BuildForType, int, string> BuildToString<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
         {
-            throw new NotImplementedException();
+            Func<BuildForType, int, string> ret;
+            try
+            {
+                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, true);
+
+                var thunk = obj.BuildToString();
+
+                ret =
+                    (data, depth) =>
+                    {
+                        var writer = new ThunkWriter();
+                        thunk(ref writer, data, depth);
+
+                        return writer.StaticToString();
+                    };
+                exceptionDuringBuild = null;
+            }
+            catch (ConstructionException e)
+            {
+                exceptionDuringBuild = e;
+                ret = BuildAlwaysFailsWithToString<BuildForType>(typeCacheType);
+            }
+
+            return ret;
         }
     }
 }

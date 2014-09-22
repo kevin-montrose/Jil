@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    delegate string StringThunkDelegate<T>(T data, int depth);
-
     static class NewtonsoftStyleTypeCache<T>
     {
         static readonly object ThunkInitLock = new object();
@@ -21,7 +19,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -43,7 +41,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -72,7 +70,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -94,7 +92,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -123,7 +121,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -145,7 +143,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -174,7 +172,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -196,7 +194,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -225,7 +223,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -247,7 +245,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -276,7 +274,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -298,7 +296,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -327,7 +325,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -349,7 +347,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -378,7 +376,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -400,7 +398,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -429,7 +427,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -451,7 +449,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -480,7 +478,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -502,7 +500,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -531,7 +529,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -553,7 +551,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -582,7 +580,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -604,7 +602,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -633,7 +631,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -655,7 +653,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -684,7 +682,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -706,7 +704,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -735,7 +733,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -757,7 +755,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -786,7 +784,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -808,7 +806,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -837,7 +835,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -859,7 +857,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -888,7 +886,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -910,7 +908,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -939,7 +937,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -961,7 +959,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -990,7 +988,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1012,7 +1010,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1041,7 +1039,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1063,7 +1061,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1092,7 +1090,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1114,7 +1112,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1143,7 +1141,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1165,7 +1163,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1194,7 +1192,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1216,7 +1214,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1245,7 +1243,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1267,7 +1265,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1296,7 +1294,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1318,7 +1316,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1347,7 +1345,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1369,7 +1367,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1398,7 +1396,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1420,7 +1418,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1449,7 +1447,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1471,7 +1469,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1500,7 +1498,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1522,7 +1520,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1551,7 +1549,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1573,7 +1571,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1602,7 +1600,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1624,7 +1622,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1653,7 +1651,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1675,7 +1673,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1704,7 +1702,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1726,7 +1724,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1755,7 +1753,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1777,7 +1775,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1806,7 +1804,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1828,7 +1826,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1857,7 +1855,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1879,7 +1877,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1908,7 +1906,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1930,7 +1928,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -1959,7 +1957,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -1981,7 +1979,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2010,7 +2008,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2032,7 +2030,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2061,7 +2059,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2083,7 +2081,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2112,7 +2110,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2134,7 +2132,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2163,7 +2161,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2185,7 +2183,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2214,7 +2212,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2236,7 +2234,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2265,7 +2263,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2287,7 +2285,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2316,7 +2314,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2338,7 +2336,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2367,7 +2365,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2389,7 +2387,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2418,7 +2416,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2440,7 +2438,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2469,7 +2467,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2491,7 +2489,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2520,7 +2518,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2542,7 +2540,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2571,7 +2569,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2593,7 +2591,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2622,7 +2620,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2644,7 +2642,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2673,7 +2671,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2695,7 +2693,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2724,7 +2722,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2746,7 +2744,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2775,7 +2773,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2797,7 +2795,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2826,7 +2824,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2848,7 +2846,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2877,7 +2875,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2899,7 +2897,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2928,7 +2926,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -2950,7 +2948,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -2979,7 +2977,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3001,7 +2999,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -3030,7 +3028,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3052,7 +3050,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -3081,7 +3079,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3103,7 +3101,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -3132,7 +3130,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3154,7 +3152,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -3183,7 +3181,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3205,7 +3203,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
@@ -3234,7 +3232,7 @@ namespace Jil.Serialize
 
         static readonly object StringThunkInitLock = new object();
         static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
+        public static volatile Func<T, int, string> StringThunk;
         public static Exception StringThunkExceptionDuringBuild;
 
         public static Action<TextWriter, T, int> Get()
@@ -3256,7 +3254,7 @@ namespace Jil.Serialize
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public static Func<T, int, string> GetToString()
         {
             LoadToString();
             return StringThunk;
