@@ -3144,10 +3144,17 @@ namespace Jil.Serialize
 
         Emit MakeEmit(Type forType)
         {
-            return Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: Utils.DoVerify);
+            if (BuildingToString)
+            {
+                return Emit.NewDynamicMethod(typeof(void), new[] { typeof(ThunkWriter).MakeByRefType(), typeof(ForType), typeof(int) }, doVerify: Utils.DoVerify);
+            }
+            else
+            {
+                return Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(ForType), typeof(int) }, doVerify: Utils.DoVerify);
+            }
         }
 
-        Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
+        void BuildObjectWithNewImpl()
         {
             var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
@@ -3175,38 +3182,18 @@ namespace Jil.Serialize
 
             WriteObject(typeof(ForType));
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildObjectWithNewDelegate()
+        {
+            BuildObjectWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildObjectWithNewDelegateToString()
         {
-            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
-
-            Emit = MakeEmit(typeof(ForType));
-
-            // dirty trick here, we can prove that overflowing is *impossible* if there are no recursive types
-            //   If that's the case, don't even bother with the check or the increment
-            if (recursiveTypes.Count != 0)
-            {
-                var goOn = Emit.DefineLabel();
-
-                Emit.LoadArgument(2);               // int
-                Emit.LoadConstant(RecursionLimit);  // int int
-                Emit.BranchIfLess(goOn);            // --empty--
-
-                Emit.NewObject(typeof(InfiniteRecursionException)); // infiniteRecursionException
-                Emit.Throw();                                       // --empty--
-
-                Emit.MarkLabel(goOn);               // --empty--
-            }
-
-            AddCharBuffer(typeof(ForType));
-
-            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
-
-            WriteObject(typeof(ForType));
-            Emit.Return();
+            BuildObjectWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -3223,7 +3210,7 @@ namespace Jil.Serialize
             return ret;
         }
 
-        Action<TextWriter, ForType, int> BuildListWithNewDelegate()
+        void BuildListWithNewImpl()
         {
             var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
@@ -3235,27 +3222,23 @@ namespace Jil.Serialize
 
             WriteList(typeof(ForType));
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildListWithNewDelegate()
+        {
+            BuildListWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildListWithNewDelegateToString()
         {
-            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
-
-            Emit = MakeEmit(typeof(ForType));
-
-            AddCharBuffer(typeof(ForType));
-
-            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
-
-            WriteList(typeof(ForType));
-            Emit.Return();
+            BuildListWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate()
+        void BuildEnumerableWithNewImpl()
         {
             var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
@@ -3267,27 +3250,23 @@ namespace Jil.Serialize
 
             WriteEnumerable(typeof(ForType));
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildEnumerableWithNewDelegate()
+        {
+            BuildEnumerableWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildEnumerableWithNewDelegateToString()
         {
-            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
-
-            Emit = MakeEmit(typeof(ForType));
-
-            AddCharBuffer(typeof(ForType));
-
-            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
-
-            WriteEnumerable(typeof(ForType));
-            Emit.Return();
+            BuildEnumerableWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate()
+        void BuildDictionaryWithNewImpl()
         {
             var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
@@ -3299,27 +3278,23 @@ namespace Jil.Serialize
 
             WriteDictionary(typeof(ForType));
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate()
+        {
+            BuildDictionaryWithNewImpl();   
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildDictionaryWithNewDelegateToString()
         {
-            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
-
-            Emit = MakeEmit(typeof(ForType));
-
-            AddCharBuffer(typeof(ForType));
-
-            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
-
-            WriteDictionary(typeof(ForType));
-            Emit.Return();
+            BuildDictionaryWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate()
+        void BuildPrimitiveWithNewImpl()
         {
             var primitiveType = typeof(ForType);
 
@@ -3333,29 +3308,23 @@ namespace Jil.Serialize
             WritePrimitive(typeof(ForType), quotesNeedHandling: true);
 
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildPrimitiveWithNewDelegate()
+        {
+            BuildPrimitiveWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildPrimitiveWithNewDelegateToString()
         {
-            var primitiveType = typeof(ForType);
-
-            Emit = MakeEmit(typeof(ForType));
-
-            AddCharBuffer(typeof(ForType));
-
-            Emit.LoadArgument(0);
-            Emit.LoadArgument(1);
-
-            WritePrimitive(typeof(ForType), quotesNeedHandling: true);
-
-            Emit.Return();
+            BuildPrimitiveWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        Action<TextWriter, ForType, int> BuildNullableWithNewDelegate()
+        void BuildNullableWithNewImpl()
         {
             var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
 
@@ -3369,33 +3338,25 @@ namespace Jil.Serialize
             Emit.LoadArgument(1);
 
             WriteNullable(typeof(ForType), quotesNeedHandling: true);
-            
+
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildNullableWithNewDelegate()
+        {
+            BuildNullableWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildNullableWithNewDelegateToString()
         {
-            var recursiveTypes = FindAndPrimeRecursiveOrReusedTypes(typeof(ForType));
-
-            Emit = MakeEmit(typeof(ForType));
-
-            AddCharBuffer(typeof(ForType));
-
-            RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
-
-            Emit.LoadArgument(0);
-            Emit.LoadArgument(1);
-
-            WriteNullable(typeof(ForType), quotesNeedHandling: true);
-
-            Emit.Return();
+            BuildNullableWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        Action<TextWriter, ForType, int> BuildEnumWithNewDelegate()
+        void BuildEnumWithNewImpl()
         {
             Emit = MakeEmit(typeof(ForType));
 
@@ -3404,19 +3365,18 @@ namespace Jil.Serialize
             WriteEnum(typeof(ForType), popTextWriter: false);
 
             Emit.Return();
+        }
+
+        Action<TextWriter, ForType, int> BuildEnumWithNewDelegate()
+        {
+            BuildEnumWithNewImpl();
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
         StringThunkDelegate<ForType> BuildEnumWithNewDelegateToString()
         {
-            Emit = MakeEmit(typeof(ForType));
-
-            Emit.LoadArgument(1);
-
-            WriteEnum(typeof(ForType), popTextWriter: false);
-
-            Emit.Return();
+            BuildEnumWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
