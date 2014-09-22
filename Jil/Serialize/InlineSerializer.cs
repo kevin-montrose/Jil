@@ -368,7 +368,16 @@ namespace Jil.Serialize
 
                 Emit.LoadArgument(2);   // Action<> TextWriter serializingType int
 
-                var recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), serializingType, typeof(int));
+                Type recursiveAct;
+                if (BuildingToString)
+                {
+                    recursiveAct = typeof(StringThunkDelegate<>).MakeGenericType(serializingType);
+                }
+                else
+                {
+                    recursiveAct = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), serializingType, typeof(int));
+                }
+
                 var invoke = recursiveAct.GetMethod("Invoke");
 
                 Emit.Call(invoke);
@@ -458,7 +467,16 @@ namespace Jil.Serialize
 
                         if (RecursiveTypes.ContainsKey(underlyingType))
                         {
-                            var act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
+                            Type act;
+                            if (BuildingToString)
+                            {
+                                act = typeof(StringThunkDelegate<>).MakeGenericType(underlyingType);
+                            }
+                            else
+                            {
+                                act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
+                            }
+                            
                             var invoke = act.GetMethod("Invoke");
 
                             Emit.Pop();                                     // --empty--
@@ -927,7 +945,14 @@ namespace Jil.Serialize
                     }
                     else
                     {
-                        proxyMethod = typeof(TextWriter).GetMethod("Write", new Type[] { primitiveType });
+                        if (BuildingToString)
+                        {
+                            proxyMethod = typeof(ThunkWriter).GetMethod("Write", new Type[] { primitiveType });
+                        }
+                        else
+                        {
+                            proxyMethod = typeof(TextWriter).GetMethod("Write", new Type[] { primitiveType });
+                        }
                     }
                 }
             }
@@ -3104,7 +3129,16 @@ namespace Jil.Serialize
                 {
                     // static case
                     var cacheType = RecusionLookupType.MakeGenericType(type);
-                    var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+                    FieldInfo thunk;
+
+                    if (BuildingToString)
+                    {
+                        thunk = cacheType.GetField("StringThunk", BindingFlags.Public | BindingFlags.Static);
+                    }
+                    else
+                    {
+                        thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+                    }
 
                     var loc = Emit.DeclareLocal(thunk.FieldType);
 
@@ -3202,7 +3236,16 @@ namespace Jil.Serialize
             var ret = forType.FindRecursiveOrReusedTypes();
             foreach (var primeType in ret)
             {
-                var loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo loadMtd;
+                if (BuildingToString)
+                {
+                    loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("LoadToString", BindingFlags.Public | BindingFlags.Static);
+                }
+                else
+                {
+                    loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                }
+
                 loadMtd.Invoke(null, new object[0]);
             }
 
@@ -3471,18 +3514,18 @@ namespace Jil.Serialize
             return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        static Func<BuildForType, int, string> BuildAlwaysFailsWithToString<BuildForType>(Type typeCacheType)
+        static StringThunkDelegate<BuildForType> BuildAlwaysFailsWithToString<BuildForType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(BuildForType));
             var stashField = specificTypeCache.GetField("StringThunkExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var emit = Emit.NewDynamicMethod(typeof(string), new[] { typeof(BuildForType), typeof(int) });
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(ThunkWriter).MakeByRefType(), typeof(BuildForType), typeof(int) });
             emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
             emit.LoadField(stashField);
             emit.NewObject<Exception, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<BuildForType, int, string>>(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
         }
 
         public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
@@ -3511,25 +3554,15 @@ namespace Jil.Serialize
             return obj.Build();
         }
 
-        public static Func<BuildForType, int, string> BuildToString<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
         {
-            Func<BuildForType, int, string> ret;
+            StringThunkDelegate<BuildForType> ret;
             try
             {
                 var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, true);
 
-                var thunk = obj.BuildToString();
+                ret = obj.BuildToString();
 
-                ret =
-                    (data, depth) =>
-                    {
-                        var writer = new ThunkWriter();
-                        writer.Init();
-
-                        thunk(ref writer, data, depth);
-
-                        return writer.StaticToString();
-                    };
                 exceptionDuringBuild = null;
             }
             catch (ConstructionException e)

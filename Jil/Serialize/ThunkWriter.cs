@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    delegate string StringThunkDelegate<T>(ref ThunkWriter writer, T data, int depth);
+    delegate void StringThunkDelegate<T>(ref ThunkWriter writer, T data, int depth);
 
     struct ThunkWriter
     {
@@ -52,5 +52,43 @@ namespace Jil.Serialize
         {
             return Builder.ToString();
         }
+
+        #region Slow Builds Only
+        // these methods are only called to compare faster methods to serializing
+        //   as such they need not be optimized
+
+        public void Write(byte b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(sbyte b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(short b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(ushort b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(int b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(uint b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(long b)
+        {
+            Write(b.ToString());
+        }
+        public void Write(ulong b)
+        {
+            Write(b.ToString());
+        }
+        #endregion
     }
 }
