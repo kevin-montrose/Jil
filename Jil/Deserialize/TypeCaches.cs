@@ -12,10 +12,10 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
             return Thunk;
@@ -40,10 +40,10 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
             return Thunk;
@@ -68,10 +68,10 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int, T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
             return Thunk;
@@ -96,10 +96,10 @@ namespace Jil.Deserialize
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
 
-        public static volatile Func<TextReader, T> Thunk;
+        public static volatile Func<TextReader, int,  T> Thunk;
         public static Exception ExceptionDuringBuild;
 
-        public static Func<TextReader, T> Get()
+        public static Func<TextReader, int, T> Get()
         {
             Load();
             return Thunk;

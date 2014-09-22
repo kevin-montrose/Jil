@@ -13,7 +13,7 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
-        public static bool AlwaysUseCharBufferForStrings = true;
+        public static bool UseCharArrayOverStringBuilder = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
 
@@ -58,9 +58,12 @@ namespace Jil.Deserialize
 
             var hasStringyTypes = 
                 involvedTypes.Contains(typeof(string)) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
+                involvedTypes.Any(t => t.IsUserDefinedType());  // for member names
 
-            var needsCharBuffer = (AlwaysUseCharBufferForStrings && hasStringyTypes) || (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+            var needsCharBuffer = 
+                hasStringyTypes ||
+                involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
+                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {
@@ -85,8 +88,16 @@ namespace Jil.Deserialize
 
             if (mayNeedStringBuilder)
             {
-                Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+                if (!UseCharArrayOverStringBuilder)
+                {
+                    Emit.DeclareLocal<StringBuilder>(StringBuilderName);
+                }
             }
+        }
+
+        void LoadCharBufferAddress()
+        {
+            Emit.LoadLocalAddress(CharBufferName);
         }
 
         void LoadCharBuffer()
@@ -216,16 +227,24 @@ namespace Jil.Deserialize
             // Stack starts
             // TextReader
 
-            if (UsingCharBuffer)
+            if (UseCharArrayOverStringBuilder)
             {
-                LoadCharBuffer();                           // TextReader char[]
-                LoadStringBuilder();                        // TextReader char[] StringBuilder
-                Emit.Call(Methods.ReadEncodedStringWithBuffer);   // string
+                LoadCharBufferAddress();                                   // TextReader char[]
+                Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
             }
             else
             {
-                LoadStringBuilder();                        // TextReader StringBuilder
-                Emit.Call(Methods.ReadEncodedString);  // string
+                if (UsingCharBuffer)
+                {
+                    LoadCharBuffer();                               // TextReader char[]
+                    LoadStringBuilder();                            // TextReader char[] StringBuilder
+                    Emit.Call(Methods.ReadEncodedStringWithBuffer); // string
+                }
+                else
+                {
+                    LoadStringBuilder();                   // TextReader StringBuilder
+                    Emit.Call(Methods.ReadEncodedString);  // string
+                }
             }
         }
 
@@ -297,24 +316,49 @@ namespace Jil.Deserialize
                 return;
             }
 
-            LoadStringBuilder();                    // TextReader StringBuilder
-
-            if (numberType == typeof(double))
+            if (UseCharArrayOverStringBuilder)
             {
-                Emit.Call(Methods.ReadDouble);   // double
-                return;
+                LoadCharBufferAddress();                    // TextReader char[]
+
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingleCharArray);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    return;
+                }
             }
-
-            if (numberType == typeof(float))
+            else
             {
-                Emit.Call(Methods.ReadSingle);  // float
-                return;
-            }
+                LoadStringBuilder();                    // TextReader StringBuilder
 
-            if (numberType == typeof(decimal))
-            {
-                Emit.Call(Methods.ReadDecimal); // decimal
-                return;
+                if (numberType == typeof(double))
+                {
+                    Emit.Call(Methods.ReadDouble);   // double
+                    return;
+                }
+
+                if (numberType == typeof(float))
+                {
+                    Emit.Call(Methods.ReadSingle);  // float
+                    return;
+                }
+
+                if (numberType == typeof(decimal))
+                {
+                    Emit.Call(Methods.ReadDecimal); // decimal
+                    return;
+                }
             }
 
             throw new ConstructionException("Unexpected number type: " + numberType);
@@ -448,9 +492,18 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                      // --empty--
             Emit.LoadArgument(0);               // TextReader
-            LoadCharBuffer();
-            Emit.Call(Methods.ReadISO8601Date); // DateTime
-            ExpectQuote();                      // DateTime
+            if (UseCharArrayOverStringBuilder)
+            {
+                LoadCharBufferAddress();
+                Emit.Call(Methods.ReadISO8601DateWithCharArray); // DateTime
+                ExpectQuote();                      // DateTime
+            }
+            else
+            {
+                LoadCharBuffer();
+                Emit.Call(Methods.ReadISO8601Date); // DateTime
+                ExpectQuote();                      // DateTime
+            }
         }
 
         void ReadPrimitive(Type primitiveType)
@@ -510,10 +563,13 @@ namespace Jil.Deserialize
         {
             var success = Emit.DefineLabel();
 
-            Emit.LoadArgument(0);           // TextReader
-            Emit.Call(TextReader_Read);     // int
-            Emit.LoadConstant(-1);          // int -1
-            Emit.BranchIfEqual(success);    // --empty--
+            Emit.LoadArgument(1);                   // int
+            Emit.LoadConstant(0);                   // int
+            Emit.UnsignedBranchIfNotEqual(success); // --empty --
+            Emit.LoadArgument(0);                           // TextReader
+            Emit.CallVirtual(TextReader_Read);              // int
+            Emit.LoadConstant(-1);                          // int -1
+            Emit.BranchIfEqual(success);                    // --empty--
 
             Emit.LoadConstant("Expected end of stream");                    // string
             Emit.LoadArgument(0);                                           // string TextReader
@@ -673,10 +729,13 @@ namespace Jil.Deserialize
 
             var isArray = listType.IsArray;
 
+            Sigil.Label doneSkipCharNull = null;
+
             if (isArray)
             {
                 listType = typeof(List<>).MakeGenericType(elementType);
                 addMtd = listType.GetMethod("Add");
+                doneSkipCharNull = Emit.DefineLabel();
             }
 
             using (var loc = Emit.DeclareLocal(listType))
@@ -693,7 +752,15 @@ namespace Jil.Deserialize
                         () =>
                         {
                             Emit.LoadNull();
-                            Emit.Branch(doneSkipChar);
+
+                            if (isArray)
+                            {
+                                Emit.Branch(doneSkipCharNull);
+                            }
+                            else
+                            {
+                                Emit.Branch(doneSkipChar);
+                            }
                         }
                     );
                     Emit.Branch(doRead);
@@ -759,6 +826,8 @@ namespace Jil.Deserialize
                 {
                     var toArray = listType.GetMethod("ToArray");
                     Emit.Call(toArray);             // elementType[]
+
+                    Emit.MarkLabel(doneSkipCharNull);
                 }
             }
         }
@@ -1704,11 +1773,14 @@ namespace Jil.Deserialize
 
             if (allowRecursion && RecursiveTypes.Contains(forType))
             {
-                var funcType = typeof(Func<,>).MakeGenericType(typeof(TextReader), forType);
+                var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
                 var funcInvoke = funcType.GetMethod("Invoke");
 
-                LoadRecursiveTypeDelegate(forType); // Func<TextReader, memberType>
-                Emit.LoadArgument(0);               // Func<TextReader, memberType> TextReader
+                LoadRecursiveTypeDelegate(forType); // Func<TextReader, int, memberType>
+                Emit.LoadArgument(0);               // Func<TextReader, int, memberType> TextReader
+                Emit.LoadArgument(1);               // Func<TextReader, int, memberType> TextReader int
+                Emit.LoadConstant(1);               // Func<TextReader, int, memberType> TextReader int int
+                Emit.Add();                         // Func<TextReader, int, memberType> TextReader int
                 Emit.Call(funcInvoke);              // memberType
                 return;
             }
@@ -1737,13 +1809,13 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public Func<TextReader, ForType> BuildWithNewDelegate()
+        public Func<TextReader, int, ForType> BuildWithNewDelegate()
         {
             var forType = typeof(ForType);
 
             RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
 
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader) }, doVerify: Utils.DoVerify);
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: Utils.DoVerify);
 
             AddGlobalVariables();
 
@@ -1759,31 +1831,31 @@ namespace Jil.Deserialize
 
             Emit.Return();
 
-            return Emit.CreateDelegate<Func<TextReader, ForType>>(Utils.DelegateOptimizationOptions);
+            return Emit.CreateDelegate<Func<TextReader, int, ForType>>(Utils.DelegateOptimizationOptions);
         }
     }
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
-            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader) });
+            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
             emit.LoadField(stashField);
             emit.NewObject<DeserializationException, string, Exception>();
             emit.Throw();
 
-            return emit.CreateDelegate<Func<TextReader, ReturnType>>(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate<Func<TextReader, int, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
             var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
 
-            Func<TextReader, ReturnType> ret;
+            Func<TextReader, int, ReturnType> ret;
             try
             {
                 ret = obj.BuildWithNewDelegate();
