@@ -111,6 +111,7 @@
     <Compile Include="Serialize\InlineSerializer.cs" />
     <Compile Include="Serialize\Methods.cs" />
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
+    <Compile Include="Serialize\ThunkWriter.cs" />
     <Compile Include="Serialize\TypeCaches.cs" />
   </ItemGroup>
   <ItemGroup>

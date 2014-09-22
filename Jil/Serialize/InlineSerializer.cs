@@ -3268,7 +3268,7 @@ namespace Jil.Serialize
         static Action<TextWriter, BuildForType, int> BuildAlwaysFailsWith<BuildForType>(Type typeCacheType)
         {
             var specificTypeCache = typeCacheType.MakeGenericType(typeof(BuildForType));
-            var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
+            var stashField = specificTypeCache.GetField("ThunkExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(BuildForType), typeof(int) });
             emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
@@ -3303,6 +3303,11 @@ namespace Jil.Serialize
         {
             var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
             return obj.Build();
+        }
+
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        {
+            throw new NotImplementedException();
         }
     }
 }

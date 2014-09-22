@@ -81,15 +81,15 @@ namespace Jil
                     return;
 
                 case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    Milliseconds<T>(data, output, options);
+                    Milliseconds(data, output, options);
                     return;
 
                 case DateTimeFormat.SecondsSinceUnixEpoch:
-                    Seconds<T>(data, output, options);
+                    Seconds(data, output, options);
                     return;
 
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    NewtonsoftStyle<T>(data, output, options);
+                    NewtonsoftStyle(data, output, options);
                     return;
 
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
@@ -109,12 +109,31 @@ namespace Jil
                 return SerializeDynamic(data, options);
             }
 
-            options = options ?? Options.Default;
-
-            using (var str = new StringWriter(System.Globalization.CultureInfo.InvariantCulture))
+            using (var str = new StringWriter())
             {
                 Serialize(data, str, options);
                 return str.ToString();
+            }
+
+            // TODO: Actually start using this crazy crap
+
+            options = options ?? Options.Default;
+
+            switch (options.UseDateTimeFormat)
+            {
+                case DateTimeFormat.ISO8601:
+                    return ISO8601ToString(data, options);
+
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    return ISO8601ToString(data, options);
+
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    return ISO8601ToString(data, options);
+
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                    return ISO8601ToString(data, options);
+
+                default: throw new InvalidOperationException("Unexpected Options: " + options);
             }
         }
 
@@ -213,6 +232,86 @@ namespace Jil
             NewtonsoftStyleTypeCache<T>.Get()(output, data, 0);
         }
 
+        static string NewtonsoftStyleToString<T>(T data, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStyleExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                return NewtonsoftStyleExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return NewtonsoftStylePrettyPrintJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                return NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStylePrettyPrintInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStyleJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                return NewtonsoftStyleExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                return NewtonsoftStylePrettyPrintTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP)
+            {
+                return NewtonsoftStyleJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                return NewtonsoftStyleInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            return NewtonsoftStyleTypeCache<T>.GetToString()(data, 0);
+        }
+
         static void Milliseconds<T>(T data, TextWriter output, Options options)
         {
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
@@ -306,6 +405,86 @@ namespace Jil
             }
 
             MillisecondsTypeCache<T>.Get()(output, data, 0);
+        }
+
+        static string MillisecondsToString<T>(T data, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return MillisecondsExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return MillisecondsPrettyPrintJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                return MillisecondsExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                return MillisecondsExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return MillisecondsPrettyPrintJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                return MillisecondsPrettyPrintExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return MillisecondsPrettyPrintInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return MillisecondsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                return MillisecondsExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                return MillisecondsPrettyPrintTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP)
+            {
+                return MillisecondsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                return MillisecondsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            return MillisecondsTypeCache<T>.GetToString()(data, 0);
         }
 
         static void Seconds<T>(T data, TextWriter output, Options options)
@@ -403,6 +582,86 @@ namespace Jil
             SecondsTypeCache<T>.Get()(output, data, 0);
         }
 
+        static string SecondsToString<T>(T data, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return SecondsExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return SecondsPrettyPrintJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return SecondsPrettyPrintExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                return SecondsExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                return SecondsExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return SecondsPrettyPrintJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                return SecondsPrettyPrintExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return SecondsPrettyPrintInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return SecondsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                return SecondsExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                return SecondsPrettyPrintTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP)
+            {
+                return SecondsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                return SecondsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            return SecondsTypeCache<T>.GetToString()(data, 0);
+        }
+
         static void ISO8601<T>(T data, TextWriter output, Options options)
         {
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
@@ -496,6 +755,86 @@ namespace Jil
             }
 
             ISO8601TypeCache<T>.Get()(output, data, 0);
+        }
+
+        static string ISO8601ToString<T>(T data, Options options)
+        {
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return ISO8601ExcludeNullsJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return ISO8601PrettyPrintJSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return ISO8601PrettyPrintExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                return ISO8601ExcludeNullsInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                return ISO8601ExcludeNullsJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return ISO8601PrettyPrintJSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                return ISO8601PrettyPrintExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return ISO8601PrettyPrintInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return ISO8601JSONPInheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                return ISO8601ExcludeNullsTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                return ISO8601PrettyPrintTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.IsJSONP)
+            {
+                return ISO8601JSONPTypeCache<T>.GetToString()(data, 0);
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                return ISO8601InheritedTypeCache<T>.GetToString()(data, 0);
+            }
+
+            return ISO8601TypeCache<T>.GetToString()(data, 0);
         }
 
         /// <summary>
