@@ -4432,6 +4432,50 @@ namespace JilTests
             Assert.AreEqual(123, b.B);
         }
 
+        class _Issue73
+        {
+            public string[] foo { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue73()
+        {
+            {
+                var obj = JSON.Deserialize<_Issue73>(@"{""foo"":null}");
+                Assert.IsNotNull(obj);
+                Assert.IsNull(obj.foo);
+            }
+        }
+
+        class _ExpectedEndOfStream
+        {
+            public _ExpectedEndOfStream Other { get; set; }
+            public string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void ExpectedEndOfStream()
+        {
+            try
+            {
+                JSON.Deserialize<string>("\"hello world\"       {");
+                Assert.Fail("should have failed");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected end of stream", e.Message);
+            }
+
+            try
+            {
+                JSON.Deserialize<_ExpectedEndOfStream>("{\"Other\":{\"Foo\":\"do a thing!\"}, \"Foo\":\"another thing!\"}   dfsfsd");
+                Assert.Fail("should have failed");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected end of stream", e.Message);
+            }
+        }
 #if !DEBUG
         #region SlowSpinUp Types
 
