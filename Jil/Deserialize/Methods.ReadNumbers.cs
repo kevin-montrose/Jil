@@ -1361,6 +1361,152 @@ namespace Jil.Deserialize
             return result;
         }
 
+        private static decimal DecimalPow(int n)
+        {
+            var result = 1M;
+            while (n-- > 0)
+                result *= 10;
+            return result;
+        }
+
+        private static readonly decimal[] decimalMultipliers =
+            Enumerable.Range(0, 18)
+            .Select(n => 1M / DecimalPow(n))
+            .ToArray();
+
+        public static readonly MethodInfo ReadDecimalFast = typeof(Methods).GetMethod("_ReadDecimalFast", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalFast(TextReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            InitDynamicBuffer(ref buffer);
+
+            int c;
+
+            var prev = -1;
+
+            var firstValidCharIdx = -1;
+            var firstDigitIdx = -1;
+            var decimalPointIdx = -1;
+            var eIdx = -1;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                if (c >= '0' && c <= '9')
+                {
+                    if (firstDigitIdx < 0)
+                    {
+                        firstDigitIdx = idx;
+                        if (firstValidCharIdx < 0)
+                            firstValidCharIdx = idx;
+                    }
+                }
+                else if (c == '+')
+                {
+                    if (firstValidCharIdx == -1)
+                    {
+                        firstValidCharIdx = idx;
+                    }
+                    else if (prev != 'e' && prev != 'E')
+                    {
+                        throw new DeserializationException("Unexpected +", reader);
+                    }
+                }
+                else if (c == '-')
+                {
+                    if (firstValidCharIdx == -1)
+                    {
+                        firstValidCharIdx = idx;
+                    }
+                    else if (prev != 'e' && prev != 'E')
+                    {
+                        throw new DeserializationException("Unexpected -", reader);
+                    }
+                }
+                else if (c == 'e' || c == 'E')
+                {
+                    if (eIdx >= 0 || firstValidCharIdx < 0)
+                    {
+                        throw new DeserializationException("Unexpected " + c, reader);
+                    }
+
+                    eIdx = idx;
+                }
+                else if (c == '.')
+                {
+                    if (firstValidCharIdx < 0 || eIdx >= 0 || decimalPointIdx >= 0)
+                    {
+                        throw new DeserializationException("Unexpected .", reader);
+                    }
+
+                    decimalPointIdx = idx;
+                }
+                else
+                {
+                    break;
+                }
+
+                buffer[idx++] = (char)c;
+                if (idx >= buffer.Length)
+                {
+                    GrowDynamicBuffer(ref buffer);
+                }
+                reader.Read();
+                prev = c;
+            }
+
+            if (eIdx < 0)
+            {
+                var endIdx = idx;
+                var maxChars = decimalPointIdx < 0 ? 18 : 19;
+                if (endIdx - firstDigitIdx <= maxChars)
+                {
+                    if (decimalPointIdx == endIdx - 1)
+                    {
+                        decimalPointIdx = -1;
+                        endIdx--;
+                    }
+
+                    var negative = buffer[firstValidCharIdx] == '-';
+
+                    Decimal result;
+                    idx = firstDigitIdx;
+                    var n1 = 0; // we use int rather than long so as to work well on 32-bit builds
+                    for (; idx < endIdx && n1 < 100000000; ++idx)
+                    {
+                        if (idx != decimalPointIdx)
+                            n1 = n1 * 10 + buffer[idx] - '0';
+                    }
+                    if (negative)
+                        n1 = -n1;
+                    if (idx == endIdx)
+                    {
+                        result = n1;
+                    }
+                    else
+                    {
+                        var n2 = 0;
+                        var multiplier = 1;
+                        for (; idx < endIdx; ++idx)
+                        {
+                            if (idx != decimalPointIdx)
+                            {
+                                multiplier *= 10;
+                                n2 = n2 * 10 + buffer[idx] - '0';
+                            }
+                        }
+                        result = (long)n1 * multiplier + (long)n2;
+                    }
+                    if (decimalPointIdx > 0)
+                    {
+                        result *= decimalMultipliers[endIdx - decimalPointIdx - 1];
+                    }
+                    return result;                    
+                }
+            }
+
+            return decimal.Parse(new string(buffer, 0, idx), NumberStyles.Float, CultureInfo.InvariantCulture);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void AssertNotFollowedByDigit(TextReader reader)

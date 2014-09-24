@@ -1939,6 +1939,51 @@ namespace JilTests
         [TestMethod]
         public void Decimals()
         {
+            for (var i = 0; i < 20; ++i)
+            {
+                for (var j=0; j < i; ++j)
+                {
+                    var sb = new StringBuilder();
+                    for (var k = 0; k < i; ++k)
+                    {
+                        sb.Append('9');
+                        if (k == j)
+                            sb.Append('.');
+                    }
+                    var numberString = sb.ToString();
+                    using (var str = new StringReader(numberString))
+                    {
+                        var res = JSON.Deserialize<decimal>(str);
+                        Assert.AreEqual(decimal.Parse(numberString), res);
+                        Assert.AreEqual(-1, str.Peek());
+                    }
+                }
+            }
+
+            using (var str = new StringReader("123456789.123456789"))
+            {
+                var res = JSON.Deserialize<decimal>(str);
+
+                Assert.AreEqual(123456789.123456789m, res);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("123456789.123456789"))
+            {
+                var res = JSON.Deserialize<decimal>(str);
+
+                Assert.AreEqual(123456789.123456789m, res);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("1234567890.123456789"))
+            {
+                var res = JSON.Deserialize<decimal>(str);
+
+                Assert.AreEqual(1234567890.123456789m, res);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
             for (var i = -11.1m; i <= 22.2m; i += 0.03m)
             {
                 var asStr = i.ToString(CultureInfo.InvariantCulture);

@@ -16,6 +16,7 @@ namespace Jil.Deserialize
         public static bool UseCharArrayOverStringBuilder = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
+        public static bool UseFastNumberDeserializers = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -334,7 +335,14 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(decimal))
                 {
-                    Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    if (UseFastNumberDeserializers)
+                    {
+                        Emit.Call(Methods.ReadDecimalFast); // decimal
+                    }
+                    else
+                    {
+                        Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    }
                     return;
                 }
             }
