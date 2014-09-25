@@ -101,6 +101,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DeepObjectGraphTest.cs" />
     <Compile Include="DeserializeDynamicTests.cs" />
     <Compile Include="DeserializeTests.cs" />
     <Compile Include="DynamicSerializationTests.cs" />
