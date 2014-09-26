@@ -1602,9 +1602,6 @@ namespace Jil.Deserialize
             {
                 var endIdx = idx;
 
-                while (decimalPointIdx > 0 && endIdx > 1 && buffer[endIdx - 1] == '0')
-                    --endIdx;
-
                 var maxChars = decimalPointIdx < 0 ? 18 : 19;
                 if (endIdx - firstDigitIdx <= maxChars)
                 {
