@@ -1127,8 +1127,6 @@ namespace JilTests
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 
-
-
         [TestMethod]
         public void TryFastDecimalDeserializer()
         {
@@ -1179,12 +1177,68 @@ namespace JilTests
                 }
             }
 
-            double fastDecimalsTime, methodTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fastDecimals, method, out fastDecimalsTime, out methodTime);
+            double fastDecimalsTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fastDecimals, method, out fastDecimalsTime, out normalTime);
 
-            Assert.IsTrue(fastDecimalsTime < methodTime, "automataTime = " + fastDecimalsTime + ", methodTime = " + methodTime);
+            Assert.IsTrue(fastDecimalsTime < normalTime, "fastDecimalsTime = " + fastDecimalsTime + ", normalTime = " + normalTime);
         }
 
+
+        [TestMethod]
+        public void TryFastDoubleDeserializer()
+        {
+            Func<TextReader, int, Double> fastDecimals;
+            Func<TextReader, int, Double> method;
+
+            try
+            {
+                {
+                    InlineDeserializer<Double>.UseFastNumberDeserializers = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    fastDecimals = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<Double>.UseFastNumberDeserializers = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    method = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<Double>.UseFastNumberDeserializers = true;
+            }
+
+            var rand = new Random(191112901);
+
+            var toSerialize = new List<Double>();
+            var sb = new StringBuilder();
+            for (var i = 0; i < 20000; i++)
+            {
+                var numberOfSignificantFigures = rand.Next(1,8);
+                var decimalPlacePosition = rand.Next(1, numberOfSignificantFigures);
+
+                for (var j = 0; j < numberOfSignificantFigures; ++j)
+                {
+                    sb.Append((char)('0' + rand.Next(10)));
+                    if (j == decimalPlacePosition)
+                        sb.Append('.');
+                }
+
+                toSerialize.Add(double.Parse(sb.ToString()));
+
+                sb.Clear();
+            }
+
+            double fastDecimalsTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fastDecimals, method, out fastDecimalsTime, out normalTime);
+
+            Assert.IsTrue(fastDecimalsTime < normalTime, "fastDecimalsTime = " + fastDecimalsTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

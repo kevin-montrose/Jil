@@ -323,7 +323,14 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(double))
                 {
-                    Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    if (UseFastNumberDeserializers)
+                    {
+                        Emit.Call(Methods.ReadDoubleFast); // decimal
+                    }
+                    else
+                    {
+                        Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    }
                     return;
                 }
 
