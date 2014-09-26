@@ -2039,10 +2039,18 @@ namespace JilTests
         [TestMethod]
         public void FastDoubles()
         {
+            using (var str = new StringReader(".002877"))
+            {
+                var res = JSON.Deserialize<Double>(str);
+                Assert.AreEqual(Double.Parse(".002877"), res);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            // Test generates 87654320 cases, 24054320 are handled by the fast double parsing routine
             var number = new char[10];
             for (var significantFigures = 1; significantFigures <= 7; ++significantFigures)
             {
-                for (var decimalPlacePosition = 1; decimalPlacePosition < significantFigures; ++decimalPlacePosition)
+                for (var decimalPlacePosition = 0; decimalPlacePosition <= significantFigures; ++decimalPlacePosition)
                 {
                     number[decimalPlacePosition] = '.';
                     var n = (int)Math.Pow(10, significantFigures);

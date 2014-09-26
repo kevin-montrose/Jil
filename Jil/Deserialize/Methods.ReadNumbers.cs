@@ -1092,7 +1092,7 @@ namespace Jil.Deserialize
                 }
                 else if (c == '.')
                 {
-                    if (firstDigitIdx < 0 || eIdx >= 0 || decimalPointIdx >= 0)
+                    if (eIdx >= 0 || decimalPointIdx >= 0)
                     {
                         throw new DeserializationException("Unexpected .", reader);
                     }
@@ -1115,18 +1115,30 @@ namespace Jil.Deserialize
             if (eIdx < 0)
             {
                 var endIdx = idx;
-
-                while (decimalPointIdx > 0 && endIdx > 1 && buffer[endIdx - 1] == '0')
+                while (decimalPointIdx >= 0 && endIdx > 1 && buffer[endIdx - 1] == '0')
+                {
                     --endIdx;
+                }
 
-                var lastCharIs5 =
-                    endIdx > 1 && buffer[endIdx - 1] == '5';
+                var startIdx =
+                    decimalPointIdx < 0
+                        ? firstDigitIdx
+                        : Math.Min(decimalPointIdx, firstDigitIdx);
+                while (startIdx < endIdx && buffer[startIdx] == '0')
+                {
+                    ++startIdx;
+                }
 
-                var maxChars = 
-                    (decimalPointIdx < 0 ? 6 : 7)
-                    + (lastCharIs5 ? 1 : 0);
+                var hasIntegerComponent  = buffer[startIdx] != '.';
+                var includesDecimalPoint = decimalPointIdx >= 0;
+                var lastCharIs5          = endIdx > 1 && buffer[endIdx - 1] == '5';
+                var maxChars = 5
+                    + (hasIntegerComponent ? 1 : 0)
+                    + (includesDecimalPoint ? 1 : 0)
+                    + (lastCharIs5 ? 1 : 0)
+                    ;
 
-                if (endIdx - firstDigitIdx <= maxChars)
+                if (endIdx - startIdx <= maxChars)
                 {
                     if (decimalPointIdx == endIdx - 1)
                     {
@@ -1134,28 +1146,25 @@ namespace Jil.Deserialize
                         endIdx--;
                     }
 
-                    var negative = buffer[firstValidCharIdx] == '-';
-
-                    idx = firstDigitIdx;
-                    var n = 0; // we use int rather than long so as to work well on 32-bit builds
+                    idx = startIdx;
+                    var n = 0;
                     for (; idx < endIdx; ++idx)
                     {
                         if (idx != decimalPointIdx)
                             n = n * 10 + buffer[idx] - '0';
                     }
-                    if (negative)
+                    if (buffer[firstValidCharIdx] == '-')
                     {
                         n = -n;
                     }
                     var result = (double)n;
-                    if (decimalPointIdx > 0)
+                    if (decimalPointIdx >= 0)
                     {
                         result /= doubleDividers[endIdx - decimalPointIdx - 1];
                     }
                     return result;
                 }
             }
-
             return double.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
         }
 
@@ -1609,7 +1618,7 @@ namespace Jil.Deserialize
 
                     Decimal result;
                     idx = firstDigitIdx;
-                    var n1 = 0; // we use int rather than long so as to work well on 32-bit builds
+                    var n1 = 0; // we use int rather than long so as to work well on 32-bit runtime
                     for (; idx < endIdx && n1 < 100000000; ++idx)
                     {
                         if (idx != decimalPointIdx)
