@@ -325,18 +325,25 @@ namespace Jil.Deserialize
                 {
                     if (UseFastNumberDeserializers)
                     {
-                        Emit.Call(Methods.ReadDoubleFast); // decimal
+                        Emit.Call(Methods.ReadDoubleFast);        // Double
                     }
                     else
                     {
-                        Emit.Call(Methods.ReadDoubleCharArray);   // double
+                        Emit.Call(Methods.ReadDoubleCharArray);   // Double
                     }
                     return;
                 }
 
                 if (numberType == typeof(float))
                 {
-                    Emit.Call(Methods.ReadSingleCharArray);  // float
+                    if (UseFastNumberDeserializers)
+                    {
+                        Emit.Call(Methods.ReadSingleFast);       // Single
+                    }
+                    else
+                    {
+                        Emit.Call(Methods.ReadSingleCharArray);  // Single
+                    }
                     return;
                 }
 

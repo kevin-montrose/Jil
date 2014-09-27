@@ -2050,27 +2050,73 @@ namespace JilTests
             var number = new char[10];
             for (var significantFigures = 1; significantFigures <= 7; ++significantFigures)
             {
-                for (var decimalPlacePosition = 0; decimalPlacePosition <= significantFigures; ++decimalPlacePosition)
+                try
                 {
-                    number[decimalPlacePosition] = '.';
-                    var n = (int)Math.Pow(10, significantFigures);
-                    for (var i=0; i < n; ++i)
+                    Parallel.For(0, significantFigures + 1, decimalPlacePosition =>
                     {
-                        var temp = i;
-                        for (var j=0; j < significantFigures; ++j)
+                        number[decimalPlacePosition] = '.';
+                        var n = (int)Math.Pow(10, significantFigures);
+                        for (var i = 0; i < n; ++i)
                         {
-                            var idx = significantFigures - j;
-                            number[idx - (idx <= decimalPlacePosition ? 1 : 0)] = (char)('0' + temp % 10);
-                            temp /= 10;
+                            var temp = i;
+                            for (var j = 0; j < significantFigures; ++j)
+                            {
+                                var idx = significantFigures - j;
+                                number[idx - (idx <= decimalPlacePosition ? 1 : 0)] = (char)('0' + temp % 10);
+                                temp /= 10;
+                            }
+                            var numberString = new string(number, 0, significantFigures + 1);
+                            using (var str = new StringReader(numberString))
+                            {
+                                var res = JSON.Deserialize<Double>(str);
+                                Assert.AreEqual(BitConverter.DoubleToInt64Bits(Double.Parse(numberString)), BitConverter.DoubleToInt64Bits(res));
+                                Assert.AreEqual(-1, str.Peek());
+                            }
                         }
-                        var numberString = new string(number, 0, significantFigures + 1);
-                        using (var str = new StringReader(numberString))
+                    });
+                }
+                catch(AggregateException ex)
+                {
+                    throw ex.InnerExceptions[0];
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FastSingles()
+        {
+            var number = new char[10];
+            for (var significantFigures = 1; significantFigures <= 7; ++significantFigures)
+            {
+                try
+                {
+                    Parallel.For(0, significantFigures + 1, decimalPlacePosition =>
+                    {
+                        number[decimalPlacePosition] = '.';
+                        var n = (int)Math.Pow(10, significantFigures);
+                        for (var i = 0; i < n; ++i)
                         {
-                            var res = JSON.Deserialize<Double>(str);
-                            Assert.AreEqual(Double.Parse(numberString), res);
-                            Assert.AreEqual(-1, str.Peek());
+                            var temp = i;
+                            for (var j = 0; j < significantFigures; ++j)
+                            {
+                                var idx = significantFigures - j;
+                                number[idx - (idx <= decimalPlacePosition ? 1 : 0)] = (char)('0' + temp % 10);
+                                temp /= 10;
+                            }
+                            var numberString = new string(number, 0, significantFigures + 1);
+                            using (var str = new StringReader(numberString))
+                            {
+                                var res = JSON.Deserialize<Single>(str);
+                                var shouldBe = Single.Parse(numberString);
+                                Assert.IsTrue(Enumerable.SequenceEqual(BitConverter.GetBytes(shouldBe), BitConverter.GetBytes(res)), "{0} should be {1:R} but is {2:R}", numberString, shouldBe, res);
+                                Assert.AreEqual(-1, str.Peek());
+                            }
                         }
-                    }
+                    });
+                }
+                catch (AggregateException ex)
+                {
+                    throw ex.InnerExceptions[0];
                 }
             }
         }

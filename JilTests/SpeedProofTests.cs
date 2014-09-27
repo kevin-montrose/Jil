@@ -1187,8 +1187,8 @@ namespace JilTests
         [TestMethod]
         public void TryFastDoubleDeserializer()
         {
-            Func<TextReader, int, Double> fastDecimals;
-            Func<TextReader, int, Double> method;
+            Func<TextReader, int, Double> fastDoubles;
+            Func<TextReader, int, Double> normalDoubles;
 
             try
             {
@@ -1197,7 +1197,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    fastDecimals = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    fastDoubles = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
 
                 {
@@ -1205,7 +1205,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    method = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                    normalDoubles = InlineDeserializerHelper.Build<Double>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
                 }
             }
             finally
@@ -1234,10 +1234,66 @@ namespace JilTests
                 sb.Clear();
             }
 
-            double fastDecimalsTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, fastDecimals, method, out fastDecimalsTime, out normalTime);
+            double fastDoublesTime, normalDoublesTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fastDoubles, normalDoubles, out fastDoublesTime, out normalDoublesTime);
 
-            Assert.IsTrue(fastDecimalsTime < normalTime, "fastDecimalsTime = " + fastDecimalsTime + ", normalTime = " + normalTime);
+            Assert.IsTrue(fastDoublesTime < normalDoublesTime, "fastDoublesTime = " + fastDoublesTime + ", normalDoublesTime = " + normalDoublesTime);
+        }
+
+        [TestMethod]
+        public void TryFastSingleDeserializer()
+        {
+            Func<TextReader, int, Single> fastSingles;
+            Func<TextReader, int, Single> normalSingles;
+
+            try
+            {
+                {
+                    InlineDeserializer<Single>.UseFastNumberDeserializers = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    fastSingles = InlineDeserializerHelper.Build<Single>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<Single>.UseFastNumberDeserializers = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    normalSingles = InlineDeserializerHelper.Build<Single>(typeof(Jil.Deserialize.NewtonsoftStyleTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<Single>.UseFastNumberDeserializers = true;
+            }
+
+            var rand = new Random(191112901);
+
+            var toSerialize = new List<Single>();
+            var sb = new StringBuilder();
+            for (var i = 0; i < 20000; i++)
+            {
+                var numberOfSignificantFigures = rand.Next(1, 8);
+                var decimalPlacePosition = rand.Next(1, numberOfSignificantFigures);
+
+                for (var j = 0; j < numberOfSignificantFigures; ++j)
+                {
+                    sb.Append((char)('0' + rand.Next(10)));
+                    if (j == decimalPlacePosition)
+                        sb.Append('.');
+                }
+
+                toSerialize.Add(Single.Parse(sb.ToString()));
+
+                sb.Clear();
+            }
+
+            double fastSinglesTime, normalSinglesTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fastSingles, normalSingles, out fastSinglesTime, out normalSinglesTime);
+
+            Assert.IsTrue(fastSinglesTime < normalSinglesTime, "fastSinglesTime = " + fastSinglesTime + ", normalSinglesTime = " + normalSinglesTime);
         }
 #endif
     }
