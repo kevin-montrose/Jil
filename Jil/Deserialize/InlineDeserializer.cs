@@ -853,6 +853,8 @@ namespace Jil.Deserialize
             }
         }
 
+        Dictionary<Type, Sigil.Local> _arrayBuilders = new Dictionary<Type, Sigil.Local>();
+
         Action ReadListSharing(Type listType)
         {
             var isValueType = listType.IsValueType;
@@ -876,12 +878,16 @@ namespace Jil.Deserialize
             Sigil.Local loc = null;
             if (isArray)
             {
-                loc = Emit.DeclareLocal(listType);
-                Emit.LoadLocalAddress(loc);         // listType*
-                Emit.InitializeObject(listType);    // --empty--
-                Emit.LoadLocalAddress(loc);         // listType*
-                var init = listType.GetMethod("Init");
-                Emit.Call(init);                    // --empty--
+                if (!_arrayBuilders.TryGetValue(listType, out loc))
+                {
+                    loc = Emit.DeclareLocal(listType);
+                    Emit.LoadLocalAddress(loc);         // listType*
+                    Emit.InitializeObject(listType);    // --empty--
+                    Emit.LoadLocalAddress(loc);         // listType*
+                    var init = listType.GetMethod("Init");
+                    Emit.Call(init);                    // --empty--
+                    _arrayBuilders[listType] = loc;
+                }
             }
 
             return () =>
