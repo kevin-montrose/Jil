@@ -1584,7 +1584,7 @@ namespace Jil.Serialize
             using (var e = Emit.DeclareLocal<int>())
             {
                 loadList();                                 // IList<>
-                Emit.CastClass(iList);                      // IList<>
+                Emit.CastClass(collectionInterface);        // IList<>
                 Emit.CallVirtual(countMtd);                 // int
                 Emit.StoreLocal(e);                         // --empty--
 
