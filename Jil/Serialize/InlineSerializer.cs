@@ -257,7 +257,7 @@ namespace Jil.Serialize
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
             // It's a list or dictionary, go and build that code
-            if (serializingType.IsListType() || serializingType.IsDictionaryType())
+            if (serializingType.IsListType() || serializingType.IsDictionaryType() || serializingType.IsReadOnlyListType() || serializingType.IsReadOnlyDictionaryType())
             {
                 if (inLocal != null)
                 {
@@ -282,13 +282,13 @@ namespace Jil.Serialize
                 {
                     Emit.StoreLocal(loc);
 
-                    if (serializingType.IsListType())
+                    if (serializingType.IsListType() || serializingType.IsReadOnlyListType())
                     {
                         WriteList(serializingType, loc);
                         return;
                     }
 
-                    if (serializingType.IsDictionaryType())
+                    if (serializingType.IsDictionaryType() || serializingType.IsReadOnlyDictionaryType())
                     {
                         WriteDictionary(serializingType, loc);
                         return;
@@ -1544,9 +1544,19 @@ namespace Jil.Serialize
                     }
                 };
 
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
-            var countMtd = listType.GetCollectionInterface().GetProperty("Count").GetMethod;
-            var accessorMtd = listType.GetListInterface().GetProperty("Item").GetMethod;
+            var listInterface =
+                listType.IsListType()
+                    ? listType.GetListInterface()
+                    : listType.GetReadOnlyListInterface();
+
+            var collectionInterface =
+                listType.IsCollectionType()
+                    ? listType.GetCollectionInterface()
+                    : listType.GetReadOnlyCollectionInterface();
+
+            var elementType = listInterface.GetGenericArguments()[0];
+            var countMtd = collectionInterface.GetProperty("Count").GetMethod;
+            var accessorMtd = listInterface.GetProperty("Item").GetMethod;
 
             var iList = typeof(IList<>).MakeGenericType(elementType);
 
@@ -2053,7 +2063,10 @@ namespace Jil.Serialize
 
         void WriteDictionaryWithoutNulls(Type dictType, Sigil.Local inLocal)
         {
-            var dictI = dictType.GetDictionaryInterface();
+            var dictI =
+                dictType.IsDictionaryType()
+                    ? dictType.GetDictionaryInterface()
+                    : dictType.GetReadOnlyDictionaryInterface();
 
             var keyType = dictI.GetGenericArguments()[0];
             var elementType = dictI.GetGenericArguments()[1];
@@ -2200,7 +2213,10 @@ namespace Jil.Serialize
 
         void WriteDictionaryWithNulls(Type dictType, Sigil.Local inLocal)
         {
-            var dictI = dictType.GetDictionaryInterface();
+            var dictI =
+                dictType.IsDictionaryType()
+                    ? dictType.GetDictionaryInterface()
+                    : dictType.GetReadOnlyDictionaryInterface();
 
             var keyType = dictI.GetGenericArguments()[0];
             var elementType = dictI.GetGenericArguments()[1];
@@ -3239,7 +3255,7 @@ namespace Jil.Serialize
                 return BuildPrimitiveWithNewDelegate();
             }
 
-            if (forType.IsDictionaryType())
+            if (forType.IsDictionaryType() || forType.IsReadOnlyDictionaryType())
             {
                 return BuildDictionaryWithNewDelegate();
             }

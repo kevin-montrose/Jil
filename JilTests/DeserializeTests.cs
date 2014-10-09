@@ -278,6 +278,130 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void IReadOnlyDictionaryEnumKeys()
+        {
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys1, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys1.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys1, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys1.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys1.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys2, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys2.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys2, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys2.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys2.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys3, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys3.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys3, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys3.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys3.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys4, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys4.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys4, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys4.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys4.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys5, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys5.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys5, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys5.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys5.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys6, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys6.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys6, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys6.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys6.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys7, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys7.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys7, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys7.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys7.B]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys8, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys8.A]);
+            }
+
+            using (var str = new StringReader("{\"A\":\"hello world\",\"B\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<_DictionaryEnumKeys8, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[_DictionaryEnumKeys8.A]);
+                Assert.AreEqual("fizz buzz", res[_DictionaryEnumKeys8.B]);
+            }
+        }
+
+        [TestMethod]
         public void DictionaryNumberKeys()
         {
             using (var str = new StringReader("{\"1\":\"hello world\"}"))
@@ -401,6 +525,131 @@ namespace JilTests
             }
         }
 
+
+        [TestMethod]
+        public void IReadOnlyDictionaryNumberKeys()
+        {
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<byte, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"2\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<byte, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[2]);
+            }
+
+            using (var str = new StringReader("{\"-1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<sbyte, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[-1]);
+            }
+
+            using (var str = new StringReader("{\"-1\":\"hello world\",\"2\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<sbyte, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[-1]);
+                Assert.AreEqual("fizz buzz", res[2]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<short, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"-22\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<short, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[-22]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<ushort, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"234\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<ushort, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[234]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<int, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"2\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<int, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[2]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<uint, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"2456789\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<uint, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[2456789]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<long, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"-1234567890\":\"hello world\",\"2\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<long, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[-1234567890]);
+                Assert.AreEqual("fizz buzz", res[2]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<ulong, string>>(str);
+                Assert.AreEqual(1, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+            }
+
+            using (var str = new StringReader("{\"1\":\"hello world\",\"" + ulong.MaxValue + "\":\"fizz buzz\"}"))
+            {
+                var res = JSON.Deserialize<IReadOnlyDictionary<ulong, string>>(str);
+                Assert.AreEqual(2, res.Count);
+                Assert.AreEqual("hello world", res[1]);
+                Assert.AreEqual("fizz buzz", res[ulong.MaxValue]);
+            }
+        }
+
 #pragma warning disable 0649
         class _IDictionaries
         {
@@ -442,6 +691,46 @@ namespace JilTests
         }
 
 #pragma warning disable 0649
+        class _IReadOnlyDictionaries
+        {
+            public IReadOnlyDictionary<string, sbyte> StringToBytes;
+            public IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>> StringToStringToBytes;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void IReadOnlyDictionaries()
+        {
+            using (var str = new StringReader("{\"StringToBytes\":{\"a\":-1,\"b\":127,\"c\":8},\"StringToStringToBytes\":{\"foo\":{\"bar\":123}, \"fizz\":{\"buzz\":456, \"bar\":789}}}"))
+            {
+                var res = JSON.Deserialize<_IReadOnlyDictionaries>(str);
+                Assert.IsNotNull(res);
+
+                Assert.IsNotNull(res.StringToBytes);
+                Assert.AreEqual(3, res.StringToBytes.Count);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("a"));
+                Assert.AreEqual((sbyte)-1, res.StringToBytes["a"]);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("b"));
+                Assert.AreEqual((sbyte)127, res.StringToBytes["b"]);
+                Assert.IsTrue(res.StringToBytes.ContainsKey("c"));
+                Assert.AreEqual((sbyte)8, res.StringToBytes["c"]);
+
+                Assert.IsNotNull(res.StringToStringToBytes);
+                Assert.AreEqual(2, res.StringToStringToBytes.Count);
+                Assert.IsTrue(res.StringToStringToBytes.ContainsKey("foo"));
+                Assert.AreEqual(1, res.StringToStringToBytes["foo"].Count);
+                Assert.IsTrue(res.StringToStringToBytes["foo"].ContainsKey("bar"));
+                Assert.AreEqual(123, res.StringToStringToBytes["foo"]["bar"]);
+                Assert.IsTrue(res.StringToStringToBytes.ContainsKey("fizz"));
+                Assert.AreEqual(2, res.StringToStringToBytes["fizz"].Count);
+                Assert.IsTrue(res.StringToStringToBytes["fizz"].ContainsKey("buzz"));
+                Assert.AreEqual(456, res.StringToStringToBytes["fizz"]["buzz"]);
+                Assert.IsTrue(res.StringToStringToBytes["fizz"].ContainsKey("bar"));
+                Assert.AreEqual(789, res.StringToStringToBytes["fizz"]["bar"]);
+            }
+        }
+
+#pragma warning disable 0649
         class _ILists
         {
             public IList<byte> Bytes;
@@ -455,6 +744,46 @@ namespace JilTests
             using (var str = new StringReader("{\"Bytes\":[255,0,128],\"IntsOfInts\":[[1,2,3],[4,5,6],[7,8,9]]}"))
             {
                 var res = JSON.Deserialize<_ILists>(str);
+                Assert.IsNotNull(res);
+
+                Assert.IsNotNull(res.Bytes);
+                Assert.AreEqual(3, res.Bytes.Count);
+                Assert.AreEqual(255, res.Bytes[0]);
+                Assert.AreEqual(0, res.Bytes[1]);
+                Assert.AreEqual(128, res.Bytes[2]);
+
+                Assert.IsNotNull(res.IntsOfInts);
+                Assert.AreEqual(3, res.IntsOfInts.Count);
+                Assert.IsNotNull(res.IntsOfInts[0]);
+                Assert.AreEqual(3, res.IntsOfInts[0].Count);
+                Assert.AreEqual(1, res.IntsOfInts[0][0]);
+                Assert.AreEqual(2, res.IntsOfInts[0][1]);
+                Assert.AreEqual(3, res.IntsOfInts[0][2]);
+                Assert.AreEqual(3, res.IntsOfInts[1].Count);
+                Assert.AreEqual(4, res.IntsOfInts[1][0]);
+                Assert.AreEqual(5, res.IntsOfInts[1][1]);
+                Assert.AreEqual(6, res.IntsOfInts[1][2]);
+                Assert.AreEqual(3, res.IntsOfInts[2].Count);
+                Assert.AreEqual(7, res.IntsOfInts[2][0]);
+                Assert.AreEqual(8, res.IntsOfInts[2][1]);
+                Assert.AreEqual(9, res.IntsOfInts[2][2]);
+            }
+        }
+
+#pragma warning disable 0649
+        class _IReadOnlyLists
+        {
+            public IReadOnlyList<byte> Bytes;
+            public IReadOnlyList<IReadOnlyList<int>> IntsOfInts;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void IReadOnlyLists()
+        {
+            using (var str = new StringReader("{\"Bytes\":[255,0,128],\"IntsOfInts\":[[1,2,3],[4,5,6],[7,8,9]]}"))
+            {
+                var res = JSON.Deserialize<_IReadOnlyLists>(str);
                 Assert.IsNotNull(res);
 
                 Assert.IsNotNull(res.Bytes);
@@ -3815,6 +4144,24 @@ namespace JilTests
             using (var str = new StringReader("{\"A\":[\"abcd\", \"efgh\"]}"))
             {
                 var res = JSON.Deserialize<_IEnumerableMember>(str);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(2, res.A.Count());
+                Assert.AreEqual("abcd", res.A.ElementAt(0));
+                Assert.AreEqual("efgh", res.A.ElementAt(1));
+            }
+        }
+
+        class _IReadOnlyListMember
+        {
+            public IReadOnlyList<string> A { get; set; }
+        }
+
+        [TestMethod]
+        public void IReadOnlyListMember()
+        {
+            using (var str = new StringReader("{\"A\":[\"abcd\", \"efgh\"]}"))
+            {
+                var res = JSON.Deserialize<_IReadOnlyListMember>(str);
                 Assert.IsNotNull(res);
                 Assert.AreEqual(2, res.A.Count());
                 Assert.AreEqual("abcd", res.A.ElementAt(0));
