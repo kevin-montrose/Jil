@@ -40,240 +40,240 @@ namespace Jil.SerializeDynamic
         {
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONPInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNulls);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONPTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStylePrettyPrintInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONP);
             }
 
             if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStyleExcludeNullsInherited);
             }
 
             if (opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleJSONPInheritedTypeCache<>);
+                return typeof(Serialize.NewtonsoftStyleJSONPInherited);
             }
 
-            return typeof(Serialize.NewtonsoftStyleTypeCache<>);
+            return typeof(Serialize.NewtonsoftStyle);
         }
 
         static Type GetSecondsTypeCache(Options opts)
         {
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.SecondsPrettyPrintExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintExcludeNullsJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsPrettyPrintExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintExcludeNullsInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsPrettyPrintJSONPInheritedTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintJSONPInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.SecondsExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
             {
-                return typeof(Serialize.SecondsPrettyPrintExcludeNullsTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintExcludeNulls);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP)
             {
-                return typeof(Serialize.SecondsPrettyPrintJSONPTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsPrettyPrintInheritedTypeCache<>);
+                return typeof(Serialize.SecondsPrettyPrintInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.SecondsExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.SecondsExcludeNullsJSONP);
             }
 
             if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.SecondsExcludeNullsInherited);
             }
 
             if (opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.SecondsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.SecondsJSONPInherited);
             }
 
-            return typeof(Serialize.SecondsTypeCache<>);
+            return typeof(Serialize.Seconds);
         }
 
         static Type GetMillisecondsTypeCache(Options opts)
         {
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintJSONPInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintJSONPInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintExcludeNullsTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintExcludeNulls);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintJSONPTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsPrettyPrintInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsPrettyPrintInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.MillisecondsExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.MillisecondsExcludeNullsJSONP);
             }
 
             if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsExcludeNullsInherited);
             }
 
             if (opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.MillisecondsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.MillisecondsJSONPInherited);
             }
 
-            return typeof(Serialize.MillisecondsTypeCache<>);
+            return typeof(Serialize.Milliseconds);
         }
 
         static Type GetISO8601TypeCache(Options opts)
         {
             if(opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601PrettyPrintJSONPInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintJSONPInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601ExcludeNullsJSONPInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601ExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
             {
-                return typeof(Serialize.ISO8601PrettyPrintExcludeNullsTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintExcludeNulls);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP)
             {
-                return typeof(Serialize.ISO8601PrettyPrintJSONPTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601PrettyPrintInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601PrettyPrintInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.ISO8601ExcludeNullsJSONPTypeCache<>);
+                return typeof(Serialize.ISO8601ExcludeNullsJSONP);
             }
 
             if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601ExcludeNullsInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601ExcludeNullsInherited);
             }
 
             if (opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.ISO8601JSONPInheritedTypeCache<>);
+                return typeof(Serialize.ISO8601JSONPInherited);
             }
 
-            return typeof(Serialize.ISO8601TypeCache<>);
+            return typeof(Serialize.ISO8601);
         }
         #endregion
 

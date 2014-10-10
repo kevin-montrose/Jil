@@ -20,7 +20,7 @@ namespace Jil.Deserialize
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
         
-        readonly Type RecursionLookupType;
+        readonly Type OptionsType;
         readonly DateTimeFormat DateFormat;
 
         bool UsingCharBuffer;
@@ -28,9 +28,9 @@ namespace Jil.Deserialize
 
         Emit Emit;
 
-        public InlineDeserializer(Type recursionLookupType, DateTimeFormat dateFormat)
+        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat)
         {
-            RecursionLookupType = recursionLookupType;
+            OptionsType = optionsType;
             DateFormat = dateFormat;
         }
 
@@ -976,7 +976,7 @@ namespace Jil.Deserialize
 
         void LoadRecursiveTypeDelegate(Type recursiveType)
         {
-            var typeCache = RecursionLookupType.MakeGenericType(recursiveType);
+            var typeCache = typeof(TypeCache<,>).MakeGenericType(OptionsType, recursiveType);
             var thunk = typeCache.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
             Emit.LoadField(thunk);
         }
@@ -1749,6 +1749,15 @@ namespace Jil.Deserialize
                 return;
             }
 
+            if (forType.IsGenericReadOnlyDictionary())
+            {
+                var keyType = forType.GetGenericArguments()[0];
+                var valueType = forType.GetGenericArguments()[1];
+                var fakeDictionary = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
+                ReadDictionary(fakeDictionary);
+                return;
+            }
+
             if (forType.IsListType())
             {
                 ReadList(forType);
@@ -1757,7 +1766,7 @@ namespace Jil.Deserialize
 
             // Final, special, case for IEnumerable<X> if *not* a List
             // We can make this work by just acting like it *is* a List<X>
-            if (forType.IsGenericEnumerable())
+            if (forType.IsGenericEnumerable() || forType.IsGenericReadOnlyList())
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
@@ -1802,7 +1811,7 @@ namespace Jil.Deserialize
             var ret = forType.FindRecursiveOrReusedTypes();
             foreach (var primeType in ret)
             {
-                var loadMtd = this.RecursionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                var loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 loadMtd.Invoke(null, new object[0]);
             }
 
@@ -1837,9 +1846,9 @@ namespace Jil.Deserialize
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type typeCacheType)
+        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type optionsType)
         {
-            var specificTypeCache = typeCacheType.MakeGenericType(typeof(ReturnType));
+            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
@@ -1851,9 +1860,9 @@ namespace Jil.Deserialize
             return emit.CreateDelegate<Func<TextReader, int, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type typeCacheType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
         {
-            var obj = new InlineDeserializer<ReturnType>(typeCacheType, dateFormat);
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat);
 
             Func<TextReader, int, ReturnType> ret;
             try
@@ -1864,7 +1873,7 @@ namespace Jil.Deserialize
             catch (ConstructionException e)
             {
                 exceptionDuringBuild = e;
-                ret = BuildAlwaysFailsWith<ReturnType>(typeCacheType);
+                ret = BuildAlwaysFailsWith<ReturnType>(optionsType);
             }
 
             return ret;
