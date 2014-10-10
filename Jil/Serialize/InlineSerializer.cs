@@ -3490,7 +3490,7 @@ namespace Jil.Serialize
                 return BuildPrimitiveWithNewDelegateToString();
             }
 
-            if (forType.IsDictionaryType())
+            if (forType.IsDictionaryType() || forType.IsReadOnlyDictionaryType())
             {
                 return BuildDictionaryWithNewDelegateToString();
             }
