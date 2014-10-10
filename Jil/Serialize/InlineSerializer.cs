@@ -114,13 +114,25 @@ namespace Jil.Serialize
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
         static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod("Write", new[] { typeof(string) });
+        static MethodInfo ThunkWriter_WriteConstant = typeof(ThunkWriter).GetMethod("WriteConstant", new[] { typeof(ConstantString) });
         void WriteString(string str)
         {
             if (BuildingToString)
             {
                 Emit.LoadArgument(0);                       // ThunkWriter*
-                Emit.LoadConstant(str);                     // ThunkWriter* string
-                Emit.CallVirtual(ThunkWriter_WriteString);   // --empty--
+
+                ConstantString constStr;
+
+                if (ThunkWriter.IsConstantString(str, out constStr))
+                {
+                    Emit.LoadConstant((int)constStr);           // ThunkWriter* int
+                    Emit.Call(ThunkWriter_WriteConstant);       // --empty--
+                }
+                else
+                {
+                    Emit.LoadConstant(str);                     // ThunkWriter* string
+                    Emit.Call(ThunkWriter_WriteString);         // --empty--
+                }
             }
             else
             {
