@@ -11,11 +11,15 @@ namespace Jil.Serialize
 
     struct ThunkWriter
     {
-        StringBuilder Builder;
+        const int InitialSize = 128;
+
+        int Index;
+        char[] Builder;
 
         public void Init()
         {
-            Builder = new StringBuilder();
+            Index = 0;
+            Builder = new char[InitialSize];
         }
 
         public void Write(float f)
@@ -33,24 +37,55 @@ namespace Jil.Serialize
             Write(m.ToString(CultureInfo.InvariantCulture));
         }
 
+        void Expand(int adding)
+        {
+            var mustBeAtLeast = Index + adding;
+            if (mustBeAtLeast >= Builder.Length)
+            {
+                var newBuilder = new char[Builder.Length * 2];
+                Builder.CopyTo(newBuilder, 0);
+                Builder = newBuilder;
+            }
+        }
+
         public void Write(char[] ch, int startIx, int len)
         {
-            Builder.Append(ch, startIx, len);
+            Expand(len);
+
+            Array.Copy(ch, startIx, Builder, Index, len);
+
+            Index += len;
         }
 
         public void Write(char ch)
         {
-            Builder.Append(ch);
+            Expand(1);
+            Builder[Index] = ch;
+            Index++;
         }
 
-        public void Write(string str)
+        public unsafe void Write(string strRef)
         {
-            Builder.Append(str);
+            var len = strRef.Length;
+            if (len == 0) return;
+
+            Expand(len);
+
+            fixed (char* strPtr = strRef)
+            {
+                var str = strPtr;
+                for (var i = 0; i < len; i++)
+                {
+                    Builder[Index] = *str;
+                    str++;
+                    Index++;
+                }
+            }
         }
 
         public string StaticToString()
         {
-            return Builder.ToString();
+            return new string(Builder, 0, Index);
         }
 
         #region Slow Builds Only
