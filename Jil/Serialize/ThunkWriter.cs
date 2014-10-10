@@ -212,6 +212,25 @@ namespace Jil.Serialize
             Index += size;
         }
 
+        public unsafe void Write(string strRef)
+        {
+            var len = strRef.Length;
+            if (len == 0) return;
+
+            Expand(len);
+
+            fixed (char* strPtr = strRef)
+            {
+                var str = strPtr;
+                for (var i = 0; i < len; i++)
+                {
+                    Builder[Index] = *str;
+                    str++;
+                    Index++;
+                }
+            }
+        }
+
         public string StaticToString()
         {
             return new string(Builder, 0, Index);
@@ -220,12 +239,6 @@ namespace Jil.Serialize
         #region Slow Builds Only
         // these methods are only called to compare faster methods to serializing
         //   as such they need not be optimized
-
-        void Write(string strRef)
-        {
-            var asChar = strRef.ToCharArray();
-            Write(asChar, 0, asChar.Length);
-        }
 
         public void Write(byte b)
         {
