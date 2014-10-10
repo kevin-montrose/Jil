@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -212,27 +213,32 @@ namespace Jil.Serialize
         int Index;
         char[] Builder;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Init()
         {
             Index = 0;
             Builder = new char[InitialSize];
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(float f)
         {
             Write(f.ToString(CultureInfo.InvariantCulture));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(double d)
         {
             Write(d.ToString(CultureInfo.InvariantCulture));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(decimal m)
         {
             Write(m.ToString(CultureInfo.InvariantCulture));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Expand(int adding)
         {
             var mustBeAtLeast = Index + adding;
@@ -244,6 +250,7 @@ namespace Jil.Serialize
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char[] ch, int startIx, int len)
         {
             Expand(len);
@@ -253,6 +260,7 @@ namespace Jil.Serialize
             Index += len;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char ch)
         {
             Expand(1);
@@ -260,6 +268,7 @@ namespace Jil.Serialize
             Index++;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteConstant(ConstantString str)
         {
             var asInt = (int)(ConstantString)str;
@@ -272,6 +281,7 @@ namespace Jil.Serialize
             Index += size;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(string strRef)
         {
             var len = strRef.Length;
@@ -291,6 +301,7 @@ namespace Jil.Serialize
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string StaticToString()
         {
             return new string(Builder, 0, Index);
