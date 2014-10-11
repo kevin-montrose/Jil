@@ -69,7 +69,7 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
-        private readonly Type RecusionLookupType;
+        private readonly Type RecusionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
         private readonly bool JSONP;
@@ -82,9 +82,9 @@ namespace Jil.Serialize
 
         private readonly bool CallOutOnPossibleDynamic;
 
-        internal InlineSerializer(Type recusionLookupType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic)
+        internal InlineSerializer(Type recusionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic)
         {
-            RecusionLookupType = recusionLookupType;
+            RecusionLookupOptionsType = recusionLookupOptionsType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
             JSONP = jsonp;
@@ -257,7 +257,7 @@ namespace Jil.Serialize
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
             // It's a list or dictionary, go and build that code
-            if (serializingType.IsListType() || serializingType.IsDictionaryType())
+            if (serializingType.IsListType() || serializingType.IsDictionaryType() || serializingType.IsReadOnlyListType() || serializingType.IsReadOnlyDictionaryType())
             {
                 if (inLocal != null)
                 {
@@ -282,13 +282,13 @@ namespace Jil.Serialize
                 {
                     Emit.StoreLocal(loc);
 
-                    if (serializingType.IsListType())
+                    if (serializingType.IsListType() || serializingType.IsReadOnlyListType())
                     {
                         WriteList(serializingType, loc);
                         return;
                     }
 
-                    if (serializingType.IsDictionaryType())
+                    if (serializingType.IsDictionaryType() || serializingType.IsReadOnlyDictionaryType())
                     {
                         WriteDictionary(serializingType, loc);
                         return;
@@ -1544,9 +1544,19 @@ namespace Jil.Serialize
                     }
                 };
 
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
-            var countMtd = listType.GetCollectionInterface().GetProperty("Count").GetMethod;
-            var accessorMtd = listType.GetListInterface().GetProperty("Item").GetMethod;
+            var listInterface =
+                listType.IsListType()
+                    ? listType.GetListInterface()
+                    : listType.GetReadOnlyListInterface();
+
+            var collectionInterface =
+                listType.IsCollectionType()
+                    ? listType.GetCollectionInterface()
+                    : listType.GetReadOnlyCollectionInterface();
+
+            var elementType = listInterface.GetGenericArguments()[0];
+            var countMtd = collectionInterface.GetProperty("Count").GetMethod;
+            var accessorMtd = listInterface.GetProperty("Item").GetMethod;
 
             var iList = typeof(IList<>).MakeGenericType(elementType);
 
@@ -1574,7 +1584,7 @@ namespace Jil.Serialize
             using (var e = Emit.DeclareLocal<int>())
             {
                 loadList();                                 // IList<>
-                Emit.CastClass(iList);                      // IList<>
+                Emit.CastClass(collectionInterface);        // IList<>
                 Emit.CallVirtual(countMtd);                 // int
                 Emit.StoreLocal(e);                         // --empty--
 
@@ -2053,7 +2063,10 @@ namespace Jil.Serialize
 
         void WriteDictionaryWithoutNulls(Type dictType, Sigil.Local inLocal)
         {
-            var dictI = dictType.GetDictionaryInterface();
+            var dictI =
+                dictType.IsDictionaryType()
+                    ? dictType.GetDictionaryInterface()
+                    : dictType.GetReadOnlyDictionaryInterface();
 
             var keyType = dictI.GetGenericArguments()[0];
             var elementType = dictI.GetGenericArguments()[1];
@@ -2200,7 +2213,10 @@ namespace Jil.Serialize
 
         void WriteDictionaryWithNulls(Type dictType, Sigil.Local inLocal)
         {
-            var dictI = dictType.GetDictionaryInterface();
+            var dictI =
+                dictType.IsDictionaryType()
+                    ? dictType.GetDictionaryInterface()
+                    : dictType.GetReadOnlyDictionaryInterface();
 
             var keyType = dictI.GetGenericArguments()[0];
             var elementType = dictI.GetGenericArguments()[1];
@@ -3044,7 +3060,7 @@ namespace Jil.Serialize
                 else
                 {
                     // static case
-                    var cacheType = RecusionLookupType.MakeGenericType(type);
+                    var cacheType = typeof(TypeCache<,>).MakeGenericType(RecusionLookupOptionsType, type);
                     var thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
 
                     var loc = Emit.DeclareLocal(thunk.FieldType);
@@ -3119,7 +3135,7 @@ namespace Jil.Serialize
             var ret = forType.FindRecursiveOrReusedTypes();
             foreach (var primeType in ret)
             {
-                var loadMtd = RecusionLookupType.MakeGenericType(primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                var loadMtd = typeof(TypeCache<,>).MakeGenericType(RecusionLookupOptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 loadMtd.Invoke(null, new object[0]);
             }
 
@@ -3239,7 +3255,7 @@ namespace Jil.Serialize
                 return BuildPrimitiveWithNewDelegate();
             }
 
-            if (forType.IsDictionaryType())
+            if (forType.IsDictionaryType() || forType.IsReadOnlyDictionaryType())
             {
                 return BuildDictionaryWithNewDelegate();
             }
@@ -3265,9 +3281,10 @@ namespace Jil.Serialize
 
     static class InlineSerializerHelper
     {
-        static Action<TextWriter, BuildForType, int> BuildAlwaysFailsWith<BuildForType>(Type typeCacheType)
+        static Action<TextWriter, BuildForType, int> BuildAlwaysFailsWith<BuildForType>(Type optionsType)
         {
-            var specificTypeCache = typeCacheType.MakeGenericType(typeof(BuildForType));
+
+            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(BuildForType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(BuildForType), typeof(int) });
@@ -3279,12 +3296,12 @@ namespace Jil.Serialize
             return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3292,16 +3309,16 @@ namespace Jil.Serialize
             catch (ConstructionException e)
             {
                 exceptionDuringBuild = e;
-                ret = BuildAlwaysFailsWith<BuildForType>(typeCacheType);
+                ret = BuildAlwaysFailsWith<BuildForType>(optionsType);
             }
 
             return ret;
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
-        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type typeCacheType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
         {
-            var obj = new InlineSerializer<BuildForType>(typeCacheType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
+            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true);
             return obj.Build();
         }
     }

@@ -10,7 +10,17 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    static class NewtonsoftStyleTypeCache<T>
+    interface ISerializeOptions
+    {
+        bool PrettyPrint { get; }
+        bool ExcludeNulls { get; }
+        DateTimeFormat DateFormat { get; }
+        bool JSONP { get; }
+        bool IncludeInherited { get; }
+    }
+
+    static class TypeCache<TOptions, T>
+        where TOptions : ISerializeOptions, new()
     {
         static readonly object InitLock = new object();
         static volatile bool BeingBuilt = false;
@@ -32,1709 +42,586 @@ namespace Jil.Serialize
                 if (Thunk != null || BeingBuilt) return;
                 BeingBuilt = true;
 
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
+                var opts = new TOptions();
+
+                Thunk = InlineSerializerHelper.Build<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, exceptionDuringBuild: out ExceptionDuringBuild);
             }
         }
     }
 
-    static class NewtonsoftStyleJSONPTypeCache<T>
+    class NewtonsoftStyle : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<T>
+    class NewtonsoftStyleJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
+    class NewtonsoftStylePrettyPrintExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<T>
+    class NewtonsoftStylePrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsJSONPInheritedTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<T>
+    class NewtonsoftStyleExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<T>
+    class NewtonsoftStylePrettyPrintJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsInheritedTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStyleExcludeNullsInheritedTypeCache<T>
+    class NewtonsoftStylePrettyPrintExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsInheritedTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStylePrettyPrintInheritedTypeCache<T>
+    class NewtonsoftStyleExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStyleJSONPInheritedTypeCache<T>
+    class NewtonsoftStylePrettyPrintInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStyleInheritedTypeCache<T>
+    class NewtonsoftStyleJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStyleExcludeNullsJSONPTypeCache<T>
+    class NewtonsoftStyleInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class NewtonsoftStylePrettyPrintJSONPTypeCache<T>
+    class NewtonsoftStyleExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStylePrettyPrintTypeCache<T>
+    class NewtonsoftStylePrettyPrintJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStyleExcludeNullsTypeCache<T>
+    class NewtonsoftStylePrettyPrint : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStyleExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class NewtonsoftStylePrettyPrintExcludeNullsTypeCache<T>
+    class NewtonsoftStyleExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(NewtonsoftStylePrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsTypeCache<T>
+    class NewtonsoftStylePrettyPrintExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsJSONPTypeCache<T>
+    class Milliseconds : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
+    class MillisecondsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
+    class MillisecondsPrettyPrintExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsExcludeNullsJSONPInheritedTypeCache<T>
+    class MillisecondsPrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsExcludeNullsJSONPInheritedTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsPrettyPrintJSONPInheritedTypeCache<T>
+    class MillisecondsExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<T>
+    class MillisecondsPrettyPrintJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsInheritedTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsExcludeNullsInheritedTypeCache<T>
+    class MillisecondsPrettyPrintExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsExcludeNullsInheritedTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsPrettyPrintInheritedTypeCache<T>
+    class MillisecondsExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsJSONPInheritedTypeCache<T>
+    class MillisecondsPrettyPrintInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsInheritedTypeCache<T>
+    class MillisecondsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsExcludeNullsJSONPTypeCache<T>
+    class MillisecondsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class MillisecondsPrettyPrintJSONPTypeCache<T>
+    class MillisecondsExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsPrettyPrintTypeCache<T>
+    class MillisecondsPrettyPrintJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsExcludeNullsTypeCache<T>
+    class MillisecondsPrettyPrint : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class MillisecondsPrettyPrintExcludeNullsTypeCache<T>
+    class MillisecondsExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(MillisecondsPrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsTypeCache<T>
+    class MillisecondsPrettyPrintExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsTypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsJSONPTypeCache<T>
+    class Seconds : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsJSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsPrettyPrintExcludeNullsJSONPTypeCache<T>
+    class SecondsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
+    class SecondsPrettyPrintExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintExcludeNullsJSONPInheritedTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsExcludeNullsJSONPInheritedTypeCache<T>
+    class SecondsPrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsExcludeNullsJSONPInheritedTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsPrettyPrintJSONPInheritedTypeCache<T>
+    class SecondsExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsPrettyPrintExcludeNullsInheritedTypeCache<T>
+    class SecondsPrettyPrintJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintExcludeNullsInheritedTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsExcludeNullsInheritedTypeCache<T>
+    class SecondsPrettyPrintExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsExcludeNullsInheritedTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsPrettyPrintInheritedTypeCache<T>
+    class SecondsExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsJSONPInheritedTypeCache<T>
+    class SecondsPrettyPrintInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsJSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsInheritedTypeCache<T>
+    class SecondsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsInheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsExcludeNullsJSONPTypeCache<T>
+    class SecondsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class SecondsPrettyPrintJSONPTypeCache<T>
+    class SecondsExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsPrettyPrintTypeCache<T>
+    class SecondsPrettyPrintJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsExcludeNullsTypeCache<T>
+    class SecondsPrettyPrint : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class SecondsPrettyPrintExcludeNullsTypeCache<T>
+    class SecondsExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(SecondsPrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601TypeCache<T>
+    class SecondsPrettyPrintExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601TypeCache<>), pretty: false, excludeNulls: false, dateFormat: DateTimeFormat.ISO8601, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601JSONPTypeCache<T>
+    class ISO8601 : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601JSONPTypeCache<>), pretty: false, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601PrettyPrintExcludeNullsJSONPTypeCache<T>
+    class ISO8601JSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintExcludeNullsJSONPTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<T>
+    class ISO8601PrettyPrintExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintExcludeNullsJSONPInheritedTypeCache<>), pretty: true, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601ExcludeNullsJSONPInheritedTypeCache<T>
+    class ISO8601PrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601ExcludeNullsJSONPInheritedTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601PrettyPrintJSONPInheritedTypeCache<T>
+    class ISO8601ExcludeNullsJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintJSONPInheritedTypeCache<>), pretty: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601PrettyPrintExcludeNullsInheritedTypeCache<T>
+    class ISO8601PrettyPrintJSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintExcludeNullsInheritedTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601ExcludeNullsInheritedTypeCache<T>
+    class ISO8601PrettyPrintExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601ExcludeNullsInheritedTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601PrettyPrintInheritedTypeCache<T>
+    class ISO8601ExcludeNullsInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintInheritedTypeCache<>), pretty: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601JSONPInheritedTypeCache<T>
+    class ISO8601PrettyPrintInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601JSONPInheritedTypeCache<>), pretty: false, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601InheritedTypeCache<T>
+    class ISO8601JSONPInherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601InheritedTypeCache<>), pretty: false, dateFormat: DateTimeFormat.ISO8601, includeInherited: true, excludeNulls: false, jsonp: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601ExcludeNullsJSONPTypeCache<T>
+    class ISO8601Inherited : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601ExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
     }
 
-    static class ISO8601PrettyPrintJSONPTypeCache<T>
+    class ISO8601ExcludeNullsJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintJSONPTypeCache<>), pretty: true, excludeNulls: false, jsonp: true, dateFormat: DateTimeFormat.ISO8601, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601PrettyPrintTypeCache<T>
+    class ISO8601PrettyPrintJSONP : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintTypeCache<>), pretty: true, excludeNulls: false, dateFormat: DateTimeFormat.ISO8601, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601ExcludeNullsTypeCache<T>
+    class ISO8601PrettyPrint : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
-
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601ExcludeNullsTypeCache<>), pretty: false, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 
-    static class ISO8601PrettyPrintExcludeNullsTypeCache<T>
+    class ISO8601ExcludeNulls : ISerializeOptions
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ExceptionDuringBuild;
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+    }
 
-        public static Action<TextWriter, T, int> Get()
-        {
-            Load();
-            return Thunk;
-        }
-
-        public static void Load()
-        {
-            if (Thunk != null) return;
-
-            lock (InitLock)
-            {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
-
-                Thunk = InlineSerializerHelper.Build<T>(typeof(ISO8601PrettyPrintExcludeNullsTypeCache<>), pretty: true, excludeNulls: true, dateFormat: DateTimeFormat.ISO8601, jsonp: false, includeInherited: false, exceptionDuringBuild: out ExceptionDuringBuild);
-            }
-        }
+    class ISO8601PrettyPrintExcludeNulls : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
     }
 }

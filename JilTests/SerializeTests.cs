@@ -786,6 +786,27 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void IReadOnlyDictionary()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    (IReadOnlyDictionary<string, int>)new Dictionary<string, int>
+                    {
+                        { "hello world", 123 },
+                        { "fizz buzz", 456 },
+                        { "indeed", 789 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
+            }
+        }
+
 #pragma warning disable 0649
         public class _List
         {
@@ -801,6 +822,26 @@ namespace JilTests
             {
                 JSON.Serialize(
                     new[]
+                    {
+                        new _List { Key = "whatever", Val = 123 },
+                        new _List { Key = "indeed", Val = 456 }
+                    },
+                    str
+                );
+
+                var res = str.ToString();
+
+                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
+            }
+        }
+
+        [TestMethod]
+        public void IReadOnlyList()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    (IReadOnlyList<_List>)new[]
                     {
                         new _List { Key = "whatever", Val = 123 },
                         new _List { Key = "indeed", Val = 456 }
@@ -6270,6 +6311,43 @@ namespace JilTests
             using (var str = new StringWriter())
             {
                 JSON.Serialize<IEnumerable<int>>(new[] { 1, 2, 3 }, str);
+                var res = str.ToString();
+                Assert.AreEqual("[1,2,3]", res);
+            }
+        }
+
+        class _ReadOnlyLists
+        {
+            public IReadOnlyList<int> A;
+            public Dictionary<int, IReadOnlyList<int>> B1;
+            public IReadOnlyDictionary<int, IReadOnlyList<int>> B2;
+            public List<IReadOnlyList<double>> C;
+            public IReadOnlyList<IReadOnlyList<string>> D;
+        }
+
+        [TestMethod]
+        public void ReadOnlyLists()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new _ReadOnlyLists
+                    {
+                        A = new[] { 1, 2, 3 },
+                        B1 = new Dictionary<int, IReadOnlyList<int>> { { 1, new[] { 2, 3 } }, { 2, new[] { 4, 5 } } },
+                        B2 = new Dictionary<int, IReadOnlyList<int>> { { 1, new[] { 2, 3 } }, { 2, new[] { 4, 5 } } },
+                        C = new List<IReadOnlyList<double>> { new[] { 1.1, 2.2, 3.3 }, new[] { 4.4, 5.5, 6.6 } },
+                        D = new[] { new[] { "hello", "world" }, new[] { "foo", "bar" } }
+                    },
+                    str
+                );
+                var res = str.ToString();
+                Assert.AreEqual("{\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]],\"A\":[1,2,3]}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize<IReadOnlyList<int>>(new[] { 1, 2, 3 }, str);
                 var res = str.ToString();
                 Assert.AreEqual("[1,2,3]", res);
             }
