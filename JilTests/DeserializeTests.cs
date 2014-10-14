@@ -4823,6 +4823,47 @@ namespace JilTests
                 Assert.AreEqual("Expected end of stream", e.Message);
             }
         }
+
+        class _Issue86List : List<string>
+        {
+            public _Issue86List(string magicString)
+            {
+                if (magicString != "magic!") throw new Exception();
+            }
+        }
+
+        class _Issue86Dict : Dictionary<string, string>
+        {
+            public _Issue86Dict(string magicString)
+            {
+                if (magicString != "magic!") throw new Exception();
+            }
+        }
+
+        [TestMethod]
+        public void Issue86()
+        {
+            try
+            {
+                JSON.Deserialize<_Issue86List>("[\"hello\", \"world\"]");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch(DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_Issue86List: Expected a parameterless constructor for JilTests.DeserializeTests+_Issue86List", e.Message);
+            }
+
+            try
+            {
+                JSON.Deserialize<_Issue86Dict>("{\"hello\": \"world\"}");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_Issue86Dict: Expected a parameterless constructor for JilTests.DeserializeTests+_Issue86Dict", e.Message);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
