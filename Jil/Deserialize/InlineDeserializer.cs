@@ -780,7 +780,10 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    Emit.NewObject(listType.GetConstructor(Type.EmptyTypes));   // listType
+                    var listCons = listType.GetConstructor(Type.EmptyTypes);
+                    if (listCons == null) throw new ConstructionException("Expected a parameterless constructor for " + listType);
+
+                    Emit.NewObject(listCons);   // listType
                     Emit.StoreLocal(loc);                                       // --empty--
                 }
 
@@ -882,7 +885,10 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    Emit.NewObject(dictType.GetConstructor(Type.EmptyTypes));   // dictType
+                    var dictCons = dictType.GetConstructor(Type.EmptyTypes);
+                    if (dictCons == null) throw new ConstructionException("Expected a parameterless constructor for " + dictType);
+
+                    Emit.NewObject(dictCons);                                   // dictType
                     Emit.StoreLocal(loc);                                       // --empty--
 
                     loadDict = () => Emit.LoadLocal(loc);
