@@ -76,6 +76,9 @@
     <Compile Include="DeserializeDynamic\JsonObject.FastNumber.cs">
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
+    <Compile Include="DeserializeDynamic\JsonObject.Static.cs">
+      <DependentUpon>JsonObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeserializeDynamic\Methods.cs" />
     <Compile Include="DeserializeDynamic\Methods.ISO8601.cs">
       <DependentUpon>Methods.cs</DependentUpon>

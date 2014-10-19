@@ -480,7 +480,10 @@ namespace JilTests
             watch.Start();
             string ser = JSON.SerializeDynamic(obj);
             watch.Stop();
-            Assert.IsTrue(watch.ElapsedMilliseconds < 100, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
+            // 200ms is kind of arbitrary, but it was > 1000 before this Issue was fixed
+            Assert.IsTrue(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
+            // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
+            Assert.AreEqual(json, ser); 
         }
     }
 }
