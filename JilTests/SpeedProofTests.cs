@@ -1127,6 +1127,110 @@ namespace JilTests
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 
+        class _NewWriteEncodedString
+        {
+            public string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void NewWriteEncodedStringMultiple()
+        {
+            Action<TextWriter, List<_NewWriteEncodedString>, int> newVersion;
+            Action<TextWriter, List<_NewWriteEncodedString>, int> oldVersion;
+
+            try
+            {
+                {
+                    InlineSerializer<List<_NewWriteEncodedString>>.UseBufferedStringWriting = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    newVersion = InlineSerializerHelper.Build<List<_NewWriteEncodedString>>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<List<_NewWriteEncodedString>>.UseBufferedStringWriting = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    oldVersion = InlineSerializerHelper.Build<List<_NewWriteEncodedString>>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<List<_NewWriteEncodedString>>.UseBufferedStringWriting = true;
+            }
+
+            var rand = new Random(163983052);
+
+            var toSerialize = new List<_NewWriteEncodedString>();
+            for (var i = 0; i < 100000; i++)
+            {
+                toSerialize.Add(
+                    new _NewWriteEncodedString
+                    {
+                        Foo = _RandString(rand)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double newTime, oldTime;
+            CompareTimes(new [] {toSerialize}.ToList(), newVersion, oldVersion, out newTime, out oldTime);
+
+            Assert.IsTrue(newTime < oldTime, "newTime = " + newTime + ", oldTime = " + oldTime);
+        }
+
+        [TestMethod]
+        public void NewWriteEncodedStringSingle()
+        {
+            Action<TextWriter, _NewWriteEncodedString, int> newVersion;
+            Action<TextWriter, _NewWriteEncodedString, int> oldVersion;
+
+            try
+            {
+                {
+                    InlineSerializer<_NewWriteEncodedString>.UseBufferedStringWriting = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    newVersion = InlineSerializerHelper.Build<_NewWriteEncodedString>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<List<_NewWriteEncodedString>>.UseBufferedStringWriting = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    oldVersion = InlineSerializerHelper.Build<_NewWriteEncodedString>(typeof(Jil.Serialize.NewtonsoftStyleExcludeNullsJSONPTypeCache<>), pretty: false, excludeNulls: true, jsonp: true, dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: false, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<_NewWriteEncodedString>.UseBufferedStringWriting = true;
+            }
+
+            var rand = new Random(163983052);
+
+            var toSerialize = new List<_NewWriteEncodedString>();
+            for (var i = 0; i < 100000; i++)
+            {
+                toSerialize.Add(
+                    new _NewWriteEncodedString
+                    {
+                        Foo = _RandString(rand)
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double newTime, oldTime;
+            CompareTimes(toSerialize, newVersion, oldVersion, out newTime, out oldTime);
+
+            Assert.IsTrue(newTime < oldTime, "newTime = " + newTime + ", oldTime = " + oldTime);
+        }
 #endif
     }
 }

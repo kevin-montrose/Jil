@@ -357,6 +357,242 @@ namespace Jil.Serialize
             writer.Write(buffer, 0, fracEnd + 2);
         }
 
+        private static int WriteHexQuads(char c, int i, char[] buffer)
+        {
+            var b = buffer;
+            // This is converted into an IL switch, so don't fret about lookup times
+            switch (c)
+            {
+                case '\u0000': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; break;
+                case '\u0001': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; break;
+                case '\u0002': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '2'; break;
+                case '\u0003': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '3'; break;
+                case '\u0004': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '4'; break;
+                case '\u0005': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '5'; break;
+                case '\u0006': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '6'; break;
+                case '\u0007': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = '7'; break;
+                case '\u0008': b[++i] = '\\'; b[++i] = 'b'; break;
+                case '\u0009': b[++i] = '\\'; b[++i] = 't'; break;
+                case '\u000A': b[++i] = '\\'; b[++i] = 'n'; break;
+                case '\u000B': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'B'; break;
+                case '\u000C': b[++i] = '\\'; b[++i] = 'f'; break;
+                case '\u000D': b[++i] = '\\'; b[++i] = 'r'; break;
+                case '\u000E': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'E'; break;
+                case '\u000F': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '0'; b[++i] = 'F'; break;
+                case '\u0010': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '0'; break;
+                case '\u0011': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '1'; break;
+                case '\u0012': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '2'; break;
+                case '\u0013': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '3'; break;
+                case '\u0014': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '4'; break;
+                case '\u0015': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '5'; break;
+                case '\u0016': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '6'; break;
+                case '\u0017': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '7'; break;
+                case '\u0018': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '8'; break;
+                case '\u0019': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = '9'; break;
+                case '\u001A': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'A'; break;
+                case '\u001B': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'B'; break;
+                case '\u001C': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'B'; break;
+                case '\u001D': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'D'; break;
+                case '\u001E': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'E'; break;
+                case '\u001F': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '0'; b[++i] = '0'; b[++i] = '1'; b[++i] = 'F'; break;
+                default: throw new ApplicationException();
+            }
+
+            return i;
+        }
+
+        private unsafe static int WriteEncodedStringWithInitializedBuffer(TextWriter writer, string strRef, int i, char[] buffer)
+        {
+            var b = buffer;
+
+            fixed (char* strFixed = strRef)
+            {
+                var checkLength = b.Length - 10;
+                for (var j = 0; j < strRef.Length; ++j)
+                {
+                    if (strFixed[j] > '\u001F')
+                    {
+                        switch (strFixed[j])
+                        {
+                            case '\\': b[++i] = '\\'; b[++i] = '\\'; break;
+                            case '"': b[++i] = '\\'; b[++i] = '"'; break;
+                            default: b[++i] = strFixed[j]; break;
+                        }
+                    }
+                    else
+                    {
+                        i = WriteHexQuads(strFixed[j], i, b);
+                    }
+
+                    if (i > checkLength)
+                    {
+                        writer.Write(b, 0, i+1);
+                        i = -1;
+                    }
+                }
+            }
+
+            return i;
+        }
+
+        private unsafe static int WriteEncodedStringWithInitializedBufferJSONP(TextWriter writer, string strRef, int i, char[] buffer)
+        {
+            var b = buffer;
+
+            fixed (char* strFixed = strRef)
+            {
+                var checkLength = b.Length - 10;
+                for (var j = 0; j < strRef.Length; ++j)
+                {
+                    if (strFixed[j] > '\u001F')
+                    {
+                        switch (strFixed[j])
+                        {
+                            case '\\': b[++i] = '\\'; b[++i] = '\\'; break;
+                            case '"': b[++i] = '\\'; b[++i] = '"'; break;
+                            case '\u2028': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '2'; b[++i] = '0'; b[++i] = '2'; b[++i] = '8'; break;
+                            case '\u2029': b[++i] = '\\'; b[++i] = 'u'; b[++i] = '2'; b[++i] = '0'; b[++i] = '2'; b[++i] = '9'; break;
+                            default: b[++i] = strFixed[j]; break;
+                        }
+                    }
+                    else
+                    {
+                        i = WriteHexQuads(strFixed[j], i, b);
+                    }
+
+                    if (i > checkLength)
+                    {
+                        writer.Write(b, 0, i+1);
+                        i = -1;
+                    }
+                }
+            }
+
+            return i;
+        }
+
+        private static void WriteEncodedString(TextWriter writer, string strRef, char[] buffer)
+        {
+            var i = WriteEncodedStringWithInitializedBuffer(writer, strRef, -1, buffer);
+
+            writer.Write(buffer, 0, i + 1);
+        }
+
+        private static void WriteEncodedStringJSONP(TextWriter writer, string strRef, char[] buffer)
+        {
+            var i = WriteEncodedStringWithInitializedBufferJSONP(writer, strRef, -1, buffer);
+
+            writer.Write(buffer, 0, i + 1);
+        }
+
+        private static void WriteEncodedStringWithQuotes(TextWriter writer, string strRef, char[] buffer)
+        {
+            var i = -1;
+            buffer[++i] = '\"';
+            i = WriteEncodedStringWithInitializedBuffer(writer, strRef, i, buffer);
+            buffer[++i] = '\"';
+
+            writer.Write(buffer, 0, i + 1);
+        }
+
+        private static void WriteEncodedStringWithQuotesJSONP(TextWriter writer, string strRef, char[] buffer)
+        {
+            var i = -1;
+            buffer[++i] = '\"';
+            i = WriteEncodedStringWithInitializedBufferJSONP(writer, strRef, i, buffer);
+            buffer[++i] = '\"';
+
+            writer.Write(buffer, 0, i + 1);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null) return;
+
+            WriteEncodedStringWithQuotes(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineJSONPBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineJSONPBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithQuotesWithoutNullsInlineJSONPBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null) return;
+
+            WriteEncodedStringWithQuotesJSONP(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithQuotesWithNullsInlineBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null)
+            {
+                writer.Write("null");
+                return;
+            }
+
+            WriteEncodedStringWithQuotes(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineJSONPBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineJSONPBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithQuotesWithNullsInlineJSONPBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null)
+            {
+                writer.Write("null");
+                return;
+            }
+
+            WriteEncodedStringWithQuotesJSONP(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithoutNullsInlineBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null) return;
+
+            WriteEncodedString(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithoutNullsInlineJSONPBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineJSONPBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithoutNullsInlineJSONPBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null) return;
+
+            WriteEncodedStringJSONP(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithNullsInlineJSONPBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineJSONPBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithNullsInlineJSONPBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null)
+            {
+                writer.Write("null");
+                return;
+            }
+
+            WriteEncodedStringJSONP(writer, strRef, buffer);
+        }
+
+        internal static readonly MethodInfo WriteEncodedStringWithNullsInlineBuffered = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineBuffered", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteEncodedStringWithNullsInlineBuffered(TextWriter writer, string strRef, char[] buffer)
+        {
+            if (strRef == null)
+            {
+                writer.Write("null");
+                return;
+            }
+
+            WriteEncodedString(writer, strRef, buffer);
+        }
+
         internal static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void _WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(TextWriter writer, string strRef)
