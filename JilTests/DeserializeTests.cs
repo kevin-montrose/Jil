@@ -2268,6 +2268,27 @@ namespace JilTests
         [TestMethod]
         public void Decimals()
         {
+            for (var i = 0; i < 20; ++i)
+            {
+                for (var j=0; j < i; ++j)
+                {
+                    var sb = new StringBuilder();
+                    for (var k = 0; k < i; ++k)
+                    {
+                        sb.Append('9');
+                        if (k == j)
+                            sb.Append('.');
+                    }
+                    var numberString = sb.ToString();
+                    using (var str = new StringReader(numberString))
+                    {
+                        var res = JSON.Deserialize<decimal>(str);
+                        Assert.AreEqual(decimal.Parse(numberString), res);
+                        Assert.AreEqual(-1, str.Peek());
+                    }
+                }
+            }
+
             for (var i = -11.1m; i <= 22.2m; i += 0.03m)
             {
                 var asStr = i.ToString(CultureInfo.InvariantCulture);
@@ -2340,6 +2361,91 @@ namespace JilTests
 
                     Assert.AreEqual(decimal.Parse(i, NumberStyles.Float, CultureInfo.InvariantCulture), res);
                     Assert.AreEqual(-1, str.Peek());
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FastDoubles()
+        {
+            using (var str = new StringReader(".002877"))
+            {
+                var res = JSON.Deserialize<Double>(str);
+                Assert.AreEqual(Double.Parse(".002877"), res);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            // Test generates 87654320 cases, 24054320 are handled by the fast double parsing routine
+            var number = new char[10];
+            for (var significantFigures = 1; significantFigures <= 7; ++significantFigures)
+            {
+                try
+                {
+                    Parallel.For(0, significantFigures + 1, decimalPlacePosition =>
+                    {
+                        number[decimalPlacePosition] = '.';
+                        var n = (int)Math.Pow(10, significantFigures);
+                        for (var i = 0; i < n; ++i)
+                        {
+                            var temp = i;
+                            for (var j = 0; j < significantFigures; ++j)
+                            {
+                                var idx = significantFigures - j;
+                                number[idx - (idx <= decimalPlacePosition ? 1 : 0)] = (char)('0' + temp % 10);
+                                temp /= 10;
+                            }
+                            var numberString = new string(number, 0, significantFigures + 1);
+                            using (var str = new StringReader(numberString))
+                            {
+                                var res = JSON.Deserialize<Double>(str);
+                                Assert.AreEqual(BitConverter.DoubleToInt64Bits(Double.Parse(numberString)), BitConverter.DoubleToInt64Bits(res));
+                                Assert.AreEqual(-1, str.Peek());
+                            }
+                        }
+                    });
+                }
+                catch(AggregateException ex)
+                {
+                    throw ex.InnerExceptions[0];
+                }
+            }
+        }
+
+        [TestMethod]
+        public void FastSingles()
+        {
+            var number = new char[10];
+            for (var significantFigures = 1; significantFigures <= 7; ++significantFigures)
+            {
+                try
+                {
+                    Parallel.For(0, significantFigures + 1, decimalPlacePosition =>
+                    {
+                        number[decimalPlacePosition] = '.';
+                        var n = (int)Math.Pow(10, significantFigures);
+                        for (var i = 0; i < n; ++i)
+                        {
+                            var temp = i;
+                            for (var j = 0; j < significantFigures; ++j)
+                            {
+                                var idx = significantFigures - j;
+                                number[idx - (idx <= decimalPlacePosition ? 1 : 0)] = (char)('0' + temp % 10);
+                                temp /= 10;
+                            }
+                            var numberString = new string(number, 0, significantFigures + 1);
+                            using (var str = new StringReader(numberString))
+                            {
+                                var res = JSON.Deserialize<Single>(str);
+                                var shouldBe = Single.Parse(numberString);
+                                Assert.IsTrue(Enumerable.SequenceEqual(BitConverter.GetBytes(shouldBe), BitConverter.GetBytes(res)), "{0} should be {1:R} but is {2:R}", numberString, shouldBe, res);
+                                Assert.AreEqual(-1, str.Peek());
+                            }
+                        }
+                    });
+                }
+                catch (AggregateException ex)
+                {
+                    throw ex.InnerExceptions[0];
                 }
             }
         }
