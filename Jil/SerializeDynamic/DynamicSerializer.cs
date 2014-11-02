@@ -73,7 +73,7 @@ namespace Jil.SerializeDynamic
                     }
 
                     stream.Write('"');
-                    memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
+                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: stream);
                     stream.Write(quoteColon);
 
                     Serialize(stream, val, opts, depth + 1);
@@ -111,7 +111,7 @@ namespace Jil.SerializeDynamic
 
                     stream.Write('"');
 
-                    memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
+                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: stream);
                     stream.Write(quoteColon);
 
                     Serialize(stream, val, opts, depth + 1);
