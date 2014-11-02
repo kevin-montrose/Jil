@@ -18,8 +18,6 @@ namespace Jil.SerializeDynamic
 {
     class DynamicSerializer
     {
-        public static bool UseWriterJsonEscape = true;
-
         static readonly Hashtable GetGetMemberCache = new Hashtable();
         static Func<object, object> GetGetMember(Type type, string memberName)
         {
@@ -75,14 +73,7 @@ namespace Jil.SerializeDynamic
                     }
 
                     stream.Write('"');
-                    if (UseWriterJsonEscape)
-                    {
-                        memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
-                    }
-                    else
-                    {
-                        stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
-                    }
+                    memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
                     stream.Write(quoteColon);
 
                     Serialize(stream, val, opts, depth + 1);
@@ -120,14 +111,7 @@ namespace Jil.SerializeDynamic
 
                     stream.Write('"');
 
-                    if (UseWriterJsonEscape)
-                    {
-                        memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
-                    }
-                    else
-                    {
-                        stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
-                    }
+                    memberName.JsonEscape(jsonp: opts.IsJSONP, output: stream);
                     stream.Write(quoteColon);
 
                     Serialize(stream, val, opts, depth + 1);

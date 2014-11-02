@@ -1126,51 +1126,6 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
-
-        [TestMethod]
-        public void UseWriterJsonEscape()
-        {
-            var json = JSON.Serialize(new { foo = "bar", fizz = "buzz", bazz = 123, whatever = 1.23456 });
-
-            try
-            {
-                var dyn = JSON.DeserializeDynamic(json);
-
-                Action old = () => { Jil.SerializeDynamic.DynamicSerializer.UseWriterJsonEscape = false; JSON.SerializeDynamic(dyn); };
-                Action fast = () => { Jil.SerializeDynamic.DynamicSerializer.UseWriterJsonEscape = true; JSON.SerializeDynamic(dyn); };
-
-                for (var i = 0; i < 5; i++)
-                {
-                    old();
-                    fast();
-                }
-
-                var oldWatch = new Stopwatch();
-                GC.Collect(3, GCCollectionMode.Forced, blocking: true);
-                oldWatch.Start();
-                for (var i = 0; i < 10000; i++)
-                {
-                    old();
-                }
-                oldWatch.Stop();
-
-                var fastWatch = new Stopwatch();
-                GC.Collect(3, GCCollectionMode.Forced, blocking: true);
-                fastWatch.Start();
-                for (var i = 0; i < 10000; i++)
-                {
-                    fast();
-                }
-                fastWatch.Stop();
-
-                //Assert.IsTrue(fastWatch.ElapsedMilliseconds < oldWatch.ElapsedMilliseconds, "fast = " + fastWatch.ElapsedMilliseconds + ", old = " + oldWatch.ElapsedMilliseconds);
-                throw new Exception("fast = " + fastWatch.ElapsedMilliseconds + ", old = " + oldWatch.ElapsedMilliseconds);
-            }
-            finally
-            {
-                Jil.SerializeDynamic.DynamicSerializer.UseWriterJsonEscape = true;
-            }
-        }
 #endif
     }
 }
