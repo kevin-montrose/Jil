@@ -730,6 +730,16 @@ namespace Jil.Common
             return ret;
         }
 
+        public static void JsonEscape(this string str, bool jsonp, System.IO.TextWriter output)
+        {
+            for (var i = 0; i < str.Length; i++)
+            {
+                var c = str[i];
+                var escaped = c.JsonEscape(jsonp);
+                output.Write(escaped);
+            }
+        }
+
         public static string JsonEscape(this char c, bool jsonp)
         {
             switch (c)
