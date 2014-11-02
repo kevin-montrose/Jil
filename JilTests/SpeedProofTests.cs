@@ -1127,6 +1127,49 @@ namespace JilTests
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 
+        [TestMethod]
+        public void UseJilStaticMemberNames()
+        {
+            var json = "{\"hello\": 1, \"world\": 2, \"foo\": 3, \"bar\": 4, \"fizz\": 5, \"buzz\": 6}";
+            var dyn = JSON.DeserializeDynamic(json);
+
+            try
+            {
+                Action old = () => { Jil.SerializeDynamic.DynamicSerializer.UseJilStaticMemberNames = false; JSON.SerializeDynamic(dyn); };
+                Action fast = () => { Jil.SerializeDynamic.DynamicSerializer.UseJilStaticMemberNames = true; JSON.SerializeDynamic(dyn); };
+
+                for (var i = 0; i < 5; i++)
+                {
+                    old();
+                    fast();
+                }
+
+                var oldWatch = new Stopwatch();
+                System.GC.Collect(3, GCCollectionMode.Forced, blocking: true);
+                oldWatch.Start();
+                for (var i = 0; i < 10000; i++)
+                {
+                    old();
+                }
+                oldWatch.Stop();
+
+                var fastWatch = new Stopwatch();
+                System.GC.Collect(3, GCCollectionMode.Forced, blocking: true);
+                fastWatch.Start();
+                for (var i = 0; i < 10000; i++)
+                {
+                    fast();
+                }
+                fastWatch.Stop();
+
+                Assert.IsTrue(fastWatch.ElapsedMilliseconds < oldWatch.ElapsedMilliseconds, "fast = " + fastWatch.ElapsedMilliseconds + ", old = " + oldWatch.ElapsedMilliseconds);
+            }
+            finally
+            {
+                Jil.SerializeDynamic.DynamicSerializer.UseJilStaticMemberNames = true;
+            }
+        }
+
 #endif
     }
 }

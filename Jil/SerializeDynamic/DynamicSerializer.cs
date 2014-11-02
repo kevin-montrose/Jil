@@ -18,6 +18,8 @@ namespace Jil.SerializeDynamic
 {
     class DynamicSerializer
     {
+        public static bool UseJilStaticMemberNames = true;
+
         static readonly Hashtable GetGetMemberCache = new Hashtable();
         static Func<object, object> GetGetMember(Type type, string memberName)
         {
@@ -51,7 +53,7 @@ namespace Jil.SerializeDynamic
             stream.Write('{');
             depth++;
 
-            var asJilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
+            var asJilDyn = UseJilStaticMemberNames  ? (dyn as Jil.DeserializeDynamic.JsonObject) : null;
             if (asJilDyn != null)
             {
                 var first = true;
