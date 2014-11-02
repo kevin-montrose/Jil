@@ -51,39 +51,76 @@ namespace Jil.SerializeDynamic
             stream.Write('{');
             depth++;
 
-            var dynType = dyn.GetType();
-            var metaObj = dyn.GetMetaObject(CachedParameterExp);
-
-            var first = true;
-            foreach (var memberName in metaObj.GetDynamicMemberNames())
+            var asJilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
+            if (asJilDyn != null)
             {
-                var getter = GetGetMember(dynType, memberName);
-                var val = getter(dyn);
-
-                if (val == null && opts.ShouldExcludeNulls) continue;
-
-                if (!first)
+                var first = true;
+                foreach (var memberName in asJilDyn.GetMemberNames())
                 {
-                    stream.Write(',');
-                }
-                first = false;
+                    var val = asJilDyn.GetMember(memberName);
 
+                    if (val == null && opts.ShouldExcludeNulls) continue;
+
+                    if (!first)
+                    {
+                        stream.Write(',');
+                    }
+                    first = false;
+
+                    if (opts.ShouldPrettyPrint)
+                    {
+                        LineBreakAndIndent(stream, depth);
+                    }
+
+                    stream.Write('"');
+                    stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
+                    stream.Write(quoteColon);
+
+                    Serialize(stream, val, opts, depth + 1);
+                }
+
+                depth--;
                 if (opts.ShouldPrettyPrint)
                 {
                     LineBreakAndIndent(stream, depth);
                 }
-
-                stream.Write('"');
-                stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
-                stream.Write(quoteColon);
-
-                Serialize(stream, val, opts, depth + 1);
             }
-
-            depth--;
-            if (opts.ShouldPrettyPrint)
+            else
             {
-                LineBreakAndIndent(stream, depth);
+                var dynType = dyn.GetType();
+                var metaObj = dyn.GetMetaObject(CachedParameterExp);
+
+                var first = true;
+                foreach (var memberName in metaObj.GetDynamicMemberNames())
+                {
+                    var getter = GetGetMember(dynType, memberName);
+                    var val = getter(dyn);
+
+                    if (val == null && opts.ShouldExcludeNulls) continue;
+
+                    if (!first)
+                    {
+                        stream.Write(',');
+                    }
+                    first = false;
+
+                    if (opts.ShouldPrettyPrint)
+                    {
+                        LineBreakAndIndent(stream, depth);
+                    }
+
+                    stream.Write('"');
+                    stream.Write(memberName.JsonEscape(jsonp: opts.IsJSONP));
+                    stream.Write(quoteColon);
+
+                    Serialize(stream, val, opts, depth + 1);
+                }
+
+                depth--;
+                if (opts.ShouldPrettyPrint)
+                {
+                    LineBreakAndIndent(stream, depth);
+                }
             }
 
             stream.Write('}');

@@ -9,6 +9,16 @@ namespace Jil.DeserializeDynamic
 {
     sealed partial class JsonObject
     {
+        public Dictionary<string, JsonObject>.KeyCollection GetMemberNames()
+        {
+            return this.ObjectMembers.Keys;
+        }
+
+        public JsonObject GetMember(string memberName)
+        {
+            return this.ObjectMembers[memberName];
+        }
+
         public bool TryCastBool(out bool bit)
         {
             if (Type == JsonObjectType.True)
