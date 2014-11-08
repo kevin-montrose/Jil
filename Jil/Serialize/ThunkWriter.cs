@@ -244,8 +244,9 @@ namespace Jil.Serialize
             var mustBeAtLeast = Index + adding;
             if (mustBeAtLeast >= Builder.Length)
             {
-                var newBuilder = new char[Builder.Length * 2];
-                Builder.CopyTo(newBuilder, 0);
+                var builderLen = Builder.Length;
+                var newBuilder = new char[builderLen * 2];
+                Array.Copy(Builder, 0, newBuilder, 0, builderLen);
                 Builder = newBuilder;
             }
         }
