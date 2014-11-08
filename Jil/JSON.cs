@@ -15,11 +15,42 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
+        static Options DefaultOptions = Options.Default;
+
+        /// <summary>
+        /// Sets the Options object that Jil will use to calls of Serialize(Dynamic) and Deserialize(Dynamic)
+        /// if no Options object is provided.
+        /// 
+        /// By default, Jil will use the Options.Default object.
+        /// 
+        /// The current default Options can be retrieved with GetDefaultOptions().
+        /// </summary>
+        public static void SetDefaultOptions(Options options)
+        {
+            if (options == null) throw new ArgumentNullException("options");
+
+            DefaultOptions = options;
+        }
+
+        /// <summary>
+        /// Gets the Options object that Jil will use to calls of Serialize(Dynamic) and Deserialize(Dynamic)
+        /// if no Options object is provided.
+        /// 
+        /// By default, Jil will use the Options.Default object.
+        /// 
+        /// The default Options can be set with SetDefaultOptions(Options options).
+        /// </summary>
+        public static Options GetDefaultOptions()
+        {
+            return DefaultOptions;
+        }
+
         /// <summary>
         /// Serializes the given data to the provided TextWriter.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted, Options.Default is used.
+        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// 
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
@@ -29,14 +60,15 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            DynamicSerializer.Serialize(output, (object)data, options ?? Options.Default, 0);
+            DynamicSerializer.Serialize(output, (object)data, options ?? DefaultOptions, 0);
         }
 
         /// <summary>
         /// Serializes the given data, returning it as a string.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted, Options.Default is used.
+        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// 
         /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
         /// This is not as fast as calling Serialize with a known type.
@@ -57,7 +89,8 @@ namespace Jil
         /// Serializes the given data to the provided TextWriter.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted, Options.Default is used.
+        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static void Serialize<T>(T data, TextWriter output, Options options = null)
         {
@@ -80,7 +113,7 @@ namespace Jil
             //       spin everything out into a string, TextWriter
             //       is an all around better interface
 
-            /*options = options ?? Options.Default;
+            /*options = options ?? DefaultOptions;
 
             switch (options.UseDateTimeFormat)
             {
@@ -108,7 +141,8 @@ namespace Jil
         /// Serializes the given data, returning the output as a string.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted, Options.Default is used.
+        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static string Serialize<T>(T data, Options options = null)
         {
@@ -117,7 +151,7 @@ namespace Jil
                 return SerializeDynamic(data, options);
             }
 
-            options = options ?? Options.Default;
+            options = options ?? DefaultOptions;
 
             switch (options.UseDateTimeFormat)
             {
@@ -854,7 +888,8 @@ namespace Jil
         /// should use DeserializeDynamic instead.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of
-        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static object Deserialize(TextReader reader, Type type, Options options = null)
         {
@@ -884,7 +919,8 @@ namespace Jil
         /// should use DeserializeDynamic instead.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of
-        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static object Deserialize(string text, Type type, Options options = null)
         {
@@ -903,7 +939,8 @@ namespace Jil
         /// Deserializes JSON from the given TextReader.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of
-        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static T Deserialize<T>(TextReader reader, Options options = null)
         {
@@ -919,7 +956,7 @@ namespace Jil
 
             try
             {
-                options = options ?? Options.Default;
+                options = options ?? DefaultOptions;
 
                 switch (options.UseDateTimeFormat)
                 {
@@ -947,7 +984,8 @@ namespace Jil
         /// Deserializes JSON from the given string.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of
-        /// the JSON being deserialized.  If omitted, Options.Default is used.
+        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
         /// </summary>
         public static T Deserialize<T>(string text, Options options = null)
         {
@@ -974,7 +1012,7 @@ namespace Jil
         /// </summary>
         public static dynamic DeserializeDynamic(TextReader reader, Options options = null)
         {
-            options = options ?? Options.Default;
+            options = options ?? DefaultOptions;
 
             var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader, options);
 

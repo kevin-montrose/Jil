@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -466,6 +467,23 @@ namespace JilTests
                 var res = JSON.SerializeDynamic(new { foo = new List<object> { new { barz = "1" } }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
                 Assert.AreEqual("{\n \"foo\": [{\n  \"barz\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
             }
+        }
+
+        [TestMethod]
+        public void Issue87()
+        {
+            string json = "{\"datalist\":[{\"timestamp\":1413131613787,\"roomSchedule\":{\"roomName\":\"21\",\"timestamp\":1413131608000,\"schedule\":[{\"actualStart\":1413115680000,\"canceled\":false,\"duration\":35100000,\"precautions\":false,\"surgeon\":\"some, guy\",\"anonId\":\"666\",\"isFirst\":true,\"service\":\"svc\",\"hideName\":false,\"id\":\"1039666\",\"state\":\"intra\",\"location\":\"Or 21\",\"actualEnd\":1413150780000,\"plannedStart\":1413114300000,\"status\":\"surgStart\",\"started\":true,\"ssn\":\"123-45-6789\",\"isCurrent\":true,\"fullName\":\"WW, FF\",\"room\":\"21\",\"name\":\"WW\",\"dob\":\"01/01/1801\",\"plannedEnd\":1413149400000,\"scheduledStart\":1413114300000,\"mrn\":\"0000004\",\"procedure\":\"ZZ\",\"turnover\":1800000}]},\"unitId\":\"AA\"}]}";
+
+            dynamic obj = JSON.DeserializeDynamic(json);
+
+            var watch = new Stopwatch();
+            watch.Start();
+            string ser = JSON.SerializeDynamic(obj);
+            watch.Stop();
+            // 200ms is kind of arbitrary, but it was > 1000 before this Issue was fixed
+            Assert.IsTrue(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
+            // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
+            Assert.AreEqual(json, ser); 
         }
     }
 }

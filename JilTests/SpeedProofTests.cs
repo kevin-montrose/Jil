@@ -1126,7 +1126,6 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
-
 #endif
     }
 }

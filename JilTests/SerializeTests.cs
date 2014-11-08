@@ -6893,5 +6893,26 @@ namespace JilTests
             var data2 = JSON.Serialize(new _Issue53 { NotSerializedProperty = DateTime.UtcNow }, Options.ExcludeNulls);
             Assert.AreEqual("{}", data2);
         }
+
+        [TestMethod]
+        public void ConfigDefaultOptions()
+        {
+            try
+            {
+                JSON.SetDefaultOptions(Options.ExcludeNulls);
+
+                var obj = new { a = (object)null, b = (object)null };
+                
+                var @default = JSON.Serialize(obj);
+                var @explicit = JSON.Serialize(obj, Options.Default);
+
+                Assert.AreNotEqual(@default, @explicit);
+                Assert.AreEqual(@default, "{}");
+            }
+            finally
+            {
+                JSON.SetDefaultOptions(Options.Default);
+            }
+        }
     }
 }
