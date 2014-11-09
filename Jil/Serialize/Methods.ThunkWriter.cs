@@ -279,7 +279,7 @@ namespace Jil.Serialize
         {
             if (strRef == null) return;
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
             fixed (char* strFixed = strRef)
             {
@@ -295,57 +295,57 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
@@ -354,7 +354,7 @@ namespace Jil.Serialize
         {
             if (strRef == null) return;
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
             fixed (char* strFixed = strRef)
             {
@@ -370,69 +370,69 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     if (c == '\u2028')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2028);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2028);
                         continue;
                     }
 
                     if (c == '\u2029')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2029);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2029);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
@@ -441,11 +441,11 @@ namespace Jil.Serialize
         {
             if (strRef == null)
             {
-                writer.WriteConstant(ConstantString.Null);
+                writer.WriteValueConstant(ConstantString_Value.Null);
                 return;
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
             fixed (char* strFixed = strRef)
             {
@@ -461,57 +461,57 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
@@ -520,11 +520,11 @@ namespace Jil.Serialize
         {
             if (strRef == null)
             {
-                writer.WriteConstant(ConstantString.Null);
+                writer.WriteValueConstant(ConstantString_Value.Null);
                 return;
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
             fixed (char* strFixed = strRef)
             {
@@ -540,69 +540,69 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     if (c == '\u2028')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2028);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2028);
                         continue;
                     }
 
                     if (c == '\u2029')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2029);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2029);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
             }
 
-            writer.WriteConstant(ConstantString.Quote);
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
         }
 
         static readonly MethodInfo WriteEncodedStringWithoutNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithoutNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
@@ -625,51 +625,51 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
@@ -696,63 +696,63 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     if (c == '\u2028')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2028);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2028);
                         continue;
                     }
 
                     if (c == '\u2029')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2029);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2029);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
@@ -765,7 +765,7 @@ namespace Jil.Serialize
         {
             if (strRef == null)
             {
-                writer.WriteConstant(ConstantString.Null);
+                writer.WriteValueConstant(ConstantString_Value.Null);
                 return;
             }
 
@@ -783,63 +783,63 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     if (c == '\u2028')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2028);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2028);
                         continue;
                     }
 
                     if (c == '\u2029')
                     {
-                        writer.WriteConstant(ConstantString.EscapeSequence_2029);
+                        writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_2029);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
@@ -852,7 +852,7 @@ namespace Jil.Serialize
         {
             if (strRef == null)
             {
-                writer.WriteConstant(ConstantString.Null);
+                writer.WriteValueConstant(ConstantString_Value.Null);
                 return;
             }
 
@@ -870,51 +870,51 @@ namespace Jil.Serialize
 
                     if (c == '\\')
                     {
-                        writer.WriteConstant(ConstantString.DoubleBackSlash);
+                        writer.WriteCommonConstant(ConstantString_Common.DoubleBackSlash);
                         continue;
                     }
 
                     if (c == '"')
                     {
-                        writer.WriteConstant(ConstantString.BackSlashQuote);
+                        writer.WriteFormattingConstant(ConstantString_Formatting.BackSlashQuote);
                         continue;
                     }
 
                     // This is converted into an IL switch, so don't fret about lookup times
                     switch (c)
                     {
-                        case '\u0000': writer.WriteConstant(ConstantString.EscapeSequence_0000); continue;
-                        case '\u0001': writer.WriteConstant(ConstantString.EscapeSequence_0001); continue;
-                        case '\u0002': writer.WriteConstant(ConstantString.EscapeSequence_0002); continue;
-                        case '\u0003': writer.WriteConstant(ConstantString.EscapeSequence_0003); continue;
-                        case '\u0004': writer.WriteConstant(ConstantString.EscapeSequence_0004); continue;
-                        case '\u0005': writer.WriteConstant(ConstantString.EscapeSequence_0005); continue;
-                        case '\u0006': writer.WriteConstant(ConstantString.EscapeSequence_0006); continue;
-                        case '\u0007': writer.WriteConstant(ConstantString.EscapeSequence_0007); continue;
-                        case '\u0008': writer.WriteConstant(ConstantString.EscapeSequence_b); continue;
-                        case '\u0009': writer.WriteConstant(ConstantString.EscapeSequence_t); continue;
-                        case '\u000A': writer.WriteConstant(ConstantString.EscapeSequence_n); continue;
-                        case '\u000B': writer.WriteConstant(ConstantString.EscapeSequence_000B); continue;
-                        case '\u000C': writer.WriteConstant(ConstantString.EscapeSequence_f); continue;
-                        case '\u000D': writer.WriteConstant(ConstantString.EscapeSequence_r); continue;
-                        case '\u000E': writer.WriteConstant(ConstantString.EscapeSequence_000E); continue;
-                        case '\u000F': writer.WriteConstant(ConstantString.EscapeSequence_000F); continue;
-                        case '\u0010': writer.WriteConstant(ConstantString.EscapeSequence_0010); continue;
-                        case '\u0011': writer.WriteConstant(ConstantString.EscapeSequence_0011); continue;
-                        case '\u0012': writer.WriteConstant(ConstantString.EscapeSequence_0012); continue;
-                        case '\u0013': writer.WriteConstant(ConstantString.EscapeSequence_0013); continue;
-                        case '\u0014': writer.WriteConstant(ConstantString.EscapeSequence_0014); continue;
-                        case '\u0015': writer.WriteConstant(ConstantString.EscapeSequence_0015); continue;
-                        case '\u0016': writer.WriteConstant(ConstantString.EscapeSequence_0016); continue;
-                        case '\u0017': writer.WriteConstant(ConstantString.EscapeSequence_0017); continue;
-                        case '\u0018': writer.WriteConstant(ConstantString.EscapeSequence_0018); continue;
-                        case '\u0019': writer.WriteConstant(ConstantString.EscapeSequence_0019); continue;
-                        case '\u001A': writer.WriteConstant(ConstantString.EscapeSequence_001A); continue;
-                        case '\u001B': writer.WriteConstant(ConstantString.EscapeSequence_001B); continue;
-                        case '\u001C': writer.WriteConstant(ConstantString.EscapeSequence_001C); continue;
-                        case '\u001D': writer.WriteConstant(ConstantString.EscapeSequence_001D); continue;
-                        case '\u001E': writer.WriteConstant(ConstantString.EscapeSequence_001E); continue;
-                        case '\u001F': writer.WriteConstant(ConstantString.EscapeSequence_001F); continue;
+                        case '\u0000': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0000); continue;
+                        case '\u0001': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0001); continue;
+                        case '\u0002': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0002); continue;
+                        case '\u0003': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0003); continue;
+                        case '\u0004': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0004); continue;
+                        case '\u0005': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0005); continue;
+                        case '\u0006': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0006); continue;
+                        case '\u0007': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_0007); continue;
+                        case '\u0008': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_b); continue;
+                        case '\u0009': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_t); continue;
+                        case '\u000A': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_n); continue;
+                        case '\u000B': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000B); continue;
+                        case '\u000C': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_f); continue;
+                        case '\u000D': writer.WriteCommonConstant(ConstantString_Common.EscapeSequence_r); continue;
+                        case '\u000E': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000E); continue;
+                        case '\u000F': writer.Write000EscapeConstant(ConstantString_000Escape.EscapeSequence_000F); continue;
+                        case '\u0010': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0010); continue;
+                        case '\u0011': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0011); continue;
+                        case '\u0012': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0012); continue;
+                        case '\u0013': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0013); continue;
+                        case '\u0014': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0014); continue;
+                        case '\u0015': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0015); continue;
+                        case '\u0016': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0016); continue;
+                        case '\u0017': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0017); continue;
+                        case '\u0018': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0018); continue;
+                        case '\u0019': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_0019); continue;
+                        case '\u001A': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001A); continue;
+                        case '\u001B': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001B); continue;
+                        case '\u001C': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001C); continue;
+                        case '\u001D': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001D); continue;
+                        case '\u001E': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001E); continue;
+                        case '\u001F': writer.Write001EscapeConstant(ConstantString_001Escape.EscapeSequence_001F); continue;
                         default: writer.Write(c); continue;
                     }
                 }
@@ -928,7 +928,7 @@ namespace Jil.Serialize
             // Gotta special case this, we can't negate it
             if (number == int.MinValue)
             {
-                writer.WriteConstant(ConstantString.Int_MinValue);
+                writer.WriteMinConstant(ConstantString_Min.Int_MinValue);
                 return;
             }
 
@@ -998,7 +998,7 @@ namespace Jil.Serialize
             // have to special case this, we can't negate it
             if (num == int.MinValue)
             {
-                writer.WriteConstant(ConstantString.Int_MinValue);
+                writer.WriteMinConstant(ConstantString_Min.Int_MinValue);
                 return;
             }
 
@@ -1255,7 +1255,7 @@ namespace Jil.Serialize
             // Gotta special case this, we can't negate it
             if (number == long.MinValue)
             {
-                writer.WriteConstant(ConstantString.LongMinValue);
+                writer.WriteMinConstant(ConstantString_Min.Long_MinValue);
                 return;
             }
 

@@ -10,214 +10,254 @@ namespace Jil.Serialize
 {
     delegate void StringThunkDelegate<T>(ref ThunkWriter writer, T data, int depth);
 
-    [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    sealed class ConstantThunkStringValueAttribute : Attribute
+    #region Strings and Enums and oh god why
+
+    // Oh my god what is going one here?
+    //
+    // Basically I've embedded all the different common JSON strings
+    //   into a bunch of losely grouped together arrays.
+    //   Each of these arrays should fit in a single cache line (<= 64 bytes) 
+    //   on a modern CPU.
+    // 
+    // Each array has a paired enum that is used to actually call 
+    //   write on in the ThunkWriter.  Each enum value encodes 
+    //   some index/length information (sometimes parts are inferred)
+    //   which is used to pick where (and how much) of an array to copy
+    //   The enums are all smaller than an long.
+
+    enum ConstantString_Common : ushort
     {
-        public string Value { get; private set; }
-        public ConstantThunkStringValueAttribute(string value)
-        {
-            Value = value;
-        }
+        DoubleBackSlash = (0 << 8) | 2,
+        EscapeSequence_2028 = (2 << 8) | 6,
+        EscapeSequence_2029 = (8 << 8) | 6,
+        EscapeSequence_b = (14 << 8) | 2,
+        EscapeSequence_t = (16 << 8) | 2,
+        EscapeSequence_n = (18 << 8) | 2,
+        EscapeSequence_f = (20 << 8) | 2,
+        EscapeSequence_r = (22 << 8) | 2
     }
 
-    // Each of these enum has an int value composed of two shorts; the first of which is the length of the string; the second is it's index.
-    // All the Values of their annotations are concated so that we can quickly look them up and do so w/o allocations
-    enum ConstantString : int
+    enum ConstantString_Formatting : ushort
     {
-        [ConstantThunkStringValue("-2147483648")]
-        Int_MinValue = (11 << 16) | 0,
-        [ConstantThunkStringValue("-9223372036854775808")]
-        LongMinValue = (20 << 16) | 11,
-        [ConstantThunkStringValue("\"")]
-        Quote = (1 << 16) | (20 + 11),
-        [ConstantThunkStringValue(@"\\")]
-        DoubleBackSlash = (2 << 16) | (20 + 11 + 1),
-        [ConstantThunkStringValue("\\\"")]
-        BackSlashQuote = (2 << 16) | (20 + 11 + 1 + 2),
-        [ConstantThunkStringValue("null")]
-        Null = (4 << 16) | (20 + 11 + 1 + 2 + 2),
-        [ConstantThunkStringValue(@"\u0000")]
-        EscapeSequence_0000 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4),
-        [ConstantThunkStringValue(@"\u0001")]
-        EscapeSequence_0001 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6),
-        [ConstantThunkStringValue(@"\u0002")]
-        EscapeSequence_0002 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0003")]
-        EscapeSequence_0003 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0004")]
-        EscapeSequence_0004 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0005")]
-        EscapeSequence_0005 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0006")]
-        EscapeSequence_0006 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0007")]
-        EscapeSequence_0007 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u000B")]
-        EscapeSequence_000B = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u000E")]
-        EscapeSequence_000E = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u000F")]
-        EscapeSequence_000F = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0010")]
-        EscapeSequence_0010 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0011")]
-        EscapeSequence_0011 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0012")]
-        EscapeSequence_0012 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0013")]
-        EscapeSequence_0013 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0014")]
-        EscapeSequence_0014 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0015")]
-        EscapeSequence_0015 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0016")]
-        EscapeSequence_0016 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0017")]
-        EscapeSequence_0017 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0018")]
-        EscapeSequence_0018 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u0019")]
-        EscapeSequence_0019 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001A")]
-        EscapeSequence_001A = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001B")]
-        EscapeSequence_001B = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001C")]
-        EscapeSequence_001C = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001D")]
-        EscapeSequence_001D = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001E")]
-        EscapeSequence_001E = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u001F")]
-        EscapeSequence_001F = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u2028")]
-        EscapeSequence_2028 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\u2029")]
-        EscapeSequence_2029 = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\b")]
-        EscapeSequence_b = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6),
-        [ConstantThunkStringValue(@"\t")]
-        EscapeSequence_t = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2),
-        [ConstantThunkStringValue(@"\n")]
-        EscapeSequence_n = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2),
-        [ConstantThunkStringValue(@"\f")]
-        EscapeSequence_f = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2),
-        [ConstantThunkStringValue(@"\r")]
-        EscapeSequence_r = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2),
-        [ConstantThunkStringValue("{")]
-        OpenCurlyBrace = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2),
-        [ConstantThunkStringValue(",")]
-        Comma = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1),
-        [ConstantThunkStringValue("}")]
-        CloseCurlyBrace = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1),
-        [ConstantThunkStringValue("[")]
-        OpenSquareBrace = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1),
-        [ConstantThunkStringValue(" ")]
-        Space = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1),
-        [ConstantThunkStringValue(", ")]
-        CommaSpace = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1),
-        [ConstantThunkStringValue("]")]
-        CloseSquareBrace = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2),
-        [ConstantThunkStringValue("\":")]
-        QuoteColon = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1),
-        [ConstantThunkStringValue("\": ")]
-        QuoteColonSpace = (3 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2),
-        [ConstantThunkStringValue(": ")]
-        ColonSpace = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3),
-        [ConstantThunkStringValue(":")]
-        Colon = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2),
-        [ConstantThunkStringValue("\"\\/Date(")]
-        Date = (8 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1),
-        [ConstantThunkStringValue(")\\/\"")]
-        CloseDate = (4 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8),
-        [ConstantThunkStringValue("true")]
-        True = (4 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4),
-        [ConstantThunkStringValue("false")]
-        False = (5 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4),
-        [ConstantThunkStringValue("\n")]
-        NewLine = (1 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5),
-        [ConstantThunkStringValue("\n ")]
-        NewLine1Space = (2 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1),
-        [ConstantThunkStringValue("\n  ")]
-        NewLine2Space = (3 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2),
-        [ConstantThunkStringValue("\n   ")]
-        NewLine3Space = (4 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3),
-        [ConstantThunkStringValue("\n    ")]
-        NewLine4Space = (5 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4),
-        [ConstantThunkStringValue("\n     ")]
-        NewLine5Space = (6 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5),
-        [ConstantThunkStringValue("\n      ")]
-        NewLine6Space = (7 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5 + 6),
-        [ConstantThunkStringValue("\n       ")]
-        NewLine7Space = (8 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5 + 6 + 7),
-        [ConstantThunkStringValue("\n        ")]
-        NewLine8Space = (9 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8),
-        [ConstantThunkStringValue("\n         ")]
-        NewLine9Space = (10 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9),
-        [ConstantThunkStringValue("\n          ")]
-        NewLine10Space = (11 << 16) | (20 + 11 + 1 + 2 + 2 + 4 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 6 + 2 + 2 + 2 + 2 + 2 + 1 + 1 + 1 + 1 + 1 + 2 + 1 + 2 + 3 + 2 + 1 + 8 + 4 + 4 + 5 + 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + 10)
+        Quote = (11 << 8) | 1,
+        BackSlashQuote = (14 << 8) | 2,
+        OpenCurlyBrace = (18 << 8) | 1,
+        Comma = (16 << 8) | 1,
+        CloseCurlyBrace = (19 << 8) | 1,
+        OpenSquareBrace = (20 << 8) | 1,
+        Space = (1 << 8) | 1,
+        CommaSpace = (16 << 8) | 2,
+        CloseSquareBrace = (21 << 8) | 1,
+        QuoteColon = (11 << 8) | 2,
+        QuoteColonSpace = (11 << 8) | 3,
+        ColonSpace = (12 << 8) | 2,
+        Colon = (12 << 8) | 1,
+        NewLine = (0 << 8) | 1,
+        NewLine1Space = (0 << 8) | 2,
+        NewLine2Space = (0 << 8) | 3,
+        NewLine3Space = (0 << 8) | 4,
+        NewLine4Space = (0 << 8) | 5,
+        NewLine5Space = (0 << 8) | 6,
+        NewLine6Space = (0 << 8) | 7,
+        NewLine7Space = (0 << 8) | 8,
+        NewLine8Space = (0 << 8) | 9,
+        NewLine9Space = (0 << 8) | 10,
+        NewLine10Space = (0 << 8) | 11
     }
+
+    enum ConstantString_Min : ushort
+    {
+        Int_MinValue = (0 << 8) | 11,
+        Long_MinValue = (12 << 8) | 20
+    }
+
+    enum ConstantString_Value : ushort
+    {
+        Null = (0 << 8) | 4,
+        Date = (4 << 8) | 8,
+        CloseDate = (12 << 8) | 4,
+        True = (16 << 8) | 4,
+        False = (20 << 8) | 5
+    }
+
+    enum ConstantString_000Escape : byte
+    {
+        EscapeSequence_0000 = 0,
+        EscapeSequence_0001 = 1,
+        EscapeSequence_0002 = 2,
+        EscapeSequence_0003 = 3,
+        EscapeSequence_0004 = 4,
+        EscapeSequence_0005 = 5,
+        EscapeSequence_0006 = 6,
+        EscapeSequence_0007 = 7,
+        EscapeSequence_000B = 8,
+        EscapeSequence_000E = 9,
+        EscapeSequence_000F = 10
+    }
+
+    enum ConstantString_001Escape : byte
+    {
+        EscapeSequence_0010 = 0,
+        EscapeSequence_0011 = 1,
+        EscapeSequence_0012 = 2,
+        EscapeSequence_0013 = 3,
+        EscapeSequence_0014 = 4,
+        EscapeSequence_0015 = 5,
+        EscapeSequence_0016 = 6,
+        EscapeSequence_0017 = 7,
+        EscapeSequence_0018 = 8,
+        EscapeSequence_0019 = 9,
+        EscapeSequence_001A = 10,
+        EscapeSequence_001B = 11,
+        EscapeSequence_001C = 12,
+        EscapeSequence_001D = 13,
+        EscapeSequence_001E = 14,
+        EscapeSequence_001F = 15
+    }
+
+    static class ThunkWriterCharArrays
+    {
+        public static readonly char[] Escape000Prefix = new char[] { '\\', 'u', '0', '0', '0' };
+        public static readonly char[] Escape001Prefix = new char[] { '\\', 'u', '0', '0', '1' };
+
+        public static readonly char[] ConstantString_Common_Chars = new char[] { '\\', '\\', '\\', 'u', '2', '0', '2', '8', '\\', 'u', '2', '0', '2', '9', '\\', 'b', '\\', 't', '\\', 'n', '\\', 'f', '\\', 'r' };
+        public static readonly char[] ConstantString_Formatting_Chars = new char[] { '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '"', ':', ' ', '\\', '"', ',', ' ', '{', '}', '[', ']' };
+        public static readonly char[] ConstantString_Min_Chars = new char[] { '-', '2', '1', '4', '7', '4', '8', '3', '6', '4', '8', '-', '9', '2', '2', '3', '3', '7', '2', '0', '3', '6', '8', '5', '4', '7', '7', '5', '8', '0', '8' };
+        public static readonly char[] ConstantString_Value_Chars = new char[] { 'n', 'u', 'l', 'l', '"', '\\', '/', 'D', 'a', 't', 'e', '(', ')', '\\', '/', '"', 't', 'r', 'u', 'e', 'f', 'a', 'l', 's', 'e' };
+        public static readonly char[] ConstantString_000Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', 'B', 'E', 'F' };
+        public static readonly char[] ConstantString_001Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    }
+
+    #endregion
 
     struct ThunkWriter
     {
-        const int InitialSize = 128;
+        const int InitialSize = 16;
 
-        static readonly char[] ConstantStrings;
-        static readonly Dictionary<string, ConstantString> Lookup;
+        /*int Index;
+        char[] Builder;*/
+        StringBuilder Builder;
 
-        static ThunkWriter()
+        public static bool IsConstantCommonString(string str, out ConstantString_Common c)
         {
-            var vals = Enum.GetValues(typeof(ConstantString));
-            var maxIx = 0;
-            var sizeAtMaxIx = 0;
-            foreach(var val in vals)
+            switch (str)
             {
-                var asInt = (int)(ConstantString)val;
-                var ix = asInt & 0xFFFF;
-                var size = (asInt >> 16) & 0xFFFF;
-
-                if (ix > maxIx)
-                {
-                    maxIx = ix;
-                    sizeAtMaxIx = size;
-                }
-            }
-
-            ConstantStrings = new char[maxIx + sizeAtMaxIx];
-            Lookup = new Dictionary<string, ConstantString>();
-            foreach (var val in vals)
-            {
-                var asInt = (int)(ConstantString)val;
-                var ix = asInt & 0xFFFF;
-                var size = (asInt >> 16) & 0xFFFF;
-
-                var field = typeof(ConstantString).GetField(((ConstantString)val).ToString(), System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                var str = ((ConstantThunkStringValueAttribute)field.GetCustomAttributes(typeof(ConstantThunkStringValueAttribute), false)[0]).Value;
-                var asChar = str.ToCharArray();
-
-                if (size != asChar.Length)
-                {
-                    throw new Exception("Expected " + str + " to be of length " + size);
-                }
-
-                Array.Copy(asChar, 0, ConstantStrings, ix, size);
-                Lookup[str] = (ConstantString)val;
+                case @"\\": c = ConstantString_Common.DoubleBackSlash; return true;
+                case @"\u2028": c = ConstantString_Common.EscapeSequence_2028; return true;
+                case @"\u2029": c = ConstantString_Common.EscapeSequence_2029; return true;
+                case @"\b": c = ConstantString_Common.EscapeSequence_b; return true;
+                case @"\t": c = ConstantString_Common.EscapeSequence_t; return true;
+                case @"\n": c = ConstantString_Common.EscapeSequence_n; return true;
+                case @"\f": c = ConstantString_Common.EscapeSequence_f; return true;
+                case @"\r": c = ConstantString_Common.EscapeSequence_r; return true;
+                default: c = 0; return false;
             }
         }
 
-        public static bool IsConstantString(string str, out ConstantString c)
+        public static bool IsConstantFormattingString(string str, out ConstantString_Formatting c)
         {
-            return Lookup.TryGetValue(str, out c);
+            switch(str)
+            {
+                case "\"": c = ConstantString_Formatting.Quote; return true;
+                case "\\\"": c =  ConstantString_Formatting.BackSlashQuote; return true;
+                case "{": c =  ConstantString_Formatting.OpenCurlyBrace; return true;
+                case ",": c = ConstantString_Formatting.Comma; return true;
+                case "}": c = ConstantString_Formatting.CloseCurlyBrace; return true;
+                case "[": c = ConstantString_Formatting.OpenSquareBrace; return true;
+                case " ": c = ConstantString_Formatting.Space; return true;
+                case ", ": c = ConstantString_Formatting.CommaSpace; return true;
+                case "]": c = ConstantString_Formatting.CloseSquareBrace; return true;
+                case "\":": c = ConstantString_Formatting.QuoteColon; return true;
+                case "\": ": c = ConstantString_Formatting.QuoteColonSpace; return true;
+                case ": ": c = ConstantString_Formatting.ColonSpace; return true;
+                case ":": c = ConstantString_Formatting.Colon; return true;
+                case "\n": c = ConstantString_Formatting.NewLine; return true;
+                case "\n ": c = ConstantString_Formatting.NewLine1Space; return true;
+                case "\n  ": c = ConstantString_Formatting.NewLine2Space; return true;
+                case "\n   ": c = ConstantString_Formatting.NewLine3Space; return true;
+                case "\n    ": c = ConstantString_Formatting.NewLine4Space; return true;
+                case "\n     ": c = ConstantString_Formatting.NewLine5Space; return true;
+                case "\n      ": c = ConstantString_Formatting.NewLine6Space; return true;
+                case "\n       ": c = ConstantString_Formatting.NewLine7Space; return true;
+                case "\n        ": c = ConstantString_Formatting.NewLine8Space; return true;
+                case "\n         ": c = ConstantString_Formatting.NewLine9Space; return true;
+                case "\n          ": c = ConstantString_Formatting.NewLine10Space; return true;
+                default: c = 0; return false;
+            }
         }
 
-        int Index;
-        char[] Builder;
+        public static bool IsConstantMinString(string str, out ConstantString_Min c)
+        {
+            switch (str)
+            {
+                case "-2147483648": c = ConstantString_Min.Int_MinValue; return true;
+                case "-9223372036854775808": c = ConstantString_Min.Long_MinValue; return true;
+                default: c = 0; return false;
+            }
+        }
+
+        public static bool IsConstantValueString(string str, out ConstantString_Value c)
+        {
+            switch (str)
+            {
+                case "null": c = ConstantString_Value.Null; return true;
+                case "\"\\/Date(": c = ConstantString_Value.Date; return true;
+                case ")\\/\"": c = ConstantString_Value.CloseDate; return true;
+                case "true": c = ConstantString_Value.True; return true;
+                case "false": c = ConstantString_Value.False; return true;
+                default: c = 0; return false;
+            }
+        }
+
+        public static bool IsConstant000EscapeString(string str, out ConstantString_000Escape c)
+        {
+            switch (str)
+            {
+                case @"\u0000": c = ConstantString_000Escape.EscapeSequence_0000; return true;
+                case @"\u0001": c = ConstantString_000Escape.EscapeSequence_0001; return true;
+                case @"\u0002": c = ConstantString_000Escape.EscapeSequence_0002; return true;
+                case @"\u0003": c = ConstantString_000Escape.EscapeSequence_0003; return true;
+                case @"\u0004": c = ConstantString_000Escape.EscapeSequence_0004; return true;
+                case @"\u0005": c = ConstantString_000Escape.EscapeSequence_0005; return true;
+                case @"\u0006": c = ConstantString_000Escape.EscapeSequence_0006; return true;
+                case @"\u0007": c = ConstantString_000Escape.EscapeSequence_0007; return true;
+                case @"\u000B": c = ConstantString_000Escape.EscapeSequence_000B; return true;
+                case @"\u000E": c = ConstantString_000Escape.EscapeSequence_000E; return true;
+                case @"\u000F": c = ConstantString_000Escape.EscapeSequence_000F; return true;
+                default: c = 0; return false;
+            }
+        }
+
+        public static bool IsConstant001EscapeString(string str, out ConstantString_001Escape c)
+        {
+            switch (str)
+            {
+                case @"\u0010": c = ConstantString_001Escape.EscapeSequence_0010; return true;
+                case @"\u0011": c = ConstantString_001Escape.EscapeSequence_0011; return true;
+                case @"\u0012": c = ConstantString_001Escape.EscapeSequence_0012; return true;
+                case @"\u0013": c = ConstantString_001Escape.EscapeSequence_0013; return true;
+                case @"\u0014": c = ConstantString_001Escape.EscapeSequence_0014; return true;
+                case @"\u0015": c = ConstantString_001Escape.EscapeSequence_0015; return true;
+                case @"\u0016": c = ConstantString_001Escape.EscapeSequence_0016; return true;
+                case @"\u0017": c = ConstantString_001Escape.EscapeSequence_0017; return true;
+                case @"\u0018": c = ConstantString_001Escape.EscapeSequence_0018; return true;
+                case @"\u0019": c = ConstantString_001Escape.EscapeSequence_0019; return true;
+                case @"\u001A": c = ConstantString_001Escape.EscapeSequence_001A; return true;
+                case @"\u000B": c = ConstantString_001Escape.EscapeSequence_001B; return true;
+                case @"\u000C": c = ConstantString_001Escape.EscapeSequence_001C; return true;
+                case @"\u000D": c = ConstantString_001Escape.EscapeSequence_001D; return true;
+                case @"\u000E": c = ConstantString_001Escape.EscapeSequence_001E; return true;
+                case @"\u000F": c = ConstantString_001Escape.EscapeSequence_001F; return true;
+                default: c = 0; return false;
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Init()
         {
-            Index = 0;
-            Builder = new char[InitialSize];
+            /*Index = 0;
+            Builder = new char[InitialSize];*/
+            Builder = (Builder ?? new StringBuilder()).Clear();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -237,75 +277,159 @@ namespace Jil.Serialize
         {
             Write(m.ToString(CultureInfo.InvariantCulture));
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
+        /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Expand(int adding)
         {
             var mustBeAtLeast = Index + adding;
             if (mustBeAtLeast >= Builder.Length)
             {
                 var builderLen = Builder.Length;
-                var newBuilder = new char[builderLen * 2];
+                var nextSize = ((mustBeAtLeast / InitialSize) + 1) * InitialSize;
+                var newBuilder = new char[nextSize];
                 Array.Copy(Builder, 0, newBuilder, 0, builderLen);
                 Builder = newBuilder;
             }
-        }
+        }*/
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char[] ch, int startIx, int len)
         {
-            Expand(len);
+            /*Expand(len);
 
             Array.Copy(ch, startIx, Builder, Index, len);
 
-            Index += len;
+            Index += len;*/
+            Builder.Append(ch, startIx, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char ch)
         {
-            Expand(1);
+            /*Expand(1);
             Builder[Index] = ch;
-            Index++;
+            Index++;*/
+            Builder.Append(ch);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteConstant(ConstantString str)
+        public void WriteCommonConstant(ConstantString_Common str)
         {
-            var asInt = (int)(ConstantString)str;
-            var ix = asInt & 0xFFFF;
-            var size = (asInt >> 16) & 0xFFFF;
+            var asUShort = (ushort)(ConstantString_Common)str;
+            var ix = asUShort >> 8;
+            var size = asUShort & 0xFF;
 
-            Expand(size);
+            /*Expand(size);
 
-            Array.Copy(ConstantStrings, ix, Builder, Index, size);
-            Index += size;
+            Array.Copy(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, Builder, Index, size);
+            Index += size;*/
+
+            Builder.Append(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, size);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteFormattingConstant(ConstantString_Formatting str)
+        {
+            var asUShort = (ushort)str;
+            var ix = (asUShort >> 8);
+            var len = asUShort & 0xFF;
+
+            /*Expand(len);
+
+            Array.Copy(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, Builder, Index, len);
+            Index += len;*/
+
+            Builder.Append(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, len);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteMinConstant(ConstantString_Min str)
+        {
+            var asUShort = (ushort)str;
+            var ix = (asUShort >> 8);
+            var len = asUShort & 0xFF;
+
+            /*Expand(len);
+
+            Array.Copy(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, Builder, Index, len);
+            Index += len;*/
+
+            Builder.Append(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, len);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteValueConstant(ConstantString_Value str)
+        {
+            var asUShort = (ushort)str;
+            var ix = (asUShort >> 8);
+            var len = asUShort & 0xFF;
+
+            /*Expand(len);
+
+            Array.Copy(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, Builder, Index, len);
+            Index += len;*/
+
+            Builder.Append(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, len);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write000EscapeConstant(ConstantString_000Escape str)
+        {
+            var ix = (byte)str;
+
+            // everything starts \u000, and is exactly 6 characters long
+            /*Expand(6);
+
+            Array.Copy(ThunkWriterCharArrays.Escape000Prefix, 0, Builder, Index, 5);
+            Builder[Index + 5] = ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix];
+
+            Index += 6;*/
+
+            Builder.Append(ThunkWriterCharArrays.Escape000Prefix);
+            Builder.Append(ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Write001EscapeConstant(ConstantString_001Escape str)
+        {
+            var ix = (byte)str;
+
+            // everything starts \u001, and is exactly 6 characters long
+            /*Expand(6);
+
+            Array.Copy(ThunkWriterCharArrays.Escape001Prefix, 0, Builder, Index, 5);
+            Builder[Index + 5] = ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix];
+
+            Index += 6;*/
+
+            Builder.Append(ThunkWriterCharArrays.Escape001Prefix);
+            Builder.Append(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(string strRef)
         {
-            var len = strRef.Length;
+            /*var len = strRef.Length;
             if (len == 0) return;
 
             Expand(len);
 
             fixed (char* strPtr = strRef)
             {
-                var str = strPtr;
-                for (var i = 0; i < len; i++)
-                {
-                    Builder[Index] = *str;
-                    str++;
-                    Index++;
-                }
-            }
+                var intPtr = (IntPtr)strPtr;
+                System.Runtime.InteropServices.Marshal.Copy(intPtr, Builder, Index, len);
+
+                Index += len;
+            }*/
+
+            Builder.Append(strRef);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string StaticToString()
         {
-            return new string(Builder, 0, Index);
+            //return new string(Builder, 0, Index);
+            return Builder.ToString();
         }
 
         #region Slow Builds Only

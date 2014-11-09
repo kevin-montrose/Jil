@@ -139,7 +139,7 @@ namespace Experiments
                 if (streamRes != strRes) throw new Exception("Uhhhhh");
             }
 
-            const int Iterations = 10000;
+            const int Iterations = 1000000;
 
             TimeSpan streamTime;
             {
@@ -169,6 +169,8 @@ namespace Experiments
 
             Console.WriteLine("Stream: " + streamTime.TotalMilliseconds + "ms");
             Console.WriteLine("String: " + strTime.TotalMilliseconds + "ms");
+            Console.WriteLine();
+            Console.WriteLine("Delta: " + (streamTime - strTime).TotalMilliseconds + "ms");
         }
     }
 }

@@ -114,24 +114,74 @@ namespace Jil.Serialize
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
         static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod("Write", new[] { typeof(string) });
-        static MethodInfo ThunkWriter_WriteConstant = typeof(ThunkWriter).GetMethod("WriteConstant", new[] { typeof(ConstantString) });
+        static MethodInfo ThunkWriter_WriteConstant = typeof(ThunkWriter).GetMethod("WriteConstant", new[] { typeof(ConstantString_Common) });
+        static MethodInfo ThunkWriter_WriteFormatingContant = typeof(ThunkWriter).GetMethod("WriteFormattingConstant", new[] { typeof(ConstantString_Formatting) });
+        static MethodInfo ThunkWriter_WriteMinConstant = typeof(ThunkWriter).GetMethod("WriteMinConstant", new[] { typeof(ConstantString_Min) });
+        static MethodInfo ThunkWriter_WriteValueConstant = typeof(ThunkWriter).GetMethod("WriteValueConstant", new[] { typeof(ConstantString_Value) });
+        static MethodInfo ThunkWriter_Write000EscapeConstant = typeof(ThunkWriter).GetMethod("Write000EscapeConstant", new[] { typeof(ConstantString_000Escape) });
+        static MethodInfo ThunkWriter_Write001EscapeConstant = typeof(ThunkWriter).GetMethod("Write001EscapeConstant", new[] { typeof(ConstantString_001Escape) });
         void WriteString(string str)
         {
             if (BuildingToString)
             {
                 Emit.LoadArgument(0);                       // ThunkWriter*
 
-                ConstantString constStr;
+                ConstantString_Common constStr;
 
-                if (ThunkWriter.IsConstantString(str, out constStr))
+                if (ThunkWriter.IsConstantCommonString(str, out constStr))
                 {
                     Emit.LoadConstant((int)constStr);           // ThunkWriter* int
                     Emit.Call(ThunkWriter_WriteConstant);       // --empty--
                 }
                 else
                 {
-                    Emit.LoadConstant(str);                     // ThunkWriter* string
-                    Emit.Call(ThunkWriter_WriteString);         // --empty--
+                    ConstantString_Formatting formattingConstString;
+                    if (ThunkWriter.IsConstantFormattingString(str, out formattingConstString))
+                    {
+                        Emit.LoadConstant((ushort)formattingConstString);   // ThinkWriter* ushort
+                        Emit.Call(ThunkWriter_WriteFormatingContant);       // --empty--
+                    }
+                    else
+                    {
+                        ConstantString_Min minConstString;
+                        if (ThunkWriter.IsConstantMinString(str, out minConstString))
+                        {
+                            Emit.LoadConstant((ushort)minConstString);      // ThunkWriter* ushort
+                            Emit.Call(ThunkWriter_WriteMinConstant);        // --empty--
+                        }
+                        else
+                        {
+                            ConstantString_Value valConstString;
+                            if (ThunkWriter.IsConstantValueString(str, out valConstString))
+                            {
+                                Emit.LoadConstant((ushort)valConstString);  // ThunkWriter* ushort
+                                Emit.Call(ThunkWriter_WriteValueConstant);  // --empty--
+                            }
+                            else
+                            {
+                                ConstantString_000Escape e000ConstString;
+                                if (ThunkWriter.IsConstant000EscapeString(str, out e000ConstString))
+                                {
+                                    Emit.LoadConstant((byte)e000ConstString);       // ThunkWriter* byte
+                                    Emit.Call(ThunkWriter_Write000EscapeConstant);  // --empty--
+                                }
+                                else
+                                {
+                                    ConstantString_001Escape e001ConstString;
+                                    if (ThunkWriter.IsConstant001EscapeString(str, out e001ConstString))
+                                    {
+                                        Emit.LoadConstant((byte)e001ConstString);       // ThunkWriter* byte
+                                        Emit.Call(ThunkWriter_Write001EscapeConstant);  // --empty--
+                                    }
+                                    else
+                                    {
+                                        Emit.LoadConstant(str);                     // ThunkWriter* string
+                                        Emit.Call(ThunkWriter_WriteString);         // --empty--
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             else
