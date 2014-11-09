@@ -132,10 +132,6 @@ namespace Jil.Serialize
 
     struct ThunkWriter
     {
-        const int InitialSize = 16;
-
-        /*int Index;
-        char[] Builder;*/
         StringBuilder Builder;
 
         public static bool IsConstantCommonString(string str, out ConstantString_Common c)
@@ -255,8 +251,6 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Init()
         {
-            /*Index = 0;
-            Builder = new char[InitialSize];*/
             Builder = (Builder ?? new StringBuilder()).Clear();
         }
 
@@ -277,38 +271,16 @@ namespace Jil.Serialize
         {
             Write(m.ToString(CultureInfo.InvariantCulture));
         }
-        
-        /*[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        void Expand(int adding)
-        {
-            var mustBeAtLeast = Index + adding;
-            if (mustBeAtLeast >= Builder.Length)
-            {
-                var builderLen = Builder.Length;
-                var nextSize = ((mustBeAtLeast / InitialSize) + 1) * InitialSize;
-                var newBuilder = new char[nextSize];
-                Array.Copy(Builder, 0, newBuilder, 0, builderLen);
-                Builder = newBuilder;
-            }
-        }*/
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char[] ch, int startIx, int len)
         {
-            /*Expand(len);
-
-            Array.Copy(ch, startIx, Builder, Index, len);
-
-            Index += len;*/
             Builder.Append(ch, startIx, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char ch)
         {
-            /*Expand(1);
-            Builder[Index] = ch;
-            Index++;*/
             Builder.Append(ch);
         }
 
@@ -318,11 +290,6 @@ namespace Jil.Serialize
             var asUShort = (ushort)(ConstantString_Common)str;
             var ix = asUShort >> 8;
             var size = asUShort & 0xFF;
-
-            /*Expand(size);
-
-            Array.Copy(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, Builder, Index, size);
-            Index += size;*/
 
             Builder.Append(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, size);
         }
@@ -334,11 +301,6 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            /*Expand(len);
-
-            Array.Copy(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, Builder, Index, len);
-            Index += len;*/
-
             Builder.Append(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, len);
         }
 
@@ -348,11 +310,6 @@ namespace Jil.Serialize
             var asUShort = (ushort)str;
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
-
-            /*Expand(len);
-
-            Array.Copy(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, Builder, Index, len);
-            Index += len;*/
 
             Builder.Append(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, len);
         }
@@ -364,11 +321,6 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            /*Expand(len);
-
-            Array.Copy(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, Builder, Index, len);
-            Index += len;*/
-
             Builder.Append(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, len);
         }
 
@@ -376,14 +328,6 @@ namespace Jil.Serialize
         public void Write000EscapeConstant(ConstantString_000Escape str)
         {
             var ix = (byte)str;
-
-            // everything starts \u000, and is exactly 6 characters long
-            /*Expand(6);
-
-            Array.Copy(ThunkWriterCharArrays.Escape000Prefix, 0, Builder, Index, 5);
-            Builder[Index + 5] = ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix];
-
-            Index += 6;*/
 
             Builder.Append(ThunkWriterCharArrays.Escape000Prefix);
             Builder.Append(ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix]);
@@ -394,14 +338,6 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            // everything starts \u001, and is exactly 6 characters long
-            /*Expand(6);
-
-            Array.Copy(ThunkWriterCharArrays.Escape001Prefix, 0, Builder, Index, 5);
-            Builder[Index + 5] = ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix];
-
-            Index += 6;*/
-
             Builder.Append(ThunkWriterCharArrays.Escape001Prefix);
             Builder.Append(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
         }
@@ -409,26 +345,12 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(string strRef)
         {
-            /*var len = strRef.Length;
-            if (len == 0) return;
-
-            Expand(len);
-
-            fixed (char* strPtr = strRef)
-            {
-                var intPtr = (IntPtr)strPtr;
-                System.Runtime.InteropServices.Marshal.Copy(intPtr, Builder, Index, len);
-
-                Index += len;
-            }*/
-
             Builder.Append(strRef);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string StaticToString()
         {
-            //return new string(Builder, 0, Index);
             return Builder.ToString();
         }
 
