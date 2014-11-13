@@ -96,6 +96,7 @@
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
     <Compile Include="Deserialize\NameAutomata.cs" />
+    <Compile Include="Common\PeekSupportingTextReader.cs" />
     <Compile Include="Deserialize\SetterLookup.cs" />
     <Compile Include="Deserialize\TypeCaches.cs" />
     <Compile Include="Deserialize\Methods.ISO8601.cs">
