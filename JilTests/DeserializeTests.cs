@@ -4864,14 +4864,14 @@ namespace JilTests
             }
         }
 
-        public class AuctionResponse
+        public class _Issue90
         {
-            public List<AuctionInfo> auctionInfo { get; set; }
-            public AuctionResponse() { auctionInfo = new List<AuctionInfo>(); }
-            public BidTokens bidTokens { get; set; }
+            public List<_Issue90_2> auctionInfo { get; set; }
+            public _Issue90() { auctionInfo = new List<_Issue90_2>(); }
+            public _Issue90_8 bidTokens { get; set; }
             public uint credits { get; set; }
-            public List<Currency> currencies { get; set; }
-            public List<DuplicateItem> duplicateItemIdList { get; set; }
+            public List<_Issue90_6> currencies { get; set; }
+            public List<_Issue90_5> duplicateItemIdList { get; set; }
             public string debug { get; set; }
             public int code { get; set; }
             [JilDirective(Name = "string")]
@@ -4880,7 +4880,7 @@ namespace JilTests
             public string errorState { get; set; }
         }
 
-        public class AuctionInfo
+        public class _Issue90_2
         {
             public string bidState { get; set; }
 
@@ -4890,7 +4890,7 @@ namespace JilTests
 
             public int expires { get; set; }
 
-            public ItemData itemData { get; set; }
+            public _Issue90_3 itemData { get; set; }
 
             public uint offers { get; set; }
 
@@ -4957,13 +4957,13 @@ namespace JilTests
             }
         }
 
-        public class ItemData
+        public class _Issue90_3
         {
             public long assetID { get; set; }
 
             public ushort assists { get; set; }
 
-            public List<Attribute> attributeList { get; set; }
+            public List<_Issue90_7> attributeList { get; set; }
 
             public ushort cardSubTypeId { get; set; }
 
@@ -4989,7 +4989,7 @@ namespace JilTests
 
             public ushort lifeTimeAssists { get; set; }
 
-            public List<Attribute> lifeTimeStats { get; set; }
+            public List<_Issue90_7> lifeTimeStats { get; set; }
 
             public byte loyaltyBonus { get; set; }
 
@@ -4997,7 +4997,7 @@ namespace JilTests
 
             public byte owners { get; set; }
 
-            public ChemistryStyle playStyle { get; set; }
+            public _Issue90_4 playStyle { get; set; }
 
             public string preferredPosition { get; set; }
 
@@ -5007,7 +5007,7 @@ namespace JilTests
 
             public long resourceId { get; set; }
 
-            public List<Attribute> statsList { get; set; }
+            public List<_Issue90_7> statsList { get; set; }
 
             public byte suspension { get; set; }
 
@@ -5020,7 +5020,7 @@ namespace JilTests
             public bool untradeable { get; set; }
         }
 
-        public enum ChemistryStyle : ushort
+        public enum _Issue90_4 : ushort
         {
             All = 0,
             Basic = 250,
@@ -5049,14 +5049,14 @@ namespace JilTests
             GkBasic = 273
         }
 
-        public class DuplicateItem
+        public class _Issue90_5
         {
             public long duplicateItemId { get; set; }
 
             public long itemId { get; set; }
         }
 
-        public class Currency
+        public class _Issue90_6
         {
             public uint finalFunds { get; set; }
 
@@ -5065,14 +5065,14 @@ namespace JilTests
             public string name { get; set; }
         }
 
-        public class Attribute
+        public class _Issue90_7
         {
             public uint index { get; set; }
 
             public uint value { get; set; }
         }
 
-        public class BidTokens
+        public class _Issue90_8
         {
             public uint count { get; set; }
 
@@ -5086,7 +5086,7 @@ namespace JilTests
 
             using (var str = new StringReader(json))
             {
-                var res = JSON.Deserialize<AuctionResponse>(str);
+                var res = JSON.Deserialize<_Issue90>(str);
                 Assert.IsNotNull(res);
             }
         }
