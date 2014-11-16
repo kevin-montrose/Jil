@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -13,6 +14,17 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static TextReader MakeSupportPeek(this TextReader inner)
+        {
+            var asStringReader = inner as StringReader;
+            if (asStringReader != null) return asStringReader;
+
+            var asStreamReader = inner as StreamReader;
+            if(asStreamReader != null && asStreamReader.BaseStream.CanSeek) return asStreamReader;
+
+            return new PeekSupportingTextReader(inner);
+        }
+
         public static string GetEnumValueName(this Type enumType, object enumVal)
         {
             var field = enumType.GetFields().Single(f => f.Name == Enum.GetName(enumType, enumVal));

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil
 {
@@ -900,7 +901,7 @@ namespace Jil
                 return DeserializeDynamic(reader, options);
             }
 
-            return Jil.Deserialize.DeserializeIndirect.Deserialize(reader, type, options);
+            return Jil.Deserialize.DeserializeIndirect.Deserialize(reader.MakeSupportPeek(), type, options);
         }
 
         /// <summary>
@@ -1006,7 +1007,7 @@ namespace Jil
         {
             options = options ?? DefaultOptions;
 
-            var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader, options);
+            var built = Jil.DeserializeDynamic.DynamicDeserializer.Deserialize(reader.MakeSupportPeek(), options);
 
             return built.BeingBuilt;
         }

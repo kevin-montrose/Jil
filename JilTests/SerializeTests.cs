@@ -6914,5 +6914,39 @@ namespace JilTests
                 JSON.SetDefaultOptions(Options.Default);
             }
         }
+
+        class _Issue89
+        {
+            public DateTime DateField { get; set; }
+            public int IntField { get; set; }
+            public Dictionary<string, object> DictField { get; set; }
+            public Exception ExceptionField { get; set; }
+
+        }
+
+        [TestMethod]
+        public void Issue89()
+        {
+            Exception e = null;
+            try
+            {
+                var x = int.Parse("330") / int.Parse("0");
+            }
+            catch (Exception _) { e = _; }
+
+            Assert.IsNotNull(e);
+
+            var obj =
+                new _Issue89
+                {
+                    DateField = DateTime.UtcNow,
+                    IntField = 123,
+                    DictField = new Dictionary<string, object> { { "foo", "bar"} },
+                    ExceptionField = e
+                };
+
+            var str = JSON.Serialize(obj);
+            Assert.AreEqual("", str);
+        }
     }
 }
