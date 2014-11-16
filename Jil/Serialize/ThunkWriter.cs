@@ -130,7 +130,7 @@ namespace Jil.Serialize
 
     #endregion
 
-    struct ThunkWriter
+    partial struct ThunkWriter
     {
         StringBuilder Builder;
 

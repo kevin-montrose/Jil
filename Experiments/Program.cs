@@ -60,14 +60,14 @@ namespace Experiments
                 RecurseObj = rand.Next(2) == 0 ? new ExampleObj(rand) : null;
             }
 
-            static string RandomString(Random rand)
+            internal static string RandomString(Random rand)
             {
                 var len = rand.Next(10);
 
                 return new string(Enumerable.Range(0, len).Select(_ => RandomChar(rand)).ToArray());
             }
 
-            static char RandomChar(Random rand)
+            internal static char RandomChar(Random rand)
             {
                 var next = rand.Next() % char.MaxValue;
 
@@ -80,7 +80,7 @@ namespace Experiments
                 return ret;
             }
 
-            static long RandomLong(Random rand)
+            internal static long RandomLong(Random rand)
             {
                 var bs = new byte[8];
                 rand.NextBytes(bs);
@@ -88,7 +88,7 @@ namespace Experiments
                 return BitConverter.ToInt64(bs, 0);
             }
 
-            static int RandomInt(Random rand)
+            internal static int RandomInt(Random rand)
             {
                 var bs = new byte[4];
                 rand.NextBytes(bs);
@@ -96,7 +96,7 @@ namespace Experiments
                 return BitConverter.ToInt32(bs, 0);
             }
 
-            static short RandomShort(Random rand)
+            internal static short RandomShort(Random rand)
             {
                 var bs = new byte[2];
                 rand.NextBytes(bs);
@@ -104,7 +104,7 @@ namespace Experiments
                 return BitConverter.ToInt16(bs, 0);
             }
 
-            static byte RandomByte(Random rand)
+            internal static byte RandomByte(Random rand)
             {
                 return (byte)(rand.Next() % byte.MaxValue);
             }
@@ -114,9 +114,7 @@ namespace Experiments
         {
             var random = new Random(27291702);
 
-            var obj = new ExampleObj(random);
-
-            //var obj = new Dictionary<string, string> { {"hello", "world"}, {"world", "hello"} };
+            var obj = ExampleObj.RandomString(random);
 
             Func<string> stream =
                 () =>
@@ -133,6 +131,8 @@ namespace Experiments
                 {
                     return Jil.JSON.Serialize(obj);
                 };
+
+            
 
             // prime
             for (var i = 0; i < 5; i++)
