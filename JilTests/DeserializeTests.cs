@@ -4864,6 +4864,232 @@ namespace JilTests
             }
         }
 
+        public class _Issue90_1
+        {
+            public List<_Issue90_2> AuctionInfo { get; set; }
+            public _Issue90_1() { AuctionInfo = new List<_Issue90_2>(); }
+            public _Issue90_8 BidTokens { get; set; }
+            public uint Credits { get; set; }
+            public List<_Issue90_6> Currencies { get; set; }
+            public List<_Issue90_5> DuplicateItemIdList { get; set; }
+            public string debug { get; set; }
+            public int Code { get; set; }
+            public string String { get; set; }
+            public string reason { get; set; }
+            public string ErrorState { get; set; }
+        }
+
+        public class _Issue90_2
+        {
+            public string BidState { get; set; }
+
+            public uint BuyNowPrice { get; set; }
+
+            public uint CurrentBid { get; set; }
+
+            public int Expires { get; set; }
+
+            public _Issue90_3 ItemData { get; set; }
+
+            public uint Offers { get; set; }
+
+            public string SellerEstablished { get; set; }
+
+            public uint SellerId { get; set; }
+
+            public string SellerName { get; set; }
+
+            public uint StartingBid { get; set; }
+
+            public long TradeId { get; set; }
+
+            public string TradeState { get; set; }
+
+            public bool? Watched { get; set; }
+
+            public uint CalculateBid()
+            {
+                if (CurrentBid == 0)
+                    return StartingBid;
+
+                if (CurrentBid < 1000)
+                    return CurrentBid + 50;
+
+                if (CurrentBid < 10000)
+                    return CurrentBid + 100;
+
+                if (CurrentBid < 50000)
+                    return CurrentBid + 250;
+
+                if (CurrentBid < 100000)
+                    return CurrentBid + 500;
+
+                return CurrentBid + 1000;
+            }
+
+            public long CalculateBaseId()
+            {
+                var baseId = ItemData.ResourceId;
+                var version = 0;
+
+                //while (baseId > 1610612736)
+                while (baseId > 16777216)
+                {
+                    version++;
+                    switch (version)
+                    {
+                        case 1:
+                            //bbaseId -= 1610612736;
+                            baseId -= 1342177280;
+                            break;
+                        case 2:
+                            baseId -= 50331648;
+                            break;
+                        default:
+                            //baseId -= 1610612736;
+                            baseId -= 16777216;
+                            break;
+                    }
+                }
+
+                return baseId;
+            }
+        }
+
+        public class _Issue90_3
+        {
+            public long AssetID { get; set; }
+
+            public ushort Assists { get; set; }
+
+            public List<_Issue90_7> AttributeList { get; set; }
+
+            public ushort CardSubTypeId { get; set; }
+
+            public byte Contract { get; set; }
+
+            public ushort? DiscardValue { get; set; }
+
+            public byte Fitness { get; set; }
+
+            public string Formation { get; set; }
+
+            public long Id { get; set; }
+
+            public byte InjuryGames { get; set; }
+
+            public string InjuryType { get; set; }
+
+            public string ItemState { get; set; }
+
+            public string ItemType { get; set; }
+
+            public uint LastSalePrice { get; set; }
+
+            public ushort LifeTimeAssists { get; set; }
+
+            public List<_Issue90_7> LifeTimeStats { get; set; }
+
+            public byte LoyaltyBonus { get; set; }
+
+            public byte Morale { get; set; }
+
+            public byte Owners { get; set; }
+
+            public _Issue90_4 PlayStyle { get; set; }
+
+            public string PreferredPosition { get; set; }
+
+            public byte RareFlag { get; set; }
+
+            public byte Rating { get; set; }
+
+            public long ResourceId { get; set; }
+
+            public List<_Issue90_7> StatsList { get; set; }
+
+            public byte Suspension { get; set; }
+
+            public uint TeamId { get; set; }
+
+            public string Timestamp { get; set; }
+
+            public int Training { get; set; }
+
+            public bool Untradeable { get; set; }
+        }
+
+        public enum _Issue90_4 : ushort
+        {
+            All = 0,
+            Basic = 250,
+            Sniper = 251,
+            Finisher = 252,
+            Deadeye = 253,
+            Marksman = 254,
+            Hawk = 255,
+            Artist = 256,
+            Architect = 257,
+            Powerhouse = 258,
+            Maestro = 259,
+            Engine = 260,
+            Sentinel = 261,
+            Guardian = 262,
+            Gladiator = 263,
+            Backbone = 264,
+            Anchor = 265,
+            Hunter = 266,
+            Catalyst = 267,
+            Shadow = 268,
+            Wall = 269,
+            Shield = 270,
+            Cat = 271,
+            Glove = 272,
+            GkBasic = 273
+        }
+
+        public class _Issue90_5
+        {
+            public long DuplicateItemId { get; set; }
+
+            public long ItemId { get; set; }
+        }
+
+        public class _Issue90_6
+        {
+            public uint FinalFunds { get; set; }
+
+            public uint Funds { get; set; }
+
+            public string Name { get; set; }
+        }
+
+        public class _Issue90_7
+        {
+            public uint Index { get; set; }
+
+            public uint Value { get; set; }
+        }
+
+        public class _Issue90_8
+        {
+            public uint Count { get; set; }
+
+            public uint UpdateTime { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue90()
+        {
+            const string json = "{\"currencies\":[{\"name\":\"COINS\",\"funds\":500,\"finalFunds\":500},{\"name\":\"POINTS\",\"funds\":0,\"finalFunds\":0}],\"auctionInfo\":[{\"buyNowPrice\":7800,\"itemData\":{\"id\":38776970722,\"timestamp\":1413479494,\"itemType\":\"player\",\"formation\":\"f4231\",\"assetId\":165229,\"pile\":5,\"rating\":81,\"teamid\":1,\"training\":0,\"untradeable\":false,\"leagueId\":0,\"resourceId\":1879213421,\"contract\":6,\"injuryType\":\"none\",\"injuryGames\":0,\"suspension\":0,\"morale\":50,\"fitness\":57,\"assists\":0,\"cardsubtypeid\":1,\"discardValue\":648,\"itemState\":\"forSale\",\"preferredPosition\":\"CB\",\"lastSalePrice\":7200,\"owners\":4,\"rareflag\":1,\"attributeList\":[{\"value\":81,\"index\":0},{\"value\":40,\"index\":1},{\"value\":62,\"index\":2},{\"value\":65,\"index\":3},{\"value\":82,\"index\":4},{\"value\":75,\"index\":5}],\"statsList\":[{\"value\":0,\"index\":0},{\"value\":0,\"index\":1},{\"value\":0,\"index\":2},{\"value\":0,\"index\":3},{\"value\":0,\"index\":4}],\"lifetimeStats\":[{\"value\":35,\"index\":0},{\"value\":3,\"index\":1},{\"value\":1,\"index\":2},{\"value\":0,\"index\":3},{\"value\":0,\"index\":4}],\"playStyle\":250,\"lifetimeAssists\":1,\"loyaltyBonus\":0},\"tradeId\":13466225834,\"currentBid\":0,\"offers\":0,\"watched\":null,\"bidState\":\"none\",\"tradeState\":\"active\",\"startingBid\":7700,\"expires\":33,\"sellerName\":\"Hamburg FC\",\"sellerEstablished\":1409109364,\"sellerId\":0},{\"buyNowPrice\":8800,\"itemData\":{\"id\":44269376297,\"timestamp\":1415214839,\"itemType\":\"player\",\"formation\":\"f4222\",\"assetId\":165229,\"pile\":5,\"rating\":81,\"teamid\":1,\"training\":0,\"untradeable\":false,\"leagueId\":0,\"resourceId\":1879213421,\"contract\":11,\"injuryType\":\"none\",\"injuryGames\":0,\"suspension\":0,\"morale\":50,\"fitness\":89,\"assists\":1,\"cardsubtypeid\":1,\"discardValue\":648,\"itemState\":\"forSale\",\"preferredPosition\":\"CB\",\"lastSalePrice\":9700,\"owners\":3,\"rareflag\":1,\"attributeList\":[{\"value\":81,\"index\":0},{\"value\":40,\"index\":1},{\"value\":62,\"index\":2},{\"value\":65,\"index\":3},{\"value\":82,\"index\":4},{\"value\":75,\"index\":5}],\"statsList\":[{\"value\":25,\"index\":0},{\"value\":1,\"index\":1},{\"value\":5,\"index\":2},{\"value\":1,\"index\":3},{\"value\":0,\"index\":4}],\"lifetimeStats\":[{\"value\":25,\"index\":0},{\"value\":1,\"index\":1},{\"value\":5,\"index\":2},{\"value\":1,\"index\":3},{\"value\":1,\"index\":4}],\"playStyle\":264,\"lifetimeAssists\":1,\"loyaltyBonus\":1},\"tradeId\":13466222807,\"currentBid\":0,\"offers\":0,\"watched\":null,\"bidState\":\"none\",\"tradeState\":\"active\",\"startingBid\":7800,\"expires\":34,\"sellerName\":\"VIVA RONALDO\",\"sellerEstablished\":1288808184,\"sellerId\":0}],\"credits\":500,\"errorState\":null,\"duplicateItemIdList\":null,\"bidTokens\":{}}";
+
+            using (var str = new StringReader(json))
+            {
+                var res = JSON.Deserialize<_Issue90_1>(str);
+                Assert.IsNotNull(res);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
