@@ -4864,72 +4864,73 @@ namespace JilTests
             }
         }
 
-        public class _Issue90_1
+        public class AuctionResponse
         {
-            public List<_Issue90_2> AuctionInfo { get; set; }
-            public _Issue90_1() { AuctionInfo = new List<_Issue90_2>(); }
-            public _Issue90_8 BidTokens { get; set; }
-            public uint Credits { get; set; }
-            public List<_Issue90_6> Currencies { get; set; }
-            public List<_Issue90_5> DuplicateItemIdList { get; set; }
+            public List<AuctionInfo> auctionInfo { get; set; }
+            public AuctionResponse() { auctionInfo = new List<AuctionInfo>(); }
+            public BidTokens bidTokens { get; set; }
+            public uint credits { get; set; }
+            public List<Currency> currencies { get; set; }
+            public List<DuplicateItem> duplicateItemIdList { get; set; }
             public string debug { get; set; }
-            public int Code { get; set; }
+            public int code { get; set; }
+            [JilDirective(Name = "string")]
             public string String { get; set; }
             public string reason { get; set; }
-            public string ErrorState { get; set; }
+            public string errorState { get; set; }
         }
 
-        public class _Issue90_2
+        public class AuctionInfo
         {
-            public string BidState { get; set; }
+            public string bidState { get; set; }
 
-            public uint BuyNowPrice { get; set; }
+            public uint buyNowPrice { get; set; }
 
-            public uint CurrentBid { get; set; }
+            public uint currentBid { get; set; }
 
-            public int Expires { get; set; }
+            public int expires { get; set; }
 
-            public _Issue90_3 ItemData { get; set; }
+            public ItemData itemData { get; set; }
 
-            public uint Offers { get; set; }
+            public uint offers { get; set; }
 
-            public string SellerEstablished { get; set; }
+            public string sellerEstablished { get; set; }
 
-            public uint SellerId { get; set; }
+            public uint sellerId { get; set; }
 
-            public string SellerName { get; set; }
+            public string sellerName { get; set; }
 
-            public uint StartingBid { get; set; }
+            public uint startingBid { get; set; }
 
-            public long TradeId { get; set; }
+            public long tradeId { get; set; }
 
-            public string TradeState { get; set; }
+            public string tradeState { get; set; }
 
-            public bool? Watched { get; set; }
+            public bool? watched { get; set; }
 
-            public uint CalculateBid()
+            public uint calculateBid()
             {
-                if (CurrentBid == 0)
-                    return StartingBid;
+                if (currentBid == 0)
+                    return startingBid;
 
-                if (CurrentBid < 1000)
-                    return CurrentBid + 50;
+                if (currentBid < 1000)
+                    return currentBid + 50;
 
-                if (CurrentBid < 10000)
-                    return CurrentBid + 100;
+                if (currentBid < 10000)
+                    return currentBid + 100;
 
-                if (CurrentBid < 50000)
-                    return CurrentBid + 250;
+                if (currentBid < 50000)
+                    return currentBid + 250;
 
-                if (CurrentBid < 100000)
-                    return CurrentBid + 500;
+                if (currentBid < 100000)
+                    return currentBid + 500;
 
-                return CurrentBid + 1000;
+                return currentBid + 1000;
             }
 
             public long CalculateBaseId()
             {
-                var baseId = ItemData.ResourceId;
+                var baseId = itemData.resourceId;
                 var version = 0;
 
                 //while (baseId > 1610612736)
@@ -4956,70 +4957,70 @@ namespace JilTests
             }
         }
 
-        public class _Issue90_3
+        public class ItemData
         {
-            public long AssetID { get; set; }
+            public long assetID { get; set; }
 
-            public ushort Assists { get; set; }
+            public ushort assists { get; set; }
 
-            public List<_Issue90_7> AttributeList { get; set; }
+            public List<Attribute> attributeList { get; set; }
 
-            public ushort CardSubTypeId { get; set; }
+            public ushort cardSubTypeId { get; set; }
 
-            public byte Contract { get; set; }
+            public byte contract { get; set; }
 
-            public ushort? DiscardValue { get; set; }
+            public ushort? discardValue { get; set; }
 
-            public byte Fitness { get; set; }
+            public byte fitness { get; set; }
 
-            public string Formation { get; set; }
+            public string formation { get; set; }
 
-            public long Id { get; set; }
+            public long id { get; set; }
 
-            public byte InjuryGames { get; set; }
+            public byte injuryGames { get; set; }
 
-            public string InjuryType { get; set; }
+            public string injuryType { get; set; }
 
-            public string ItemState { get; set; }
+            public string itemState { get; set; }
 
-            public string ItemType { get; set; }
+            public string itemType { get; set; }
 
-            public uint LastSalePrice { get; set; }
+            public uint lastSalePrice { get; set; }
 
-            public ushort LifeTimeAssists { get; set; }
+            public ushort lifeTimeAssists { get; set; }
 
-            public List<_Issue90_7> LifeTimeStats { get; set; }
+            public List<Attribute> lifeTimeStats { get; set; }
 
-            public byte LoyaltyBonus { get; set; }
+            public byte loyaltyBonus { get; set; }
 
-            public byte Morale { get; set; }
+            public byte morale { get; set; }
 
-            public byte Owners { get; set; }
+            public byte owners { get; set; }
 
-            public _Issue90_4 PlayStyle { get; set; }
+            public ChemistryStyle playStyle { get; set; }
 
-            public string PreferredPosition { get; set; }
+            public string preferredPosition { get; set; }
 
-            public byte RareFlag { get; set; }
+            public byte rareFlag { get; set; }
 
-            public byte Rating { get; set; }
+            public byte rating { get; set; }
 
-            public long ResourceId { get; set; }
+            public long resourceId { get; set; }
 
-            public List<_Issue90_7> StatsList { get; set; }
+            public List<Attribute> statsList { get; set; }
 
-            public byte Suspension { get; set; }
+            public byte suspension { get; set; }
 
-            public uint TeamId { get; set; }
+            public uint teamId { get; set; }
 
-            public string Timestamp { get; set; }
+            public string timestamp { get; set; }
 
-            public int Training { get; set; }
+            public int training { get; set; }
 
-            public bool Untradeable { get; set; }
+            public bool untradeable { get; set; }
         }
 
-        public enum _Issue90_4 : ushort
+        public enum ChemistryStyle : ushort
         {
             All = 0,
             Basic = 250,
@@ -5048,34 +5049,34 @@ namespace JilTests
             GkBasic = 273
         }
 
-        public class _Issue90_5
+        public class DuplicateItem
         {
-            public long DuplicateItemId { get; set; }
+            public long duplicateItemId { get; set; }
 
-            public long ItemId { get; set; }
+            public long itemId { get; set; }
         }
 
-        public class _Issue90_6
+        public class Currency
         {
-            public uint FinalFunds { get; set; }
+            public uint finalFunds { get; set; }
 
-            public uint Funds { get; set; }
+            public uint funds { get; set; }
 
-            public string Name { get; set; }
+            public string name { get; set; }
         }
 
-        public class _Issue90_7
+        public class Attribute
         {
-            public uint Index { get; set; }
+            public uint index { get; set; }
 
-            public uint Value { get; set; }
+            public uint value { get; set; }
         }
 
-        public class _Issue90_8
+        public class BidTokens
         {
-            public uint Count { get; set; }
+            public uint count { get; set; }
 
-            public uint UpdateTime { get; set; }
+            public uint updateTime { get; set; }
         }
 
         [TestMethod]
@@ -5085,7 +5086,7 @@ namespace JilTests
 
             using (var str = new StringReader(json))
             {
-                var res = JSON.Deserialize<_Issue90_1>(str);
+                var res = JSON.Deserialize<AuctionResponse>(str);
                 Assert.IsNotNull(res);
             }
         }
