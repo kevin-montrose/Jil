@@ -4894,7 +4894,8 @@ namespace JilTests
 
             public uint offers { get; set; }
 
-            public string sellerEstablished { get; set; }
+            //public string sellerEstablished { get; set; }
+            public long sellerEstablished { get; set; }
 
             public uint sellerId { get; set; }
 
@@ -4997,7 +4998,8 @@ namespace JilTests
 
             public byte owners { get; set; }
 
-            public _Issue90_4 playStyle { get; set; }
+            //public _Issue90_4 playStyle { get; set; }
+            public ushort playStyle { get; set; }
 
             public string preferredPosition { get; set; }
 
@@ -5013,7 +5015,8 @@ namespace JilTests
 
             public uint teamId { get; set; }
 
-            public string timestamp { get; set; }
+            //public string timestamp { get; set; }
+            public long timestamp { get; set; }
 
             public int training { get; set; }
 
