@@ -6946,7 +6946,7 @@ namespace JilTests
                 };
 
             var str = JSON.Serialize(obj);
-            Assert.AreEqual("", str);
+            Assert.IsNotNull(str);
         }
     }
 }

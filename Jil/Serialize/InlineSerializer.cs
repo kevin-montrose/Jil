@@ -279,7 +279,7 @@ namespace Jil.Serialize
                 flags |= BindingFlags.DeclaredOnly;
             }
 
-            var props = forType.GetProperties(flags).Where(p => p.GetMethod != null);
+            var props = forType.GetProperties(flags).Where(p => p.GetMethod != null && p.GetIndexParameters().Length == 0);
             var fields = forType.GetFields(flags);
 
             var members = props.Cast<MemberInfo>().Concat(fields).Where(f => f.ShouldUseMember());
