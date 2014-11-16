@@ -114,7 +114,7 @@ namespace Jil.Serialize
 
         static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
         static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod("Write", new[] { typeof(string) });
-        static MethodInfo ThunkWriter_WriteConstant = typeof(ThunkWriter).GetMethod("WriteConstant", new[] { typeof(ConstantString_Common) });
+        static MethodInfo ThunkWriter_WriteCommonConstant = typeof(ThunkWriter).GetMethod("WriteCommonConstant", new[] { typeof(ConstantString_Common) });
         static MethodInfo ThunkWriter_WriteFormatingContant = typeof(ThunkWriter).GetMethod("WriteFormattingConstant", new[] { typeof(ConstantString_Formatting) });
         static MethodInfo ThunkWriter_WriteMinConstant = typeof(ThunkWriter).GetMethod("WriteMinConstant", new[] { typeof(ConstantString_Min) });
         static MethodInfo ThunkWriter_WriteValueConstant = typeof(ThunkWriter).GetMethod("WriteValueConstant", new[] { typeof(ConstantString_Value) });
@@ -131,7 +131,7 @@ namespace Jil.Serialize
                 if (ThunkWriter.IsConstantCommonString(str, out constStr))
                 {
                     Emit.LoadConstant((int)constStr);           // ThunkWriter* int
-                    Emit.Call(ThunkWriter_WriteConstant);       // --empty--
+                    Emit.Call(ThunkWriter_WriteCommonConstant);       // --empty--
                 }
                 else
                 {

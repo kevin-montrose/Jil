@@ -35,6 +35,8 @@ namespace Experiments
 
             public ExampleObj RecurseObj { get; set; }
 
+            public ExampleObj() { }
+
             public ExampleObj(Random rand)
             {
                 String = RandomString(rand);
@@ -114,12 +116,14 @@ namespace Experiments
 
             var obj = new ExampleObj(random);
 
+            //var obj = new Dictionary<string, string> { {"hello", "world"}, {"world", "hello"} };
+
             Func<string> stream =
                 () =>
                 {
                     using (var writer = new StringWriter())
                     {
-                        Jil.JSON.Serialize(new List<string> { "hello", "world" }, writer);
+                        Jil.JSON.Serialize(obj, writer);
                         return writer.ToString();
                     }
                 };
@@ -127,7 +131,7 @@ namespace Experiments
             Func<string> str =
                 () =>
                 {
-                    return Jil.JSON.Serialize(new List<string> { "hello", "world" });
+                    return Jil.JSON.Serialize(obj);
                 };
 
             // prime
