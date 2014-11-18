@@ -1091,7 +1091,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
+                    var cons = objType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
 
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
@@ -1270,7 +1270,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
+                    var cons = objType.GetConstructor(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
 
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
