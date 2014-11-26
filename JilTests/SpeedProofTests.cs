@@ -1126,6 +1126,51 @@ namespace JilTests
 
             Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
+
+        [TestMethod]
+        public void UseFastFloatingPointMethods()
+        {
+            Func<TextReader, int, float> fast;
+            Func<TextReader, int, float> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<float>.UseFastFloatingPointMethods = true;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    fast = InlineDeserializerHelper.Build<float>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineDeserializer<float>.UseFastFloatingPointMethods = false;
+                    Exception ignored;
+
+                    // Build the *actual* deserializer method
+                    normal = InlineDeserializerHelper.Build<float>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<float>.UseFastFloatingPointMethods = true;
+            }
+
+            var rand = new Random(70063350);
+
+            var toSerialize = new List<float>();
+            for (var i = 0; i < 100000; i++)
+            {
+                toSerialize.Add((float)(rand.NextDouble() * (double)int.MaxValue));
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

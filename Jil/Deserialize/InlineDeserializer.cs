@@ -13,6 +13,7 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
+        public static bool UseFastFloatingPointMethods = true;
         public static bool UseCharArrayOverStringBuilder = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
@@ -316,48 +317,75 @@ namespace Jil.Deserialize
                 return;
             }
 
-            if (UseCharArrayOverStringBuilder)
+            if (UseFastFloatingPointMethods)
             {
                 LoadCharBufferAddress();                    // TextReader char[]
 
                 if (numberType == typeof(double))
                 {
+                    // TODO: fast double
                     Emit.Call(Methods.ReadDoubleCharArray);   // double
                     return;
                 }
 
                 if (numberType == typeof(float))
                 {
-                    Emit.Call(Methods.ReadSingleCharArray);  // float
+                    Emit.Call(Methods.ReadSingleFast);      // float
                     return;
                 }
 
                 if (numberType == typeof(decimal))
                 {
+                    // TODO: fast decimal
                     Emit.Call(Methods.ReadDecimalCharArray); // decimal
                     return;
                 }
             }
             else
             {
-                LoadStringBuilder();                    // TextReader StringBuilder
-
-                if (numberType == typeof(double))
+                if (UseCharArrayOverStringBuilder)
                 {
-                    Emit.Call(Methods.ReadDouble);   // double
-                    return;
+                    LoadCharBufferAddress();                    // TextReader char[]
+
+                    if (numberType == typeof(double))
+                    {
+                        Emit.Call(Methods.ReadDoubleCharArray);   // double
+                        return;
+                    }
+
+                    if (numberType == typeof(float))
+                    {
+                        Emit.Call(Methods.ReadSingleCharArray);  // float
+                        return;
+                    }
+
+                    if (numberType == typeof(decimal))
+                    {
+                        Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                        return;
+                    }
                 }
-
-                if (numberType == typeof(float))
+                else
                 {
-                    Emit.Call(Methods.ReadSingle);  // float
-                    return;
-                }
+                    LoadStringBuilder();                    // TextReader StringBuilder
 
-                if (numberType == typeof(decimal))
-                {
-                    Emit.Call(Methods.ReadDecimal); // decimal
-                    return;
+                    if (numberType == typeof(double))
+                    {
+                        Emit.Call(Methods.ReadDouble);   // double
+                        return;
+                    }
+
+                    if (numberType == typeof(float))
+                    {
+                        Emit.Call(Methods.ReadSingle);  // float
+                        return;
+                    }
+
+                    if (numberType == typeof(decimal))
+                    {
+                        Emit.Call(Methods.ReadDecimal); // decimal
+                        return;
+                    }
                 }
             }
 
