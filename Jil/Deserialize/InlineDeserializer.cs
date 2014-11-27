@@ -323,8 +323,7 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(double))
                 {
-                    // TODO: fast double
-                    Emit.Call(Methods.ReadDoubleCharArray);   // double
+                    Emit.Call(Methods.ReadDoubleFast);   // double
                     return;
                 }
 
