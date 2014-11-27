@@ -1814,18 +1814,22 @@ namespace Jil.Deserialize
 
                     var negative = buffer[firstValidCharIdx] == '-';
 
-                    Decimal result;
-                    idx = firstDigitIdx;
+                    decimal result;
                     var n1 = 0; // we use int rather than long so as to work well on 32-bit runtime
-                    for (; idx < endIdx && n1 < 100000000; ++idx)
+
+                    for (idx = firstDigitIdx; idx < endIdx && n1 < 100000000; ++idx)
                     {
                         if (idx != decimalPointIdx)
+                        {
                             n1 = n1 * 10 + buffer[idx] - '0';
+                        }
                     }
+
                     if (negative)
                     {
                         n1 = -n1;
                     }
+
                     if (idx == endIdx)
                     {
                         result = n1;
@@ -1834,20 +1838,25 @@ namespace Jil.Deserialize
                     {
                         var n2 = 0;
                         var multiplier = 1;
-                        for (; idx < endIdx; ++idx)
+                        while(idx < endIdx)
                         {
                             if (idx != decimalPointIdx)
                             {
                                 multiplier *= 10;
                                 n2 = n2 * 10 + buffer[idx] - '0';
                             }
+
+                            idx++;
                         }
+
                         result = (long)n1 * multiplier + (long)n2;
                     }
+
                     if (decimalPointIdx > 0)
                     {
                         result *= DecimalMultipliers[endIdx - decimalPointIdx - 1];
                     }
+
                     return result;
                 }
             }
