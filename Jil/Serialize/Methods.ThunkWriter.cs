@@ -1336,5 +1336,19 @@ namespace Jil.Serialize
         {
             writer.Write(d);
         }
+
+        public static readonly MethodInfo WriteTimeSpanISO8601_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanISO8601_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteTimeSpanISO8601_ThunkWriter(ref ThunkWriter writer, TimeSpan ts)
+        {
+            throw new NotImplementedException();
+        }
+
+        static readonly MethodInfo WriteTimeSpanNewtonsoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteTimeSpanNewtonsoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

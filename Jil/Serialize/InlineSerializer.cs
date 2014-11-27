@@ -814,6 +814,52 @@ namespace Jil.Serialize
             WriteDateTime();
         }
 
+        static readonly MethodInfo TimeSpan_TotalSeconds = typeof(TimeSpan).GetProperty("TotalSeconds").GetMethod;
+        static readonly MethodInfo TimeSpan_TotalMilliseconds = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+        void WriteTimeSpan()
+        {
+            // top of stack:
+            //  - TimeSpan
+            //  - TextWriter
+
+            if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch)
+            {
+                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(loc);                   // TextWriter
+                    Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
+                }
+
+                Emit.Call(TimeSpan_TotalSeconds);       // TextWriter double
+                WritePrimitive(typeof(double), false);  // --empty--
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch)
+            {
+                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(loc);                   // TextWriter
+                    Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
+                }
+
+                Emit.Call(TimeSpan_TotalMilliseconds);  // TextWriter double
+                WritePrimitive(typeof(double), false);  // --empty--
+                return;
+            }
+
+            switch(DateFormat)
+            {
+                case DateTimeFormat.ISO8601: 
+                    Emit.Call(Methods.GetWriteTimeSpanISO8601(BuildingToString)); 
+                    return;
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: 
+                    Emit.Call(Methods.GetWriteTimeSpanNewtonsoft(BuildingToString)); 
+                    return;
+                default: throw new Exception("Unexpected DateTimeFormat [" + DateFormat + "]");
+            }
+        }
+
         void WriteDateTime()
         {
             // top of stack:
@@ -901,6 +947,12 @@ namespace Jil.Serialize
                     Emit.Call(GetWriteEncodedStringMethod());
                 }
                 
+                return;
+            }
+
+            if(primitiveType == typeof(TimeSpan))
+            {
+                WriteTimeSpan();
                 return;
             }
 

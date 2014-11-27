@@ -160,5 +160,21 @@ namespace Jil.Serialize
                     WriteEncodedStringWithNullsInlineUnsafe :
                     WriteEncodedStringWithNullsInlineUnsafe_ThunkWriter;
         }
+
+        public static MethodInfo GetWriteTimeSpanISO8601(bool needThunkWriter)
+        {
+            return
+                !needThunkWriter ?
+                    WriteTimeSpanISO8601 :
+                    WriteTimeSpanISO8601_ThunkWriter;
+        }
+
+        public static MethodInfo GetWriteTimeSpanNewtonsoft(bool needThunkWriter)
+        {
+            return
+                !needThunkWriter ?
+                    WriteTimeSpanNewtonsoft :
+                    WriteTimeSpanNewtonsoft_ThunkWriter;
+        }
     }
 }

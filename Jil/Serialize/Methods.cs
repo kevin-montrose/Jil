@@ -1447,5 +1447,19 @@ namespace Jil.Serialize
 
             writer.Write(d.ToString(invariant));
         }
+
+        static readonly MethodInfo WriteTimeSpanISO8601 = typeof(Methods).GetMethod("_WriteTimeSpanISO8601", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteTimeSpanISO8601(TextWriter writer, TimeSpan ts)
+        {
+            throw new NotImplementedException();
+        }
+
+        static readonly MethodInfo WriteTimeSpanNewtonsoft = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _WriteTimeSpanNewtonsoft(TextWriter writer, TimeSpan ts)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

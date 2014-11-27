@@ -703,7 +703,8 @@ namespace Jil.Common
                 t == typeof(bool) ||
                 t == typeof(DateTime) ||
                 t == typeof(DateTimeOffset) ||
-                t == typeof(Guid);
+                t == typeof(Guid) ||
+                t == typeof(TimeSpan);
         }
 
         public static bool IsStringyType(this MemberInfo member)
