@@ -335,8 +335,7 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(decimal))
                 {
-                    // TODO: fast decimal
-                    Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                    Emit.Call(Methods.ReadDecimalFast); // decimal
                     return;
                 }
             }
