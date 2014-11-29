@@ -1348,6 +1348,13 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _WriteTimeSpanNewtonsoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
+            // can't negate this, have to handle it manually
+            if (ts.Ticks == long.MinValue)
+            {
+                writer.Write("\"-10675199.02:48:05.4775808\"");
+                return;
+            }
+
             writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
             if (ts.Ticks < 0)
