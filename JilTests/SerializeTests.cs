@@ -7198,23 +7198,38 @@ namespace JilTests
 
             foreach (var ts in timeSpans)
             {
-                string streamJson;
+                string streamJson, stringJson;
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(ts, str, Options.ISO8601);
                     streamJson = str.ToString();
                 }
 
+                {
+                    stringJson = JSON.Serialize(ts, Options.ISO8601);
+                }
+
+                Assert.IsTrue(streamJson == stringJson);
+
                 var dotNetStr = XmlConvert.ToString(ts);
 
                 streamJson = streamJson.Trim('"');
+                stringJson = stringJson.Trim('"');
+
                 if (streamJson.IndexOf('.') != -1)
                 {
                     var lastChar = streamJson[streamJson.Length - 1];
                     streamJson = streamJson.Substring(0, streamJson.Length - 1).TrimEnd('0') + lastChar;
                 }
 
+                if (stringJson.IndexOf('.') != -1)
+                {
+                    var lastChar = stringJson[stringJson.Length - 1];
+                    stringJson = stringJson.Substring(0, stringJson.Length - 1).TrimEnd('0') + lastChar;
+                }
+
                 Assert.AreEqual(dotNetStr, streamJson);
+                Assert.AreEqual(dotNetStr, stringJson);
             }
         }
     }

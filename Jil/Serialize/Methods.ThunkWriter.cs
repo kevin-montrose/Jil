@@ -1339,9 +1339,135 @@ namespace Jil.Serialize
 
         public static readonly MethodInfo WriteTimeSpanISO8601_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanISO8601_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _WriteTimeSpanISO8601_ThunkWriter(ref ThunkWriter writer, TimeSpan ts)
+        static void _WriteTimeSpanISO8601_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
-            throw new NotImplementedException();
+            // can't negate this, have to handle it manually
+            if (ts.Ticks == long.MinValue)
+            {
+                writer.Write("\"-P10675199DT2H48M5.4775808S\"");
+                return;
+            }
+
+            writer.Write('"');
+
+            if (ts.Ticks < 0)
+            {
+                writer.Write('-');
+                ts = ts.Negate();
+            }
+
+            writer.Write('P');
+
+            var days = ts.Days;
+            var hours = ts.Hours;
+            var minutes = ts.Minutes;
+            var seconds = ts.Seconds;
+            var milliseconds = ts.Milliseconds;
+
+            // days
+            if (days > 0)
+            {
+                _CustomWriteIntUnrolledSigned_ThunkWriter(ref writer, days, buffer);
+                writer.Write('D');
+            }
+
+            // time separator
+            writer.Write('T');
+
+            // hours
+            if (hours > 0)
+            {
+                _CustomWriteIntUnrolledSigned_ThunkWriter(ref writer, hours, buffer);
+                writer.Write('H');
+            }
+
+            // minutes
+            if (minutes > 0)
+            {
+                _CustomWriteIntUnrolledSigned_ThunkWriter(ref writer, minutes, buffer);
+                writer.Write('M');
+            }
+
+            // seconds
+            _CustomWriteIntUnrolledSigned_ThunkWriter(ref writer, seconds, buffer);
+
+            // fractional part
+            {
+                TwoDigits digits;
+                int fracEnd;
+                var endCount = 0;
+                var remainingTicks = (ts - new TimeSpan(days, hours, minutes, seconds, 0)).Ticks;
+
+                if (remainingTicks > 0)
+                {
+                    buffer[0] = '.';
+
+                    var fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[7] = digits.Second;
+                        buffer[6] = digits.First;
+                        fracEnd = 8;
+                    }
+                    else
+                    {
+                        fracEnd = 6;
+                    }
+
+                    fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[5] = digits.Second;
+                        buffer[4] = digits.First;
+                    }
+                    else
+                    {
+                        if (fracEnd == 6)
+                        {
+                            fracEnd = 4;
+                        }
+                        else
+                        {
+                            buffer[5] = '0';
+                            buffer[4] = '0';
+                        }
+                    }
+
+                    fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[3] = digits.Second;
+                        buffer[2] = digits.First;
+                    }
+                    else
+                    {
+                        if (fracEnd == 4)
+                        {
+                            fracEnd = 2;
+                        }
+                        else
+                        {
+                            buffer[3] = '0';
+                            buffer[2] = '0';
+                        }
+                    }
+
+                    fracPart = remainingTicks;
+                    buffer[1] = (char)('0' + fracPart);
+
+                    endCount = fracEnd;
+                }
+
+                writer.Write(buffer, 0, endCount);
+            }
+
+            writer.Write("S\"");
         }
 
         static readonly MethodInfo WriteTimeSpanNewtonsoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
