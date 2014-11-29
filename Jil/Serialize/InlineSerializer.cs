@@ -848,13 +848,14 @@ namespace Jil.Serialize
                 return;
             }
 
+            Emit.LoadLocal(CharBuffer);                                         // TextWriter TimeSpan char[]
+
             switch(DateFormat)
             {
                 case DateTimeFormat.ISO8601: 
                     Emit.Call(Methods.GetWriteTimeSpanISO8601(BuildingToString));       // --empty--
                     return;
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    Emit.LoadLocal(CharBuffer);                                         // TextWriter TimeSpan char[]
                     Emit.Call(Methods.GetWriteTimeSpanNewtonsoft(BuildingToString));    // --empty--
                     return;
                 default: throw new Exception("Unexpected DateTimeFormat [" + DateFormat + "]");

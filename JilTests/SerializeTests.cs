@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace JilTests
 {
@@ -7165,6 +7166,55 @@ namespace JilTests
 
                 Assert.AreEqual(dotNetStr, streamJson);
                 Assert.AreEqual(dotNetStr, stringJson);
+            }
+        }
+
+        [TestMethod]
+        public void ISO8601TimeSpans()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts in timeSpans)
+            {
+                string streamJson;
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(ts, str, Options.ISO8601);
+                    streamJson = str.ToString();
+                }
+
+                var dotNetStr = XmlConvert.ToString(ts);
+
+                streamJson = streamJson.Trim('"');
+                if (streamJson.IndexOf('.') != -1)
+                {
+                    var lastChar = streamJson[streamJson.Length - 1];
+                    streamJson = streamJson.Substring(0, streamJson.Length - 1).TrimEnd('0') + lastChar;
+                }
+
+                Assert.AreEqual(dotNetStr, streamJson);
             }
         }
     }
