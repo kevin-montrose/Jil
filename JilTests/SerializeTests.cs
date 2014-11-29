@@ -6949,6 +6949,7 @@ namespace JilTests
             Assert.IsNotNull(str);
         }
 
+#if EXHAUSTIVE_TEST
         [TestMethod]
         public void NewtonsoftTimeSpans()
         {
@@ -7004,5 +7005,7 @@ namespace JilTests
                     }
                 );
         }
+#endif
+
     }
 }
