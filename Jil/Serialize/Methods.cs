@@ -1459,7 +1459,7 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _WriteTimeSpanNewtonsoft(TextWriter writer, TimeSpan ts, char[] buffer)
         {
-            writer.Write('\"');
+            writer.Write('"');
 
             if (ts.Ticks < 0)
             {
