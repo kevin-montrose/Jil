@@ -4864,6 +4864,78 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void SecondsTimeSpan()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts1 in timeSpans)
+            {
+                var json = JSON.Serialize(ts1, Options.SecondsSinceUnixEpoch);
+                var ts2 = JSON.Deserialize<TimeSpan>(json, Options.SecondsSinceUnixEpoch);
+
+                Assert.AreEqual(Math.Round(ts1.TotalSeconds), Math.Round(ts2.TotalSeconds));
+            }
+        }
+
+        [TestMethod]
+        public void MillisecondsTimeSpan()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts1 in timeSpans)
+            {
+                var json = JSON.Serialize(ts1, Options.MillisecondsSinceUnixEpoch);
+                var ts2 = JSON.Deserialize<TimeSpan>(json, Options.MillisecondsSinceUnixEpoch);
+
+                Assert.AreEqual(Math.Round(ts1.TotalMilliseconds), Math.Round(ts2.TotalMilliseconds));
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

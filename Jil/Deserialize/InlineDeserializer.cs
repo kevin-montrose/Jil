@@ -443,6 +443,98 @@ namespace Jil.Deserialize
             Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
         }
 
+        void ReadTimeSpan()
+        {
+            switch(DateFormat)
+            {
+                case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsTimeSpan(); break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsTimeSpan(); break;
+                
+                case DateTimeFormat.ISO8601:
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: throw new NotImplementedException();
+
+                default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
+            }
+        }
+
+        static readonly MethodInfo TimeSpan_FromSeconds = typeof(TimeSpan).GetMethod("FromSeconds", BindingFlags.Static | BindingFlags.Public);
+        void ReadSecondsTimeSpan()
+        {
+            var maxSecs = TimeSpan.MaxValue.TotalSeconds;
+            var minSecs = TimeSpan.MinValue.TotalSeconds;
+
+            var maxTicks = TimeSpan.MaxValue.Ticks;
+            var minTicks = TimeSpan.MinValue.Ticks;
+            
+            var isMax = Emit.DefineLabel();
+            var isMin = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
+
+            ReadPrimitive(typeof(double));          // double
+            Emit.Duplicate();                       // double double
+            Emit.LoadConstant(maxSecs);             // double double double
+            Emit.BranchIfGreaterOrEqual(isMax);     // double
+
+            Emit.Duplicate();                       // double double
+            Emit.LoadConstant(minSecs);             // double double double
+            Emit.BranchIfLessOrEqual(isMin);        // double
+            
+            Emit.Call(TimeSpan_FromSeconds);        // TimeSpan
+            Emit.Branch(done);                      // TimeSpan
+
+            Emit.MarkLabel(isMax);                  // double
+            Emit.Pop();                             // --empty--
+            Emit.LoadConstant(maxTicks);            // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
+            Emit.Branch(done);                      // TimeSpan
+
+            Emit.MarkLabel(isMin);                  // double
+            Emit.Pop();                             // --empty--
+            Emit.LoadConstant(minTicks);            // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
+
+            Emit.MarkLabel(done);                   // TimeSpan
+        }
+
+        static readonly MethodInfo TimeSpan_FromMilliseconds = typeof(TimeSpan).GetMethod("FromMilliseconds", BindingFlags.Static | BindingFlags.Public);
+        void ReadMillisecondsTimeSpan()
+        {
+            var maxMs = TimeSpan.MaxValue.TotalMilliseconds;
+            var minMs = TimeSpan.MinValue.TotalMilliseconds;
+
+            var maxTicks = TimeSpan.MaxValue.Ticks;
+            var minTicks = TimeSpan.MinValue.Ticks;
+
+            var isMax = Emit.DefineLabel();
+            var isMin = Emit.DefineLabel();
+            var done = Emit.DefineLabel();
+
+            ReadPrimitive(typeof(double));          // double
+            Emit.Duplicate();                       // double double
+            Emit.LoadConstant(maxMs);               // double double double
+            Emit.BranchIfGreaterOrEqual(isMax);     // double
+
+            Emit.Duplicate();                       // double double
+            Emit.LoadConstant(minMs);               // double double double
+            Emit.BranchIfLessOrEqual(isMin);        // double
+
+            Emit.Call(TimeSpan_FromMilliseconds);   // TimeSpan
+            Emit.Branch(done);                      // TimeSpan
+
+            Emit.MarkLabel(isMax);                  // double
+            Emit.Pop();                             // --empty--
+            Emit.LoadConstant(maxTicks);            // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
+            Emit.Branch(done);                      // TimeSpan
+
+            Emit.MarkLabel(isMin);                  // double
+            Emit.Pop();                             // --empty--
+            Emit.LoadConstant(minTicks);            // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
+
+            Emit.MarkLabel(done);                   // TimeSpan
+        }
+
         void ReadDate()
         {
             switch (DateFormat)
@@ -555,6 +647,12 @@ namespace Jil.Deserialize
             if (primitiveType == typeof(Guid))
             {
                 ReadGuid();
+                return;
+            }
+
+            if (primitiveType == typeof(TimeSpan))
+            {
+                ReadTimeSpan();
                 return;
             }
 
