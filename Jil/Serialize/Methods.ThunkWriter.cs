@@ -1346,7 +1346,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo WriteTimeSpanNewtonsoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _WriteTimeSpanNewtonsoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts)
+        static void _WriteTimeSpanNewtonsoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
             throw new NotImplementedException();
         }

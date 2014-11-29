@@ -457,7 +457,7 @@ namespace JilTests
 #endif
         class _JilDirectiveAttributeTest
         {
-            [JilDirective(Name="AOverride")]
+            [JilDirective(Name = "AOverride")]
             public string A;
             [JilDirective(Ignore = true)]
             public string B;
@@ -6625,7 +6625,7 @@ namespace JilTests
         [TestMethod]
         public void ReuseTypeSerializers()
         {
-            var str = JSON.Serialize(new _ReuseTypeSerializers1 { A = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A="hello", B=123}, B = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "world", B=456 } });
+            var str = JSON.Serialize(new _ReuseTypeSerializers1 { A = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "hello", B = 123 }, B = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "world", B = 456 } });
             Assert.AreEqual("{\"A\":{\"B\":123,\"A\":\"hello\"},\"B\":{\"B\":456,\"A\":\"world\"}}", str);
         }
 
@@ -6902,7 +6902,7 @@ namespace JilTests
                 JSON.SetDefaultOptions(Options.ExcludeNulls);
 
                 var obj = new { a = (object)null, b = (object)null };
-                
+
                 var @default = JSON.Serialize(obj);
                 var @explicit = JSON.Serialize(obj, Options.Default);
 
@@ -6941,12 +6941,68 @@ namespace JilTests
                 {
                     DateField = DateTime.UtcNow,
                     IntField = 123,
-                    DictField = new Dictionary<string, object> { { "foo", "bar"} },
+                    DictField = new Dictionary<string, object> { { "foo", "bar" } },
                     ExceptionField = e
                 };
 
             var str = JSON.Serialize(obj);
             Assert.IsNotNull(str);
+        }
+
+        [TestMethod]
+        public void NewtonsoftTimeSpans()
+        {
+            Enumerable
+                .Range(0, 365)
+                .AsParallel()
+                .ForAll(
+                    d =>
+                    {
+                        for (var h = 0; h < 24; h++)
+                        {
+                            for (var m = 0; m < 60; m++)
+                            {
+                                for (var s = 0; s < 60; s++)
+                                {
+                                    for (var ms = 0; ms < 1000; ms++)
+                                    {
+                                        var ts1 = new TimeSpan(d, h, m, s, ms);
+                                        var ts2 = ts1.Negate();
+
+                                        string json1, json2;
+
+                                        using (var str = new StringWriter())
+                                        {
+                                            JSON.Serialize(ts1, str);
+                                            json1 = str.ToString();
+                                        }
+
+                                        using (var str = new StringWriter())
+                                        {
+                                            JSON.Serialize(ts2, str);
+                                            json2 = str.ToString();
+                                        }
+
+                                        var str1 = ts1.ToString();
+                                        var str2 = ts2.ToString();
+
+                                        if (str1.IndexOf('.') != -1) str1 = str1.TrimEnd('0');
+                                        if (str2.IndexOf('.') != -1) str2 = str2.TrimEnd('0');
+
+                                        var jsonStr1 = json1.Substring(1, json1.Length - 2);
+                                        var jsonStr2 = json2.Substring(1, json2.Length - 2);
+
+                                        if (jsonStr1.IndexOf('.') != -1) jsonStr1 = jsonStr1.TrimEnd('0');
+                                        if (jsonStr2.IndexOf('.') != -1) jsonStr2 = jsonStr2.TrimEnd('0');
+
+                                        Assert.AreEqual(str1, jsonStr1);
+                                        Assert.AreEqual(str2, jsonStr2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
         }
     }
 }

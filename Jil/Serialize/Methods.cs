@@ -1457,9 +1457,134 @@ namespace Jil.Serialize
 
         static readonly MethodInfo WriteTimeSpanNewtonsoft = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _WriteTimeSpanNewtonsoft(TextWriter writer, TimeSpan ts)
+        static void _WriteTimeSpanNewtonsoft(TextWriter writer, TimeSpan ts, char[] buffer)
         {
-            throw new NotImplementedException();
+            writer.Write('\"');
+
+            if (ts.Ticks < 0)
+            {
+                writer.Write('-');
+                ts = ts.Negate();
+            }
+
+            var days = ts.Days;
+            var hours = ts.Hours;
+            var minutes = ts.Minutes;
+            var secs = ts.Seconds;
+            int endCount;
+
+            TwoDigits digits;
+
+            // days
+            {
+                if (days != 0)
+                {
+                    _CustomWriteInt(writer, days, buffer);
+                    writer.Write('.');
+                }
+            }
+
+            // hours
+            {
+                digits = DigitPairs[hours];
+                buffer[0] = digits.First;
+                buffer[1] = digits.Second;
+            }
+
+            buffer[2] = ':';
+
+            // minutes
+            {
+                digits = DigitPairs[minutes];
+                buffer[3] = digits.First;
+                buffer[4] = digits.Second;
+            }
+
+            buffer[5] = ':';
+
+            // seconds
+            {
+                digits = DigitPairs[secs];
+                buffer[6] = digits.First;
+                buffer[7] = digits.Second;
+            }
+
+            endCount = 8;
+
+            // factional part
+            {
+                int fracEnd;
+                var remainingTicks = (ts - new TimeSpan(ts.Days, ts.Hours, ts.Minutes, ts.Seconds, 0)).Ticks;
+                if (remainingTicks > 0)
+                {
+                    buffer[8] = '.';
+
+                    var fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[15] = digits.Second;
+                        buffer[14] = digits.First;
+                        fracEnd = 16;
+                    }
+                    else
+                    {
+                        fracEnd = 14;
+                    }
+
+                    fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[13] = digits.Second;
+                        buffer[12] = digits.First;
+                    }
+                    else
+                    {
+                        if (fracEnd == 14)
+                        {
+                            fracEnd = 12;
+                        }
+                        else
+                        {
+                            buffer[13] = '0';
+                            buffer[12] = '0';
+                        }
+                    }
+
+                    fracPart = remainingTicks % 100;
+                    remainingTicks /= 100;
+                    if (fracPart > 0)
+                    {
+                        digits = DigitPairs[fracPart];
+                        buffer[11] = digits.Second;
+                        buffer[10] = digits.First;
+                    }
+                    else
+                    {
+                        if (fracEnd == 12)
+                        {
+                            fracEnd = 10;
+                        }
+                        else
+                        {
+                            buffer[11] = '0';
+                            buffer[10] = '0';
+                        }
+                    }
+
+                    fracPart = remainingTicks;
+                    buffer[9] = (char)('0' + fracPart);
+
+                    endCount = fracEnd;
+                }
+            }
+
+            writer.Write(buffer, 0, endCount);
+
+            writer.Write('"');
         }
     }
 }
