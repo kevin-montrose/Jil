@@ -806,5 +806,35 @@ namespace JilTests
 
             Assert.AreEqual("{\n \"size\": 30,\n \"from\": 0,\n \"query\": {\n  \"filtered\": {\n   \"query\": {\n    \"bool\": {\n     \"must\": [{\n      \"must\": null,\n      \"must_not\": null,\n      \"should\": [{\n       \"query_string\": {\n        \"use_dis_max\": true,\n        \"fields\": [\"personalStatement\", \"yearsOfExperienceTags^1.5\", \"stackExchangeAnswersTags^0.1\", \"name\", \"likeTags\", \"stackOverflowUserName\", \"projects.projectName\", \"projects.projectTags\", \"projects.projectDescription\", \"experience.experienceJobTitle\", \"experience.experienceEmployerName\", \"experience.experienceTags\", \"experience.experienceResponsibilities\", \"education.educationInstitution\", \"education.educationTags\", \"education.educationDegreeName\", \"education.educationAchievements\"],\n        \"default_operator\": \"AND\",\n        \"query\": \"Dean Ward\"\n       }\n      }],\n      \"_cache\": null,\n      \"boost\": null,\n      \"minimum_number_should_match\": 1\n     }],\n     \"must_not\": null,\n     \"should\": null,\n     \"_cache\": null,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   },\n   \"filter\": {\n    \"bool\": {\n     \"must\": null,\n     \"must_not\": [{\n      \"term\": {\n       \"blocking\": 1234\n      }\n     }],\n     \"should\": null,\n     \"_cache\": true,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   }\n  }\n }\n}", res);
         }
+
+        abstract class _RecursiveDynamic_Abstract
+        {
+            public _RecursiveDynamic_Abstract[] SubMembers { get; set; }
+            public int A { get; set; }
+        }
+
+        class _RecursiveDynamic : _RecursiveDynamic_Abstract
+        {
+            public double B { get; set; }
+        }
+
+        [TestMethod]
+        public void RecursiveDynamic()
+        {
+            object foo =
+                new
+                {
+                    Item = (object)new _RecursiveDynamic
+                    {
+                        A = 999,
+                        B = -999,
+                        SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                    }
+                };
+
+            var res = JSON.SerializeDynamic(foo, Options.PrettyPrintExcludeNullsIncludeInherited);
+
+            Assert.AreEqual("{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}", res);
+        }
     }
 }
