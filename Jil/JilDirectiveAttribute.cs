@@ -10,8 +10,9 @@ namespace Jil
     /// Alternative to using [DataMember] and [IgnoreDataMember], for 
     /// when their use isn't possible.
     /// 
-    /// When applied to an property or field, allows configuration
-    /// of the name (de)serialized and whether to (de)serialize at all.
+    /// When applied to a property or field, allows configuration
+    /// of the name (de)serialized, whether to (de)serialize at all,
+    /// and the primitive type to treat an enum type as.
     /// 
     /// Takes precedence over [DataMember] and [IgnoreDataMember].
     /// </summary>
@@ -27,6 +28,13 @@ namespace Jil
         /// the value of Name.
         /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// If true and the member annotated is an enum, will cause Jil to convert
+        /// the enum to the appropriate primitive type before serializing; and expect
+        /// that primitive type when deserializing, converting back to the enum when
+        /// constructing the final object.
+        /// </summary>
+        public Type SerializeEnumerationAs { get; set; }
 
         /// <summary>
         /// Create a new JilDirectiveAttribute
@@ -47,6 +55,15 @@ namespace Jil
         public JilDirectiveAttribute(bool ignore)
         {
             Ignore = ignore;
+        }
+
+        /// <summary>
+        /// Create a new JilDirectiveAttribute, treating the decorate member of an enum type
+        /// as the given primitive type (ie. byte, sbyte, short, ushort, int, uint, long, or ulong).
+        /// </summary>
+        public JilDirectiveAttribute(Type serializeEnumAs)
+        {
+            SerializeEnumerationAs = serializeEnumAs;
         }
     }
 }

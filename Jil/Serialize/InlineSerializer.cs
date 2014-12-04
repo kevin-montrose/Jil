@@ -382,7 +382,11 @@ namespace Jil.Serialize
             }
 
             // Only put this on the stack if we'll need it
-            var preloadTextWriter = serializingType.IsPrimitiveType() || isRecursive || serializingType.IsNullableType();
+            var preloadTextWriter = 
+                serializingType.IsPrimitiveType() ||
+                (serializingType.IsEnum && member.ShouldConvertEnum(serializingType)) ||
+                isRecursive || 
+                serializingType.IsNullableType();
             if (preloadTextWriter)
             {
                 Emit.LoadArgument(0);   // TextWriter
@@ -461,6 +465,20 @@ namespace Jil.Serialize
 
             if (serializingType.IsEnum)
             {
+                Type convertEnumTo;
+                if (member.ShouldConvertEnum(serializingType, out convertEnumTo))
+                {
+                    var underlying = Enum.GetUnderlyingType(serializingType);
+                    Emit.Convert(underlying);
+                    if (underlying != convertEnumTo)
+                    {
+                        Emit.Convert(convertEnumTo);
+                    }
+                    WritePrimitive(convertEnumTo, quotesNeedHandling: true);
+
+                    return;
+                }
+
                 WriteEnum(serializingType, popTextWriter: false);
                 return;
             }

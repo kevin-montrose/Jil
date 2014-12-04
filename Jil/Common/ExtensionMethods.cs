@@ -14,6 +14,117 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static bool ShouldConvertEnum(this MemberInfo member, Type enumType)
+        {
+            Type ignored;
+            return member.ShouldConvertEnum(enumType, out ignored);
+        }
+
+        public static bool ShouldConvertEnum(this MemberInfo member, Type enumType, out Type toType)
+        {
+            var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
+            if (attr == null || attr.SerializeEnumerationAs == null)
+            {
+                toType = null;
+                return false;
+            }
+
+            var primitiveType = Enum.GetUnderlyingType(enumType);
+            var convert = attr.SerializeEnumerationAs;
+
+            bool underlyingSigned, targetSigned;
+            int underlyingSize, targetSize;
+
+            if (!GetEnumUnderlyingPrimitiveInfo(primitiveType, out underlyingSigned, out underlyingSize) || !GetEnumUnderlyingPrimitiveInfo(primitiveType, out targetSigned, out targetSize))
+            {
+                throw new ConstructionException("Cannot map enum [" + enumType + "] with underlying type [" + primitiveType + "] to [" + convert + "], convert is not an acceptable integer primitive type");
+            }
+
+            // possible cases
+            // both are signed and target is equal or large to underlying => OK
+            // underlying is unsigned, and target is unsigned and equal or larger => OK
+            // underlying is unsigned and target is signed and larger => OK
+            // underlying is signed, target is unsigned => NOPE
+            // underlying is unsigned, target is signed and equal or smaller => NOPE
+
+            if (underlyingSigned && !targetSigned)
+            {
+                throw new ConstructionException("Cannot map enum [" + enumType + "] with underlying type [" + primitiveType + "] to [" + convert + "], there is a signed/unsigned mismatch");
+            }
+
+            if (!underlyingSigned && (targetSigned && targetSize <= underlyingSize))
+            {
+                throw new ConstructionException("Cannot map enum [" + enumType + "] with underlying type [" + primitiveType + "] to [" + convert + "], target type is not large enough");
+            }
+
+            toType = convert;
+            return true;
+        }
+
+        static bool GetEnumUnderlyingPrimitiveInfo(Type primitiveType, out bool signed, out int numBytes)
+        {
+            if (primitiveType == typeof(byte))
+            {
+                signed = false;
+                numBytes = 1;
+                return true;
+            }
+
+            if (primitiveType == typeof(sbyte))
+            {
+                signed = true;
+                numBytes = 1;
+                return true;
+            }
+
+            if (primitiveType == typeof(short))
+            {
+                signed = true;
+                numBytes = 2;
+                return true;
+            }
+
+            if (primitiveType == typeof(ushort))
+            {
+                signed = false;
+                numBytes = 2;
+                return true;
+            }
+
+            if (primitiveType == typeof(int))
+            {
+                signed = true;
+                numBytes = 4;
+                return true;
+            }
+
+            if (primitiveType == typeof(uint))
+            {
+                signed = false;
+                numBytes = 4;
+                return true;
+            }
+
+            if (primitiveType == typeof(long))
+            {
+                signed = true;
+                numBytes = 8;
+                return true;
+            }
+
+            if (primitiveType == typeof(ulong))
+            {
+                signed = false;
+                numBytes = 8;
+                return true;
+            }
+
+            signed = false;
+            numBytes = -1;
+
+            return false;
+        }
+
         public static TextReader MakeSupportPeek(this TextReader inner)
         {
             var asStringReader = inner as StringReader;
