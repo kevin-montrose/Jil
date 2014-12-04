@@ -810,6 +810,7 @@ namespace JilTests
         abstract class _RecursiveDynamic_Abstract
         {
             public _RecursiveDynamic_Abstract[] SubMembers { get; set; }
+            public object[] SubMembersAsObjects { get { return SubMembers == null ? null : SubMembers.Cast<object>().ToArray(); } }
             public int A { get; set; }
         }
 
@@ -821,20 +822,31 @@ namespace JilTests
         [TestMethod]
         public void RecursiveDynamic()
         {
-            object foo =
-                new
+            object[] foo = new object[]
                 {
-                    Item = (object)new _RecursiveDynamic
+                    new
                     {
-                        A = 999,
-                        B = -999,
-                        SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                        Item = (object)new _RecursiveDynamic
+                        {
+                            A = 999,
+                            B = -999,
+                            SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                        }
+                    },
+                    new
+                    {
+                        Item = (object)new _RecursiveDynamic
+                        {
+                            A = 999,
+                            B = -999,
+                            SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                        }
                     }
                 };
 
             var res = JSON.SerializeDynamic(foo, Options.PrettyPrintExcludeNullsIncludeInherited);
 
-            Assert.AreEqual("{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}", res);
+            Assert.AreEqual("[{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}, {\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}]", res);
         }
     }
 }
