@@ -131,7 +131,7 @@ namespace JilTests
         [TestMethod]
         public void Simple()
         {
-            using(var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic(123, str);
                 var res = str.ToString();
@@ -377,7 +377,7 @@ namespace JilTests
             public DateTime CreationDate { get; set; }
         }
 
-#endregion
+        #endregion
 
         [TestMethod]
         public void PersonElasticMigration()
@@ -483,7 +483,7 @@ namespace JilTests
             // 200ms is kind of arbitrary, but it was > 1000 before this Issue was fixed
             Assert.IsTrue(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
             // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
-            Assert.AreEqual(json, ser); 
+            Assert.AreEqual(json, ser);
         }
 
         [TestMethod]
@@ -500,6 +500,178 @@ namespace JilTests
 
                 var res = str.ToString();
                 Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+            }
+        }
+
+        [TestMethod]
+        public void ExcludingNulls()
+        {
+            // to stream tests
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(null, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("null", res);
+                }
+
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(null, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("null", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(new[] { null, "hello", "world" }, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(new[] { null, "hello", "world" }, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    JSON.SerializeDynamic(data, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    JSON.SerializeDynamic(data, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+            }
+
+            // to string tests
+            {
+                {
+                    var res = JSON.SerializeDynamic(null, Options.Default);
+
+                    Assert.AreEqual("null", res);
+                }
+
+
+                {
+                    var res = JSON.SerializeDynamic(null, Options.ExcludeNulls);
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("null", res);
+                }
+
+                {
+                    var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.Default);
+
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                {
+                    var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.ExcludeNulls);
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    var res = JSON.SerializeDynamic(data, Options.Default);
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    var res = JSON.SerializeDynamic(data, Options.Default);
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
             }
         }
     }
