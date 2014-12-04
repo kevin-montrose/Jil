@@ -674,51 +674,6 @@ namespace JilTests
                 }
             }
         }
-        
-        private _ElasticExampleFailure BuildSkillsQuery(string queryString)
-        {
-            var skillsBoolQuery = new _ElasticExampleFailure
-            {
-                minimum_number_should_match = 1
-            };
-
-            // we determined that one query is a requirement here, and no more becuase
-            // otherwise it will try to run the entire boolean query on just the fields selected
-            // when we add advanced search so people can specify specific fields for specific text
-            // we will still need this inner bool query
-            var fieldsForQueryString = new List<string>
-                {
-                    "personalStatement",
-                    "yearsOfExperienceTags^1.5",
-                    "stackExchangeAnswersTags^0.1",
-                    "name",
-                    "likeTags",
-                    "stackOverflowUserName",
-                    "projects.projectName",
-                    "projects.projectTags",
-                    "projects.projectDescription",
-                    "experience.experienceJobTitle",
-                    "experience.experienceEmployerName",
-                    "experience.experienceTags",
-                    "experience.experienceResponsibilities",
-                    "education.educationInstitution",
-                    "education.educationTags",
-                    "education.educationDegreeName",
-                    "education.educationAchievements",
-                };
-
-            skillsBoolQuery.AddShould(new
-            {
-                query_string = new
-                {
-                    query = queryString,
-                    default_operator = "AND",
-                    fields = fieldsForQueryString.ToArray(),
-                    use_dis_max = true,
-                }
-            });
-            return skillsBoolQuery;
-        }
 
         public class _ElasticExampleFailure
         {
@@ -773,36 +728,83 @@ namespace JilTests
             {
                 return _must.Any() || _must_not.Any() || _should.Any();
             }
+
+            public static _ElasticExampleFailure BuildSkillsQuery(string queryString)
+            {
+                var skillsBoolQuery = new _ElasticExampleFailure
+                {
+                    minimum_number_should_match = 1
+                };
+
+                // we determined that one query is a requirement here, and no more becuase
+                // otherwise it will try to run the entire boolean query on just the fields selected
+                // when we add advanced search so people can specify specific fields for specific text
+                // we will still need this inner bool query
+                var fieldsForQueryString = new List<string>
+                {
+                    "personalStatement",
+                    "yearsOfExperienceTags^1.5",
+                    "stackExchangeAnswersTags^0.1",
+                    "name",
+                    "likeTags",
+                    "stackOverflowUserName",
+                    "projects.projectName",
+                    "projects.projectTags",
+                    "projects.projectDescription",
+                    "experience.experienceJobTitle",
+                    "experience.experienceEmployerName",
+                    "experience.experienceTags",
+                    "experience.experienceResponsibilities",
+                    "education.educationInstitution",
+                    "education.educationTags",
+                    "education.educationDegreeName",
+                    "education.educationAchievements",
+                };
+
+                skillsBoolQuery.AddShould(new
+                {
+                    query_string = new
+                    {
+                        query = queryString,
+                        default_operator = "AND",
+                        fields = fieldsForQueryString.ToArray(),
+                        use_dis_max = true,
+                    }
+                });
+                return skillsBoolQuery;
+            }
         }
 
         [TestMethod]
         public void ElasticExampleFailure()
         {
             var mainQuery = new _ElasticExampleFailure();
-	        var filterQuery = new _ElasticExampleFailure() { _cache = true };
-	        filterQuery.AddMustNot(new { term = new { blocking = 1234 }, });
-	        mainQuery.AddMust(BuildSkillsQuery("Dean Ward"));
-	
-                            object filteredQuery = new
-                                    {
-                                        query = new { @bool = mainQuery },
-                                        filter = new { @bool = filterQuery }
-                                    };
+            var filterQuery = new _ElasticExampleFailure() { _cache = true };
+            filterQuery.AddMustNot(new { term = new { blocking = 1234 }, });
+            mainQuery.AddMust(_ElasticExampleFailure.BuildSkillsQuery("Dean Ward"));
 
-                            object queryObject = new
-                            {
-                                from = 0,
-                                size = 30,
-                                query = new
-                                {
-                                    filtered = filteredQuery
-                                },
-                            };
-					
-	        var options = new Options(prettyPrint:true)	;
+            object filteredQuery = 
+                new
+                {
+                    query = new { @bool = mainQuery },
+                    filter = new { @bool = filterQuery }
+                };
+
+            object queryObject = 
+                new
+                {
+                    from = 0,
+                    size = 30,
+                    query = new
+                    {
+                        filtered = filteredQuery
+                    },
+                };
+
+            var options = new Options(prettyPrint: true);
             var res = JSON.SerializeDynamic(queryObject, options);
 
-            Assert.AreEqual("", res);
+            Assert.AreEqual("{\n \"size\": 30,\n \"from\": 0,\n \"query\": {\n  \"filtered\": {\n   \"query\": {\n    \"bool\": {\n     \"must\": [{\n      \"must\": null,\n      \"must_not\": null,\n      \"should\": [{\n       \"query_string\": {\n        \"use_dis_max\": true,\n        \"fields\": [\"personalStatement\", \"yearsOfExperienceTags^1.5\", \"stackExchangeAnswersTags^0.1\", \"name\", \"likeTags\", \"stackOverflowUserName\", \"projects.projectName\", \"projects.projectTags\", \"projects.projectDescription\", \"experience.experienceJobTitle\", \"experience.experienceEmployerName\", \"experience.experienceTags\", \"experience.experienceResponsibilities\", \"education.educationInstitution\", \"education.educationTags\", \"education.educationDegreeName\", \"education.educationAchievements\"],\n        \"default_operator\": \"AND\",\n        \"query\": \"Dean Ward\"\n       }\n      }],\n      \"_cache\": null,\n      \"boost\": null,\n      \"minimum_number_should_match\": 1\n     }],\n     \"must_not\": null,\n     \"should\": null,\n     \"_cache\": null,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   },\n   \"filter\": {\n    \"bool\": {\n     \"must\": null,\n     \"must_not\": [{\n      \"term\": {\n       \"blocking\": 1234\n      }\n     }],\n     \"should\": null,\n     \"_cache\": true,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   }\n  }\n }\n}", res);
         }
     }
 }

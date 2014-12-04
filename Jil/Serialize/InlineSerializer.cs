@@ -3311,6 +3311,9 @@ namespace Jil.Serialize
 
         HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
         {
+            // if we're serializing dynamically, we can't actually preload
+            if (CallOutOnPossibleDynamic) return new HashSet<Type>();
+
             var ret = forType.FindRecursiveOrReusedTypes();
             foreach (var primeType in ret)
             {
