@@ -23,14 +23,14 @@ namespace Jil.Common
         public static bool ShouldConvertEnum(this MemberInfo member, Type enumType, out Type toType)
         {
             var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
-            if (attr == null || attr.SerializeEnumerationAs == null)
+            if (attr == null || attr.TreatEnumerationAs == null)
             {
                 toType = null;
                 return false;
             }
 
             var primitiveType = Enum.GetUnderlyingType(enumType);
-            var convert = attr.SerializeEnumerationAs;
+            var convert = attr.TreatEnumerationAs;
 
             bool underlyingSigned, targetSigned;
             int underlyingSize, targetSize;

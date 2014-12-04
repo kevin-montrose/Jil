@@ -7150,71 +7150,71 @@ namespace JilTests
             public enum H : ulong { X8, Y8, Z8 }
 
             public A A1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(byte))]
+            [JilDirective(TreatEnumerationAs = typeof(byte))]
             public A A2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            [JilDirective(TreatEnumerationAs = typeof(short))]
             public A A3 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ushort))]
+            [JilDirective(TreatEnumerationAs = typeof(ushort))]
             public A A4 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            [JilDirective(TreatEnumerationAs = typeof(int))]
             public A A5 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            [JilDirective(TreatEnumerationAs = typeof(uint))]
             public A A6 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public A A7 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            [JilDirective(TreatEnumerationAs = typeof(ulong))]
             public A A8 { get; set; }
 
             public B B1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(sbyte))]
+            [JilDirective(TreatEnumerationAs = typeof(sbyte))]
             public B B2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            [JilDirective(TreatEnumerationAs = typeof(short))]
             public B B3 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            [JilDirective(TreatEnumerationAs = typeof(int))]
             public B B4 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public B B5 { get; set; }
 
             public C C1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            [JilDirective(TreatEnumerationAs = typeof(short))]
             public C C2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            [JilDirective(TreatEnumerationAs = typeof(int))]
             public C C3 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public C C4 { get; set; }
 
             public D D1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ushort))]
+            [JilDirective(TreatEnumerationAs = typeof(ushort))]
             public D D2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            [JilDirective(TreatEnumerationAs = typeof(int))]
             public D D3 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            [JilDirective(TreatEnumerationAs = typeof(uint))]
             public D D4 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public D D5 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            [JilDirective(TreatEnumerationAs = typeof(ulong))]
             public D D6 { get; set; }
 
             public E E1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            [JilDirective(TreatEnumerationAs = typeof(int))]
             public E E2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public E E3 { get; set; }
 
             public F F1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            [JilDirective(TreatEnumerationAs = typeof(uint))]
             public F F2 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public F F3 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            [JilDirective(TreatEnumerationAs = typeof(ulong))]
             public F F4 { get; set; }
 
             public G G1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            [JilDirective(TreatEnumerationAs = typeof(long))]
             public G G2 { get; set; }
 
             public H H1 { get; set; }
-            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            [JilDirective(TreatEnumerationAs = typeof(ulong))]
             public H H2 { get; set; }
         }
 

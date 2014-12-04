@@ -34,7 +34,7 @@ namespace Jil
         /// that primitive type when deserializing, converting back to the enum when
         /// constructing the final object.
         /// </summary>
-        public Type SerializeEnumerationAs { get; set; }
+        public Type TreatEnumerationAs { get; set; }
 
         /// <summary>
         /// Create a new JilDirectiveAttribute
@@ -63,7 +63,7 @@ namespace Jil
         /// </summary>
         public JilDirectiveAttribute(Type serializeEnumAs)
         {
-            SerializeEnumerationAs = serializeEnumAs;
+            TreatEnumerationAs = serializeEnumAs;
         }
     }
 }
