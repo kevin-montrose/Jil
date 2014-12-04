@@ -4864,6 +4864,128 @@ namespace JilTests
             }
         }
 
+        class _ConvertEnumsToPrimitives
+        {
+            public enum A : byte { X1, Y1, Z1 }
+            public enum B : sbyte { X2, Y2, Z2 }
+            public enum C : short { X3, Y3, Z3 }
+            public enum D : ushort { X4, Y4, Z4 }
+            public enum E : int { X5, Y5, Z5 }
+            public enum F : uint { X6, Y6, Z6 }
+            public enum G : long { X7, Y7, Z7 }
+            public enum H : ulong { X8, Y8, Z8 }
+
+            public A A1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(byte))]
+            public A A2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            public A A3 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ushort))]
+            public A A4 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            public A A5 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            public A A6 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public A A7 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            public A A8 { get; set; }
+
+            public B B1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(sbyte))]
+            public B B2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            public B B3 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            public B B4 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public B B5 { get; set; }
+
+            public C C1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(short))]
+            public C C2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            public C C3 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public C C4 { get; set; }
+
+            public D D1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ushort))]
+            public D D2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            public D D3 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            public D D4 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public D D5 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            public D D6 { get; set; }
+
+            public E E1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(int))]
+            public E E2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public E E3 { get; set; }
+
+            public F F1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(uint))]
+            public F F2 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public F F3 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            public F F4 { get; set; }
+
+            public G G1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(long))]
+            public G G2 { get; set; }
+
+            public H H1 { get; set; }
+            [JilDirective(SerializeEnumerationAs = typeof(ulong))]
+            public H H2 { get; set; }
+        }
+
+        [TestMethod]
+        public void ConvertEnumsToPrimitives()
+        {
+            var res = JSON.Deserialize<_ConvertEnumsToPrimitives>("{\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1\n}");
+
+            Assert.IsNotNull(res);
+            Assert.IsTrue(res.A1 == _ConvertEnumsToPrimitives.A.X1);
+            Assert.IsTrue(res.A2 == _ConvertEnumsToPrimitives.A.Y1);
+            Assert.IsTrue(res.A3 == _ConvertEnumsToPrimitives.A.Z1);
+            Assert.IsTrue(res.A4 == _ConvertEnumsToPrimitives.A.X1);
+            Assert.IsTrue(res.A5 == _ConvertEnumsToPrimitives.A.Y1);
+            Assert.IsTrue(res.A6 == _ConvertEnumsToPrimitives.A.Z1);
+            Assert.IsTrue(res.A7 == _ConvertEnumsToPrimitives.A.X1);
+            Assert.IsTrue(res.A8 == _ConvertEnumsToPrimitives.A.Y1);
+            Assert.IsTrue(res.B1 == _ConvertEnumsToPrimitives.B.X2);
+            Assert.IsTrue(res.B2 == _ConvertEnumsToPrimitives.B.Y2);
+            Assert.IsTrue(res.B3 == _ConvertEnumsToPrimitives.B.Z2);
+            Assert.IsTrue(res.B4 == _ConvertEnumsToPrimitives.B.X2);
+            Assert.IsTrue(res.B5 == _ConvertEnumsToPrimitives.B.Y2);
+            Assert.IsTrue(res.C1 == _ConvertEnumsToPrimitives.C.X3);
+            Assert.IsTrue(res.C2 == _ConvertEnumsToPrimitives.C.Y3);
+            Assert.IsTrue(res.C3 == _ConvertEnumsToPrimitives.C.Z3);
+            Assert.IsTrue(res.C4 == _ConvertEnumsToPrimitives.C.X3);
+            Assert.IsTrue(res.D1 == _ConvertEnumsToPrimitives.D.X4);
+            Assert.IsTrue(res.D2 == _ConvertEnumsToPrimitives.D.Y4);
+            Assert.IsTrue(res.D3 == _ConvertEnumsToPrimitives.D.Z4);
+            Assert.IsTrue(res.D4 == _ConvertEnumsToPrimitives.D.X4);
+            Assert.IsTrue(res.D5 == _ConvertEnumsToPrimitives.D.Y4);
+            Assert.IsTrue(res.D6 == _ConvertEnumsToPrimitives.D.Z4);
+            Assert.IsTrue(res.E1 == _ConvertEnumsToPrimitives.E.X5);
+            Assert.IsTrue(res.E2 == _ConvertEnumsToPrimitives.E.Y5);
+            Assert.IsTrue(res.E3 == _ConvertEnumsToPrimitives.E.Z5);
+            Assert.IsTrue(res.F1 == _ConvertEnumsToPrimitives.F.X6);
+            Assert.IsTrue(res.F2 == _ConvertEnumsToPrimitives.F.Y6);
+            Assert.IsTrue(res.F3 == _ConvertEnumsToPrimitives.F.Z6);
+            Assert.IsTrue(res.F4 == _ConvertEnumsToPrimitives.F.X6);
+            Assert.IsTrue(res.G1 == _ConvertEnumsToPrimitives.G.X7);
+            Assert.IsTrue(res.G2 == _ConvertEnumsToPrimitives.G.Y7);
+            Assert.IsTrue(res.H1 == _ConvertEnumsToPrimitives.H.X8);
+            Assert.IsTrue(res.H2 == _ConvertEnumsToPrimitives.H.Y8);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

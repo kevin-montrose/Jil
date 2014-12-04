@@ -1207,7 +1207,19 @@ namespace Jil.Deserialize
                     var memberType = member.ReturnType();
 
                     Emit.MarkLabel(label);      // objType(*?)
-                    Build(member.ReturnType()); // objType(*?) memberType
+
+                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                    if (memberType.IsEnum && memberAttr != null && memberAttr.SerializeEnumerationAs != null)
+                    {
+                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                        Build(memberAttr.SerializeEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                        Emit.Convert(underlyingEnumType);           // objType(*?) memberType
+                    }
+                    else
+                    {
+                        Build(memberType);          // objType(*?) memberType
+                    }
 
                     if (member is FieldInfo)
                     {
@@ -1376,7 +1388,19 @@ namespace Jil.Deserialize
                     var memberType = member.ReturnType();
 
                     Emit.MarkLabel(label);      // objType(*?)
-                    Build(member.ReturnType()); // objType(*?) memberType
+
+                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                    if (memberType.IsEnum && memberAttr != null && memberAttr.SerializeEnumerationAs != null)
+                    {
+                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                        Build(memberAttr.SerializeEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                        Emit.Convert(underlyingEnumType);           // objType(*?) memberType
+                    }
+                    else
+                    {
+                        Build(memberType);          // objType(*?) memberType
+                    }
 
                     if (member is FieldInfo)
                     {
