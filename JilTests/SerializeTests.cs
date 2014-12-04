@@ -6948,5 +6948,22 @@ namespace JilTests
             var str = JSON.Serialize(obj);
             Assert.IsNotNull(str);
         }
+
+        [TestMethod]
+        public void NullArrayElements()
+        {
+            using (var str = new StringWriter())
+            {
+                var obj = 
+                    new
+                    {
+                        ids = new string[] { null, "US", "HI" }
+                    };
+                JSON.Serialize(obj, str, new Options(excludeNulls: true));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+            }
+        }
     }
 }

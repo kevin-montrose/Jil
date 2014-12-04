@@ -485,5 +485,22 @@ namespace JilTests
             // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
             Assert.AreEqual(json, ser); 
         }
+
+        [TestMethod]
+        public void NullArrayElements()
+        {
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        ids = new string[] { null, "US", "HI" }
+                    };
+                JSON.SerializeDynamic(obj, str, new Options(excludeNulls: true));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+            }
+        }
     }
 }
