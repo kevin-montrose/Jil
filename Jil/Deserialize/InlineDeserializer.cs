@@ -15,8 +15,8 @@ namespace Jil.Deserialize
     {
         public static bool UseFastFloatingPointMethods = true;
         public static bool UseCharArrayOverStringBuilder = true;
-        public static bool UseNameAutomata = true;
-        public static bool UseNameAutomataForEnums = true;
+        public static bool UseNameAutomata = false;// true;
+        public static bool UseNameAutomataForEnums = false;// true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -61,7 +61,7 @@ namespace Jil.Deserialize
                 involvedTypes.Contains(typeof(string)) ||
                 involvedTypes.Any(t => t.IsUserDefinedType());  // for member names
 
-            var needsCharBuffer = 
+            var needsCharBuffer =
                 hasStringyTypes ||
                 involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
                 (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
@@ -85,11 +85,14 @@ namespace Jil.Deserialize
                 involvedTypes.Contains(typeof(double)) ||
                 involvedTypes.Contains(typeof(decimal)) ||
                 involvedTypes.Any(t => t.IsEnum) ||
-                involvedTypes.Any(t => t.IsUserDefinedType());
+                involvedTypes.Any(t => t.IsUserDefinedType()) ||
+                (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
 
             if (mayNeedStringBuilder)
             {
-                if (!UseCharArrayOverStringBuilder)
+                var gonnaUseAStringBuilderAnyway = (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
+
+                if (!UseCharArrayOverStringBuilder || gonnaUseAStringBuilderAnyway)
                 {
                     Emit.DeclareLocal<StringBuilder>(StringBuilderName);
                 }
