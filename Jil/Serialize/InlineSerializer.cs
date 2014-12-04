@@ -500,10 +500,7 @@ namespace Jil.Serialize
                 Emit.BranchIfTrue(notNull);     // TextWriter
 
                 Emit.Pop();                 // --empty--
-                if (!ExcludeNulls)
-                {
-                    WriteString("null");        // --empty--
-                }
+                WriteString("null");        // --empty--
                 Emit.Branch(done);          // --empty--
 
                 Emit.MarkLabel(notNull);    // TextWriter
@@ -1694,10 +1691,7 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);         // --empty--
-            if (!ExcludeNulls)
-            {
-                WriteString("null");            // --empty--
-            }
+            WriteString("null");                // --empty--
             Emit.Branch(end);                   // --empty--
 
             Emit.MarkLabel(notNull);            // --empty--
@@ -1824,10 +1818,7 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);         // --empty--
-            if (!ExcludeNulls)
-            {
-                WriteString("null");            // --empty--
-            }
+            WriteString("null");                // --empty--
             Emit.Branch(end);                   // --empty--
 
             Emit.MarkLabel(notNull);            // --empty--
@@ -1970,10 +1961,7 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);
-            if (!ExcludeNulls)
-            {
-                WriteString("null");
-            }
+            WriteString("null");
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
@@ -2262,10 +2250,7 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);
-            if (!ExcludeNulls)
-            {
-                WriteString("null");
-            }
+            WriteString("null");
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
@@ -2412,10 +2397,7 @@ namespace Jil.Serialize
             var end = Emit.DefineLabel();
 
             Emit.BranchIfTrue(notNull);
-            if (!ExcludeNulls)
-            {
-                WriteString("null");
-            }
+            WriteString("null");
             Emit.Branch(end);
 
             Emit.MarkLabel(notNull);
@@ -2736,18 +2718,18 @@ namespace Jil.Serialize
 
         public MethodInfo GetWriteEncodedStringWithQuotesMethod()
         {
-            return
-                ExcludeNulls ?
-                    JSONP ? Methods.GetWriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(BuildingToString) :
-                    JSONP ? Methods.GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithQuotesWithNullsInlineUnsafe(BuildingToString);
+            return 
+                JSONP ? 
+                    Methods.GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(BuildingToString) : 
+                    Methods.GetWriteEncodedStringWithQuotesWithNullsInlineUnsafe(BuildingToString);
         }
 
         MethodInfo GetWriteEncodedStringMethod()
         {
             return
-                ExcludeNulls ?
-                    JSONP ? Methods.GetWriteEncodedStringWithoutNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithoutNullsInlineUnsafe(BuildingToString) :
-                    JSONP ? Methods.GetWriteEncodedStringWithNullsInlineJSONPUnsafe(BuildingToString) : Methods.GetWriteEncodedStringWithNullsInlineUnsafe(BuildingToString);
+                JSONP ? 
+                    Methods.GetWriteEncodedStringWithNullsInlineJSONPUnsafe(BuildingToString) : 
+                    Methods.GetWriteEncodedStringWithNullsInlineUnsafe(BuildingToString);
         }
 
         void WriteKeyValue(Type keyType, Type elementType)
