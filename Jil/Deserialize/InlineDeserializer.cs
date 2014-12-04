@@ -15,8 +15,8 @@ namespace Jil.Deserialize
     {
         public static bool UseFastFloatingPointMethods = true;
         public static bool UseCharArrayOverStringBuilder = true;
-        public static bool UseNameAutomata = false;// true;
-        public static bool UseNameAutomataForEnums = false;// true;
+        public static bool UseNameAutomata = true;
+        public static bool UseNameAutomataForEnums = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
