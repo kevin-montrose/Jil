@@ -674,5 +674,135 @@ namespace JilTests
                 }
             }
         }
+        
+        private _ElasticExampleFailure BuildSkillsQuery(string queryString)
+        {
+            var skillsBoolQuery = new _ElasticExampleFailure
+            {
+                minimum_number_should_match = 1
+            };
+
+            // we determined that one query is a requirement here, and no more becuase
+            // otherwise it will try to run the entire boolean query on just the fields selected
+            // when we add advanced search so people can specify specific fields for specific text
+            // we will still need this inner bool query
+            var fieldsForQueryString = new List<string>
+                {
+                    "personalStatement",
+                    "yearsOfExperienceTags^1.5",
+                    "stackExchangeAnswersTags^0.1",
+                    "name",
+                    "likeTags",
+                    "stackOverflowUserName",
+                    "projects.projectName",
+                    "projects.projectTags",
+                    "projects.projectDescription",
+                    "experience.experienceJobTitle",
+                    "experience.experienceEmployerName",
+                    "experience.experienceTags",
+                    "experience.experienceResponsibilities",
+                    "education.educationInstitution",
+                    "education.educationTags",
+                    "education.educationDegreeName",
+                    "education.educationAchievements",
+                };
+
+            skillsBoolQuery.AddShould(new
+            {
+                query_string = new
+                {
+                    query = queryString,
+                    default_operator = "AND",
+                    fields = fieldsForQueryString.ToArray(),
+                    use_dis_max = true,
+                }
+            });
+            return skillsBoolQuery;
+        }
+
+        public class _ElasticExampleFailure
+        {
+            private List<object> _must = new List<object>();
+            private List<object> _must_not = new List<object>();
+            private List<object> _should = new List<object>();
+
+            public object[] must { get { return GetClean(_must); } }
+            public object[] must_not { get { return GetClean(_must_not); } }
+            public object[] should { get { return GetClean(_should); } }
+            public int? minimum_number_should_match { get; set; }
+            public float? boost { get; set; }
+            public bool? _cache { get; set; }
+
+            public void Append(_ElasticExampleFailure toAppend)
+            {
+                if (toAppend.must != null) this._must.AddRange(toAppend.must);
+                if (toAppend.must_not != null) this._must_not.AddRange(toAppend.must_not);
+                if (toAppend.should != null) this._should.AddRange(toAppend.should);
+            }
+
+            private object[] GetClean(List<object> list)
+            {
+                return list.Any() ? list.ToArray() : null;
+            }
+
+            public void AddMust(object query)
+            {
+                if (query != null)
+                {
+                    _must.Add(query);
+                }
+            }
+
+            public void AddMustNot(object query)
+            {
+                if (query != null)
+                {
+                    _must_not.Add(query);
+                }
+            }
+
+            public void AddShould(object query)
+            {
+                if (query != null)
+                {
+                    _should.Add(query);
+                }
+            }
+
+            public bool HasTerms()
+            {
+                return _must.Any() || _must_not.Any() || _should.Any();
+            }
+        }
+
+        [TestMethod]
+        public void ElasticExampleFailure()
+        {
+            var mainQuery = new _ElasticExampleFailure();
+	        var filterQuery = new _ElasticExampleFailure() { _cache = true };
+	        filterQuery.AddMustNot(new { term = new { blocking = 1234 }, });
+	        mainQuery.AddMust(BuildSkillsQuery("Dean Ward"));
+	
+                            object filteredQuery = new
+                                    {
+                                        query = new { @bool = mainQuery },
+                                        filter = new { @bool = filterQuery }
+                                    };
+
+                            object queryObject = new
+                            {
+                                from = 0,
+                                size = 30,
+                                query = new
+                                {
+                                    filtered = filteredQuery
+                                },
+                            };
+					
+	        var options = new Options(prettyPrint:true)	;
+            var res = JSON.SerializeDynamic(queryObject, options);
+
+            Assert.AreEqual("", res);
+        }
     }
 }
