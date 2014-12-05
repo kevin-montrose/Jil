@@ -7272,5 +7272,38 @@ namespace JilTests
 
             Assert.AreEqual("{\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1\n}", res);
         }
+
+        class _Issue95
+        {
+            public _Issue95Enum Flags { get; set; }
+        }
+
+        [Flags]
+        enum _Issue95Enum
+        {
+            Foo = 0,
+            Bar = 1,
+            Baz = 2
+        }
+
+        [TestMethod]
+        public void Issue95()
+        {
+            var items = 
+                Enumerable
+                    .Range(0, 10)
+                    .Select(
+                        _ =>
+                        {
+                            var t = new _Issue95();
+                            var values = (_Issue95Enum[])Enum.GetValues(typeof(_Issue95Enum));
+                            t.Flags = values[_ % values.Length];
+                            return t;
+                        }
+                    );
+
+            var serialized = JSON.Serialize(items, Options.ISO8601PrettyPrint);
+            Assert.AreEqual("[{\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}]", serialized);
+        }
     }
 }

@@ -3063,9 +3063,6 @@ namespace Jil.Serialize
             using (var enumLoc = Emit.DeclareLocal<ulong>())
             using (var notFirst = Emit.DeclareLocal<bool>())
             {
-                Emit.LoadConstant(false);
-                Emit.StoreLocal(notFirst);
-
                 Emit.StoreLocal(enumLoc);       // TextWriter?
                 if (popTextWriter)
                 {
