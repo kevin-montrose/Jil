@@ -5058,6 +5058,43 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void NewtonsoftTimeSpan()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                //var ms = rand.Next(1000);
+
+                //var ts = new TimeSpan(d, h, m, s, ms);
+                var ts = new TimeSpan(d, h, m, s);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            //timeSpans.Add(TimeSpan.MaxValue);
+            //timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts1 in timeSpans)
+            {
+                var json = JSON.Serialize(ts1, Options.Default);
+                var ts2 = JSON.Deserialize<TimeSpan>(json, Options.Default);
+
+                Assert.AreEqual(Math.Round(ts1.TotalMilliseconds), Math.Round(ts2.TotalMilliseconds));
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

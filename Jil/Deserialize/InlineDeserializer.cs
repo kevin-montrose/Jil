@@ -452,9 +452,10 @@ namespace Jil.Deserialize
             {
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsTimeSpan(); break;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsTimeSpan(); break;
-                
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: ReadNewtonsoftStyleTimeSpan(); break;
+
                 case DateTimeFormat.ISO8601:
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: throw new NotImplementedException();
+                
 
                 default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
             }
@@ -536,6 +537,13 @@ namespace Jil.Deserialize
             Emit.NewObject<TimeSpan, long>();       // TimeSpan
 
             Emit.MarkLabel(done);                   // TimeSpan
+        }
+
+        void ReadNewtonsoftStyleTimeSpan()
+        {
+            Emit.LoadArgument(0);
+            ReadPrimitive(typeof(string));              // string
+            Emit.Call(Methods.ReadNewtonsoftTimeSpan);  // TimeSpan
         }
 
         void ReadDate()

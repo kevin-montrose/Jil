@@ -1175,5 +1175,108 @@ namespace Jil.Deserialize
 
             return ret;
         }
+
+        public static readonly MethodInfo ReadNewtonsoftTimeSpan = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
+        static TimeSpan _ReadNewtonsoftTimeSpan(TextReader reader, string str)
+        {
+            if (str.Length == 0)
+            {
+                throw new DeserializationException("Unexpected empty string", reader);
+            }
+
+            int days, hours, minutes, seconds, fraction;
+            days = hours = minutes = seconds = fraction = 0;
+
+            bool isNegative, pastDays, pastHours, pastMinutes, pastSeconds;
+            isNegative = pastDays = pastHours = pastMinutes = pastSeconds = false;
+
+            var ixOfLastPeriod = -1;
+            var part = 0;
+
+            int i;
+
+            if (str[0] == '-')
+            {
+                isNegative = true;
+                i = 1;
+            }
+            else
+            {
+                i = 0;
+            }
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '.')
+                {
+                    ixOfLastPeriod = i;
+
+                    if (!pastDays)
+                    {
+                        days = part;
+                        part = 0;
+                        pastDays = true;
+                        continue;
+                    }
+
+                    if (!pastSeconds)
+                    {
+                        seconds = part;
+                        part = 0;
+                        pastSeconds = true;
+                        continue;
+                    }
+
+                    throw new DeserializationException("Unexpected character .", reader);
+                }
+
+                if (c == ':')
+                {
+                    if (!pastHours)
+                    {
+                        hours = part;
+                        part = 0;
+                        pastHours = true;
+                        continue;
+                    }
+
+                    if(!pastMinutes)
+                    {
+                        minutes = part;
+                        part = 0;
+                        pastMinutes = true;
+                        continue;
+                    }
+
+                    throw new DeserializationException("Unexpected character :", reader);
+                }
+
+                if (c < '0' || c > '9')
+                {
+                    throw new DeserializationException("Expected digit, found " + c, reader);
+                }
+
+                part *= 10;
+                part += (c - '0');
+            }
+
+            if (!pastSeconds)
+            {
+                seconds = part;
+            }
+            else
+            {
+                fraction = part;
+            }
+
+            var ret = new TimeSpan(days, hours, minutes, seconds);
+            if(isNegative)
+            {
+                ret = ret.Negate();
+            }
+
+            return ret;
+        }
     }
 }
