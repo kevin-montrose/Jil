@@ -131,7 +131,7 @@ namespace JilTests
         [TestMethod]
         public void Simple()
         {
-            using(var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic(123, str);
                 var res = str.ToString();
@@ -377,7 +377,7 @@ namespace JilTests
             public DateTime CreationDate { get; set; }
         }
 
-#endregion
+        #endregion
 
         [TestMethod]
         public void PersonElasticMigration()
@@ -483,7 +483,370 @@ namespace JilTests
             // 200ms is kind of arbitrary, but it was > 1000 before this Issue was fixed
             Assert.IsTrue(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
             // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
-            Assert.AreEqual(json, ser); 
+            Assert.AreEqual(json, ser);
+        }
+
+        [TestMethod]
+        public void NullArrayElements()
+        {
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        ids = new string[] { null, "US", "HI" }
+                    };
+                JSON.SerializeDynamic(obj, str, new Options(excludeNulls: true));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+            }
+        }
+
+        [TestMethod]
+        public void ExcludingNulls()
+        {
+            // to stream tests
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(null, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("null", res);
+                }
+
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(null, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("null", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(new[] { null, "hello", "world" }, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(new[] { null, "hello", "world" }, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    JSON.SerializeDynamic(data, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    JSON.SerializeDynamic(data, str, Options.Default);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                using (var str = new StringWriter())
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
+                    var res = str.ToString();
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+            }
+
+            // to string tests
+            {
+                {
+                    var res = JSON.SerializeDynamic(null, Options.Default);
+
+                    Assert.AreEqual("null", res);
+                }
+
+
+                {
+                    var res = JSON.SerializeDynamic(null, Options.ExcludeNulls);
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("null", res);
+                }
+
+                {
+                    var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.Default);
+
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                {
+                    var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.ExcludeNulls);
+
+                    // it's not a member, it should be written
+                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                }
+
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    var res = JSON.SerializeDynamic(data, Options.Default);
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                {
+                    var data = new Dictionary<string, int?>();
+                    data["hello"] = 123;
+                    data["world"] = null;
+
+                    var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    var res = JSON.SerializeDynamic(data, Options.Default);
+
+                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                }
+
+                {
+                    var data =
+                        new
+                        {
+                            hello = 123,
+                            world = default(object)
+                        };
+
+                    var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
+
+                    Assert.AreEqual("{\"hello\":123}", res);
+                }
+            }
+        }
+
+        public class _ElasticExampleFailure
+        {
+            private List<object> _must = new List<object>();
+            private List<object> _must_not = new List<object>();
+            private List<object> _should = new List<object>();
+
+            public object[] must { get { return GetClean(_must); } }
+            public object[] must_not { get { return GetClean(_must_not); } }
+            public object[] should { get { return GetClean(_should); } }
+            public int? minimum_number_should_match { get; set; }
+            public float? boost { get; set; }
+            public bool? _cache { get; set; }
+
+            public void Append(_ElasticExampleFailure toAppend)
+            {
+                if (toAppend.must != null) this._must.AddRange(toAppend.must);
+                if (toAppend.must_not != null) this._must_not.AddRange(toAppend.must_not);
+                if (toAppend.should != null) this._should.AddRange(toAppend.should);
+            }
+
+            private object[] GetClean(List<object> list)
+            {
+                return list.Any() ? list.ToArray() : null;
+            }
+
+            public void AddMust(object query)
+            {
+                if (query != null)
+                {
+                    _must.Add(query);
+                }
+            }
+
+            public void AddMustNot(object query)
+            {
+                if (query != null)
+                {
+                    _must_not.Add(query);
+                }
+            }
+
+            public void AddShould(object query)
+            {
+                if (query != null)
+                {
+                    _should.Add(query);
+                }
+            }
+
+            public bool HasTerms()
+            {
+                return _must.Any() || _must_not.Any() || _should.Any();
+            }
+
+            public static _ElasticExampleFailure BuildSkillsQuery(string queryString)
+            {
+                var skillsBoolQuery = new _ElasticExampleFailure
+                {
+                    minimum_number_should_match = 1
+                };
+
+                // we determined that one query is a requirement here, and no more becuase
+                // otherwise it will try to run the entire boolean query on just the fields selected
+                // when we add advanced search so people can specify specific fields for specific text
+                // we will still need this inner bool query
+                var fieldsForQueryString = new List<string>
+                {
+                    "personalStatement",
+                    "yearsOfExperienceTags^1.5",
+                    "stackExchangeAnswersTags^0.1",
+                    "name",
+                    "likeTags",
+                    "stackOverflowUserName",
+                    "projects.projectName",
+                    "projects.projectTags",
+                    "projects.projectDescription",
+                    "experience.experienceJobTitle",
+                    "experience.experienceEmployerName",
+                    "experience.experienceTags",
+                    "experience.experienceResponsibilities",
+                    "education.educationInstitution",
+                    "education.educationTags",
+                    "education.educationDegreeName",
+                    "education.educationAchievements",
+                };
+
+                skillsBoolQuery.AddShould(new
+                {
+                    query_string = new
+                    {
+                        query = queryString,
+                        default_operator = "AND",
+                        fields = fieldsForQueryString.ToArray(),
+                        use_dis_max = true,
+                    }
+                });
+                return skillsBoolQuery;
+            }
+        }
+
+        [TestMethod]
+        public void ElasticExampleFailure()
+        {
+            var mainQuery = new _ElasticExampleFailure();
+            var filterQuery = new _ElasticExampleFailure() { _cache = true };
+            filterQuery.AddMustNot(new { term = new { blocking = 1234 }, });
+            mainQuery.AddMust(_ElasticExampleFailure.BuildSkillsQuery("Dean Ward"));
+
+            object filteredQuery = 
+                new
+                {
+                    query = new { @bool = mainQuery },
+                    filter = new { @bool = filterQuery }
+                };
+
+            object queryObject = 
+                new
+                {
+                    from = 0,
+                    size = 30,
+                    query = new
+                    {
+                        filtered = filteredQuery
+                    },
+                };
+
+            var options = new Options(prettyPrint: true);
+            var res = JSON.SerializeDynamic(queryObject, options);
+
+            Assert.AreEqual("{\n \"size\": 30,\n \"from\": 0,\n \"query\": {\n  \"filtered\": {\n   \"query\": {\n    \"bool\": {\n     \"must\": [{\n      \"must\": null,\n      \"must_not\": null,\n      \"should\": [{\n       \"query_string\": {\n        \"use_dis_max\": true,\n        \"fields\": [\"personalStatement\", \"yearsOfExperienceTags^1.5\", \"stackExchangeAnswersTags^0.1\", \"name\", \"likeTags\", \"stackOverflowUserName\", \"projects.projectName\", \"projects.projectTags\", \"projects.projectDescription\", \"experience.experienceJobTitle\", \"experience.experienceEmployerName\", \"experience.experienceTags\", \"experience.experienceResponsibilities\", \"education.educationInstitution\", \"education.educationTags\", \"education.educationDegreeName\", \"education.educationAchievements\"],\n        \"default_operator\": \"AND\",\n        \"query\": \"Dean Ward\"\n       }\n      }],\n      \"_cache\": null,\n      \"boost\": null,\n      \"minimum_number_should_match\": 1\n     }],\n     \"must_not\": null,\n     \"should\": null,\n     \"_cache\": null,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   },\n   \"filter\": {\n    \"bool\": {\n     \"must\": null,\n     \"must_not\": [{\n      \"term\": {\n       \"blocking\": 1234\n      }\n     }],\n     \"should\": null,\n     \"_cache\": true,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   }\n  }\n }\n}", res);
+        }
+
+        abstract class _RecursiveDynamic_Abstract
+        {
+            public _RecursiveDynamic_Abstract[] SubMembers { get; set; }
+            public object[] SubMembersAsObjects { get { return SubMembers == null ? null : SubMembers.Cast<object>().ToArray(); } }
+            public int A { get; set; }
+        }
+
+        class _RecursiveDynamic : _RecursiveDynamic_Abstract
+        {
+            public double B { get; set; }
+        }
+
+        [TestMethod]
+        public void RecursiveDynamic()
+        {
+            object[] foo = new object[]
+                {
+                    new
+                    {
+                        Item = (object)new _RecursiveDynamic
+                        {
+                            A = 999,
+                            B = -999,
+                            SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                        }
+                    },
+                    new
+                    {
+                        Item = (object)new _RecursiveDynamic
+                        {
+                            A = 999,
+                            B = -999,
+                            SubMembers = new[] { new _RecursiveDynamic { A = 1, B = 2.0, SubMembers = new[] { new _RecursiveDynamic { A = 5, B = 6.6 } } }, new _RecursiveDynamic { A = 3, B = 4 } }
+                        }
+                    }
+                };
+
+            var res = JSON.SerializeDynamic(foo, Options.PrettyPrintExcludeNullsIncludeInherited);
+
+            Assert.AreEqual("[{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}, {\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}]", res);
         }
     }
 }

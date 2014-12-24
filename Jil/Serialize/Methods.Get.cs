@@ -97,22 +97,6 @@ namespace Jil.Serialize
                     WriteGuid_ThunkWriter;
         }
 
-        public static MethodInfo GetWriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe(bool needThunkWriter)
-        {
-            return
-                !needThunkWriter ?
-                    WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe :
-                    WriteEncodedStringWithQuotesWithoutNullsInlineJSONPUnsafe_ThunkWriter;
-        }
-
-        public static MethodInfo GetWriteEncodedStringWithQuotesWithoutNullsInlineUnsafe(bool needThunkWriter)
-        {
-            return
-                !needThunkWriter ?
-                    WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe :
-                    WriteEncodedStringWithQuotesWithoutNullsInlineUnsafe_ThunkWriter;
-        }
-
         public static MethodInfo GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(bool needThunkWriter)
         {
             return
@@ -127,22 +111,6 @@ namespace Jil.Serialize
                 !needThunkWriter ?
                     WriteEncodedStringWithQuotesWithNullsInlineUnsafe :
                     WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter;
-        }
-
-        public static MethodInfo GetWriteEncodedStringWithoutNullsInlineJSONPUnsafe(bool needThunkWriter)
-        {
-            return
-                !needThunkWriter ?
-                    WriteEncodedStringWithoutNullsInlineJSONPUnsafe :
-                    WriteEncodedStringWithoutNullsInlineJSONPUnsafe_ThunkWriter;
-        }
-
-        public static MethodInfo GetWriteEncodedStringWithoutNullsInlineUnsafe(bool needThunkWriter)
-        {
-            return
-                !needThunkWriter ?
-                    WriteEncodedStringWithoutNullsInlineUnsafe :
-                    WriteEncodedStringWithoutNullsInlineUnsafe_ThunkWriter;
         }
 
         public static MethodInfo GetWriteEncodedStringWithNullsInlineJSONPUnsafe(bool needThunkWriter)
