@@ -5070,10 +5070,9 @@ namespace JilTests
                 var h = rand.Next(24);
                 var m = rand.Next(60);
                 var s = rand.Next(60);
-                //var ms = rand.Next(1000);
+                var ms = rand.Next(1000);
 
-                //var ts = new TimeSpan(d, h, m, s, ms);
-                var ts = new TimeSpan(d, h, m, s);
+                var ts = new TimeSpan(d, h, m, s, ms);
                 if (rand.Next(2) == 0)
                 {
                     ts = ts.Negate();
@@ -5082,8 +5081,8 @@ namespace JilTests
                 timeSpans.Add(ts);
             }
 
-            //timeSpans.Add(TimeSpan.MaxValue);
-            //timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
             timeSpans.Add(default(TimeSpan));
 
             foreach (var ts1 in timeSpans)

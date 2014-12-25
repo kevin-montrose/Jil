@@ -1176,6 +1176,19 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        static double[] DivideFractionBy =
+            new double[]
+            { 
+                10, 
+                100, 
+                1000, 
+                10000, 
+                100000,
+                1000000,
+                10000000,
+                100000000
+            };
+
         public static readonly MethodInfo ReadNewtonsoftTimeSpan = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         static TimeSpan _ReadNewtonsoftTimeSpan(TextReader reader, string str)
         {
@@ -1270,7 +1283,22 @@ namespace Jil.Deserialize
                 fraction = part;
             }
 
-            var ret = new TimeSpan(days, hours, minutes, seconds);
+            var msInt = 0;
+            if (fraction != 0)
+            {
+                var sizeOfFraction = str.Length - (ixOfLastPeriod + 1);
+
+                if (sizeOfFraction > 7)
+                {
+                    throw new DeserializationException("Fractional part of TimeSpan too large", reader);
+                }
+
+                var fracOfSecond = part / DivideFractionBy[sizeOfFraction - 1];
+                var ms = fracOfSecond * 1000.0;
+                msInt = (int)ms;
+            }
+
+            var ret = new TimeSpan(days, hours, minutes, seconds, msInt);
             if(isNegative)
             {
                 ret = ret.Negate();
