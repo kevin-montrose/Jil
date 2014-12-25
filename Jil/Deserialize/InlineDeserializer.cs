@@ -461,6 +461,8 @@ namespace Jil.Deserialize
         static readonly MethodInfo TimeSpan_FromSeconds = typeof(TimeSpan).GetMethod("FromSeconds", BindingFlags.Static | BindingFlags.Public);
         void ReadSecondsTimeSpan()
         {
+            const double TicksPerSecond = 10000000;
+
             var maxSecs = TimeSpan.MaxValue.TotalSeconds;
             var minSecs = TimeSpan.MinValue.TotalSeconds;
 
@@ -479,8 +481,11 @@ namespace Jil.Deserialize
             Emit.Duplicate();                       // double double
             Emit.LoadConstant(minSecs);             // double double double
             Emit.BranchIfLessOrEqual(isMin);        // double
-            
-            Emit.Call(TimeSpan_FromSeconds);        // TimeSpan
+
+            Emit.LoadConstant(TicksPerSecond);      // double double
+            Emit.Multiply();                        // double
+            Emit.Convert<long>();                   // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
             Emit.Branch(done);                      // TimeSpan
 
             Emit.MarkLabel(isMax);                  // double
@@ -497,9 +502,10 @@ namespace Jil.Deserialize
             Emit.MarkLabel(done);                   // TimeSpan
         }
 
-        static readonly MethodInfo TimeSpan_FromMilliseconds = typeof(TimeSpan).GetMethod("FromMilliseconds", BindingFlags.Static | BindingFlags.Public);
         void ReadMillisecondsTimeSpan()
         {
+            const double TicksPerMillisecond = 10000;
+
             var maxMs = TimeSpan.MaxValue.TotalMilliseconds;
             var minMs = TimeSpan.MinValue.TotalMilliseconds;
 
@@ -519,7 +525,10 @@ namespace Jil.Deserialize
             Emit.LoadConstant(minMs);               // double double double
             Emit.BranchIfLessOrEqual(isMin);        // double
 
-            Emit.Call(TimeSpan_FromMilliseconds);   // TimeSpan
+            Emit.LoadConstant(TicksPerMillisecond); // double double
+            Emit.Multiply();                        // double
+            Emit.Convert<long>();                   // long
+            Emit.NewObject<TimeSpan, long>();       // TimeSpan
             Emit.Branch(done);                      // TimeSpan
 
             Emit.MarkLabel(isMax);                  // double
