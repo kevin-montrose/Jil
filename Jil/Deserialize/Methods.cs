@@ -1310,6 +1310,11 @@ namespace Jil.Deserialize
         public static readonly MethodInfo ReadISO8601TimeSpan = typeof(Methods).GetMethod("_ReadISO8601TimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         static TimeSpan _ReadISO8601TimeSpan(TextReader reader, string str)
         {
+            const long TicksPerDay = 864000000000;
+            const long TicksPerHour = 36000000000;
+            const long TicksPerMinute = 600000000;
+            const long TicksPerSecond = 10000000;
+
             // Format goes like so:
             // - (-)P(([n]Y)([n]M)([n]D))(T([n]H)([n]M)([n]S))
             // - Y[n]W
@@ -1360,31 +1365,47 @@ namespace Jil.Deserialize
             if (week == -1) week = 0;
             if (day == -1) day = 0;
 
-            double hour, minutes, seconds;
-            int timeFraction, timeFracLen;
+            double hour, minute, second;
 
             if (hasTimePart)
             {
                 ix++;   // skip 'T'
-                ISO8601TimeSpan_ReadTimePart(reader, str, ref ix, out hour, out minutes, out seconds, out timeFraction, out timeFracLen);
+                ISO8601TimeSpan_ReadTimePart(reader, str, ref ix, out hour, out minute, out second);
             }
             else
             {
-                hour = minutes = seconds = timeFraction = timeFracLen = 0;
+                hour = minute = second = 0;
             }
-
-            // TODO: Finish implementing, only days are really working here
 
             if (year != 0) throw new NotImplementedException();
             if (month != 0) throw new NotImplementedException();
+            
+            // TODO: This math doesn't work with min/max TimeSpan
 
-            var ret = TimeSpan.FromDays(day);
+            var ticks =
+                day * TicksPerDay +
+                hour * TicksPerHour +
+                minute * TicksPerMinute +
+                second * TicksPerSecond;
+
             if (isNegative)
             {
-                ret = ret.Negate();
+                ticks = -ticks;
             }
 
-            return ret;
+            if (ticks >= TimeSpan.MaxValue.Ticks)
+            {
+                ticks = TimeSpan.MaxValue.Ticks;
+            }
+
+            if (ticks <= TimeSpan.MinValue.Ticks)
+            {
+                ticks = TimeSpan.MinValue.Ticks;
+            }
+
+            var longTicks = (long)ticks;
+
+            return new TimeSpan(longTicks);
         }
 
         static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, string str, ref int ix, out double year, out double month, out double week, out double day)
@@ -1485,6 +1506,87 @@ namespace Jil.Deserialize
             return false;
         }
 
+
+
+        private static void ISO8601TimeSpan_ReadTimePart(TextReader reader, string str, ref int ix, out double hour, out double minutes, out double seconds)
+        {
+            hour = minutes = seconds = 0;
+
+            bool hourSeen, minutesSeen, secondsSeen;
+            hourSeen = minutesSeen = secondsSeen = false;
+
+            var fracSeen = false;
+
+            while (ix != str.Length)
+            {
+                if (fracSeen)
+                {
+                    throw new DeserializationException("Expected Time part of TimeSpan to end", reader);
+                }
+
+                int whole, fraction, fracLen;
+                var part = ISO8601TimeSpan_ReadPart(reader, str, ref ix, out whole, out fraction, out fracLen);
+
+                if (fracLen != 0)
+                {
+                    fracSeen = true;
+                }
+
+                if (part == 'H')
+                {
+                    if (hourSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen twice", reader);
+                    }
+
+                    if (minutesSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen after minutes already parsed", reader);
+                    }
+
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", reader);
+                    }
+
+                    hour = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    hourSeen = true;
+                    continue;
+                }
+
+                if (part == 'M')
+                {
+                    if (minutesSeen)
+                    {
+                        throw new DeserializationException("Minute part of TimeSpan seen twice", reader);
+                    }
+
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", reader);
+                    }
+
+                    minutes = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    minutesSeen = true;
+                    continue;
+                }
+
+                if (part == 'S')
+                {
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Seconds part of TimeSpan seen twice", reader);
+                    }
+
+                    seconds = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    secondsSeen = true;
+                    continue;
+                }
+
+                throw new DeserializationException("Expected H, M, or S but found: " + part, reader);
+            }
+        }
+
         static double ISO8601TimeSpan_ToDouble(TextReader reader, int whole, int fraction, int fracLen)
         {
             double ret = whole;
@@ -1538,21 +1640,13 @@ namespace Jil.Deserialize
                 if (c < '0' || c > '9' || ix == str.Length)
                 {
                     fraction = part;
-                    fracLen = ix - (ixOfPeriod + 1);
+                    fracLen = (ix - 1) - (ixOfPeriod + 1);
                     return c;
                 }
 
                 part *= 10;
                 part += (c - '0');
             }
-        }
-
-        private static void ISO8601TimeSpan_ReadTimePart(TextReader reader, string str, ref int ix, out double hour, out double minutes, out double seconds, out int timeFraction, out int timeFracLen)
-        {
-            // TODO: Actually implement
-
-            ix = str.Length;
-            hour = minutes = seconds = timeFraction = timeFracLen = 0;
         }
     }
 }
