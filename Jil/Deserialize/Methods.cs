@@ -1393,17 +1393,18 @@ namespace Jil.Deserialize
                 ticks = -ticks;
             }
 
-            if (ticks >= TimeSpan.MaxValue.Ticks)
+            long longTicks;
+            var overflowsPositive = ticks > 0 & (longTicks = (long)ticks) < 0;
+
+            if (overflowsPositive)
             {
-                ticks = TimeSpan.MaxValue.Ticks;
+                longTicks = TimeSpan.MaxValue.Ticks;
             }
 
             if (ticks <= TimeSpan.MinValue.Ticks)
             {
-                ticks = TimeSpan.MinValue.Ticks;
+                longTicks = TimeSpan.MinValue.Ticks;
             }
-
-            var longTicks = (long)ticks;
 
             return new TimeSpan(longTicks);
         }

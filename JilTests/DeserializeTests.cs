@@ -5010,7 +5010,9 @@ namespace JilTests
             }
 
             timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
             timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
             timeSpans.Add(default(TimeSpan));
 
             foreach (var ts1 in timeSpans)
@@ -5046,7 +5048,9 @@ namespace JilTests
             }
 
             timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
             timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
             timeSpans.Add(default(TimeSpan));
 
             foreach (var ts1 in timeSpans)
@@ -5082,7 +5086,9 @@ namespace JilTests
             }
 
             timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
             timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
             timeSpans.Add(default(TimeSpan));
 
             foreach (var ts1 in timeSpans)
@@ -5117,8 +5123,10 @@ namespace JilTests
                 timeSpans.Add(ts);
             }
 
-            /*timeSpans.Add(TimeSpan.MaxValue);
-            timeSpans.Add(TimeSpan.MinValue);*/
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
             timeSpans.Add(default(TimeSpan));
 
             foreach (var ts1 in timeSpans)
@@ -5126,7 +5134,7 @@ namespace JilTests
                 var json = JSON.Serialize(ts1, Options.ISO8601);
                 var ts2 = JSON.Deserialize<TimeSpan>(json, Options.ISO8601);
 
-                Assert.AreEqual(Math.Round(ts1.TotalMilliseconds), Math.Round(ts2.TotalMilliseconds));
+                Assert.AreEqual(ts1.Ticks, ts2.Ticks);
             }
         }
 
