@@ -120,6 +120,13 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
+        public bool TryCastTimeSpan(out TimeSpan ts)
+        {
+            // TODO: Implement!
+            ts = TimeSpan.MinValue;
+            return false;
+        }
+
         public bool TryCastGuid(out Guid g)
         {
             if (Type != JsonObjectType.String)

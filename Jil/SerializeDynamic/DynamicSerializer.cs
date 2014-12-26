@@ -492,6 +492,45 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
+        static readonly ConvertBinder TimeSpanConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(TimeSpan), typeof(DynamicSerializer));
+        static bool CanBeTimeSpan(object dyn, out TimeSpan ts)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(TimeSpanConvertBinder, out ret))
+                {
+                    ts = (TimeSpan)ret;
+                    return true;
+                }
+
+                ts = TimeSpan.MinValue;
+                return false;
+            }
+
+            var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
+            if (jilDyn != null)
+            {
+                return jilDyn.TryCastTimeSpan(out ts);
+            }
+
+            return CanBeTimeSpanDynamic(dyn, out ts);
+        }
+
+        static bool CanBeTimeSpanDynamic(dynamic dyn, out TimeSpan ts)
+        {
+            try
+            {
+                ts = (TimeSpan)dyn;
+                return true;
+            }
+            catch { }
+
+            ts = TimeSpan.MinValue;
+            return false;
+        }
+
         static readonly ConvertBinder GuidConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(Guid), typeof(DynamicSerializer));
         static bool CanBeGuid(object dyn, out Guid guid)
         {
@@ -694,6 +733,13 @@ namespace Jil.SerializeDynamic
                 if(CanBeDateTime(dynObject, out dt))
                 {
                     Serialize(stream, dt, opts, depth);
+                    return;
+                }
+
+                TimeSpan ts;
+                if(CanBeTimeSpan(dynObject, out ts))
+                {
+                    Serialize(stream, ts, opts, depth);
                     return;
                 }
 

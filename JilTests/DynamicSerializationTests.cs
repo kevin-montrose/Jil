@@ -848,5 +848,230 @@ namespace JilTests
 
             Assert.AreEqual("[{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}, {\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}]", res);
         }
+
+        [TestMethod]
+        public void NewtonsoftTimeSpans()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts in timeSpans)
+            {
+                string streamJson, stringJson;
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(ts, str, Options.Default);
+                    streamJson = str.ToString();
+                }
+
+                {
+                    stringJson = JSON.SerializeDynamic(ts, Options.Default);
+                }
+
+                Assert.IsTrue(streamJson.StartsWith("\""));
+                Assert.IsTrue(streamJson.EndsWith("\""));
+                Assert.IsTrue(stringJson.StartsWith("\""));
+                Assert.IsTrue(stringJson.EndsWith("\""));
+
+                var dotNetStr = ts.ToString();
+
+                streamJson = streamJson.Trim('"');
+                stringJson = stringJson.Trim('"');
+
+                if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
+                if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
+                if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
+
+                Assert.AreEqual(dotNetStr, streamJson);
+                Assert.AreEqual(dotNetStr, stringJson);
+            }
+        }
+
+        [TestMethod]
+        public void SecondsTimeSpans()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts in timeSpans)
+            {
+                string streamJson, stringJson;
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(ts, str, Options.SecondsSinceUnixEpoch);
+                    streamJson = str.ToString();
+                }
+
+                {
+                    stringJson = JSON.SerializeDynamic(ts, Options.SecondsSinceUnixEpoch);
+                }
+
+                var dotNetStr = ts.TotalSeconds.ToString();
+
+                if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
+                if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
+                if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
+
+                Assert.AreEqual(dotNetStr, streamJson);
+                Assert.AreEqual(dotNetStr, stringJson);
+            }
+        }
+
+        [TestMethod]
+        public void MillsecondsTimeSpans()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts in timeSpans)
+            {
+                string streamJson, stringJson;
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(ts, str, Options.MillisecondsSinceUnixEpoch);
+                    streamJson = str.ToString();
+                }
+
+                {
+                    stringJson = JSON.SerializeDynamic(ts, Options.MillisecondsSinceUnixEpoch);
+                }
+
+                var dotNetStr = ts.TotalMilliseconds.ToString();
+
+                if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
+                if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
+                if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
+
+                Assert.AreEqual(dotNetStr, streamJson);
+                Assert.AreEqual(dotNetStr, stringJson);
+            }
+        }
+
+        [TestMethod]
+        public void ISO8601TimeSpans()
+        {
+            var rand = new Random();
+            var timeSpans = new List<TimeSpan>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var d = rand.Next(10675199 - 1);
+                var h = rand.Next(24);
+                var m = rand.Next(60);
+                var s = rand.Next(60);
+                var ms = rand.Next(1000);
+
+                var ts = new TimeSpan(d, h, m, s, ms);
+                if (rand.Next(2) == 0)
+                {
+                    ts = ts.Negate();
+                }
+
+                timeSpans.Add(ts);
+            }
+
+            timeSpans.Add(TimeSpan.MaxValue);
+            timeSpans.Add(TimeSpan.MinValue);
+            timeSpans.Add(default(TimeSpan));
+
+            foreach (var ts in timeSpans)
+            {
+                string streamJson, stringJson;
+                using (var str = new StringWriter())
+                {
+                    JSON.SerializeDynamic(ts, str, Options.ISO8601);
+                    streamJson = str.ToString();
+                }
+
+                {
+                    stringJson = JSON.SerializeDynamic(ts, Options.ISO8601);
+                }
+
+                Assert.IsTrue(streamJson == stringJson);
+
+                var dotNetStr = System.Xml.XmlConvert.ToString(ts);
+
+                streamJson = streamJson.Trim('"');
+                stringJson = stringJson.Trim('"');
+
+                if (streamJson.IndexOf('.') != -1)
+                {
+                    var lastChar = streamJson[streamJson.Length - 1];
+                    streamJson = streamJson.Substring(0, streamJson.Length - 1).TrimEnd('0') + lastChar;
+                }
+
+                if (stringJson.IndexOf('.') != -1)
+                {
+                    var lastChar = stringJson[stringJson.Length - 1];
+                    stringJson = stringJson.Substring(0, stringJson.Length - 1).TrimEnd('0') + lastChar;
+                }
+
+                Assert.AreEqual(dotNetStr, streamJson);
+                Assert.AreEqual(dotNetStr, stringJson);
+            }
+        }
     }
 }
