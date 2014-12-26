@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
-    partial class Methods
+    static partial class Methods
     {
         public static readonly MethodInfo ReadISO8601DateWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -92,6 +92,12 @@
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\InterfaceImplementation.cs" />
     <Compile Include="Deserialize\Methods.cs" />
+    <Compile Include="Deserialize\Methods.ISO8601DateTime.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Deserialize\Methods.ISO8601TimeSpan.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
     <Compile Include="Deserialize\Methods.ReadNumbers.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
@@ -99,9 +105,6 @@
     <Compile Include="Common\PeekSupportingTextReader.cs" />
     <Compile Include="Deserialize\SetterLookup.cs" />
     <Compile Include="Deserialize\TypeCaches.cs" />
-    <Compile Include="Deserialize\Methods.ISO8601.cs">
-      <DependentUpon>Methods.cs</DependentUpon>
-    </Compile>
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JilDirectiveAttribute.cs" />
