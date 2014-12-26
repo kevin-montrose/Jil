@@ -337,7 +337,7 @@ namespace Jil.Deserialize
             {
                 var c = str[ix];
 
-                if (c == '.')
+                if (c == '.' || c == ',')
                 {
                     whole = part;
                     break;
@@ -358,7 +358,7 @@ namespace Jil.Deserialize
 
             var ixOfPeriod = ix;
 
-            ix++;   // skip the '.'
+            ix++;   // skip the '.' or ','
             part = 0;
             while (true)
             {
