@@ -15,7 +15,7 @@ namespace Jil.Deserialize
         static readonly ulong MaxTicks = (ulong)TimeSpan.MaxValue.Ticks;
         public static readonly MethodInfo ReadISO8601TimeSpan = typeof(Methods).GetMethod("_ReadISO8601TimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TimeSpan _ReadISO8601TimeSpan(TextReader reader, string str)
+        static TimeSpan _ReadISO8601TimeSpan(TextReader reader, char[] str)
         {
             const ulong TicksPerDay = 864000000000;
             const ulong TicksPerHour = 36000000000;
@@ -24,9 +24,11 @@ namespace Jil.Deserialize
 
             // Format goes like so:
             // - (-)P(([n]Y)([n]M)([n]D))(T([n]H)([n]M)([n]S))
-            // - Y[n]W
+            // - P[n]W
 
-            if (str.Length == 0)
+            var len = ReadTimeSpanInto(reader, str);
+
+            if (len == 0)
             {
                 throw new DeserializationException("Unexpected empty string", reader);
             }
@@ -41,7 +43,7 @@ namespace Jil.Deserialize
                 ix++;
             }
 
-            if (ix >= str.Length)
+            if (ix >= len)
             {
                 throw new DeserializationException("Expected P, instead TimeSpan string ended", reader);
             }
@@ -55,7 +57,7 @@ namespace Jil.Deserialize
             ix++;   // skip 'P'
 
             double year, month, week, day;
-            var hasTimePart = ISO8601TimeSpan_ReadDatePart(reader, str, ref ix, out year, out month, out week, out day);
+            var hasTimePart = ISO8601TimeSpan_ReadDatePart(reader, str, len, ref ix, out year, out month, out week, out day);
 
             if (week != -1 && (year != -1 || month != -1 || day != -1))
             {
@@ -77,7 +79,7 @@ namespace Jil.Deserialize
             if (hasTimePart)
             {
                 ix++;   // skip 'T'
-                ISO8601TimeSpan_ReadTimePart(reader, str, ref ix, out hour, out minute, out second);
+                ISO8601TimeSpan_ReadTimePart(reader, str, len, ref ix, out hour, out minute, out second);
             }
             else
             {
@@ -110,7 +112,33 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, string str, ref int ix, out double year, out double month, out double week, out double day)
+        static int ReadTimeSpanInto(TextReader reader, char[] buffer)
+        {
+            var i = reader.Peek();
+            if (i != '"') throw new DeserializationException("Expected \", found " + (char)i, reader);
+            
+            reader.Read();  // skip the opening '"'
+
+            var ix = 0;
+            while (true)
+            {
+                if (ix >= CharBufferSize) throw new DeserializationException("ISO8601 duration too long", reader);
+
+                i = reader.Read();
+                if (i == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (i == '"')
+                {
+                    break;
+                }
+
+                buffer[ix] = (char)i;
+                ix++;
+            }
+
+            return ix;
+        }
+
+        static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, char[] str, int strLen, ref int ix, out double year, out double month, out double week, out double day)
         {
             year = month = week = day = -1;
 
@@ -119,7 +147,7 @@ namespace Jil.Deserialize
 
             var fracSeen = false;
 
-            while (ix != str.Length)
+            while (ix != strLen)
             {
                 if (str[ix] == 'T')
                 {
@@ -132,7 +160,7 @@ namespace Jil.Deserialize
                 }
 
                 int whole, fraction, fracLen;
-                var part = ISO8601TimeSpan_ReadPart(reader, str, ref ix, out whole, out fraction, out fracLen);
+                var part = ISO8601TimeSpan_ReadPart(reader, str, strLen, ref ix, out whole, out fraction, out fracLen);
 
                 if (fracLen != 0)
                 {
@@ -208,7 +236,7 @@ namespace Jil.Deserialize
             return false;
         }
 
-        private static void ISO8601TimeSpan_ReadTimePart(TextReader reader, string str, ref int ix, out double hour, out double minutes, out double seconds)
+        private static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
         {
             hour = minutes = seconds = 0;
 
@@ -217,7 +245,7 @@ namespace Jil.Deserialize
 
             var fracSeen = false;
 
-            while (ix != str.Length)
+            while (ix != strLen)
             {
                 if (fracSeen)
                 {
@@ -225,7 +253,7 @@ namespace Jil.Deserialize
                 }
 
                 int whole, fraction, fracLen;
-                var part = ISO8601TimeSpan_ReadPart(reader, str, ref ix, out whole, out fraction, out fracLen);
+                var part = ISO8601TimeSpan_ReadPart(reader, str, strLen, ref ix, out whole, out fraction, out fracLen);
 
                 if (fracLen != 0)
                 {
@@ -302,7 +330,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        static char ISO8601TimeSpan_ReadPart(TextReader reader, string str, ref int ix, out int whole, out int fraction, out int fracLen)
+        static char ISO8601TimeSpan_ReadPart(TextReader reader, char[] str, int strLen, ref int ix, out int whole, out int fraction, out int fracLen)
         {
             var part = 0;
             while (true)
@@ -316,7 +344,7 @@ namespace Jil.Deserialize
                 }
 
                 ix++;
-                if (c < '0' || c > '9' || ix == str.Length)
+                if (c < '0' || c > '9' || ix == strLen)
                 {
                     whole = part;
                     fraction = 0;
@@ -337,7 +365,7 @@ namespace Jil.Deserialize
                 var c = str[ix];
 
                 ix++;
-                if (c < '0' || c > '9' || ix == str.Length)
+                if (c < '0' || c > '9' || ix == strLen)
                 {
                     fraction = part;
                     fracLen = (ix - 1) - (ixOfPeriod + 1);

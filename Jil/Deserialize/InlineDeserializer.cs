@@ -64,7 +64,8 @@ namespace Jil.Deserialize
             var needsCharBuffer =
                 hasStringyTypes ||
                 involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
-                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601);
+                (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
+                (involvedTypes.Contains(typeof(TimeSpan)) && DateFormat == DateTimeFormat.ISO8601);
 
             if (needsCharBuffer)
             {
@@ -555,7 +556,7 @@ namespace Jil.Deserialize
         void ReadISO8601TimeSpan()
         {
             Emit.LoadArgument(0);                       // TextReader
-            ReadPrimitive(typeof(string));              // string
+            LoadCharBuffer();                           // TextReader char[]
             Emit.Call(Methods.ReadISO8601TimeSpan);     // TimeSpan
         }
 
