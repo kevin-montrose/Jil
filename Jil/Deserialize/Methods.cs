@@ -1307,13 +1307,15 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        static readonly ulong MinTicks = (ulong)(-TimeSpan.MinValue.Ticks);
+        static readonly ulong MaxTicks = (ulong)TimeSpan.MaxValue.Ticks;
         public static readonly MethodInfo ReadISO8601TimeSpan = typeof(Methods).GetMethod("_ReadISO8601TimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         static TimeSpan _ReadISO8601TimeSpan(TextReader reader, string str)
         {
-            const long TicksPerDay = 864000000000;
-            const long TicksPerHour = 36000000000;
-            const long TicksPerMinute = 600000000;
-            const long TicksPerSecond = 10000000;
+            const ulong TicksPerDay = 864000000000;
+            const ulong TicksPerHour = 36000000000;
+            const ulong TicksPerMinute = 600000000;
+            const ulong TicksPerSecond = 10000000;
 
             // Format goes like so:
             // - (-)P(([n]Y)([n]M)([n]D))(T([n]H)([n]M)([n]S))
@@ -1379,34 +1381,28 @@ namespace Jil.Deserialize
 
             if (year != 0) throw new NotImplementedException();
             if (month != 0) throw new NotImplementedException();
-            
-            // TODO: This math doesn't work with min/max TimeSpan
 
-            var ticks =
-                day * TicksPerDay +
-                hour * TicksPerHour +
-                minute * TicksPerMinute +
-                second * TicksPerSecond;
+            var ticks = (ulong)(day * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
 
+            TimeSpan ret;
+
+            if (ticks >= MaxTicks && !isNegative)
+            {
+                return TimeSpan.MaxValue;
+            }
+
+            if (ticks >= MinTicks && isNegative)
+            {
+                return TimeSpan.MinValue;
+            }
+
+            ret = new TimeSpan((long)ticks);
             if (isNegative)
             {
-                ticks = -ticks;
+                ret = ret.Negate();
             }
 
-            long longTicks;
-            var overflowsPositive = ticks > 0 & (longTicks = (long)ticks) < 0;
-
-            if (overflowsPositive)
-            {
-                longTicks = TimeSpan.MaxValue.Ticks;
-            }
-
-            if (ticks <= TimeSpan.MinValue.Ticks)
-            {
-                longTicks = TimeSpan.MinValue.Ticks;
-            }
-
-            return new TimeSpan(longTicks);
+            return ret;
         }
 
         static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, string str, ref int ix, out double year, out double month, out double week, out double day)

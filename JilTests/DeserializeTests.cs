@@ -5134,7 +5134,11 @@ namespace JilTests
                 var json = JSON.Serialize(ts1, Options.ISO8601);
                 var ts2 = JSON.Deserialize<TimeSpan>(json, Options.ISO8601);
 
-                Assert.AreEqual(ts1.Ticks, ts2.Ticks);
+                var txtJson = json.Replace("\"", "");
+                var ts3 = System.Xml.XmlConvert.ToTimeSpan(txtJson);
+
+                Assert.AreEqual(Math.Round(ts1.TotalMilliseconds), Math.Round(ts2.TotalMilliseconds));
+                Assert.AreEqual(Math.Round(ts3.TotalMilliseconds), Math.Round(ts2.TotalMilliseconds));
             }
         }
 
