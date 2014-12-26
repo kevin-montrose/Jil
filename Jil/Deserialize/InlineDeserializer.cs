@@ -65,7 +65,7 @@ namespace Jil.Deserialize
                 hasStringyTypes ||
                 involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
                 (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
-                (involvedTypes.Contains(typeof(TimeSpan)) && DateFormat == DateTimeFormat.ISO8601);
+                (involvedTypes.Contains(typeof(TimeSpan)) && (DateFormat == DateTimeFormat.ISO8601 || DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch));
 
             if (needsCharBuffer)
             {
@@ -549,7 +549,7 @@ namespace Jil.Deserialize
         void ReadNewtonsoftStyleTimeSpan()
         {
             Emit.LoadArgument(0);                       // TextReader
-            ReadPrimitive(typeof(string));              // string
+            LoadCharBuffer();                           // TextReader char[]
             Emit.Call(Methods.ReadNewtonsoftTimeSpan);  // TimeSpan
         }
 

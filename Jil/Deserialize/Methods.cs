@@ -1190,9 +1190,11 @@ namespace Jil.Deserialize
             };
 
         public static readonly MethodInfo ReadNewtonsoftTimeSpan = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
-        static TimeSpan _ReadNewtonsoftTimeSpan(TextReader reader, string str)
+        static TimeSpan _ReadNewtonsoftTimeSpan(TextReader reader, char[] buffer)
         {
-            if (str.Length == 0)
+            var strLen = ReadTimeSpanInto(reader, buffer);
+
+            if (strLen == 0)
             {
                 throw new DeserializationException("Unexpected empty string", reader);
             }
@@ -1208,7 +1210,7 @@ namespace Jil.Deserialize
 
             int i;
 
-            if (str[0] == '-')
+            if (buffer[0] == '-')
             {
                 isNegative = true;
                 i = 1;
@@ -1218,9 +1220,9 @@ namespace Jil.Deserialize
                 i = 0;
             }
 
-            for (; i < str.Length; i++)
+            for (; i < strLen; i++)
             {
-                var c = str[i];
+                var c = buffer[i];
                 if (c == '.')
                 {
                     ixOfLastPeriod = i;
@@ -1286,7 +1288,7 @@ namespace Jil.Deserialize
             var msInt = 0;
             if (fraction != 0)
             {
-                var sizeOfFraction = str.Length - (ixOfLastPeriod + 1);
+                var sizeOfFraction = strLen - (ixOfLastPeriod + 1);
 
                 if (sizeOfFraction > 7)
                 {
