@@ -1031,6 +1031,57 @@ namespace Jil.DeserializeDynamic
                                 return false;
                         }
                     }
+                    if(returnType == typeof(TimeSpan))
+                    {
+                        const double TicksPerMillisecond = 10000;
+                        const double TicksPerSecond = 10000000;
+
+                        double res;
+                        var ret = FastNumberToDouble(out res);
+                        if (!ret)
+                        {
+                            result = null;
+                            return false;
+                        }
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                var msTicksDouble = res * TicksPerMillisecond;
+                                var msTicks = (long)msTicksDouble;
+                                
+                                if (msTicksDouble >= TimeSpan.MaxValue.Ticks)
+                                {
+                                    msTicks = TimeSpan.MaxValue.Ticks;
+                                }
+                                
+                                if(msTicksDouble <= TimeSpan.MinValue.Ticks)
+                                {
+                                    msTicks = TimeSpan.MinValue.Ticks;
+                                }
+
+                                result = new TimeSpan(msTicks);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                var sTicksDouble = res * TicksPerSecond;
+                                var sTicks = (long)sTicksDouble;
+                                
+                                if (sTicksDouble >= TimeSpan.MaxValue.Ticks)
+                                {
+                                    sTicks = TimeSpan.MaxValue.Ticks;
+                                }
+                                
+                                if(sTicksDouble <= TimeSpan.MinValue.Ticks)
+                                {
+                                    sTicks = TimeSpan.MinValue.Ticks;
+                                }
+
+                                result = new TimeSpan(sTicks);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.Number:
                     if (returnType == typeof(double))
@@ -1120,6 +1171,51 @@ namespace Jil.DeserializeDynamic
                                 return false;
                         }
                     }
+                    if (returnType == typeof(TimeSpan))
+                    {
+                        const double TicksPerMillisecond = 10000;
+                        const double TicksPerSecond = 10000000;
+
+                        var res = NumberValue;
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                var msTicksDouble = res * TicksPerMillisecond;
+                                var msTicks = (long)msTicksDouble;
+
+                                if (msTicksDouble >= TimeSpan.MaxValue.Ticks)
+                                {
+                                    msTicks = TimeSpan.MaxValue.Ticks;
+                                }
+
+                                if (msTicksDouble <= TimeSpan.MinValue.Ticks)
+                                {
+                                    msTicks = TimeSpan.MinValue.Ticks;
+                                }
+
+                                result = new TimeSpan(msTicks);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                var sTicksDouble = res * TicksPerSecond;
+                                var sTicks = (long)sTicksDouble;
+
+                                if (sTicksDouble >= TimeSpan.MaxValue.Ticks)
+                                {
+                                    sTicks = TimeSpan.MaxValue.Ticks;
+                                }
+
+                                if (sTicksDouble <= TimeSpan.MinValue.Ticks)
+                                {
+                                    sTicks = TimeSpan.MinValue.Ticks;
+                                }
+
+                                result = new TimeSpan(sTicks);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.String:
                     if (returnType == typeof(string))
@@ -1187,6 +1283,11 @@ namespace Jil.DeserializeDynamic
                                 result = null;
                                 return false;
                         }
+                    }
+                    if(returnType == typeof(TimeSpan))
+                    {
+                        // TODO: Implement
+                        throw new NotImplementedException();
                     }
                     break;
                 case JsonObjectType.Object:

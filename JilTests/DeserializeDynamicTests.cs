@@ -2124,5 +2124,141 @@ namespace JilTests
                 Assert.AreEqual(str1, str2);
             }
         }
+
+        [TestMethod]
+        public void TimeSpans_Milliseconds()
+        {
+            var rand = new Random();
+            var ts = new List<TimeSpan>();
+            for (var i = 0; i < 10000; i++)
+            {
+                var ms = rand.Next();
+                if (rand.Next(2) == 1)
+                {
+                    ms = -ms;
+                }
+
+                ts.Add(TimeSpan.FromMilliseconds(ms));
+            }
+
+            ts.Add(TimeSpan.MaxValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
+            ts.Add(TimeSpan.MinValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
+            ts.Add(default(TimeSpan));
+
+            foreach (var t1 in ts)
+            {
+                var str1 = JSON.Serialize(t1, Options.MillisecondsSinceUnixEpoch);
+                var dyn = JSON.DeserializeDynamic(str1, Options.MillisecondsSinceUnixEpoch);
+                var t2 = (TimeSpan)dyn;
+                var str2 = JSON.Serialize(t2, Options.MillisecondsSinceUnixEpoch);
+
+                Assert.AreEqual(Math.Round(t1.TotalMilliseconds), Math.Round(t2.TotalMilliseconds));
+                Assert.AreEqual(str1, str2);
+            }
+        }
+
+        [TestMethod]
+        public void TimeSpans_Seconds()
+        {
+            var rand = new Random();
+            var ts = new List<TimeSpan>();
+            for (var i = 0; i < 10000; i++)
+            {
+                var ms = rand.Next();
+                if (rand.Next(2) == 1)
+                {
+                    ms = -ms;
+                }
+
+                ts.Add(TimeSpan.FromSeconds(ms));
+            }
+
+            ts.Add(TimeSpan.MaxValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
+            ts.Add(TimeSpan.MinValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
+            ts.Add(default(TimeSpan));
+
+            foreach (var t1 in ts)
+            {
+                var str1 = JSON.Serialize(t1, Options.SecondsSinceUnixEpoch);
+                var dyn = JSON.DeserializeDynamic(str1, Options.SecondsSinceUnixEpoch);
+                var t2 = (TimeSpan)dyn;
+                var str2 = JSON.Serialize(t2, Options.SecondsSinceUnixEpoch);
+
+                Assert.AreEqual(Math.Round(t1.TotalSeconds), Math.Round(t2.TotalSeconds));
+                Assert.AreEqual(str1, str2);
+            }
+        }
+
+        [TestMethod]
+        public void TimeSpans_Newtonsoft()
+        {
+            var rand = new Random();
+            var ts = new List<TimeSpan>();
+            for (var i = 0; i < 10000; i++)
+            {
+                var ms = rand.Next();
+                if (rand.Next(2) == 1)
+                {
+                    ms = -ms;
+                }
+
+                ts.Add(TimeSpan.FromSeconds(ms));
+            }
+
+            ts.Add(TimeSpan.MaxValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
+            ts.Add(TimeSpan.MinValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
+            ts.Add(default(TimeSpan));
+
+            foreach (var t1 in ts)
+            {
+                var str1 = JSON.Serialize(t1, Options.Default);
+                var dyn = JSON.DeserializeDynamic(str1, Options.Default);
+                var t2 = (TimeSpan)dyn;
+                var str2 = JSON.Serialize(t2, Options.Default);
+
+                Assert.AreEqual(Math.Round(t1.TotalMilliseconds), Math.Round(t2.TotalMilliseconds));
+                Assert.AreEqual(str1, str2);
+            }
+        }
+
+        [TestMethod]
+        public void TimeSpans_ISO8601()
+        {
+            var rand = new Random();
+            var ts = new List<TimeSpan>();
+            for (var i = 0; i < 10000; i++)
+            {
+                var ms = rand.Next();
+                if (rand.Next(2) == 1)
+                {
+                    ms = -ms;
+                }
+
+                ts.Add(TimeSpan.FromSeconds(ms));
+            }
+
+            ts.Add(TimeSpan.MaxValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MaxValue.Ticks - n)));
+            ts.Add(TimeSpan.MinValue);
+            ts.AddRange(Enumerable.Range(1, 1000).Select(n => new TimeSpan(TimeSpan.MinValue.Ticks + n)));
+            ts.Add(default(TimeSpan));
+
+            foreach (var t1 in ts)
+            {
+                var str1 = JSON.Serialize(t1, Options.ISO8601);
+                var dyn = JSON.DeserializeDynamic(str1, Options.ISO8601);
+                var t2 = (TimeSpan)dyn;
+                var str2 = JSON.Serialize(t2, Options.ISO8601);
+
+                Assert.AreEqual(Math.Round(t1.TotalMilliseconds), Math.Round(t2.TotalMilliseconds));
+                Assert.AreEqual(str1, str2);
+            }
+        }
     }
 }
