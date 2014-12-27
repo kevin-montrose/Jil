@@ -2075,5 +2075,54 @@ namespace JilTests
                 Assert.IsTrue(foo);
             }
         }
+
+        [TestMethod]
+        public void DateTimeOffsets()
+        {
+            // milliseconds
+            {
+                var now = DateTimeOffset.UtcNow;
+                var str1 = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
+                var dyn = JSON.DeserializeDynamic(str1, Options.MillisecondsSinceUnixEpoch);
+                var dto = (DateTimeOffset)dyn;
+                
+                var str2 = JSON.Serialize(dto, Options.MillisecondsSinceUnixEpoch);
+
+                Assert.AreEqual(str1, str2);
+            }
+            // seconds
+            {
+                var now = DateTimeOffset.UtcNow;
+                var str1 = JSON.Serialize(now, Options.SecondsSinceUnixEpoch);
+                var dyn = JSON.DeserializeDynamic(str1, Options.SecondsSinceUnixEpoch);
+                var dto = (DateTimeOffset)dyn;
+
+                var str2 = JSON.Serialize(dto, Options.SecondsSinceUnixEpoch);
+
+                Assert.AreEqual(str1, str2);
+            }
+            // newtonsoft-style
+            {
+                var now = DateTimeOffset.UtcNow;
+                var str1 = JSON.Serialize(now, Options.Default);
+                var dyn = JSON.DeserializeDynamic(str1, Options.Default);
+                var dto = (DateTimeOffset)dyn;
+
+                var str2 = JSON.Serialize(dto, Options.Default);
+
+                Assert.AreEqual(str1, str2);
+            }
+            // iso8601
+            {
+                var now = DateTimeOffset.UtcNow;
+                var str1 = JSON.Serialize(now, Options.ISO8601);
+                var dyn = JSON.DeserializeDynamic(str1, Options.ISO8601);
+                var dto = (DateTimeOffset)dyn;
+
+                var str2 = JSON.Serialize(dto, Options.ISO8601);
+
+                Assert.AreEqual(str1, str2);
+            }
+        }
     }
 }

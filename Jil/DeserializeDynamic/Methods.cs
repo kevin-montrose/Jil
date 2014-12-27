@@ -13,6 +13,7 @@ namespace Jil.DeserializeDynamic
     static partial class Methods
     {
         internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        internal static readonly DateTimeOffset UnixEpochOffset = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
         // .NET will expand a char[] allocation up to 32, don't bother trimming this unless you can get this down to 16
         //    you'll just be making string parsing slower for no benefit
