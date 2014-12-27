@@ -249,7 +249,7 @@ namespace Jil.Deserialize
             return false;
         }
 
-        private static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
+        static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
         {
             hour = minutes = seconds = 0;
 
@@ -290,7 +290,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", reader);
                     }
 
-                    hour = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
                     hourSeen = true;
                     continue;
                 }
@@ -307,7 +307,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", reader);
                     }
 
-                    minutes = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
                     minutesSeen = true;
                     continue;
                 }
@@ -319,7 +319,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Seconds part of TimeSpan seen twice", reader);
                     }
 
-                    seconds = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
                     secondsSeen = true;
                     continue;
                 }
@@ -328,7 +328,7 @@ namespace Jil.Deserialize
             }
         }
 
-        static double ISO8601TimeSpan_ToDouble(TextReader reader, int whole, int fraction, int fracLen)
+        static double ISO8601TimeSpan_ToDouble(int whole, int fraction, int fracLen)
         {
             double ret = whole;
             double frac = fraction;
