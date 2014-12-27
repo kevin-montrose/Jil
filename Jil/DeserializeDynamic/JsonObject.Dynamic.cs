@@ -1009,6 +1009,28 @@ namespace Jil.DeserializeDynamic
                                 return false;
                         }
                     }
+                    if(returnType == typeof(DateTimeOffset))
+                    {
+                        long res;
+                        var ret = FastNumberToLong(out res);
+                        if (!ret)
+                        {
+                            result = null;
+                            return false;
+                        }
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                result = Methods.UnixEpochOffset + TimeSpan.FromMilliseconds(res);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                result = Methods.UnixEpochOffset + TimeSpan.FromSeconds(res);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
                     break;
                 case JsonObjectType.Number:
                     if (returnType == typeof(double))
@@ -1076,6 +1098,22 @@ namespace Jil.DeserializeDynamic
                                 return true;
                             case DateTimeFormat.SecondsSinceUnixEpoch:
                                 result = Methods.UnixEpoch + TimeSpan.FromSeconds(res);
+                                return true;
+                            default:
+                                result = null;
+                                return false;
+                        }
+                    }
+                    if (returnType == typeof(DateTimeOffset))
+                    {
+                        var res = (long)NumberValue;
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                                result = Methods.UnixEpochOffset + TimeSpan.FromMilliseconds(res);
+                                return true;
+                            case DateTimeFormat.SecondsSinceUnixEpoch:
+                                result = Methods.UnixEpochOffset + TimeSpan.FromSeconds(res);
                                 return true;
                             default:
                                 result = null;
