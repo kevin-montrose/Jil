@@ -22,6 +22,7 @@ namespace Jil.Deserialize
             const ulong TicksPerMinute = 600000000;
             const ulong TicksPerSecond = 10000000;
 
+            const ulong TicksPerWeek = TicksPerDay * 7;
             const ulong TicksPerMonth = TicksPerDay * 30;
             const ulong TicksPerYear = TicksPerDay * 365;
 
@@ -72,8 +73,6 @@ namespace Jil.Deserialize
                 throw new DeserializationException("TimeSpans with a week defined cannot also have a time defined", reader);
             }
 
-            if (week != -1) throw new NotImplementedException();
-
             if (year == -1) year = 0;
             if (month == -1) month = 0;
             if (week == -1) week = 0;
@@ -99,9 +98,17 @@ namespace Jil.Deserialize
 
             if (month != 0)
             {
+                // .NET (via XmlConvert) converts months to years
+                // This isn't inkeeping with the spec, but of the bad choices... I choose this one
                 var yearsFromMonths = ((ulong)month) / 12;
                 var monthsAfterYears = ((ulong)month) % 12;
                 ticks += (ulong)(yearsFromMonths * TicksPerYear + monthsAfterYears * TicksPerMonth);
+            }
+
+            if (week != 0)
+            {
+                // ISO8601 defines weeks as 7 days, so don't convert weeks to months or years (even if that may seem more sensible)
+                ticks += ((ulong)week) * TicksPerWeek;
             }
 
             ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);

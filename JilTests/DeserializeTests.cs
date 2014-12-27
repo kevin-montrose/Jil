@@ -5173,6 +5173,36 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void ISO8601TimeSpan_Weeks()
+        {
+            var rand = new Random();
+            var timeSpans = new List<Tuple<int, string>>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var w = rand.Next(10000);
+
+                var str = "P" + w + "W";
+                if (rand.Next(2) == 0)
+                {
+                    w = -w;
+                    str = "-" + str;
+                }
+
+                timeSpans.Add(Tuple.Create(w, str));
+            }
+
+            foreach (var t in timeSpans)
+            {
+                var w = t.Item1;
+                var str = t.Item2;
+                var ts = JSON.Deserialize<TimeSpan>("\"" + str + "\"", Options.ISO8601);
+
+                Assert.AreEqual(w, ts.TotalDays / 7);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
