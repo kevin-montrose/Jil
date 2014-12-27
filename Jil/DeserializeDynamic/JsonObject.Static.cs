@@ -116,6 +116,24 @@ namespace Jil.DeserializeDynamic
                 }
             }
 
+            if (Type == JsonObjectType.String)
+            {
+                DateTime res;
+                bool ret;
+
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                        ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out res);
+                        dt = res;
+                        return ret;
+                    case DateTimeFormat.ISO8601:
+                        ret = Methods.ReadISO8601DateTime(StringValue, out res);
+                        dt = res;
+                        return ret;
+                }
+            }
+
             dt = default(DateTime);
             return false;
         }
