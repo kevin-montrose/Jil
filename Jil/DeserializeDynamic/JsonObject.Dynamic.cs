@@ -1286,8 +1286,23 @@ namespace Jil.DeserializeDynamic
                     }
                     if(returnType == typeof(TimeSpan))
                     {
-                        // TODO: Implement
-                        throw new NotImplementedException();
+                        TimeSpan ts;
+                        bool ret;
+
+                        switch (Options.UseDateTimeFormat)
+                        {
+                            case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                                ret = Methods.ReadNewtonsoftStyleTimeSpan(StringValue, out ts);
+                                result = ts;
+                                return ret;
+                            case DateTimeFormat.ISO8601:
+                                ret = Methods.ReadISO8601TimeSpan(StringValue, out ts);
+                                result = ts;
+                                return ret;
+                            default:
+                                result = null;
+                                return false;
+                        }
                     }
                     break;
                 case JsonObjectType.Object:

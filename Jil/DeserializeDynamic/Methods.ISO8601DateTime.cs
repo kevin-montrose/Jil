@@ -42,7 +42,7 @@ namespace Jil.DeserializeDynamic
             // hhmm.fff*
             // hh:mm:ss.fff*
             // hhmmss.fff*
-            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 6)
+            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 7)
 
             // Here are the possible formats for timezones
             // Z
@@ -59,7 +59,7 @@ namespace Jil.DeserializeDynamic
             // 9999-12-31T01:23:45.678901+01:23
             // 0123456789ABCDEFGHIJKLMNOPQRS
             //
-            // Maximum date size is 32 characters
+            // Maximum date size is 33 characters
 
             dt = default(DateTime);
             if (str.Length > 33)

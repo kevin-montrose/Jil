@@ -80,7 +80,10 @@
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
     <Compile Include="DeserializeDynamic\Methods.cs" />
-    <Compile Include="DeserializeDynamic\Methods.ISO8601.cs">
+    <Compile Include="DeserializeDynamic\Methods.ISO8601DateTime.cs">
+      <DependentUpon>Methods.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeserializeDynamic\Methods.ISO8601TimeSpan.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />

@@ -530,5 +530,10 @@ namespace Jil.DeserializeDynamic
             dt = UnixEpoch + TimeSpan.FromMilliseconds(l);
             return true;
         }
+
+        public static bool ReadNewtonsoftStyleTimeSpan(string str, out TimeSpan ts)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
