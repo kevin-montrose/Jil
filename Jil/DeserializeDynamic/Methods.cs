@@ -531,9 +531,139 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
+        static readonly double[] DivideFractionBy =
+            new double[]
+            { 
+                10, 
+                100, 
+                1000, 
+                10000, 
+                100000,
+                1000000,
+                10000000,
+                100000000
+            };
+
         public static bool ReadNewtonsoftStyleTimeSpan(string str, out TimeSpan ts)
         {
-            throw new NotImplementedException();
+            if (str.Length == 0)
+            {
+                ts = default(TimeSpan);
+                return false;
+            }
+
+            int days, hours, minutes, seconds, fraction;
+            days = hours = minutes = seconds = fraction = 0;
+
+            bool isNegative, pastDays, pastHours, pastMinutes, pastSeconds;
+            isNegative = pastDays = pastHours = pastMinutes = pastSeconds = false;
+
+            var ixOfLastPeriod = -1;
+            var part = 0;
+
+            int i;
+
+            if (str[0] == '-')
+            {
+                isNegative = true;
+                i = 1;
+            }
+            else
+            {
+                i = 0;
+            }
+
+            for (; i < str.Length; i++)
+            {
+                var c = str[i];
+                if (c == '.')
+                {
+                    ixOfLastPeriod = i;
+
+                    if (!pastDays)
+                    {
+                        days = part;
+                        part = 0;
+                        pastDays = true;
+                        continue;
+                    }
+
+                    if (!pastSeconds)
+                    {
+                        seconds = part;
+                        part = 0;
+                        pastSeconds = true;
+                        continue;
+                    }
+
+                    ts = default(TimeSpan);
+                    return false;
+                }
+
+                if (c == ':')
+                {
+                    if (!pastHours)
+                    {
+                        hours = part;
+                        part = 0;
+                        pastHours = true;
+                        continue;
+                    }
+
+                    if (!pastMinutes)
+                    {
+                        minutes = part;
+                        part = 0;
+                        pastMinutes = true;
+                        continue;
+                    }
+
+                    ts = default(TimeSpan);
+                    return false;
+                }
+
+                if (c < '0' || c > '9')
+                {
+                    ts = default(TimeSpan);
+                    return false;
+                }
+
+                part *= 10;
+                part += (c - '0');
+            }
+
+            if (!pastSeconds)
+            {
+                seconds = part;
+            }
+            else
+            {
+                fraction = part;
+            }
+
+            var msInt = 0;
+            if (fraction != 0)
+            {
+                var sizeOfFraction = str.Length - (ixOfLastPeriod + 1);
+
+                if (sizeOfFraction > 7)
+                {
+                    ts = default(TimeSpan);
+                    return false;
+                }
+
+                var fracOfSecond = part / DivideFractionBy[sizeOfFraction - 1];
+                var ms = fracOfSecond * 1000.0;
+                msInt = (int)ms;
+            }
+
+            ts = new TimeSpan(days, hours, minutes, seconds, msInt);
+            if (isNegative)
+            {
+                ts = ts.Negate();
+            }
+
+            return true;
         }
     }
 }

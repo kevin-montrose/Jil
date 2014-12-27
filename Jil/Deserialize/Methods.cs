@@ -1176,7 +1176,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        static double[] DivideFractionBy =
+        static readonly double[] DivideFractionBy =
             new double[]
             { 
                 10, 
