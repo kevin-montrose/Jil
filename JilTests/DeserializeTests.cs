@@ -5144,6 +5144,35 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void ISO8601TimeSpan_YearsMonth()
+        {
+            var rand = new Random();
+            var timeSpans = new List<string>();
+
+            for (var i = 0; i < 1000; i++)
+            {
+                var y = rand.Next(10000);
+                var m = rand.Next(100);
+
+                var str = "P" + y + "Y" + m + "M";
+                if (rand.Next(2) == 0)
+                {
+                    str = "-" + str;
+                }
+
+                timeSpans.Add(str);
+            }
+
+            foreach (var str in timeSpans)
+            {
+                var shouldMatch = System.Xml.XmlConvert.ToTimeSpan(str);
+                var ts = JSON.Deserialize<TimeSpan>("\"" + str + "\"", Options.ISO8601);
+
+                Assert.AreEqual(shouldMatch.Ticks, ts.Ticks);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

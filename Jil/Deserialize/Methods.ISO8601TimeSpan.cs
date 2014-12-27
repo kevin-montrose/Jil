@@ -22,6 +22,9 @@ namespace Jil.Deserialize
             const ulong TicksPerMinute = 600000000;
             const ulong TicksPerSecond = 10000000;
 
+            const ulong TicksPerMonth = TicksPerDay * 30;
+            const ulong TicksPerYear = TicksPerDay * 365;
+
             // Format goes like so:
             // - (-)P(([n]Y)([n]M)([n]D))(T([n]H)([n]M)([n]S))
             // - P[n]W
@@ -56,7 +59,7 @@ namespace Jil.Deserialize
 
             ix++;   // skip 'P'
 
-            double year, month, week, day;
+            long year, month, week, day;
             var hasTimePart = ISO8601TimeSpan_ReadDatePart(reader, str, len, ref ix, out year, out month, out week, out day);
 
             if (week != -1 && (year != -1 || month != -1 || day != -1))
@@ -68,6 +71,8 @@ namespace Jil.Deserialize
             {
                 throw new DeserializationException("TimeSpans with a week defined cannot also have a time defined", reader);
             }
+
+            if (week != -1) throw new NotImplementedException();
 
             if (year == -1) year = 0;
             if (month == -1) month = 0;
@@ -86,12 +91,20 @@ namespace Jil.Deserialize
                 hour = minute = second = 0;
             }
 
-            if (year != 0) throw new NotImplementedException();
-            if (month != 0) throw new NotImplementedException();
+            ulong ticks = 0;
+            if (year != 0)
+            {
+                ticks += ((ulong)year) * TicksPerYear;
+            }
 
-            var ticks = (ulong)(day * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
+            if (month != 0)
+            {
+                var yearsFromMonths = ((ulong)month) / 12;
+                var monthsAfterYears = ((ulong)month) % 12;
+                ticks += (ulong)(yearsFromMonths * TicksPerYear + monthsAfterYears * TicksPerMonth);
+            }
 
-            TimeSpan ret;
+            ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
 
             if (ticks >= MaxTicks && !isNegative)
             {
@@ -103,7 +116,7 @@ namespace Jil.Deserialize
                 return TimeSpan.MinValue;
             }
 
-            ret = new TimeSpan((long)ticks);
+            var ret = new TimeSpan((long)ticks);
             if (isNegative)
             {
                 ret = ret.Negate();
@@ -138,14 +151,12 @@ namespace Jil.Deserialize
             return ix;
         }
 
-        static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, char[] str, int strLen, ref int ix, out double year, out double month, out double week, out double day)
+        static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, char[] str, int strLen, ref int ix, out long year, out long month, out long week, out long day)
         {
             year = month = week = day = -1;
 
             bool yearSeen, monthSeen, weekSeen, daySeen;
             yearSeen = monthSeen = weekSeen = daySeen = false;
-
-            var fracSeen = false;
 
             while (ix != strLen)
             {
@@ -154,17 +165,12 @@ namespace Jil.Deserialize
                     return true;
                 }
 
-                if (fracSeen)
-                {
-                    throw new DeserializationException("Expected Time part of TimeSpan to start", reader);
-                }
-
                 int whole, fraction, fracLen;
                 var part = ISO8601TimeSpan_ReadPart(reader, str, strLen, ref ix, out whole, out fraction, out fracLen);
 
                 if (fracLen != 0)
                 {
-                    fracSeen = true;
+                    throw new DeserializationException("Fractional values are not supported in the year, month, day, or week parts of an ISO8601 TimeSpan", reader);
                 }
 
                 if (part == 'Y')
@@ -184,7 +190,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Year part of TimeSpan seen after day already parsed", reader);
                     }
 
-                    year = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    year = (long)whole;
                     yearSeen = true;
                     continue;
                 }
@@ -201,7 +207,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Month part of TimeSpan seen after day already parsed", reader);
                     }
 
-                    month = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    month = (long)whole;
                     monthSeen = true;
                     continue;
                 }
@@ -213,7 +219,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Week part of TimeSpan seen twice", reader);
                     }
 
-                    week = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    week = (long)whole;
                     weekSeen = true;
                     continue;
                 }
@@ -225,7 +231,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Day part of TimeSpan seen twice", reader);
                     }
 
-                    day = ISO8601TimeSpan_ToDouble(reader, whole, fraction, fracLen);
+                    day = (long)whole;
                     daySeen = true;
                     continue;
                 }
