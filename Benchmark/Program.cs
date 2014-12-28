@@ -9,6 +9,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Jil;
 using System.IO;
+using Benchmark.Models;
 
 namespace Benchmark
 {
@@ -174,6 +175,15 @@ namespace Benchmark
                             }
                     )
                 ).ToList();
+        }
+
+        static byte[] ProtobufSerialize<T>(T obj)
+        {
+            using (var mem = new MemoryStream())
+            {
+                ProtoBuf.Serializer.Serialize(mem, obj);
+                return mem.ToArray();
+            }
         }
 
         static MethodInfo _NewtonsoftSerialize = typeof(Program).GetMethod("NewtonsoftSerialize", BindingFlags.NonPublic | BindingFlags.Static);
@@ -639,10 +649,166 @@ namespace Benchmark
             }
         }
 
+        const int JilIndex = 0;
+        const int NewtonSoftIndex = 1;
+        const int ProtobufIndex = 2;
+        const int ServiceStackIndex = 3;
+
+        static void DoComparisonGraph()
+        {
+            // single
+            ResetRand();
+            double[] answerSpeed = CompareSerializers((Answer)MakeSingleObject(typeof(Answer)));
+
+            ResetRand();
+            double[] questionSpeed = CompareSerializers((Question)MakeSingleObject(typeof(Question)));
+
+            ResetRand();
+            double[] userSpeed = CompareSerializers((User)MakeSingleObject(typeof(User)));
+
+            // list
+            ResetRand();
+            double[] answerListSpeed = CompareSerializers((List<Answer>)MakeListObject(typeof(Answer)));
+
+            ResetRand();
+            double[] questionListSpeed = CompareSerializers((List<Question>)MakeListObject(typeof(Question)));
+
+            ResetRand();
+            double[] userListSpeed = CompareSerializers((List<User>)MakeListObject(typeof(User)));
+
+            // dictionary
+            ResetRand();
+            double[] answerDictSpeed = CompareSerializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)));
+
+            ResetRand();
+            double[] questionDictSpeed = CompareSerializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)));
+
+            ResetRand();
+            double[] userDictSpeed = CompareSerializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)));
+
+            Console.WriteLine("\tJil\tNewtonSoft\tProtobuf\tServiceStack");
+            
+            Console.WriteLine("Answer\t" + answerSpeed[JilIndex] + "\t" + answerSpeed[NewtonSoftIndex] + "\t" + answerSpeed[ProtobufIndex] + "\t" + answerSpeed[ServiceStackIndex]);
+            Console.WriteLine("Question\t" + questionSpeed[JilIndex] + "\t" + questionSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionSpeed[ServiceStackIndex]);
+            Console.WriteLine("User\t" + userSpeed[JilIndex] + "\t" + userSpeed[NewtonSoftIndex] + "\t" + userSpeed[ProtobufIndex] + "\t" + userSpeed[ServiceStackIndex]);
+            Console.WriteLine();
+            Console.WriteLine("List<Answer>\t" + answerListSpeed[JilIndex] + "\t" + answerListSpeed[NewtonSoftIndex] + "\t" + answerListSpeed[ProtobufIndex] + "\t" + answerListSpeed[ServiceStackIndex]);
+            Console.WriteLine("List<Question>\t" + questionListSpeed[JilIndex] + "\t" + questionListSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionListSpeed[ServiceStackIndex]);
+            Console.WriteLine("List<User>\t" + userListSpeed[JilIndex] + "\t" + userListSpeed[NewtonSoftIndex] + "\t" + userListSpeed[ProtobufIndex] + "\t" + userListSpeed[ServiceStackIndex]);
+            Console.WriteLine();
+            Console.WriteLine("Dictionary<string,Answer>\t" + answerDictSpeed[JilIndex] + "\t" + answerDictSpeed[NewtonSoftIndex] + "\t" + answerDictSpeed[ProtobufIndex] + "\t" + answerDictSpeed[ServiceStackIndex]);
+            Console.WriteLine("Dictionary<string,Question>\t" + questionDictSpeed[JilIndex] + "\t" + questionDictSpeed[NewtonSoftIndex] + "\t" + questionDictSpeed[ProtobufIndex] + "\t" + questionDictSpeed[ServiceStackIndex]);
+            Console.WriteLine("Dictionary<string,User>\t" + userDictSpeed[JilIndex] + "\t" + userDictSpeed[NewtonSoftIndex] + "\t" + userDictSpeed[ProtobufIndex] + "\t" + userDictSpeed[ServiceStackIndex]);
+        }
+
+        static double[] CompareSerializers<T>(T obj)
+        {
+            const int TestRuns = 100;
+
+            Action<T> jilSerializer = a => JilSerialize(a);
+            Action<T> newtonSoftSerializer = a => NewtonsoftSerialize(a);
+            Action<T> protobufSerializer = a => ProtobufSerialize(a);
+            Action<T> serviceStackSerializer = a => ServiceStackSerialize(a);
+
+            jilSerializer(default(T));
+            newtonSoftSerializer(default(T));
+            protobufSerializer(default(T));
+            serviceStackSerializer(default(T));
+            
+            var ret = new double[4];
+            
+
+            // Jil
+            {
+                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                
+                var testGroup = new TestGroup("Jil");
+                var serializeResult = testGroup.Plan("Serialization", () => jilSerializer(obj), TestRuns).GetResult();
+
+                if (serializeResult.Outcomes.Any(o => o.Exception != null))
+                {
+                    throw new Exception();
+                }
+
+                ret[JilIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+            }
+
+            // NewtonSoft
+            {
+                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+
+                var testGroup = new TestGroup("NewtonSoft");
+                var serializeResult = testGroup.Plan("Serialization", () => newtonSoftSerializer(obj), TestRuns).GetResult();
+
+                if (serializeResult.Outcomes.Any(o => o.Exception != null))
+                {
+                    throw new Exception();
+                }
+
+                ret[NewtonSoftIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+            }
+
+            // Protobuf
+            {
+                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+
+                var testGroup = new TestGroup("Protobuf");
+                var serializeResult = testGroup.Plan("Serialization", () => protobufSerializer(obj), TestRuns).GetResult();
+
+                if (serializeResult.Outcomes.Any(o => o.Exception != null))
+                {
+                    throw new Exception();
+                }
+
+                ret[ProtobufIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+            }
+
+            // ServiceStack
+            {
+                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+
+                var testGroup = new TestGroup("ServiceStack");
+                var serializeResult = testGroup.Plan("Serialization", () => serviceStackSerializer(obj), TestRuns).GetResult();
+
+                if (serializeResult.Outcomes.Any(o => o.Exception != null))
+                {
+                    throw new Exception();
+                }
+
+                ret[ServiceStackIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+            }
+
+            return ret;
+        }
+
         static void Main(string[] args)
         {
-            Console.WriteLine("== Quick Graph " + DateTime.UtcNow + " ==");
-            DoQuickGraph();
+            Console.WriteLine("1. Quick Graph");
+            Console.WriteLine("2. Comparison Graph");
+
+            Console.WriteLine();
+            Console.Write("Selection? ");
+            var k = Console.ReadKey().KeyChar;
+            Console.WriteLine();
+
+            if (k == '1')
+            {
+                Console.WriteLine("== Quick Graph " + DateTime.UtcNow + " ==");
+                DoQuickGraph();
+            }
+            else
+            {
+                if (k == '2')
+                {
+                    Console.WriteLine("== Comparison Graph " + DateTime.UtcNow + " ==");
+                    DoComparisonGraph();
+                }
+                else
+                {
+                    Console.WriteLine("Unknown Options");
+                    return;
+                }
+            }
 
             Console.WriteLine("== Finished ==");
 
