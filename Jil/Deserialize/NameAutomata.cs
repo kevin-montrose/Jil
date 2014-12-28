@@ -14,9 +14,9 @@ namespace Jil.Deserialize
 {
     internal static class NameAutomata<T>
     {
-        public static class Helper
+        static class Helper
         {
-            public static void Consume(TextReader tr, int ch)
+            static void Consume(TextReader tr, int ch)
             {
                 while (ch != '\"' && ch != -1)
                 {
@@ -24,7 +24,7 @@ namespace Jil.Deserialize
                 }
             }
 
-            public static char ExpectUnicodeHexQuad(TextReader reader)
+            static char ExpectUnicodeHexQuad(TextReader reader)
             {
                 var c = reader.Read();
                 if (c != 'u')
@@ -37,8 +37,8 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int) });
-        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
+        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", BindingFlags.Static | BindingFlags.NonPublic);
 
         class Data
         {
