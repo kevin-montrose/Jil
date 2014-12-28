@@ -635,10 +635,17 @@ namespace Jil.DeserializeDynamic
             if (!pastSeconds)
             {
                 seconds = part;
+                pastSeconds = true;
             }
             else
             {
                 fraction = part;
+            }
+
+            if (!pastHours || !pastMinutes || !pastSeconds)
+            {
+                ts = default(TimeSpan);
+                return false;
             }
 
             var msInt = 0;

@@ -1279,10 +1279,16 @@ namespace Jil.Deserialize
             if (!pastSeconds)
             {
                 seconds = part;
+                pastSeconds = true;
             }
             else
             {
                 fraction = part;
+            }
+
+            if (!pastHours || !pastMinutes || !pastSeconds)
+            {
+                throw new DeserializationException("Missing required portion of TimeSpan", reader);
             }
 
             var msInt = 0;
