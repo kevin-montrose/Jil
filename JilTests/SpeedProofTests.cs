@@ -1256,108 +1256,6 @@ namespace JilTests
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
-        class _NameAutomataSwitches
-        {
-            public string A { get; set; }
-            public string B { get; set; }
-            public string C { get; set; }
-            public string D { get; set; }
-            public string E { get; set; }
-            public string F { get; set; }
-            public string G { get; set; }
-            public string H { get; set; }
-            public string I { get; set; }
-            public string J { get; set; }
-            public string K { get; set; }
-            public string L { get; set; }
-            public string M { get; set; }
-            public string N { get; set; }
-            public string O { get; set; }
-            public string P { get; set; }
-            public string Q { get; set; }
-            public string R { get; set; }
-            public string S { get; set; }
-            public string T { get; set; }
-            public string U { get; set; }
-            public string V { get; set; }
-            public string W { get; set; }
-            public string X { get; set; }
-            public string Y { get; set; }
-            public string Z { get; set; }
-        }
-
-        [TestMethod]
-        public void NameAutomataSwitches()
-        {
-            var obj = 
-                new _NameAutomataSwitches
-                {
-                    A = "a",
-                    B = "b",
-                    C = "c",
-                    D = "d",
-                    E = "e",
-                    F = "f",
-                    G = "g",
-                    H = "h",
-                    I = "i",
-                    J = "j",
-                    K = "k",
-                    L = "L",
-                    M = "m",
-                    N = "n",
-                    O = "o",
-                    P = "p",
-                    Q = "q",
-                    R = "r",
-                    S = "s",
-                    T = "t",
-                    U = "u",
-                    V = "v",
-                    W = "w",
-                    X = "x",
-                    Y = "y",
-                    Z = "z"
-                };
-
-            Func<TextReader, int, _NameAutomataSwitches> switches;
-            Func<TextReader, int, _NameAutomataSwitches> normal;
-
-            try
-            {
-                {
-                    NameAutomataConfig.UseSwitches = true;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    switches = InlineDeserializerHelper.Build<_NameAutomataSwitches>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                }
-
-                {
-                    NameAutomataConfig.UseSwitches = false;
-                    Exception ignored;
-
-                    // Build the *actual* deserializer method
-                    normal = InlineDeserializerHelper.Build<_NameAutomataSwitches>(typeof(Jil.Deserialize.NewtonsoftStyle), dateFormat: Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, exceptionDuringBuild: out ignored);
-                }
-            }
-            finally
-            {
-                NameAutomataConfig.UseSwitches = true;
-            }
-
-            var toSerialize = new List<_NameAutomataSwitches>();
-            for (var i = 0; i < 10000; i++)
-            {
-                toSerialize.Add(obj);
-            }
-
-            double switchTime, normalTime;
-            CompareTimes(toSerialize, Jil.Options.Default, switches, normal, out switchTime, out normalTime);
-
-            Assert.IsTrue(switchTime < normalTime, "switchTime = " + switchTime + ", normalTime = " + normalTime);
-        }
-
         class _NameAutomataBinarySearch
         {
             public string A { get; set; }
@@ -1428,7 +1326,6 @@ namespace JilTests
             try
             {
                 {
-                    NameAutomataConfig.UseSwitches = false;
                     NameAutomataConfig.UseBinarySearch = true;
                     Exception ignored;
 
@@ -1437,7 +1334,6 @@ namespace JilTests
                 }
 
                 {
-                    NameAutomataConfig.UseSwitches = false;
                     NameAutomataConfig.UseBinarySearch = false;
                     Exception ignored;
 
@@ -1447,7 +1343,6 @@ namespace JilTests
             }
             finally
             {
-                NameAutomataConfig.UseSwitches = true;
                 NameAutomataConfig.UseBinarySearch = true;
             }
 

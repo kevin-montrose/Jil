@@ -14,7 +14,6 @@ namespace Jil.Deserialize
 {
     internal static class NameAutomataConfig
     {
-        public static bool UseSwitches = true;
         public static bool UseBinarySearch = true;
     }
 
@@ -193,53 +192,20 @@ namespace Jil.Deserialize
 
         static void DoCharBranches(Data d, List<Tuple<char, Label>> namesToFinish)
         {
-            // TODO: these different approaches start at random constants
-            //       actually get some rigor behind when we decide to do either
-
-            var groups = SplitIntoContiguousGroups(namesToFinish);
-
-            List<Tuple<char, Label>> remainingNamesToFinish;
-            if (NameAutomataConfig.UseSwitches)
+            // TODO: 5 is arbitrary, actually figure out what # is the tipping point
+            if (namesToFinish.Count >= 5 && NameAutomataConfig.UseBinarySearch)
             {
-                var switches = groups.Where(g => g.Count >= 5).ToList();
-
-                foreach (var needsSwitch in switches)
-                {
-                    DoCharSwitch(d, needsSwitch);
-                }
-
-                remainingNamesToFinish = namesToFinish.Where(t => !switches.Any(s => s.Any(x => x.Item1 == t.Item1))).ToList();
+                DoCharBinarySearch(d, namesToFinish);
             }
             else
             {
-                remainingNamesToFinish = namesToFinish;
-            }
-
-            if (remainingNamesToFinish.Count >= 5 && NameAutomataConfig.UseBinarySearch)
-            {
-                DoCharBinarySearch(d, remainingNamesToFinish);
-            }
-            else
-            {
-                foreach (var item in remainingNamesToFinish)
+                foreach (var item in namesToFinish)
                 {
                     d.Emit.LoadLocal(d.Local_ch);
                     d.Emit.LoadConstant((int)item.Item1);
                     d.Emit.BranchIfEqual(item.Item2);
                 }
             }
-        }
-
-        static void DoCharSwitch(Data d, List<Tuple<char, Label>> namesToFinish)
-        {
-            var minVal = namesToFinish.OrderBy(_ => _.Item1).First().Item1;
-
-            var allLabels = namesToFinish.OrderBy(_ => _.Item1).Select(_ => _.Item2).ToArray();
-
-            d.Emit.LoadLocal(d.Local_ch);       // int
-            d.Emit.LoadConstant((int)minVal);   // int int
-            d.Emit.Subtract();                  // int
-            d.Emit.Switch(allLabels);           // --empty--
         }
 
         static void DoCharBinarySearch(Data d, List<Tuple<char, Label>> namesToFinish)
