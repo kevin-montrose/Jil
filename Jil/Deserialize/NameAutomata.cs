@@ -171,18 +171,7 @@ namespace Jil.Deserialize
                 d.Emit.CallVirtual(TextReader_Read);
                 d.Emit.StoreLocal(d.Local_ch);
 
-                Action checkChars = () =>
-                {
-                    // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
-                    foreach (var item in namesToFinish)
-                    {
-                        d.Emit.LoadLocal(d.Local_ch);
-                        d.Emit.LoadConstant((int)item.Item1);
-                        d.Emit.BranchIfEqual(item.Item2);
-                    }
-                };
-
-                checkChars();
+                DoBranches(d, namesToFinish);
 
                 d.Emit.LoadLocal(d.Local_ch);               // char
                 d.Emit.LoadConstant('\\');                  // char char
@@ -191,10 +180,21 @@ namespace Jil.Deserialize
                 d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
                 d.Emit.StoreLocal(d.Local_ch);              //
 
-                checkChars();
+                DoBranches(d, namesToFinish);
 
                 d.Emit.Branch(d.Failure);
             });
+        }
+
+        static void DoBranches(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
+            foreach (var item in namesToFinish)
+            {
+                d.Emit.LoadLocal(d.Local_ch);
+                d.Emit.LoadConstant((int)item.Item1);
+                d.Emit.BranchIfEqual(item.Item2);
+            }
         }
 
         public static AutomataName CreateName(string name, Action<Emit<Func<TextReader, T>>> onFound)
