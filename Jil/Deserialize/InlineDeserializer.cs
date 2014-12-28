@@ -17,6 +17,8 @@ namespace Jil.Deserialize
         public static bool UseCharArrayOverStringBuilder = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;
+        public static bool UseNameAutomataSwitches = true;
+        public static bool UseNameAutomataBinarySearch = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -1259,11 +1261,11 @@ namespace Jil.Deserialize
                 // special case object w/ no deserializable properties
                 if (setters.Count == 0)
                 {
-                    loadObj();                      // objType(*?)
+                    loadObj();                          // objType(*?)
 
                     if (objType.IsValueType)
                     {
-                        Emit.LoadObject(objType);   // objType
+                        Emit.LoadObject(objType);       // objType
                     }
 
                     SkipAllMembers(done, doneSkipChar); // objType
@@ -1293,10 +1295,10 @@ namespace Jil.Deserialize
 
                 CheckQuote();               // objType(*?)
                 Emit.LoadArgument(0);       // objType(*?) TextReader
-                Emit.Call(findSetterIdx);  // objType(*?) int
+                Emit.Call(findSetterIdx);   // objType(*?) int
 
-                ReadSkipWhitespace();        // objType(*?) int
-                CheckChar(':');            // objType(*?) int
+                ReadSkipWhitespace();       // objType(*?) int
+                CheckChar(':');             // objType(*?) int
                 ConsumeWhiteSpace();        // objType(*?) int
 
                 var readingMember = Emit.DefineLabel();
@@ -1306,10 +1308,10 @@ namespace Jil.Deserialize
                 {
                     var isMember = Emit.DefineLabel();
 
-                    Emit.Duplicate();// objType(*?) int int
-                    Emit.StoreLocal(oLoc);// objType(*?) int
-                    Emit.LoadConstant(0); // objType(*?) int int
-                    Emit.BranchIfGreaterOrEqual(isMember); // objType(*?)
+                    Emit.Duplicate();                       // objType(*?) int int
+                    Emit.StoreLocal(oLoc);                  // objType(*?) int
+                    Emit.LoadConstant(0);                   // objType(*?) int int
+                    Emit.BranchIfGreaterOrEqual(isMember);  // objType(*?)
 
                     Emit.Pop();                     // --empty--
                     SkipObjectMember();             // --empty--
@@ -1337,7 +1339,7 @@ namespace Jil.Deserialize
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
                         Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);           // objType(*?) memberType
+                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
                     }
                     else
                     {
@@ -1346,26 +1348,26 @@ namespace Jil.Deserialize
 
                     if (member is FieldInfo)
                     {
-                        Emit.StoreField((FieldInfo)member);             // --empty--
+                        Emit.StoreField((FieldInfo)member); // --empty--
                     }
                     else
                     {
-                        SetProperty((PropertyInfo)member);              // --empty--
+                        SetProperty((PropertyInfo)member);  // --empty--
                     }
 
-                    Emit.Branch(loopStart);     // --empty--
+                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
 
-                Emit.MarkLabel(loopStart);      // --empty--
-                loadObj();                      // objType(*?)
-                ReadSkipWhitespace();           // objType(*?) int 
-                Emit.Duplicate();               // objType(*?) int int
-                Emit.LoadConstant(',');         // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);   // objType(*?) int
-                Emit.LoadConstant('}');         // objType(*?) int '}'
-                Emit.BranchIfEqual(doneSkipChar);// objType(*?)
+                Emit.MarkLabel(loopStart);          // --empty--
+                loadObj();                          // objType(*?)
+                ReadSkipWhitespace();               // objType(*?) int 
+                Emit.Duplicate();                   // objType(*?) int int
+                Emit.LoadConstant(',');             // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);       // objType(*?) int
+                Emit.LoadConstant('}');             // objType(*?) int '}'
+                Emit.BranchIfEqual(doneSkipChar);   // objType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
@@ -1375,8 +1377,8 @@ namespace Jil.Deserialize
                 ReadSkipWhitespace();
 
                 CheckQuote();
-                Emit.LoadArgument(0);           // TextReader
-                Emit.Call(findSetterIdx);      // int
+                Emit.LoadArgument(0);               // TextReader
+                Emit.Call(findSetterIdx);           // int
 
                 ReadSkipWhitespace();               // objType(*?) int
                 CheckChar(':');                     // objType(*?) int
@@ -1393,7 +1395,7 @@ namespace Jil.Deserialize
 
             if (objType.IsValueType)
             {
-                Emit.LoadObject(objType);     // objType
+                Emit.LoadObject(objType);       // objType
             }
         }
 
@@ -1518,7 +1520,7 @@ namespace Jil.Deserialize
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
                         Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);           // objType(*?) memberType
+                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
                     }
                     else
                     {
@@ -1527,26 +1529,26 @@ namespace Jil.Deserialize
 
                     if (member is FieldInfo)
                     {
-                        Emit.StoreField((FieldInfo)member);             // --empty--
+                        Emit.StoreField((FieldInfo)member); // --empty--
                     }
                     else
                     {
-                        SetProperty((PropertyInfo)member);              // --empty--
+                        SetProperty((PropertyInfo)member);  // --empty--
                     }
 
-                    Emit.Branch(loopStart);     // --empty--
+                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
 
-                Emit.MarkLabel(loopStart);      // --empty--
-                loadObj();                      // objType(*?)
-                ReadSkipWhitespace();                  // objType(*?) int 
-                Emit.Duplicate();               // objType(*?) int int
-                Emit.LoadConstant(',');         // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);   // objType(*?) int
-                Emit.LoadConstant('}');         // objType(*?) int '}'
-                Emit.BranchIfEqual(doneSkipChar);       // objType(*?)
+                Emit.MarkLabel(loopStart);          // --empty--
+                loadObj();                          // objType(*?)
+                ReadSkipWhitespace();               // objType(*?) int 
+                Emit.Duplicate();                   // objType(*?) int int
+                Emit.LoadConstant(',');             // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);       // objType(*?) int
+                Emit.LoadConstant('}');             // objType(*?) int '}'
+                Emit.BranchIfEqual(doneSkipChar);   // objType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
@@ -1571,7 +1573,7 @@ namespace Jil.Deserialize
 
             if(objType.IsValueType)
             {
-                Emit.LoadObject(objType);     // objType
+                Emit.LoadObject(objType);       // objType
             }
         }
 
@@ -1629,18 +1631,18 @@ namespace Jil.Deserialize
 
             var loopStart = Emit.DefineLabel();
 
-            ConsumeWhiteSpace();        // --empty--
-            RawPeekChar();              // int 
-            Emit.LoadConstant('}');     // int '}'
-            Emit.BranchIfEqual(doneNotNull);   // --empty--
-            Emit.LoadField(order);      // Dictionary<string, int> string
-            Build(typeof(string));      // Dictionary<string, int> string
-            ReadSkipWhitespace();       // Dictionary<string, int> string
-            CheckChar(':');             // Dictionary<string, int> string
-            ConsumeWhiteSpace();        // Dictionary<string, int> string
+            ConsumeWhiteSpace();                // --empty--
+            RawPeekChar();                      // int 
+            Emit.LoadConstant('}');             // int '}'
+            Emit.BranchIfEqual(doneNotNull);    // --empty--
+            Emit.LoadField(order);              // Dictionary<string, int> string
+            Build(typeof(string));              // Dictionary<string, int> string
+            ReadSkipWhitespace();               // Dictionary<string, int> string
+            CheckChar(':');                     // Dictionary<string, int> string
+            ConsumeWhiteSpace();                // Dictionary<string, int> string
 
             var readingMember = Emit.DefineLabel();
-            Emit.MarkLabel(readingMember);  // Dictionary<string, int> string
+            Emit.MarkLabel(readingMember);      // Dictionary<string, int> string
 
             using (var oLoc = Emit.DeclareLocal<int>())
             {
@@ -1676,14 +1678,14 @@ namespace Jil.Deserialize
 
             var nextItem = Emit.DefineLabel();
 
-            Emit.MarkLabel(loopStart);      // --empty--
-            ConsumeWhiteSpace();            // --empty--
-            RawPeekChar();                  // int 
-            Emit.Duplicate();               // int int
-            Emit.LoadConstant(',');         // int int ','
-            Emit.BranchIfEqual(nextItem);   // int
-            Emit.LoadConstant('}');         // int '}'
-            Emit.BranchIfEqual(doneNotNull);       // --empty--
+            Emit.MarkLabel(loopStart);          // --empty--
+            ConsumeWhiteSpace();                // --empty--
+            RawPeekChar();                      // int 
+            Emit.Duplicate();                   // int int
+            Emit.LoadConstant(',');             // int int ','
+            Emit.BranchIfEqual(nextItem);       // int
+            Emit.LoadConstant('}');             // int '}'
+            Emit.BranchIfEqual(doneNotNull);    // --empty--
 
             // didn't get what we expected
             ThrowExpected(",", "}");
@@ -1701,7 +1703,7 @@ namespace Jil.Deserialize
             ConsumeWhiteSpace();                // Dictionary<string, int> string
             Emit.Branch(readingMember);         // Dictionary<string, int> string
 
-            Emit.MarkLabel(doneNotNull);               // --empty--
+            Emit.MarkLabel(doneNotNull);        // --empty--
             Emit.LoadArgument(0);               // TextReader
             Emit.CallVirtual(TextReader_Read);  // int
             Emit.Pop();                         // --empty--
@@ -1789,10 +1791,10 @@ namespace Jil.Deserialize
 
             var loopStart = Emit.DefineLabel();
 
-            ReadSkipWhitespace();       // int 
+            ReadSkipWhitespace();                       // int 
             Emit.Duplicate();
-            Emit.LoadConstant('}');     // int '}'
-            Emit.BranchIfEqual(doneNotNullPopSkipChar);   // --empty--
+            Emit.LoadConstant('}');                     // int '}'
+            Emit.BranchIfEqual(doneNotNullPopSkipChar); // --empty--
 
             CheckQuote();                               // --empty--
             Emit.LoadArgument(0);                       // TextReader
@@ -1823,20 +1825,20 @@ namespace Jil.Deserialize
 
             var nextItem = Emit.DefineLabel();
 
-            Emit.MarkLabel(loopStart);      // --empty--
-            ReadSkipWhitespace();           // --empty--
-            Emit.Duplicate();               // int int
-            Emit.LoadConstant(',');         // int int ','
-            Emit.BranchIfEqual(nextItem);   // int
-            Emit.LoadConstant('}');         // int '}'
-            Emit.BranchIfEqual(doneNotNullSkipChar);// --empty--
+            Emit.MarkLabel(loopStart);                  // --empty--
+            ReadSkipWhitespace();                       // --empty--
+            Emit.Duplicate();                           // int int
+            Emit.LoadConstant(',');                     // int int ','
+            Emit.BranchIfEqual(nextItem);               // int
+            Emit.LoadConstant('}');                     // int '}'
+            Emit.BranchIfEqual(doneNotNullSkipChar);    // --empty--
 
             // didn't get what we expected
             ThrowExpected(",", "}");
 
-            Emit.MarkLabel(nextItem);           // int
-            Emit.Pop();                         // --empty--
-            ReadSkipWhitespace();               // --empty--
+            Emit.MarkLabel(nextItem);                   // int
+            Emit.Pop();                                 // --empty--
+            ReadSkipWhitespace();                       // --empty--
 
             CheckQuote();                               // --empty--
             Emit.LoadArgument(0);                       // TextReader

@@ -12,11 +12,16 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
+    internal static class NameAutomataConfig
+    {
+        public static bool UseBinarySearch = true;
+    }
+
     internal static class NameAutomata<T>
     {
-        public static class Helper
+        static class Helper
         {
-            public static void Consume(TextReader tr, int ch)
+            static void Consume(TextReader tr, int ch)
             {
                 while (ch != '\"' && ch != -1)
                 {
@@ -24,7 +29,7 @@ namespace Jil.Deserialize
                 }
             }
 
-            public static char ExpectUnicodeHexQuad(TextReader reader)
+            static char ExpectUnicodeHexQuad(TextReader reader)
             {
                 var c = reader.Read();
                 if (c != 'u')
@@ -37,8 +42,8 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", new[] { typeof(TextReader), typeof(int) });
-        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", new[] { typeof(TextReader) });
+        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", BindingFlags.Static | BindingFlags.NonPublic);
+        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", BindingFlags.Static | BindingFlags.NonPublic);
 
         class Data
         {
@@ -52,17 +57,16 @@ namespace Jil.Deserialize
             public readonly bool FoldMultipleValues;
             public readonly bool CaseSensitive;
 
-            public Data
-                (Action<Action> addAction
-                , Emit<Func<TextReader, T>> emit
-                , Action<Emit<Func<TextReader, T>>> doReturn
-                , Label start
-                , Label failure
-                , Local local_ch
-                , bool skipWhitespace
-                , bool foldMultipleValues
-                , bool caseSensitive
-                )
+            public Data(
+                Action<Action> addAction, 
+                Emit<Func<TextReader, T>> emit, 
+                Action<Emit<Func<TextReader, T>>> doReturn, 
+                Label start, 
+                Label failure, 
+                Local local_ch, 
+                bool skipWhitespace, 
+                bool foldMultipleValues, 
+                bool caseSensitive)
             {
                 AddAction = addAction;
                 Emit = emit;
@@ -171,18 +175,7 @@ namespace Jil.Deserialize
                 d.Emit.CallVirtual(TextReader_Read);
                 d.Emit.StoreLocal(d.Local_ch);
 
-                Action checkChars = () =>
-                {
-                    // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
-                    foreach (var item in namesToFinish)
-                    {
-                        d.Emit.LoadLocal(d.Local_ch);
-                        d.Emit.LoadConstant((int)item.Item1);
-                        d.Emit.BranchIfEqual(item.Item2);
-                    }
-                };
-
-                checkChars();
+                DoCharBranches(d, namesToFinish);
 
                 d.Emit.LoadLocal(d.Local_ch);               // char
                 d.Emit.LoadConstant('\\');                  // char char
@@ -191,10 +184,120 @@ namespace Jil.Deserialize
                 d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
                 d.Emit.StoreLocal(d.Local_ch);              //
 
-                checkChars();
+                DoCharBranches(d, namesToFinish);
 
                 d.Emit.Branch(d.Failure);
             });
+        }
+
+        static void DoCharBranches(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+
+            if (NameAutomataConfig.UseBinarySearch)
+            {
+                var bsComparisons = (int)Math.Ceiling(Math.Log(namesToFinish.Count, 2)) + 1;
+                if (bsComparisons < namesToFinish.Count)
+                {
+                    DoCharBinarySearch(d, namesToFinish);
+                }
+                else
+                {
+                    DoCharLinearScan(d, namesToFinish);
+                }
+            }
+            else
+            {
+                DoCharLinearScan(d, namesToFinish);
+            }
+        }
+
+        static void DoCharLinearScan(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            foreach (var item in namesToFinish)
+            {
+                d.Emit.LoadLocal(d.Local_ch);
+                d.Emit.LoadConstant((int)item.Item1);
+                d.Emit.BranchIfEqual(item.Item2);
+            }
+        }
+
+        static void DoCharBinarySearch(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            var noMatch = d.Emit.DefineLabel();
+
+            var inOrder = namesToFinish.OrderBy(_ => _.Item1).ToList();
+
+            Action<List<Tuple<char, Label>>> match = null;
+            match =
+                charsLeft =>
+                {
+                    if (charsLeft.Count == 0)
+                    {
+                        d.Emit.Branch(noMatch);                 // --empty--
+                        return;
+                    }
+
+                    if (charsLeft.Count == 1)
+                    {
+                        var exact = charsLeft[0];
+
+                        d.Emit.LoadLocal(d.Local_ch);           // int
+                        d.Emit.LoadConstant((int)exact.Item1);  // int int
+                        d.Emit.BranchIfEqual(exact.Item2);      // --empty--
+                        d.Emit.Branch(noMatch);                 // --empty--
+                        return;
+                    }
+
+                    var midPoint = charsLeft.Count / 2;
+                    var midVal = charsLeft[midPoint];
+
+                    var left = charsLeft.Take(midPoint).ToList();
+                    var right = charsLeft.Skip(midPoint).ToList();
+
+                    var leftLabel = d.Emit.DefineLabel();
+
+                    d.Emit.LoadLocal(d.Local_ch);           // int
+                    d.Emit.LoadConstant((int)midVal.Item1); // int int
+                    d.Emit.BranchIfLess(leftLabel);         // --empty--
+                    match(right);                           // --empty--
+
+                    d.Emit.MarkLabel(leftLabel);            // --empty--
+                    match(left);                            // --empty
+                };
+
+            match(inOrder);
+
+            d.Emit.MarkLabel(noMatch);
+        }
+
+        static List<List<Tuple<char, Label>>> SplitIntoContiguousGroups(List<Tuple<char, Label>> chars)
+        {
+            var inOrder = chars.OrderBy(t => t.Item1).ToList();
+
+            var ret = new List<List<Tuple<char, Label>>>();
+
+            var runningGroup = new List<Tuple<char, Label>>();
+
+            foreach (var t in inOrder)
+            {
+                if (runningGroup.Count == 0 || (runningGroup[runningGroup.Count - 1].Item1 + 1) == t.Item1)
+                {
+                    runningGroup.Add(t);
+                }
+                else
+                {
+                    ret.Add(runningGroup);
+                    runningGroup = new List<Tuple<char, Label>>();
+                    runningGroup.Add(t);
+                }
+            }
+
+            if (runningGroup.Count > 0)
+            {
+                ret.Add(runningGroup);
+            }
+
+            return ret;
         }
 
         public static AutomataName CreateName(string name, Action<Emit<Func<TextReader, T>>> onFound)

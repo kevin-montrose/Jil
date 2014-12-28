@@ -75,10 +75,10 @@ These methods return `dynamic`, and support the following operations:
       - in this example, `keyValue` is a dynamic with `Key` and `Value` properties
     * or `foreach(var item in JSON.DeserializeDynamic("[0, 1, 2]")) { ... }`
       - in this example, `item` is a `dynamic` and will have values 0, 1, and 2
-   - Common unary operators (+, -, and !)
-   - Common binary operators (&&, ||, +, -, *, /, ==, !=, <, <=, >, and >=)
-   - `.Length` & `.Count` on arrays
-   - `.ContainsKey(string)` on objects
+  - Common unary operators (+, -, and !)
+  - Common binary operators (&&, ||, +, -, *, /, ==, !=, <, <=, >, and >=)
+  - `.Length` & `.Count` on arrays
+  - `.ContainsKey(string)` on objects
 
 ## Supported Types
 
