@@ -192,19 +192,32 @@ namespace Jil.Deserialize
 
         static void DoCharBranches(Data d, List<Tuple<char, Label>> namesToFinish)
         {
-            // TODO: 5 is arbitrary, actually figure out what # is the tipping point
-            if (namesToFinish.Count >= 5 && NameAutomataConfig.UseBinarySearch)
+
+            if (NameAutomataConfig.UseBinarySearch)
             {
-                DoCharBinarySearch(d, namesToFinish);
+                var bsComparisons = (int)Math.Ceiling(Math.Log(namesToFinish.Count, 2)) + 1;
+                if (bsComparisons < namesToFinish.Count)
+                {
+                    DoCharBinarySearch(d, namesToFinish);
+                }
+                else
+                {
+                    DoCharLinearScan(d, namesToFinish);
+                }
             }
             else
             {
-                foreach (var item in namesToFinish)
-                {
-                    d.Emit.LoadLocal(d.Local_ch);
-                    d.Emit.LoadConstant((int)item.Item1);
-                    d.Emit.BranchIfEqual(item.Item2);
-                }
+                DoCharLinearScan(d, namesToFinish);
+            }
+        }
+
+        static void DoCharLinearScan(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            foreach (var item in namesToFinish)
+            {
+                d.Emit.LoadLocal(d.Local_ch);
+                d.Emit.LoadConstant((int)item.Item1);
+                d.Emit.BranchIfEqual(item.Item2);
             }
         }
 
