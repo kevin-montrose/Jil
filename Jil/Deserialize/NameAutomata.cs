@@ -12,6 +12,12 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
+    internal static class NameAutomataConfig
+    {
+        public static bool UseSwitches = true;
+        public static bool UseBinarySearch = true;
+    }
+
     internal static class NameAutomata<T>
     {
         static class Helper
@@ -52,17 +58,16 @@ namespace Jil.Deserialize
             public readonly bool FoldMultipleValues;
             public readonly bool CaseSensitive;
 
-            public Data
-                (Action<Action> addAction
-                , Emit<Func<TextReader, T>> emit
-                , Action<Emit<Func<TextReader, T>>> doReturn
-                , Label start
-                , Label failure
-                , Local local_ch
-                , bool skipWhitespace
-                , bool foldMultipleValues
-                , bool caseSensitive
-                )
+            public Data(
+                Action<Action> addAction, 
+                Emit<Func<TextReader, T>> emit, 
+                Action<Emit<Func<TextReader, T>>> doReturn, 
+                Label start, 
+                Label failure, 
+                Local local_ch, 
+                bool skipWhitespace, 
+                bool foldMultipleValues, 
+                bool caseSensitive)
             {
                 AddAction = addAction;
                 Emit = emit;
@@ -193,16 +198,24 @@ namespace Jil.Deserialize
 
             var groups = SplitIntoContiguousGroups(namesToFinish);
 
-            var switches = groups.Where(g => g.Count >= 5).ToList();
-
-            foreach (var needsSwitch in switches)
+            List<Tuple<char, Label>> remainingNamesToFinish;
+            if (NameAutomataConfig.UseSwitches)
             {
-                DoCharSwitch(d, needsSwitch);
+                var switches = groups.Where(g => g.Count >= 5).ToList();
+
+                foreach (var needsSwitch in switches)
+                {
+                    DoCharSwitch(d, needsSwitch);
+                }
+
+                remainingNamesToFinish = namesToFinish.Where(t => !switches.Any(s => s.Any(x => x.Item1 == t.Item1))).ToList();
+            }
+            else
+            {
+                remainingNamesToFinish = namesToFinish;
             }
 
-            var remainingNamesToFinish = namesToFinish.Where(t => !switches.Any(s => s.Any(x => x.Item1 == t.Item1))).ToList();
-
-            if (remainingNamesToFinish.Count >= 5)
+            if (remainingNamesToFinish.Count >= 5 && NameAutomataConfig.UseBinarySearch)
             {
                 DoCharBinarySearch(d, remainingNamesToFinish);
             }
