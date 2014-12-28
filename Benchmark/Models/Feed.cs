@@ -70,7 +70,7 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.account_id == obj.account_id &&
+                this.account_id == (int?)obj.account_id &&
                 this.association_bonuses.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.association_bonuses) &&
                 this.badges.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.badges) &&
                 this.banner_ads.TrueEqualsListDynamic((IEnumerable<dynamic>)obj.banner_ads) &&
@@ -188,12 +188,12 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.group_id == obj.group_id &&
-                this.link == obj.link &&
-                this.rep_change == obj.rep_change &&
-                this.site == obj.site &&
-                this.title == obj.title;
+                this.added_date == (long?)obj.added_date &&
+                this.group_id == (int?)obj.group_id &&
+                this.link == (string)obj.link &&
+                this.rep_change == (int?)obj.rep_change &&
+                this.site == (string)obj.site &&
+                this.title == (string)obj.title;
         }
     }
 
@@ -243,17 +243,17 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.answer_id == obj.answer_id &&
-                this.body == obj.body &&
-                this.comment_id == obj.comment_id &&
-                this.creation_date == obj.creation_date &&
-                this.group_id == obj.group_id &&
-                this.item_type == obj.item_type &&
-                this.link == obj.link &&
-                this.question_id == obj.question_id &&
-                this.site == obj.site &&
-                this.title == obj.title;
+                this.added_date == (long?)obj.added_date &&
+                this.answer_id == (int?)obj.answer_id &&
+                this.body == (string)obj.body &&
+                this.comment_id == (int?)obj.comment_id &&
+                this.creation_date == (long?)obj.creation_date &&
+                this.group_id == (int?)obj.group_id &&
+                this.item_type == (string)obj.item_type &&
+                this.link == (string)obj.link &&
+                this.question_id == (int?)obj.question_id &&
+                this.site == (string)obj.site &&
+                this.title == (string)obj.title;
         }
     }
 
@@ -285,7 +285,7 @@ namespace Benchmark.Models
         [ProtoMember(5)]
         public string badge_description { get; set; }
         [ProtoMember(6)]
-        public int badge_id { get; set; }
+        public int? badge_id { get; set; }
 
         [ProtoMember(7)]
         public int? post_id { get; set; }
@@ -315,16 +315,16 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.badge_description == obj.badge_description &&
-                this.badge_id == obj.badge_id &&
-                this.badge_name == obj.badge_name &&
-                this.badge_type == obj.badge_type &&
-                this.group_id == obj.group_id &&
-                this.link == obj.link &&
-                this.post_id == obj.post_id &&
-                this.rank == obj.rank &&
-                this.site == obj.site;
+                this.added_date == (long?)obj.added_date &&
+                this.badge_description == (string)obj.badge_description &&
+                this.badge_id == (int?)obj.badge_id &&
+                this.badge_name == (string)obj.badge_name &&
+                this.badge_type == (BadgeType?)obj.badge_type &&
+                this.group_id == (int?)obj.group_id &&
+                this.link == (string)obj.link &&
+                this.post_id == (int?)obj.post_id &&
+                this.rank == (BadgeRank?)obj.rank &&
+                this.site == (string)obj.site;
         }
     }
 
@@ -366,14 +366,14 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.group_id == obj.group_id &&
-                this.link == obj.link &&
-                this.privilege_id == obj.privilege_id &&
-                this.privilege_long_description == obj.privilege_long_description &&
-                this.privilege_short_description == obj.privilege_short_description &&
-                this.reputation_required == obj.reputation_required &&
-                this.site == obj.site;
+                this.added_date == (long?)obj.added_date &&
+                this.group_id == (int?)obj.group_id &&
+                this.link == (string)obj.link &&
+                this.privilege_id == (int?)obj.privilege_id &&
+                this.privilege_long_description == (string)obj.privilege_long_description &&
+                this.privilege_short_description == (string)obj.privilege_short_description &&
+                this.reputation_required == (int?)obj.reputation_required &&
+                this.site == (string)obj.site;
         }
     }
 
@@ -486,10 +486,10 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.amount == obj.amount &&
-                this.group_id == obj.group_id &&
-                this.site == obj.site;
+                this.added_date == (long?)obj.added_date &&
+                this.amount == (int?)obj.amount &&
+                this.group_id == (int?)obj.group_id &&
+                this.site == (string)obj.site;
         }
     }
 
@@ -527,13 +527,13 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.added_date == obj.added_date &&
-                this.company_name == obj.company_name &&
-                this.group_id == obj.group_id &&
-                this.job_id == obj.job_id &&
-                this.link == obj.link &&
-                this.location == obj.location &&
-                this.title == obj.title;
+                this.added_date == (long?)obj.added_date &&
+                this.company_name == (string)obj.company_name &&
+                this.group_id == (int?)obj.group_id &&
+                this.job_id == (int?)obj.job_id &&
+                this.link == (string)obj.link &&
+                this.location == (string)obj.location &&
+                this.title == (string)obj.title;
         }
     }
 
@@ -561,9 +561,9 @@ namespace Benchmark.Models
             public bool EqualsDynamic(dynamic obj)
             {
                 return
-                    this.height == obj.height &&
-                    this.image_url == obj.image_url &&
-                    this.width == obj.width;
+                    this.height == (int?)obj.height &&
+                    this.image_url == (string)obj.image_url &&
+                    this.width == (int?)obj.width;
             }
         }
 
@@ -618,9 +618,9 @@ namespace Benchmark.Models
         public bool EqualsDynamic(dynamic obj)
         {
             return
-                this.message == obj.message &&
-                this.minimum_supported_version == obj.minimum_supported_version &&
-                this.should_update == obj.should_update;
+                this.message == (string)obj.message &&
+                this.minimum_supported_version == (string)obj.minimum_supported_version &&
+                this.should_update == (bool?)obj.should_update;
         }
     }
 }

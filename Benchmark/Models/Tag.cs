@@ -44,7 +44,7 @@ namespace Benchmark.Models
         {
             return
                 this.count.TrueEquals((int?)obj.count) &&
-                this.has_synonyms.TrueEquals((bool)obj.has_synonyms) &&
+                this.has_synonyms.TrueEquals((bool?)obj.has_synonyms) &&
                 this.is_moderator_only.TrueEquals((bool?)obj.is_moderator_only) &&
                 this.is_required.TrueEquals((bool?)obj.is_required) &&
                 this.last_activity_date.TrueEquals((DateTime?)obj.last_activity_date) &&
