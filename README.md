@@ -92,6 +92,8 @@ The following types (and any user defined types composed of them) are supported:
   - Floating point numbers (float, double, and decimal)
   - DateTimes & DateTimeOffsets
     * See Configuration for further details
+  - TimeSpans
+    * See Configuration for further details
   - Nullable types
   - Enumerations
     * Including \[Flags\]
@@ -107,11 +109,19 @@ declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.micro
 
 Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options` parameter which controls:
 
-  - The format of DateTimes & DateTimeOffsets, one of
-    * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string, ie. "\/Date(##...##)\/"
-	* MillisecondsSinceUnixEpoch, a number, which can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
-	* SecondsSinceUnixEpoch, a number, commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
-	* ISO8601, a string, ie. "2011-07-14T19:43:37Z"
+  - The format of DateTimes, DateTimeOffsets, and TimeSpans; one of
+    * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string
+	  - "\/Date(##...##)\/" for DateTimes
+	  - "1.23:45:56.78" for TimeSpans
+	* MillisecondsSinceUnixEpoch, a number
+	  - for DateTimes it can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
+	  - for TimeSpans it's simply [TimeSpan.TotalMilliseconds](http://msdn.microsoft.com/en-us/library/system.timespan.totalmilliseconds%28v=vs.110%29.aspx)
+	* SecondsSinceUnixEpoch, a number
+	  - for DateTimes this is commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
+	  - for TimeSpans it's simply [TimeSpan.TotalSeconds](http://msdn.microsoft.com/en-us/library/system.timespan.totalseconds%28v=vs.110%29.aspx)
+	* ISO8601, a string
+	  - for DateTimes, ie. "2011-07-14T19:43:37Z"
+	  - for TimeSpans, ie. "P40DT11H10M9.4S" 
   - Whether or not to exclude null values when serializing dictionaries, and object members
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
