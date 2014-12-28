@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Jil;
 using System.IO;
 using Benchmark.Models;
+using System.Diagnostics;
 
 namespace Benchmark
 {
@@ -664,37 +665,39 @@ namespace Benchmark
 
         static void DoComparisonGraph()
         {
+            const int TestRuns = 10000;
+
             // serializers
             {
                 // single
                 ResetRand();
-                double[] answerSpeed = CompareSerializers((Answer)MakeSingleObject(typeof(Answer)));
+                double[] answerSpeed = CompareSerializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionSpeed = CompareSerializers((Question)MakeSingleObject(typeof(Question)));
+                double[] questionSpeed = CompareSerializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userSpeed = CompareSerializers((User)MakeSingleObject(typeof(User)));
+                double[] userSpeed = CompareSerializers((User)MakeSingleObject(typeof(User)), TestRuns);
 
                 // list
                 ResetRand();
-                double[] answerListSpeed = CompareSerializers((List<Answer>)MakeListObject(typeof(Answer)));
+                double[] answerListSpeed = CompareSerializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionListSpeed = CompareSerializers((List<Question>)MakeListObject(typeof(Question)));
+                double[] questionListSpeed = CompareSerializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userListSpeed = CompareSerializers((List<User>)MakeListObject(typeof(User)));
+                double[] userListSpeed = CompareSerializers((List<User>)MakeListObject(typeof(User)), TestRuns);
 
                 // dictionary
                 ResetRand();
-                double[] answerDictSpeed = CompareSerializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)));
+                double[] answerDictSpeed = CompareSerializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionDictSpeed = CompareSerializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)));
+                double[] questionDictSpeed = CompareSerializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userDictSpeed = CompareSerializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)));
+                double[] userDictSpeed = CompareSerializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
 
                 Console.WriteLine("== Serializers == ");
 
@@ -719,33 +722,33 @@ namespace Benchmark
             {
                 // single
                 ResetRand();
-                double[] answerSpeed = CompareDeserializers((Answer)MakeSingleObject(typeof(Answer)));
+                double[] answerSpeed = CompareDeserializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionSpeed = CompareDeserializers((Question)MakeSingleObject(typeof(Question)));
+                double[] questionSpeed = CompareDeserializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userSpeed = CompareDeserializers((User)MakeSingleObject(typeof(User)));
+                double[] userSpeed = CompareDeserializers((User)MakeSingleObject(typeof(User)), TestRuns);
 
                 // list
                 ResetRand();
-                double[] answerListSpeed = CompareDeserializers((List<Answer>)MakeListObject(typeof(Answer)));
+                double[] answerListSpeed = CompareDeserializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionListSpeed = CompareDeserializers((List<Question>)MakeListObject(typeof(Question)));
+                double[] questionListSpeed = CompareDeserializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userListSpeed = CompareDeserializers((List<User>)MakeListObject(typeof(User)));
+                double[] userListSpeed = CompareDeserializers((List<User>)MakeListObject(typeof(User)), TestRuns);
 
                 // dictionary
                 ResetRand();
-                double[] answerDictSpeed = CompareDeserializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)));
+                double[] answerDictSpeed = CompareDeserializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
 
                 ResetRand();
-                double[] questionDictSpeed = CompareDeserializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)));
+                double[] questionDictSpeed = CompareDeserializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
 
                 ResetRand();
-                double[] userDictSpeed = CompareDeserializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)));
+                double[] userDictSpeed = CompareDeserializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
 
                 Console.WriteLine("== Deserializers == ");
 
@@ -765,10 +768,8 @@ namespace Benchmark
             }
         }
 
-        static double[] CompareDeserializers<T>(T obj)
+        static double[] CompareDeserializers<T>(T obj, int testRuns)
         {
-            const int TestRuns = 100;
-
             Action<string> jilDeserializer = a => JilDeserialize(a, obj);
             Action<string> newtonSoftDeserializer = a => NewtonsoftDeserialize<T>(a);
             Action<byte[]> protobufDeserializer = a => ProtobufDeserialize<T>(a);
@@ -787,144 +788,83 @@ namespace Benchmark
             // Jil
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("Jil");
-                var serializeResult = testGroup.Plan("Deserialization", () => jilDeserializer(json), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[JilIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[JilIndex] = AverageRuntime(() => jilDeserializer(json), testRuns);
             }
 
             // NewtonSoft
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("NewtonSoft");
-                var serializeResult = testGroup.Plan("Deserialization", () => newtonSoftDeserializer(json), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[NewtonSoftIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftDeserializer(json), testRuns);
             }
 
             // Protobuf
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("Protobuf");
-                var serializeResult = testGroup.Plan("Deserialization", () => protobufDeserializer(bytes), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[ProtobufIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[ProtobufIndex] = AverageRuntime(() => protobufDeserializer(bytes), testRuns);
             }
 
             // ServiceStack
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("ServiceStack");
-                var serializeResult = testGroup.Plan("Deserialization", () => serviceStackDeserializer(json), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[ServiceStackIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[ServiceStackIndex] = AverageRuntime(() => serviceStackDeserializer(json), testRuns);
             }
 
             return ret;
         }
 
-        static double[] CompareSerializers<T>(T obj)
+        static double[] CompareSerializers<T>(T obj, int testRuns)
         {
-            const int TestRuns = 100;
-
             Action<T> jilSerializer = a => JilSerialize(a);
             Action<T> newtonSoftSerializer = a => NewtonsoftSerialize(a);
             Action<T> protobufSerializer = a => ProtobufSerialize(a);
             Action<T> serviceStackSerializer = a => ServiceStackSerialize(a);
 
-            jilSerializer(default(T));
-            newtonSoftSerializer(default(T));
-            protobufSerializer(default(T));
-            serviceStackSerializer(default(T));
+            jilSerializer(obj);
+            newtonSoftSerializer(obj);
+            protobufSerializer(obj);
+            serviceStackSerializer(obj);
             
             var ret = new double[4];
             
-
             // Jil
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                
-                var testGroup = new TestGroup("Jil");
-                var serializeResult = testGroup.Plan("Serialization", () => jilSerializer(obj), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[JilIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[JilIndex] = AverageRuntime(() => jilSerializer(obj), testRuns);
             }
 
             // NewtonSoft
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("NewtonSoft");
-                var serializeResult = testGroup.Plan("Serialization", () => newtonSoftSerializer(obj), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[NewtonSoftIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftSerializer(obj), testRuns);
             }
 
             // Protobuf
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("Protobuf");
-                var serializeResult = testGroup.Plan("Serialization", () => protobufSerializer(obj), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[ProtobufIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[ProtobufIndex] = AverageRuntime(() => protobufSerializer(obj), testRuns);
             }
 
             // ServiceStack
             {
                 System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-
-                var testGroup = new TestGroup("ServiceStack");
-                var serializeResult = testGroup.Plan("Serialization", () => serviceStackSerializer(obj), TestRuns).GetResult();
-
-                if (serializeResult.Outcomes.Any(o => o.Exception != null))
-                {
-                    throw new Exception();
-                }
-
-                ret[ServiceStackIndex] = serializeResult.Outcomes.Average(o => o.Elapsed.TotalMilliseconds);
+                ret[ServiceStackIndex] = AverageRuntime(() => serviceStackSerializer(obj), testRuns);
             }
 
             return ret;
+        }
+
+        static double AverageRuntime(Action act, int runs)
+        {
+            var watch = new Stopwatch();
+
+            watch.Start();
+            for (var i = 0; i < runs; i++)
+            {
+                act();
+            }
+            watch.Stop();
+
+            return watch.ElapsedMilliseconds / (double)runs;
         }
 
         static void Main(string[] args)
