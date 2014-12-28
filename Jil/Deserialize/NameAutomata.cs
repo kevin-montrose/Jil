@@ -171,7 +171,7 @@ namespace Jil.Deserialize
                 d.Emit.CallVirtual(TextReader_Read);
                 d.Emit.StoreLocal(d.Local_ch);
 
-                DoBranches(d, namesToFinish);
+                DoCharBranches(d, namesToFinish);
 
                 d.Emit.LoadLocal(d.Local_ch);               // char
                 d.Emit.LoadConstant('\\');                  // char char
@@ -180,21 +180,132 @@ namespace Jil.Deserialize
                 d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
                 d.Emit.StoreLocal(d.Local_ch);              //
 
-                DoBranches(d, namesToFinish);
+                DoCharBranches(d, namesToFinish);
 
                 d.Emit.Branch(d.Failure);
             });
         }
 
-        static void DoBranches(Data d, List<Tuple<char, Label>> namesToFinish)
+        static void DoCharBranches(Data d, List<Tuple<char, Label>> namesToFinish)
         {
-            // TODO: optimize this; use 'switch' and/or binary split depending on number/layout of characters
-            foreach (var item in namesToFinish)
+            // TODO: these different approaches start at random constants
+            //       actually get some rigor behind when we decide to do either
+
+            var groups = SplitIntoContiguousGroups(namesToFinish);
+
+            var switches = groups.Where(g => g.Count >= 5).ToList();
+
+            foreach (var needsSwitch in switches)
             {
-                d.Emit.LoadLocal(d.Local_ch);
-                d.Emit.LoadConstant((int)item.Item1);
-                d.Emit.BranchIfEqual(item.Item2);
+                DoCharSwitch(d, needsSwitch);
             }
+
+            var remainingNamesToFinish = namesToFinish.Where(t => !switches.Any(s => s.Any(x => x.Item1 == t.Item1))).ToList();
+
+            if (remainingNamesToFinish.Count >= 5)
+            {
+                DoCharBinarySearch(d, remainingNamesToFinish);
+            }
+            else
+            {
+                foreach (var item in remainingNamesToFinish)
+                {
+                    d.Emit.LoadLocal(d.Local_ch);
+                    d.Emit.LoadConstant((int)item.Item1);
+                    d.Emit.BranchIfEqual(item.Item2);
+                }
+            }
+        }
+
+        static void DoCharSwitch(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            var minVal = namesToFinish.OrderBy(_ => _.Item1).First().Item1;
+
+            var allLabels = namesToFinish.OrderBy(_ => _.Item1).Select(_ => _.Item2).ToArray();
+
+            d.Emit.LoadLocal(d.Local_ch);       // int
+            d.Emit.LoadConstant((int)minVal);   // int int
+            d.Emit.Subtract();                  // int
+            d.Emit.Switch(allLabels);           // --empty--
+        }
+
+        static void DoCharBinarySearch(Data d, List<Tuple<char, Label>> namesToFinish)
+        {
+            var noMatch = d.Emit.DefineLabel();
+
+            var inOrder = namesToFinish.OrderBy(_ => _.Item1).ToList();
+
+            Action<List<Tuple<char, Label>>> match = null;
+            match =
+                charsLeft =>
+                {
+                    if (charsLeft.Count == 0)
+                    {
+                        d.Emit.Branch(noMatch);                 // --empty--
+                        return;
+                    }
+
+                    if (charsLeft.Count == 1)
+                    {
+                        var exact = charsLeft[0];
+
+                        d.Emit.LoadLocal(d.Local_ch);           // int
+                        d.Emit.LoadConstant((int)exact.Item1);  // int int
+                        d.Emit.BranchIfEqual(exact.Item2);      // --empty--
+                        d.Emit.Branch(noMatch);                 // --empty--
+                        return;
+                    }
+
+                    var midPoint = charsLeft.Count / 2;
+                    var midVal = charsLeft[midPoint];
+
+                    var left = charsLeft.Take(midPoint).ToList();
+                    var right = charsLeft.Skip(midPoint).ToList();
+
+                    var leftLabel = d.Emit.DefineLabel();
+
+                    d.Emit.LoadLocal(d.Local_ch);           // int
+                    d.Emit.LoadConstant((int)midVal.Item1); // int int
+                    d.Emit.BranchIfLess(leftLabel);         // --empty--
+                    match(right);                           // --empty--
+
+                    d.Emit.MarkLabel(leftLabel);            // --empty--
+                    match(left);                            // --empty
+                };
+
+            match(inOrder);
+
+            d.Emit.MarkLabel(noMatch);
+        }
+
+        static List<List<Tuple<char, Label>>> SplitIntoContiguousGroups(List<Tuple<char, Label>> chars)
+        {
+            var inOrder = chars.OrderBy(t => t.Item1).ToList();
+
+            var ret = new List<List<Tuple<char, Label>>>();
+
+            var runningGroup = new List<Tuple<char, Label>>();
+
+            foreach (var t in inOrder)
+            {
+                if (runningGroup.Count == 0 || (runningGroup[runningGroup.Count - 1].Item1 + 1) == t.Item1)
+                {
+                    runningGroup.Add(t);
+                }
+                else
+                {
+                    ret.Add(runningGroup);
+                    runningGroup = new List<Tuple<char, Label>>();
+                    runningGroup.Add(t);
+                }
+            }
+
+            if (runningGroup.Count > 0)
+            {
+                ret.Add(runningGroup);
+            }
+
+            return ret;
         }
 
         public static AutomataName CreateName(string name, Action<Emit<Func<TextReader, T>>> onFound)
