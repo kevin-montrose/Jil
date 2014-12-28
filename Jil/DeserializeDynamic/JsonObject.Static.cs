@@ -140,8 +140,114 @@ namespace Jil.DeserializeDynamic
 
         public bool TryCastTimeSpan(out TimeSpan ts)
         {
-            // TODO: Implement!
-            ts = TimeSpan.MinValue;
+            if (Type == JsonObjectType.FastNumber)
+            {
+                const double TicksPerMillisecond = 10000;
+                const double TicksPerSecond = 10000000;
+
+                double res;
+                var ret = FastNumberToDouble(out res);
+                if (!ret)
+                {
+                    ts = default(TimeSpan);
+                    return false;
+                }
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        var msTicksDouble = res * TicksPerMillisecond;
+                        var msTicks = (long)msTicksDouble;
+
+                        if (msTicksDouble >= TimeSpan.MaxValue.Ticks)
+                        {
+                            msTicks = TimeSpan.MaxValue.Ticks;
+                        }
+
+                        if (msTicksDouble <= TimeSpan.MinValue.Ticks)
+                        {
+                            msTicks = TimeSpan.MinValue.Ticks;
+                        }
+
+                        ts = new TimeSpan(msTicks);
+                        return true;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        var sTicksDouble = res * TicksPerSecond;
+                        var sTicks = (long)sTicksDouble;
+
+                        if (sTicksDouble >= TimeSpan.MaxValue.Ticks)
+                        {
+                            sTicks = TimeSpan.MaxValue.Ticks;
+                        }
+
+                        if (sTicksDouble <= TimeSpan.MinValue.Ticks)
+                        {
+                            sTicks = TimeSpan.MinValue.Ticks;
+                        }
+
+                        ts = new TimeSpan(sTicks);
+                        return true;
+                }
+            }
+
+            if (Type == JsonObjectType.Number)
+            {
+                const double TicksPerMillisecond = 10000;
+                const double TicksPerSecond = 10000000;
+
+                var res = NumberValue;
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        var msTicksDouble = res * TicksPerMillisecond;
+                        var msTicks = (long)msTicksDouble;
+
+                        if (msTicksDouble >= TimeSpan.MaxValue.Ticks)
+                        {
+                            msTicks = TimeSpan.MaxValue.Ticks;
+                        }
+
+                        if (msTicksDouble <= TimeSpan.MinValue.Ticks)
+                        {
+                            msTicks = TimeSpan.MinValue.Ticks;
+                        }
+
+                        ts = new TimeSpan(msTicks);
+                        return true;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        var sTicksDouble = res * TicksPerSecond;
+                        var sTicks = (long)sTicksDouble;
+
+                        if (sTicksDouble >= TimeSpan.MaxValue.Ticks)
+                        {
+                            sTicks = TimeSpan.MaxValue.Ticks;
+                        }
+
+                        if (sTicksDouble <= TimeSpan.MinValue.Ticks)
+                        {
+                            sTicks = TimeSpan.MinValue.Ticks;
+                        }
+
+                        ts = new TimeSpan(sTicks);
+                        return true;
+                }
+            }
+
+            if(Type == JsonObjectType.String)
+            {
+                bool ret;
+
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                        ret = Methods.ReadNewtonsoftStyleTimeSpan(StringValue, out ts);
+                        return ret;
+                    case DateTimeFormat.ISO8601:
+                        ret = Methods.ReadISO8601TimeSpan(StringValue, out ts);
+                        return ret;
+                }
+            }
+
+            ts = default(TimeSpan);
             return false;
         }
 
