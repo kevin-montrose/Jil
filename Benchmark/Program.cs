@@ -162,7 +162,7 @@ namespace Benchmark
                         {
                             Serializer = serializerName + " (Serialize)",
                             TypeName = niceTypeName,
-                            Ellapsed = o.Elapsed
+                            Elapsed = o.Elapsed
                         }
                 ).Concat(
                     deserializeResult.Outcomes.Select(
@@ -171,7 +171,7 @@ namespace Benchmark
                             {
                                 Serializer = serializerName + " (Deserialize)",
                                 TypeName = niceTypeName,
-                                Ellapsed = o.Elapsed
+                                Elapsed = o.Elapsed
                             }
                     )
                 ).ToList();
@@ -593,8 +593,8 @@ namespace Benchmark
             }
             Console.SetOut(oldOut);
 
-            Func<List<Result>, Func<Result, bool>, double> jilStatic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Static")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
-            Func<List<Result>, Func<Result, bool>, double> jilDynamic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Dynamic")).Select(x => x.Ellapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jilStatic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Static")).Select(x => x.Elapsed.TotalMilliseconds).Median();
+            Func<List<Result>, Func<Result, bool>, double> jilDynamic = (r, f) => r.Where(w => f(w) && w.Serializer.StartsWith("Jil Dynamic")).Select(x => x.Elapsed.TotalMilliseconds).Median();
 
             {
                 Func<Result, bool> serialize = r => r.Serializer.Contains("(Serialize)");

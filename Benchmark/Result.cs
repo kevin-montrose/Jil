@@ -10,6 +10,6 @@ namespace Benchmark
     {
         public string Serializer { get; set; }
         public string TypeName { get; set; }
-        public TimeSpan Ellapsed { get; set; }
+        public TimeSpan Elapsed { get; set; }
     }
 }
