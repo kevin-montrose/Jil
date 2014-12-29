@@ -577,11 +577,6 @@ namespace Jil.Deserialize
 
         void ReadNewtosoftDateTime()
         {
-            var isPlus = Emit.DefineLabel();
-            var isMinus = Emit.DefineLabel();
-            var expectEnd = Emit.DefineLabel();
-            var withTimeZone = Emit.DefineLabel();
-
             ExpectQuote();                                      // --empty--
             ExpectChar('\\');                                   // --empty--
             ExpectChar('/');                                    // --empty--
