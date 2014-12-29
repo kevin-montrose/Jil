@@ -1010,9 +1010,9 @@ namespace Jil.Serialize
                 return;
             }
 
-            var needsIntCoersion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
+            var needsIntCoercion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
 
-            if (needsIntCoersion)
+            if (needsIntCoercion)
             {
                 Emit.Convert<int>();            // TextWriter int
                 primitiveType = typeof(int);
