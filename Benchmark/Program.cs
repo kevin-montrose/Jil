@@ -669,102 +669,138 @@ namespace Benchmark
 
             // serializers
             {
-                // single
-                ResetRand();
-                double[] answerSpeed = CompareSerializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionSpeed = CompareSerializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userSpeed = CompareSerializers((User)MakeSingleObject(typeof(User)), TestRuns);
-
-                // list
-                ResetRand();
-                double[] answerListSpeed = CompareSerializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionListSpeed = CompareSerializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userListSpeed = CompareSerializers((List<User>)MakeListObject(typeof(User)), TestRuns);
-
-                // dictionary
-                ResetRand();
-                double[] answerDictSpeed = CompareSerializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionDictSpeed = CompareSerializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userDictSpeed = CompareSerializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
-
                 Console.WriteLine("== Serializers == ");
-
                 Console.WriteLine("\tJil\tNewtonSoft\tProtobuf\tServiceStack");
 
-                Console.WriteLine("Answer\t" + answerSpeed[JilIndex] + "\t" + answerSpeed[NewtonSoftIndex] + "\t" + answerSpeed[ProtobufIndex] + "\t" + answerSpeed[ServiceStackIndex]);
-                Console.WriteLine("Question\t" + questionSpeed[JilIndex] + "\t" + questionSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionSpeed[ServiceStackIndex]);
-                Console.WriteLine("User\t" + userSpeed[JilIndex] + "\t" + userSpeed[NewtonSoftIndex] + "\t" + userSpeed[ProtobufIndex] + "\t" + userSpeed[ServiceStackIndex]);
+                // single
+                {
+                    ResetRand();
+                    double[] answerSpeed = CompareSerializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("Answer\t" + answerSpeed[JilIndex] + "\t" + answerSpeed[NewtonSoftIndex] + "\t" + answerSpeed[ProtobufIndex] + "\t" + answerSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionSpeed = CompareSerializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("Question\t" + questionSpeed[JilIndex] + "\t" + questionSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userSpeed = CompareSerializers((User)MakeSingleObject(typeof(User)), TestRuns);
+                    Console.WriteLine("User\t" + userSpeed[JilIndex] + "\t" + userSpeed[NewtonSoftIndex] + "\t" + userSpeed[ProtobufIndex] + "\t" + userSpeed[ServiceStackIndex]);
+                }
+
                 Console.WriteLine();
-                Console.WriteLine("List<Answer>\t" + answerListSpeed[JilIndex] + "\t" + answerListSpeed[NewtonSoftIndex] + "\t" + answerListSpeed[ProtobufIndex] + "\t" + answerListSpeed[ServiceStackIndex]);
-                Console.WriteLine("List<Question>\t" + questionListSpeed[JilIndex] + "\t" + questionListSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionListSpeed[ServiceStackIndex]);
-                Console.WriteLine("List<User>\t" + userListSpeed[JilIndex] + "\t" + userListSpeed[NewtonSoftIndex] + "\t" + userListSpeed[ProtobufIndex] + "\t" + userListSpeed[ServiceStackIndex]);
+
+                // list
+                {
+                    ResetRand();
+                    double[] answerListSpeed = CompareSerializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("List<Answer>\t" + answerListSpeed[JilIndex] + "\t" + answerListSpeed[NewtonSoftIndex] + "\t" + answerListSpeed[ProtobufIndex] + "\t" + answerListSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionListSpeed = CompareSerializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("List<Question>\t" + questionListSpeed[JilIndex] + "\t" + questionListSpeed[NewtonSoftIndex] + "\t" + questionListSpeed[ProtobufIndex] + "\t" + questionListSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userListSpeed = CompareSerializers((List<User>)MakeListObject(typeof(User)), TestRuns);
+                    Console.WriteLine("List<User>\t" + userListSpeed[JilIndex] + "\t" + userListSpeed[NewtonSoftIndex] + "\t" + userListSpeed[ProtobufIndex] + "\t" + userListSpeed[ServiceStackIndex]);
+                }
+
                 Console.WriteLine();
-                Console.WriteLine("Dictionary<string,Answer>\t" + answerDictSpeed[JilIndex] + "\t" + answerDictSpeed[NewtonSoftIndex] + "\t" + answerDictSpeed[ProtobufIndex] + "\t" + answerDictSpeed[ServiceStackIndex]);
-                Console.WriteLine("Dictionary<string,Question>\t" + questionDictSpeed[JilIndex] + "\t" + questionDictSpeed[NewtonSoftIndex] + "\t" + questionDictSpeed[ProtobufIndex] + "\t" + questionDictSpeed[ServiceStackIndex]);
-                Console.WriteLine("Dictionary<string,User>\t" + userDictSpeed[JilIndex] + "\t" + userDictSpeed[NewtonSoftIndex] + "\t" + userDictSpeed[ProtobufIndex] + "\t" + userDictSpeed[ServiceStackIndex]);
+
+                // dictionary
+                {
+                    ResetRand();
+                    double[] answerDictSpeed = CompareSerializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("Dictionary<string,Answer>\t" + answerDictSpeed[JilIndex] + "\t" + answerDictSpeed[NewtonSoftIndex] + "\t" + answerDictSpeed[ProtobufIndex] + "\t" + answerDictSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionDictSpeed = CompareSerializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("Dictionary<string,Question>\t" + questionDictSpeed[JilIndex] + "\t" + questionDictSpeed[NewtonSoftIndex] + "\t" + questionDictSpeed[ProtobufIndex] + "\t" + questionDictSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userDictSpeed = CompareSerializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
+                    Console.WriteLine("Dictionary<string,User>\t" + userDictSpeed[JilIndex] + "\t" + userDictSpeed[NewtonSoftIndex] + "\t" + userDictSpeed[ProtobufIndex] + "\t" + userDictSpeed[ServiceStackIndex]);
+                }
             }
 
             Console.WriteLine();
 
             // deserializers
             {
-                // single
-                ResetRand();
-                double[] answerSpeed = CompareDeserializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionSpeed = CompareDeserializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userSpeed = CompareDeserializers((User)MakeSingleObject(typeof(User)), TestRuns);
-
-                // list
-                ResetRand();
-                double[] answerListSpeed = CompareDeserializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionListSpeed = CompareDeserializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userListSpeed = CompareDeserializers((List<User>)MakeListObject(typeof(User)), TestRuns);
-
-                // dictionary
-                ResetRand();
-                double[] answerDictSpeed = CompareDeserializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
-
-                ResetRand();
-                double[] questionDictSpeed = CompareDeserializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
-
-                ResetRand();
-                double[] userDictSpeed = CompareDeserializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
-
                 Console.WriteLine("== Deserializers == ");
-
                 Console.WriteLine("\tJil\tNewtonSoft\tProtobuf\tServiceStack");
 
-                Console.WriteLine("Answer\t" + answerSpeed[JilIndex] + "\t" + answerSpeed[NewtonSoftIndex] + "\t" + answerSpeed[ProtobufIndex] + "\t" + answerSpeed[ServiceStackIndex]);
-                Console.WriteLine("Question\t" + questionSpeed[JilIndex] + "\t" + questionSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionSpeed[ServiceStackIndex]);
-                Console.WriteLine("User\t" + userSpeed[JilIndex] + "\t" + userSpeed[NewtonSoftIndex] + "\t" + userSpeed[ProtobufIndex] + "\t" + userSpeed[ServiceStackIndex]);
+                // single
+                {
+                    ResetRand();
+                    double[] answerSpeed = CompareDeserializers((Answer)MakeSingleObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("Answer\t" + answerSpeed[JilIndex] + "\t" + answerSpeed[NewtonSoftIndex] + "\t" + answerSpeed[ProtobufIndex] + "\t" + answerSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionSpeed = CompareDeserializers((Question)MakeSingleObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("Question\t" + questionSpeed[JilIndex] + "\t" + questionSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userSpeed = CompareDeserializers((User)MakeSingleObject(typeof(User)), TestRuns);
+                    Console.WriteLine("User\t" + userSpeed[JilIndex] + "\t" + userSpeed[NewtonSoftIndex] + "\t" + userSpeed[ProtobufIndex] + "\t" + userSpeed[ServiceStackIndex]);
+                }
+
                 Console.WriteLine();
-                Console.WriteLine("List<Answer>\t" + answerListSpeed[JilIndex] + "\t" + answerListSpeed[NewtonSoftIndex] + "\t" + answerListSpeed[ProtobufIndex] + "\t" + answerListSpeed[ServiceStackIndex]);
-                Console.WriteLine("List<Question>\t" + questionListSpeed[JilIndex] + "\t" + questionListSpeed[NewtonSoftIndex] + "\t" + questionSpeed[ProtobufIndex] + "\t" + questionListSpeed[ServiceStackIndex]);
-                Console.WriteLine("List<User>\t" + userListSpeed[JilIndex] + "\t" + userListSpeed[NewtonSoftIndex] + "\t" + userListSpeed[ProtobufIndex] + "\t" + userListSpeed[ServiceStackIndex]);
+
+                // list
+                {
+                    ResetRand();
+                    double[] answerListSpeed = CompareDeserializers((List<Answer>)MakeListObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("List<Answer>\t" + answerListSpeed[JilIndex] + "\t" + answerListSpeed[NewtonSoftIndex] + "\t" + answerListSpeed[ProtobufIndex] + "\t" + answerListSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionListSpeed = CompareDeserializers((List<Question>)MakeListObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("List<Question>\t" + questionListSpeed[JilIndex] + "\t" + questionListSpeed[NewtonSoftIndex] + "\t" + questionListSpeed[ProtobufIndex] + "\t" + questionListSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userListSpeed = CompareDeserializers((List<User>)MakeListObject(typeof(User)), TestRuns);
+                    Console.WriteLine("List<User>\t" + userListSpeed[JilIndex] + "\t" + userListSpeed[NewtonSoftIndex] + "\t" + userListSpeed[ProtobufIndex] + "\t" + userListSpeed[ServiceStackIndex]);
+                }
+
                 Console.WriteLine();
-                Console.WriteLine("Dictionary<string,Answer>\t" + answerDictSpeed[JilIndex] + "\t" + answerDictSpeed[NewtonSoftIndex] + "\t" + answerDictSpeed[ProtobufIndex] + "\t" + answerDictSpeed[ServiceStackIndex]);
-                Console.WriteLine("Dictionary<string,Question>\t" + questionDictSpeed[JilIndex] + "\t" + questionDictSpeed[NewtonSoftIndex] + "\t" + questionDictSpeed[ProtobufIndex] + "\t" + questionDictSpeed[ServiceStackIndex]);
-                Console.WriteLine("Dictionary<string,User>\t" + userDictSpeed[JilIndex] + "\t" + userDictSpeed[NewtonSoftIndex] + "\t" + userDictSpeed[ProtobufIndex] + "\t" + userDictSpeed[ServiceStackIndex]);
+
+                // dictionary
+                {
+                    ResetRand();
+                    double[] answerDictSpeed = CompareDeserializers((Dictionary<string, Answer>)MakeDictionaryObject(typeof(Answer)), TestRuns);
+                    Console.WriteLine("Dictionary<string,Answer>\t" + answerDictSpeed[JilIndex] + "\t" + answerDictSpeed[NewtonSoftIndex] + "\t" + answerDictSpeed[ProtobufIndex] + "\t" + answerDictSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] questionDictSpeed = CompareDeserializers((Dictionary<string, Question>)MakeDictionaryObject(typeof(Question)), TestRuns);
+                    Console.WriteLine("Dictionary<string,Question>\t" + questionDictSpeed[JilIndex] + "\t" + questionDictSpeed[NewtonSoftIndex] + "\t" + questionDictSpeed[ProtobufIndex] + "\t" + questionDictSpeed[ServiceStackIndex]);
+                }
+
+                {
+                    ResetRand();
+                    double[] userDictSpeed = CompareDeserializers((Dictionary<string, User>)MakeDictionaryObject(typeof(User)), TestRuns);
+                    Console.WriteLine("Dictionary<string,User>\t" + userDictSpeed[JilIndex] + "\t" + userDictSpeed[NewtonSoftIndex] + "\t" + userDictSpeed[ProtobufIndex] + "\t" + userDictSpeed[ServiceStackIndex]);
+                }
             }
         }
 
@@ -783,33 +819,72 @@ namespace Benchmark
             protobufDeserializer(bytes);
             serviceStackDeserializer(json);
 
-            var ret = new double[4];
+            double[] ret = null;
 
             // Jil
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[JilIndex] = AverageRuntime(() => jilDeserializer(json), testRuns);
-            }
+            Action jil =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[JilIndex] = AverageRuntime(() => jilDeserializer(json), testRuns);
+                };
 
             // NewtonSoft
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftDeserializer(json), testRuns);
-            }
+            Action newtonSoft =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftDeserializer(json), testRuns);
+                };
 
             // Protobuf
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[ProtobufIndex] = AverageRuntime(() => protobufDeserializer(bytes), testRuns);
-            }
+            Action protobuf =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[ProtobufIndex] = AverageRuntime(() => protobufDeserializer(bytes), testRuns);
+                };
 
             // ServiceStack
+            Action serviceStack =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[ServiceStackIndex] = AverageRuntime(() => serviceStackDeserializer(json), testRuns);
+                };
+
+            var allRuns = new List<double[]>();
+
+            foreach (var perm in Permutate(4))
             {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[ServiceStackIndex] = AverageRuntime(() => serviceStackDeserializer(json), testRuns);
+                ret = new double[4];
+                foreach (var ix in perm)
+                {
+                    switch (ix)
+                    {
+                        case 0: jil(); break;
+                        case 1: newtonSoft(); break;
+                        case 2: protobuf(); break;
+                        case 3: serviceStack(); break;
+                        default: throw new InvalidOperationException();
+                    }
+                }
+
+                allRuns.Add(ret);
             }
 
-            return ret;
+            // we've got all combinations of runs, pick the *median* ones
+            //   since those should be the most representive controling for surrounding
+            //   code
+            var medians = new double[4];
+
+            for (var i = 0; i < 4; i++)
+            {
+                var allForI = allRuns.Select(run => run[i]).OrderBy(_ => _).ToArray();
+                medians[i] = (allForI[1] + allForI[2]) / 2.0;
+            }
+
+            return medians;
         }
 
         static double[] CompareSerializers<T>(T obj, int testRuns)
@@ -824,33 +899,118 @@ namespace Benchmark
             protobufSerializer(obj);
             serviceStackSerializer(obj);
             
-            var ret = new double[4];
+            double[] ret = null;
             
             // Jil
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[JilIndex] = AverageRuntime(() => jilSerializer(obj), testRuns);
-            }
+            Action jil =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[JilIndex] = AverageRuntime(() => jilSerializer(obj), testRuns);
+                };
 
             // NewtonSoft
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftSerializer(obj), testRuns);
-            }
+            Action newtonSoft =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftSerializer(obj), testRuns);
+                };
 
             // Protobuf
-            {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[ProtobufIndex] = AverageRuntime(() => protobufSerializer(obj), testRuns);
-            }
+            Action protobuf =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[ProtobufIndex] = AverageRuntime(() => protobufSerializer(obj), testRuns);
+                };
 
             // ServiceStack
+            Action serviceStack =
+                () =>
+                {
+                    System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+                    ret[ServiceStackIndex] = AverageRuntime(() => serviceStackSerializer(obj), testRuns);
+                };
+
+            var allRuns = new List<double[]>();
+
+            foreach (var perm in Permutate(4))
             {
-                System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
-                ret[ServiceStackIndex] = AverageRuntime(() => serviceStackSerializer(obj), testRuns);
+                ret = new double[4];
+                foreach(var ix in perm)
+                {
+                    switch (ix)
+                    {
+                        case 0: jil(); break;
+                        case 1: newtonSoft(); break;
+                        case 2: protobuf(); break;
+                        case 3: serviceStack(); break;
+                        default: throw new InvalidOperationException();
+                    }
+                }
+
+                allRuns.Add(ret);
             }
 
-            return ret;
+            // we've got all combinations of runs, pick the *median* ones
+            //   since those should be the most representive controling for surrounding
+            //   code
+            var medians = new double[4];
+
+            for (var i = 0; i < 4; i++)
+            {
+                var allForI = allRuns.Select(run => run[i]).OrderBy(_ => _).ToArray();
+
+                if (allForI.Length % 2 == 1)
+                {
+                    medians[i] = allForI[allForI.Length / 2];
+                }
+                else
+                {
+                    // 4 -> 1, 2
+                    medians[i] = (allForI[allForI.Length / 2 - 1] + allForI[allForI.Length / 2]) / 2.0;
+                }
+            }
+
+            return medians;
+        }
+
+        static IEnumerable<int[]> Permutate(int upTo)
+        {
+            var asArr = Enumerable.Range(0, upTo);
+
+            return Permutate(asArr.ToArray());
+        }
+
+        static IEnumerable<T[]> Permutate<T>(T[] array)
+        {
+            if (array == null || array.Length == 0)
+            {
+                yield return new T[0];
+            }
+            else
+            {
+                for (int pick = 0; pick < array.Length; ++pick)
+                {
+                    T item = array[pick];
+                    int i = -1;
+                    T[] rest = Array.FindAll<T>(
+                        array, delegate(T p) { return ++i != pick; }
+                    );
+                    foreach (T[] restPermuted in Permutate(rest))
+                    {
+                        i = -1;
+                        yield return Array.ConvertAll<T, T>(
+                            array,
+                            delegate(T p)
+                            {
+                                return ++i == 0 ? item : restPermuted[i - 1];
+                            }
+                        );
+                    }
+                }
+            }
         }
 
         static double AverageRuntime(Action act, int runs)
@@ -901,6 +1061,10 @@ namespace Benchmark
             }
 
             Console.WriteLine("== Finished ==");
+
+#if DEBUG
+            Console.ReadKey();
+#endif
         }
     }
 }
