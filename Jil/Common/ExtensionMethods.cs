@@ -282,7 +282,7 @@ namespace Jil.Common
             var asProp = member as PropertyInfo;
             if (asProp != null) return asProp.IsConstant();
 
-            throw new Exception("Expected member to be a FieldInfo or PropetyInfo, found: " + member);
+            throw new Exception("Expected member to be a FieldInfo or PropertyInfo, found: " + member);
         }
 
         public static bool IsConstant(this FieldInfo field)
