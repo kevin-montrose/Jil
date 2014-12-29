@@ -217,7 +217,6 @@ namespace Jil.Common
                 int? intOperand;
                 long? longOperand;
                 double? doubleOperand;
-                var startsAt = i;
                 i += _ReadOp(cil, i, out fieldHandle, out opcode, out intOperand, out longOperand, out doubleOperand);
 
                 FieldInfo field = null;
@@ -246,7 +245,6 @@ namespace Jil.Common
                 int? ignored1;
                 long? ignored2;
                 double? ignored3;
-                var startsAt = i;
                 i += _ReadOp(cil, i, out fieldHandle, out ignoredOp, out ignored1, out ignored2, out ignored3);
 
                 if (fieldHandle.HasValue)
@@ -345,7 +343,6 @@ namespace Jil.Common
                 case OperandType.InlineSwitch:
                     advance += 4;
                     var len = readInt(operandStart);
-                    var offset1 = instrStart + len * 4;
                     for (var i = 0; i < len; i++)
                     {
                         advance += 4;
