@@ -1651,8 +1651,6 @@ namespace Jil.Serialize
 
             if (asField == null && asProp == null) throw new ConstructionException("Encountered a serializable member that is neither a field nor a property: " + member);
 
-            var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
-
             var end = Emit.DefineLabel();
             var writeValue = Emit.DefineLabel();
 
@@ -1750,8 +1748,6 @@ namespace Jil.Serialize
             var elementType = listInterface.GetGenericArguments()[0];
             var countMtd = collectionInterface.GetProperty("Count").GetMethod;
             var accessorMtd = listInterface.GetProperty("Item").GetMethod;
-
-            var iList = typeof(IList<>).MakeGenericType(elementType);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -1877,8 +1873,6 @@ namespace Jil.Serialize
 
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
             var countMtd = listType.GetProperty("Length").GetMethod;
-
-            var iList = typeof(IList<>).MakeGenericType(elementType);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || isRecursive || elementType.IsNullableType();
@@ -3473,8 +3467,6 @@ namespace Jil.Serialize
 
         void BuildPrimitiveWithNewImpl()
         {
-            var primitiveType = typeof(ForType);
-
             Emit = MakeEmit(typeof(ForType));
 
             AddCharBuffer(typeof(ForType));
