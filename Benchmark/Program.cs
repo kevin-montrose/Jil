@@ -869,6 +869,10 @@ namespace Benchmark
 
         static void Main(string[] args)
         {
+            // single core
+            var proc = Process.GetCurrentProcess();
+            proc.ProcessorAffinity = (IntPtr)1;             // only use the first processor
+
             Console.WriteLine("1. Quick Graph");
             Console.WriteLine("2. Comparison Graph");
 
