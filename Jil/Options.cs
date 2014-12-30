@@ -93,7 +93,7 @@ namespace Jil
         ///   prettyPrint - whether or not to include whitespace and newlines for ease of reading
         ///   excludeNulls - whether or not to write object members whose value is null
         ///   jsonp - whether or not the serialized json should be valid for use with JSONP
-        ///   dateFormat - the style in which to serialize DateTimes
+        ///   dateFormat - the style in which to serialize DateTimes and TimeSpans
         ///   includeInherited - whether or not to serialize members declared by an objects base types
         ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
