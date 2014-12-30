@@ -135,15 +135,15 @@ in the pursuit of speed.
 These benchmarks were run on a machine with the following specs:
 
 <ul>
- <li>Operating System: Windows 8 Enterprise 64-bit (6.2, Build 9200) (9200.win8_gdr.130531-1504)</li>
+ <li>Operating System: Windows 8.1 Enterprise 64-bit (6.3, Build 9600) (9600.winblue_r3.140827-1500)</li>
  <li>System Manufacturer: Apple Inc.</li>
- <li>System Model: MacBookPro8,2</li>
- <li>Processor: Intel(R) Core(TM) i7-2860QM CPU @ 2.50GHz (8 CPUs), ~2.5GHz</li>
- <li>Memory: 8192MB RAM</li>
+ <li>System Model: MacBookPro11,3</li>
+ <li>Processor: Intel(R) Core(TM) i7-4960HQ CPU @ 2.60GHz (8 CPUs), ~2.6GHz</li>
+ <li>Memory: 16384MB RAM</li>
  <ul>
   <li>DDR3</li>
   <li>Dual Channel</li>
-  <li>665.2 MHZ</li>
+  <li>798.1 MHZ</li>
  </ul>
 </ul>
 
@@ -151,35 +151,28 @@ As with all benchmarks, take these with a grain of salt.
 
 ### Serialization
 
-For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/3ccb091e1f2659e5d6832518657ae9e3a42e3634/Benchmark):
+For comparison, here's how Jil stacks up against other popular .NET serializers in a [synthetic benchmark](https://github.com/kevin-montrose/Jil/tree/7915b2e8897024e82628c514d63af596fcfd5013/Benchmark):
 
- - [Json.NET](http://james.newtonking.com/json) - JSON library included with ASP.NET MVC
- - [ServiceStack.Text](https://github.com/ServiceStack/ServiceStack.Text) - JSON, CSV, and JSV library; a part of the [ServiceStack framework](https://github.com/ServiceStack/ServiceStack)
- - [protobuf-net](https://code.google.com/p/protobuf-net/) - binary serializer for Google's [Protocol Buffers](https://code.google.com/p/protobuf/)
+ - [Json.NET](http://james.newtonking.com/json) - JSON library included with ASP.NET MVC, version 6.0.7
+ - [ServiceStack.Text](https://github.com/ServiceStack/ServiceStack.Text) - JSON, CSV, and JSV library; a part of the [ServiceStack framework](https://github.com/ServiceStack/ServiceStack), version 3.9.71
+ - [protobuf-net](https://code.google.com/p/protobuf-net/) - binary serializer for Google's [Protocol Buffers](https://code.google.com/p/protobuf/), version 2.0.0.688
    * __does not__ serialize JSON, included as a baseline
 
 All three libraries are in use at [Stack Exchange](https://stackexchange.com/) in various production roles.
 
-<img src="https://i.imgur.com/DBpzOyt.png" />
+<img src="https://i.imgur.com/kagJdod.png" />
 
-<img src="https://i.imgur.com/nUb74Mv.png" />
+<img src="https://i.imgur.com/ggFu8Kw.png" />
 
-<img src="https://i.imgur.com/3zGueX0.png" />
+<img src="https://i.imgur.com/moSS1Mv.png" />
 
-Numbers can found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdENqWE5QTVhsSjZUMV9MQVg1SV9TNnc&usp=sharing).
+Note that the bars in each group of each graph are scaled so that the fastest library is 100.
+
+Numbers, include millisecond timings, can found in [this Google Document](https://docs.google.com/spreadsheets/d/1Jx7DAGopJo3BC0St_L5qHJJrWpZe9x9BCHgdeY9-b-w/edit).
 
 The Question, Answer, and User types are taken from the [Stack Exchange API](http://api.stackexchange.com/).
 
 Data for each type is randomly generated from a fixed seed.  Random text is biased towards ASCII<sup>*</sup>, but includes all unicode.
-
-To sanity check these results, [a serializer benchmark from theburningmonk](http://theburningmonk.com/benchmarks/) was forked to include Jil.
-[Source available on Github](https://github.com/kevin-montrose/SimpleSpeedTester).
-
-<img src="http://i.imgur.com/Cqxr2cg.png" />
-
-Numbers can be found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdHRpNUdTeTY3cm9LT0pzUHktNTU0SHc&usp=sharing).
-Note that times are in milliseconds in this benchmark, and in _microseconds_ in the preceeding one.  Also be aware that the following serializers
-in theburningmonk benchmark are **not** JSON serializers: protobuf-net, MongoDB Driver BSON, and Json.Net BSON.
 
 <sub>*This is meant to simulate typical content from the Stack Exchange API.</sub>
 
@@ -187,15 +180,15 @@ in theburningmonk benchmark are **not** JSON serializers: protobuf-net, MongoDB 
 
 The same libraries and same types were used to test deserialization.
 
-<img src="http://i.imgur.com/NXQOS8n.png" />
+<img src="https://i.imgur.com/Qvdvo44.png" />
 
-<img src="http://i.imgur.com/opUEdOs.png" />
+<img src="https://i.imgur.com/QPtJzZV.png" />
 
-<img src="http://i.imgur.com/62h8hXf.png" />
+<img src="https://i.imgur.com/fESbbgm.png" />
 
-Numbers can be found in [this Google Document](https://docs.google.com/spreadsheet/ccc?key=0AjfqnvvE279FdHEwZ3FCZDB3aEZCelZUMElBUUIyRnc&usp=drive_web#gid=0).
+Note that the bars in each group of each graph are scaled so that the fastest library is 100.
 
-[Recent JSON serializer benchmarks by theburningmonk](http://theburningmonk.com/2014/02/json-serializers-benchmarks-updated/) have included Jil 1.0.x as well.
+Numbers, include millisecond timings, can be found in [the same Google Document](https://docs.google.com/spreadsheets/d/1Jx7DAGopJo3BC0St_L5qHJJrWpZe9x9BCHgdeY9-b-w/edit).
 
 ## Tricks
 
@@ -306,5 +299,6 @@ Just like Jil maintains many different methods for writing integer types, it als
 
 Rather than read a member name into a string or buffer when deserializing, Jil will try to match it one character at a time using an [automata](http://en.wikipedia.org/wiki/Automata_theory).
 
+### Avoid Abstractions If Able
 
-
+If you're serializing to `string` (as indicated by using a particular [`Serialize<T>`](https://github.com/kevin-montrose/Jil/blob/7915b2e8897024e82628c514d63af596fcfd5013/Jil/JSON.cs#L140) method) Jil will avoid the overhead of virtually dispatching calls against `TextWriter`, and instead statically call against it's own specialized [`StringBuilder`-eqsue class](https://github.com/kevin-montrose/Jil/blob/7915b2e8897024e82628c514d63af596fcfd5013/Jil/Serialize/ThunkWriter.cs#L133).  In the general case Jil prefers to write against a `TextWriter` so as to keep memory pressure low (a real concern in many real world deployments), but when Jil is going to allocate a `string` anyway avoiding virtual dispatch results in a noticeable speed up. 
