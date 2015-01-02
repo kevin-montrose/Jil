@@ -141,7 +141,7 @@ namespace Jil.Common
             var field = enumType.GetFields().Single(f => f.Name == Enum.GetName(enumType, enumVal));
 
             var enumMember = field.GetCustomAttribute<System.Runtime.Serialization.EnumMemberAttribute>();
-            if (enumMember == null)
+            if (enumMember == null || enumMember.Value == null)
             {
                 return Enum.GetName(enumType, enumVal);
             }

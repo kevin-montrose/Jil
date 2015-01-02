@@ -7589,5 +7589,18 @@ namespace JilTests
             var serialized = JSON.Serialize(items, Options.ISO8601PrettyPrint);
             Assert.AreEqual("[{\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}]", serialized);
         }
+
+        enum _Issue101
+        {
+            [EnumMember]Foo,
+            [EnumMember(Value = "BAR")]Bar
+        }
+
+        [TestMethod]
+        public void Issue101()
+        {
+            var serialized = JSON.Serialize(new {foo = _Issue101.Foo, bar = _Issue101.Bar});
+            Assert.AreEqual("{\"foo\":\"Foo\",\"bar\":\"BAR\"}", serialized);
+        }
     }
 }
