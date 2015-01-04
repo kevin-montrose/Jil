@@ -69,7 +69,7 @@ namespace Jil.Serialize
                 { '\u001F', @"\u001F" }
         };
 
-        private readonly Type RecusionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
+        private readonly Type RecursionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
         private readonly bool ExcludeNulls;
         private readonly bool PrettyPrint;
         private readonly bool JSONP;
@@ -84,9 +84,9 @@ namespace Jil.Serialize
 
         private readonly bool BuildingToString;
 
-        internal InlineSerializer(Type recusionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic, bool buildToString)
+        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic, bool buildToString)
         {
-            RecusionLookupOptionsType = recusionLookupOptionsType;
+            RecursionLookupOptionsType = recursionLookupOptionsType;
             PrettyPrint = pretty;
             ExcludeNulls = excludeNulls;
             JSONP = jsonp;
@@ -1010,9 +1010,9 @@ namespace Jil.Serialize
                 return;
             }
 
-            var needsIntCoersion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
+            var needsIntCoercion = primitiveType == typeof(byte) || primitiveType == typeof(sbyte) || primitiveType == typeof(short) || primitiveType == typeof(ushort);
 
-            if (needsIntCoersion)
+            if (needsIntCoercion)
             {
                 Emit.Convert<int>();            // TextWriter int
                 primitiveType = typeof(int);
@@ -3260,7 +3260,7 @@ namespace Jil.Serialize
                 else
                 {
                     // static case
-                    var cacheType = typeof(TypeCache<,>).MakeGenericType(RecusionLookupOptionsType, type);
+                    var cacheType = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, type);
                     FieldInfo thunk;
 
                     if (BuildingToString)
@@ -3374,11 +3374,11 @@ namespace Jil.Serialize
                 MethodInfo loadMtd;
                 if (BuildingToString)
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecusionLookupOptionsType, primeType).GetMethod("LoadToString", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("LoadToString", BindingFlags.Public | BindingFlags.Static);
                 }
                 else
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecusionLookupOptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 }
 
                 loadMtd.Invoke(null, new object[0]);
