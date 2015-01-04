@@ -21,8 +21,6 @@ namespace Jil.Deserialize
         {
             _nameOrderedSetters = GetOrderedSetters();
 
-            var setters = GetSetters();
-
             Lookup =
                 _nameOrderedSetters
                 .Select((setter, index) => Tuple.Create(setter.Item1, index))

@@ -1157,7 +1157,6 @@ namespace Jil.Serialize
             var hours = ts.Hours;
             var minutes = ts.Minutes;
             var seconds = ts.Seconds;
-            var milliseconds = ts.Milliseconds;
 
             // days
             if (days > 0)
