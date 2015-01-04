@@ -662,30 +662,26 @@ namespace Jil.SerializeDynamic
 
         static bool CanBeListAndNotDictionaryDynamic(dynamic dyn, out IEnumerable enumerable)
         {
-            try
+            if (dyn is IDictionary<string, object>)
             {
-                enumerable = (IEnumerable)dyn;
-
-                // if either of these succeed, we're not really a "list"
-                try
-                {
-                    var asDict1 = (IDictionary<string, object>)dyn;
-                    return false;
-                }
-                catch { }
-                try
-                {
-                    var asDict2 = (IDictionary)dyn;
-                    return false;
-                }
-                catch { }
-
-                return true;
+                enumerable = default(IEnumerable);
+                return false;
             }
-            catch { }
 
-            enumerable = null;
-            return false;
+            if (dyn is IDictionary)
+            {
+                enumerable = default(IEnumerable);
+                return false;
+            }
+
+            enumerable = dyn as IEnumerable;
+            
+            if (enumerable == null)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
