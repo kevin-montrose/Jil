@@ -14,6 +14,11 @@ namespace Jil.Common
 {
     static class ExtensionMethods
     {
+        public static ConstructorInfo GetPublicOrPrivateConstructor(this Type onType, params Type[] parameterTypes)
+        {
+            return onType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, parameterTypes, null);
+        }
+
         public static bool ShouldConvertEnum(this MemberInfo member, Type enumType)
         {
             Type ignored;

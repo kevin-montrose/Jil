@@ -5203,6 +5203,51 @@ namespace JilTests
             }
         }
 
+        class _PrivateConstructor_Object
+        {
+            public string A { get; set; }
+            public int B { get; set; }
+
+            private _PrivateConstructor_Object() { }
+        }
+
+        [TestMethod]
+        public void PrivateConstructor_Object()
+        {
+            var res = JSON.Deserialize<_PrivateConstructor_Object>("{\"A\":\"hello world\", \"B\": 12345}");
+            Assert.AreEqual("hello world", res.A);
+            Assert.AreEqual(12345, res.B);
+        }
+
+        class _PrivateConstructor_List : List<string>
+        {
+            private _PrivateConstructor_List() : base() { }
+        }
+
+        [TestMethod]
+        public void PrivateConstructor_List()
+        {
+            var res = JSON.Deserialize<_PrivateConstructor_List>("[\"hello\", \"world\"]");
+            Assert.AreEqual(2, res.Count);
+            Assert.AreEqual("hello", res[0]);
+            Assert.AreEqual("world", res[1]);
+        }
+
+        class _PrivateConstructor_Dictionary : Dictionary<string, int>
+        {
+            private _PrivateConstructor_Dictionary() : base() { }
+        }
+
+        [TestMethod]
+        public void PrivateConstructor_Dictionary()
+        {
+            var res = JSON.Deserialize<_PrivateConstructor_Dictionary>("{\"hello\": 123, \"world\":456, \"foo\":789}");
+            Assert.AreEqual(3, res.Count);
+            Assert.AreEqual(123, res["hello"]);
+            Assert.AreEqual(456, res["world"]);
+            Assert.AreEqual(789, res["foo"]);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

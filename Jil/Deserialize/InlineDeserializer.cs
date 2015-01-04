@@ -926,7 +926,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var listCons = listType.GetConstructor(Type.EmptyTypes);
+                    var listCons = listType.GetPublicOrPrivateConstructor();
                     if (listCons == null) throw new ConstructionException("Expected a parameterless constructor for " + listType);
 
                     Emit.NewObject(listCons);   // listType
@@ -1031,7 +1031,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var dictCons = dictType.GetConstructor(Type.EmptyTypes);
+                    var dictCons = dictType.GetPublicOrPrivateConstructor();
                     if (dictCons == null) throw new ConstructionException("Expected a parameterless constructor for " + dictType);
 
                     Emit.NewObject(dictCons);                                   // dictType
@@ -1237,8 +1237,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
-
+                    var cons = objType.GetPublicOrPrivateConstructor();
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
@@ -1428,8 +1427,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetConstructor(Type.EmptyTypes);
-
+                    var cons = objType.GetPublicOrPrivateConstructor();
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
