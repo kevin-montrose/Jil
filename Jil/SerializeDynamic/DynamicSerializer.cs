@@ -278,6 +278,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 bit = (bool)dyn;
                 return true;
             }
@@ -338,6 +339,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 var asLong = (long)dyn;
 
                 if (asLong < 0)
@@ -359,6 +361,7 @@ namespace Jil.SerializeDynamic
 
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 integer = (ulong)dyn;
                 negative = false;
 
@@ -415,6 +418,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 floatingPoint = (double)dyn;
                 return true;
             }
@@ -422,6 +426,7 @@ namespace Jil.SerializeDynamic
 
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 floatingPoint = (float)dyn;
                 return true;
             }
@@ -429,6 +434,7 @@ namespace Jil.SerializeDynamic
 
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 floatingPoint = (double)(decimal)dyn;
                 return true;
             }
@@ -475,6 +481,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 dt = (DateTime)dyn;
                 return true;
             }
@@ -482,6 +489,7 @@ namespace Jil.SerializeDynamic
 
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 var dto = (DateTimeOffset)dyn;
                 dt = dto.UtcDateTime;
                 return true;
@@ -522,6 +530,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 ts = (TimeSpan)dyn;
                 return true;
             }
@@ -561,6 +570,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 guid = (Guid)dyn;
                 return true;
             }
@@ -607,6 +617,7 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 str = (string)dyn;
                 return true;
             }
@@ -614,6 +625,7 @@ namespace Jil.SerializeDynamic
 
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 var c = (char)dyn;
                 str = c.ToString();
                 return true;
@@ -664,17 +676,20 @@ namespace Jil.SerializeDynamic
         {
             try
             {
+                // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                 enumerable = (IEnumerable)dyn;
 
                 // if either of these succeed, we're not really a "list"
                 try
                 {
+                    // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                     var asDict1 = (IDictionary<string, object>)dyn;
                     return false;
                 }
                 catch { }
                 try
                 {
+                    // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                     var asDict2 = (IDictionary)dyn;
                     return false;
                 }
