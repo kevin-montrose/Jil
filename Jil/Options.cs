@@ -85,6 +85,7 @@ namespace Jil
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
         internal bool IsJSONP { get; private set; }
         internal bool ShouldIncludeInherited { get; private set; }
+        internal bool ISO8601ShouldNotConvertToUtc { get; private set; }
 
         /// <summary>
         /// Configuration for Jil serialization options.
@@ -97,13 +98,15 @@ namespace Jil
         ///   includeInherited - whether or not to serialize members declared by an objects base types
         ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false,
+            bool iso8601ShouldNotConvertToUtc = false)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
+            ISO8601ShouldNotConvertToUtc = false;
         }
 
         /// <summary>
