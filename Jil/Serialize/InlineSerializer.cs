@@ -788,7 +788,10 @@ namespace Jil.Serialize
                     Emit.LoadLocalAddress(loc);                     // TextWriter DateTime*
                 }
 
-                Emit.Call(toUniversalTime);                         // TextWriter DateTime
+                if (!ISO8601ShouldNotConvertToUtc)
+                {
+                    Emit.Call(toUniversalTime); // TextWriter DateTime
+                }
 
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
@@ -811,6 +814,7 @@ namespace Jil.Serialize
             }
 
             Emit.LoadLocal(CharBuffer);                                     // TextWriter DateTime char[]
+            Emit.LoadConstant(ISO8601ShouldNotConvertToUtc);                // TextWriter DateTime char[] bool
             Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));  // --empty--
         }
 
@@ -3243,13 +3247,14 @@ namespace Jil.Serialize
                     var getMtd = (MethodInfo)recursiveSerializerCache.GetField("GetFor").GetValue(null);
 
                     var loc = Emit.DeclareLocal(getMtd.ReturnType);
-                    Emit.LoadConstant(this.PrettyPrint);        // bool
-                    Emit.LoadConstant(this.ExcludeNulls);       // bool bool
-                    Emit.LoadConstant(this.JSONP);              // bool bool bool
-                    Emit.LoadConstant((byte)this.DateFormat);   // bool bool bool byte
-                    Emit.LoadConstant(this.IncludeInherited);   // bool bool bool DateTimeFormat bool
-                    Emit.Call(getMtd);                          // Action<TextWriter, type, int>)
-                    Emit.StoreLocal(loc);                       // --empty--
+                    Emit.LoadConstant(this.PrettyPrint);                  // bool
+                    Emit.LoadConstant(this.ExcludeNulls);                 // bool bool
+                    Emit.LoadConstant(this.JSONP);                        // bool bool bool
+                    Emit.LoadConstant((byte)this.DateFormat);             // bool bool bool byte
+                    Emit.LoadConstant(this.IncludeInherited);             // bool bool bool DateTimeFormat bool
+                    Emit.LoadConstant(this.ISO8601ShouldNotConvertToUtc); // bool bool bool DateTimeFormat bool
+                    Emit.Call(getMtd);                                    // Action<TextWriter, type, int>)
+                    Emit.StoreLocal(loc);                                 // --empty--
 
                     ret[type] = loc;
                 }

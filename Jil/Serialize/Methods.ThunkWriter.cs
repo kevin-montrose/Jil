@@ -137,7 +137,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo CustomISO8601ToString_ThunkWriter = typeof(Methods).GetMethod("_CustomISO8601ToString_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomISO8601ToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, char[] buffer)
+        static void _CustomISO8601ToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, char[] buffer, bool shouldNotConvertToUtc)
         {
             // "yyyy-mm-ddThh:mm:ss.fffffffZ"
             // 0123456789ABCDEFGHIJKL
@@ -147,7 +147,8 @@ namespace Jil.Serialize
 
             buffer[0] = '"';
 
-            dt = dt.ToUniversalTime();
+            if(shouldNotConvertToUtc)
+                dt = dt.ToUniversalTime();
 
             uint val;
 
@@ -267,7 +268,10 @@ namespace Jil.Serialize
                 fracEnd = 20;
             }
 
-            buffer[fracEnd] = 'Z';
+            if (!shouldNotConvertToUtc)
+                buffer[fracEnd] = 'Z';
+            else
+                fracEnd = --fracEnd;
             buffer[fracEnd + 1] = '"';
 
             writer.Write(buffer, 0, fracEnd + 2);
