@@ -75,6 +75,7 @@ namespace Jil.Serialize
         private readonly bool JSONP;
         private readonly DateTimeFormat DateFormat;
         private readonly bool IncludeInherited;
+        private readonly bool ISO8601ShouldNotConvertToUtc;
         
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
@@ -84,7 +85,7 @@ namespace Jil.Serialize
 
         private readonly bool BuildingToString;
 
-        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic, bool buildToString)
+        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
             PrettyPrint = pretty;
@@ -92,6 +93,7 @@ namespace Jil.Serialize
             JSONP = jsonp;
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
+            ISO8601ShouldNotConvertToUtc = iso8601ShouldNotConvertToUtc;
 
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
 
@@ -3655,12 +3657,12 @@ namespace Jil.Serialize
             return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, false);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, iso8601ShouldNotConvertToUtc, false, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3675,18 +3677,18 @@ namespace Jil.Serialize
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
-        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc)
         {
-            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true, false);
+            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, iso8601ShouldNotConvertToUtc, true, false);
             return obj.Build();
         }
 
-        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, out Exception exceptionDuringBuild)
         {
             StringThunkDelegate<BuildForType> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, true);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, iso8601ShouldNotConvertToUtc, false, true);
 
                 ret = obj.BuildToString();
 
