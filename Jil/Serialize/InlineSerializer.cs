@@ -75,7 +75,7 @@ namespace Jil.Serialize
         private readonly bool JSONP;
         private readonly DateTimeFormat DateFormat;
         private readonly bool IncludeInherited;
-        private readonly bool ISO8601ShouldNotConvertToUtc;
+        private readonly bool ShouldConvertToUtc;
         
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
@@ -85,7 +85,7 @@ namespace Jil.Serialize
 
         private readonly bool BuildingToString;
 
-        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, bool callOutOnPossibleDynamic, bool buildToString)
+        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool shouldConvertToUtc, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
             PrettyPrint = pretty;
@@ -93,7 +93,7 @@ namespace Jil.Serialize
             JSONP = jsonp;
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
-            ISO8601ShouldNotConvertToUtc = iso8601ShouldNotConvertToUtc;
+            ShouldConvertToUtc = shouldConvertToUtc;
 
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
 
@@ -788,7 +788,7 @@ namespace Jil.Serialize
                     Emit.LoadLocalAddress(loc);                     // TextWriter DateTime*
                 }
 
-                if (!ISO8601ShouldNotConvertToUtc)
+                if (ShouldConvertToUtc)
                 {
                     Emit.Call(toUniversalTime); // TextWriter DateTime
                 }
@@ -800,6 +800,7 @@ namespace Jil.Serialize
                 }
 
                 Emit.LoadConstant("\\\"yyyy-MM-ddTHH:mm:ssZ\\\"");      // TextWriter DateTime* string
+
                 Emit.Call(toString);                                    // TextWriter string
 
                 if (BuildingToString)
@@ -814,7 +815,7 @@ namespace Jil.Serialize
             }
 
             Emit.LoadLocal(CharBuffer);                                     // TextWriter DateTime char[]
-            Emit.LoadConstant(ISO8601ShouldNotConvertToUtc);                // TextWriter DateTime char[] bool
+            Emit.LoadConstant(ShouldConvertToUtc);                // TextWriter DateTime char[] bool
             Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));  // --empty--
         }
 
@@ -3252,7 +3253,7 @@ namespace Jil.Serialize
                     Emit.LoadConstant(this.JSONP);                        // bool bool bool
                     Emit.LoadConstant((byte)this.DateFormat);             // bool bool bool byte
                     Emit.LoadConstant(this.IncludeInherited);             // bool bool bool DateTimeFormat bool
-                    Emit.LoadConstant(this.ISO8601ShouldNotConvertToUtc); // bool bool bool DateTimeFormat bool
+                    Emit.LoadConstant(this.ShouldConvertToUtc);           // bool bool bool DateTimeFormat bool
                     Emit.Call(getMtd);                                    // Action<TextWriter, type, int>)
                     Emit.StoreLocal(loc);                                 // --empty--
 
@@ -3662,12 +3663,12 @@ namespace Jil.Serialize
             return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, out Exception exceptionDuringBuild)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool shouldConvertToUtc, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, iso8601ShouldNotConvertToUtc, false, false);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, shouldConvertToUtc, false, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3688,12 +3689,12 @@ namespace Jil.Serialize
             return obj.Build();
         }
 
-        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool iso8601ShouldNotConvertToUtc, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool shouldConvertToUtc, out Exception exceptionDuringBuild)
         {
             StringThunkDelegate<BuildForType> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, iso8601ShouldNotConvertToUtc, false, true);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, shouldConvertToUtc, false, true);
 
                 ret = obj.BuildToString();
 

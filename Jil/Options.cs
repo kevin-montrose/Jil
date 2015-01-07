@@ -51,17 +51,12 @@ namespace Jil
         public static readonly Options ISO8601ExcludeNulls = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true);
         public static readonly Options ISO8601JSONP = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true);
         public static readonly Options ISO8601IncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, includeInherited: true);
-        public static readonly Options ISO8601NotConvertToUtc = new Options(dateFormat: DateTimeFormat.ISO8601, iso8601ShouldNotConvertToUtc: true);
         public static readonly Options ISO8601PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true);
         public static readonly Options ISO8601PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, jsonp: true);
         public static readonly Options ISO8601PrettyPrintIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, includeInherited: true);
-        public static readonly Options ISO8601PrettyPrintNotConvertToUtc = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, iso8601ShouldNotConvertToUtc: true);
         public static readonly Options ISO8601ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, jsonp: true);
         public static readonly Options ISO8601ExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, includeInherited: true);
-        public static readonly Options ISO8601ExcludeNullsNotConvertToUtc = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, iso8601ShouldNotConvertToUtc: true);
         public static readonly Options ISO8601JSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, includeInherited: true);
-        public static readonly Options ISO8601JSONPNotConvertToUtc = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, iso8601ShouldNotConvertToUtc: true);
-        public static readonly Options ISO8601IncludeInheritedNotConvertToUtc = new Options(dateFormat: DateTimeFormat.ISO8601, includeInherited: true, iso8601ShouldNotConvertToUtc: true);
         public static readonly Options ISO8601PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, jsonp: true);
         public static readonly Options ISO8601PrettyPrintExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, includeInherited: true);
         public static readonly Options ISO8601PrettyPrintJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, includeInherited: true);
@@ -92,7 +87,7 @@ namespace Jil
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
         internal bool IsJSONP { get; private set; }
         internal bool ShouldIncludeInherited { get; private set; }
-        internal bool ISO8601ShouldNotConvertToUtc { get; private set; }
+        internal bool ShouldConvertToUtc { get; private set; }
 
         /// <summary>
         /// Configuration for Jil serialization options.
@@ -106,14 +101,14 @@ namespace Jil
         ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
         public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false,
-            bool iso8601ShouldNotConvertToUtc = false)
+            bool shouldConvertToUtc = true)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
-            ISO8601ShouldNotConvertToUtc = iso8601ShouldNotConvertToUtc;
+            ShouldConvertToUtc = shouldConvertToUtc;
         }
 
         /// <summary>
@@ -125,13 +120,13 @@ namespace Jil
         {
             return
                 string.Format(
-                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, ISO8601ShouldNotConvertToUtc = {5} }}",
+                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, ShouldConvertToUtc = {5} }}",
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,
                     IsJSONP,
                     ShouldIncludeInherited,
-                    ISO8601ShouldNotConvertToUtc
+                    ShouldConvertToUtc
                 );
         }
 
@@ -155,7 +150,7 @@ namespace Jil
                 (ShouldExcludeNulls ? 0x2 : 0x0) |
                 (IsJSONP ? 0x4 : 0x0) |
                 (ShouldIncludeInherited ? 0x8 : 0x0) |
-                (ISO8601ShouldNotConvertToUtc ? 0x16 : 0x0) |
+                (ShouldConvertToUtc ? 0x16 : 0x0) |
                 dateTimeMask;
         }
 
@@ -173,7 +168,7 @@ namespace Jil
                 other.ShouldExcludeNulls == this.ShouldExcludeNulls &&
                 other.IsJSONP == this.IsJSONP &&
                 other.ShouldIncludeInherited == this.ShouldIncludeInherited &&
-                other.ISO8601ShouldNotConvertToUtc == this.ISO8601ShouldNotConvertToUtc;
+                other.ShouldConvertToUtc == this.ShouldConvertToUtc;
         }
     }
 }

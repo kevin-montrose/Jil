@@ -221,7 +221,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo CustomISO8601ToString = typeof(Methods).GetMethod("_CustomISO8601ToString", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _CustomISO8601ToString(TextWriter writer, DateTime dt, char[] buffer, bool shouldNotConvertToUtc)
+        static void _CustomISO8601ToString(TextWriter writer, DateTime dt, char[] buffer, bool shouldConvertToUtc)
         {
             // "yyyy-mm-ddThh:mm:ss.fffffffZ"
             // 0123456789ABCDEFGHIJKL
@@ -231,8 +231,10 @@ namespace Jil.Serialize
 
             buffer[0] = '"';
 
-            if(!shouldNotConvertToUtc)
+            if (shouldConvertToUtc)
+            {
                 dt = dt.ToUniversalTime();
+            }
 
             uint val;
 
@@ -352,10 +354,14 @@ namespace Jil.Serialize
                 fracEnd = 20;
             }
 
-            if(!shouldNotConvertToUtc)
+            if (shouldConvertToUtc)
+            {
                 buffer[fracEnd] = 'Z';
+            }
             else
+            {
                 fracEnd = --fracEnd;
+            }
             buffer[fracEnd + 1] = '"';
 
             writer.Write(buffer, 0, fracEnd + 2);
