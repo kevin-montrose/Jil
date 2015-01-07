@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using DateTimeFormat = Jil.DateTimeFormat;
 
 namespace JilTests
 {
@@ -1600,6 +1601,58 @@ namespace JilTests
                 }
 
                 Assert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        public void DateTimeWithoutUtcConvertion()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                    str,
+                    new Options(shouldConvertToUtc: false)
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                    str,
+                    new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, shouldConvertToUtc: false)
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("315532800000", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                    str,
+                    new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, shouldConvertToUtc: false)
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("315532800", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Unspecified),
+                    str,
+                    new Options(dateFormat: DateTimeFormat.ISO8601, shouldConvertToUtc: false)
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("\"1980-01-01T00:00:00\"", res);
             }
         }
 
