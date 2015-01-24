@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Jil")]
 [assembly: AssemblyDescription("A fast JSON serializer and deserializer")]
 [assembly: AssemblyProduct("Jil")]
-[assembly: AssemblyCopyright("Copyright © Kevin Montrose 2013 - 2014")]
+[assembly: AssemblyCopyright("Copyright © Kevin Montrose 2013 - 2015")]
 
 [assembly: ComVisible(false)]
 
