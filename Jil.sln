@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jil", "Jil\Jil.csproj", "{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiments", "Experiments\Experiments.csproj", "{E26CA103-9746-4038-876F-19218F47C29C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benchmark.csproj", "{F4EB088A-3962-4444-8935-7D5B1C197019}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jil.StrongName", "Jil.StrongName\Jil.StrongName.csproj", "{0EDD50BE-0CCD-48E1-A613-4A623F543492}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +50,12 @@ Global
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release_ExhaustiveTest|Any CPU.Build.0 = Release_ExhaustiveTest|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4EB088A-3962-4444-8935-7D5B1C197019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Release_ExhaustiveTest|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Release_ExhaustiveTest|Any CPU.Build.0 = Release|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EDD50BE-0CCD-48E1-A613-4A623F543492}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
