@@ -1874,7 +1874,7 @@ namespace Jil.Deserialize
             }
         }
 
-        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool) });
+        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(UnspecifiedDateTimeKindBehavior) });
         static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
         void ReadDynamic()
         {
@@ -1886,6 +1886,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant(false);                                                   // TextReader bool bool bool
                 Emit.LoadConstant((byte)DateFormat);                                        // TextReader bool bool bool byte
                 Emit.LoadConstant(false);                                                   // TextReader bool bool bool byte bool
+                Emit.LoadConstant((byte)UnspecifiedDateTimeKindBehavior.IsLocal);           // TextReader bool bool bool byte bool byte
                 Emit.NewObject(OptionsCons);                                                // TextReader Options
                 Emit.NewObject(ObjectBuilderCons);                                          // TextReader ObjectBuilder
                 Emit.StoreLocal(dyn);                                                       // TextReader

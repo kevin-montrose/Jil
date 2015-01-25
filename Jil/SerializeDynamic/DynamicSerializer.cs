@@ -169,7 +169,7 @@ namespace Jil.SerializeDynamic
             {
                 ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
                 if (ret != null) return ret;
-                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited });
+                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior });
             }
 
             return ret;
