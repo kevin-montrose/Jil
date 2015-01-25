@@ -605,15 +605,10 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -663,15 +658,10 @@ namespace Jil.Serialize
 
         void WriteMillisecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -717,15 +707,10 @@ namespace Jil.Serialize
 
         void WriteSecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -776,20 +761,10 @@ namespace Jil.Serialize
             //  - DateTime
             //  - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             if (!UseCustomISODateFormatting)
             {
                 var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
-
-                using (var loc = Emit.DeclareLocal<DateTime>())
-                {
-                    Emit.StoreLocal(loc);                           // TextWriter
-                    Emit.LoadLocalAddress(loc);                     // TextWriter DateTime*
-                }
-
-                Emit.Call(toUniversalTime);                         // TextWriter DateTime
-
+                
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
                     Emit.StoreLocal(loc);       // TextWriter
@@ -884,6 +859,15 @@ namespace Jil.Serialize
             // top of stack:
             //   - DateTime
             //   - TextWriter
+
+            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(loc);               // TextWriter
+                Emit.LoadLocalAddress(loc);         // TextWriter DateTime*
+                Emit.Call(toUniversalTime);         // TextWriter DateTime
+            }
 
             if (DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
             {

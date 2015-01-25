@@ -231,8 +231,6 @@ namespace Jil.Serialize
 
             buffer[0] = '"';
 
-            dt = dt.ToUniversalTime();
-
             uint val;
 
             // Year
