@@ -152,10 +152,5 @@ namespace Jil.Serialize
                     CustomISO8601WithOffsetToString :
                     CustomISO8601WithOffsetToString_ThunkWriter;
         }
-
-        public static MethodInfo GetCustomNewtonsoftWithOffsetToString(bool needThunkWriter)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
