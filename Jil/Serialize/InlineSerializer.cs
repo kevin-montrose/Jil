@@ -790,20 +790,57 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetMethod;
+        static readonly MethodInfo TimeSpan_Hours = typeof(TimeSpan).GetProperty("Hours").GetMethod;
+        static readonly MethodInfo TimeSpan_Minutes = typeof(TimeSpan).GetProperty("Minutes").GetMethod;
         void WriteDateTimeOffset()
         {
             // top of stack:
             //  - DateTimeOffset
             //  - TextWriter
 
-            using(var loc = Emit.DeclareLocal<DateTimeOffset>())
+            if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch || DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch)
             {
-                Emit.StoreLocal(loc);               // TextWriter
-                Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
+                // No room for an offset in these forms, so just re-use DateTime logic
+                using (var loc = Emit.DeclareLocal<DateTimeOffset>())
+                {
+                    Emit.StoreLocal(loc);               // TextWriter
+                    Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
+                }
+
+                Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
+                WriteDateTime();
+                return;
             }
 
-            Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
-            WriteDateTime();
+            // Get the DateTime equivalent and the offset on the stack
+            using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>())
+            using (var tsLoc = Emit.DeclareLocal<TimeSpan>())
+            {
+                Emit.StoreLocal(dtoLoc);            // TextWriter
+                Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTimeOffset*
+                Emit.Call(DateTimeOffset_DateTime); // TextWriter DateTime
+                Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTime DateTimeOffset*
+                Emit.Call(DateTimeOffset_Offset);   // TextWriter DateTime TimeSpan
+                Emit.StoreLocal(tsLoc);             // TextWriter DateTime
+                Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime TimeSpan*
+                Emit.Call(TimeSpan_Hours);          // TextWriter DateTime int
+                Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime int TimeSpan*
+                Emit.Call(TimeSpan_Minutes);        // TextWriter DateTime int int
+            }
+
+            switch(DateFormat){
+                case DateTimeFormat.ISO8601:
+                    Emit.LoadLocal(CharBuffer);
+                    Emit.Call(Methods.GetCustomISO8601WithOffsetToString(BuildingToString));
+                    return;
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                    Emit.Call(Methods.GetCustomNewtonsoftWithOffsetToString(BuildingToString));
+                    return;
+                default:
+                    throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
+            }
         }
 
         static readonly MethodInfo TimeSpan_TotalSeconds = typeof(TimeSpan).GetProperty("TotalSeconds").GetMethod;

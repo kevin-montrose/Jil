@@ -355,6 +355,20 @@ namespace Jil.Serialize
             writer.Write(buffer, 0, fracEnd + 2);
         }
 
+        static readonly MethodInfo CustomISO8601WithOffsetToString = typeof(Methods).GetMethod("_CustomISO8601WithOffsetToString", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomISO8601WithOffsetToString(TextWriter writer, DateTime dt, int hours, int minutes, char[] buffer)
+        {
+            if (hours == 0 && minutes == 0)
+            {
+                // It's actually in UTC time, bail!
+                _CustomISO8601ToString(writer, dt, buffer);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineUnsafe(TextWriter writer, string strRef)

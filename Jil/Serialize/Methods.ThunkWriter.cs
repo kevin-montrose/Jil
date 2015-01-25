@@ -271,6 +271,20 @@ namespace Jil.Serialize
             writer.Write(buffer, 0, fracEnd + 2);
         }
 
+        static readonly MethodInfo CustomISO8601WithOffsetToString_ThunkWriter = typeof(Methods).GetMethod("_CustomISO8601WithOffsetToString_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomISO8601WithOffsetToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, int hours, int minutes, char[] buffer)
+        {
+            if (hours == 0 && minutes == 0)
+            {
+                // It's actually in UTC time, bail!
+                _CustomISO8601ToString_ThunkWriter(ref writer, dt, buffer);
+                return;
+            }
+
+            throw new NotImplementedException();
+        }
+
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter(ref ThunkWriter writer, string strRef)
