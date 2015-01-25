@@ -277,7 +277,7 @@ Similarly to numbers, each of Jil's date formats has a custom Write() implementa
 
 Noticing a pattern?
 
-Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L18) (which is one of the reasons Jil only supports the D format).
+Jil has a [custom Guid writer](https://github.com/kevin-montrose/Jil/blob/201a611f1589c07b6a65d4fb07bf1d95616bf1e4/Jil/Serialize/Methods.cs#L100) (which is one of the reasons Jil only supports the D format).
 
 Fun fact about this method, I tested a more branch heavy version (which removed the byte lookup) which turned out to be considerably slower than the built-in method due to [branch prediction failures](http://stackoverflow.com/a/11227902/80572).
 Type 4 Guids being random makes for something quite close to the worst case for branch prediciton.
