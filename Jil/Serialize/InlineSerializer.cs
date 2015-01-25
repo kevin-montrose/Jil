@@ -862,11 +862,28 @@ namespace Jil.Serialize
 
             var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
 
+            var kind = typeof(DateTime).GetProperty("Kind");
+            var specifyKind = typeof(DateTime).GetMethod("SpecifyKind", BindingFlags.Public | BindingFlags.Static);
+
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);               // TextWriter
-                Emit.LoadLocalAddress(loc);         // TextWriter DateTime*
-                Emit.Call(toUniversalTime);         // TextWriter DateTime
+                var noChange = Emit.DefineLabel();
+                var convertToKind = UnspecifiedDateTimeBehavior == UnspecifiedDateTimeKindBehavior.IsLocal ? DateTimeKind.Local : DateTimeKind.Utc;
+
+                Emit.StoreLocal(loc);                               // TextWriter
+                Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
+                LoadProperty(kind);                                 // TextWriter DateTimeKind
+                Emit.LoadConstant((int)DateTimeKind.Unspecified);   // TextWriter DateTimeKind DateTimeKind
+                
+                Emit.UnsignedBranchIfNotEqual(noChange);            // TextWriter
+                Emit.LoadLocal(loc);                                // TextWriter DateTime
+                Emit.LoadConstant((int)convertToKind);              // TextWriter DateTime DateTimeKind
+                Emit.Call(specifyKind);                             // TextWriter DateTime
+                Emit.StoreLocal(loc);                               // TextWriter
+                
+                Emit.MarkLabel(noChange);                           // TextWriter
+                Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
+                Emit.Call(toUniversalTime);                         // TextWriter DateTime
             }
 
             if (DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
