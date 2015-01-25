@@ -445,8 +445,31 @@ namespace Jil.Deserialize
         static readonly ConstructorInfo DateTimeOffsetConst = typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) });
         void ReadDateTimeOffset()
         {
-            ReadDate();                             // DateTime
-            Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
+            if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+            {
+                // All three of these formats either lack a timezone offset, or ignore it (looking at you Newtonsoft).
+                // So let's just reuse the DateTime reader
+                ReadDate();                             // DateTime
+                Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
+                return;
+            }
+
+            ExpectQuote();                      // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            if (UseCharArrayOverStringBuilder)
+            {
+                LoadCharBufferAddress();
+                Emit.Call(Methods.ReadISO8601DateWithOffsetWithCharArray);  // DateTimeOffset
+                ExpectQuote();                                              // DateTimeOffset
+            }
+            else
+            {
+                LoadCharBuffer();
+                Emit.Call(Methods.ReadISO8601DateWithOffset);   // DateTimeOffset
+                ExpectQuote();                                  // DateTimeOffset
+            }
         }
 
         void ReadTimeSpan()
@@ -636,7 +659,7 @@ namespace Jil.Deserialize
             {
                 LoadCharBufferAddress();
                 Emit.Call(Methods.ReadISO8601DateWithCharArray); // DateTime
-                ExpectQuote();                      // DateTime
+                ExpectQuote();                                   // DateTime
             }
             else
             {
