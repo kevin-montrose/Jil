@@ -5248,6 +5248,113 @@ namespace JilTests
             Assert.AreEqual(789, res["foo"]);
         }
 
+        class _SeekNotSupported : Stream
+        {
+            readonly byte[] Data;
+            int Index = 0;
+
+            public _SeekNotSupported(string str)
+            {
+                Data = Encoding.UTF8.GetBytes(str);
+            }
+
+            public override bool CanRead
+            {
+                get { return true; }
+            }
+
+            public override bool CanSeek
+            {
+                get { return false; }
+            }
+
+            public override bool CanWrite
+            {
+                get { return false; }
+            }
+
+            public override void Flush()
+            {
+                
+            }
+
+            public override long Length
+            {
+                get { throw new NotImplementedException(); }
+            }
+
+            public override long Position
+            {
+                get
+                {
+                    throw new NotImplementedException();
+                }
+                set
+                {
+                    throw new NotImplementedException();
+                }
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                if (count < 0) throw new Exception();
+
+                if (Index == Data.Length) return 0;
+
+                buffer[offset] = Data[Index];
+                Index++;
+                return 1;
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [TestMethod]
+        public void SeekNotSupported()
+        {
+            using(var str = new _SeekNotSupported("{\"hello\": 123, \"world\":456, \"foo\":789}"))
+            using(var reader = new StreamReader(str))
+            {
+                var res = JSON.Deserialize<Dictionary<string, int>>(reader);
+                Assert.AreEqual(3, res.Count);
+                Assert.AreEqual(123, res["hello"]);
+                Assert.AreEqual(456, res["world"]);
+                Assert.AreEqual(789, res["foo"]);
+            }
+
+            using (var str = new _SeekNotSupported("{\"hello\": 123, \"world\":456, \"foo\":789}"))
+            using (var reader = new StreamReader(str))
+            {
+                var res = (Dictionary<string, int>)JSON.Deserialize(reader, typeof(Dictionary<string, int>));
+                Assert.AreEqual(3, res.Count);
+                Assert.AreEqual(123, res["hello"]);
+                Assert.AreEqual(456, res["world"]);
+                Assert.AreEqual(789, res["foo"]);
+            }
+
+            using (var str = new _SeekNotSupported("{\"hello\": 123, \"world\":456, \"foo\":789}"))
+            using (var reader = new StreamReader(str))
+            {
+                var res = JSON.DeserializeDynamic(reader);
+                Assert.AreEqual(123, (int)res.hello);
+                Assert.AreEqual(456, (int)res.world);
+                Assert.AreEqual(789, (int)res.foo);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
