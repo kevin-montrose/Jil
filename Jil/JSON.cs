@@ -1658,6 +1658,7 @@ namespace Jil
             try
             {
                 options = options ?? DefaultOptions;
+                reader = reader.MakeSupportPeek();
 
                 switch (options.UseDateTimeFormat)
                 {
