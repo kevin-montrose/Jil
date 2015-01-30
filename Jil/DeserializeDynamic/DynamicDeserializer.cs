@@ -114,6 +114,11 @@ namespace Jil.DeserializeDynamic
                     reader.Read();  // skip the ]
                     break;
                 }
+                if (c == ' ')
+                {
+                    reader.Read();
+                    continue;
+                }
 
                 _DeserializeMember(reader, builder);
                 Methods.ConsumeWhiteSpace(reader);
