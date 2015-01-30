@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace JilTests
 {
+    using System.Collections;
+
     [TestClass]
     public class DeserializeDynamicTests
     {
@@ -2257,6 +2259,31 @@ namespace JilTests
 
                 Assert.AreEqual(Math.Round(t1.TotalMilliseconds), Math.Round(t2.TotalMilliseconds));
             }
+        }
+
+        [TestMethod]
+        public void Issue111()
+        {
+            const string json = @"
+{
+  ""took"" : 2,
+  ""timed_out"" : false,
+  ""_shards"" : {
+    ""total"" : 2,
+    ""successful"" : 2,
+    ""failed"" : 0
+  },
+  ""hits"" : {
+    ""total"" : 0,
+    ""max_score"" : null,
+    ""hits"" : [ ]
+  }
+}
+";
+
+            var dyn = JSON.DeserializeDynamic(json);
+            var hits = (IEnumerable<object>)dyn.hits.hits;
+            Assert.AreEqual(0, hits.Count());
         }
     }
 }
