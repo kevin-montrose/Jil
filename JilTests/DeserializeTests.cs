@@ -5356,6 +5356,14 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void EmptyArrayWithSpace()
+        {
+            var res = JSON.Deserialize<object[]>("[ ]");
+            Assert.IsNotNull(res);
+            Assert.AreEqual(0, res.Length);
+        }
+
+        [TestMethod]
         public void DateTimeOffsetPreservesOffset()
         {
             var toTest = new List<DateTimeOffset>();

@@ -107,6 +107,8 @@ namespace Jil.DeserializeDynamic
 
             while(true)
             {
+                Methods.ConsumeWhiteSpace(reader);
+
                 c = reader.Peek();
                 if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
                 if (c == ']')

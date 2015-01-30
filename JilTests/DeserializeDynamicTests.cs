@@ -2258,5 +2258,13 @@ namespace JilTests
                 Assert.AreEqual(Math.Round(t1.TotalMilliseconds), Math.Round(t2.TotalMilliseconds));
             }
         }
+
+        [TestMethod]
+        public void EmptyArrayWithSpace()
+        {
+            var res = JSON.DeserializeDynamic("[ ]");
+            Assert.IsNotNull(res);
+            Assert.AreEqual(0, (int)res.Length);
+        }
     }
 }
