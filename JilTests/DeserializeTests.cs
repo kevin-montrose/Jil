@@ -5355,6 +5355,14 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void EmptyArrayWithSpace()
+        {
+            var res = JSON.DeserializeDynamic("[ ]");
+            Assert.IsNotNull(res);
+            Assert.AreEqual(0, (int)res.Length);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
