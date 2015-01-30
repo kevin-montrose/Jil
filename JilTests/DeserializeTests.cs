@@ -5358,9 +5358,9 @@ namespace JilTests
         [TestMethod]
         public void EmptyArrayWithSpace()
         {
-            var res = JSON.DeserializeDynamic("[ ]");
+            var res = JSON.Deserialize<object[]>("[ ]");
             Assert.IsNotNull(res);
-            Assert.AreEqual(0, (int)res.Length);
+            Assert.AreEqual(0, res.Length);
         }
 
 #if !DEBUG
