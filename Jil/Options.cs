@@ -45,6 +45,7 @@ namespace Jil
         public static readonly Options MillisecondsSinceUnixEpochExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true);
         public static readonly Options MillisecondsSinceUnixEpochPrettyPrintExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true);
 
+
         public static readonly Options ISO8601 = new Options(dateFormat: DateTimeFormat.ISO8601);
         public static readonly Options ISO8601PrettyPrint = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true);
         public static readonly Options ISO8601ExcludeNulls = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true);
@@ -61,6 +62,7 @@ namespace Jil
         public static readonly Options ISO8601PrettyPrintJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, jsonp: true, includeInherited: true);
         public static readonly Options ISO8601ExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, excludeNulls: true, jsonp: true, includeInherited: true);
         public static readonly Options ISO8601PrettyPrintExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.ISO8601, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true);
+
 
         public static readonly Options SecondsSinceUnixEpoch = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch);
         public static readonly Options SecondsSinceUnixEpochPrettyPrint = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true);
@@ -85,6 +87,7 @@ namespace Jil
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
         internal bool IsJSONP { get; private set; }
         internal bool ShouldIncludeInherited { get; private set; }
+        internal bool ShouldConvertToUtc { get; private set; }
 
         /// <summary>
         /// Configuration for Jil serialization options.
@@ -97,13 +100,15 @@ namespace Jil
         ///   includeInherited - whether or not to serialize members declared by an objects base types
         ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false,
+            bool shouldConvertToUtc = true)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
+            ShouldConvertToUtc = shouldConvertToUtc;
         }
 
         /// <summary>
@@ -115,12 +120,13 @@ namespace Jil
         {
             return
                 string.Format(
-                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, AllowHashFunction = {5} }}",
+                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, ShouldConvertToUtc = {5} }}",
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,
                     IsJSONP,
-                    ShouldIncludeInherited
+                    ShouldIncludeInherited,
+                    ShouldConvertToUtc
                 );
         }
 
@@ -144,6 +150,7 @@ namespace Jil
                 (ShouldExcludeNulls ? 0x2 : 0x0) |
                 (IsJSONP ? 0x4 : 0x0) |
                 (ShouldIncludeInherited ? 0x8 : 0x0) |
+                (ShouldConvertToUtc ? 0x16 : 0x0) |
                 dateTimeMask;
         }
 
@@ -160,7 +167,8 @@ namespace Jil
                 other.ShouldPrettyPrint == this.ShouldPrettyPrint &&
                 other.ShouldExcludeNulls == this.ShouldExcludeNulls &&
                 other.IsJSONP == this.IsJSONP &&
-                other.ShouldIncludeInherited == this.ShouldIncludeInherited;
+                other.ShouldIncludeInherited == this.ShouldIncludeInherited &&
+                other.ShouldConvertToUtc == this.ShouldConvertToUtc;
         }
     }
 }
