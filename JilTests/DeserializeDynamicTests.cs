@@ -2266,5 +2266,14 @@ namespace JilTests
             Assert.IsNotNull(res);
             Assert.AreEqual(0, (int)res.Length);
         }
+
+        [TestMethod]
+        public void DynamicTypeConverter()
+        {
+            var dyn = JSON.DeserializeDynamic("123");
+            System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+            Assert.IsTrue(tc.CanConvertTo(typeof(int)));
+            Assert.AreEqual(123, (int)tc.ConvertTo(dyn, typeof(int)));
+        }
     }
 }

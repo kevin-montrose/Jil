@@ -79,6 +79,9 @@
     <Compile Include="DeserializeDynamic\JsonObject.Static.cs">
       <DependentUpon>JsonObject.cs</DependentUpon>
     </Compile>
+    <Compile Include="DeserializeDynamic\JsonObject.TypeConverter.cs">
+      <DependentUpon>JsonObject.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeserializeDynamic\Methods.cs" />
     <Compile Include="DeserializeDynamic\Methods.ISO8601DateTime.cs">
       <DependentUpon>Methods.cs</DependentUpon>
