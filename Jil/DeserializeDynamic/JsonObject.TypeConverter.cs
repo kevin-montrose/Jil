@@ -32,9 +32,17 @@ namespace Jil.DeserializeDynamic
                 return false;
             }
 
+            void ThrowIfNotValid(object value)
+            {
+                if (!IsValid(null, value))
+                {
+                    throw new InvalidOperationException("This TypeConverter is not bound to the passed in value");
+                }
+            }
+
             public override bool IsValid(ITypeDescriptorContext context, object value)
             {
-                return value is JsonObject;
+                return object.ReferenceEquals(Context, value);
             }
 
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -67,7 +75,7 @@ namespace Jil.DeserializeDynamic
 
                     case JsonObjectType.String:
                         // TODO: Guids and dates and oh my
-                        return nonNullable == typeof(string) || nonNullable == typeof(char);
+                        return nonNullable == typeof(string);
 
                     default: throw new Exception("Unexpected JsonObjectType: " + Context.Type);
                 }
@@ -75,10 +83,12 @@ namespace Jil.DeserializeDynamic
 
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
             {
+                ThrowIfNotValid(value);
+
                 object ret;
                 if (!Context.InnerTryConvert(destinationType, out ret))
                 {
-                    throw new NotSupportedException("Could not convert [" + Context + "] to " + destinationType);
+                    throw GetConvertToException(value, destinationType);
                 }
 
                 return ret;
@@ -87,17 +97,17 @@ namespace Jil.DeserializeDynamic
 
         public AttributeCollection GetAttributes()
         {
-            return new AttributeCollection();
+            return AttributeCollection.Empty;
         }
 
         public string GetClassName()
         {
-            return this.GetType().FullName;
+            return null;
         }
 
         public string GetComponentName()
         {
-            return GetClassName();
+            return null;
         }
 
         public TypeConverter GetConverter()
@@ -122,22 +132,22 @@ namespace Jil.DeserializeDynamic
 
         public EventDescriptorCollection GetEvents(Attribute[] attributes)
         {
-            return new EventDescriptorCollection(new EventDescriptor[0]);
+            return EventDescriptorCollection.Empty;
         }
 
         public EventDescriptorCollection GetEvents()
         {
-            return new EventDescriptorCollection(new EventDescriptor[0]);
+            return EventDescriptorCollection.Empty;
         }
 
         public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
         {
-            return new PropertyDescriptorCollection(new PropertyDescriptor[0]);
+            return PropertyDescriptorCollection.Empty;
         }
 
         public PropertyDescriptorCollection GetProperties()
         {
-            return new PropertyDescriptorCollection(new PropertyDescriptor[0]);
+            return PropertyDescriptorCollection.Empty;
         }
 
         public object GetPropertyOwner(PropertyDescriptor pd)

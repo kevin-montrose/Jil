@@ -2270,10 +2270,40 @@ namespace JilTests
         [TestMethod]
         public void DynamicTypeConverter()
         {
-            var dyn = JSON.DeserializeDynamic("123");
-            System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
-            Assert.IsTrue(tc.CanConvertTo(typeof(int)));
-            Assert.AreEqual(123, (int)tc.ConvertTo(dyn, typeof(int)));
+            {
+                var dyn = JSON.DeserializeDynamic("123");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(int)));
+                Assert.AreEqual(123, (int)tc.ConvertTo(dyn, typeof(int)));
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("123.45");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                Assert.AreEqual(123.45, (double)tc.ConvertTo(dyn, typeof(double)));
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("123.45");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(float)));
+                Assert.AreEqual(123.45f, (float)tc.ConvertTo(dyn, typeof(float)));
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("123.45");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(decimal)));
+                Assert.AreEqual(123.45m, (decimal)tc.ConvertTo(dyn, typeof(decimal)));
+            }
+
+            {
+                var dyn = JSON.DeserializeDynamic("\"hello\"");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                Assert.AreEqual("hello", (string)tc.ConvertTo(dyn, typeof(string)));
+            }
         }
     }
 }
