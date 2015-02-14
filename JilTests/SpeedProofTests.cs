@@ -1357,6 +1357,71 @@ namespace JilTests
 
             Assert.IsTrue(binarySearchTime < normalTime, "binarySearchTime = " + binarySearchTime + ", normalTime = " + normalTime);
         }
+
+        [TestMethod]
+        public void DynamicTypeConverter()
+        {
+            Func<TextReader, int, object> trialCasts =
+                (reader, depth) =>
+                {
+                    var dyn = JSON.DeserializeDynamic(reader);
+
+                    try
+                    {
+                        var asInt = (int)dyn;
+                        return asInt;
+                    }
+                    catch { }
+
+                    try
+                    {
+                        var asDouble = (double)dyn;
+                        return asDouble;
+                    }
+                    catch { }
+
+                    try
+                    {
+                        var asString = (string)dyn;
+                        return asString;
+                    }
+                    catch { }
+
+                    return null;
+                };
+            Func<TextReader, int, object> typeConverter =
+                (reader, depth) =>
+                {
+                    var dyn = JSON.DeserializeDynamic(reader);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+
+                    if (tc.CanConvertTo(typeof(int))) return (int)dyn;
+                    if (tc.CanConvertTo(typeof(double))) return (double)dyn;
+                    if (tc.CanConvertTo(typeof(string))) return (string)dyn;
+
+                    return null;
+                };
+
+            var rand = new Random(97031664);
+
+            var toSerialize = new List<object>();
+            for (var i = 0; i < 100; i++)
+            {
+                switch(rand.Next(4))
+                {
+                    case 0: toSerialize.Add(rand.Next()); break;
+                    case 1: toSerialize.Add(rand.NextDouble() * rand.Next()); break;
+                    case 2: toSerialize.Add(_RandString(rand)); break;
+                    case 3: toSerialize.Add(new object()); break;
+                    default: throw new Exception();
+                }
+            }
+
+            double trialCastTime, typeConverterTime;
+            CompareTimes(toSerialize, Jil.Options.Default, trialCasts, typeConverter, out trialCastTime, out typeConverterTime);
+
+            Assert.IsTrue(typeConverterTime < trialCastTime, "typeConverterTime = " + typeConverterTime + ", trialCastTime = " + trialCastTime);
+        }
 #endif
     }
 }
