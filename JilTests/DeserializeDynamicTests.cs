@@ -2278,6 +2278,14 @@ namespace JilTests
         [TestMethod]
         public void DynamicTypeConverter()
         {
+            // enums
+            {
+                var dyn = JSON.DeserializeDynamic("\"Hello\"");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(_DynamicTypeConverter)));
+                Assert.AreEqual(_DynamicTypeConverter.Hello, (_DynamicTypeConverter)tc.ConvertTo(dyn, typeof(_DynamicTypeConverter)));
+            }
+
             // ints
             {
                 var dyn = JSON.DeserializeDynamic("123");
