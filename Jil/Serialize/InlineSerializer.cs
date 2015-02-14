@@ -75,6 +75,7 @@ namespace Jil.Serialize
         private readonly bool JSONP;
         private readonly DateTimeFormat DateFormat;
         private readonly bool IncludeInherited;
+        private readonly UnspecifiedDateTimeKindBehavior UnspecifiedDateTimeBehavior;
         
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
@@ -84,7 +85,7 @@ namespace Jil.Serialize
 
         private readonly bool BuildingToString;
 
-        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, bool callOutOnPossibleDynamic, bool buildToString)
+        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
             PrettyPrint = pretty;
@@ -92,6 +93,7 @@ namespace Jil.Serialize
             JSONP = jsonp;
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
+            UnspecifiedDateTimeBehavior = dateTimeBehavior;
 
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
 
@@ -603,15 +605,10 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -661,15 +658,10 @@ namespace Jil.Serialize
 
         void WriteMillisecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -715,15 +707,10 @@ namespace Jil.Serialize
 
         void WriteSecondsStyleDateTime()
         {
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             using (var loc = Emit.DeclareLocal<DateTime>())
             {
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
-                Emit.Call(toUniversalTime); // TextWriter DateTime
-                Emit.StoreLocal(loc);       // TextWriter
-                Emit.LoadLocalAddress(loc); // TextWriter DateTime*
+                Emit.StoreLocal(loc);                   // TextWriter
+                Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
             }
 
             if (!SkipDateTimeMathMethods)
@@ -774,20 +761,10 @@ namespace Jil.Serialize
             //  - DateTime
             //  - TextWriter
 
-            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
-
             if (!UseCustomISODateFormatting)
             {
                 var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
-
-                using (var loc = Emit.DeclareLocal<DateTime>())
-                {
-                    Emit.StoreLocal(loc);                           // TextWriter
-                    Emit.LoadLocalAddress(loc);                     // TextWriter DateTime*
-                }
-
-                Emit.Call(toUniversalTime);                         // TextWriter DateTime
-
+                
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
                     Emit.StoreLocal(loc);       // TextWriter
@@ -813,20 +790,58 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetMethod;
+        static readonly MethodInfo TimeSpan_Hours = typeof(TimeSpan).GetProperty("Hours").GetMethod;
+        static readonly MethodInfo TimeSpan_Minutes = typeof(TimeSpan).GetProperty("Minutes").GetMethod;
         void WriteDateTimeOffset()
         {
             // top of stack:
             //  - DateTimeOffset
             //  - TextWriter
 
-            using(var loc = Emit.DeclareLocal<DateTimeOffset>())
+            if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
             {
-                Emit.StoreLocal(loc);               // TextWriter
-                Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
+                // No room for an offset in these forms, so just re-use DateTime logic
+                // One wrinkle, the Newtonsoft-style *can* include an offset... but the seconds
+                //   count is still from UTC.  Since the offset isn't necessary, we're not
+                //   going to emit it because it's a waste of time.
+                using (var loc = Emit.DeclareLocal<DateTimeOffset>())
+                {
+                    Emit.StoreLocal(loc);               // TextWriter
+                    Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
+                }
+
+                Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
+                WriteDateTime();
+                return;
             }
 
-            Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
-            WriteDateTime();
+            if (DateFormat == DateTimeFormat.ISO8601)
+            {
+                // Get the DateTime equivalent and the offset on the stack
+                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>())
+                using (var tsLoc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(dtoLoc);            // TextWriter
+                    Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTimeOffset*
+                    Emit.Call(DateTimeOffset_DateTime); // TextWriter DateTime
+                    Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTime DateTimeOffset*
+                    Emit.Call(DateTimeOffset_Offset);   // TextWriter DateTime TimeSpan
+                    Emit.StoreLocal(tsLoc);             // TextWriter DateTime
+                    Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime TimeSpan*
+                    Emit.Call(TimeSpan_Hours);          // TextWriter DateTime int
+                    Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime int TimeSpan*
+                    Emit.Call(TimeSpan_Minutes);        // TextWriter DateTime int int
+                }
+                Emit.LoadLocal(CharBuffer);
+                Emit.Call(Methods.GetCustomISO8601WithOffsetToString(BuildingToString));
+                return;
+            }
+
+            throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
         }
 
         static readonly MethodInfo TimeSpan_TotalSeconds = typeof(TimeSpan).GetProperty("TotalSeconds").GetMethod;
@@ -882,6 +897,32 @@ namespace Jil.Serialize
             // top of stack:
             //   - DateTime
             //   - TextWriter
+
+            var toUniversalTime = typeof(DateTime).GetMethod("ToUniversalTime");
+
+            var kind = typeof(DateTime).GetProperty("Kind");
+            var specifyKind = typeof(DateTime).GetMethod("SpecifyKind", BindingFlags.Public | BindingFlags.Static);
+
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                var noChange = Emit.DefineLabel();
+                var convertToKind = UnspecifiedDateTimeBehavior == UnspecifiedDateTimeKindBehavior.IsLocal ? DateTimeKind.Local : DateTimeKind.Utc;
+
+                Emit.StoreLocal(loc);                               // TextWriter
+                Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
+                LoadProperty(kind);                                 // TextWriter DateTimeKind
+                Emit.LoadConstant((int)DateTimeKind.Unspecified);   // TextWriter DateTimeKind DateTimeKind
+                
+                Emit.UnsignedBranchIfNotEqual(noChange);            // TextWriter
+                Emit.LoadLocal(loc);                                // TextWriter DateTime
+                Emit.LoadConstant((int)convertToKind);              // TextWriter DateTime DateTimeKind
+                Emit.Call(specifyKind);                             // TextWriter DateTime
+                Emit.StoreLocal(loc);                               // TextWriter
+                
+                Emit.MarkLabel(noChange);                           // TextWriter
+                Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
+                Emit.Call(toUniversalTime);                         // TextWriter DateTime
+            }
 
             if (DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
             {
@@ -3655,12 +3696,12 @@ namespace Jil.Serialize
             return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, false);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, false, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3675,18 +3716,18 @@ namespace Jil.Serialize
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
-        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited)
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior)
         {
-            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, true, false);
+            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, true, false);
             return obj.Build();
         }
 
-        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, out Exception exceptionDuringBuild)
         {
             StringThunkDelegate<BuildForType> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, false, true);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, false, true);
 
                 ret = obj.BuildToString();
 

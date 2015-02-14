@@ -91,6 +91,7 @@ The following types (and any user defined types composed of them) are supported:
   - Integer numbers (int, long, byte, etc.)
   - Floating point numbers (float, double, and decimal)
   - DateTimes & DateTimeOffsets
+    * Note that DateTimes are converted to UTC time to allow for round-tripping, use DateTimeOffsets if you need to preserve timezone information
     * See Configuration for further details
   - TimeSpans
     * See Configuration for further details
@@ -111,17 +112,22 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
 
   - The format of DateTimes, DateTimeOffsets, and TimeSpans; one of
     * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string
-	  - "\/Date(##...##)\/" for DateTimes
+	  - "\/Date(##...##)\/" for DateTimes & DateTimeOffsets
 	  - "1.23:45:56.78" for TimeSpans
 	* MillisecondsSinceUnixEpoch, a number
-	  - for DateTimes it can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
+	  - for DateTimes & DateTimeOffsets it can be passed directly to [JavaScript's Date() constructor](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date)
 	  - for TimeSpans it's simply [TimeSpan.TotalMilliseconds](http://msdn.microsoft.com/en-us/library/system.timespan.totalmilliseconds%28v=vs.110%29.aspx)
 	* SecondsSinceUnixEpoch, a number
-	  - for DateTimes this is commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
+	  - for DateTimes & DateTimeOffsets this is commonly refered to as [unix time](http://en.wikipedia.org/wiki/Unix_time)
 	  - for TimeSpans it's simply [TimeSpan.TotalSeconds](http://msdn.microsoft.com/en-us/library/system.timespan.totalseconds%28v=vs.110%29.aspx)
 	* ISO8601, a string
-	  - for DateTimes, ie. "2011-07-14T19:43:37Z"
+	  - for DateTimes & DateTimeOffsets, ie. "2011-07-14T19:43:37Z"
+	    * DateTimes are always serialized in UTC (timezone offset = 00:00), because Local DateTimes cannot reliably roundtrip
+		* DateTimeOffsets include their timezone offset when serialized
 	  - for TimeSpans, ie. "P40DT11H10M9.4S" 
+  - What to treat DateTimes with an [Unspecified DateTimeKind](https://msdn.microsoft.com/en-us/library/shx7s921%28v=vs.110%29.aspx) as; one of
+    * IsLocal, will treat an unspecified DateTime as if it were in local time
+	* IsUtc, will treat an unspecified DateTime as if it were in UTC
   - Whether or not to exclude null values when serializing dictionaries, and object members
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)

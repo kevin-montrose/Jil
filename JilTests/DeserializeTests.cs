@@ -5363,6 +5363,46 @@ namespace JilTests
             Assert.AreEqual(0, res.Length);
         }
 
+        [TestMethod]
+        public void DateTimeOffsetPreservesOffset()
+        {
+            var toTest = new List<DateTimeOffset>();
+            toTest.Add(DateTimeOffset.Now);
+
+            for (var h = 0; h <= 14; h++)
+            {
+                for (var m = 0; m < 60; m++)
+                {
+                    if (h == 14 && m > 0) continue;
+
+                    var offsetPos = new TimeSpan(h, m, 0);
+                    var offsetNeg = offsetPos.Negate();
+
+                    var now = DateTime.Now;
+                    now = DateTime.SpecifyKind(now, DateTimeKind.Unspecified);
+
+                    toTest.Add(new DateTimeOffset(now, offsetPos));
+                    toTest.Add(new DateTimeOffset(now, offsetNeg));
+                }
+            }
+
+            foreach (var testDto in toTest)
+            {
+                var strStr = JSON.Serialize(testDto, Options.ISO8601);
+                var dto = JSON.Deserialize<DateTimeOffset>(strStr, Options.ISO8601);
+
+                Assert.AreEqual(testDto.Year, dto.Year);
+                Assert.AreEqual(testDto.Month, dto.Month);
+                Assert.AreEqual(testDto.Day, dto.Day);
+                Assert.AreEqual(testDto.Hour, dto.Hour);
+                Assert.AreEqual(testDto.Minute, dto.Minute);
+                Assert.AreEqual(testDto.Second, dto.Second);
+                Assert.AreEqual(testDto.Millisecond, dto.Millisecond);
+                Assert.AreEqual(testDto.Offset.Hours, dto.Offset.Hours);
+                Assert.AreEqual(testDto.Offset.Minutes, dto.Offset.Minutes);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

@@ -144,5 +144,13 @@ namespace Jil.Serialize
                     WriteTimeSpanNewtonsoft :
                     WriteTimeSpanNewtonsoft_ThunkWriter;
         }
+
+        public static MethodInfo GetCustomISO8601WithOffsetToString(bool needThunkWriter)
+        {
+            return
+                !needThunkWriter ?
+                    CustomISO8601WithOffsetToString :
+                    CustomISO8601WithOffsetToString_ThunkWriter;
+        }
     }
 }

@@ -147,8 +147,6 @@ namespace Jil.Serialize
 
             buffer[0] = '"';
 
-            dt = dt.ToUniversalTime();
-
             uint val;
 
             // Year
@@ -271,6 +269,174 @@ namespace Jil.Serialize
             buffer[fracEnd + 1] = '"';
 
             writer.Write(buffer, 0, fracEnd + 2);
+        }
+
+        static readonly MethodInfo CustomISO8601WithOffsetToString_ThunkWriter = typeof(Methods).GetMethod("_CustomISO8601WithOffsetToString_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomISO8601WithOffsetToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, int hours, int minutes, char[] buffer)
+        {
+            if (hours == 0 && minutes == 0)
+            {
+                // It's actually in UTC time, bail!
+                _CustomISO8601ToString_ThunkWriter(ref writer, dt, buffer);
+                return;
+            }
+
+            // "yyyy-mm-ddThh:mm:ss.fffffff+oo:oo"
+            // 0123456789ABCDEFGHIJKLMNOPQRSTUVWXY
+            //
+            // Yes, DateTime.Max is in fact guaranteed to have a 4 digit year (and no more)
+            // f of 7 digits allows for 1 Tick level resolution
+
+            var offsetIsNegative = false;
+            if (hours < 0 || minutes < 0)
+            {
+                offsetIsNegative = true;
+                hours = -hours;
+                minutes = -minutes;
+            }
+
+            buffer[0] = '"';
+
+            uint val;
+
+            // Year
+            val = (uint)dt.Year;
+            var digits = DigitPairs[(byte)(val % 100)];
+            buffer[4] = digits.Second;
+            buffer[3] = digits.First;
+            digits = DigitPairs[(byte)(val / 100)];
+            buffer[2] = digits.Second;
+            buffer[1] = digits.First;
+
+            // delimiter
+            buffer[5] = '-';
+
+            // Month
+            digits = DigitPairs[dt.Month];
+            buffer[7] = digits.Second;
+            buffer[6] = digits.First;
+
+            // Delimiter
+            buffer[8] = '-';
+
+            // Day
+            digits = DigitPairs[dt.Day];
+            buffer[10] = digits.Second;
+            buffer[9] = digits.First;
+
+            // Delimiter
+            buffer[11] = 'T';
+
+            digits = DigitPairs[dt.Hour];
+            buffer[13] = digits.Second;
+            buffer[12] = digits.First;
+
+            // Delimiter
+            buffer[14] = ':';
+
+            digits = DigitPairs[dt.Minute];
+            buffer[16] = digits.Second;
+            buffer[15] = digits.First;
+
+            // Delimiter
+            buffer[17] = ':';
+
+            digits = DigitPairs[dt.Second];
+            buffer[19] = digits.Second;
+            buffer[18] = digits.First;
+
+            int fracEnd;
+            var remainingTicks = (dt - new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second)).Ticks;
+            if (remainingTicks > 0)
+            {
+                buffer[20] = '.';
+
+                var fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[27] = digits.Second;
+                    buffer[26] = digits.First;
+                    fracEnd = 28;
+                }
+                else
+                {
+                    fracEnd = 26;
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[25] = digits.Second;
+                    buffer[24] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 26)
+                    {
+                        fracEnd = 24;
+                    }
+                    else
+                    {
+                        buffer[25] = '0';
+                        buffer[24] = '0';
+                    }
+                }
+
+                fracPart = remainingTicks % 100;
+                remainingTicks /= 100;
+                if (fracPart > 0)
+                {
+                    digits = DigitPairs[fracPart];
+                    buffer[23] = digits.Second;
+                    buffer[22] = digits.First;
+                }
+                else
+                {
+                    if (fracEnd == 24)
+                    {
+                        fracEnd = 22;
+                    }
+                    else
+                    {
+                        buffer[23] = '0';
+                        buffer[22] = '0';
+                    }
+                }
+
+                fracPart = remainingTicks;
+                buffer[21] = (char)('0' + fracPart);
+            }
+            else
+            {
+                fracEnd = 20;
+            }
+
+            if (offsetIsNegative)
+            {
+                buffer[fracEnd] = '-';
+            }
+            else
+            {
+                buffer[fracEnd] = '+';
+            }
+
+            digits = DigitPairs[hours];
+            buffer[fracEnd + 1] = digits.First;
+            buffer[fracEnd + 2] = digits.Second;
+            buffer[fracEnd + 3] = ':';
+
+            digits = DigitPairs[minutes];
+            buffer[fracEnd + 4] = digits.First;
+            buffer[fracEnd + 5] = digits.Second;
+
+            buffer[fracEnd + 6] = '"';
+
+            writer.Write(buffer, 0, fracEnd + 7);
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
