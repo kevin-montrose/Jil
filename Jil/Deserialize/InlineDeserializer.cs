@@ -1088,10 +1088,10 @@ namespace Jil.Deserialize
                     }
                 }
                 ReadSkipWhitespace();        // dictType(*?) (integer|string|enum)
-                CheckChar(':');            // dictType(*?) (integer|string|enum)
-                ConsumeWhiteSpace();        // dictType(*?) (integer|string|enum)
-                Build(valType);             // dictType(*?) (integer|string|enum) valType
-                Emit.CallVirtual(addMtd);   // --empty--
+                CheckChar(':');              // dictType(*?) (integer|string|enum)
+                ConsumeWhiteSpace();         // dictType(*?) (integer|string|enum)
+                Build(valType);              // dictType(*?) (integer|string|enum) valType
+                Emit.CallVirtual(addMtd);    // --empty--
 
                 var nextItem = Emit.DefineLabel();
 
