@@ -926,5 +926,150 @@ namespace Jil.DeserializeDynamic
                 return false;
             }
         }
+
+        public static bool ReadISO8601DateWithOffset(string str, out DateTimeOffset dto)
+        {
+            // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
+            //   See: http://en.wikipedia.org/wiki/ISO_8601 &
+            //        http://tools.ietf.org/html/rfc3339
+            //        *is bullshit
+
+            // Here are the possible formats for dates
+            // YYYY-MM-DD
+            // YYYY-MM
+            // YYYY-DDD (ordinal date)
+            // YYYY-Www (week date, the W is a literal)
+            // YYYY-Www-D
+            // YYYYMMDD
+            // YYYYWww
+            // YYYYWwwD
+            // YYYYDDD
+
+            // Here are the possible formats for times
+            // hh
+            // hh:mm
+            // hhmm
+            // hh:mm:ss
+            // hhmmss
+            // hh,fff*
+            // hh:mm,fff*
+            // hhmm,fff*
+            // hh:mm:ss,fff*
+            // hhmmss,fff*
+            // hh.fff*
+            // hh:mm.fff*
+            // hhmm.fff*
+            // hh:mm:ss.fff*
+            // hhmmss.fff*
+            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 7)
+
+            // Here are the possible formats for timezones
+            // Z
+            // +hh
+            // +hh:mm
+            // +hhmm
+            // -hh
+            // -hh:mm
+            // -hhmm
+
+            // they are concatenated to form a full instant, with T as a separator between date & time
+            // i.e. <date>T<time><timezone>
+            // the longest possible string:
+            // 9999-12-31T01:23:45.678901+01:23
+            // 0123456789ABCDEFGHIJKLMNOPQRS
+            //
+            // Maximum date size is 33 characters
+
+            dto = default(DateTimeOffset);
+            if (str.Length > 33)
+            {
+                return false;
+            }
+
+            var ix = 0;
+            int? tPos = null;
+            int? zPlusOrMinus = null;
+            for (ix = 0; ix < str.Length; ix++)
+            {
+                var c = str[ix];
+
+                // RFC3339 allows lowercase t and spaces as alternatives to ISO8601's T
+                if (c == 'T' || c == 't' || c == ' ')
+                {
+                    if (tPos.HasValue) return false;
+                    tPos = ix - 1;
+                }
+
+                if (tPos.HasValue)
+                {
+                    // RFC3339 allows lowercase z as alternatives to ISO8601's Z
+                    if (c == 'Z' || c == 'z' || c == '+' || c == '-')
+                    {
+                        if (zPlusOrMinus.HasValue) return false;
+                        zPlusOrMinus = ix - 1;
+                    }
+                }
+            }
+
+            // step ix back one so it's still < str.Length
+            ix--;
+
+            bool? hasSeparators;
+
+            DateTime date;// this is in *LOCAL TIME* because that's what the spec says
+            if (!_ParseISO8601Date(str, 0, tPos ?? ix, out hasSeparators, out date))
+            {
+                return false;
+            }
+
+            if (!tPos.HasValue)
+            {
+                dto = date;
+                return true;
+            }
+
+            TimeSpan time;
+            if (!_ParseISO8601Time(str, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators, out time))
+            {
+                return false;
+            }
+
+            if (!zPlusOrMinus.HasValue)
+            {
+                try
+                {
+                    dto = DateTime.SpecifyKind(date + time, DateTimeKind.Unspecified);
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false;
+                }
+            }
+
+            bool unknownLocalOffset;
+            // only +1 here because the separator is significant (oy vey)
+            TimeSpan timezoneOffset;
+            if (!_ParseISO8601TimeZoneOffset(str, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset, out timezoneOffset))
+            {
+                return false;
+            }
+
+            try
+            {
+                if (unknownLocalOffset)
+                {
+                    dto = DateTime.SpecifyKind(date + time, DateTimeKind.Unspecified);
+                    return true;
+                }
+
+                dto = new DateTimeOffset(DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time, timezoneOffset);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }
