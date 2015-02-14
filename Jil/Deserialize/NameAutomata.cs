@@ -34,7 +34,7 @@ namespace Jil.Deserialize
                 var c = reader.Read();
                 if (c != 'u')
                 {
-                    throw new DeserializationException("Escape sequence expected unicode hex quad", reader);
+                    throw new DeserializationException("Escape sequence expected unicode hex quad", reader, c == -1);
                 }
 
                 return (char)Methods.ReadHexQuad(reader);

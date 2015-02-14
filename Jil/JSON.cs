@@ -1678,7 +1678,7 @@ namespace Jil
             {
                 if (e is DeserializationException) throw;
 
-                throw new DeserializationException(e, reader);
+                throw new DeserializationException(e, reader, false);
             }
         }
 

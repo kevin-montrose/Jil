@@ -55,8 +55,6 @@ namespace Jil
             EndedUnexpectedly = endedEarly;
         }
 
-
-
         internal DeserializationException(string msg, TextReader reader, Exception inner, bool? endedEarly)
             : base(msg, inner)
         {

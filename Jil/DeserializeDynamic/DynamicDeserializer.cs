@@ -21,7 +21,7 @@ namespace Jil.DeserializeDynamic
 
             Methods.ConsumeWhiteSpace(reader);
             var c = reader.Peek();
-            if (c != -1) throw new DeserializationException("Expected end of stream", reader);
+            if (c != -1) throw new DeserializationException("Expected end of stream", reader, true);
 
             return ret;
         }
@@ -50,19 +50,19 @@ namespace Jil.DeserializeDynamic
                 return;
             }
 
-            if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+            if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
 
-            throw new DeserializationException("Expected \", [, {, n, t, f, -, 0, 1, 2, 3, 4, 5, 6, 7, 8, or 9; found " + (char)c, reader);
+            throw new DeserializationException("Expected \", [, {, n, t, f, -, 0, 1, 2, 3, 4, 5, 6, 7, 8, or 9; found " + (char)c, reader, false);
         }
 
         static void DeserializeTrue(TextReader reader, ObjectBuilder builder)
         {
             var c = reader.Read();
-            if (c != 'r') throw new DeserializationException("Expected r", reader);
+            if (c != 'r') throw new DeserializationException("Expected r", reader, c == -1);
             c = reader.Read();
-            if (c != 'u') throw new DeserializationException("Expected u", reader);
+            if (c != 'u') throw new DeserializationException("Expected u", reader, c == -1);
             c = reader.Read();
-            if (c != 'e') throw new DeserializationException("Expected e", reader);
+            if (c != 'e') throw new DeserializationException("Expected e", reader, c == -1);
 
             builder.PutTrue();
         }
@@ -70,13 +70,13 @@ namespace Jil.DeserializeDynamic
         static void DeserializeFalse(TextReader reader, ObjectBuilder builder)
         {
             var c = reader.Read();
-            if (c != 'a') throw new DeserializationException("Expected a", reader);
+            if (c != 'a') throw new DeserializationException("Expected a", reader, c == -1);
             c = reader.Read();
-            if (c != 'l') throw new DeserializationException("Expected l", reader);
+            if (c != 'l') throw new DeserializationException("Expected l", reader, c == -1);
             c = reader.Read();
-            if (c != 's') throw new DeserializationException("Expected s", reader);
+            if (c != 's') throw new DeserializationException("Expected s", reader, c == -1);
             c = reader.Read();
-            if (c != 'e') throw new DeserializationException("Expected e", reader);
+            if (c != 'e') throw new DeserializationException("Expected e", reader, c == -1);
 
             builder.PutFalse();
         }
@@ -84,11 +84,11 @@ namespace Jil.DeserializeDynamic
         static void DeserializeNull(TextReader reader, ObjectBuilder builder)
         {
             var c = reader.Read();
-            if (c != 'u') throw new DeserializationException("Expected u", reader);
+            if (c != 'u') throw new DeserializationException("Expected u", reader, c == -1);
             c = reader.Read();
-            if (c != 'l') throw new DeserializationException("Expected l", reader);
+            if (c != 'l') throw new DeserializationException("Expected l", reader, c == -1);
             c = reader.Read();
-            if (c != 'l') throw new DeserializationException("Expected l", reader);
+            if (c != 'l') throw new DeserializationException("Expected l", reader, c == -1);
 
             builder.PutNull();
         }
@@ -110,7 +110,7 @@ namespace Jil.DeserializeDynamic
                 Methods.ConsumeWhiteSpace(reader);
 
                 c = reader.Peek();
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
                 if (c == ']')
                 {
                     reader.Read();  // skip the ]
@@ -124,9 +124,7 @@ namespace Jil.DeserializeDynamic
                 if(c == ',') continue;
                 if(c == ']') break;
 
-                if(c == -1) throw new DeserializationException("Unexpected end of stream", reader);
-
-                throw new DeserializationException("Expected , or ], found "+(char)c, reader);
+                throw new DeserializationException("Expected , or ], found "+(char)c, reader, c == -1);
             }
 
             builder.EndArray();
@@ -142,7 +140,7 @@ namespace Jil.DeserializeDynamic
                 Methods.ConsumeWhiteSpace(reader);
 
                 c = reader.Peek();
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
                 if (c == '}')
                 {
                     reader.Read();  // skip }
@@ -150,16 +148,16 @@ namespace Jil.DeserializeDynamic
                 }
 
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
-                if (c != '"') throw new DeserializationException("Expected \", found " + (char)c, reader);
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
+                if (c != '"') throw new DeserializationException("Expected \", found " + (char)c, reader, false);
 
                 builder.StartObjectMember();
                 DeserializeString(reader, builder);
 
                 Methods.ConsumeWhiteSpace(reader);
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
-                if (c != ':') throw new DeserializationException("Expected :, found " + (char)c, reader);
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
+                if (c != ':') throw new DeserializationException("Expected :, found " + (char)c, reader, false);
 
                 _DeserializeMember(reader, builder);
 
@@ -171,9 +169,9 @@ namespace Jil.DeserializeDynamic
                 if (c == ',') continue;
                 if (c == '}') break;
 
-                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (c == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
 
-                throw new DeserializationException("Expected , or }, found " + (char)c, reader);
+                throw new DeserializationException("Expected , or }, found " + (char)c, reader, false);
             }
 
             builder.EndObject();
@@ -200,7 +198,7 @@ namespace Jil.DeserializeDynamic
             if (leadingChar == '-')
             {
                 var next = reader.Read();
-                if (next != '-' && !(next >= '0' && next <= '9')) throw new DeserializationException("Expected -, or digit", reader);
+                if (next != '-' && !(next >= '0' && next <= '9')) throw new DeserializationException("Expected -, or digit", reader, next == -1);
 
                 leadingChar = (char)next;
                 negative = true;
@@ -216,7 +214,7 @@ namespace Jil.DeserializeDynamic
             {
                 reader.Read();
                 c = reader.Read();
-                if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader);
+                if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader, c == -1);
 
                 afterDot = Methods.ReadUInt((char)c, reader, out afterDotLen);
 
@@ -235,7 +233,7 @@ namespace Jil.DeserializeDynamic
                 {
                     c = reader.Read();
                 }
-                if (c != '-' && !(c >= '0' || c <= '9')) throw new DeserializationException("Expected -, +, or digit", reader);
+                if (c != '-' && !(c >= '0' || c <= '9')) throw new DeserializationException("Expected -, +, or digit", reader, c == -1);
                 afterE = Methods.ReadLong((char)c, reader);
             }
             else
@@ -254,7 +252,7 @@ namespace Jil.DeserializeDynamic
                 }
                 catch (OverflowException)
                 {
-                    throw new DeserializationException("Number too large to be parsed encountered", reader);
+                    throw new DeserializationException("Number too large to be parsed encountered", reader, false);
                 }
             }
 

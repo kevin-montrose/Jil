@@ -62,7 +62,7 @@ namespace Jil.DeserializeDynamic
                     }
 
                     var first = reader.Read();
-                    if (first == -1) throw new DeserializationException("Expected any character", reader);
+                    if (first == -1) throw new DeserializationException("Expected any character", reader, true);
 
                     // we didn't have to use anything but the buffer, make a string and return it!
                     if (first == '"')
@@ -81,7 +81,7 @@ namespace Jil.DeserializeDynamic
                     }
 
                     var second = reader.Read();
-                    if (second == -1) throw new DeserializationException("Expected any character", reader);
+                    if (second == -1) throw new DeserializationException("Expected any character", reader, true);
 
                     switch (second)
                     {
@@ -95,7 +95,7 @@ namespace Jil.DeserializeDynamic
                         case 't': buffer[ix] = '\t'; ix++; continue;
                     }
 
-                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader, false);
 
                     commonSb.Append(buffer, 0, ix);
 
@@ -110,7 +110,7 @@ namespace Jil.DeserializeDynamic
             while (true)
             {
                 var first = reader.Read();
-                if (first == -1) throw new DeserializationException("Expected any character", reader);
+                if (first == -1) throw new DeserializationException("Expected any character", reader, true);
 
                 if (first == '"')
                 {
@@ -124,7 +124,7 @@ namespace Jil.DeserializeDynamic
                 }
 
                 var second = reader.Read();
-                if (second == -1) throw new DeserializationException("Expected any character", reader);
+                if (second == -1) throw new DeserializationException("Expected any character", reader, true);
 
                 switch (second)
                 {
@@ -138,7 +138,7 @@ namespace Jil.DeserializeDynamic
                     case 't': commonSb.Append('\t'); continue;
                 }
 
-                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader);
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", reader, false);
 
                 // now we're in an escape sequence, we expect 4 hex #s; always
                 ReadHexQuadToBuilder(reader, commonSb);
@@ -159,6 +159,7 @@ namespace Jil.DeserializeDynamic
             //char1:
             {
                 var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
@@ -181,13 +182,14 @@ namespace Jil.DeserializeDynamic
                     goto char2;
                 }
 
-                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
             char2:
             encodedChar *= 16;
             {
                 var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
@@ -210,13 +212,14 @@ namespace Jil.DeserializeDynamic
                     goto char3;
                 }
 
-                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
             char3:
             encodedChar *= 16;
             {
                 var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
@@ -239,13 +242,14 @@ namespace Jil.DeserializeDynamic
                     goto char4;
                 }
 
-                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
             char4:
             encodedChar *= 16;
             {
                 var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
 
                 c -= '0';
                 if (c >= 0 && c <= 9)
@@ -268,7 +272,7 @@ namespace Jil.DeserializeDynamic
                     goto finished;
                 }
 
-                throw new DeserializationException("Expected hex digit, found: " + c, reader);
+                throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
             finished:
@@ -298,7 +302,7 @@ namespace Jil.DeserializeDynamic
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -309,7 +313,7 @@ namespace Jil.DeserializeDynamic
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -320,7 +324,7 @@ namespace Jil.DeserializeDynamic
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -332,7 +336,7 @@ namespace Jil.DeserializeDynamic
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -415,7 +419,7 @@ namespace Jil.DeserializeDynamic
                 overflowByPowersOfTen++;
             }
 
-            throw new DeserializationException("Number too large to be parsed encountered", reader);
+            throw new DeserializationException("Number too large to be parsed encountered", reader, false);
         }
 
         public static long ReadLong(char firstChar, TextReader reader)

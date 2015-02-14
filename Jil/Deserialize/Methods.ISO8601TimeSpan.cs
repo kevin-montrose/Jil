@@ -34,7 +34,7 @@ namespace Jil.Deserialize
 
             if (len == 0)
             {
-                throw new DeserializationException("Unexpected empty string", reader);
+                throw new DeserializationException("Unexpected empty string", reader, false);
             }
 
             var ix = 0;
@@ -49,13 +49,13 @@ namespace Jil.Deserialize
 
             if (ix >= len)
             {
-                throw new DeserializationException("Expected P, instead TimeSpan string ended", reader);
+                throw new DeserializationException("Expected P, instead TimeSpan string ended", reader, false);
             }
 
             c = str[ix];
             if (c != 'P')
             {
-                throw new DeserializationException("Expected P, found " + c, reader);
+                throw new DeserializationException("Expected P, found " + c, reader, false);
             }
 
             ix++;   // skip 'P'
@@ -65,12 +65,12 @@ namespace Jil.Deserialize
 
             if (week != -1 && (year != -1 || month != -1 || day != -1))
             {
-                throw new DeserializationException("Week part of TimeSpan defined along with one or more of year, month, or day", reader);
+                throw new DeserializationException("Week part of TimeSpan defined along with one or more of year, month, or day", reader, false);
             }
 
             if (week != -1 && hasTimePart)
             {
-                throw new DeserializationException("TimeSpans with a week defined cannot also have a time defined", reader);
+                throw new DeserializationException("TimeSpans with a week defined cannot also have a time defined", reader, false);
             }
 
             if (year == -1) year = 0;
@@ -135,17 +135,17 @@ namespace Jil.Deserialize
         static int ReadTimeSpanInto(TextReader reader, char[] buffer)
         {
             var i = reader.Peek();
-            if (i != '"') throw new DeserializationException("Expected \", found " + (char)i, reader);
+            if (i != '"') throw new DeserializationException("Expected \", found " + (char)i, reader, i == -1);
             
             reader.Read();  // skip the opening '"'
 
             var ix = 0;
             while (true)
             {
-                if (ix >= CharBufferSize) throw new DeserializationException("ISO8601 duration too long", reader);
+                if (ix >= CharBufferSize) throw new DeserializationException("ISO8601 duration too long", reader, false);
 
                 i = reader.Read();
-                if (i == -1) throw new DeserializationException("Unexpected end of stream", reader);
+                if (i == -1) throw new DeserializationException("Unexpected end of stream", reader, true);
                 if (i == '"')
                 {
                     break;
@@ -177,24 +177,24 @@ namespace Jil.Deserialize
 
                 if (fracLen != 0)
                 {
-                    throw new DeserializationException("Fractional values are not supported in the year, month, day, or week parts of an ISO8601 TimeSpan", reader);
+                    throw new DeserializationException("Fractional values are not supported in the year, month, day, or week parts of an ISO8601 TimeSpan", reader, false);
                 }
 
                 if (part == 'Y')
                 {
                     if (yearSeen)
                     {
-                        throw new DeserializationException("Year part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Year part of TimeSpan seen twice", reader, false);
                     }
 
                     if (monthSeen)
                     {
-                        throw new DeserializationException("Year part of TimeSpan seen after month already parsed", reader);
+                        throw new DeserializationException("Year part of TimeSpan seen after month already parsed", reader, false);
                     }
 
                     if (daySeen)
                     {
-                        throw new DeserializationException("Year part of TimeSpan seen after day already parsed", reader);
+                        throw new DeserializationException("Year part of TimeSpan seen after day already parsed", reader, false);
                     }
 
                     year = (long)whole;
@@ -206,12 +206,12 @@ namespace Jil.Deserialize
                 {
                     if (monthSeen)
                     {
-                        throw new DeserializationException("Month part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Month part of TimeSpan seen twice", reader, false);
                     }
 
                     if (daySeen)
                     {
-                        throw new DeserializationException("Month part of TimeSpan seen after day already parsed", reader);
+                        throw new DeserializationException("Month part of TimeSpan seen after day already parsed", reader, false);
                     }
 
                     month = (long)whole;
@@ -223,7 +223,7 @@ namespace Jil.Deserialize
                 {
                     if (weekSeen)
                     {
-                        throw new DeserializationException("Week part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Week part of TimeSpan seen twice", reader, false);
                     }
 
                     week = (long)whole;
@@ -235,7 +235,7 @@ namespace Jil.Deserialize
                 {
                     if (daySeen)
                     {
-                        throw new DeserializationException("Day part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Day part of TimeSpan seen twice", reader, false);
                     }
 
                     day = (long)whole;
@@ -243,7 +243,7 @@ namespace Jil.Deserialize
                     continue;
                 }
 
-                throw new DeserializationException("Expected Y, M, W, or D but found: " + part, reader);
+                throw new DeserializationException("Expected Y, M, W, or D but found: " + part, reader, false);
             }
 
             return false;
@@ -262,7 +262,7 @@ namespace Jil.Deserialize
             {
                 if (fracSeen)
                 {
-                    throw new DeserializationException("Expected Time part of TimeSpan to end", reader);
+                    throw new DeserializationException("Expected Time part of TimeSpan to end", reader, false);
                 }
 
                 int whole, fraction, fracLen;
@@ -277,17 +277,17 @@ namespace Jil.Deserialize
                 {
                     if (hourSeen)
                     {
-                        throw new DeserializationException("Hour part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Hour part of TimeSpan seen twice", reader, false);
                     }
 
                     if (minutesSeen)
                     {
-                        throw new DeserializationException("Hour part of TimeSpan seen after minutes already parsed", reader);
+                        throw new DeserializationException("Hour part of TimeSpan seen after minutes already parsed", reader, false);
                     }
 
                     if (secondsSeen)
                     {
-                        throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", reader);
+                        throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", reader, false);
                     }
 
                     hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
@@ -299,12 +299,12 @@ namespace Jil.Deserialize
                 {
                     if (minutesSeen)
                     {
-                        throw new DeserializationException("Minute part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Minute part of TimeSpan seen twice", reader, false);
                     }
 
                     if (secondsSeen)
                     {
-                        throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", reader);
+                        throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", reader, false);
                     }
 
                     minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
@@ -316,7 +316,7 @@ namespace Jil.Deserialize
                 {
                     if (secondsSeen)
                     {
-                        throw new DeserializationException("Seconds part of TimeSpan seen twice", reader);
+                        throw new DeserializationException("Seconds part of TimeSpan seen twice", reader, false);
                     }
 
                     seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
@@ -324,7 +324,7 @@ namespace Jil.Deserialize
                     continue;
                 }
 
-                throw new DeserializationException("Expected H, M, or S but found: " + part, reader);
+                throw new DeserializationException("Expected H, M, or S but found: " + part, reader, false);
             }
         }
 

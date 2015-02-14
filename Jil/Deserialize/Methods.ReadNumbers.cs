@@ -43,35 +43,39 @@ namespace Jil.Deserialize
 
             // first digit hour
             c = reader.Read();
+            if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             temp += c;
 
             // second digit hour
             temp *= 10;
             c = reader.Read();
+            if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             temp += c;
 
-            if (temp > 23) throw new DeserializationException("Expected hour portion of timezone offset between 0 and 24", reader);
+            if (temp > 23) throw new DeserializationException("Expected hour portion of timezone offset between 0 and 24", reader, false);
 
             temp = 0;
             // first digit minute
             temp *= 10;
             c = reader.Read();
+            if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             temp += c;
 
             // second digit minute
             temp *= 10;
             c = reader.Read();
+            if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             temp += c;
 
-            if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59", reader);
+            if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59", reader, false);
         }
 
         public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
@@ -86,8 +90,9 @@ namespace Jil.Deserialize
 
             // first digit *must* exist, we can't overread
             var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Unexpected end of reader", reader, true);
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
@@ -127,17 +132,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader, true);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit", reader);
+                if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
@@ -177,17 +182,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader, true);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit", reader);
+                if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
@@ -242,10 +247,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit", reader);
+            if (c == -1) throw new DeserializationException("Expected digit", reader, true);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
@@ -301,17 +306,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader, true);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit", reader);
+                if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
@@ -406,10 +411,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit", reader);
+            if (c == -1) throw new DeserializationException("Expected digit", reader, true);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
@@ -505,17 +510,17 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader);
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", reader, true);
 
             if (c == '-')
             {
                 negative = true;
                 c = reader.Read();
-                if (c == -1) throw new DeserializationException("Expected digit", reader);
+                if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
@@ -689,10 +694,10 @@ namespace Jil.Deserialize
 
             // digit #1
             var c = reader.Read();
-            if (c == -1) throw new DeserializationException("Expected digit", reader);
+            if (c == -1) throw new DeserializationException("Expected digit", reader, true);
 
             c = c - '0';
-            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader);
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
@@ -880,7 +885,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -891,7 +896,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -902,7 +907,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -914,7 +919,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -963,7 +968,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -974,7 +979,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -985,7 +990,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -997,7 +1002,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -1074,7 +1079,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
                         firstValidCharIdx = idx;
                     }
@@ -1084,7 +1089,7 @@ namespace Jil.Deserialize
                         {
                             if (prev != -1 && !(prev == 'e' || prev == 'E'))
                             {
-                                throw new DeserializationException("Unexpected -", reader);
+                                throw new DeserializationException("Unexpected -", reader, false);
                             }
                             firstValidCharIdx = idx;
                         }
@@ -1094,7 +1099,7 @@ namespace Jil.Deserialize
                             {
                                 if (eIdx >= 0 || firstDigitIdx < 0)
                                 {
-                                    throw new DeserializationException("Unexpected " + c, reader);
+                                    throw new DeserializationException("Unexpected " + c, reader, false);
                                 }
                                 eIdx = idx;
                             }
@@ -1104,7 +1109,7 @@ namespace Jil.Deserialize
                                 {
                                     if (eIdx >= 0 || decimalPointIdx >= 0)
                                     {
-                                        throw new DeserializationException("Unexpected .", reader);
+                                        throw new DeserializationException("Unexpected .", reader, false);
                                     }
                                     decimalPointIdx = idx;
                                 }
@@ -1211,7 +1216,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -1222,7 +1227,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -1233,7 +1238,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -1245,7 +1250,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -1294,7 +1299,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -1305,7 +1310,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -1316,7 +1321,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -1328,7 +1333,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -1405,7 +1410,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
                         firstValidCharIdx = idx;
                     }
@@ -1415,7 +1420,7 @@ namespace Jil.Deserialize
                         {
                             if (prev != -1 && !(prev == 'e' || prev == 'E'))
                             {
-                                throw new DeserializationException("Unexpected -", reader);
+                                throw new DeserializationException("Unexpected -", reader, false);
                             }
                             firstValidCharIdx = idx;
                         }
@@ -1425,7 +1430,7 @@ namespace Jil.Deserialize
                             {
                                 if (eIdx >= 0 || firstDigitIdx < 0)
                                 {
-                                    throw new DeserializationException("Unexpected " + c, reader);
+                                    throw new DeserializationException("Unexpected " + c, reader, false);
                                 }
                                 eIdx = idx;
                             }
@@ -1435,7 +1440,7 @@ namespace Jil.Deserialize
                                 {
                                     if (eIdx >= 0 || decimalPointIdx >= 0)
                                     {
-                                        throw new DeserializationException("Unexpected .", reader);
+                                        throw new DeserializationException("Unexpected .", reader, false);
                                     }
                                     decimalPointIdx = idx;
                                 }
@@ -1543,7 +1548,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -1554,7 +1559,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -1565,7 +1570,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -1577,7 +1582,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -1626,7 +1631,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
 
                         goto storeChar;
@@ -1637,7 +1642,7 @@ namespace Jil.Deserialize
                     {
                         if (prev != -1 && !(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected -", reader);
+                            throw new DeserializationException("Unexpected -", reader, false);
                         }
 
                         goto storeChar;
@@ -1648,7 +1653,7 @@ namespace Jil.Deserialize
                     {
                         if (afterE || !afterFirstDigit)
                         {
-                            throw new DeserializationException("Unexpected " + c, reader);
+                            throw new DeserializationException("Unexpected " + c, reader, false);
                         }
 
                         afterE = true;
@@ -1660,7 +1665,7 @@ namespace Jil.Deserialize
                     {
                         if (!afterFirstDigit || afterE || afterDot)
                         {
-                            throw new DeserializationException("Unexpected .", reader);
+                            throw new DeserializationException("Unexpected .", reader, false);
                         }
 
                         afterDot = true;
@@ -1744,7 +1749,7 @@ namespace Jil.Deserialize
                     {
                         if (!(prev == 'e' || prev == 'E'))
                         {
-                            throw new DeserializationException("Unexpected +", reader);
+                            throw new DeserializationException("Unexpected +", reader, false);
                         }
                         firstValidCharIdx = idx;
                     }
@@ -1754,7 +1759,7 @@ namespace Jil.Deserialize
                         {
                             if (prev != -1 && !(prev == 'e' || prev == 'E'))
                             {
-                                throw new DeserializationException("Unexpected -", reader);
+                                throw new DeserializationException("Unexpected -", reader, false);
                             }
                             firstValidCharIdx = idx;
                         }
@@ -1764,7 +1769,7 @@ namespace Jil.Deserialize
                             {
                                 if (eIdx >= 0 || firstDigitIdx < 0)
                                 {
-                                    throw new DeserializationException("Unexpected " + c, reader);
+                                    throw new DeserializationException("Unexpected " + c, reader, false);
                                 }
                                 eIdx = idx;
                             }
@@ -1774,7 +1779,7 @@ namespace Jil.Deserialize
                                 {
                                     if (eIdx >= 0 || decimalPointIdx >= 0)
                                     {
-                                        throw new DeserializationException("Unexpected .", reader);
+                                        throw new DeserializationException("Unexpected .", reader, false);
                                     }
                                     decimalPointIdx = idx;
                                 }
@@ -1871,7 +1876,7 @@ namespace Jil.Deserialize
 
             if (next >= '0' && next <= '9')
             {
-                throw new DeserializationException(new OverflowException("Number did not end when expected, may overflow"), reader);
+                throw new DeserializationException(new OverflowException("Number did not end when expected, may overflow"), reader, false);
             }
         }
     }
