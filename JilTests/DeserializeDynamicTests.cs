@@ -2267,6 +2267,14 @@ namespace JilTests
             Assert.AreEqual(0, (int)res.Length);
         }
 
+        enum _DynamicTypeConverter
+        {
+            None = 0,
+
+            Hello = 1,
+            World = 2
+        }
+
         [TestMethod]
         public void DynamicTypeConverter()
         {
@@ -2413,6 +2421,81 @@ namespace JilTests
                     var diff = (dto - (DateTimeOffset)tc.ConvertTo(dyn, typeof(DateTimeOffset))).Duration();
                     Assert.IsTrue(diff.TotalSeconds < 1);
                 }
+            }
+
+            // IEnumerable
+            {
+                var dyn = JSON.DeserializeDynamic("[123, \"hello\", 456.7]");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                
+                Assert.IsTrue(tc.CanConvertTo(typeof(System.Collections.IEnumerable)));
+                var e = (System.Collections.IEnumerable)tc.ConvertTo(dyn, typeof(System.Collections.IEnumerable));
+                Assert.AreEqual(3, e.Cast<dynamic>().Count());
+                
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(e.Cast<dynamic>().ElementAt(0));
+                Assert.IsTrue(tc.CanConvertTo(typeof(int)));
+                Assert.AreEqual(123, (int)tc.ConvertTo(e.Cast<dynamic>().ElementAt(0), typeof(int)));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(e.Cast<dynamic>().ElementAt(1));
+                Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                Assert.AreEqual("hello", (string)tc.ConvertTo(e.Cast<dynamic>().ElementAt(1), typeof(string)));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(e.Cast<dynamic>().ElementAt(2));
+                Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                Assert.AreEqual(456.7, (double)tc.ConvertTo(e.Cast<dynamic>().ElementAt(2), typeof(double)));
+            }
+
+            // IEnumerable<T>
+            {
+                var dyn = JSON.DeserializeDynamic("[123, 456, 789]");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+
+                Assert.IsTrue(tc.CanConvertTo(typeof(IEnumerable<int>)));
+                var e = (IEnumerable<int>)tc.ConvertTo(dyn, typeof(IEnumerable<int>));
+                Assert.AreEqual(3, e.Count());
+                Assert.AreEqual(123, e.ElementAt(0));
+                Assert.AreEqual(456, e.ElementAt(1));
+                Assert.AreEqual(789, e.ElementAt(2));
+            }
+
+            // Dictionary<string, dynamic>
+            {
+                var dyn = JSON.DeserializeDynamic("{\"hello\":123, \"world\": 456.7 }");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+
+                Assert.IsTrue(tc.CanConvertTo(typeof(IDictionary<string, dynamic>)));
+                var d = (Dictionary<string, dynamic>)tc.ConvertTo(dyn, typeof(IDictionary<string, dynamic>));
+                Assert.AreEqual(2, d.Count);
+                Assert.IsTrue(d.ContainsKey("hello"));
+                Assert.IsTrue(d.ContainsKey("world"));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(d["hello"]);
+                Assert.IsTrue(tc.CanConvertTo(typeof(int)));
+                Assert.AreEqual(123, (int)tc.ConvertTo(d["hello"], typeof(int)));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(d["world"]);
+                Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                Assert.AreEqual(456.7, (double)tc.ConvertTo(d["world"], typeof(double)));
+            }
+
+            // Dictionary<enum, dynamic>
+            {
+                var dyn = JSON.DeserializeDynamic("{\"Hello\":123, \"World\": 456.7 }");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+
+                Assert.IsTrue(tc.CanConvertTo(typeof(IDictionary<_DynamicTypeConverter, dynamic>)));
+                var d = (Dictionary<_DynamicTypeConverter, dynamic>)tc.ConvertTo(dyn, typeof(IDictionary<_DynamicTypeConverter, dynamic>));
+                Assert.AreEqual(2, d.Count);
+                Assert.IsTrue(d.ContainsKey(_DynamicTypeConverter.Hello));
+                Assert.IsTrue(d.ContainsKey(_DynamicTypeConverter.World));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(d[_DynamicTypeConverter.Hello]);
+                Assert.IsTrue(tc.CanConvertTo(typeof(int)));
+                Assert.AreEqual(123, (int)tc.ConvertTo(d[_DynamicTypeConverter.Hello], typeof(int)));
+
+                tc = System.ComponentModel.TypeDescriptor.GetConverter(d[_DynamicTypeConverter.World]);
+                Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                Assert.AreEqual(456.7, (double)tc.ConvertTo(d[_DynamicTypeConverter.World], typeof(double)));
             }
         }
     }
