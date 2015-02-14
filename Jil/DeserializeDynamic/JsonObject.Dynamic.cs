@@ -1267,17 +1267,19 @@ namespace Jil.DeserializeDynamic
                     if (returnType == typeof(DateTimeOffset))
                     {
                         DateTime dt;
+                        DateTimeOffset res;
                         bool ret;
 
                         switch (Options.UseDateTimeFormat)
                         {
                             case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
                                 ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out dt);
-                                result = new DateTimeOffset(dt);
+                                res = dt;
+                                result = res;
                                 return ret;
                             case DateTimeFormat.ISO8601:
-                                ret = Methods.ReadISO8601DateTime(StringValue, out dt);
-                                result = new DateTimeOffset(dt);
+                                ret = Methods.ReadISO8601DateWithOffset(StringValue, out res);
+                                result = res;
                                 return ret;
                             default:
                                 result = null;
