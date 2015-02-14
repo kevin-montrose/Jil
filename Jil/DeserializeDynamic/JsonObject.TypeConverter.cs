@@ -47,38 +47,8 @@ namespace Jil.DeserializeDynamic
 
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             {
-                var nonNullable = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
-
-                switch (Context.Type)
-                {
-                    case JsonObjectType.Array:
-                        if (nonNullable == typeof(System.Collections.IEnumerable)) return true;
-
-                        if (!nonNullable.IsGenericEnumerable()) return false;
-
-                        var destinationElemType = nonNullable.GetGenericArguments()[0];
-
-                        // TODO: Less allocations here please
-                        return Context.ArrayValue.All(o => { object ignored; return o.InnerTryConvert(destinationElemType, out ignored); });
-                    
-                    case JsonObjectType.False:
-                    case JsonObjectType.True:
-                        return nonNullable == typeof(bool);
-
-                    case JsonObjectType.FastNumber:
-                    case JsonObjectType.Number:
-                        return nonNullable.IsNumberType();
-
-                    case JsonObjectType.Object:
-                        // TODO: Implement! (aside, this is a nasty one)
-                        throw new NotImplementedException();
-
-                    case JsonObjectType.String:
-                        // TODO: Guids and dates and oh my
-                        return nonNullable == typeof(string);
-
-                    default: throw new Exception("Unexpected JsonObjectType: " + Context.Type);
-                }
+                object ignored;
+                return Context.InnerTryConvert(destinationType, out ignored);
             }
 
             public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)

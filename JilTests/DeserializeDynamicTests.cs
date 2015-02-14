@@ -2270,6 +2270,7 @@ namespace JilTests
         [TestMethod]
         public void DynamicTypeConverter()
         {
+            // ints
             {
                 var dyn = JSON.DeserializeDynamic("123");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
@@ -2277,6 +2278,7 @@ namespace JilTests
                 Assert.AreEqual(123, (int)tc.ConvertTo(dyn, typeof(int)));
             }
 
+            // doubles
             {
                 var dyn = JSON.DeserializeDynamic("123.45");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
@@ -2284,6 +2286,7 @@ namespace JilTests
                 Assert.AreEqual(123.45, (double)tc.ConvertTo(dyn, typeof(double)));
             }
 
+            // floats
             {
                 var dyn = JSON.DeserializeDynamic("123.45");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
@@ -2291,6 +2294,7 @@ namespace JilTests
                 Assert.AreEqual(123.45f, (float)tc.ConvertTo(dyn, typeof(float)));
             }
 
+            // decimals
             {
                 var dyn = JSON.DeserializeDynamic("123.45");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
@@ -2298,11 +2302,117 @@ namespace JilTests
                 Assert.AreEqual(123.45m, (decimal)tc.ConvertTo(dyn, typeof(decimal)));
             }
 
+            // strings
             {
                 var dyn = JSON.DeserializeDynamic("\"hello\"");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
                 Assert.IsTrue(tc.CanConvertTo(typeof(string)));
                 Assert.AreEqual("hello", (string)tc.ConvertTo(dyn, typeof(string)));
+            }
+
+            // Guids
+            {
+                var guid = Guid.NewGuid();
+                var dyn = JSON.DeserializeDynamic("\"" + guid.ToString("D") + "\"");
+                System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                Assert.IsTrue(tc.CanConvertTo(typeof(Guid)));
+                Assert.AreEqual(guid.ToString("D"), (string)tc.ConvertTo(dyn, typeof(string)));
+                Assert.AreEqual(guid, (Guid)tc.ConvertTo(dyn, typeof(Guid)));
+            }
+
+            // DateTimes
+            {
+                var dt = DateTime.UtcNow;
+                {
+                    var json = JSON.Serialize(dt, Options.Default);
+                    var dyn = JSON.DeserializeDynamic(json, Options.Default);
+                    var asStr = JSON.Deserialize<string>(json);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTime)));
+                    Assert.AreEqual(asStr, (string)tc.ConvertTo(dyn, typeof(string)));
+                    var diff = (dt - (DateTime)tc.ConvertTo(dyn, typeof(DateTime))).Duration();
+                    Assert.IsTrue(diff.TotalMilliseconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dt, Options.ISO8601);
+                    var dyn = JSON.DeserializeDynamic(json, Options.ISO8601);
+                    var asStr = JSON.Deserialize<string>(json);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTime)));
+                    Assert.AreEqual(asStr, (string)tc.ConvertTo(dyn, typeof(string)));
+                    var diff = (dt - (DateTime)tc.ConvertTo(dyn, typeof(DateTime))).Duration();
+                    Assert.IsTrue(diff.TotalSeconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dt, Options.MillisecondsSinceUnixEpoch);
+                    var dyn = JSON.DeserializeDynamic(json, Options.MillisecondsSinceUnixEpoch);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTime)));
+                    Assert.AreEqual(double.Parse(json), (double)tc.ConvertTo(dyn, typeof(double)));
+                    var diff = (dt - (DateTime)tc.ConvertTo(dyn, typeof(DateTime))).Duration();
+                    Assert.IsTrue(diff.TotalMilliseconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dt, Options.SecondsSinceUnixEpoch);
+                    var dyn = JSON.DeserializeDynamic(json, Options.SecondsSinceUnixEpoch);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTime)));
+                    Assert.AreEqual(double.Parse(json), (double)tc.ConvertTo(dyn, typeof(double)));
+                    var diff = (dt - (DateTime)tc.ConvertTo(dyn, typeof(DateTime))).Duration();
+                    Assert.IsTrue(diff.TotalSeconds < 1);
+                }
+            }
+
+            // DateTimeOffsets
+            {
+                var dto = DateTimeOffset.Now;
+                {
+                    var json = JSON.Serialize(dto, Options.Default);
+                    var dyn = JSON.DeserializeDynamic(json, Options.Default);
+                    var asStr = JSON.Deserialize<string>(json);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTimeOffset)));
+                    Assert.AreEqual(asStr, (string)tc.ConvertTo(dyn, typeof(string)));
+                    var diff = (dto - (DateTimeOffset)tc.ConvertTo(dyn, typeof(DateTimeOffset))).Duration();
+                    Assert.IsTrue(diff.TotalMilliseconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dto, Options.ISO8601);
+                    var dyn = JSON.DeserializeDynamic(json, Options.ISO8601);
+                    var asStr = JSON.Deserialize<string>(json);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(string)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTimeOffset)));
+                    Assert.AreEqual(asStr, (string)tc.ConvertTo(dyn, typeof(string)));
+                    var diff = (dto - (DateTimeOffset)tc.ConvertTo(dyn, typeof(DateTimeOffset))).Duration();
+                    Assert.IsTrue(diff.TotalSeconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dto, Options.MillisecondsSinceUnixEpoch);
+                    var dyn = JSON.DeserializeDynamic(json, Options.MillisecondsSinceUnixEpoch);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTimeOffset)));
+                    Assert.AreEqual(double.Parse(json), (double)tc.ConvertTo(dyn, typeof(double)));
+                    var diff = (dto - (DateTimeOffset)tc.ConvertTo(dyn, typeof(DateTimeOffset))).Duration();
+                    Assert.IsTrue(diff.TotalMilliseconds < 1);
+                }
+                {
+                    var json = JSON.Serialize(dto, Options.SecondsSinceUnixEpoch);
+                    var dyn = JSON.DeserializeDynamic(json, Options.SecondsSinceUnixEpoch);
+                    System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
+                    Assert.IsTrue(tc.CanConvertTo(typeof(double)));
+                    Assert.IsTrue(tc.CanConvertTo(typeof(DateTimeOffset)));
+                    Assert.AreEqual(double.Parse(json), (double)tc.ConvertTo(dyn, typeof(double)));
+                    var diff = (dto - (DateTimeOffset)tc.ConvertTo(dyn, typeof(DateTimeOffset))).Duration();
+                    Assert.IsTrue(diff.TotalSeconds < 1);
+                }
             }
         }
     }
