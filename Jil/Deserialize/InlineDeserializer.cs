@@ -135,7 +135,12 @@ namespace Jil.Deserialize
 
         void ThrowExpectedButEnded(char c)
         {
-            Emit.LoadConstant("Expected character: '" + c + "', but the reader ended"); // string
+            ThrowExpectedButEnded("" + c);
+        }
+
+        void ThrowExpectedButEnded(string s)
+        {
+            Emit.LoadConstant("Expected character: '" + s + "', but the reader ended"); // string
             Emit.LoadArgument(0);                                                       // string TextReader
             Emit.LoadConstant(true);                                                    // string TextReader bool
             Emit.NewObject<DeserializationException, string, TextReader, bool>();       // DeserializationException
@@ -151,12 +156,34 @@ namespace Jil.Deserialize
             Emit.Throw();                                                           // --empty--
         }
 
+        void ThrowIfEmptyAndWasExpecting(params object[] ps)
+        {
+            // top of stack:
+            // int
+
+            var notEmpty = Emit.DefineLabel();
+            
+            Emit.Duplicate();                           // int int
+            Emit.LoadConstant(-1);                      // int int -1
+            Emit.UnsignedBranchIfNotEqual(notEmpty);    // int
+
+            Emit.Pop();                                                                         // --empty--
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
+            Emit.LoadArgument(0);                                                               // string TextReader
+            Emit.LoadConstant(true);                                                            // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();               // DeserializationException
+            Emit.Throw();                                                                       // --empty--
+
+            Emit.MarkLabel(notEmpty);                   // int
+        }
+
         void ThrowExpected(params object[] ps)
         {
             Emit.LoadConstant("Expected: " + string.Join(", ", ps));                // string
             Emit.LoadArgument(0);                                                   // string TextReader
-            Emit.NewObject<DeserializationException, string, TextReader>();         // DeserializationException
-            Emit.Throw();
+            Emit.LoadConstant(false);                                               // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            Emit.Throw();                                                           // --empty--
         }
 
         void ExpectChar(char c)
@@ -213,6 +240,7 @@ namespace Jil.Deserialize
             var gotN = Emit.DefineLabel();
             var done = Emit.DefineLabel();
 
+            // TODO: Indicate that the delegate running means the stream ended
             RawReadChar(() => ThrowExpected(c, "null")); // int
             Emit.Duplicate();                               // int int
             Emit.LoadConstant((int)c);                      // int int int
@@ -436,7 +464,7 @@ namespace Jil.Deserialize
 
             // end of stream **AND** not true or false case
             Emit.MarkLabel(endOfStream);                    // --empty--
-            ThrowExpected("true or false");                 // --empty--
+            ThrowExpectedButEnded("true or false");         // --empty--
 
             Emit.MarkLabel(mayBeTrue);      // int
             Emit.Pop();                     // --empty--
@@ -764,10 +792,11 @@ namespace Jil.Deserialize
             Emit.LoadConstant(-1);                          // int -1
             Emit.BranchIfEqual(success);                    // --empty--
 
-            Emit.LoadConstant("Expected end of stream");                    // string
-            Emit.LoadArgument(0);                                           // string TextReader
-            Emit.NewObject<DeserializationException, string, TextReader>(); // DeserializationException
-            Emit.Throw();                                                   // --empty--
+            Emit.LoadConstant("Expected end of stream");                            // string
+            Emit.LoadArgument(0);                                                   // string TextReader
+            Emit.LoadConstant(false);                                               // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            Emit.Throw();                                                           // --empty--
 
             Emit.MarkLabel(success);        // --empty--
         }
@@ -995,6 +1024,8 @@ namespace Jil.Deserialize
                 Emit.MarkLabel(startLoop);                      // --empty--
                 loadList();                                     // listType(*?)
                 ReadSkipWhitespace();                           // listType(*?) int
+                ThrowIfEmptyAndWasExpecting(",", "]");          // listType(*?) int
+
                 Emit.Duplicate();                               // listType(*?) int int
                 Emit.LoadConstant(',');                         // listType(*?) int int ','
                 Emit.BranchIfEqual(nextItem);                   // listType(*?) int
@@ -1119,9 +1150,11 @@ namespace Jil.Deserialize
 
                 var nextItem = Emit.DefineLabel();
 
-                Emit.MarkLabel(loopStart);      // --empty--
-                loadDict();                     // dictType(*?)
-                ReadSkipWhitespace();           // dictType(*?) int 
+                Emit.MarkLabel(loopStart);              // --empty--
+                loadDict();                             // dictType(*?)
+                ReadSkipWhitespace();                   // dictType(*?) int 
+                ThrowIfEmptyAndWasExpecting(",", "}");  // dictType(*?) int
+
                 Emit.Duplicate();               // dictType(*?) int int
                 Emit.LoadConstant(',');         // dictType(*?) int int ','
                 Emit.BranchIfEqual(nextItem);   // dictType(*?) int
@@ -1401,14 +1434,15 @@ namespace Jil.Deserialize
 
                 var nextItem = Emit.DefineLabel();
 
-                Emit.MarkLabel(loopStart);          // --empty--
-                loadObj();                          // objType(*?)
-                ReadSkipWhitespace();               // objType(*?) int 
-                Emit.Duplicate();                   // objType(*?) int int
-                Emit.LoadConstant(',');             // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);       // objType(*?) int
-                Emit.LoadConstant('}');             // objType(*?) int '}'
-                Emit.BranchIfEqual(doneSkipChar);   // objType(*?)
+                Emit.MarkLabel(loopStart);              // --empty--
+                loadObj();                              // objType(*?)
+                ReadSkipWhitespace();                   // objType(*?) int 
+                ThrowIfEmptyAndWasExpecting(",", "}");  // objType(*?) int
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(',');                 // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);           // objType(*?) int
+                Emit.LoadConstant('}');                 // objType(*?) int '}'
+                Emit.BranchIfEqual(doneSkipChar);       // objType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
@@ -1581,14 +1615,16 @@ namespace Jil.Deserialize
 
                 var nextItem = Emit.DefineLabel();
 
-                Emit.MarkLabel(loopStart);          // --empty--
-                loadObj();                          // objType(*?)
-                ReadSkipWhitespace();               // objType(*?) int 
-                Emit.Duplicate();                   // objType(*?) int int
-                Emit.LoadConstant(',');             // objType(*?) int int ','
-                Emit.BranchIfEqual(nextItem);       // objType(*?) int
-                Emit.LoadConstant('}');             // objType(*?) int '}'
-                Emit.BranchIfEqual(doneSkipChar);   // objType(*?)
+                Emit.MarkLabel(loopStart);              // --empty--
+                loadObj();                              // objType(*?)
+                ReadSkipWhitespace();                   // objType(*?) int 
+                ThrowIfEmptyAndWasExpecting(",", "}");  // objType(*?) int
+
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(',');                 // objType(*?) int int ','
+                Emit.BranchIfEqual(nextItem);           // objType(*?) int
+                Emit.LoadConstant('}');                 // objType(*?) int '}'
+                Emit.BranchIfEqual(doneSkipChar);       // objType(*?)
 
                 // didn't get what we expected
                 ThrowExpected(",", "}");
@@ -1718,9 +1754,11 @@ namespace Jil.Deserialize
 
             var nextItem = Emit.DefineLabel();
 
-            Emit.MarkLabel(loopStart);          // --empty--
-            ConsumeWhiteSpace();                // --empty--
-            RawPeekChar();                      // int 
+            Emit.MarkLabel(loopStart);              // --empty--
+            ConsumeWhiteSpace();                    // --empty--
+            RawPeekChar();                          // int 
+            ThrowIfEmptyAndWasExpecting(",", "}");  // int
+
             Emit.Duplicate();                   // int int
             Emit.LoadConstant(',');             // int int ','
             Emit.BranchIfEqual(nextItem);       // int
@@ -1866,7 +1904,9 @@ namespace Jil.Deserialize
             var nextItem = Emit.DefineLabel();
 
             Emit.MarkLabel(loopStart);                  // --empty--
-            ReadSkipWhitespace();                       // --empty--
+            ReadSkipWhitespace();                       // int
+            ThrowIfEmptyAndWasExpecting(",", "}");      // int
+
             Emit.Duplicate();                           // int int
             Emit.LoadConstant(',');                     // int int ','
             Emit.BranchIfEqual(nextItem);               // int
@@ -2076,7 +2116,8 @@ namespace Jil.Deserialize
             var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
             emit.LoadField(stashField);
-            emit.NewObject<DeserializationException, string, Exception>();
+            emit.LoadConstant(false);
+            emit.NewObject<DeserializationException, string, Exception, bool>();
             emit.Throw();
 
             return emit.CreateDelegate<Func<TextReader, int, ReturnType>>(Utils.DelegateOptimizationOptions);

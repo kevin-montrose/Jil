@@ -337,7 +337,8 @@ namespace Jil.Deserialize
 
                         emit.LoadConstant("Unexpected value for " + typeof(T).Name);
                         emit.LoadArgument(0);
-                        emit.NewObject<DeserializationException, string, TextReader>();
+                        emit.LoadConstant(false);
+                        emit.NewObject<DeserializationException, string, TextReader, bool>();
                         emit.Throw();
                     }
                 );

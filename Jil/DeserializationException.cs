@@ -65,7 +65,11 @@ namespace Jil
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, Exception inner) : base(msg + ": " + inner.Message, inner) { }
+        internal DeserializationException(string msg, Exception inner, bool endedEarly) 
+            : base(msg + ": " + inner.Message, inner) 
+        {
+            EndedUnexpectedly = endedEarly;
+        }
 
         void InspectReader(TextReader reader)
         {
