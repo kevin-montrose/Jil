@@ -34,31 +34,23 @@ namespace Jil
         /// This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
         /// and throw an exception is an implementation detail.
         /// </summary>
-        public bool? EndedUnexpectedly { get; private set; }
+        public bool EndedUnexpectedly { get; private set; }
 
-        // TODO: Always indicate endedEarly, and then delete these constructors
-        internal DeserializationException(Exception e, TextReader reader) : this(e, reader, default(bool?)) { }
-        internal DeserializationException(string msg, TextReader reader) : this(msg, reader, default(bool?)) { }
-        internal DeserializationException(string msg, TextReader reader, Exception inner) : this(msg, reader, inner, default(bool?)) { }
-        internal DeserializationException(Exception inner, TextReader reader, bool endedEarly) : this(inner, reader, (bool?)endedEarly) { }
-        internal DeserializationException(string msg, TextReader reader, bool endedEarly) : this(msg, reader, (bool?)endedEarly) { }
-        internal DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly) : this(msg, reader, inner, (bool?)endedEarly) { }
-
-        internal DeserializationException(Exception inner, TextReader reader, bool? endedEarly)
+        internal DeserializationException(Exception inner, TextReader reader, bool endedEarly)
             : base(inner.Message, inner)
         {
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, TextReader reader, bool? endedEarly) 
+        internal DeserializationException(string msg, TextReader reader, bool endedEarly) 
             : base(msg) 
         {
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, TextReader reader, Exception inner, bool? endedEarly)
+        internal DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly)
             : base(msg, inner)
         {
             InspectReader(reader);
