@@ -5477,6 +5477,31 @@ namespace JilTests
             }
         }
 
+        static void _Issue117<T>() where T : struct
+        {
+            try
+            {
+                var x = JSON.Deserialize<T>("001");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException) { }
+
+            try
+            {
+                var x = JSON.Deserialize<T>("123.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException) { }
+        }
+
+        [TestMethod]
+        public void Issue117()
+        {
+            _Issue117<float>();
+            _Issue117<double>();
+            _Issue117<decimal>();
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
