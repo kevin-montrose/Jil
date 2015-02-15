@@ -5403,6 +5403,80 @@ namespace JilTests
             }
         }
 
+        class _EarlyStreamEnds_Int
+        {
+            public int A { get; set; }
+        }
+
+        [TestMethod]
+        public void EarlyStreamEnds()
+        {
+            using (var str = new StringReader("{\"A\":"))
+            {
+                try
+                {
+                    JSON.Deserialize<_EarlyStreamEnds_Int>(str);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.IsTrue(e.EndedUnexpectedly);
+                }
+            }
+
+            using (var str = new StringReader("{\"A\""))
+            {
+                try
+                {
+                    JSON.Deserialize<_EarlyStreamEnds_Int>(str);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.IsTrue(e.EndedUnexpectedly);
+                }
+            }
+
+            using (var str = new StringReader("{"))
+            {
+                try
+                {
+                    JSON.Deserialize<_EarlyStreamEnds_Int>(str);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.IsTrue(e.EndedUnexpectedly);
+                }
+            }
+
+            using(var str = new StringReader("\"123"))
+            {
+                try
+                {
+                    JSON.Deserialize<Guid>(str);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.IsTrue(e.EndedUnexpectedly);
+                }
+            }
+
+            using (var str = new StringReader("[0, "))
+            {
+                try
+                {
+                    JSON.Deserialize<int[]>(str);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.IsTrue(e.EndedUnexpectedly);
+                }
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
