@@ -133,12 +133,22 @@ namespace Jil.Deserialize
             Emit.MarkLabel(haveChar);                   // int
         }
 
+        void ThrowExpectedButEnded(char c)
+        {
+            Emit.LoadConstant("Expected character: '" + c + "', but the reader ended"); // string
+            Emit.LoadArgument(0);                                                       // string TextReader
+            Emit.LoadConstant(true);                                                    // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();       // DeserializationException
+            Emit.Throw();                                                               // --empty--
+        }
+
         void ThrowExpected(char c)
         {
-            Emit.LoadConstant("Expected character: '" + c + "'");               // string
-            Emit.LoadArgument(0);                                               // string TextReader
-            Emit.NewObject<DeserializationException, string, TextReader>();     // DeserializationException
-            Emit.Throw();
+            Emit.LoadConstant("Expected character: '" + c + "'");                   // string
+            Emit.LoadArgument(0);                                                   // string TextReader
+            Emit.LoadConstant(false);                                               // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            Emit.Throw();                                                           // --empty--
         }
 
         void ThrowExpected(params object[] ps)
@@ -151,26 +161,40 @@ namespace Jil.Deserialize
 
         void ExpectChar(char c)
         {
-            var gotChar = Emit.DefineLabel();
+            var gotRightChar = Emit.DefineLabel();
+            var gotAChar = Emit.DefineLabel();
 
-            Emit.LoadArgument(0);                   // TextReader
-            Emit.CallVirtual(TextReader_Read);      // int
-            Emit.LoadConstant((int)c);              // int int
-            Emit.BranchIfEqual(gotChar);            // --empty--
-            ThrowExpected(c);                       // --empty--
+            Emit.LoadArgument(0);                       // TextReader
+            Emit.CallVirtual(TextReader_Read);          // int
+            Emit.LoadConstant((int)c);                  // int int
+            Emit.Duplicate();                           // int int int
+            Emit.LoadConstant(-1);                      // int int int -1
+            Emit.UnsignedBranchIfNotEqual(gotAChar);    // int int
+            ThrowExpectedButEnded(c);                   // int int
 
-            Emit.MarkLabel(gotChar);                // --empty--
+            Emit.MarkLabel(gotAChar);                   // --empty--
+            Emit.BranchIfEqual(gotRightChar);           // --empty--
+            ThrowExpected(c);                           // --empty--
+
+            Emit.MarkLabel(gotRightChar);               // --empty--
         }
 
         void CheckChar(char c)
         {
-            var gotChar = Emit.DefineLabel();
+            var gotRightChar = Emit.DefineLabel();
+            var gotAChar = Emit.DefineLabel();
 
-            Emit.LoadConstant((int)c);              // int int
-            Emit.BranchIfEqual(gotChar);            // --empty--
-            ThrowExpected(c);                       // --empty--
+            Emit.LoadConstant((int)c);                  // int int
+            Emit.Duplicate();                           // int int int
+            Emit.LoadConstant(-1);                      // int int int -1
+            Emit.UnsignedBranchIfNotEqual(gotAChar);    // int int
+            ThrowExpectedButEnded(c);                   // --empty--
 
-            Emit.MarkLabel(gotChar);                // --empty--
+            Emit.MarkLabel(gotAChar);                   // int int
+            Emit.BranchIfEqual(gotRightChar);           // --empty--
+            ThrowExpected(c);                           // --empty--
+
+            Emit.MarkLabel(gotRightChar);                // --empty--
         }
 
         void ExpectQuote()

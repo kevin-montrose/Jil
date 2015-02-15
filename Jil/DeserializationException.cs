@@ -40,6 +40,9 @@ namespace Jil
         internal DeserializationException(Exception e, TextReader reader) : this(e, reader, default(bool?)) { }
         internal DeserializationException(string msg, TextReader reader) : this(msg, reader, default(bool?)) { }
         internal DeserializationException(string msg, TextReader reader, Exception inner) : this(msg, reader, inner, default(bool?)) { }
+        internal DeserializationException(Exception inner, TextReader reader, bool endedEarly) : this(inner, reader, (bool?)endedEarly) { }
+        internal DeserializationException(string msg, TextReader reader, bool endedEarly) : this(msg, reader, (bool?)endedEarly) { }
+        internal DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly) : this(msg, reader, inner, (bool?)endedEarly) { }
 
         internal DeserializationException(Exception inner, TextReader reader, bool? endedEarly)
             : base(inner.Message, inner)
