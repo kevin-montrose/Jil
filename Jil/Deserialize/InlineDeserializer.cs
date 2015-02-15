@@ -138,6 +138,15 @@ namespace Jil.Deserialize
             ThrowExpectedButEnded("" + c);
         }
 
+        void ThrowExpectedButEnded(params object[] ps)
+        {
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
+            Emit.LoadArgument(0);                                                               // string TextReader
+            Emit.LoadConstant(true);                                                            // string TextReader bool
+            Emit.NewObject<DeserializationException, string, TextReader, bool>();               // DeserializationException
+            Emit.Throw();                                                                       // --empty--
+        }
+
         void ThrowExpectedButEnded(string s)
         {
             Emit.LoadConstant("Expected character: '" + s + "', but the reader ended"); // string
@@ -211,13 +220,13 @@ namespace Jil.Deserialize
             var gotRightChar = Emit.DefineLabel();
             var gotAChar = Emit.DefineLabel();
 
-            Emit.LoadConstant((int)c);                  // int int
-            Emit.Duplicate();                           // int int int
-            Emit.LoadConstant(-1);                      // int int int -1
-            Emit.UnsignedBranchIfNotEqual(gotAChar);    // int int
+            Emit.Duplicate();                           // int int
+            Emit.LoadConstant(-1);                      // int int -1
+            Emit.UnsignedBranchIfNotEqual(gotAChar);    // int
             ThrowExpectedButEnded(c);                   // --empty--
 
-            Emit.MarkLabel(gotAChar);                   // int int
+            Emit.MarkLabel(gotAChar);                   // int
+            Emit.LoadConstant((int)c);                  // int int
             Emit.BranchIfEqual(gotRightChar);           // --empty--
             ThrowExpected(c);                           // --empty--
 
@@ -240,14 +249,13 @@ namespace Jil.Deserialize
             var gotN = Emit.DefineLabel();
             var done = Emit.DefineLabel();
 
-            // TODO: Indicate that the delegate running means the stream ended
-            RawReadChar(() => ThrowExpected(c, "null")); // int
-            Emit.Duplicate();                               // int int
-            Emit.LoadConstant((int)c);                      // int int int
-            Emit.BranchIfEqual(gotChar);                    // int 
-            Emit.LoadConstant((int)'n');                    // int n
-            Emit.BranchIfEqual(gotN);                       // --empty--
-            ThrowExpected(c, "null");                    // --empty--
+            RawReadChar(() => ThrowExpectedButEnded(c, "null"));    // int
+            Emit.Duplicate();                                       // int int
+            Emit.LoadConstant((int)c);                              // int int int
+            Emit.BranchIfEqual(gotChar);                            // int 
+            Emit.LoadConstant((int)'n');                            // int n
+            Emit.BranchIfEqual(gotN);                               // --empty--
+            ThrowExpected(c, "null");                               // --empty--
 
             Emit.MarkLabel(gotChar);                        // int
             Emit.Pop();                                     // --empty--
