@@ -2801,7 +2801,7 @@ namespace Jil.Serialize
 
                 if (elementType.IsDictionaryType())
                 {
-                    WriteList(elementType, loc);
+                    WriteDictionary(elementType, loc);
 
                     Emit.MarkLabel(done);
 
