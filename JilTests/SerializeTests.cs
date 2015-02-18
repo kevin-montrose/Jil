@@ -7692,5 +7692,17 @@ namespace JilTests
                 Assert.AreEqual(shouldMatch, streamStr);
             }
         }
+
+        class _DictionaryDictionary
+        {
+            public Dictionary<string, Dictionary<string, int>> A { get; set; }
+        }
+
+        [TestMethod]
+        public void DictionaryDictionary()
+        {
+            var str = JSON.Serialize<Dictionary<string, Dictionary<string, int>>>(new Dictionary<string, Dictionary<string, int>>(), Options.ExcludeNulls);
+            Assert.IsFalse(string.IsNullOrEmpty(str));
+        }
     }
 }
