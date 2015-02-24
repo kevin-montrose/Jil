@@ -5484,22 +5484,28 @@ namespace JilTests
                 var x = JSON.Deserialize<T>("001");
                 Assert.Fail("Shouldn't be possible");
             }
-            catch (DeserializationException) { }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
 
             try
             {
                 var x = JSON.Deserialize<T>("123.");
                 Assert.Fail("Shouldn't be possible");
             }
-            catch (DeserializationException) { }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
         }
 
         [TestMethod]
         public void Issue117()
         {
+            _Issue117<decimal>();
             _Issue117<float>();
             _Issue117<double>();
-            _Issue117<decimal>();
         }
 
 #if !DEBUG

@@ -1602,7 +1602,18 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
-            var result = decimal.Parse(commonSb.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture);
+            var asStr = commonSb.ToString();
+            if (asStr[asStr.Length - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if(asStr.Length >= 2 && asStr[0] == '0')
+            {
+                var secondChar = asStr[1];
+                if(secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
+            }
+
+            var result = decimal.Parse(asStr, NumberStyles.Float, CultureInfo.InvariantCulture);
             commonSb.Clear();
             return result;
         }
