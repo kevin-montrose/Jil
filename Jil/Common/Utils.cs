@@ -809,12 +809,18 @@ namespace Jil.Common
 
                 foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    addIfReachable(field.FieldType, curNode);
+                    if (field.ShouldUseMember())
+                    {
+                        addIfReachable(field.FieldType, curNode);
+                    }
                 }
 
                 foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
                 {
-                    addIfReachable(prop.PropertyType, curNode);
+                    if (prop.ShouldUseMember())
+                    {
+                        addIfReachable(prop.PropertyType, curNode);
+                    }
                 }
             }
 
