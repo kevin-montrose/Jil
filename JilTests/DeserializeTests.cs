@@ -5477,18 +5477,8 @@ namespace JilTests
             }
         }
 
-        static void _Issue117<T>() where T : struct
+        static void _Issue117_TrailingDot<T>() where T : struct
         {
-            try
-            {
-                var x = JSON.Deserialize<T>("001");
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("Number cannot have leading zeros", e.Message);
-            }
-
             try
             {
                 var x = JSON.Deserialize<T>("123.");
@@ -5500,22 +5490,86 @@ namespace JilTests
             }
         }
 
+        static void _Issue117_LeadingZero<T>() where T : struct
+        {
+            try
+            {
+                var x = JSON.Deserialize<T>("001");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+        }
+
         [TestMethod]
         public void Issue117_Decimal()
         {
-            _Issue117<decimal>();
+            _Issue117_TrailingDot<decimal>();
+            _Issue117_LeadingZero<decimal>();
         }
 
         [TestMethod]
         public void Issue117_Float()
         {
-            _Issue117<float>();
+            _Issue117_TrailingDot<float>();
+            _Issue117_LeadingZero<float>();
         }
 
         [TestMethod]
         public void Issue117_Double()
         {
-            _Issue117<double>();
+            _Issue117_TrailingDot<double>();
+            _Issue117_LeadingZero<double>();
+        }
+
+        [TestMethod]
+        public void Issue117_SByte()
+        {
+            _Issue117_LeadingZero<sbyte>();
+        }
+
+        [TestMethod]
+        public void Issue117_Byte()
+        {
+            _Issue117_LeadingZero<byte>();
+        }
+
+        [TestMethod]
+        public void Issue117_UShort()
+        {
+            _Issue117_LeadingZero<ushort>();
+        }
+
+        [TestMethod]
+        public void Issue117_Short()
+        {
+            _Issue117_LeadingZero<short>();
+        }
+
+        [TestMethod]
+        public void Issue117_UInt()
+        {
+            _Issue117_LeadingZero<uint>();
+        }
+
+        [TestMethod]
+        public void Issue117_Int()
+        {
+            _Issue117_LeadingZero<int>();
+        }
+
+        [TestMethod]
+        public void Issue117_ULong()
+        {
+            _Issue117_LeadingZero<ulong>();
+        }
+
+        [TestMethod]
+        public void Issue117_Long()
+        {
+            _Issue117_LeadingZero<long>();
         }
 
 #if !DEBUG
