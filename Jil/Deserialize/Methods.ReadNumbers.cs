@@ -1264,10 +1264,21 @@ namespace Jil.Deserialize
                     afterFirstDigit = true;
                 }
 
-            storeChar:
+                storeChar:
                 commonSb.Append((char)c);
                 reader.Read();
                 prev = c;
+            }
+
+            var asStr = commonSb.ToString();
+            if (asStr[asStr.Length - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if (asStr.Length >= 2 && asStr[0] == '0')
+            {
+                var secondChar = asStr[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
             }
 
             var result = float.Parse(commonSb.ToString(), CultureInfo.InvariantCulture);
@@ -1355,6 +1366,16 @@ namespace Jil.Deserialize
                 }
                 reader.Read();
                 prev = c;
+            }
+
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
             }
 
             var result = float.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
@@ -1463,6 +1484,16 @@ namespace Jil.Deserialize
 
                 reader.Read();
                 prev = c;
+            }
+
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
             }
 
             if (eIdx < 0)
