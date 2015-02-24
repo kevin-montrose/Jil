@@ -5503,11 +5503,25 @@ namespace JilTests
             }
         }
 
+        static void _Issue117_NegativeLeadingZero<T>() where T : struct
+        {
+            try
+            {
+                var x = JSON.Deserialize<T>("-001");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+        }
+
         [TestMethod]
         public void Issue117_Decimal()
         {
             _Issue117_TrailingDot<decimal>();
             _Issue117_LeadingZero<decimal>();
+            _Issue117_NegativeLeadingZero<decimal>();
         }
 
         [TestMethod]
@@ -5515,6 +5529,7 @@ namespace JilTests
         {
             _Issue117_TrailingDot<float>();
             _Issue117_LeadingZero<float>();
+            _Issue117_NegativeLeadingZero<float>();
         }
 
         [TestMethod]
@@ -5522,12 +5537,14 @@ namespace JilTests
         {
             _Issue117_TrailingDot<double>();
             _Issue117_LeadingZero<double>();
+            _Issue117_NegativeLeadingZero<double>();
         }
 
         [TestMethod]
         public void Issue117_SByte()
         {
             _Issue117_LeadingZero<sbyte>();
+            _Issue117_NegativeLeadingZero<sbyte>();
         }
 
         [TestMethod]
@@ -5546,6 +5563,7 @@ namespace JilTests
         public void Issue117_Short()
         {
             _Issue117_LeadingZero<short>();
+            _Issue117_NegativeLeadingZero<short>();
         }
 
         [TestMethod]
@@ -5558,6 +5576,7 @@ namespace JilTests
         public void Issue117_Int()
         {
             _Issue117_LeadingZero<int>();
+            _Issue117_NegativeLeadingZero<int>();
         }
 
         [TestMethod]
@@ -5570,6 +5589,7 @@ namespace JilTests
         public void Issue117_Long()
         {
             _Issue117_LeadingZero<long>();
+            _Issue117_NegativeLeadingZero<long>();
         }
 
 #if !DEBUG
