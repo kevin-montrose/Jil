@@ -1604,10 +1604,10 @@ namespace Jil.Deserialize
 
             var asStr = commonSb.ToString();
             if (asStr[asStr.Length - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
-            if(asStr.Length >= 2 && asStr[0] == '0')
+            if (asStr.Length >= 2 && asStr[0] == '0')
             {
                 var secondChar = asStr[1];
-                if(secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
                 {
                     throw new DeserializationException("Number cannot have leading zeros", reader, false);
                 }
@@ -1700,7 +1700,18 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
-            var result = decimal.Parse(new string(buffer, 0, idx), NumberStyles.Float, CultureInfo.InvariantCulture);
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
+            }
+
+            var asStr = new string(buffer, 0, idx);
+            var result = decimal.Parse(asStr, NumberStyles.Float, CultureInfo.InvariantCulture);
             return result;
         }
 
