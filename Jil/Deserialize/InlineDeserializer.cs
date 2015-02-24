@@ -13,8 +13,7 @@ namespace Jil.Deserialize
 {
     class InlineDeserializer<ForType>
     {
-        //public static bool UseFastFloatingPointMethods = true;
-        public static bool UseFastFloatingPointMethods = false;
+        public static bool UseFastFloatingPointMethods = true;
         public static bool UseCharArrayOverStringBuilder = true;
         public static bool UseNameAutomata = true;
         public static bool UseNameAutomataForEnums = true;

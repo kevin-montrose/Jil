@@ -5501,10 +5501,20 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void Issue117()
+        public void Issue117_Decimal()
         {
             _Issue117<decimal>();
+        }
+
+        [TestMethod]
+        public void Issue117_Float()
+        {
             _Issue117<float>();
+        }
+
+        [TestMethod]
+        public void Issue117_Double()
+        {
             _Issue117<double>();
         }
 

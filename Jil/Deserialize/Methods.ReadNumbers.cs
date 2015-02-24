@@ -1826,6 +1826,16 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                }
+            }
+
             if (eIdx < 0)
             {
                 var endIdx = idx;
