@@ -675,5 +675,27 @@ namespace JilTests
             Assert.IsTrue(reused.Any(r => r == typeof(_Inner2)));
             Assert.IsTrue(reused.Any(r => r == typeof(Dictionary<string, _Inner2>)));
         }
+
+        class _Issue119B
+        {
+            public _Issue119A A { get; set; }
+            public _Issue119B B { get; set; }
+        }
+
+        class _Issue119A
+        {
+            public _Issue119A Recurse { get; set; }
+            
+            [Jil.JilDirective(Ignore = true)]
+            public _Issue119B IgnoredRecurse { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue119()
+        {
+            var typesToPrime = Utils.FindRecursiveTypes(typeof(_Issue119A));
+            Assert.AreEqual(1, typesToPrime.Count);
+            Assert.AreEqual(typeof(_Issue119A), typesToPrime.Single());
+        }
     }
 }
