@@ -98,9 +98,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (byte)ret;
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += (uint)c;
@@ -150,9 +150,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += c;
@@ -202,9 +202,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += c;
@@ -262,9 +262,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (ushort)ret;
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += (uint)c;
@@ -330,9 +330,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += c;
@@ -430,9 +430,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (uint)ret;
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += (uint)c;
@@ -538,9 +538,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += (uint)c;
@@ -717,9 +717,9 @@ namespace Jil.Deserialize
 
             // digit #2
             c = reader.Peek();
-            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return ret;
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
             reader.Read();
             ret *= 10;
             ret += (uint)c;
