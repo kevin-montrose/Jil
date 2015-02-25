@@ -5510,6 +5510,39 @@ namespace JilTests
             }
         }
 
+        static void _Issue117_NegativeTrailingDot<T>() where T : struct
+        {
+            try
+            {
+                var x = JSON.Deserialize<T>("-1.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+
+            try
+            {
+                var x = JSON.Deserialize<T>("-12.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+
+            try
+            {
+                var x = JSON.Deserialize<T>("-123.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+        }
+
         static void _Issue117_LeadingZero<T>() where T : struct
         {
             try
@@ -5560,6 +5593,7 @@ namespace JilTests
         public void Issue117_Decimal()
         {
             _Issue117_TrailingDot<decimal>();
+            _Issue117_NegativeTrailingDot<decimal>();
             _Issue117_LeadingZero<decimal>();
             _Issue117_NegativeLeadingZero<decimal>();
         }
@@ -5568,6 +5602,7 @@ namespace JilTests
         public void Issue117_Float()
         {
             _Issue117_TrailingDot<float>();
+            _Issue117_NegativeTrailingDot<float>();
             _Issue117_LeadingZero<float>();
             _Issue117_NegativeLeadingZero<float>();
         }
@@ -5576,6 +5611,7 @@ namespace JilTests
         public void Issue117_Double()
         {
             _Issue117_TrailingDot<double>();
+            _Issue117_NegativeTrailingDot<double>();
             _Issue117_LeadingZero<double>();
             _Issue117_NegativeLeadingZero<double>();
         }
