@@ -2506,5 +2506,29 @@ namespace JilTests
                 Assert.AreEqual(456.7, (double)tc.ConvertTo(d[_DynamicTypeConverter.World], typeof(double)));
             }
         }
+
+        [TestMethod]
+        public void Issue117()
+        {
+            try
+            {
+                JSON.DeserializeDynamic("001");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("123.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+        }
     }
 }
