@@ -2527,7 +2527,7 @@ namespace JilTests
             }
             catch (DeserializationException e)
             {
-                Assert.AreEqual("Number cannot end with .", e.Message);
+                Assert.AreEqual("Expected digit", e.Message);
             }
         }
     }

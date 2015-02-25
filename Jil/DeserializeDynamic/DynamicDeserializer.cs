@@ -214,7 +214,7 @@ namespace Jil.DeserializeDynamic
             {
                 reader.Read();
                 c = reader.Read();
-                if (c < '0' && c > '9') throw new DeserializationException("Expected digit", reader, c == -1);
+                if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, c == -1);
 
                 afterDot = Methods.ReadUInt((char)c, reader, out afterDotLen);
 

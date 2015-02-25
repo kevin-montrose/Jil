@@ -374,6 +374,8 @@ namespace Jil.DeserializeDynamic
             ulong ret;
             int c;
 
+            var firstDigitZero = firstChar == '0';
+
             // char1
             ret = (ulong)(firstChar - '0');
 
@@ -382,6 +384,9 @@ namespace Jil.DeserializeDynamic
                 c = reader.Peek();
                 if (c < '0' || c > '9') return ret;
                 reader.Read();
+
+                if(firstDigitZero && i == 2 && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
+
                 ret *= 10;
                 ret += (uint)(c - '0');
             }
