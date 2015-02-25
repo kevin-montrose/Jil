@@ -385,7 +385,7 @@ namespace Jil.DeserializeDynamic
                 if (c < '0' || c > '9') return ret;
                 reader.Read();
 
-                if(firstDigitZero && i == 2 && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
+                if(firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", reader, false);
 
                 ret *= 10;
                 ret += (uint)(c - '0');
