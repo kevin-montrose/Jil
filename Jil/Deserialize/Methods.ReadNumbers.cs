@@ -143,12 +143,14 @@ namespace Jil.Deserialize
                 if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
+            var firstDigitZero = c == '0';
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
             c = reader.Peek();
+            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
             reader.Read();
@@ -193,12 +195,14 @@ namespace Jil.Deserialize
                 if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
+            var firstDigitZero = c == '0';
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
             c = reader.Peek();
+            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
             reader.Read();
@@ -319,12 +323,14 @@ namespace Jil.Deserialize
                 if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
+            var firstDigitZero = c == '0';
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += c;
 
             // digit #2
             c = reader.Peek();
+            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return (int)(ret * (negative ? -1 : 1));
             reader.Read();
@@ -525,12 +531,14 @@ namespace Jil.Deserialize
                 if (c == -1) throw new DeserializationException("Expected digit", reader, true);
             }
 
+            var firstDigitZero = c == '0';
             c = c - '0';
             if (c < 0 || c > 9) throw new DeserializationException("Expected digit", reader, false);
             ret += (uint)c;
 
             // digit #2
             c = reader.Peek();
+            if (firstDigitZero && c == '0') throw new DeserializationException("Number cannot have leading zeros", reader, false);
             c = c - '0';
             if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
             reader.Read();
