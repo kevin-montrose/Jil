@@ -5481,6 +5481,26 @@ namespace JilTests
         {
             try
             {
+                var x = JSON.Deserialize<T>("1.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+
+            try
+            {
+                var x = JSON.Deserialize<T>("12.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot end with .", e.Message);
+            }
+
+            try
+            {
                 var x = JSON.Deserialize<T>("123.");
                 Assert.Fail("Shouldn't be possible");
             }
@@ -5494,6 +5514,16 @@ namespace JilTests
         {
             try
             {
+                var x = JSON.Deserialize<T>("01");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
+            try
+            {
                 var x = JSON.Deserialize<T>("001");
                 Assert.Fail("Shouldn't be possible");
             }
@@ -5505,6 +5535,16 @@ namespace JilTests
 
         static void _Issue117_NegativeLeadingZero<T>() where T : struct
         {
+            try
+            {
+                var x = JSON.Deserialize<T>("-01");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
             try
             {
                 var x = JSON.Deserialize<T>("-001");

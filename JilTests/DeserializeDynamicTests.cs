@@ -2512,6 +2512,16 @@ namespace JilTests
         {
             try
             {
+                JSON.DeserializeDynamic("01");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
+            try
+            {
                 JSON.DeserializeDynamic("001");
                 Assert.Fail("Shouldn't be possible");
             }
@@ -2522,7 +2532,77 @@ namespace JilTests
 
             try
             {
+                JSON.DeserializeDynamic("-01");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("-001");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Number cannot have leading zeros", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("1.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected digit", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("12.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected digit", e.Message);
+            }
+
+            try
+            {
                 JSON.DeserializeDynamic("123.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected digit", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("-1.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected digit", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("-12.");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected digit", e.Message);
+            }
+
+            try
+            {
+                JSON.DeserializeDynamic("-123.");
                 Assert.Fail("Shouldn't be possible");
             }
             catch (DeserializationException e)
