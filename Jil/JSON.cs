@@ -164,6 +164,9 @@ namespace Jil
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
                     return NewtonsoftStyleToString(data, options);
 
+                case DateTimeFormat.RFC1123:
+                    return RFC1123ToString(data, options);
+
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
             }
         }

@@ -214,7 +214,7 @@ namespace Jil
         {
             return
                 string.Format(
-                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, AllowHashFunction = {5}, UseUnspecifiedDateTimeKindBehavior = {6} }}",
+                    "{{ ShouldPrettyPrint = {0}, ShouldExcludeNulls = {1}, UseDateTimeFormat = {2}, IsJSONP = {3}, ShouldIncludeInherited = {4}, UseUnspecifiedDateTimeKindBehavior = {5} }}",
                     ShouldPrettyPrint,
                     ShouldExcludeNulls,
                     UseDateTimeFormat,

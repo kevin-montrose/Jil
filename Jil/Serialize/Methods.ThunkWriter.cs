@@ -1461,7 +1461,77 @@ namespace Jil.Serialize
         static readonly MethodInfo CustomRFC1123_ThunkWriter = typeof(Methods).GetMethod("_CustomRFC1123_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
         static void _CustomRFC1123_ThunkWriter(ref ThunkWriter writer, DateTime dt)
         {
-            throw new NotImplementedException();
+            writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
+
+            // compiles as a switch
+            switch (dt.DayOfWeek)
+            {
+                case DayOfWeek.Sunday: writer.Write("Sun, "); break;
+                case DayOfWeek.Monday: writer.Write("Mon, "); break;
+                case DayOfWeek.Tuesday: writer.Write("Tue, "); break;
+                case DayOfWeek.Wednesday: writer.Write("Wed, "); break;
+                case DayOfWeek.Thursday: writer.Write("Thu, "); break;
+                case DayOfWeek.Friday: writer.Write("Fri, "); break;
+                case DayOfWeek.Saturday: writer.Write("Sat, "); break;
+            }
+
+            {
+                var day = DigitPairs[dt.Day];
+                writer.Write(day.First);
+                writer.Write(day.Second);
+                writer.WriteFormattingConstant(ConstantString_Formatting.Space);
+            }
+
+            // compiles as a switch
+            switch (dt.Month)
+            {
+                case 1: writer.Write("Jan "); break;
+                case 2: writer.Write("Feb "); break;
+                case 3: writer.Write("Mar "); break;
+                case 4: writer.Write("Apr "); break;
+                case 5: writer.Write("May "); break;
+                case 6: writer.Write("Jun "); break;
+                case 7: writer.Write("Jul "); break;
+                case 8: writer.Write("Aug "); break;
+                case 9: writer.Write("Sep "); break;
+                case 10: writer.Write("Oct "); break;
+                case 11: writer.Write("Nov "); break;
+                case 12: writer.Write("Dec "); break;
+            }
+
+            {
+                var year = dt.Year;
+                var firstHalfYear = DigitPairs[year / 100];
+                writer.Write(firstHalfYear.First);
+                writer.Write(firstHalfYear.Second);
+
+                var secondHalfYear = DigitPairs[year % 100];
+                writer.Write(secondHalfYear.First);
+                writer.Write(secondHalfYear.Second);
+                writer.WriteFormattingConstant(ConstantString_Formatting.Space);
+            }
+
+            {
+                var hour = DigitPairs[dt.Hour];
+                writer.Write(hour.First);
+                writer.Write(hour.Second);
+                writer.WriteFormattingConstant(ConstantString_Formatting.Colon);
+            }
+
+            {
+                var minute = DigitPairs[dt.Minute];
+                writer.Write(minute.First);
+                writer.Write(minute.Second);
+                writer.WriteFormattingConstant(ConstantString_Formatting.Colon);
+            }
+
+            {
+                var second = DigitPairs[dt.Second];
+                writer.Write(second.First);
+                writer.Write(second.Second);
+            }
+
+            writer.Write(" GMT\"");
         }
     }
 }
