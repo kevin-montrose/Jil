@@ -9,6 +9,14 @@ namespace Jil.Serialize
 {
     static partial class Methods
     {
+        public static MethodInfo GetCustomRFC1123(bool needThunkWriter)
+        {
+            return
+                !needThunkWriter ?
+                    CustomRFC1123 :
+                    CustomRFC1123_ThunkWriter;
+        }
+
         public static MethodInfo GetCustomISO8601ToString(bool needThunkWriter)
         {
             return

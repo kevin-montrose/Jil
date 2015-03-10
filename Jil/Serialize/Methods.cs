@@ -1568,5 +1568,11 @@ namespace Jil.Serialize
 
             writer.Write('"');
         }
+
+        static readonly MethodInfo CustomRFC1123 = typeof(Methods).GetMethod("_CustomRFC1123", BindingFlags.NonPublic | BindingFlags.Static);
+        static void _CustomRFC1123(TextWriter writer, DateTime dt)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

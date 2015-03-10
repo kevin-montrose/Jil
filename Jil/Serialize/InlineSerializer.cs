@@ -25,6 +25,7 @@ namespace Jil.Serialize
         public static bool AllocationlessDictionaries = true;
         public static bool PropagateConstants = true;
         public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseCustomRFC1123DateTimeFormatting = true;
 
         static string CharBuffer = "char_buffer";
         internal const int CharBufferSize = 36;
@@ -796,16 +797,22 @@ namespace Jil.Serialize
             //  - DateTime
             //  - TextWriter 
 
-            // TODO: replace shitty terrible implementation with something that doesn't suck
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            if (!UseCustomRFC1123DateTimeFormatting)
             {
-                Emit.StoreLocal(loc);               // TextWriter
-                Emit.LoadLocalAddress(loc);         // DateTime* TextWriter
+                using (var loc = Emit.DeclareLocal<DateTime>())
+                {
+                    Emit.StoreLocal(loc);               // TextWriter
+                    Emit.LoadLocalAddress(loc);         // DateTime* TextWriter
+                }
+
+                Emit.LoadConstant("R");                                     // string DateTime* TextWriter
+                Emit.Call(DateTime_ToString);                               // string TextWriter
+                WritePrimitive(typeof(string), quotesNeedHandling: true);   // --empty--
+
+                return;
             }
 
-            Emit.LoadConstant("R");                                     // string DateTime* TextWriter
-            Emit.Call(DateTime_ToString);                               // string TextWriter
-            WritePrimitive(typeof(string), quotesNeedHandling: true);   // --empty--
+            Emit.Call(Methods.GetCustomRFC1123(BuildingToString));  // --empty--
         }
 
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;

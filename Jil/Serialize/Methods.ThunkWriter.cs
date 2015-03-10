@@ -1457,5 +1457,11 @@ namespace Jil.Serialize
 
             writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
         }
+
+        static readonly MethodInfo CustomRFC1123_ThunkWriter = typeof(Methods).GetMethod("_CustomRFC1123_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
+        static void _CustomRFC1123_ThunkWriter(ref ThunkWriter writer, DateTime dt)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
