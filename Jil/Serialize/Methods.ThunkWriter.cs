@@ -1475,6 +1475,8 @@ namespace Jil.Serialize
             }
 
             // compiles as a switch
+            // not converted to a ConstantString_* enum because you can't pack these such that
+            //   they fit in a cache line
             switch (dt.Month)
             {
                 case 1: writer.Write("Jan "); break;
