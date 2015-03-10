@@ -123,6 +123,7 @@ namespace Jil.Serialize
         static MethodInfo ThunkWriter_WriteValueConstant = typeof(ThunkWriter).GetMethod("WriteValueConstant", new[] { typeof(ConstantString_Value) });
         static MethodInfo ThunkWriter_Write000EscapeConstant = typeof(ThunkWriter).GetMethod("Write000EscapeConstant", new[] { typeof(ConstantString_000Escape) });
         static MethodInfo ThunkWriter_Write001EscapeConstant = typeof(ThunkWriter).GetMethod("Write001EscapeConstant", new[] { typeof(ConstantString_001Escape) });
+        static MethodInfo ThunkWriter_WriteDayOfWeek = typeof(ThunkWriter).GetMethod("WriteDayOfWeek", new[] { typeof(ConstantString_DaysOfWeek) });
         void WriteString(string str)
         {
             if (BuildingToString)
@@ -178,8 +179,17 @@ namespace Jil.Serialize
                                     }
                                     else
                                     {
-                                        Emit.LoadConstant(str);                     // ThunkWriter* string
-                                        Emit.Call(ThunkWriter_WriteString);         // --empty--
+                                        ConstantString_DaysOfWeek dayOfWeek;
+                                        if (ThunkWriter.IsConstantDaysOfWeek(str, out dayOfWeek))
+                                        {
+                                            Emit.LoadConstant((byte)dayOfWeek);         // ThunkWriter* byte
+                                            Emit.Call(ThunkWriter_WriteDayOfWeek);      // --empty--
+                                        }
+                                        else
+                                        {
+                                            Emit.LoadConstant(str);                     // ThunkWriter* string
+                                            Emit.Call(ThunkWriter_WriteString);         // --empty--
+                                        }
                                     }
                                 }
                             }

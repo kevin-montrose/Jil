@@ -115,6 +115,17 @@ namespace Jil.Serialize
         EscapeSequence_001F = 15
     }
 
+    enum ConstantString_DaysOfWeek : byte
+    {
+        Sunday = 0,
+        Monday = 3,
+        Tuesday = 6,
+        Wednesday = 9,
+        Thursday = 12,
+        Friday = 15,
+        Saturday = 18
+    }
+
     static class ThunkWriterCharArrays
     {
         public static readonly char[] Escape000Prefix = new char[] { '\\', 'u', '0', '0', '0' };
@@ -126,6 +137,8 @@ namespace Jil.Serialize
         public static readonly char[] ConstantString_Value_Chars = new char[] { 'n', 'u', 'l', 'l', '"', '\\', '/', 'D', 'a', 't', 'e', '(', ')', '\\', '/', '"', 't', 'r', 'u', 'e', 'f', 'a', 'l', 's', 'e' };
         public static readonly char[] ConstantString_000Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', 'B', 'E', 'F' };
         public static readonly char[] ConstantString_001Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+        public static readonly char[] ConstantString_DaysOfWeek = new char[] { 'S', 'u', 'n', 'M', 'o', 'n', 'T', 'u', 'e', 'W', 'e', 'd', 'T', 'h', 'u', 'F', 'r', 'i', 'S', 'a', 't' };
     }
 
     #endregion
@@ -248,6 +261,21 @@ namespace Jil.Serialize
             }
         }
 
+        public static bool IsConstantDaysOfWeek(string str, out ConstantString_DaysOfWeek c)
+        {
+            switch (str)
+            {
+                case "Sun": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Mon": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Tue": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Wed": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Thu": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Fri": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Sat": c = ConstantString_DaysOfWeek.Sunday; return true;
+                default: c = 0; return false;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Init()
         {
@@ -340,6 +368,13 @@ namespace Jil.Serialize
 
             Builder.Append(ThunkWriterCharArrays.Escape001Prefix);
             Builder.Append(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteDayOfWeek(ConstantString_DaysOfWeek str)
+        {
+            var ix = (byte)str;
+            Builder.Append(ThunkWriterCharArrays.ConstantString_DaysOfWeek, ix, 3);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -1463,17 +1463,9 @@ namespace Jil.Serialize
         {
             writer.WriteFormattingConstant(ConstantString_Formatting.Quote);
 
-            // compiles as a switch
-            switch (dt.DayOfWeek)
-            {
-                case DayOfWeek.Sunday: writer.Write("Sun, "); break;
-                case DayOfWeek.Monday: writer.Write("Mon, "); break;
-                case DayOfWeek.Tuesday: writer.Write("Tue, "); break;
-                case DayOfWeek.Wednesday: writer.Write("Wed, "); break;
-                case DayOfWeek.Thursday: writer.Write("Thu, "); break;
-                case DayOfWeek.Friday: writer.Write("Fri, "); break;
-                case DayOfWeek.Saturday: writer.Write("Sat, "); break;
-            }
+            var dayOfWeek = (ConstantString_DaysOfWeek)(((byte)dt.DayOfWeek) * 3);
+            writer.WriteDayOfWeek(dayOfWeek);
+            writer.WriteFormattingConstant(ConstantString_Formatting.CommaSpace);
 
             {
                 var day = DigitPairs[dt.Day];
