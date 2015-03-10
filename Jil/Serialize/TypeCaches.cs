@@ -716,6 +716,326 @@ namespace Jil.Serialize
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
     }
 
+    class RFC1123 : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123Utc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123JSONP : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123JSONPUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONP : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintJSONPInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintJSONPInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123ExcludeNullsInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123ExcludeNullsInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123JSONPInherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123JSONPInheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123Inherited : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123InheritedUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123ExcludeNullsJSONP : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintJSONP : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintJSONPUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrint : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123ExcludeNulls : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123ExcludeNullsUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNulls : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsUtc : ISerializeOptions
+    {
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+    }
+
     class Milliseconds : ISerializeOptions
     {
         public bool PrettyPrint { get { return false; } }

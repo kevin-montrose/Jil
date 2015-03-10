@@ -32,6 +32,7 @@ namespace Jil.SerializeDynamic
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: return GetMillisecondsTypeCache(opts);
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: return GetNewtonsoftTypeCache(opts);
                 case DateTimeFormat.SecondsSinceUnixEpoch: return GetSecondsTypeCache(opts);
+                case DateTimeFormat.RFC1123: return GetRFC1123TypeCache(opts);
                 default: throw new Exception("Unexpected DateTimeFormat: " + opts.UseDateTimeFormat);
             }
         }
@@ -154,6 +155,66 @@ namespace Jil.SerializeDynamic
             }
 
             return typeof(Serialize.Seconds);
+        }
+
+        static Type GetRFC1123TypeCache(Options opts)
+        {
+            if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintExcludeNullsJSONPInherited);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintExcludeNullsJSONP);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintExcludeNullsInherited);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintJSONPInherited);
+            }
+
+            if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123ExcludeNullsJSONPInherited);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintExcludeNulls);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.IsJSONP)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintJSONP);
+            }
+
+            if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123PrettyPrintInherited);
+            }
+
+            if (opts.ShouldExcludeNulls && opts.IsJSONP)
+            {
+                return typeof(Serialize.RFC1123ExcludeNullsJSONP);
+            }
+
+            if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123ExcludeNullsInherited);
+            }
+
+            if (opts.IsJSONP && opts.ShouldIncludeInherited)
+            {
+                return typeof(Serialize.RFC1123JSONPInherited);
+            }
+
+            return typeof(Serialize.RFC1123);
         }
 
         static Type GetMillisecondsTypeCache(Options opts)

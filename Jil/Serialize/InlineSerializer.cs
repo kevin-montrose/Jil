@@ -789,6 +789,25 @@ namespace Jil.Serialize
             Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));  // --empty--
         }
 
+        static readonly MethodInfo DateTime_ToString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
+        void WriteRFC1123StyleDateTime()
+        {
+            // top of stack is
+            //  - DateTime
+            //  - TextWriter 
+
+            // TODO: replace shitty terrible implementation with something that doesn't suck
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                Emit.StoreLocal(loc);               // TextWriter
+                Emit.LoadLocalAddress(loc);         // DateTime* TextWriter
+            }
+
+            Emit.LoadConstant("R");                                     // string DateTime* TextWriter
+            Emit.Call(DateTime_ToString);                               // string TextWriter
+            WritePrimitive(typeof(string), quotesNeedHandling: true);   // --empty--
+        }
+
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
         static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetMethod;
         static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetMethod;
@@ -802,7 +821,8 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.RFC1123)
             {
                 // No room for an offset in these forms, so just re-use DateTime logic
                 // One wrinkle, the Newtonsoft-style *can* include an offset... but the seconds
@@ -924,31 +944,26 @@ namespace Jil.Serialize
                 Emit.Call(toUniversalTime);                         // TextWriter DateTime
             }
 
-            if (DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+            switch (DateFormat)
             {
-                WriteNewtonsoftStyleDateTime();
-                return;
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                    WriteNewtonsoftStyleDateTime();
+                    return;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    WriteMillisecondsStyleDateTime();
+                    return;
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    WriteSecondsStyleDateTime();
+                    return;
+                case DateTimeFormat.ISO8601:
+                    WriteISO8601StyleDateTime();
+                    return;
+                case DateTimeFormat.RFC1123:
+                    WriteRFC1123StyleDateTime();
+                    return;
+                default:
+                    throw new ConstructionException("Unexpected DateFormat: " + DateFormat);
             }
-
-            if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch)
-            {
-                WriteMillisecondsStyleDateTime();
-                return;
-            }
-
-            if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch)
-            {
-                WriteSecondsStyleDateTime();
-                return;
-            }
-
-            if (DateFormat == DateTimeFormat.ISO8601)
-            {
-                WriteISO8601StyleDateTime();
-                return;
-            }
-
-            throw new ConstructionException("Unexpected DateFormat: " + DateFormat);
         }
 
         void CallWriteInt()

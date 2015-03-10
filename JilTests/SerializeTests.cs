@@ -1570,6 +1570,18 @@ namespace JilTests
                 var res = str.ToString();
                 Assert.AreEqual("\"1980-01-01T00:00:00Z\"", res);
             }
+
+            using(var str = new StringWriter())
+            {
+                JSON.Serialize(
+                    new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+                    str,
+                    Options.RFC1123
+                );
+
+                var res = str.ToString();
+                Assert.AreEqual("\"Tue, 01 Jan 1980 00:00:00 GMT\"", res);
+            }
         }
 
         [TestMethod]

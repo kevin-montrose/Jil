@@ -142,6 +142,39 @@ namespace Jil
         public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
         public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+
+        public static readonly Options RFC1123 = new Options(dateFormat: DateTimeFormat.RFC1123);
+        public static readonly Options RFC1123PrettyPrint = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true);
+        public static readonly Options RFC1123ExcludeNulls = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true);
+        public static readonly Options RFC1123JSONP = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true);
+        public static readonly Options RFC1123IncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, includeInherited: true);
+        public static readonly Options RFC1123PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true);
+        public static readonly Options RFC1123PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, jsonp: true);
+        public static readonly Options RFC1123PrettyPrintIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, includeInherited: true);
+        public static readonly Options RFC1123ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, jsonp: true);
+        public static readonly Options RFC1123ExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, includeInherited: true);
+        public static readonly Options RFC1123JSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true, includeInherited: true);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, includeInherited: true);
+        public static readonly Options RFC1123PrettyPrintJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true, includeInherited: true);
+        public static readonly Options RFC1123ExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, jsonp: true, includeInherited: true);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true);
+        public static readonly Options RFC1123Utc = new Options(dateFormat: DateTimeFormat.RFC1123, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123ExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123JSONPUtc = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123IncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintJSONPUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123ExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123ExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123JSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123hPrettyPrintExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123ExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options RFC1123PrettyPrintExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.RFC1123, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
 #pragma warning restore 1591
 
         internal bool ShouldPrettyPrint { get; private set; }
@@ -196,21 +229,30 @@ namespace Jil
         /// </summary>
         public override int GetHashCode()
         {
+            const int isoMask = 0x20;
+            const int milliMask = isoMask * 2;
+            const int newtonMask = milliMask * 2;
+            const int secondsMask = newtonMask * 2;
+            const int rfc1123Mask = secondsMask * 2;
+            const int localMask = rfc1123Mask * 2;
+            const int utcMask = localMask * 2;
+
             int dateTimeMask;
             switch(UseDateTimeFormat)
             {
-                case DateTimeFormat.ISO8601: dateTimeMask = 0x20; break;
-                case DateTimeFormat.MillisecondsSinceUnixEpoch: dateTimeMask = 0x40; break;
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: dateTimeMask = 0x80; break;
-                case DateTimeFormat.SecondsSinceUnixEpoch: dateTimeMask = 0x100; break;
+                case DateTimeFormat.ISO8601: dateTimeMask = isoMask; break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch: dateTimeMask = milliMask; break;
+                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: dateTimeMask = newtonMask; break;
+                case DateTimeFormat.SecondsSinceUnixEpoch: dateTimeMask = secondsMask; break;
+                case DateTimeFormat.RFC1123: dateTimeMask = rfc1123Mask; break;
                 default: throw new Exception("Unexpected DateTimeFormat "+UseDateTimeFormat);
             }
 
             int unspecifiedMask;
             switch(UseUnspecifiedDateTimeKindBehavior)
             {
-                case UnspecifiedDateTimeKindBehavior.IsLocal: unspecifiedMask = 0x200; break;
-                case UnspecifiedDateTimeKindBehavior.IsUTC: unspecifiedMask = 0x400; break;
+                case UnspecifiedDateTimeKindBehavior.IsLocal: unspecifiedMask = localMask; break;
+                case UnspecifiedDateTimeKindBehavior.IsUTC: unspecifiedMask = utcMask; break;
                 default: throw new Exception("Unexpected UnspecifiedDateTimeKindBehavior " + UseUnspecifiedDateTimeKindBehavior);
             }
 

@@ -126,6 +126,10 @@ namespace Jil
                     NewtonsoftStyle(data, output, options);
                     return;
 
+                case DateTimeFormat.RFC1123:
+                    RFC1123(data, output, options);
+                    return;
+
                 default: throw new InvalidOperationException("Unexpected Options: " + options);
             }
         }
@@ -1227,6 +1231,358 @@ namespace Jil
             }
 
             return WriteToString(TypeCache<SecondsUtc, T>.GetToString(), data);
+        }
+
+        static void RFC1123<T>(T data, TextWriter output, Options options)
+        {
+            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
+            {
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+                {
+                    TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123PrettyPrintJSONPInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123ExcludeNullsInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.IsJSONP)
+                {
+                    TypeCache<RFC1123ExcludeNullsJSONP, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldPrettyPrint && options.IsJSONP)
+                {
+                    TypeCache<RFC1123PrettyPrintJSONP, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+                {
+                    TypeCache<RFC1123PrettyPrintExcludeNulls, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123PrettyPrintInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123JSONPInherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldExcludeNulls)
+                {
+                    TypeCache<RFC1123ExcludeNulls, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldPrettyPrint)
+                {
+                    TypeCache<RFC1123PrettyPrint, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.IsJSONP)
+                {
+                    TypeCache<RFC1123JSONP, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                if (options.ShouldIncludeInherited)
+                {
+                    TypeCache<RFC1123Inherited, T>.Get()(output, data, 0);
+                    return;
+                }
+
+                TypeCache<RFC1123, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                TypeCache<RFC1123PrettyPrintJSONPUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123PrettyPrintInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123JSONPInheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                TypeCache<RFC1123ExcludeNullsUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                TypeCache<RFC1123PrettyPrintUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.IsJSONP)
+            {
+                TypeCache<RFC1123JSONPUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                TypeCache<RFC1123InheritedUtc, T>.Get()(output, data, 0);
+                return;
+            }
+
+            TypeCache<RFC1123Utc, T>.Get()(output, data, 0);
+            return;
+        }
+
+        static string RFC1123ToString<T>(T data, Options options)
+        {
+            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
+            {
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintJSONPInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123ExcludeNullsInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.IsJSONP)
+                {
+                    return WriteToString(TypeCache<RFC1123ExcludeNullsJSONP, T>.GetToString(), data);
+                }
+
+                if (options.ShouldPrettyPrint && options.IsJSONP)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintJSONP, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNulls, T>.GetToString(), data);
+                }
+
+                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrintInherited, T>.GetToString(), data);
+                }
+
+                if (options.IsJSONP && options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123JSONPInherited, T>.GetToString(), data);
+                }
+
+                if (options.ShouldExcludeNulls)
+                {
+                    return WriteToString(TypeCache<RFC1123ExcludeNulls, T>.GetToString(), data);
+                }
+
+                if (options.ShouldPrettyPrint)
+                {
+                    return WriteToString(TypeCache<RFC1123PrettyPrint, T>.GetToString(), data);
+                }
+
+                if (options.IsJSONP)
+                {
+                    return WriteToString(TypeCache<RFC1123JSONP, T>.GetToString(), data);
+                }
+
+                if (options.ShouldIncludeInherited)
+                {
+                    return WriteToString(TypeCache<RFC1123Inherited, T>.GetToString(), data);
+                }
+
+                return WriteToString(TypeCache<RFC1123, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.IsJSONP)
+            {
+                return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldPrettyPrint && options.IsJSONP)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintJSONPUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.IsJSONP && options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123JSONPInheritedUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldExcludeNulls)
+            {
+                return WriteToString(TypeCache<RFC1123ExcludeNullsUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldPrettyPrint)
+            {
+                return WriteToString(TypeCache<RFC1123PrettyPrintUtc, T>.GetToString(), data);
+            }
+
+            if (options.IsJSONP)
+            {
+                return WriteToString(TypeCache<RFC1123JSONPUtc, T>.GetToString(), data);
+            }
+
+            if (options.ShouldIncludeInherited)
+            {
+                return WriteToString(TypeCache<RFC1123InheritedUtc, T>.GetToString(), data);
+            }
+
+            return WriteToString(TypeCache<RFC1123Utc, T>.GetToString(), data);
         }
 
         static void ISO8601<T>(T data, TextWriter output, Options options)

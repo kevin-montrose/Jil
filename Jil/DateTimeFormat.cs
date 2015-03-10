@@ -51,6 +51,19 @@ namespace Jil
         /// Examples:
         ///     P123DT11H30M2.3S
         /// </summary>
-        ISO8601 = 3
+        ISO8601 = 3,
+        /// <summary>
+        /// DateTimes will be formatted as "ddd, dd MMM yyyy HH:mm:ss GMT" where
+        /// ddd is the abbreviation of a day, dd is the day (starting at 01), MMM is the abbreviation of a month,
+        /// yyyy is the year, HH is the hour (starting at 00, continuing to 24), mm is the minute (start at 00),
+        /// and ss is the second (starting at 00), and GMT is a literal indicating the timezone (always GMT).
+        /// 
+        /// Examples:
+        ///     Thu, 10 Apr 2008 13:30:00 GMT
+        ///     Tue, 10 Mar 2015 00:14:34 GMT
+        ///     
+        /// TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+        /// </summary>
+        RFC1123 = 4
     }
 }
