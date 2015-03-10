@@ -1422,6 +1422,68 @@ namespace JilTests
 
             Assert.IsTrue(typeConverterTime < trialCastTime, "typeConverterTime = " + typeConverterTime + ", trialCastTime = " + trialCastTime);
         }
+
+        public class _CustomRFC1123DateFormatting
+        {
+            public List<DateTime> Dates;
+        }
+
+        [TestMethod]
+        public void UseCustomRFC1123DateFormatting()
+        {
+            Action<TextWriter, _CustomRFC1123DateFormatting, int> fast;
+            Action<TextWriter, _CustomRFC1123DateFormatting, int> normal;
+
+            try
+            {
+                {
+                    InlineSerializer<_CustomRFC1123DateFormatting>.UseCustomRFC1123DateTimeFormatting = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    fast = InlineSerializerHelper.Build<_CustomRFC1123DateFormatting>(typeof(Jil.Serialize.RFC1123), dateFormat: Jil.DateTimeFormat.RFC1123, pretty: false, excludeNulls: false, jsonp: false, includeInherited: false, dateTimeBehavior: UnspecifiedDateTimeKindBehavior.IsLocal, exceptionDuringBuild: out ignored);
+                }
+
+                {
+                    InlineSerializer<_CustomRFC1123DateFormatting>.UseCustomRFC1123DateTimeFormatting = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineSerializerHelper.Build<_CustomRFC1123DateFormatting>(typeof(Jil.Serialize.RFC1123), dateFormat: Jil.DateTimeFormat.RFC1123, pretty: false, excludeNulls: false, jsonp: false, includeInherited: false, dateTimeBehavior: UnspecifiedDateTimeKindBehavior.IsLocal, exceptionDuringBuild: out ignored);
+                }
+            }
+            finally
+            {
+                InlineSerializer<_CustomRFC1123DateFormatting>.UseCustomRFC1123DateTimeFormatting = true;
+            }
+
+            var rand = new Random(270129617);
+
+            var toSerialize = new List<_CustomRFC1123DateFormatting>();
+            for (var i = 0; i < 1000; i++)
+            {
+                var numDates = new DateTime[5 + rand.Next(10)];
+
+                for (var j = 0; j < numDates.Length; j++)
+                {
+                    numDates[j] = _RandDateTime(rand);
+                }
+
+                toSerialize.Add(
+                    new _CustomRFC1123DateFormatting
+                    {
+                        Dates = numDates.ToList()
+                    }
+                );
+            }
+
+            toSerialize = toSerialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

@@ -1616,6 +1616,37 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void RFC1123DateTimes()
+        {
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var rand = new Random(15030661);
+
+            for (var i = 0; i < 10000; i++)
+            {
+                var rndDt = epoch;
+                switch (rand.Next(6))
+                {
+                    case 0: rndDt += TimeSpan.FromDays(rand.Next(ushort.MaxValue)); break;
+                    case 1: rndDt += TimeSpan.FromHours(rand.Next(ushort.MaxValue)); break;
+                    case 2: rndDt += TimeSpan.FromSeconds(rand.Next()); break;
+                    case 3: rndDt -= TimeSpan.FromDays(rand.Next(ushort.MaxValue)); break;
+                    case 4: rndDt -= TimeSpan.FromHours(rand.Next(ushort.MaxValue)); break;
+                    case 5: rndDt -= TimeSpan.FromSeconds(rand.Next()); break;
+                }
+
+                var expected = "\"" + rndDt.ToString("R") + "\"";
+                string actual;
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(rndDt, str, Options.RFC1123);
+                    actual = str.ToString();
+                }
+
+                Assert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
         public void AllOptions()
         {
             using (var str = new StringWriter())
