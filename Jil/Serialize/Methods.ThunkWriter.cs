@@ -1525,7 +1525,7 @@ namespace Jil.Serialize
                 writer.Write(second.Second);
             }
 
-            writer.Write(" GMT\"");
+            writer.WriteValueConstant(ConstantString_Value.SpaceGMTQuote);
         }
     }
 }

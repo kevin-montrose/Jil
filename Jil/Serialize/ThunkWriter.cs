@@ -77,7 +77,8 @@ namespace Jil.Serialize
         Date = (4 << 8) | 8,
         CloseDate = (12 << 8) | 4,
         True = (16 << 8) | 4,
-        False = (20 << 8) | 5
+        False = (20 << 8) | 5,
+        SpaceGMTQuote = (25 << 8) | 5
     }
 
     enum ConstantString_000Escape : byte
@@ -134,7 +135,7 @@ namespace Jil.Serialize
         public static readonly char[] ConstantString_Common_Chars = new char[] { '\\', '\\', '\\', 'u', '2', '0', '2', '8', '\\', 'u', '2', '0', '2', '9', '\\', 'b', '\\', 't', '\\', 'n', '\\', 'f', '\\', 'r' };
         public static readonly char[] ConstantString_Formatting_Chars = new char[] { '\n', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '"', ':', ' ', '\\', '"', ',', ' ', '{', '}', '[', ']' };
         public static readonly char[] ConstantString_Min_Chars = new char[] { '-', '2', '1', '4', '7', '4', '8', '3', '6', '4', '8', '-', '9', '2', '2', '3', '3', '7', '2', '0', '3', '6', '8', '5', '4', '7', '7', '5', '8', '0', '8' };
-        public static readonly char[] ConstantString_Value_Chars = new char[] { 'n', 'u', 'l', 'l', '"', '\\', '/', 'D', 'a', 't', 'e', '(', ')', '\\', '/', '"', 't', 'r', 'u', 'e', 'f', 'a', 'l', 's', 'e' };
+        public static readonly char[] ConstantString_Value_Chars = new char[] { 'n', 'u', 'l', 'l', '"', '\\', '/', 'D', 'a', 't', 'e', '(', ')', '\\', '/', '"', 't', 'r', 'u', 'e', 'f', 'a', 'l', 's', 'e', ' ', 'G', 'M', 'T', '"' };
         public static readonly char[] ConstantString_000Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', 'B', 'E', 'F' };
         public static readonly char[] ConstantString_001Escape_Chars = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
@@ -214,6 +215,7 @@ namespace Jil.Serialize
                 case ")\\/\"": c = ConstantString_Value.CloseDate; return true;
                 case "true": c = ConstantString_Value.True; return true;
                 case "false": c = ConstantString_Value.False; return true;
+                case " GMT\"": c = ConstantString_Value.SpaceGMTQuote; return true;
                 default: c = 0; return false;
             }
         }
