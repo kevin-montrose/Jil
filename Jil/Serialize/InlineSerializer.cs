@@ -922,6 +922,8 @@ namespace Jil.Serialize
                 case DateTimeFormat.ISO8601: 
                     Emit.Call(Methods.GetWriteTimeSpanISO8601(BuildingToString));       // --empty--
                     return;
+                
+                case DateTimeFormat.RFC1123:
                 case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
                     Emit.Call(Methods.GetWriteTimeSpanNewtonsoft(BuildingToString));    // --empty--
                     return;
