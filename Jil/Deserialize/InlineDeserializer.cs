@@ -20,6 +20,7 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataForEnums = true;
         public static bool UseNameAutomataSwitches = true;
         public static bool UseNameAutomataBinarySearch = true;
+        public static bool UseFastRFC1123Method = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -735,32 +736,38 @@ namespace Jil.Deserialize
         static readonly MethodInfo CultureInfo_InvariantCulture = typeof(CultureInfo).GetProperty("InvariantCulture").GetMethod;
         void ReadRFC1123DateTime()
         {
-            // a terrible, no good, very slow implementation
-            // TODO: make this actually fast
-            var universal = (int)DateTimeStyles.AdjustToUniversal;
-
-            ReadPrimitive(typeof(string));              // string
-            Emit.LoadConstant("R");                     // string string
-            Emit.Call(CultureInfo_InvariantCulture);    // string string CultureInfo
-            Emit.LoadConstant(universal);               // string string CultureInfo int
-
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            if (!UseFastRFC1123Method)
             {
-                var success = Emit.DefineLabel();
+                var universal = (int)DateTimeStyles.AdjustToUniversal;
 
-                Emit.LoadLocalAddress(loc);             // string string CultureInfo int DateTime&
-                Emit.Call(DateTime_TryParseExact);      // bool
-                Emit.BranchIfTrue(success);             // --empty--
+                ReadPrimitive(typeof(string));              // string
+                Emit.LoadConstant("R");                     // string string
+                Emit.Call(CultureInfo_InvariantCulture);    // string string CultureInfo
+                Emit.LoadConstant(universal);               // string string CultureInfo int
 
-                Emit.LoadConstant("Couldn't parse RFC1123 DateTime");                   // string
-                Emit.LoadArgument(0);                                                   // string TextReader
-                Emit.LoadConstant(false);                                               // string TextReader bool
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
-                Emit.Throw();
+                using (var loc = Emit.DeclareLocal<DateTime>())
+                {
+                    var success = Emit.DefineLabel();
 
-                Emit.MarkLabel(success);    // --empty--
-                Emit.LoadLocal(loc);        // DateTime
+                    Emit.LoadLocalAddress(loc);             // string string CultureInfo int DateTime&
+                    Emit.Call(DateTime_TryParseExact);      // bool
+                    Emit.BranchIfTrue(success);             // --empty--
+
+                    Emit.LoadConstant("Couldn't parse RFC1123 DateTime");                   // string
+                    Emit.LoadArgument(0);                                                   // string TextReader
+                    Emit.LoadConstant(false);                                               // string TextReader bool
+                    Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+                    Emit.Throw();
+
+                    Emit.MarkLabel(success);    // --empty--
+                    Emit.LoadLocal(loc);        // DateTime
+                }
             }
+
+            ExpectQuote();                      // --empty--
+            Emit.LoadArgument(0);               // TextReader
+            Emit.Call(Methods.ReadRFC1123Date); // DateTime
+            ExpectQuote();                      // DateTime
         }
 
         void ReadPrimitive(Type primitiveType)
