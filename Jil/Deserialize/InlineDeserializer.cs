@@ -8,6 +8,7 @@ using Jil.Common;
 using Sigil.NonGeneric;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Globalization;
 
 namespace Jil.Deserialize
 {
@@ -653,6 +654,7 @@ namespace Jil.Deserialize
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsDateTime(); break;
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsDateTime(); break;
                 case DateTimeFormat.ISO8601: ReadISO8601DateTime(); break;
+                case DateTimeFormat.RFC1123: ReadRFC1123DateTime(); break;
                 default: throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
             }
             
@@ -726,6 +728,38 @@ namespace Jil.Deserialize
                 LoadCharBuffer();
                 Emit.Call(Methods.ReadISO8601Date); // DateTime
                 ExpectQuote();                      // DateTime
+            }
+        }
+
+        static readonly MethodInfo DateTime_TryParseExact = typeof(DateTime).GetMethod("TryParseExact", new[] { typeof(string), typeof(string), typeof(IFormatProvider), typeof(DateTimeStyles), typeof(DateTime).MakeByRefType() });
+        static readonly MethodInfo CultureInfo_InvariantCulture = typeof(CultureInfo).GetProperty("InvariantCulture").GetMethod;
+        void ReadRFC1123DateTime()
+        {
+            // a terrible, no good, very slow implementation
+            // TODO: make this actually fast
+            var universal = (int)DateTimeStyles.AdjustToUniversal;
+
+            ReadPrimitive(typeof(string));              // string
+            Emit.LoadConstant("R");                     // string string
+            Emit.Call(CultureInfo_InvariantCulture);    // string string CultureInfo
+            Emit.LoadConstant(universal);               // string string CultureInfo int
+
+            using (var loc = Emit.DeclareLocal<DateTime>())
+            {
+                var success = Emit.DefineLabel();
+
+                Emit.LoadLocalAddress(loc);             // string string CultureInfo int DateTime&
+                Emit.Call(DateTime_TryParseExact);      // bool
+                Emit.BranchIfTrue(success);             // --empty--
+
+                Emit.LoadConstant("Couldn't parse RFC1123 DateTime");                   // string
+                Emit.LoadArgument(0);                                                   // string TextReader
+                Emit.LoadConstant(false);                                               // string TextReader bool
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+                Emit.Throw();
+
+                Emit.MarkLabel(success);    // --empty--
+                Emit.LoadLocal(loc);        // DateTime
             }
         }
 

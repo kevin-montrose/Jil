@@ -62,4 +62,9 @@ namespace Jil.Deserialize
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
     }
+
+    class RFC1123Style : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+    }
 }

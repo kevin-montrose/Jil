@@ -5668,6 +5668,17 @@ namespace JilTests
             _Issue117_NegativeLeadingZero<long>();
         }
 
+        [TestMethod]
+        public void RFC1123DateTime()
+        {
+            var now = DateTime.UtcNow;
+            var json = "\"" + now.ToString("R") + "\"";
+            var res = JSON.Deserialize<DateTime>(json, Options.RFC1123);
+
+            var diff = now - res;
+            Assert.IsTrue(diff.TotalSeconds < 1);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

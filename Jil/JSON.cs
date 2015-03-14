@@ -2029,6 +2029,8 @@ namespace Jil
                         return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.Get()(reader, 0);
                     case DateTimeFormat.ISO8601:
                         return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.Get()(reader, 0);
+                    case DateTimeFormat.RFC1123:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.Get()(reader, 0);
                     default: throw new InvalidOperationException("Unexpected Options: " + options);
                 }
 
