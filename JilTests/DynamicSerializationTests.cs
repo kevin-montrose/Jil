@@ -1073,5 +1073,16 @@ namespace JilTests
                 Assert.AreEqual(dotNetStr, stringJson);
             }
         }
+
+        [TestMethod]
+        public void RFC1123()
+        {
+            var now = DateTime.UtcNow;
+            var str = JSON.SerializeDynamic(now, Options.RFC1123);
+            var res = JSON.Deserialize<DateTime>(str, Options.RFC1123);
+
+            var diff = (now - res).Duration();
+            Assert.IsTrue(diff.TotalSeconds < 1);
+        }
     }
 }
