@@ -2610,5 +2610,17 @@ namespace JilTests
                 Assert.AreEqual("Expected digit", e.Message);
             }
         }
+
+        [TestMethod]
+        public void RFC1123()
+        {
+            var now = DateTime.UtcNow;
+            var str = JSON.Serialize(now, Options.RFC1123);
+            var dyn = JSON.DeserializeDynamic(str, Options.RFC1123);
+            DateTime res = dyn;
+
+            var diff = (now - res).Duration();
+            Assert.IsTrue(diff.TotalSeconds < 1);
+        }
     }
 }
