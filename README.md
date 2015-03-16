@@ -125,6 +125,9 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
 	    * DateTimes are always serialized in UTC (timezone offset = 00:00), because Local DateTimes cannot reliably roundtrip
 		* DateTimeOffsets include their timezone offset when serialized
 	  - for TimeSpans, ie. "P40DT11H10M9.4S" 
+    * RFC1123, a string
+	  - for DateTimes and DateTimeOffsets, ie. "Thu, 10 Apr 2008 13:30:00 GMT"
+	  - "1.23:45:56.78" for TimeSpans
   - What to treat DateTimes with an [Unspecified DateTimeKind](https://msdn.microsoft.com/en-us/library/shx7s921%28v=vs.110%29.aspx) as; one of
     * IsLocal, will treat an unspecified DateTime as if it were in local time
 	* IsUtc, will treat an unspecified DateTime as if it were in UTC
