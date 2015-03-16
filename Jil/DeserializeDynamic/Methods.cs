@@ -681,5 +681,911 @@ namespace Jil.DeserializeDynamic
 
             return true;
         }
+
+        public static bool ReadRFC1123DateTime(string str, out DateTime res)
+        {
+            // ddd, dd MMM yyyy HH:mm:ss GMT'"
+
+            var ix = 0;
+            DayOfWeek dayOfWeek;
+            if (!ReadRFC1123DayOfWeek(str, ref ix, out dayOfWeek))
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var c = str[ix];
+            if (c != ',')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            ix++;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            c = str[ix];
+            if (c != ' ')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            ix++;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var day = 0;
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            day += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            day *= 10;
+            day += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ' ')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            int month;
+            if(!ReadRFC1123Month(str, ref ix, out month))
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ' ')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var year = 0;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            year += (c - '0');
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            year *= 10;
+            year += (c - '0');
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            year *= 10;
+            year += (c - '0');
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            year *= 10;
+            year += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ' ')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var hour = 0;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            hour += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            hour *= 10;
+            hour += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ':')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var min = 0;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            min += (c - '0');
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            min *= 10;
+            min += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ':')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var sec = 0;
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            sec += (c - '0');
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c < '0' || c > '9')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            sec *= 10;
+            sec += (c - '0');
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != ' ')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != 'G')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != 'M')
+            {
+                res = default(DateTime);
+                return false;
+            }
+            if (ix >= str.Length)
+            {
+                res = default(DateTime);
+                return false;
+            }
+            c = str[ix];
+            ix++;
+            if (c != 'T')
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            var ret = new DateTime(year, month, day, hour, min, sec, DateTimeKind.Utc);
+
+            if (ret.DayOfWeek != (DayOfWeek)dayOfWeek)
+            {
+                res = default(DateTime);
+                return false;
+            }
+
+            res = ret;
+            return true;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool ReadRFC1123Month(string str, ref int ix, out int res)
+        {
+            if (ix >= str.Length)
+            {
+                res = 0;
+                return false;
+            }
+            var c = str[ix];
+            ix++;
+
+            // Jan | Jun | Jul
+            if (c == 'J')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c == 'a')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = 0;
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'n')
+                    {
+                        res = 0;
+                        return false;
+                    }
+
+                    res = 1;
+                    return true;
+                }
+
+                if (c != 'u')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                
+                if (c == 'n')
+                {
+                    res = 6;
+                    return true;
+                }
+
+                if (c == 'l')
+                {
+                    res = 7;
+                    return true;
+                }
+
+                res = 0;
+                return false;
+            }
+
+            // Feb
+            if (c == 'F')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'e')
+                {
+                    res = 0;
+                    return false;
+                }
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'b')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                res = 2;
+                return true;
+            }
+
+            // Mar | May
+            if (c == 'M')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'a')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                
+                if (c == 'r')
+                {
+                    res = 3;
+                    return true;
+                }
+
+                if (c == 'y')
+                {
+                    res = 5;
+                    return true;
+                }
+
+                res = 0;
+                return false;
+            }
+
+            // Apr | Aug
+            if (c == 'A')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c == 'p')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = 0;
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'r')
+                    {
+                        res = 0;
+                        return false;
+                    }
+
+                    res = 4;
+                    return true;
+                }
+
+                if (c == 'u')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = 0;
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'g')
+                    {
+                        res = 0;
+                        return false;
+                    }
+
+                    res = 8;
+                    return true;
+                }
+
+                res = 0;
+                return false;
+            }
+
+            // Sep
+            if (c == 'S')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'e')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'p')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                res = 9;
+                return true;
+            }
+
+            // Oct
+            if (c == 'O')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c != 'c')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 't')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                res = 10;
+                return true;
+            }
+
+            // Nov
+            if (c == 'N')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c != 'o')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c != 'v')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                res = 11;
+                return true;
+            }
+
+            // Dec
+            if (c == 'D')
+            {
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c != 'e')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = 0;
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c != 'c')
+                {
+                    res = 0;
+                    return false;
+                }
+
+                res = 12;
+                return true;
+            }
+
+            res = 0;
+            return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool ReadRFC1123DayOfWeek(string str, ref int ix, out DayOfWeek res)
+        {
+            if(ix >= str.Length)
+            {
+                res= default(DayOfWeek);
+                return false;
+            }
+
+            var c = str[ix];
+            ix++;
+
+            // Mon
+            if (c == 'M')
+            {
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'o')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'n')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                res=   DayOfWeek.Monday;
+                return true;
+            }
+
+            // Tue | Thu
+            if (c == 'T')
+            {
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c == 'u')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'e')
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+
+                    res =  DayOfWeek.Tuesday;
+                    return true;
+                }
+
+                if (c == 'h')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'u')
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+
+                    res= DayOfWeek.Thursday;
+                    return true;
+                }
+
+                res = default(DayOfWeek);
+                return false;
+            }
+
+            // Wed
+            if (c == 'W')
+            {
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'e')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'd')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                res = DayOfWeek.Wednesday;
+                return true;
+            }
+
+            // Fri
+            if (c == 'F')
+            {
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'r')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+                if (c != 'i')
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+
+                res = DayOfWeek.Friday;
+                return true;
+            }
+
+            // Sat | Sun
+            if (c == 'S')
+            {
+                if (ix >= str.Length)
+                {
+                    res = default(DayOfWeek);
+                    return false;
+                }
+                c = str[ix];
+                ix++;
+
+                if (c == 'a')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 't')
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+
+                    res = DayOfWeek.Saturday;
+                    return true;
+                }
+
+                if (c == 'u')
+                {
+                    if (ix >= str.Length)
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+                    c = str[ix];
+                    ix++;
+                    if (c != 'n')
+                    {
+                        res = default(DayOfWeek);
+                        return false;
+                    }
+
+                    res = DayOfWeek.Sunday;
+                    return true;
+                }
+
+                res = default(DayOfWeek);
+                return false;
+            }
+
+            res = default(DayOfWeek);
+            return false;
+        }
     }
 }

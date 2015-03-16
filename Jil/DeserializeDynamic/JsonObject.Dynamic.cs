@@ -1259,6 +1259,10 @@ namespace Jil.DeserializeDynamic
                                 ret = Methods.ReadISO8601DateTime(StringValue, out res);
                                 result = res;
                                 return ret;
+                            case DateTimeFormat.RFC1123:
+                                ret = Methods.ReadRFC1123DateTime(StringValue, out res);
+                                result = res;
+                                return ret;
                             default:
                                 result = null;
                                 return false;
