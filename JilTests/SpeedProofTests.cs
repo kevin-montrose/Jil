@@ -1484,6 +1484,51 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
+
+        [TestMethod]
+        public void UseFastRFC1123Method()
+        {
+            Func<TextReader, int, DateTime> fast;
+            Func<TextReader, int, DateTime> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<DateTime>.UseFastRFC1123Method = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    fast = InlineDeserializerHelper.Build<DateTime>(typeof(Jil.Serialize.RFC1123), DateTimeFormat.RFC1123, out ignored);
+                }
+
+                {
+                    InlineDeserializer<DateTime>.UseFastRFC1123Method = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineDeserializerHelper.Build<DateTime>(typeof(Jil.Serialize.RFC1123), DateTimeFormat.RFC1123, out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<DateTime>.UseFastRFC1123Method = true;
+            }
+
+            var rand = new Random(270129617);
+
+            var toDeserialize = new List<DateTime>();
+            for (var i = 0; i < 1000; i++)
+            {
+                toDeserialize.Add(_RandDateTime(rand));
+            }
+
+            toDeserialize = toDeserialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double fastTime, normalTime;
+            CompareTimes(toDeserialize, Options.RFC1123, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+        }
 #endif
     }
 }

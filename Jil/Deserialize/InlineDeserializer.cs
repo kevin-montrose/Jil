@@ -762,6 +762,8 @@ namespace Jil.Deserialize
                     Emit.MarkLabel(success);    // --empty--
                     Emit.LoadLocal(loc);        // DateTime
                 }
+
+                return;
             }
 
             ExpectQuote();                      // --empty--
