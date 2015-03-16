@@ -1521,7 +1521,7 @@ namespace Jil.Deserialize
                     c = reader.Read();
                     if (c != 'g') throw new DeserializationException("Expected g", reader, c == -1);
 
-                    return 9;
+                    return 8;
                 }
 
                 throw new DeserializationException("Expected p, or u", reader, c == -1);
