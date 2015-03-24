@@ -431,7 +431,7 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(float))
                 {
-                    Emit.Call(Methods.ReadSingleFast);      // float
+                    Emit.Call(Methods.GetReadSingleFast(ReadingFromString));      // float
                     return;
                 }
 
@@ -455,7 +455,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(float))
                     {
-                        Emit.Call(Methods.ReadSingleCharArray);  // float
+                        Emit.Call(Methods.GetReadSingleCharArray(ReadingFromString));  // float
                         return;
                     }
 
@@ -477,7 +477,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(float))
                     {
-                        Emit.Call(Methods.ReadSingle);  // float
+                        Emit.Call(Methods.GetReadSingle(ReadingFromString));  // float
                         return;
                     }
 

@@ -104,5 +104,29 @@ namespace Jil.Deserialize
                     ReadDouble :
                     ReadDoubleThunkReader;
         }
+
+        public static MethodInfo GetReadSingleFast(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadSingleFast :
+                    ReadSingleFastThunkReader;
+        }
+
+        public static MethodInfo GetReadSingleCharArray(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadSingleCharArray :
+                    ReadSingleCharArrayThunkReader;
+        }
+
+        public static MethodInfo GetReadSingle(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadSingle :
+                    ReadSingleThunkReader;
+        }
     }
 }

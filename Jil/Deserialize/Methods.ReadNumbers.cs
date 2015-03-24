@@ -1266,7 +1266,7 @@ namespace Jil.Deserialize
             return double.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
         }
 
-        public static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
         {
@@ -1368,7 +1368,7 @@ namespace Jil.Deserialize
             return result;
         }
 
-        public static readonly MethodInfo ReadSingleCharArray = typeof(Methods).GetMethod("_ReadSingleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadSingleCharArray = typeof(Methods).GetMethod("_ReadSingleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingleCharArray(TextReader reader, ref char[] buffer)
         {
@@ -1486,7 +1486,7 @@ namespace Jil.Deserialize
             10000000000.0f,
         };
 
-        public static readonly MethodInfo ReadSingleFast = typeof(Methods).GetMethod("_ReadSingleFast", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadSingleFast = typeof(Methods).GetMethod("_ReadSingleFast", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float _ReadSingleFast(TextReader reader, ref char[] buffer)
         {
