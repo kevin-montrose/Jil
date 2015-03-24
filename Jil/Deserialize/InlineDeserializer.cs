@@ -425,7 +425,7 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(double))
                 {
-                    Emit.Call(Methods.ReadDoubleFast);   // double
+                    Emit.Call(Methods.GetReadDoubleFast(ReadingFromString));   // double
                     return;
                 }
 
@@ -449,7 +449,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(double))
                     {
-                        Emit.Call(Methods.ReadDoubleCharArray);   // double
+                        Emit.Call(Methods.GetReadDoubleCharArray(ReadingFromString));   // double
                         return;
                     }
 
@@ -471,7 +471,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(double))
                     {
-                        Emit.Call(Methods.ReadDouble);   // double
+                        Emit.Call(Methods.GetReadDouble(ReadingFromString));   // double
                         return;
                     }
 

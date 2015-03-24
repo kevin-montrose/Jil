@@ -878,7 +878,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double _ReadDouble(TextReader reader, ref StringBuilder commonSb)
         {
@@ -980,7 +980,7 @@ namespace Jil.Deserialize
             return result;
         }
 
-        public static readonly MethodInfo ReadDoubleCharArray = typeof(Methods).GetMethod("_ReadDoubleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDoubleCharArray = typeof(Methods).GetMethod("_ReadDoubleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double _ReadDoubleCharArray(TextReader reader, ref char[] buffer)
         {
@@ -1099,7 +1099,7 @@ namespace Jil.Deserialize
             10000000000.0,
         };
 
-        public static readonly MethodInfo ReadDoubleFast = typeof(Methods).GetMethod("_ReadDoubleFast", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDoubleFast = typeof(Methods).GetMethod("_ReadDoubleFast", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static double _ReadDoubleFast(TextReader reader, ref char[] buffer)
         {
