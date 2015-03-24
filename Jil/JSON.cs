@@ -1968,7 +1968,7 @@ namespace Jil
                 return DeserializeDynamic(reader, options);
             }
 
-            return Jil.Deserialize.DeserializeIndirect.Deserialize(reader.MakeSupportPeek(), type, options);
+            return Jil.Deserialize.DeserializeIndirect.DeserializeFromStream(reader.MakeSupportPeek(), type, options);
         }
 
         /// <summary>
@@ -1986,13 +1986,20 @@ namespace Jil
         {
             if (text == null)
             {
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException("reader");
             }
 
-            using (var reader = new StringReader(text))
+            if (type == null)
             {
-                return Deserialize(reader, type, options);
+                throw new ArgumentNullException("type");
             }
+
+            if (type == typeof(object))
+            {
+                return DeserializeDynamic(text, options);
+            }
+
+            return Jil.Deserialize.DeserializeIndirect.DeserializeFromString(text, type, options);
         }
 
         /// <summary>

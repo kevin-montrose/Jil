@@ -110,6 +110,7 @@
     <Compile Include="Deserialize\NameAutomata.cs" />
     <Compile Include="Common\PeekSupportingTextReader.cs" />
     <Compile Include="Deserialize\SetterLookup.cs" />
+    <Compile Include="Deserialize\ThunkReader.cs" />
     <Compile Include="Deserialize\TypeCaches.cs" />
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
