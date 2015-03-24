@@ -373,25 +373,25 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(byte))
             {
-                Emit.Call(Methods.GetReadUInt8(ReadingFromString)); // byte
+                Emit.Call(Methods.GetReadUInt8(ReadingFromString));     // byte
                 return;
             }
 
             if (numberType == typeof(sbyte))
             {
-                Emit.Call(Methods.GetReadInt8(ReadingFromString));  // sbyte
+                Emit.Call(Methods.GetReadInt8(ReadingFromString));      // sbyte
                 return;
             }
 
             if (numberType == typeof(short))
             {
-                Emit.Call(Methods.GetReadInt16(ReadingFromString)); // short
+                Emit.Call(Methods.GetReadInt16(ReadingFromString));     // short
                 return;
             }
 
             if (numberType == typeof(ushort))
             {
-                Emit.Call(Methods.ReadUInt16);  // ushort
+                Emit.Call(Methods.GetReadUInt16(ReadingFromString));    // ushort
                 return;
             }
 

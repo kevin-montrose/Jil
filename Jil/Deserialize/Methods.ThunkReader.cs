@@ -186,6 +186,66 @@ namespace Jil.Deserialize
             }
         }
 
+        static readonly MethodInfo ReadUInt16ThunkReader = typeof(Methods).GetMethod("_ReadUInt16ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ushort _ReadUInt16ThunkReader(ref ThunkReader reader)
+        {
+            // max: 65535
+            // min:     0
+            // digits:  5
+
+            uint ret = 0;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit", ref reader, true);
+
+            var firstDigitZero = c == '0';
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", ref reader, false);
+            ret += (uint)c;
+
+            // digit #2
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (ushort)ret;
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #3
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #4
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #5
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (ushort)ret;
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            AssertNotFollowedByDigit(ref reader);
+
+            checked
+            {
+                return (ushort)ret;
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void AssertNotFollowedByDigit(ref ThunkReader reader)
         {
