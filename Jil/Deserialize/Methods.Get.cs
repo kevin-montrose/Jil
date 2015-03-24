@@ -48,5 +48,13 @@ namespace Jil.Deserialize
                     ReadUInt16 :
                     ReadUInt16ThunkReader;
         }
+
+        public static MethodInfo GetReadInt32(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadInt32 :
+                    ReadInt32ThunkReader;
+        }
     }
 }

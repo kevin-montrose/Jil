@@ -397,7 +397,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(int))
             {
-                Emit.Call(Methods.ReadInt32);   // int
+                Emit.Call(Methods.GetReadInt32(ReadingFromString));     // int
                 return;
             }
 
