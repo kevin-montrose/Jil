@@ -27,16 +27,18 @@ namespace Jil.Deserialize
         
         readonly Type OptionsType;
         readonly DateTimeFormat DateFormat;
+        readonly bool ReadingFromString;
 
         bool UsingCharBuffer;
         HashSet<Type> RecursiveTypes;
 
         Emit Emit;
 
-        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat)
+        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat, bool readingFromString)
         {
             OptionsType = optionsType;
             DateFormat = dateFormat;
+            ReadingFromString = readingFromString;
         }
 
         void SetProperty(PropertyInfo prop)
@@ -2155,14 +2157,39 @@ namespace Jil.Deserialize
 
             return Emit.CreateDelegate<Func<TextReader, int, ForType>>(Utils.DelegateOptimizationOptions);
         }
+
+        public StringThunkDelegate<ForType> BuildFromStringWithNewDelegate()
+        {
+            var forType = typeof(ForType);
+
+            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
+
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(ThunkReader).MakeByRefType(), typeof(int) }, doVerify: Utils.DoVerify);
+
+            AddGlobalVariables();
+
+            ConsumeWhiteSpace();
+
+            Build(forType, allowRecursion: false);
+
+            // we have to consume this, otherwise we might succeed with invalid JSON
+            ConsumeWhiteSpace();
+
+            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
+            ExpectEndOfStream();
+
+            Emit.Return();
+
+            return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
+        }
     }
 
     static class InlineDeserializerHelper
     {
-        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWith<ReturnType>(Type optionsType)
+        static Func<TextReader, int, ReturnType> BuildAlwaysFailsWithFromStream<ReturnType>(Type optionsType)
         {
             var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(ReturnType));
-            var stashField = specificTypeCache.GetField("ExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
+            var stashField = specificTypeCache.GetField("ExceptionDuringBuildFromStream", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
             emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
@@ -2174,9 +2201,24 @@ namespace Jil.Deserialize
             return emit.CreateDelegate<Func<TextReader, int, ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, int, ReturnType> Build<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        static StringThunkDelegate<ReturnType> BuildAlwaysFailsWithFromString<ReturnType>(Type optionsType)
         {
-            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat);
+            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(ReturnType));
+            var stashField = specificTypeCache.GetField("ExceptionDuringBuildFromString", BindingFlags.Static | BindingFlags.Public);
+
+            var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(ThunkReader).MakeByRefType(), typeof(int) });
+            emit.LoadConstant("Error occurred building a deserializer for " + typeof(ReturnType));
+            emit.LoadField(stashField);
+            emit.LoadConstant(false);
+            emit.NewObject<DeserializationException, string, Exception, bool>();
+            emit.Throw();
+
+            return emit.CreateDelegate<StringThunkDelegate<ReturnType>>(Utils.DelegateOptimizationOptions);
+        }
+
+        public static Func<TextReader, int, ReturnType> BuildFromStream<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        {
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, readingFromString: false);
 
             Func<TextReader, int, ReturnType> ret;
             try
@@ -2187,10 +2229,30 @@ namespace Jil.Deserialize
             catch (ConstructionException e)
             {
                 exceptionDuringBuild = e;
-                ret = BuildAlwaysFailsWith<ReturnType>(optionsType);
+                ret = BuildAlwaysFailsWithFromStream<ReturnType>(optionsType);
             }
 
             return ret;
         }
+
+        public static StringThunkDelegate<ReturnType> BuildFromString<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        {
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, readingFromString: true);
+
+            StringThunkDelegate<ReturnType> ret;
+            try
+            {
+                ret = obj.BuildFromStringWithNewDelegate();
+                exceptionDuringBuild = null;
+            }
+            catch (ConstructionException e)
+            {
+                exceptionDuringBuild = e;
+                ret = BuildAlwaysFailsWithFromString<ReturnType>(optionsType);
+            }
+
+            return ret;
+        }
+
     }
 }

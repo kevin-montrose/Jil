@@ -2069,9 +2069,33 @@ namespace Jil
                 return DeserializeDynamic(text, options);
             }
 
-            using (var reader = new StringReader(text))
+            try
             {
-                return Deserialize<T>(reader, options);
+                options = options ?? DefaultOptions;
+
+                var thunk = new Jil.Deserialize.ThunkReader(text);
+
+                switch (options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.NewtonsoftStyle, T>.GetFromString()(ref thunk, 0);
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.GetFromString()(ref thunk, 0);
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.GetFromString()(ref thunk, 0);
+                    case DateTimeFormat.ISO8601:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.GetFromString()(ref thunk, 0);
+                    case DateTimeFormat.RFC1123:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.GetFromString()(ref thunk, 0);
+                    default: throw new InvalidOperationException("Unexpected Options: " + options);
+                }
+
+            }
+            catch (Exception e)
+            {
+                if (e is DeserializationException) throw;
+
+                throw new DeserializationException("An exception occurred: "+e.Message, e, false);
             }
         }
 

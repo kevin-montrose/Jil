@@ -15,11 +15,15 @@ namespace Jil.Deserialize
     static class TypeCache<TOptions, T>
         where TOptions : IDeserializeOptions, new()
     {
-        static readonly object InitLock = new object();
-        static volatile bool BeingBuilt = false;
-
+        static readonly object ThunkInitLock = new object();
+        static volatile bool ThunkBeingBuilt = false;
         public static volatile Func<TextReader, int, T> Thunk;
-        public static Exception ExceptionDuringBuild;
+        public static Exception ExceptionDuringBuildFromStream;
+
+        static readonly object StringThunkInitLock = new object();
+        static volatile bool StringThunkBeingBuilt = false;
+        public static volatile StringThunkDelegate<T> StringThunk;
+        public static Exception ExceptionDuringBuildFromString;
 
         public static Func<TextReader, int, T> Get()
         {
@@ -31,14 +35,35 @@ namespace Jil.Deserialize
         {
             if (Thunk != null) return;
 
-            lock (InitLock)
+            lock (ThunkInitLock)
             {
-                if (Thunk != null || BeingBuilt) return;
-                BeingBuilt = true;
+                if (Thunk != null || ThunkBeingBuilt) return;
+                ThunkBeingBuilt = true;
 
                 var options = new TOptions();
 
-                Thunk = InlineDeserializerHelper.Build<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuild);
+                Thunk = InlineDeserializerHelper.BuildFromStream<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuildFromStream);
+            }
+        }
+
+        public static StringThunkDelegate<T> GetFromString()
+        {
+            LoadFromString();
+            return StringThunk;
+        }
+
+        public static void LoadFromString()
+        {
+            if (StringThunk != null) return;
+
+            lock (StringThunkInitLock)
+            {
+                if (StringThunk != null || StringThunkBeingBuilt) return;
+                StringThunkBeingBuilt = true;
+
+                var options = new TOptions();
+
+                StringThunk = InlineDeserializerHelper.BuildFromString<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuildFromString);
             }
         }
     }

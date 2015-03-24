@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
+    delegate T StringThunkDelegate<T>(ref ThunkReader writer, int depth);
+
     struct ThunkReader
     {
         string Value;
