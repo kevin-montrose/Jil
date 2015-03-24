@@ -409,7 +409,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(long))
             {
-                Emit.Call(Methods.ReadInt64);   // long
+                Emit.Call(Methods.GetReadInt64(ReadingFromString));     // long
                 return;
             }
 

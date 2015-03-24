@@ -454,6 +454,193 @@ namespace Jil.Deserialize
             }
         }
 
+        static readonly MethodInfo ReadInt64ThunkReader = typeof(Methods).GetMethod("_ReadInt64ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static long _ReadInt64ThunkReader(ref ThunkReader reader)
+        {
+            // max:  9223372036854775807
+            // min: -9223372036854775808
+            // digits:                19
+
+            ulong ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", ref reader, true);
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit", ref reader, true);
+            }
+
+            var firstDigitZero = c == '0';
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", ref reader, false);
+            ret += (uint)c;
+
+            // digit #2
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #3
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #4
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #5
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #6
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #7
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #8
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #9
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #10
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #11
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #12
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #13
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #14
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #15
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #16
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #17
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #18
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            // digit #19
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return ((long)ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += (uint)c;
+
+            AssertNotFollowedByDigit(ref reader);
+
+            // one edge case, the minimum long value has to be checked for
+            //   because otherwise we will overflow long and throw
+            if (negative && ret == 9223372036854775808UL)
+            {
+                return long.MinValue;
+            }
+
+            checked
+            {
+                return ((long)ret * (negative ? -1 : 1));
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void AssertNotFollowedByDigit(ref ThunkReader reader)
         {
