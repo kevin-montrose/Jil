@@ -2156,14 +2156,8 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public Func<TextReader, int, ForType> BuildWithNewDelegate()
+        void BuildWithNew(Type forType)
         {
-            var forType = typeof(ForType);
-
-            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
-
-            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: Utils.DoVerify);
-
             AddGlobalVariables();
 
             ConsumeWhiteSpace();
@@ -2177,6 +2171,17 @@ namespace Jil.Deserialize
             ExpectEndOfStream();
 
             Emit.Return();
+        }
+
+        public Func<TextReader, int, ForType> BuildWithNewDelegate()
+        {
+            var forType = typeof(ForType);
+
+            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
+
+            Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: Utils.DoVerify);
+
+            BuildWithNew(forType);
 
             return Emit.CreateDelegate<Func<TextReader, int, ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -2189,19 +2194,7 @@ namespace Jil.Deserialize
 
             Emit = Emit.NewDynamicMethod(forType, new[] { typeof(ThunkReader).MakeByRefType(), typeof(int) }, doVerify: Utils.DoVerify);
 
-            AddGlobalVariables();
-
-            ConsumeWhiteSpace();
-
-            Build(forType, allowRecursion: false);
-
-            // we have to consume this, otherwise we might succeed with invalid JSON
-            ConsumeWhiteSpace();
-
-            // We also must confirm that we read everything, again otherwise we might accept garbage as valid
-            ExpectEndOfStream();
-
-            Emit.Return();
+            BuildWithNew(forType);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
