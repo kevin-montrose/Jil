@@ -128,5 +128,29 @@ namespace Jil.Deserialize
                     ReadSingle :
                     ReadSingleThunkReader;
         }
+
+        public static MethodInfo GetReadDecimalFast(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadDecimalFast :
+                    ReadDecimalFastThunkReader;
+        }
+
+        public static MethodInfo GetReadDecimalCharArray(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadDecimalCharArray :
+                    ReadDecimalCharArrayThunkReader;
+        }
+
+        public static MethodInfo GetReadDecimal(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadDecimal :
+                    ReadDecimalThunkReader;
+        }
     }
 }

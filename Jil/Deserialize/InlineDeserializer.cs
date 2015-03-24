@@ -437,7 +437,7 @@ namespace Jil.Deserialize
 
                 if (numberType == typeof(decimal))
                 {
-                    Emit.Call(Methods.ReadDecimalFast); // decimal
+                    Emit.Call(Methods.GetReadDecimalFast(ReadingFromString)); // decimal
                     return;
                 }
             }
@@ -461,7 +461,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(decimal))
                     {
-                        Emit.Call(Methods.ReadDecimalCharArray); // decimal
+                        Emit.Call(Methods.GetReadDecimalCharArray(ReadingFromString)); // decimal
                         return;
                     }
                 }
@@ -483,7 +483,7 @@ namespace Jil.Deserialize
 
                     if (numberType == typeof(decimal))
                     {
-                        Emit.Call(Methods.ReadDecimal); // decimal
+                        Emit.Call(Methods.GetReadDecimal(ReadingFromString)); // decimal
                         return;
                     }
                 }

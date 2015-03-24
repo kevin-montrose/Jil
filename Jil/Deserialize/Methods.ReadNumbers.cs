@@ -1654,7 +1654,7 @@ namespace Jil.Deserialize
             return float.Parse(new string(buffer, 0, idx), CultureInfo.InvariantCulture);
         }
 
-        public static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {
@@ -1756,7 +1756,7 @@ namespace Jil.Deserialize
             return result;
         }
 
-        public static readonly MethodInfo ReadDecimalCharArray = typeof(Methods).GetMethod("_ReadDecimalCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDecimalCharArray = typeof(Methods).GetMethod("_ReadDecimalCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimalCharArray(TextReader reader, ref char[] buffer)
         {
@@ -1882,7 +1882,7 @@ namespace Jil.Deserialize
                 0.00000000000000001m
             };
 
-        public static readonly MethodInfo ReadDecimalFast = typeof(Methods).GetMethod("_ReadDecimalFast", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadDecimalFast = typeof(Methods).GetMethod("_ReadDecimalFast", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static decimal _ReadDecimalFast(TextReader reader, ref char[] buffer)
         {

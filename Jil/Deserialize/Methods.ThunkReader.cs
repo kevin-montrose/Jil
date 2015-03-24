@@ -1582,5 +1582,385 @@ namespace Jil.Deserialize
             commonSb.Clear();
             return result;
         }
+
+        static readonly MethodInfo ReadDecimalFastThunkReader = typeof(Methods).GetMethod("_ReadDecimalFastThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalFastThunkReader(ref ThunkReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            InitDynamicBuffer(ref buffer);
+
+            int c;
+
+            var prev = -1;
+
+            var firstDigitIdx = -1;
+            var firstValidCharIdx = -1;
+            var decimalPointIdx = -1;
+            var eIdx = -1;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                if (c >= '0' && c <= '9')
+                {
+                    if (firstDigitIdx < 0)
+                    {
+                        firstDigitIdx = idx;
+                        if (firstValidCharIdx < 0)
+                        {
+                            firstValidCharIdx = idx;
+                        }
+                    }
+                }
+                else
+                {
+                    if (c == '+')
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", ref reader, false);
+                        }
+                        firstValidCharIdx = idx;
+                    }
+                    else
+                    {
+                        if (c == '-')
+                        {
+                            if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                            {
+                                throw new DeserializationException("Unexpected -", ref reader, false);
+                            }
+                            firstValidCharIdx = idx;
+                        }
+                        else
+                        {
+                            if (c == 'e' || c == 'E')
+                            {
+                                if (eIdx >= 0 || firstDigitIdx < 0)
+                                {
+                                    throw new DeserializationException("Unexpected " + c, ref reader, false);
+                                }
+                                eIdx = idx;
+                            }
+                            else
+                            {
+                                if (c == '.')
+                                {
+                                    if (eIdx >= 0 || decimalPointIdx >= 0)
+                                    {
+                                        throw new DeserializationException("Unexpected .", ref reader, false);
+                                    }
+                                    decimalPointIdx = idx;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                buffer[idx] = (char)c;
+                idx++;
+
+                if (idx >= buffer.Length)
+                {
+                    GrowDynamicBuffer(ref buffer);
+                }
+
+                reader.Read();
+                prev = c;
+            }
+
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+            if (idx >= 3 && buffer[0] == '-' && buffer[1] == '0')
+            {
+                var secondChar = buffer[2];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+
+            if (eIdx < 0)
+            {
+                var endIdx = idx;
+
+                var maxChars = decimalPointIdx < 0 ? 18 : 19;
+                if (endIdx - firstDigitIdx <= maxChars)
+                {
+                    if (decimalPointIdx == endIdx - 1)
+                    {
+                        decimalPointIdx = -1;
+                        endIdx--;
+                    }
+
+                    var negative = buffer[firstValidCharIdx] == '-';
+
+                    decimal result;
+                    var n1 = 0; // we use int rather than long so as to work well on 32-bit runtime
+
+                    for (idx = firstDigitIdx; idx < endIdx && n1 < 100000000; ++idx)
+                    {
+                        if (idx != decimalPointIdx)
+                        {
+                            n1 = n1 * 10 + buffer[idx] - '0';
+                        }
+                    }
+
+                    if (negative)
+                    {
+                        n1 = -n1;
+                    }
+
+                    if (idx == endIdx)
+                    {
+                        result = n1;
+                    }
+                    else
+                    {
+                        var n2 = 0;
+                        var multiplier = 1;
+                        while (idx < endIdx)
+                        {
+                            if (idx != decimalPointIdx)
+                            {
+                                multiplier *= 10;
+                                n2 = n2 * 10 + buffer[idx] - '0';
+                            }
+
+                            idx++;
+                        }
+
+                        result = (long)n1 * multiplier + (long)n2;
+                    }
+
+                    if (decimalPointIdx > 0)
+                    {
+                        result *= DecimalMultipliers[endIdx - decimalPointIdx - 1];
+                    }
+
+                    return result;
+                }
+            }
+
+            return decimal.Parse(new string(buffer, 0, idx), NumberStyles.Float, CultureInfo.InvariantCulture);
+        }
+
+        static readonly MethodInfo ReadDecimalCharArrayThunkReader = typeof(Methods).GetMethod("_ReadDecimalCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            InitDynamicBuffer(ref buffer);
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", ref reader, false);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", ref reader, false);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, ref reader, false);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", ref reader, false);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+            storeChar:
+                buffer[idx++] = (char)c;
+                if (idx >= buffer.Length)
+                {
+                    GrowDynamicBuffer(ref buffer);
+                }
+                reader.Read();
+                prev = c;
+            }
+
+            if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
+            if (idx >= 2 && buffer[0] == '0')
+            {
+                var secondChar = buffer[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+            if (idx >= 3 && buffer[0] == '-' && buffer[1] == '0')
+            {
+                var secondChar = buffer[2];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+
+            var asStr = new string(buffer, 0, idx);
+            var result = decimal.Parse(asStr, NumberStyles.Float, CultureInfo.InvariantCulture);
+            return result;
+        }
+
+        static readonly MethodInfo ReadDecimalThunkReader = typeof(Methods).GetMethod("_ReadDecimalThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static decimal _ReadDecimalThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new StringBuilder();
+
+            int c;
+
+            var prev = -1;
+            var afterFirstDigit = false;
+            var afterE = false;
+            var afterDot = false;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                var isDigit = c >= '0' && c <= '9';
+                if (!isDigit)
+                {
+                    var isPlus = c == '+';
+                    if (isPlus)
+                    {
+                        if (!(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected +", ref reader, false);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isMinus = c == '-';
+                    if (isMinus)
+                    {
+                        if (prev != -1 && !(prev == 'e' || prev == 'E'))
+                        {
+                            throw new DeserializationException("Unexpected -", ref reader, false);
+                        }
+
+                        goto storeChar;
+                    }
+
+                    var isE = c == 'e' || c == 'E';
+                    if (isE)
+                    {
+                        if (afterE || !afterFirstDigit)
+                        {
+                            throw new DeserializationException("Unexpected " + c, ref reader, false);
+                        }
+
+                        afterE = true;
+                        goto storeChar;
+                    }
+
+                    var isDot = c == '.';
+                    if (isDot)
+                    {
+                        if (!afterFirstDigit || afterE || afterDot)
+                        {
+                            throw new DeserializationException("Unexpected .", ref reader, false);
+                        }
+
+                        afterDot = true;
+                        goto storeChar;
+                    }
+
+                    break;
+                }
+                else
+                {
+                    afterFirstDigit = true;
+                }
+
+            storeChar:
+                commonSb.Append((char)c);
+                reader.Read();
+                prev = c;
+            }
+
+            var asStr = commonSb.ToString();
+            var strLen = asStr.Length;
+            if (asStr[strLen - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
+            if (strLen >= 2 && asStr[0] == '0')
+            {
+                var secondChar = asStr[1];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+            if (strLen >= 3 && asStr[0] == '-' && asStr[1] == '0')
+            {
+                var secondChar = asStr[2];
+                if (secondChar != '.' && secondChar != 'e' && secondChar != 'E')
+                {
+                    throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+                }
+            }
+
+            var result = decimal.Parse(asStr, NumberStyles.Float, CultureInfo.InvariantCulture);
+            commonSb.Clear();
+            return result;
+        }
     }
 }
