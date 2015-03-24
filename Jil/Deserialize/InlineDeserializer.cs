@@ -403,7 +403,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(uint))
             {
-                Emit.Call(Methods.ReadUInt32);  // uint
+                Emit.Call(Methods.GetReadUInt32(ReadingFromString));    // uint
                 return;
             }
 
