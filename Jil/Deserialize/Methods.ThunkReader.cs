@@ -1962,5 +1962,155 @@ namespace Jil.Deserialize
             commonSb.Clear();
             return result;
         }
+
+        static readonly MethodInfo ReadEncodedCharThunkReader = typeof(Methods).GetMethod("_ReadEncodedCharThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static char _ReadEncodedCharThunkReader(ref ThunkReader reader)
+        {
+            var first = reader.Read();
+            if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+            if (first != '\\') return (char)first;
+
+            var second = reader.Read();
+            if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+            switch (second)
+            {
+                case '"': return '"';
+                case '\\': return '\\';
+                case '/': return '/';
+                case 'b': return '\b';
+                case 'f': return '\f';
+                case 'n': return '\n';
+                case 'r': return '\r';
+                case 't': return '\t';
+            }
+
+            if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+            // now we're in an escape sequence, we expect 4 hex #s; always
+            var ret = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char2;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+        char2:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char3;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+        char3:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto char4;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+        char4:
+            ret *= 16;
+            {
+                var c = reader.Read();
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    ret += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    ret += 10 + c;
+                    goto finished;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+        finished:
+            if (ret < char.MinValue || ret > char.MaxValue) throw new DeserializationException("Encoded character out of System.Char range, found: " + ret, ref reader, false);
+
+            return (char)ret;
+        }
     }
 }

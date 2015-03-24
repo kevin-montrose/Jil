@@ -152,5 +152,13 @@ namespace Jil.Deserialize
                     ReadDecimal :
                     ReadDecimalThunkReader;
         }
+
+        public static MethodInfo GetReadEncodedChar(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadEncodedChar :
+                    ReadEncodedCharThunkReader;
+        }
     }
 }

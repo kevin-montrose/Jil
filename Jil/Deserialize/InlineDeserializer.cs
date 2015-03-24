@@ -321,8 +321,8 @@ namespace Jil.Deserialize
 
         void ReadEncodedChar()
         {
-            Emit.LoadArgument(0);               // TextReader
-            Emit.Call(Methods.ReadEncodedChar); // char
+            Emit.LoadArgument(0);                                       // TextReader
+            Emit.Call(Methods.GetReadEncodedChar(ReadingFromString));   // char
         }
 
         void CallReadEncodedString()
