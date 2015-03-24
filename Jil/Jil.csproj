@@ -98,6 +98,7 @@
     <Compile Include="Deserialize\InlineDeserializer.cs" />
     <Compile Include="Deserialize\InterfaceImplementation.cs" />
     <Compile Include="Deserialize\Methods.cs" />
+    <Compile Include="Deserialize\Methods.Get.cs" />
     <Compile Include="Deserialize\Methods.ISO8601DateTime.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
@@ -107,6 +108,7 @@
     <Compile Include="Deserialize\Methods.ReadNumbers.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
+    <Compile Include="Deserialize\Methods.ThunkReader.cs" />
     <Compile Include="Deserialize\NameAutomata.cs" />
     <Compile Include="Common\PeekSupportingTextReader.cs" />
     <Compile Include="Deserialize\SetterLookup.cs" />

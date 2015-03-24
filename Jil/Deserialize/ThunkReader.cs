@@ -13,6 +13,8 @@ namespace Jil.Deserialize
         string Value;
         int Index;
 
+        public int Position { get { return Index + 1; } }
+
         public ThunkReader(string val) : this()
         {
             Value = val;

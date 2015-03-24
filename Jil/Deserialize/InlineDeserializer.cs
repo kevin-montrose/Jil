@@ -122,12 +122,26 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
+        static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", Type.EmptyTypes);
+        void ReadCharFromStream()
+        {
+            Emit.LoadArgument(0);                   // (TextReader|ref ThunkReader)
+            if(ReadingFromString)
+            {
+                Emit.Call(ThunkReader_Read);        // int
+            }
+            else
+            {
+                Emit.CallVirtual(TextReader_Read);  // int
+            }
+        }
+
+        
         void RawReadChar(Action endOfStream)
         {
             var haveChar = Emit.DefineLabel();
 
-            Emit.LoadArgument(0);                       // TextReader
-            Emit.CallVirtual(TextReader_Read);          // int
+            ReadCharFromStream();                       // int
             Emit.Duplicate();                           // int int
             Emit.LoadConstant(-1);                      // int int -1
             Emit.UnsignedBranchIfNotEqual(haveChar);    // int
@@ -142,12 +156,20 @@ namespace Jil.Deserialize
             ThrowExpectedButEnded("" + c);
         }
 
+        static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) }, null);
         void ThrowExpectedButEnded(params object[] ps)
         {
             Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
             Emit.LoadArgument(0);                                                               // string TextReader
             Emit.LoadConstant(true);                                                            // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();               // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);          // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();           // DeserializationException
+            }
             Emit.Throw();                                                                       // --empty--
         }
 
@@ -156,7 +178,15 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected character: '" + s + "', but the reader ended"); // string
             Emit.LoadArgument(0);                                                       // string TextReader
             Emit.LoadConstant(true);                                                    // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();       // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            }
+
             Emit.Throw();                                                               // --empty--
         }
 
@@ -165,7 +195,14 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected character: '" + c + "'");                   // string
             Emit.LoadArgument(0);                                                   // string TextReader
             Emit.LoadConstant(false);                                               // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            }
             Emit.Throw();                                                           // --empty--
         }
 
@@ -184,7 +221,14 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
             Emit.LoadArgument(0);                                                               // string TextReader
             Emit.LoadConstant(true);                                                            // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();               // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);          // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();           // DeserializationException
+            }
             Emit.Throw();                                                                       // --empty--
 
             Emit.MarkLabel(notEmpty);                   // int
@@ -195,7 +239,14 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected: " + string.Join(", ", ps));                // string
             Emit.LoadArgument(0);                                                   // string TextReader
             Emit.LoadConstant(false);                                               // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            }
             Emit.Throw();                                                           // --empty--
         }
 
@@ -204,8 +255,7 @@ namespace Jil.Deserialize
             var gotRightChar = Emit.DefineLabel();
             var gotAChar = Emit.DefineLabel();
 
-            Emit.LoadArgument(0);                       // TextReader
-            Emit.CallVirtual(TextReader_Read);          // int
+            ReadCharFromStream();                       // int
             Emit.LoadConstant((int)c);                  // int int
             Emit.Duplicate();                           // int int int
             Emit.LoadConstant(-1);                      // int int int -1
@@ -823,8 +873,8 @@ namespace Jil.Deserialize
 
         void ConsumeWhiteSpace()
         {
-            Emit.LoadArgument(0);                   // TextReader
-            Emit.Call(Methods.ConsumeWhiteSpace);       // --empty--
+            Emit.LoadArgument(0);                                       // TextReader
+            Emit.Call(Methods.GetConsumeWhiteSpace(ReadingFromString)); // --empty--
         }
 
         void ReadSkipWhitespace()
@@ -840,15 +890,21 @@ namespace Jil.Deserialize
             Emit.LoadArgument(1);                   // int
             Emit.LoadConstant(0);                   // int
             Emit.UnsignedBranchIfNotEqual(success); // --empty --
-            Emit.LoadArgument(0);                           // TextReader
-            Emit.CallVirtual(TextReader_Read);              // int
-            Emit.LoadConstant(-1);                          // int -1
-            Emit.BranchIfEqual(success);                    // --empty--
+            ReadCharFromStream();                   // int
+            Emit.LoadConstant(-1);                  // int -1
+            Emit.BranchIfEqual(success);            // --empty--
 
             Emit.LoadConstant("Expected end of stream");                            // string
             Emit.LoadArgument(0);                                                   // string TextReader
             Emit.LoadConstant(false);                                               // string TextReader bool
-            Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            if (ReadingFromString)
+            {
+                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
+            }
+            else
+            {
+                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+            }
             Emit.Throw();                                                           // --empty--
 
             Emit.MarkLabel(success);        // --empty--
@@ -1096,8 +1152,7 @@ namespace Jil.Deserialize
                 Emit.Branch(startLoop);             // --empty--
 
                 Emit.MarkLabel(done);               // listType(*?)
-                Emit.LoadArgument(0);               // listType(*?) TextReader
-                Emit.CallVirtual(TextReader_Read);  // listType(*?) int
+                ReadCharFromStream();               // listType(*?) int
                 Emit.Pop();                         // listType(*?)
 
                 Emit.MarkLabel(doneSkipChar);       // listType(*?)
@@ -1246,8 +1301,7 @@ namespace Jil.Deserialize
             }
 
             Emit.MarkLabel(done);               // dictType(*?)
-            Emit.LoadArgument(0);               // dictType(*?) TextReader
-            Emit.CallVirtual(TextReader_Read);  // dictType(*?) int
+            ReadCharFromStream();               // dictType(*?) int
             Emit.Pop();                         // dictType(*?)
 
             Emit.MarkLabel(doneSkipChar);       // dictType(*?)
@@ -1329,8 +1383,7 @@ namespace Jil.Deserialize
             Emit.Branch(continueSkipping);          // objType
 
             Emit.MarkLabel(done);               // objType
-            Emit.LoadArgument(0);               // objType TextReader
-            Emit.CallVirtual(TextReader_Read);  // objType int
+            ReadCharFromStream();               // objType int
             Emit.Pop();                         // objType
 
             Emit.MarkLabel(doneSkipChar);   // objType(*?)
@@ -1515,8 +1568,7 @@ namespace Jil.Deserialize
             }
 
             Emit.MarkLabel(done);               // objType(*?)
-            Emit.LoadArgument(0);               // objType(*?) TextReader
-            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+            ReadCharFromStream();               // objType(*?) int
             Emit.Pop();                         // objType(*?)
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
@@ -1694,8 +1746,7 @@ namespace Jil.Deserialize
             }
 
             Emit.MarkLabel(done);               // objType(*?)
-            Emit.LoadArgument(0);               // objType(*?) TextReader
-            Emit.CallVirtual(TextReader_Read);  // objType(*?) int
+            ReadCharFromStream();               // objType(*?) int
             Emit.Pop();                         // objType(*?)
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
@@ -1823,8 +1874,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(nextItem);           // int
             Emit.Pop();                         // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
+            ReadCharFromStream();               // int
             Emit.Pop();                         // --empty--
             ConsumeWhiteSpace();                // --empty--
             Emit.LoadField(order);              // Dictionary<string, int> string
@@ -1835,8 +1885,7 @@ namespace Jil.Deserialize
             Emit.Branch(readingMember);         // Dictionary<string, int> string
 
             Emit.MarkLabel(doneNotNull);        // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
+            ReadCharFromStream();               // int
             Emit.Pop();                         // --empty--
 
             var done = Emit.DefineLabel();
@@ -1983,8 +2032,7 @@ namespace Jil.Deserialize
             Emit.Branch(readingMember);         // int
 
             Emit.MarkLabel(doneNotNull);        // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.CallVirtual(TextReader_Read);  // int
+            ReadCharFromStream();               // int
 
             Emit.MarkLabel(doneNotNullPopSkipChar);
             Emit.Pop();                         // --empty--

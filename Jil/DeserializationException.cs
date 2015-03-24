@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Deserialize;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,10 +44,24 @@ namespace Jil
             EndedUnexpectedly = endedEarly;
         }
 
+        internal DeserializationException(Exception inner, ref ThunkReader reader, bool endedEarly)
+            : base(inner.Message, inner)
+        {
+            InspectReader(ref reader);
+            EndedUnexpectedly = endedEarly;
+        }
+
         internal DeserializationException(string msg, TextReader reader, bool endedEarly) 
             : base(msg) 
         {
             InspectReader(reader);
+            EndedUnexpectedly = endedEarly;
+        }
+
+        internal DeserializationException(string msg, ref ThunkReader reader, bool endedEarly)
+            : base(msg)
+        {
+            InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
 
@@ -57,10 +72,36 @@ namespace Jil
             EndedUnexpectedly = endedEarly;
         }
 
+        internal DeserializationException(string msg, ref ThunkReader reader, Exception inner, bool endedEarly)
+            : base(msg, inner)
+        {
+            InspectReader(ref reader);
+            EndedUnexpectedly = endedEarly;
+        }
+
         internal DeserializationException(string msg, Exception inner, bool endedEarly) 
             : base(msg + ": " + inner.Message, inner) 
         {
             EndedUnexpectedly = endedEarly;
+        }
+
+        void InspectReader(ref ThunkReader reader)
+        {
+            try
+            {
+                Position = reader.Position;
+
+                var sb = new StringBuilder();
+
+                int c;
+                while ((c = reader.Read()) != -1 && sb.Length < 50)
+                {
+                    sb.Append((char)c);
+                }
+
+                SnippetAfterError = sb.ToString();
+            }
+            catch (Exception) { /* best effort here, things are already jacked */ }
         }
 
         void InspectReader(TextReader reader)
