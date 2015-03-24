@@ -373,7 +373,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(byte))
             {
-                Emit.Call(Methods.ReadUInt8);   // byte
+                Emit.Call(Methods.GetReadUInt8(ReadingFromString));   // byte
                 return;
             }
 

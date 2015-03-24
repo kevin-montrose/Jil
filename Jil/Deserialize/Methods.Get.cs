@@ -16,5 +16,13 @@ namespace Jil.Deserialize
                     ConsumeWhiteSpace :
                     ConsumeWhiteSpaceThunkReader;
         }
+
+        public static MethodInfo GetReadUInt8(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadUInt8 :
+                    ReadUInt8ThunkReader;
+        }
     }
 }

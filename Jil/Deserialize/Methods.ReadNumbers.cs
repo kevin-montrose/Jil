@@ -78,7 +78,7 @@ namespace Jil.Deserialize
             if (temp > 59) throw new DeserializationException("Expected minute portion of timezone offset between 0 and 59", reader, false);
         }
 
-        public static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static byte _ReadUInt8(TextReader reader)
         {
