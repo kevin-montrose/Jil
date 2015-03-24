@@ -476,7 +476,7 @@ namespace Jil.Deserialize
                 c == 0x0D;
         }
 
-        public static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedString(TextReader reader, ref StringBuilder commonSb)
         {
@@ -527,7 +527,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadEncodedStringWithCharArray = typeof(Methods).GetMethod("_ReadEncodedStringWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadEncodedStringWithCharArray = typeof(Methods).GetMethod("_ReadEncodedStringWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         static string _ReadEncodedStringWithCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -630,7 +630,7 @@ namespace Jil.Deserialize
             return (char)unescaped;
         }
 
-        public static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
         {

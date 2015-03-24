@@ -332,21 +332,21 @@ namespace Jil.Deserialize
 
             if (UseCharArrayOverStringBuilder)
             {
-                LoadCharBufferAddress();                                   // TextReader char[]
-                Emit.Call(Methods.ReadEncodedStringWithCharArray); // string
+                LoadCharBufferAddress();                                                    // TextReader char[]
+                Emit.Call(Methods.GetReadEncodedStringWithCharArray(ReadingFromString));    // string
             }
             else
             {
                 if (UsingCharBuffer)
                 {
-                    LoadCharBuffer();                               // TextReader char[]
-                    LoadStringBuilder();                            // TextReader char[] StringBuilder
-                    Emit.Call(Methods.ReadEncodedStringWithBuffer); // string
+                    LoadCharBuffer();                                                       // TextReader char[]
+                    LoadStringBuilder();                                                    // TextReader char[] StringBuilder
+                    Emit.Call(Methods.GetReadEncodedStringWithBuffer(ReadingFromString));   // string
                 }
                 else
                 {
-                    LoadStringBuilder();                   // TextReader StringBuilder
-                    Emit.Call(Methods.ReadEncodedString);  // string
+                    LoadStringBuilder();                                        // TextReader StringBuilder
+                    Emit.Call(Methods.GetReadEncodedString(ReadingFromString)); // string
                 }
             }
         }

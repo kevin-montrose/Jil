@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Common;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -2111,6 +2112,429 @@ namespace Jil.Deserialize
             if (ret < char.MinValue || ret > char.MaxValue) throw new DeserializationException("Encoded character out of System.Char range, found: " + ret, ref reader, false);
 
             return (char)ret;
+        }
+
+        static readonly MethodInfo ReadEncodedStringWithCharArrayThunkReader = typeof(Methods).GetMethod("_ReadEncodedStringWithCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        static string _ReadEncodedStringWithCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
+        {
+            var idx = 0;
+            InitDynamicBuffer(ref buffer);
+
+            while (true)
+            {
+                while (idx < buffer.Length - 1)
+                {
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                    if (first == '"')
+                    {
+                        goto complete;
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[idx++] = (char)first;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                    switch (second)
+                    {
+                        case '"': buffer[idx++] = '"'; continue;
+                        case '\\': buffer[idx++] = '\\'; continue;
+                        case '/': buffer[idx++] = '/'; continue;
+                        case 'b': buffer[idx++] = '\b'; continue;
+                        case 'f': buffer[idx++] = '\f'; continue;
+                        case 'n': buffer[idx++] = '\n'; continue;
+                        case 'r': buffer[idx++] = '\r'; continue;
+                        case 't': buffer[idx++] = '\t'; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    buffer[idx++] = ReadHexQuad2(ref reader);
+                }
+
+                GrowDynamicBuffer(ref buffer);
+            }
+
+            complete: 
+            return new string(buffer, 0, idx);
+        }
+
+        static char ReadHexQuad2(ref ThunkReader reader)
+        {
+            int unescaped;
+            int c;
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9')
+            {
+                unescaped = (c - '0') << 12;
+            }
+            else if (c >= 'A' && c <= 'F')
+            {
+                unescaped = (10 + c - 'A') << 12;
+            }
+            else if (c >= 'a' && c <= 'f')
+            {
+                unescaped = (10 + c - 'a') << 12;
+            }
+            else
+            {
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9')
+            {
+                unescaped |= (c - '0') << 8;
+            }
+            else if (c >= 'A' && c <= 'F')
+            {
+                unescaped |= (10 + c - 'A') << 8;
+            }
+            else if (c >= 'a' && c <= 'f')
+            {
+                unescaped |= (10 + c - 'a') << 8;
+            }
+            else
+            {
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9')
+            {
+                unescaped |= (c - '0') << 4;
+            }
+            else if (c >= 'A' && c <= 'F')
+            {
+                unescaped |= (10 + c - 'A') << 4;
+            }
+            else if (c >= 'a' && c <= 'f')
+            {
+                unescaped |= (10 + c - 'a') << 4;
+            }
+            else
+            {
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+            c = reader.Read();
+            if (c >= '0' && c <= '9')
+            {
+                unescaped |= c - '0';
+            }
+            else if (c >= 'A' && c <= 'F')
+            {
+                unescaped |= 10 + c - 'A';
+            }
+            else if (c >= 'a' && c <= 'f')
+            {
+                unescaped |= 10 + c - 'a';
+            }
+            else
+            {
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, c == -1);
+            }
+
+            return (char)unescaped;
+        }
+
+        static readonly MethodInfo ReadEncodedStringWithBufferThunkReader = typeof(Methods).GetMethod("_ReadEncodedStringWithBufferThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static string _ReadEncodedStringWithBufferThunkReader(ref ThunkReader reader, char[] buffer, ref StringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new StringBuilder();
+
+            {
+                var ix = 0;
+
+                while (ix <= CharBufferSize)
+                {
+                    if (ix == CharBufferSize)
+                    {
+                        commonSb.Append(buffer, 0, ix);
+                        break;
+                    }
+
+                    var first = reader.Read();
+                    if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                    // we didn't have to use anything but the buffer, make a string and return it!
+                    if (first == '"')
+                    {
+                        // avoid an allocation here
+                        if (ix == 0) return "";
+
+                        return new string(buffer, 0, ix);
+                    }
+
+                    if (first != '\\')
+                    {
+                        buffer[ix] = (char)first;
+                        ix++;
+                        continue;
+                    }
+
+                    var second = reader.Read();
+                    if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                    switch (second)
+                    {
+                        case '"': buffer[ix] = '"'; ix++; continue;
+                        case '\\': buffer[ix] = '\\'; ix++; continue;
+                        case '/': buffer[ix] = '/'; ix++; continue;
+                        case 'b': buffer[ix] = '\b'; ix++; continue;
+                        case 'f': buffer[ix] = '\f'; ix++; continue;
+                        case 'n': buffer[ix] = '\n'; ix++; continue;
+                        case 'r': buffer[ix] = '\r'; ix++; continue;
+                        case 't': buffer[ix] = '\t'; ix++; continue;
+                    }
+
+                    if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+                    commonSb.Append(buffer, 0, ix);
+
+                    // now we're in an escape sequence, we expect 4 hex #s; always
+                    ReadHexQuadToBuilder(ref reader, commonSb);
+                    break;
+                }
+            }
+
+            // fall through to using a StringBuilder
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                if (first == '"')
+                {
+                    break;
+                }
+
+                if (first != '\\')
+                {
+                    commonSb.Append((char)first);
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                switch (second)
+                {
+                    case '"': commonSb.Append('"'); continue;
+                    case '\\': commonSb.Append('\\'); continue;
+                    case '/': commonSb.Append('/'); continue;
+                    case 'b': commonSb.Append('\b'); continue;
+                    case 'f': commonSb.Append('\f'); continue;
+                    case 'n': commonSb.Append('\n'); continue;
+                    case 'r': commonSb.Append('\r'); continue;
+                    case 't': commonSb.Append('\t'); continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                ReadHexQuadToBuilder(ref reader, commonSb);
+            }
+
+            var ret = commonSb.ToString();
+
+            // leave this clean for the next use
+            commonSb.Clear();
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ReadHexQuadToBuilder(ref ThunkReader reader, StringBuilder commonSb)
+        {
+            var encodedChar = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+
+                if (c == -1) throw new DeserializationException("Expected hex digit, stream ended instead", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char2;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char2:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                if (c == -1) throw new DeserializationException("Expected hex digit, stream ended instead", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char3;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char3:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                if (c == -1) throw new DeserializationException("Expected hex digit, stream ended instead", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto char4;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char4:
+            encodedChar *= 16;
+            {
+                var c = reader.Read();
+
+                if (c == -1) throw new DeserializationException("Expected hex digit, stream ended instead", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    encodedChar += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    encodedChar += 10 + c;
+                    goto finished;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        finished:
+            commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
+        }
+
+        static readonly MethodInfo ReadEncodedStringThunkReader = typeof(Methods).GetMethod("_ReadEncodedStringThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static string _ReadEncodedStringThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
+        {
+            commonSb = commonSb ?? new StringBuilder();
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                if (first == '"')
+                {
+                    break;
+                }
+
+                if (first != '\\')
+                {
+                    commonSb.Append((char)first);
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                switch (second)
+                {
+                    case '"': commonSb.Append('"'); continue;
+                    case '\\': commonSb.Append('\\'); continue;
+                    case '/': commonSb.Append('/'); continue;
+                    case 'b': commonSb.Append('\b'); continue;
+                    case 'f': commonSb.Append('\f'); continue;
+                    case 'n': commonSb.Append('\n'); continue;
+                    case 'r': commonSb.Append('\r'); continue;
+                    case 't': commonSb.Append('\t'); continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                ReadHexQuadToBuilder(ref reader, commonSb);
+            }
+
+            var ret = commonSb.ToString();
+
+            // leave this clean for the next use
+            commonSb.Clear();
+
+            return ret;
         }
     }
 }

@@ -160,5 +160,29 @@ namespace Jil.Deserialize
                     ReadEncodedChar :
                     ReadEncodedCharThunkReader;
         }
+
+        public static MethodInfo GetReadEncodedStringWithCharArray(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadEncodedStringWithCharArray :
+                    ReadEncodedStringWithCharArrayThunkReader;
+        }
+
+        public static MethodInfo GetReadEncodedStringWithBuffer(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadEncodedStringWithBuffer :
+                    ReadEncodedStringWithBufferThunkReader;
+        }
+
+        public static MethodInfo GetReadEncodedString(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadEncodedString :
+                    ReadEncodedStringThunkReader;
+        }
     }
 }
