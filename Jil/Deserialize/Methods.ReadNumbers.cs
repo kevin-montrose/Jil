@@ -121,7 +121,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static sbyte _ReadInt8(TextReader reader)
         {

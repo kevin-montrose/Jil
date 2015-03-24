@@ -373,13 +373,13 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(byte))
             {
-                Emit.Call(Methods.GetReadUInt8(ReadingFromString));   // byte
+                Emit.Call(Methods.GetReadUInt8(ReadingFromString)); // byte
                 return;
             }
 
             if (numberType == typeof(sbyte))
             {
-                Emit.Call(Methods.ReadInt8);    // sbyte
+                Emit.Call(Methods.GetReadInt8(ReadingFromString));  // sbyte
                 return;
             }
 

@@ -24,5 +24,13 @@ namespace Jil.Deserialize
                     ReadUInt8 :
                     ReadUInt8ThunkReader;
         }
+
+        public static MethodInfo GetReadInt8(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadInt8 :
+                    ReadInt8ThunkReader;
+        }
     }
 }
