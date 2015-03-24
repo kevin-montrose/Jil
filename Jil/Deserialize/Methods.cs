@@ -76,7 +76,7 @@ namespace Jil.Deserialize
             public byte B15;
         }
 
-        public static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static Guid _ReadGuid(TextReader reader)
         {

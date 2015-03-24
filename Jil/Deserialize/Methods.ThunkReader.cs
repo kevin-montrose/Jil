@@ -2536,5 +2536,120 @@ namespace Jil.Deserialize
 
             return ret;
         }
+
+        static readonly MethodInfo ReadGuidThunkReader = typeof(Methods).GetMethod("_ReadGuidThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static Guid _ReadGuidThunkReader(ref ThunkReader reader)
+        {
+            // 1314FAD4-7505-439D-ABD2-DBD89242928C
+            // 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ
+            //
+            // Guid is guaranteed to be a 36 character string
+
+            // Bytes are in a different order than you might expect
+            // For: 35 91 8b c9 - 19 6d - 40 ea  - 97 79  - 88 9d 79 b7 53 f0 
+            // Get: C9 8B 91 35   6D 19   EA 40    97 79    88 9D 79 B7 53 F0 
+            // Ix:   0  1  2  3    4  5    6  7     8  9    10 11 12 13 14 15
+            //
+            // And we have to account for dashes
+            //
+            // So the map is like so:
+            // chars[0]  -> bytes[3]  -> buffer[ 0, 1]
+            // chars[1]  -> bytes[2]  -> buffer[ 2, 3]
+            // chars[2]  -> bytes[1]  -> buffer[ 4, 5]
+            // chars[3]  -> bytes[0]  -> buffer[ 6, 7]
+            // chars[4]  -> bytes[5]  -> buffer[ 9,10]
+            // chars[5]  -> bytes[4]  -> buffer[11,12]
+            // chars[6]  -> bytes[7]  -> buffer[14,15]
+            // chars[7]  -> bytes[6]  -> buffer[16,17]
+            // chars[8]  -> bytes[8]  -> buffer[19,20]
+            // chars[9]  -> bytes[9]  -> buffer[21,22]
+            // chars[10] -> bytes[10] -> buffer[24,25]
+            // chars[11] -> bytes[11] -> buffer[26,27]
+            // chars[12] -> bytes[12] -> buffer[28,29]
+            // chars[13] -> bytes[13] -> buffer[30,31]
+            // chars[14] -> bytes[14] -> buffer[32,33]
+            // chars[15] -> bytes[15] -> buffer[34,35]
+
+            var asStruct = new GuidStruct();
+            asStruct.B03 = ReadGuidByte(ref reader);
+            asStruct.B02 = ReadGuidByte(ref reader);
+            asStruct.B01 = ReadGuidByte(ref reader);
+            asStruct.B00 = ReadGuidByte(ref reader);
+
+            var c = reader.Read();
+            if (c != '-') throw new DeserializationException("Expected -", ref reader, c == -1);
+
+            asStruct.B05 = ReadGuidByte(ref reader);
+            asStruct.B04 = ReadGuidByte(ref reader);
+
+            c = reader.Read();
+            if (c != '-') throw new DeserializationException("Expected -", ref reader, c == -1);
+
+            asStruct.B07 = ReadGuidByte(ref reader);
+            asStruct.B06 = ReadGuidByte(ref reader);
+
+            c = reader.Read();
+            if (c != '-') throw new DeserializationException("Expected -", ref reader, c == -1);
+
+            asStruct.B08 = ReadGuidByte(ref reader);
+            asStruct.B09 = ReadGuidByte(ref reader);
+
+            c = reader.Read();
+            if (c != '-') throw new DeserializationException("Expected -", ref reader, c == -1);
+
+            asStruct.B10 = ReadGuidByte(ref reader);
+            asStruct.B11 = ReadGuidByte(ref reader);
+            asStruct.B12 = ReadGuidByte(ref reader);
+            asStruct.B13 = ReadGuidByte(ref reader);
+            asStruct.B14 = ReadGuidByte(ref reader);
+            asStruct.B15 = ReadGuidByte(ref reader);
+
+            return asStruct.Value;
+        }
+
+        static byte ReadGuidByte(ref ThunkReader reader)
+        {
+            var a = reader.Read();
+            if (a == -1) throw new DeserializationException("Expected any character", ref reader, true);
+            if (!((a >= '0' && a <= '9') || (a >= 'A' && a <= 'F') || (a >= 'a' && a <= 'f'))) throw new DeserializationException("Expected a hex number", ref reader, false);
+            var b = reader.Read();
+            if (b == -1) throw new DeserializationException("Expected any character", ref reader, true);
+            if (!((b >= '0' && b <= '9') || (b >= 'A' && b <= 'F') || (b >= 'a' && b <= 'f'))) throw new DeserializationException("Expected a hex number", ref reader, false);
+
+            if (a <= '9')
+            {
+                a -= '0';
+            }
+            else
+            {
+                if (a <= 'F')
+                {
+                    a -= ('A' - 10);
+                }
+                else
+                {
+                    a -= ('a' - 10);
+                }
+            }
+
+            if (b <= '9')
+            {
+                b -= '0';
+            }
+            else
+            {
+                if (b <= 'F')
+                {
+                    b -= ('A' - 10);
+                }
+                else
+                {
+                    b -= ('a' - 10);
+                }
+            }
+
+            return (byte)(a * 16 + b);
+        }
     }
 }

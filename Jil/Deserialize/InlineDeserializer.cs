@@ -533,9 +533,9 @@ namespace Jil.Deserialize
         void ReadGuid()
         {
             ExpectQuote();
-            Emit.LoadArgument(0);           // TextReader
-            Emit.Call(Methods.ReadGuid);    // Guid
-            ExpectQuote();                  // Guid
+            Emit.LoadArgument(0);                               // TextReader
+            Emit.Call(Methods.GetReadGuid(ReadingFromString));  // Guid
+            ExpectQuote();                                      // Guid
         }
 
         static readonly ConstructorInfo DateTimeOffsetConst = typeof(DateTimeOffset).GetConstructor(new[] { typeof(DateTime) });

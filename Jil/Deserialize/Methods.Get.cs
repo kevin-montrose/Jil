@@ -184,5 +184,13 @@ namespace Jil.Deserialize
                     ReadEncodedString :
                     ReadEncodedStringThunkReader;
         }
+
+        public static MethodInfo GetReadGuid(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadGuid :
+                    ReadGuidThunkReader;
+        }
     }
 }
