@@ -385,7 +385,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(short))
             {
-                Emit.Call(Methods.ReadInt16);   // short
+                Emit.Call(Methods.GetReadInt16(ReadingFromString)); // short
                 return;
             }
 

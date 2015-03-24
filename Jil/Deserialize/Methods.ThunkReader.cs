@@ -118,6 +118,74 @@ namespace Jil.Deserialize
             }
         }
 
+        static readonly MethodInfo ReadInt16ThunkReader = typeof(Methods).GetMethod("_ReadInt16ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static short _ReadInt16ThunkReader(ref ThunkReader reader)
+        {
+            // max:  32767
+            // min: -32768
+            // digits:   5
+
+            int ret = 0;
+            var negative = false;
+
+            // digit #1
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected digit or '-'", ref reader, true);
+
+            if (c == '-')
+            {
+                negative = true;
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected digit", ref reader, true);
+            }
+
+            var firstDigitZero = c == '0';
+            c = c - '0';
+            if (c < 0 || c > 9) throw new DeserializationException("Expected digit", ref reader, false);
+            ret += c;
+
+            // digit #2
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            if (firstDigitZero) throw new DeserializationException("Number cannot have leading zeros", ref reader, false);
+            reader.Read();
+            ret *= 10;
+            ret += c;
+
+            // digit #3
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (sbyte)(ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += c;
+
+            // digit #4
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += c;
+
+            // digit #5
+            c = reader.Peek();
+            c = c - '0';
+            if (c < 0 || c > 9) return (short)(ret * (negative ? -1 : 1));
+            reader.Read();
+            ret *= 10;
+            ret += c;
+
+            AssertNotFollowedByDigit(ref reader);
+
+            checked
+            {
+                return (short)(ret * (negative ? -1 : 1));
+            }
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void AssertNotFollowedByDigit(ref ThunkReader reader)
         {
