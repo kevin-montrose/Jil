@@ -157,19 +157,30 @@ namespace Jil.Deserialize
         }
 
         static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) }, null);
-        void ThrowExpectedButEnded(params object[] ps)
+        static readonly ConstructorInfo DeserializationException_Cons_string_TextReader_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(TextReader), typeof(bool) }, null);
+        void ThrowStringStreamBool()
         {
-            Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
-            Emit.LoadArgument(0);                                                               // string TextReader
-            Emit.LoadConstant(true);                                                            // string TextReader bool
+            // top of stack is:
+            // string
+            // (TextReader|ref ThunkReader)
+            // bool
+
             if (ReadingFromString)
             {
                 Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);          // DeserializationException
             }
             else
             {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();           // DeserializationException
+                Emit.NewObject(DeserializationException_Cons_string_TextReader_bool);           // DeserializationException
             }
+        }
+
+        void ThrowExpectedButEnded(params object[] ps)
+        {
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
+            Emit.LoadArgument(0);                                                               // string TextReader
+            Emit.LoadConstant(true);                                                            // string TextReader bool
+            ThrowStringStreamBool();                                                            // DeserializationException
             Emit.Throw();                                                                       // --empty--
         }
 
@@ -178,15 +189,7 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected character: '" + s + "', but the reader ended"); // string
             Emit.LoadArgument(0);                                                       // string TextReader
             Emit.LoadConstant(true);                                                    // string TextReader bool
-            if (ReadingFromString)
-            {
-                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
-            }
-            else
-            {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
-            }
-
+            ThrowStringStreamBool();                                                    // DeserializationException
             Emit.Throw();                                                               // --empty--
         }
 
@@ -195,14 +198,7 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected character: '" + c + "'");                   // string
             Emit.LoadArgument(0);                                                   // string TextReader
             Emit.LoadConstant(false);                                               // string TextReader bool
-            if (ReadingFromString)
-            {
-                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
-            }
-            else
-            {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
-            }
+            ThrowStringStreamBool();                                                // DeserializationException
             Emit.Throw();                                                           // --empty--
         }
 
@@ -221,14 +217,7 @@ namespace Jil.Deserialize
             Emit.LoadConstant("Expected: " + string.Join(", ", ps) + "; but the reader ended"); // string
             Emit.LoadArgument(0);                                                               // string TextReader
             Emit.LoadConstant(true);                                                            // string TextReader bool
-            if (ReadingFromString)
-            {
-                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);          // DeserializationException
-            }
-            else
-            {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();           // DeserializationException
-            }
+            ThrowStringStreamBool();                                                            // DeserializationException
             Emit.Throw();                                                                       // --empty--
 
             Emit.MarkLabel(notEmpty);                   // int
@@ -236,18 +225,11 @@ namespace Jil.Deserialize
 
         void ThrowExpected(params object[] ps)
         {
-            Emit.LoadConstant("Expected: " + string.Join(", ", ps));                // string
-            Emit.LoadArgument(0);                                                   // string TextReader
-            Emit.LoadConstant(false);                                               // string TextReader bool
-            if (ReadingFromString)
-            {
-                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
-            }
-            else
-            {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
-            }
-            Emit.Throw();                                                           // --empty--
+            Emit.LoadConstant("Expected: " + string.Join(", ", ps));    // string
+            Emit.LoadArgument(0);                                       // string TextReader
+            Emit.LoadConstant(false);                                   // string TextReader bool
+            ThrowStringStreamBool();                                    // DeserializationException
+            Emit.Throw();                                               // --empty--
         }
 
         void ExpectChar(char c)
@@ -808,7 +790,7 @@ namespace Jil.Deserialize
                     Emit.LoadConstant("Couldn't parse RFC1123 DateTime");                   // string
                     Emit.LoadArgument(0);                                                   // string TextReader
                     Emit.LoadConstant(false);                                               // string TextReader bool
-                    Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
+                    ThrowStringStreamBool();
                     Emit.Throw();
 
                     Emit.MarkLabel(success);    // --empty--
@@ -894,18 +876,11 @@ namespace Jil.Deserialize
             Emit.LoadConstant(-1);                  // int -1
             Emit.BranchIfEqual(success);            // --empty--
 
-            Emit.LoadConstant("Expected end of stream");                            // string
-            Emit.LoadArgument(0);                                                   // string TextReader
-            Emit.LoadConstant(false);                                               // string TextReader bool
-            if (ReadingFromString)
-            {
-                Emit.NewObject(DeserializationException_Cons_string_ThunkWriter_bool);  // DeserializationException
-            }
-            else
-            {
-                Emit.NewObject<DeserializationException, string, TextReader, bool>();   // DeserializationException
-            }
-            Emit.Throw();                                                           // --empty--
+            Emit.LoadConstant("Expected end of stream");    // string
+            Emit.LoadArgument(0);                           // string TextReader
+            Emit.LoadConstant(false);                       // string TextReader bool
+            ThrowStringStreamBool();                        // DeserializationException
+            Emit.Throw();                                   // --empty--
 
             Emit.MarkLabel(success);        // --empty--
         }
