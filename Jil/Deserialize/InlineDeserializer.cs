@@ -415,7 +415,7 @@ namespace Jil.Deserialize
 
             if (numberType == typeof(ulong))
             {
-                Emit.Call(Methods.ReadUInt64);  // ulong
+                Emit.Call(Methods.GetReadUInt64(ReadingFromString));    // ulong
                 return;
             }
 
