@@ -7838,34 +7838,70 @@ namespace JilTests
         [TestMethod]
         public void NaNFails()
         {
-            try
+            // double
             {
-                JSON.Serialize(double.NaN);
-                Assert.Fail("Should be impossible");
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("NaN is not a permitted JSON number value", e.Message);
+                try
+                {
+                    JSON.Serialize(double.NaN);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("NaN is not a permitted JSON number value", e.Message);
+                }
+
+                try
+                {
+                    JSON.Serialize(double.NegativeInfinity);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("-Infinity is not a permitted JSON number value", e.Message);
+                }
+
+                try
+                {
+                    JSON.Serialize(double.PositiveInfinity);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
+                }
             }
 
-            try
+            // float
             {
-                JSON.Serialize(double.NegativeInfinity);
-                Assert.Fail("Should be impossible");
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("-Infinity is not a permitted JSON number value", e.Message);
-            }
+                try
+                {
+                    JSON.Serialize(float.NaN);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("NaN is not a permitted JSON number value", e.Message);
+                }
 
-            try
-            {
-                JSON.Serialize(double.PositiveInfinity);
-                Assert.Fail("Should be impossible");
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
+                try
+                {
+                    JSON.Serialize(float.NegativeInfinity);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("-Infinity is not a permitted JSON number value", e.Message);
+                }
+
+                try
+                {
+                    JSON.Serialize(float.PositiveInfinity);
+                    Assert.Fail("Should be impossible");
+                }
+                catch (Exception e)
+                {
+                    Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
+                }
             }
         }
     }
