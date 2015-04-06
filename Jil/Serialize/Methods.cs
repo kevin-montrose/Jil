@@ -1648,14 +1648,9 @@ namespace Jil.Serialize
 
         static readonly MethodInfo ValidateDouble = typeof(Methods).GetMethod("_ValidateDouble", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static void _ValidateDouble(double d)
+        static void _ValidateDouble(double d)
         {
-            const ulong NaNMask = 0x7FF0000000000000;
-
-            ulong asULong = *((ulong*)(&d));
-            var isNaN = (asULong & NaNMask) == NaNMask;
-
-            if (!isNaN) return;
+            if (!double.IsNaN(d) && !double.IsInfinity(d)) return;
 
             if (double.IsNegativeInfinity(d)) throw new InvalidOperationException("-Infinity is not a permitted JSON number value");
             if (double.IsPositiveInfinity(d)) throw new InvalidOperationException("Infinity is not a permitted JSON number value");
@@ -1665,14 +1660,9 @@ namespace Jil.Serialize
 
         static readonly MethodInfo ValidateFloat = typeof(Methods).GetMethod("_ValidateFloat", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe static void _ValidateFloat(float f)
+        static void _ValidateFloat(float f)
         {
-            const uint NaNMask = 0x7F800000;
-            
-            uint asUInt = *((uint*)(&f));
-            var isNaN = (asUInt & NaNMask) == NaNMask;
-
-            if (!isNaN) return;
+            if (!float.IsNaN(f) && !float.IsInfinity(f)) return;
 
             if (float.IsNegativeInfinity(f)) throw new InvalidOperationException("-Infinity is not a permitted JSON number value");
             if (float.IsPositiveInfinity(f)) throw new InvalidOperationException("Infinity is not a permitted JSON number value");
