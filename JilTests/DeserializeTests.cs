@@ -5704,6 +5704,40 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void NaNFails()
+        {
+            try
+            {
+                JSON.Deserialize<float>("NaN");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.IsNotNull(e);
+            }
+
+            try
+            {
+                JSON.Deserialize<double>("NaN");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.IsNotNull(e);
+            }
+
+            try
+            {
+                JSON.Deserialize<decimal>("NaN");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.IsNotNull(e);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
