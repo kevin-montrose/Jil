@@ -10,10 +10,14 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
+    delegate EnumType EnumThunkReaderDelegate<EnumType>(ref ThunkReader reader) 
+        where EnumType : struct;
+
     class EnumLookup<EnumType>
         where EnumType : struct
     {
         private static Func<TextReader, EnumType> _getEnumValue;
+        private static EnumThunkReaderDelegate<EnumType> _getEnumValueThunkReader;
 
         static EnumLookup()
         {
@@ -23,6 +27,11 @@ namespace Jil.Deserialize
                 typeof(EnumType).IsFlagsEnum()
                     ? CreateFindFlagsEnum(enumValues)
                     : CreateFindEnum(enumValues);
+
+            _getEnumValueThunkReader =
+                typeof(EnumType).IsFlagsEnum()
+                    ? CreateFindFlagsEnumThunkReader(enumValues)
+                    : CreateFindEnumThunkReader(enumValues);
         }
 
         private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
@@ -53,6 +62,28 @@ namespace Jil.Deserialize
                 );
 
             return (Func<TextReader, EnumType>)ret;
+        }
+
+        private static EnumThunkReaderDelegate<EnumType> CreateFindEnumThunkReader(IEnumerable<Tuple<string, object>> names)
+        {
+            var thunkReaderRef = typeof(ThunkReader).MakeByRefType();
+
+            var underlyingType = Enum.GetUnderlyingType(typeof(EnumType));
+
+            var nameToResults =
+                names
+                .Select(name => NameAutomata<EnumType>.CreateName(thunkReaderRef, name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
+                .ToList();
+
+            var ret =
+                NameAutomata<EnumType>.Create<EnumThunkReaderDelegate<EnumType>>(
+                    thunkReaderRef,
+                    nameToResults,
+                    false,
+                    defaultValue: null
+                );
+
+            return (EnumThunkReaderDelegate<EnumType>)ret;
         }
 
         private static Func<TextReader, EnumType> CreateFindFlagsEnum(IReadOnlyList<Tuple<string, object>> names)
@@ -101,6 +132,54 @@ namespace Jil.Deserialize
             return (Func<TextReader, EnumType>)ret;
         }
 
+        private static EnumThunkReaderDelegate<EnumType> CreateFindFlagsEnumThunkReader(IReadOnlyList<Tuple<string, object>> names)
+        {
+            var thunkReaderRef = typeof(ThunkReader).MakeByRefType();
+
+            var underlyingType = Enum.GetUnderlyingType(typeof(EnumType));
+
+            var resultValue = "result_value";
+
+            var nameToResults =
+                names
+                .Select(name =>
+                    NameAutomata<EnumType>.CreateName(
+                        thunkReaderRef,
+                        name.Item1,
+                        emit =>
+                        {
+                            LoadConstantOfType(emit, name.Item2, underlyingType);
+                            emit.LoadLocal(resultValue);
+                            emit.Or();
+                            emit.StoreLocal(resultValue);
+                        }))
+                .ToList();
+
+
+            var ret =
+                NameAutomata<EnumType>.CreateFold<EnumThunkReaderDelegate<EnumType>>(
+                    thunkReaderRef,
+                    nameToResults,
+                    emit =>
+                    {
+                        emit.DeclareLocal(underlyingType, resultValue);
+                        LoadConstantOfType(emit, 0, underlyingType);
+                        emit.StoreLocal(resultValue);
+                    },
+                    emit =>
+                    {
+                        emit.LoadLocal(resultValue);
+                        emit.Return();
+                    },
+                    true,
+                    true,
+                    false,
+                    defaultValue: null
+                );
+
+            return (EnumThunkReaderDelegate<EnumType>)ret;
+        }
+
         static void LoadConstantOfType(Emit Emit, object val, Type type)
         {
             if (type == typeof(byte))
@@ -144,6 +223,11 @@ namespace Jil.Deserialize
         public static EnumType GetEnumValue(TextReader reader)
         {
             return _getEnumValue(reader);
+        }
+
+        public static EnumType GetEnumValueThunkReader(ref ThunkReader reader)
+        {
+            return _getEnumValueThunkReader(ref reader);
         }
     }
 }

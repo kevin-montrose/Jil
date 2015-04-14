@@ -2651,5 +2651,133 @@ namespace Jil.Deserialize
 
             return (byte)(a * 16 + b);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int ReadHexQuadThunkReader(ref ThunkReader reader)
+        {
+            int unescaped = 0;
+
+            //char1:
+            {
+                var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected hex digit, instead reader ended", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char2;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char2;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char2:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected hex digit, instead reader ended", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char3;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char3;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char3:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected hex digit, instead reader ended", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto char4;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto char4;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        char4:
+            unescaped *= 16;
+            {
+                var c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected hex digit, instead reader ended", ref reader, true);
+
+                c -= '0';
+                if (c >= 0 && c <= 9)
+                {
+                    unescaped += c;
+                    goto finished;
+                }
+
+                c -= ('A' - '0');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                c -= ('f' - 'F');
+                if (c >= 0 && c <= 5)
+                {
+                    unescaped += 10 + c;
+                    goto finished;
+                }
+
+                throw new DeserializationException("Expected hex digit, found: " + c, ref reader, false);
+            }
+
+        finished:
+            return unescaped;
+        }
     }
 }

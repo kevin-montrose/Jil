@@ -21,7 +21,18 @@ namespace Jil.Deserialize
     {
         static class Helper
         {
-            static void Consume(TextReader tr, int ch)
+            static MethodInfo Consume = typeof(Helper).GetMethod("_Consume", BindingFlags.Static | BindingFlags.NonPublic);
+            static MethodInfo ConsumeThunkReader = typeof(Helper).GetMethod("_ConsumeThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+
+            public static MethodInfo GetConsume(Type forType)
+            {
+                if (forType == typeof(TextReader)) return Consume;
+                if (forType == typeof(ThunkReader).MakeByRefType()) return ConsumeThunkReader;
+
+                throw new Exception("Unexpected type " + forType);
+            }
+
+            static void _Consume(TextReader tr, int ch)
             {
                 while (ch != '\"' && ch != -1)
                 {
@@ -29,7 +40,26 @@ namespace Jil.Deserialize
                 }
             }
 
-            static char ExpectUnicodeHexQuad(TextReader reader)
+            static void _ConsumeThunkReader(ref ThunkReader tr, int ch)
+            {
+                while (ch != '\"' && ch != -1)
+                {
+                    ch = tr.Read();
+                }
+            }
+
+            static MethodInfo ExpectUnicodeHexQuad = typeof(Helper).GetMethod("_ExpectUnicodeHexQuad", BindingFlags.Static | BindingFlags.NonPublic);
+            static MethodInfo ExpectUnicodeHexQuadThunkReader = typeof(Helper).GetMethod("_ExpectUnicodeHexQuadThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+
+            public static MethodInfo GetExpectUnicodeHexQuad(Type forType)
+            {
+                if (forType == typeof(TextReader)) return ExpectUnicodeHexQuad;
+                if (forType == typeof(ThunkReader).MakeByRefType()) return ExpectUnicodeHexQuadThunkReader;
+
+                throw new Exception("Unexpected type " + forType);
+            }
+
+            static int _ExpectUnicodeHexQuad(TextReader reader)
             {
                 var c = reader.Read();
                 if (c != 'u')
@@ -37,13 +67,31 @@ namespace Jil.Deserialize
                     throw new DeserializationException("Escape sequence expected unicode hex quad", reader, c == -1);
                 }
 
-                return (char)Methods.ReadHexQuad(reader);
+                return Methods.ReadHexQuad(reader);
+            }
+
+            static int _ExpectUnicodeHexQuadThunkReader(ref ThunkReader reader)
+            {
+                var c = reader.Read();
+                if (c != 'u')
+                {
+                    throw new DeserializationException("Escape sequence expected unicode hex quad", ref reader, c == -1);
+                }
+
+                return Methods.ReadHexQuadThunkReader(ref reader);
+            }
+
+            static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
+            static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", Type.EmptyTypes);
+
+            public static MethodInfo GetRead(Type forType)
+            {
+                if (forType == typeof(TextReader)) return TextReader_Read;
+                if (forType == typeof(ThunkReader).MakeByRefType()) return ThunkReader_Read;
+
+                throw new Exception("Unexpected type " + forType);
             }
         }
-
-        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo Helper_Consume = typeof(Helper).GetMethod("Consume", BindingFlags.Static | BindingFlags.NonPublic);
-        static MethodInfo Helper_ExpectUnicodeHexQuad = typeof(Helper).GetMethod("ExpectUnicodeHexQuad", BindingFlags.Static | BindingFlags.NonPublic);
 
         class Data<V>
         {
@@ -115,7 +163,7 @@ namespace Jil.Deserialize
             });
         }
 
-        static void NextChar<V>(Data<V> d, IList<AutomataName> nameValues, int pos, Label onMatchChar)
+        static void NextChar<V>(Type readerType, Data<V> d, IList<AutomataName> nameValues, int pos, Label onMatchChar)
         {
             var chars =
                 nameValues
@@ -165,7 +213,7 @@ namespace Jil.Deserialize
                         namesToFinish.Add(Tuple.Create(lower, next));
                         namesToFinish.Add(Tuple.Create(upper, next));
                     }
-                    NextChar(d, items, pos + 1, next);
+                    NextChar(readerType, d, items, pos + 1, next);
                 }
             }
 
@@ -174,17 +222,17 @@ namespace Jil.Deserialize
                 d.Emit.MarkLabel(onMatchChar);
 
                 d.Emit.LoadArgument(0);
-                d.Emit.CallVirtual(TextReader_Read);
+                d.Emit.CallVirtual(Helper.GetRead(readerType));
                 d.Emit.StoreLocal(d.Local_ch);
 
                 DoCharBranches(d, namesToFinish);
 
-                d.Emit.LoadLocal(d.Local_ch);               // char
-                d.Emit.LoadConstant('\\');                  // char char
-                d.Emit.UnsignedBranchIfNotEqual(d.Failure); // 
-                d.Emit.LoadArgument(0);                     // TextReader
-                d.Emit.Call(Helper_ExpectUnicodeHexQuad);   // char
-                d.Emit.StoreLocal(d.Local_ch);              //
+                d.Emit.LoadLocal(d.Local_ch);                               // char
+                d.Emit.LoadConstant('\\');                                  // char char
+                d.Emit.UnsignedBranchIfNotEqual(d.Failure);                 // 
+                d.Emit.LoadArgument(0);                                     // TextReader
+                d.Emit.Call(Helper.GetExpectUnicodeHexQuad(readerType));    // char
+                d.Emit.StoreLocal(d.Local_ch);                              //
 
                 DoCharBranches(d, namesToFinish);
 
@@ -337,7 +385,7 @@ namespace Jil.Deserialize
 
                         emit.LoadArgument(0);
                         emit.LoadLocal(ch);
-                        emit.Call(Helper_Consume);
+                        emit.Call(Helper.GetConsume(readerType));
 
                         emit.LoadConstant("Unexpected value for " + typeof(T).Name);
                         emit.LoadArgument(0);
@@ -357,7 +405,7 @@ namespace Jil.Deserialize
 
                         emit.LoadArgument(0);
                         emit.LoadLocal(ch);
-                        emit.Call(Helper_Consume);
+                        emit.Call(Helper.GetConsume(readerType));
 
                         // strip of the ? if it exists
                         var type = typeof(T);
@@ -374,7 +422,7 @@ namespace Jil.Deserialize
             var start = emit.DefineLabel("start");
             var d = new Data<T>(addAction, emit, doReturn, start, failure, ch, skipWhitespace, foldMultipleValues, caseSensitive);
 
-            NextChar(d, sorted, 0, start);
+            NextChar(readerType, d, sorted, 0, start);
 
             foreach (var action in stack)
             {

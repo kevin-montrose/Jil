@@ -908,11 +908,20 @@ namespace Jil.Deserialize
             if (UseNameAutomataForEnums)
             {
                 var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
-                var getEnumValue = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
+
+                MethodInfo getVal;
+                if (ReadingFromString)
+                {
+                    getVal = setterLookup.GetMethod("GetEnumValueThunkReader", new[] { typeof(ThunkReader).MakeByRefType() });
+                }
+                else
+                {
+                    getVal = setterLookup.GetMethod("GetEnumValue", new[] { typeof(TextReader) });
+                }
 
                 ExpectQuote();
-                Emit.LoadArgument(0);     // TextReader
-                Emit.Call(getEnumValue);  // emum
+                Emit.LoadArgument(0);   // TextReader
+                Emit.Call(getVal);      // emum
 
                 return;
             }
