@@ -1570,6 +1570,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomRFC1123 = typeof(Methods).GetMethod("_CustomRFC1123", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomRFC1123(TextWriter writer, DateTime dt)
         {
             writer.Write('"');
@@ -1643,6 +1644,30 @@ namespace Jil.Serialize
             }
 
             writer.Write(" GMT\"");
+        }
+
+        static readonly MethodInfo ValidateDouble = typeof(Methods).GetMethod("_ValidateDouble", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ValidateDouble(double d)
+        {
+            if (!double.IsNaN(d) && !double.IsInfinity(d)) return;
+
+            if (double.IsNegativeInfinity(d)) throw new InvalidOperationException("-Infinity is not a permitted JSON number value");
+            if (double.IsPositiveInfinity(d)) throw new InvalidOperationException("Infinity is not a permitted JSON number value");
+
+            throw new InvalidOperationException("NaN is not a permitted JSON number value");
+        }
+
+        static readonly MethodInfo ValidateFloat = typeof(Methods).GetMethod("_ValidateFloat", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ValidateFloat(float f)
+        {
+            if (!float.IsNaN(f) && !float.IsInfinity(f)) return;
+
+            if (float.IsNegativeInfinity(f)) throw new InvalidOperationException("-Infinity is not a permitted JSON number value");
+            if (float.IsPositiveInfinity(f)) throw new InvalidOperationException("Infinity is not a permitted JSON number value");
+
+            throw new InvalidOperationException("NaN is not a permitted JSON number value");
         }
     }
 }

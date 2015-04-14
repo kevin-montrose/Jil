@@ -9,6 +9,18 @@ namespace Jil.Serialize
 {
     static partial class Methods
     {
+        public static MethodInfo GetValidateDouble()
+        {
+            // no difference depending on thunk writer here
+            return ValidateDouble;
+        }
+
+        public static MethodInfo GetValidateFloat()
+        {
+            // no difference depending on thunk writer here
+            return ValidateFloat;
+        }
+
         public static MethodInfo GetCustomRFC1123(bool needThunkWriter)
         {
             return

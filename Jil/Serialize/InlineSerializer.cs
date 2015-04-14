@@ -1163,7 +1163,35 @@ namespace Jil.Serialize
                 }
             }
 
-            Emit.Call(proxyMethod);       // --empty--
+            ValidateFloatingPoint(primitiveType);       // TextWriter (float|double|decimal)
+            Emit.Call(proxyMethod);                     // --empty--
+        }
+
+        void ValidateFloatingPoint(Type type)
+        {
+            // JSON doesn't allow any sort of NaN value, including +/- Infinity
+            //  so we have to bail on them
+
+            MethodInfo validateCall;
+            if(type == typeof(double))
+            {
+                validateCall = Methods.GetValidateDouble();
+            }
+            else
+            {
+                if (type == typeof(float))
+                {
+                    validateCall = Methods.GetValidateFloat();
+                }else
+                {
+                    // decimal has no NaN values, so no checks are needed
+                    return;
+                }
+
+            }
+
+            Emit.Duplicate();           // TextWriter (float|double|decimal) (float|double|decimal)
+            Emit.Call(validateCall);    // TextWriter (float|double|decimal)
         }
 
         void WriteGuidFast(bool quotesNeedHandling)
