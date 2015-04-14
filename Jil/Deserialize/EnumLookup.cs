@@ -40,11 +40,11 @@ namespace Jil.Deserialize
 
             var nameToResults =
                 names
-                .Select(name => NameAutomata<EnumType>.CreateName(name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
+                .Select(name => NameAutomata<EnumType>.CreateName<TextReader>(name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
                 .ToList();
 
             return
-                NameAutomata<EnumType>.Create(
+                NameAutomata<EnumType>.Create<TextReader>(
                     nameToResults,
                     false,
                     defaultValue: null
@@ -60,7 +60,7 @@ namespace Jil.Deserialize
             var nameToResults =
                 names
                 .Select(name =>
-                    NameAutomata<EnumType>.CreateName(
+                    NameAutomata<EnumType>.CreateName<TextReader>(
                         name.Item1,
                         emit =>
                         {
