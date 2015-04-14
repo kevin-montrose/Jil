@@ -48,8 +48,8 @@ namespace Jil.Deserialize
         class Data<V>
         {
             public readonly Action<Action> AddAction;
-            public readonly Emit<Func<V, T>> Emit;
-            public readonly Action<Emit<Func<V, T>>> DoReturn;
+            public readonly Emit Emit;
+            public readonly Action<Emit> DoReturn;
             public readonly Label Start;
             public readonly Label Failure;
             public readonly Local Local_ch;
@@ -59,8 +59,8 @@ namespace Jil.Deserialize
 
             public Data(
                 Action<Action> addAction, 
-                Emit<Func<V, T>> emit, 
-                Action<Emit<Func<V, T>>> doReturn, 
+                Emit emit, 
+                Action<Emit> doReturn, 
                 Label start, 
                 Label failure, 
                 Local local_ch, 
@@ -81,19 +81,21 @@ namespace Jil.Deserialize
         }
 
         [DebuggerDisplay("{Name}")]
-        public class AutomataName<V>
+        public class AutomataName
         {
+            public readonly Type ReaderType;
             public readonly string Name;
-            public readonly Action<Emit<Func<V, T>>> OnFound;
+            public readonly Action<Emit> OnFound;
 
-            public AutomataName(string name, Action<Emit<Func<V, T>>> onFound)
+            public AutomataName(Type readerType, string name, Action<Emit> onFound)
             {
+                ReaderType = readerType;
                 Name = name;
                 OnFound = onFound;
             }
         }
 
-        static void FinishName<V>(Data<V> d, AutomataName<V> nameValue, Label onMatchChar)
+        static void FinishName<V>(Data<V> d, AutomataName nameValue, Label onMatchChar)
         {
             d.AddAction(() =>
             {
@@ -103,7 +105,7 @@ namespace Jil.Deserialize
             });
         }
 
-        private static void FoldName<V>(Data<V> d, AutomataName<V> nameValue, Label foldName)
+        private static void FoldName<V>(Data<V> d, AutomataName nameValue, Label foldName)
         {
             d.AddAction(() =>
             {
@@ -113,7 +115,7 @@ namespace Jil.Deserialize
             });
         }
 
-        static void NextChar<V>(Data<V> d, IList<AutomataName<V>> nameValues, int pos, Label onMatchChar)
+        static void NextChar<V>(Data<V> d, IList<AutomataName> nameValues, int pos, Label onMatchChar)
         {
             var chars =
                 nameValues
@@ -300,12 +302,12 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static AutomataName<V> CreateName<V>(string name, Action<Emit<Func<V, T>>> onFound)
+        public static AutomataName CreateName(Type readerType, string name, Action<Emit> onFound)
         {
-            return new AutomataName<V>(name, onFound);
+            return new AutomataName(readerType, name, onFound);
         }
 
-        public static Func<V, T> CreateFold<V>(IEnumerable<AutomataName<V>> names, Action<Emit<Func<V, T>>> initialize, Action<Emit<Func<V, T>>> doReturn, bool skipWhitespace, bool foldMultipleValues, bool caseSensitive, object defaultValue)
+        public static Delegate CreateFold<DelegateType>(Type readerType, IEnumerable<AutomataName> names, Action<Emit> initialize, Action<Emit> doReturn, bool skipWhitespace, bool foldMultipleValues, bool caseSensitive, object defaultValue)
         {
             var sorted =
                 names
@@ -316,12 +318,14 @@ namespace Jil.Deserialize
             Action<Action> addAction =
                 action => stack.Push(action);
 
-            var emit = Emit<Func<V, T>>.NewDynamicMethod(doVerify: Utils.DoVerify);
+            var emit = Emit.NewDynamicMethod(typeof(T), new[] { readerType }, doVerify: Utils.DoVerify);
 
             initialize(emit);
 
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
+
+            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(string), readerType, typeof(bool) }, null);
 
             if (defaultValue == null)
             {
@@ -338,7 +342,8 @@ namespace Jil.Deserialize
                         emit.LoadConstant("Unexpected value for " + typeof(T).Name);
                         emit.LoadArgument(0);
                         emit.LoadConstant(false);
-                        emit.NewObject<DeserializationException, string, V, bool>();
+
+                        emit.NewObject(cons);
                         emit.Throw();
                     }
                 );
@@ -367,7 +372,7 @@ namespace Jil.Deserialize
             }
 
             var start = emit.DefineLabel("start");
-            var d = new Data<V>(addAction, emit, doReturn, start, failure, ch, skipWhitespace, foldMultipleValues, caseSensitive);
+            var d = new Data<T>(addAction, emit, doReturn, start, failure, ch, skipWhitespace, foldMultipleValues, caseSensitive);
 
             NextChar(d, sorted, 0, start);
 
@@ -376,12 +381,12 @@ namespace Jil.Deserialize
                 action();
             }
 
-            return emit.CreateDelegate(Utils.DelegateOptimizationOptions);
+            return emit.CreateDelegate(typeof(DelegateType), Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<V, T> Create<V>(IEnumerable<AutomataName<V>> names, bool caseSensitive, object defaultValue)
+        public static Delegate Create<DelegateType>(Type readerType, IEnumerable<AutomataName> names, bool caseSensitive, object defaultValue)
         {
-            return CreateFold<V>(names, _ => { }, emit => emit.Return(), false, false, caseSensitive, defaultValue);
+            return CreateFold<DelegateType>(readerType, names, _ => { }, emit => emit.Return(), false, false, caseSensitive, defaultValue);
         }
     }
 }

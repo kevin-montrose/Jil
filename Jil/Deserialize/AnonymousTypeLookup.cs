@@ -35,10 +35,11 @@ namespace Jil.Deserialize
         {
             var nameToResults =
                 names
-                .Select((name, index) => NameAutomata<int>.CreateName<TextReader>(name, emit => emit.LoadConstant(index)))
+                .Select((name, index) => NameAutomata<int>.CreateName(typeof(TextReader), name, emit => emit.LoadConstant(index)))
                 .ToList();
 
-            return NameAutomata<int>.Create<TextReader>(nameToResults, true, defaultValue: -1);
+            var ret = NameAutomata<int>.Create<Func<TextReader, int>>(typeof(TextReader), nameToResults, true, defaultValue: -1);
+            return (Func<TextReader, int>)ret;
         }
 
         // probably not the best place for this; but sufficent I guess...

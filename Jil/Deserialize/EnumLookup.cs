@@ -1,4 +1,5 @@
 ﻿using Jil.Common;
+using Sigil.NonGeneric;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -26,7 +27,7 @@ namespace Jil.Deserialize
 
         private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
         {
-            return 
+            return
                 Enum.GetValues(typeof(EnumType))
                 .Cast<object>()
                 .Select(enumVal => Tuple.Create(typeof(EnumType).GetEnumValueName(enumVal), enumVal))
@@ -40,15 +41,18 @@ namespace Jil.Deserialize
 
             var nameToResults =
                 names
-                .Select(name => NameAutomata<EnumType>.CreateName<TextReader>(name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
+                .Select(name => NameAutomata<EnumType>.CreateName(typeof(TextReader), name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
                 .ToList();
 
-            return
-                NameAutomata<EnumType>.Create<TextReader>(
+            var ret =
+                NameAutomata<EnumType>.Create<Func<TextReader, EnumType>>(
+                    typeof(TextReader),
                     nameToResults,
                     false,
                     defaultValue: null
                 );
+
+            return (Func<TextReader, EnumType>)ret;
         }
 
         private static Func<TextReader, EnumType> CreateFindFlagsEnum(IReadOnlyList<Tuple<string, object>> names)
@@ -60,7 +64,8 @@ namespace Jil.Deserialize
             var nameToResults =
                 names
                 .Select(name =>
-                    NameAutomata<EnumType>.CreateName<TextReader>(
+                    NameAutomata<EnumType>.CreateName(
+                        typeof(TextReader),
                         name.Item1,
                         emit =>
                         {
@@ -72,8 +77,9 @@ namespace Jil.Deserialize
                 .ToList();
 
 
-            return 
-                NameAutomata<EnumType>.CreateFold(
+            var ret =
+                NameAutomata<EnumType>.CreateFold<Func<TextReader, EnumType>>(
+                    typeof(TextReader),
                     nameToResults,
                     emit =>
                     {
@@ -91,32 +97,50 @@ namespace Jil.Deserialize
                     false,
                     defaultValue: null
                 );
+
+            return (Func<TextReader, EnumType>)ret;
         }
 
-
-        static void LoadConstantOfType(Sigil.Emit<Func<TextReader, EnumType>> Emit, object val, Type type)
+        static void LoadConstantOfType(Emit Emit, object val, Type type)
         {
-            if (type == typeof(byte)) {
+            if (type == typeof(byte))
+            {
                 Emit.LoadConstant((byte)val);
-            } else if (type == typeof(sbyte)) {
+            }
+            else if (type == typeof(sbyte))
+            {
                 Emit.LoadConstant((sbyte)val);
-            } else if (type == typeof(short)) {
+            }
+            else if (type == typeof(short))
+            {
                 Emit.LoadConstant((short)val);
-            } else if (type == typeof(ushort)) {
+            }
+            else if (type == typeof(ushort))
+            {
                 Emit.LoadConstant((ushort)val);
-            } else if (type == typeof(int)) {
+            }
+            else if (type == typeof(int))
+            {
                 Emit.LoadConstant((int)val);
-            } else if (type == typeof(uint)) {
+            }
+            else if (type == typeof(uint))
+            {
                 Emit.LoadConstant((uint)val);
-            } else if (type == typeof(long)) {
+            }
+            else if (type == typeof(long))
+            {
                 Emit.LoadConstant((long)val);
-            } else if (type == typeof(ulong)) {
+            }
+            else if (type == typeof(ulong))
+            {
                 Emit.LoadConstant((ulong)val);
-            } else {
+            }
+            else
+            {
                 throw new ConstructionException("Unexpected type: " + type);
             }
         }
-        
+
         public static EnumType GetEnumValue(TextReader reader)
         {
             return _getEnumValue(reader);
