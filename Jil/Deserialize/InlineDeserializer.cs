@@ -1342,6 +1342,8 @@ namespace Jil.Deserialize
         {
             var continueSkipping = Emit.DefineLabel();
 
+            var skipEncodedString = Methods.GetSkipEncodedString(ReadingFromString);
+
             // first pass, doesn't check for ,
             ConsumeWhiteSpace();                // objType
             RawPeekChar();                      // objType char
@@ -1349,7 +1351,7 @@ namespace Jil.Deserialize
             Emit.BranchIfEqual(done);           // objType
 
             Emit.LoadArgument(0);                   // objType TextReader
-            Emit.Call(Methods.SkipEncodedString);   // objType
+            Emit.Call(skipEncodedString);           // objType
             ReadSkipWhitespace();                   // objType
             CheckChar(':');                         // objType
             ConsumeWhiteSpace();                    // objType
@@ -1368,7 +1370,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();                    // objType
             Emit.LoadArgument(0);                   // objType TextReader
-            Emit.Call(Methods.SkipEncodedString);   // objType
+            Emit.Call(skipEncodedString);           // objType
             ReadSkipWhitespace();                   // objType
             CheckChar(':');                         // objType
             ConsumeWhiteSpace();                    // objType
@@ -1931,7 +1933,17 @@ namespace Jil.Deserialize
             var cons = objType.GetConstructors().Single();
 
             var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
-            var findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
+
+            MethodInfo findConstructorParameterIndex;
+            if(ReadingFromString)
+            {
+                findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndexThunkReader", new[] { typeof(ThunkReader).MakeByRefType() });
+            }
+            else
+            {
+                findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndex", new[] { typeof(TextReader) });
+            }
+
             var propertyMap = (Dictionary<string, Tuple<Type, int>>)setterLookup.GetField("ParametersToTypeAndIndex").GetValue(null);
 
             if (propertyMap.Count == 0)

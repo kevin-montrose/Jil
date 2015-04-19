@@ -3083,5 +3083,12 @@ namespace Jil.Deserialize
                 return;
             }
         }
+
+        static MethodInfo SkipEncodedStringThunkReader = typeof(Methods).GetMethod("_SkipEncodedStringThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _SkipEncodedStringThunkReader(ref ThunkReader reader)
+        {
+            SkipEncodedStringWithLeadCharThunkReader(ref reader, reader.Read());
+        }
     }
 }

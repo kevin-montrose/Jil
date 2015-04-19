@@ -224,5 +224,13 @@ namespace Jil.Deserialize
                     Skip :
                     SkipThunkReader;
         }
+
+        public static MethodInfo GetSkipEncodedString(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    SkipEncodedString :
+                    SkipEncodedStringThunkReader;
+        }
     }
 }
