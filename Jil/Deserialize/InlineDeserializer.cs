@@ -800,10 +800,10 @@ namespace Jil.Deserialize
                 return;
             }
 
-            ExpectQuote();                      // --empty--
-            Emit.LoadArgument(0);               // TextReader
-            Emit.Call(Methods.ReadRFC1123Date); // DateTime
-            ExpectQuote();                      // DateTime
+            ExpectQuote();                                              // --empty--
+            Emit.LoadArgument(0);                                       // TextReader
+            Emit.Call(Methods.GetReadRFC1123Date(ReadingFromString));   // DateTime
+            ExpectQuote();                                              // DateTime
         }
 
         void ReadPrimitive(Type primitiveType)

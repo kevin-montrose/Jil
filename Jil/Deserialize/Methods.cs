@@ -1349,7 +1349,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static readonly MethodInfo ReadRFC1123Date = typeof(Methods).GetMethod("_ReadRFC1123Date", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadRFC1123Date = typeof(Methods).GetMethod("_ReadRFC1123Date", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTime _ReadRFC1123Date(TextReader reader)
         {

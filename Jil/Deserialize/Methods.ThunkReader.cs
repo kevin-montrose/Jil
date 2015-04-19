@@ -4000,5 +4000,325 @@ namespace Jil.Deserialize
                 return new TimeSpan(hour, mins, 0);
             }
         }
+
+        static readonly MethodInfo ReadRFC1123DateThunkReader = typeof(Methods).GetMethod("_ReadRFC1123DateThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTime _ReadRFC1123DateThunkReader(ref ThunkReader reader)
+        {
+            // ddd, dd MMM yyyy HH:mm:ss GMT'"
+
+            var dayOfWeek = ReadRFC1123DayOfWeekThunkReader(ref reader);
+
+            var c = reader.Read();
+            if (c != ',') throw new DeserializationException("Expected ,", ref reader, c == -1);
+
+            c = reader.Read();
+            if (c != ' ') throw new DeserializationException("Expected [space]", ref reader, c == -1);
+
+            var day = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            day += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            day *= 10;
+            day += (c - '0');
+
+            c = reader.Read();
+            if (c != ' ') throw new DeserializationException("Expected [space]", ref reader, c == -1);
+
+            var month = ReadRFC1123MonthThunkReader(ref reader);
+
+            c = reader.Read();
+            if (c != ' ') throw new DeserializationException("Expected [space]", ref reader, c == -1);
+
+            var year = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            year += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            year *= 10;
+            year += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            year *= 10;
+            year += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            year *= 10;
+            year += (c - '0');
+
+            c = reader.Read();
+            if (c != ' ') throw new DeserializationException("Expected [space]", ref reader, c == -1);
+
+            var hour = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            hour += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            hour *= 10;
+            hour += (c - '0');
+
+            c = reader.Read();
+            if (c != ':') throw new DeserializationException("Expected :", ref reader, c == -1);
+
+            var min = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            min += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            min *= 10;
+            min += (c - '0');
+
+            c = reader.Read();
+            if (c != ':') throw new DeserializationException("Expected :", ref reader, c == -1);
+
+            var sec = 0;
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            sec += (c - '0');
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            sec *= 10;
+            sec += (c - '0');
+
+            c = reader.Read();
+            if (c != ' ') throw new DeserializationException("Expected [space]", ref reader, c == -1);
+
+            c = reader.Read();
+            if (c != 'G') throw new DeserializationException("Expected G", ref reader, c == -1);
+            c = reader.Read();
+            if (c != 'M') throw new DeserializationException("Expected M", ref reader, c == -1);
+            c = reader.Read();
+            if (c != 'T') throw new DeserializationException("Expected T", ref reader, c == -1);
+
+            var ret = new DateTime(year, month, day, hour, min, sec, DateTimeKind.Utc);
+
+            if (ret.DayOfWeek != (DayOfWeek)dayOfWeek)
+            {
+                throw new DeserializationException("RFC1123 DateTime claimed to be [" + (DayOfWeek)dayOfWeek + "], but really was [" + ret.DayOfWeek + "]", ref reader, false);
+            }
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static byte ReadRFC1123MonthThunkReader(ref ThunkReader reader)
+        {
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected month, instead stream ended", ref reader, true);
+
+            // Jan | Jun | Jul
+            if (c == 'J')
+            {
+                c = reader.Read();
+                if (c == 'a')
+                {
+                    c = reader.Read();
+                    if (c != 'n') throw new DeserializationException("Expected n", ref reader, c == -1);
+
+                    return 1;
+                }
+
+                if (c != 'u') throw new DeserializationException("Expected u", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c == 'n') return 6;
+                if (c == 'l') return 7;
+
+                throw new DeserializationException("Expected n, or l", ref reader, c == -1);
+            }
+
+            // Feb
+            if (c == 'F')
+            {
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+                c = reader.Read();
+                if (c != 'b') throw new DeserializationException("Expected b", ref reader, c == -1);
+
+                return 2;
+            }
+
+            // Mar | May
+            if (c == 'M')
+            {
+                c = reader.Read();
+                if (c != 'a') throw new DeserializationException("Expected a", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c == 'r') return 3;
+                if (c == 'y') return 5;
+
+                throw new DeserializationException("Expected r, or y", ref reader, c == -1);
+            }
+
+            // Apr | Aug
+            if (c == 'A')
+            {
+                c = reader.Read();
+                if (c == 'p')
+                {
+                    c = reader.Read();
+                    if (c != 'r') throw new DeserializationException("Expected r", ref reader, c == -1);
+
+                    return 4;
+                }
+
+                if (c == 'u')
+                {
+                    c = reader.Read();
+                    if (c != 'g') throw new DeserializationException("Expected g", ref reader, c == -1);
+
+                    return 8;
+                }
+
+                throw new DeserializationException("Expected p, or u", ref reader, c == -1);
+            }
+
+            // Sep
+            if (c == 'S')
+            {
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+                c = reader.Read();
+                if (c != 'p') throw new DeserializationException("Expected p", ref reader, c == -1);
+
+                return 9;
+            }
+
+            // Oct
+            if (c == 'O')
+            {
+                c = reader.Read();
+                if (c != 'c') throw new DeserializationException("Expected c", ref reader, c == -1);
+                c = reader.Read();
+                if (c != 't') throw new DeserializationException("Expected t", ref reader, c == -1);
+
+                return 10;
+            }
+
+            // Nov
+            if (c == 'N')
+            {
+                c = reader.Read();
+                if (c != 'o') throw new DeserializationException("Expected o", ref reader, c == -1);
+                c = reader.Read();
+                if (c != 'v') throw new DeserializationException("Expected v", ref reader, c == -1);
+
+                return 11;
+            }
+
+            // Dec
+            if (c == 'D')
+            {
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+                c = reader.Read();
+                if (c != 'c') throw new DeserializationException("Expected c", ref reader, c == -1);
+
+                return 12;
+            }
+
+            throw new DeserializationException("Expected J, F, M, A, S, O, N, or D", ref reader, false);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DayOfWeek ReadRFC1123DayOfWeekThunkReader(ref ThunkReader reader)
+        {
+            var c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected day of week, instead stream ended", ref reader, true);
+
+            // Mon
+            if (c == 'M')
+            {
+                c = reader.Read();
+                if (c != 'o') throw new DeserializationException("Expected o", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'n') throw new DeserializationException("Expected n", ref reader, c == -1);
+
+                return DayOfWeek.Monday;
+            }
+
+            // Tue | Thu
+            if (c == 'T')
+            {
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected h or u; instead stream ended", ref reader, true);
+
+                if (c == 'u')
+                {
+                    c = reader.Read();
+                    if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+
+                    return DayOfWeek.Tuesday;
+                }
+
+                if (c == 'h')
+                {
+                    c = reader.Read();
+                    if (c != 'u') throw new DeserializationException("Expected u", ref reader, c == -1);
+
+                    return DayOfWeek.Thursday;
+                }
+
+                throw new DeserializationException("Expected h or u", ref reader, false);
+            }
+
+            // Wed
+            if (c == 'W')
+            {
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'd') throw new DeserializationException("Expected d", ref reader, c == -1);
+
+                return DayOfWeek.Wednesday;
+            }
+
+            // Fri
+            if (c == 'F')
+            {
+                c = reader.Read();
+                if (c != 'r') throw new DeserializationException("Expected r", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'i') throw new DeserializationException("Expected i", ref reader, c == -1);
+
+                return DayOfWeek.Friday;
+            }
+
+            // Sat | Sun
+            if (c == 'S')
+            {
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected a or u; instead stream ended", ref reader, true);
+
+                if (c == 'a')
+                {
+                    c = reader.Read();
+                    if (c != 't') throw new DeserializationException("Expected t", ref reader, c == -1);
+
+                    return DayOfWeek.Saturday;
+                }
+
+                if (c == 'u')
+                {
+                    c = reader.Read();
+                    if (c != 'n') throw new DeserializationException("Expected n", ref reader, c == -1);
+
+                    return DayOfWeek.Sunday;
+                }
+
+                throw new DeserializationException("Expected a or u", ref reader, false);
+            }
+
+            throw new DeserializationException("Expected M, T, W, F, or S", ref reader, false);
+        }
     }
 }
