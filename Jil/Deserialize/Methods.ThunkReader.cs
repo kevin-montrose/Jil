@@ -2779,5 +2779,61 @@ namespace Jil.Deserialize
         finished:
             return unescaped;
         }
+
+        static readonly MethodInfo ParseEnumThunkReader = typeof(Methods).GetMethod("_ParseEnumThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        static TEnum _ParseEnumThunkReader<TEnum>(string asStr, ref ThunkReader reader)
+            where TEnum : struct
+        {
+            TEnum ret;
+            if (!TryParseEnum<TEnum>(asStr, out ret))
+            {
+                throw new DeserializationException("Unexpected value for " + typeof(TEnum).Name + ": " + asStr, ref reader, false);
+            }
+
+            return ret;
+        }
+
+        static readonly MethodInfo ReadFlagsEnumThunkReader = typeof(Methods).GetMethod("_ReadFlagsEnumThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        static TEnum _ReadFlagsEnumThunkReader<TEnum>(ref ThunkReader reader, ref StringBuilder commonSb)
+            where TEnum : struct
+        {
+            commonSb = commonSb ?? new StringBuilder();
+
+            var ret = default(TEnum);
+
+            while (true)
+            {
+                var c = _ReadEncodedCharThunkReader(ref reader);
+
+                // ignore this *particular* whitespace
+                if (c != ' ')
+                {
+                    // comma delimited
+                    if (c == ',' || c == '"')
+                    {
+                        var asStr = commonSb.ToString();
+                        TEnum parsed;
+                        if (!TryParseEnum<TEnum>(asStr, out parsed))
+                        {
+                            throw new DeserializationException("Expected " + typeof(TEnum).Name + ", found: " + asStr, ref reader, false);
+                        }
+
+                        ret = FlagsEnumCombiner<TEnum>.Combine(ret, parsed);
+
+                        commonSb.Clear();
+
+                        if (c == '"') break;
+
+                        continue;
+                    }
+                    commonSb.Append(c);
+                }
+            }
+
+            // reset before returning
+            commonSb.Clear();
+
+            return ret;
+        }
     }
 }

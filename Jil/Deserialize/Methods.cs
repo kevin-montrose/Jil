@@ -1148,7 +1148,7 @@ namespace Jil.Deserialize
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
-        public static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo ParseEnum = typeof(Methods).GetMethod("_ParseEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ParseEnum<TEnum>(string asStr, TextReader reader)
             where TEnum : struct
         {
@@ -1167,7 +1167,7 @@ namespace Jil.Deserialize
             return EnumValues<TEnum>.TryParse(asStr, out parsed);
         }
 
-        public static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo ReadFlagsEnum = typeof(Methods).GetMethod("_ReadFlagsEnum", BindingFlags.NonPublic | BindingFlags.Static);
         static TEnum _ReadFlagsEnum<TEnum>(TextReader reader, ref StringBuilder commonSb)
             where TEnum : struct
         {

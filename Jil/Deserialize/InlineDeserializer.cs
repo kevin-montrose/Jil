@@ -896,7 +896,7 @@ namespace Jil.Deserialize
         {
             ExpectQuote();                  // --empty--
 
-            var specific = Methods.ReadFlagsEnum.MakeGenericMethod(enumType);
+            var specific = Methods.GetReadFlagsEnum(ReadingFromString).MakeGenericMethod(enumType);
 
             Emit.LoadArgument(0);           // TextReader
             LoadStringBuilder();            // TextReader StringBuilder&
@@ -932,7 +932,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            var specific = Methods.ParseEnum.MakeGenericMethod(enumType);
+            var specific = Methods.GetParseEnum(ReadingFromString).MakeGenericMethod(enumType);
 
             ExpectQuote();                  // --empty--
             Emit.LoadArgument(0);           // TextReader

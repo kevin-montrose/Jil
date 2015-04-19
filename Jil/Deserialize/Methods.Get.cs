@@ -192,5 +192,21 @@ namespace Jil.Deserialize
                     ReadGuid :
                     ReadGuidThunkReader;
         }
+
+        public static MethodInfo GetParseEnum(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ParseEnum :
+                    ParseEnumThunkReader;
+        }
+
+        public static MethodInfo GetReadFlagsEnum(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadFlagsEnum :
+                    ReadFlagsEnumThunkReader;
+        }
     }
 }
