@@ -208,5 +208,13 @@ namespace Jil.Deserialize
                     ReadFlagsEnum :
                     ReadFlagsEnumThunkReader;
         }
+
+        public static MethodInfo GetReadSkipWhitespace(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadSkipWhitespace :
+                    ReadSkipWhitespaceThunkReader;
+        }
     }
 }

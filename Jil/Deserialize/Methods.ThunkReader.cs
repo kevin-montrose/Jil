@@ -2835,5 +2835,15 @@ namespace Jil.Deserialize
 
             return ret;
         }
+
+        static readonly MethodInfo ReadSkipWhitespaceThunkReader = typeof(Methods).GetMethod("_ReadSkipWhitespaceThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int _ReadSkipWhitespaceThunkReader(ref ThunkReader reader)
+        {
+            int c;
+            do { c = reader.Read(); }
+            while (IsWhiteSpace(c));
+            return c;
+        }
     }
 }

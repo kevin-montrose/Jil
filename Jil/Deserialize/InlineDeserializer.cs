@@ -861,8 +861,8 @@ namespace Jil.Deserialize
 
         void ReadSkipWhitespace()
         {
-            Emit.LoadArgument(0);                   // TextReader
-            Emit.Call(Methods.ReadSkipWhitespace);  // int
+            Emit.LoadArgument(0);                                           // TextReader
+            Emit.Call(Methods.GetReadSkipWhitespace(ReadingFromString));    // int
         }
 
         void ExpectEndOfStream()
