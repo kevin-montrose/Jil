@@ -23,7 +23,7 @@ namespace Jil.Deserialize
     //      * *except* for long, where we accumulate into a ulong and do the special checked; because there's no larger type
     static partial class Methods
     {
-        public static readonly MethodInfo DiscardNewtonsoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardNewtonsoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo DiscardNewtonsoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardNewtonsoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _DiscardNewtonsoftTimeZoneOffset(TextReader reader)
         {

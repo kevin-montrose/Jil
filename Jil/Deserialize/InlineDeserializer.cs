@@ -707,7 +707,7 @@ namespace Jil.Deserialize
             ExpectChar('(');                                    // --empty--
             ReadPrimitive(typeof(long));                        // long
             Emit.LoadArgument(0);                               // long TextReader
-            Emit.Call(Methods.DiscardNewtonsoftTimeZoneOffset); // long
+            Emit.Call(Methods.GetDiscardNewtonsoftTimeZoneOffset(ReadingFromString)); // long
             ExpectChar(')');                                    // long
             ExpectChar('\\');                                   // long
             ExpectChar('/');                                    // long
@@ -755,14 +755,14 @@ namespace Jil.Deserialize
             if (UseCharArrayOverStringBuilder)
             {
                 LoadCharBufferAddress();
-                Emit.Call(Methods.ReadISO8601DateWithCharArray); // DateTime
-                ExpectQuote();                                   // DateTime
+                Emit.Call(Methods.GetReadISO8601DateWithCharArray(ReadingFromString));  // DateTime
+                ExpectQuote();                                                          // DateTime
             }
             else
             {
                 LoadCharBuffer();
-                Emit.Call(Methods.ReadISO8601Date); // DateTime
-                ExpectQuote();                      // DateTime
+                Emit.Call(Methods.GetReadISO8601Date(ReadingFromString));   // DateTime
+                ExpectQuote();                                              // DateTime
             }
         }
 
