@@ -216,5 +216,13 @@ namespace Jil.Deserialize
                     ReadSkipWhitespace :
                     ReadSkipWhitespaceThunkReader;
         }
+
+        public static MethodInfo GetSkip(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    Skip :
+                    SkipThunkReader;
+        }
     }
 }

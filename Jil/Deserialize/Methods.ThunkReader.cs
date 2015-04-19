@@ -2845,5 +2845,243 @@ namespace Jil.Deserialize
             while (IsWhiteSpace(c));
             return c;
         }
+
+        static readonly MethodInfo SkipThunkReader = typeof(Methods).GetMethod("_SkipThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _SkipThunkReader(ref ThunkReader reader)
+        {
+            SkipWithLeadCharThunkReader(ref reader, reader.Read());
+        }
+
+        static void SkipWithLeadCharThunkReader(ref ThunkReader reader, int leadChar)
+        {
+            // skip null
+            if (leadChar == 'n')
+            {
+                var c = reader.Read();
+                if (c != 'u') throw new DeserializationException("Expected u", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'l') throw new DeserializationException("Expected l", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'l') throw new DeserializationException("Expected l", ref reader, c == -1);
+                return;
+            }
+
+            // skip a string
+            if (leadChar == '"')
+            {
+                SkipEncodedStringWithLeadCharThunkReader(ref reader, leadChar);
+                return;
+            }
+
+            // skip an object
+            if (leadChar == '{')
+            {
+                SkipObjectThunkReader(ref reader, leadChar);
+                return;
+            }
+
+            // skip a list
+            if (leadChar == '[')
+            {
+                SkipListThunkReader(ref reader, leadChar);
+                return;
+            }
+
+            // skip a number
+            if ((leadChar >= '0' && leadChar <= '9') || leadChar == '-')
+            {
+                SkipNumberThunkReader(ref reader, leadChar);
+                return;
+            }
+
+            // skip false
+            if (leadChar == 'f')
+            {
+                var c = reader.Read();
+                if (c != 'a') throw new DeserializationException("Expected a", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'l') throw new DeserializationException("Expected l", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 's') throw new DeserializationException("Expected s", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+                return;
+            }
+
+            // skip true
+            if (leadChar == 't')
+            {
+                var c = reader.Read();
+                if (c != 'r') throw new DeserializationException("Expected r", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'u') throw new DeserializationException("Expected u", ref reader, c == -1);
+
+                c = reader.Read();
+                if (c != 'e') throw new DeserializationException("Expected e", ref reader, c == -1);
+                return;
+            }
+
+            throw new DeserializationException("Expected digit, -, \", {, n, t, f, or [", ref reader, leadChar == -1);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipEncodedStringWithLeadCharThunkReader(ref ThunkReader reader, int leadChar)
+        {
+            if (leadChar != '"') throw new DeserializationException("Expected \"", ref reader, leadChar == -1);
+
+            while (true)
+            {
+                var first = reader.Read();
+                if (first == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                // we didn't have to use anything but the buffer, make a string and return it!
+                if (first == '"')
+                {
+                    return;
+                }
+
+                if (first != '\\')
+                {
+                    continue;
+                }
+
+                var second = reader.Read();
+                if (second == -1) throw new DeserializationException("Expected any character", ref reader, true);
+
+                switch (second)
+                {
+                    case '"': continue;
+                    case '\\': continue;
+                    case '/': continue;
+                    case 'b': continue;
+                    case 'f': continue;
+                    case 'n': continue;
+                    case 'r': continue;
+                    case 't': continue;
+                }
+
+                if (second != 'u') throw new DeserializationException("Unrecognized escape sequence", ref reader, false);
+
+                // now we're in an escape sequence, we expect 4 hex #s; always
+                var u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", ref reader, u == -1);
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", ref reader, u == -1);
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", ref reader, u == -1);
+                u = reader.Read();
+                if (!((u >= '0' && u <= '9') || (u >= 'A' && u <= 'F') || (u >= 'a' && u <= 'f'))) throw new DeserializationException("Expected hex digit", ref reader, u == -1);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipObjectThunkReader(ref ThunkReader reader, int leadChar)
+        {
+            if (leadChar != '{') throw new DeserializationException("Expected {", ref reader, leadChar == -1);
+
+            int c;
+
+            c = _ReadSkipWhitespaceThunkReader(ref reader);
+            if (c == '}')
+            {
+                return;
+            }
+            SkipEncodedStringWithLeadCharThunkReader(ref reader, c);
+            c = _ReadSkipWhitespaceThunkReader(ref reader);
+            if (c != ':') throw new DeserializationException("Expected :", ref reader, c == -1);
+            c = _ReadSkipWhitespaceThunkReader(ref reader);
+            SkipWithLeadCharThunkReader(ref reader, c);
+
+            while (true)
+            {
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                if (c == '}') return;
+                if (c != ',') throw new DeserializationException("Expected ,", ref reader, c == -1);
+
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                SkipEncodedStringWithLeadCharThunkReader(ref reader, c);
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                if (c != ':') throw new DeserializationException("Expected :", ref reader, c == -1);
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                SkipWithLeadCharThunkReader(ref reader, c);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipListThunkReader(ref ThunkReader reader, int leadChar)
+        {
+            if (leadChar != '[') throw new DeserializationException("Expected [", ref reader, leadChar == -1);
+
+            int c;
+
+            c = _ReadSkipWhitespaceThunkReader(ref reader);
+            if (c == ']')
+            {
+                return;
+            }
+            SkipWithLeadCharThunkReader(ref reader, c);
+
+            while (true)
+            {
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                if (c == ']') return;
+                if (c != ',') throw new DeserializationException("Expected ], or ,", ref reader, c == -1);
+                c = _ReadSkipWhitespaceThunkReader(ref reader);
+                SkipWithLeadCharThunkReader(ref reader, c);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void SkipNumberThunkReader(ref ThunkReader reader, int leadChar)
+        {
+            // leadChar should be a start of the number
+
+            var seenDecimal = false;
+            var seenExponent = false;
+
+            while (true)
+            {
+                var c = reader.Peek();
+                if (c == -1) throw new DeserializationException("Unexpected end of reader", ref reader, true);
+
+                if (c >= '0' && c <= '9')
+                {
+                    reader.Read();  // skip the digit
+                    continue;
+                }
+
+                if (c == '.' && !seenDecimal)
+                {
+                    reader.Read();      // skip the decimal
+                    seenDecimal = true;
+                    continue;
+                }
+
+                if ((c == 'e' || c == 'E') && !seenExponent)
+                {
+                    reader.Read();      // skip the decimal
+                    seenExponent = true;
+                    seenDecimal = true;
+
+                    var next = reader.Peek();
+                    if (next == '-' || next == '+' || (next >= '0' && next <= '9'))
+                    {
+                        reader.Read();
+                        continue;
+                    }
+
+                    throw new DeserializationException("Expected -, or a digit", ref reader, false);
+                }
+
+                return;
+            }
+        }
     }
 }

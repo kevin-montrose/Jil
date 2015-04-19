@@ -10,10 +10,13 @@ using Sigil;
 
 namespace Jil.Deserialize
 {
+    delegate int SetterLookupThunkReaderDelegate(ref ThunkReader reader);
+
     static class SetterLookup<ForType>
     {
         private static readonly IReadOnlyList<Tuple<string, MemberInfo>> _nameOrderedSetters;
         private static Func<TextReader, int> _findMember;
+        private static SetterLookupThunkReaderDelegate _findMemberThunkReader;
 
         public static Dictionary<string, int> Lookup;
 
@@ -27,6 +30,7 @@ namespace Jil.Deserialize
                 .ToDictionary(kv => kv.Item1, kv => kv.Item2);
 
             _findMember = CreateFindMember(_nameOrderedSetters.Select(setter => setter.Item1));
+            _findMemberThunkReader = CreateFindMemberThunkReader(_nameOrderedSetters.Select(setter => setter.Item1));
         }
 
         private static IReadOnlyList<Tuple<string, MemberInfo>> GetOrderedSetters()
@@ -58,10 +62,27 @@ namespace Jil.Deserialize
             return (Func<TextReader, int>)ret;
         }
 
+        private static SetterLookupThunkReaderDelegate CreateFindMemberThunkReader(IEnumerable<string> names)
+        {
+            var nameToResults =
+                names
+                .Select((name, index) => NameAutomata<int>.CreateName(typeof(ThunkReader).MakeByRefType(), name, emit => emit.LoadConstant(index)))
+                .ToList();
+
+            var ret = NameAutomata<int>.Create<SetterLookupThunkReaderDelegate>(typeof(ThunkReader).MakeByRefType(), nameToResults, true, defaultValue: -1);
+
+            return (SetterLookupThunkReaderDelegate)ret;
+        }
+
         // probably not the best place for this; but sufficent I guess...
         public static int FindSetterIndex(TextReader reader)
         {
             return _findMember(reader);
+        }
+
+        public static int FindSetterIndexThunkReader(ref ThunkReader reader)
+        {
+            return _findMemberThunkReader(ref reader);
         }
 
         public static Dictionary<string, MemberInfo> GetSetters()

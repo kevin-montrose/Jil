@@ -191,7 +191,7 @@ namespace Jil.Deserialize
             return (byte)(a * 16 + b);
         }
 
-        public static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _Skip(TextReader reader)
         {

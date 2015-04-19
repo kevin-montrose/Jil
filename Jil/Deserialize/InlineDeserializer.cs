@@ -1302,8 +1302,8 @@ namespace Jil.Deserialize
 
         void SkipObjectMember()
         {
-            Emit.LoadArgument(0);       // TextReader
-            Emit.Call(Methods.Skip);    // --empty--
+            Emit.LoadArgument(0);                           // TextReader
+            Emit.Call(Methods.GetSkip(ReadingFromString));  // --empty--
         }
 
         void LoadRecursiveTypeDelegate(Type recursiveType)
@@ -1452,7 +1452,15 @@ namespace Jil.Deserialize
                     .Select((kv, i) => new { Index = i, Name = kv.Key, Setter = kv.Value, Label = Emit.DefineLabel() })
                     .ToList();
 
-                var findSetterIdx = setterLookup.GetMethod("FindSetterIndex", new[] { typeof(TextReader) });
+                MethodInfo findSetterIdx;
+                if(ReadingFromString)
+                {
+                    findSetterIdx = setterLookup.GetMethod("FindSetterIndexThunkReader", new[] { typeof(ThunkReader).MakeByRefType() });
+                }
+                else
+                {
+                    findSetterIdx = setterLookup.GetMethod("FindSetterIndex", new[] { typeof(TextReader) });
+                }
 
                 var inOrderLabels =
                     orderedSetters
