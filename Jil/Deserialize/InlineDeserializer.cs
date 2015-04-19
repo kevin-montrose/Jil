@@ -886,10 +886,19 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo TextReader_Peek = typeof(TextReader).GetMethod("Peek", BindingFlags.Public | BindingFlags.Instance);
+        static readonly MethodInfo ThunkReader_Peek = typeof(ThunkReader).GetMethod("Peek", BindingFlags.Public | BindingFlags.Instance);
         void RawPeekChar()
         {
             Emit.LoadArgument(0);                   // TextReader
-            Emit.CallVirtual(TextReader_Peek);      // int
+
+            if (!ReadingFromString)
+            {
+                Emit.CallVirtual(TextReader_Peek);      // int
+            }
+            else
+            {
+                Emit.Call(ThunkReader_Peek);            // int
+            }
         }
 
         void ReadFlagsEnum(Type enumType)
