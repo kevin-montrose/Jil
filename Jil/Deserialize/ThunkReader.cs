@@ -10,8 +10,9 @@ namespace Jil.Deserialize
 
     struct ThunkReader
     {
-        string Value;
-        int Index;
+        // TODO: make these private once we're no longer doing a crappy job in dynamic deserialization
+        internal string Value;
+        internal int Index;
 
         public int Position { get { return Index + 1; } }
 

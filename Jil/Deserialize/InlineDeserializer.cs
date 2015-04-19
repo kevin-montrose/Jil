@@ -2102,7 +2102,10 @@ namespace Jil.Deserialize
                 Emit.NewObject(ObjectBuilderCons);                                          // TextReader ObjectBuilder
                 Emit.StoreLocal(dyn);                                                       // TextReader
                 Emit.LoadLocal(dyn);                                                        // TextReader ObjectBuilder
-                Emit.Call(Jil.DeserializeDynamic.DynamicDeserializer.DeserializeMember);    // --empty--
+
+                var deserializeDyn = Jil.DeserializeDynamic.DynamicDeserializer.GetDeserializeMember(ReadingFromString);
+
+                Emit.Call(deserializeDyn);                                                  // --empty--
                 Emit.LoadLocal(dyn);                                                        // ObjectBuilder
                 Emit.LoadField(Jil.DeserializeDynamic.ObjectBuilder._BeingBuilt);           // JsonObject
             }
