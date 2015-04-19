@@ -557,14 +557,14 @@ namespace Jil.Deserialize
             if (UseCharArrayOverStringBuilder)
             {
                 LoadCharBufferAddress();
-                Emit.Call(Methods.ReadISO8601DateWithOffsetWithCharArray);  // DateTimeOffset
-                ExpectQuote();                                              // DateTimeOffset
+                Emit.Call(Methods.GetReadISO8601DateWithOffsetWithCharArray(ReadingFromString));    // DateTimeOffset
+                ExpectQuote();                                                                      // DateTimeOffset
             }
             else
             {
                 LoadCharBuffer();
-                Emit.Call(Methods.ReadISO8601DateWithOffset);   // DateTimeOffset
-                ExpectQuote();                                  // DateTimeOffset
+                Emit.Call(Methods.GetReadISO8601DateWithOffset(ReadingFromString)); // DateTimeOffset
+                ExpectQuote();                                                      // DateTimeOffset
             }
         }
 

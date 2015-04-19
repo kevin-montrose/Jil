@@ -4320,5 +4320,144 @@ namespace Jil.Deserialize
 
             throw new DeserializationException("Expected M, T, W, F, or S", ref reader, false);
         }
+
+        static readonly MethodInfo ReadISO8601DateWithOffsetWithCharArrayThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetWithCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTimeOffset _ReadISO8601DateWithOffsetWithCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
+        {
+            InitDynamicBuffer(ref buffer);
+            return _ReadISO8601DateWithOffsetThunkReader(ref reader, buffer);
+        }
+
+        static readonly MethodInfo ReadISO8601DateWithOffsetThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTimeOffset _ReadISO8601DateWithOffsetThunkReader(ref ThunkReader reader, char[] buffer)
+        {
+            // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
+            //   See: http://en.wikipedia.org/wiki/ISO_8601 &
+            //        http://tools.ietf.org/html/rfc3339
+            //        *is bullshit
+
+            // Here are the possible formats for dates
+            // YYYY-MM-DD
+            // YYYY-MM
+            // YYYY-DDD (ordinal date)
+            // YYYY-Www (week date, the W is a literal)
+            // YYYY-Www-D
+            // YYYYMMDD
+            // YYYYWww
+            // YYYYWwwD
+            // YYYYDDD
+
+            // Here are the possible formats for times
+            // hh
+            // hh:mm
+            // hhmm
+            // hh:mm:ss
+            // hhmmss
+            // hh,fff*
+            // hh:mm,fff*
+            // hhmm,fff*
+            // hh:mm:ss,fff*
+            // hhmmss,fff*
+            // hh.fff*
+            // hh:mm.fff*
+            // hhmm.fff*
+            // hh:mm:ss.fff*
+            // hhmmss.fff*
+            // * arbitrarily many (technically an "agreed upon" number, I'm agreeing on 7 because that's out to a Tick)
+
+            // Here are the possible formats for timezones
+            // Z
+            // +hh
+            // +hh:mm
+            // +hhmm
+            // -hh
+            // -hh:mm
+            // -hhmm
+
+            // they are concatenated to form a full instant, with T as a separator between date & time
+            // i.e. <date>T<time><timezone>
+            // the longest possible string:
+            // 9999-12-31T01:23:45.6789012+34:56
+            //
+            // Maximum date size is 33 characters
+
+            var ix = -1;
+            int? tPos = null;
+            int? zPlusOrMinus = null;
+            while (true)
+            {
+                var c = reader.Peek();
+                if (c == -1) throw new DeserializationException("Unexpected end of stream while parsing ISO8601 date", ref reader, true);
+
+                if (c == '"') break;
+
+                // actually consume that character
+                reader.Read();
+
+                ix++;
+                if (ix == CharBufferSize) throw new DeserializationException("ISO8601 date is too long, expected " + CharBufferSize + " characters or less", ref reader, false);
+                buffer[ix] = (char)c;
+
+                // RFC3339 allows lowercase t and spaces as alternatives to ISO8601's T
+                if (c == 'T' || c == 't' || c == ' ')
+                {
+                    if (tPos.HasValue) throw new DeserializationException("Unexpected second T in ISO8601 date", ref reader, false);
+                    tPos = ix - 1;
+                }
+
+                if (tPos.HasValue)
+                {
+                    // RFC3339 allows lowercase z as alternatives to ISO8601's Z
+                    if (c == 'Z' || c == 'z' || c == '+' || c == '-')
+                    {
+                        if (zPlusOrMinus.HasValue) throw new DeserializationException("Unexpected second Z, +, or - in ISO8601 date", ref reader, false);
+                        zPlusOrMinus = ix - 1;
+                    }
+                }
+            }
+
+            bool? hasSeparators;
+
+            var date = ParseISO8601DateThunkReader(ref reader, buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
+            if (!tPos.HasValue)
+            {
+                return date;
+            }
+
+            var time = ParseISO8601TimeThunkReader(ref reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
+            if (!zPlusOrMinus.HasValue)
+            {
+                try
+                {
+                    return date + time;
+                }
+                catch (Exception e)
+                {
+                    throw new DeserializationException("ISO8601 date with time could not be represented as a DateTime", ref reader, e, false);
+                }
+            }
+
+            bool unknownLocalOffset;
+            // only +1 here because the separator is significant (oy vey)
+            var timezoneOffset = ParseISO8601TimeZoneOffsetThunkReader(ref reader, buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
+
+            try
+            {
+                if (unknownLocalOffset)
+                {
+                    return DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time;
+                }
+
+                var utc = DateTime.SpecifyKind(DateTime.SpecifyKind(date, DateTimeKind.Utc) + time, DateTimeKind.Unspecified);
+
+                return new DateTimeOffset(utc, timezoneOffset);
+            }
+            catch (Exception e)
+            {
+                throw new DeserializationException("ISO8601 date with time and timezone offset could not be represented as a DateTime", ref reader, e, false);
+            }
+        }
     }
 }

@@ -264,5 +264,21 @@ namespace Jil.Deserialize
                     ReadRFC1123Date :
                     ReadRFC1123DateThunkReader;
         }
+
+        public static MethodInfo GetReadISO8601DateWithOffsetWithCharArray(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadISO8601DateWithOffsetWithCharArray :
+                    ReadISO8601DateWithOffsetWithCharArrayThunkReader;
+        }
+
+        public static MethodInfo GetReadISO8601DateWithOffset(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadISO8601DateWithOffset :
+                    ReadISO8601DateWithOffsetThunkReader;
+        }
     }
 }

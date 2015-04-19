@@ -148,7 +148,7 @@ namespace Jil.Deserialize
             }
         }
 
-        public static readonly MethodInfo ReadISO8601DateWithOffsetWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadISO8601DateWithOffsetWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTimeOffset _ReadISO8601DateWithOffsetWithCharArray(TextReader reader, ref char[] buffer)
         {
@@ -156,7 +156,7 @@ namespace Jil.Deserialize
             return _ReadISO8601DateWithOffset(reader, buffer);
         }
 
-        public static readonly MethodInfo ReadISO8601DateWithOffset = typeof(Methods).GetMethod("_ReadISO8601DateWithOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo ReadISO8601DateWithOffset = typeof(Methods).GetMethod("_ReadISO8601DateWithOffset", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static DateTimeOffset _ReadISO8601DateWithOffset(TextReader reader, char[] buffer)
         {
