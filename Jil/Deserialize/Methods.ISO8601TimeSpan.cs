@@ -13,7 +13,8 @@ namespace Jil.Deserialize
     {
         static readonly ulong MinTicks = (ulong)(-TimeSpan.MinValue.Ticks);
         static readonly ulong MaxTicks = (ulong)TimeSpan.MaxValue.Ticks;
-        public static readonly MethodInfo ReadISO8601TimeSpan = typeof(Methods).GetMethod("_ReadISO8601TimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
+        
+        static readonly MethodInfo ReadISO8601TimeSpan = typeof(Methods).GetMethod("_ReadISO8601TimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static TimeSpan _ReadISO8601TimeSpan(TextReader reader, char[] str)
         {
@@ -132,6 +133,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int ReadTimeSpanInto(TextReader reader, char[] buffer)
         {
             var i = reader.Peek();
@@ -158,6 +160,7 @@ namespace Jil.Deserialize
             return ix;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool ISO8601TimeSpan_ReadDatePart(TextReader reader, char[] str, int strLen, ref int ix, out long year, out long month, out long week, out long day)
         {
             year = month = week = day = -1;
@@ -249,6 +252,7 @@ namespace Jil.Deserialize
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
         {
             hour = minutes = seconds = 0;
@@ -343,6 +347,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static char ISO8601TimeSpan_ReadPart(TextReader reader, char[] str, int strLen, ref int ix, out int whole, out int fraction, out int fracLen)
         {
             var part = 0;

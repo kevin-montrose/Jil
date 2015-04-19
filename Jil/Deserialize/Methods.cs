@@ -1223,7 +1223,7 @@ namespace Jil.Deserialize
                 100000000
             };
 
-        public static readonly MethodInfo ReadNewtonsoftTimeSpan = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo ReadNewtonsoftTimeSpan = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpan", BindingFlags.NonPublic | BindingFlags.Static);
         static TimeSpan _ReadNewtonsoftTimeSpan(TextReader reader, char[] buffer)
         {
             var strLen = ReadTimeSpanInto(reader, buffer);

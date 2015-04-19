@@ -669,16 +669,16 @@ namespace Jil.Deserialize
 
         void ReadNewtonsoftStyleTimeSpan()
         {
-            Emit.LoadArgument(0);                       // TextReader
-            LoadCharBuffer();                           // TextReader char[]
-            Emit.Call(Methods.ReadNewtonsoftTimeSpan);  // TimeSpan
+            Emit.LoadArgument(0);                                               // TextReader
+            LoadCharBuffer();                                                   // TextReader char[]
+            Emit.Call(Methods.GetReadNewtonsoftTimeSpan(ReadingFromString));    // TimeSpan
         }
 
         void ReadISO8601TimeSpan()
         {
-            Emit.LoadArgument(0);                       // TextReader
-            LoadCharBuffer();                           // TextReader char[]
-            Emit.Call(Methods.ReadISO8601TimeSpan);     // TimeSpan
+            Emit.LoadArgument(0);                                           // TextReader
+            LoadCharBuffer();                                               // TextReader char[]
+            Emit.Call(Methods.GetReadISO8601TimeSpan(ReadingFromString));   // TimeSpan
         }
 
         void ReadDate()

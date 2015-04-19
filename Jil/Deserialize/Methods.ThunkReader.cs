@@ -4459,5 +4459,497 @@ namespace Jil.Deserialize
                 throw new DeserializationException("ISO8601 date with time and timezone offset could not be represented as a DateTime", ref reader, e, false);
             }
         }
+
+        static readonly MethodInfo ReadNewtonsoftTimeSpanThunkReader = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpanThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        static TimeSpan _ReadNewtonsoftTimeSpanThunkReader(ref ThunkReader reader, char[] buffer)
+        {
+            var strLen = ReadTimeSpanIntoThunkReader(ref reader, buffer);
+
+            if (strLen == 0)
+            {
+                throw new DeserializationException("Unexpected empty string", ref reader, false);
+            }
+
+            int days, hours, minutes, seconds, fraction;
+            days = hours = minutes = seconds = fraction = 0;
+
+            bool isNegative, pastDays, pastHours, pastMinutes, pastSeconds;
+            isNegative = pastDays = pastHours = pastMinutes = pastSeconds = false;
+
+            var ixOfLastPeriod = -1;
+            var part = 0;
+
+            int i;
+
+            if (buffer[0] == '-')
+            {
+                isNegative = true;
+                i = 1;
+            }
+            else
+            {
+                i = 0;
+            }
+
+            for (; i < strLen; i++)
+            {
+                var c = buffer[i];
+                if (c == '.')
+                {
+                    ixOfLastPeriod = i;
+
+                    if (!pastDays)
+                    {
+                        days = part;
+                        part = 0;
+                        pastDays = true;
+                        continue;
+                    }
+
+                    if (!pastSeconds)
+                    {
+                        seconds = part;
+                        part = 0;
+                        pastSeconds = true;
+                        continue;
+                    }
+
+                    throw new DeserializationException("Unexpected character .", ref reader, false);
+                }
+
+                if (c == ':')
+                {
+                    if (!pastHours)
+                    {
+                        hours = part;
+                        part = 0;
+                        pastHours = true;
+                        continue;
+                    }
+
+                    if (!pastMinutes)
+                    {
+                        minutes = part;
+                        part = 0;
+                        pastMinutes = true;
+                        continue;
+                    }
+
+                    throw new DeserializationException("Unexpected character :", ref reader, false);
+                }
+
+                if (c < '0' || c > '9')
+                {
+                    throw new DeserializationException("Expected digit, found " + c, ref reader, false);
+                }
+
+                part *= 10;
+                part += (c - '0');
+            }
+
+            if (!pastSeconds)
+            {
+                seconds = part;
+                pastSeconds = true;
+            }
+            else
+            {
+                fraction = part;
+            }
+
+            if (!pastHours || !pastMinutes || !pastSeconds)
+            {
+                throw new DeserializationException("Missing required portion of TimeSpan", ref reader, false);
+            }
+
+            var msInt = 0;
+            if (fraction != 0)
+            {
+                var sizeOfFraction = strLen - (ixOfLastPeriod + 1);
+
+                if (sizeOfFraction > 7)
+                {
+                    throw new DeserializationException("Fractional part of TimeSpan too large", ref reader, false);
+                }
+
+                var fracOfSecond = part / DivideFractionBy[sizeOfFraction - 1];
+                var ms = fracOfSecond * 1000.0;
+                msInt = (int)ms;
+            }
+
+            var ret = new TimeSpan(days, hours, minutes, seconds, msInt);
+            if (isNegative)
+            {
+                ret = ret.Negate();
+            }
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static int ReadTimeSpanIntoThunkReader(ref ThunkReader reader, char[] buffer)
+        {
+            var i = reader.Peek();
+            if (i != '"') throw new DeserializationException("Expected \", found " + (char)i, ref reader, i == -1);
+
+            reader.Read();  // skip the opening '"'
+
+            var ix = 0;
+            while (true)
+            {
+                if (ix >= CharBufferSize) throw new DeserializationException("ISO8601 duration too long", ref reader, false);
+
+                i = reader.Read();
+                if (i == -1) throw new DeserializationException("Unexpected end of stream", ref reader, true);
+                if (i == '"')
+                {
+                    break;
+                }
+
+                buffer[ix] = (char)i;
+                ix++;
+            }
+
+            return ix;
+        }
+
+        static readonly MethodInfo ReadISO8601TimeSpanThunkReader = typeof(Methods).GetMethod("_ReadISO8601TimeSpanThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static TimeSpan _ReadISO8601TimeSpanThunkReader(ref ThunkReader reader, char[] str)
+        {
+            const ulong TicksPerDay = 864000000000;
+            const ulong TicksPerHour = 36000000000;
+            const ulong TicksPerMinute = 600000000;
+            const ulong TicksPerSecond = 10000000;
+
+            const ulong TicksPerWeek = TicksPerDay * 7;
+            const ulong TicksPerMonth = TicksPerDay * 30;
+            const ulong TicksPerYear = TicksPerDay * 365;
+
+            // Format goes like so:
+            // - (-)P(([n]Y)([n]M)([n]D))(T([n]H)([n]M)([n]S))
+            // - P[n]W
+
+            var len = ReadTimeSpanIntoThunkReader(ref reader, str);
+
+            if (len == 0)
+            {
+                throw new DeserializationException("Unexpected empty string", ref reader, false);
+            }
+
+            var ix = 0;
+            var isNegative = false;
+
+            var c = str[ix];
+            if (c == '-')
+            {
+                isNegative = true;
+                ix++;
+            }
+
+            if (ix >= len)
+            {
+                throw new DeserializationException("Expected P, instead TimeSpan string ended", ref reader, false);
+            }
+
+            c = str[ix];
+            if (c != 'P')
+            {
+                throw new DeserializationException("Expected P, found " + c, ref reader, false);
+            }
+
+            ix++;   // skip 'P'
+
+            long year, month, week, day;
+            var hasTimePart = ISO8601TimeSpan_ReadDatePartThunkReader(ref reader, str, len, ref ix, out year, out month, out week, out day);
+
+            if (week != -1 && (year != -1 || month != -1 || day != -1))
+            {
+                throw new DeserializationException("Week part of TimeSpan defined along with one or more of year, month, or day", ref reader, false);
+            }
+
+            if (week != -1 && hasTimePart)
+            {
+                throw new DeserializationException("TimeSpans with a week defined cannot also have a time defined", ref reader, false);
+            }
+
+            if (year == -1) year = 0;
+            if (month == -1) month = 0;
+            if (week == -1) week = 0;
+            if (day == -1) day = 0;
+
+            double hour, minute, second;
+
+            if (hasTimePart)
+            {
+                ix++;   // skip 'T'
+                ISO8601TimeSpan_ReadTimePartThunkReader(ref reader, str, len, ref ix, out hour, out minute, out second);
+            }
+            else
+            {
+                hour = minute = second = 0;
+            }
+
+            ulong ticks = 0;
+            if (year != 0)
+            {
+                ticks += ((ulong)year) * TicksPerYear;
+            }
+
+            if (month != 0)
+            {
+                // .NET (via XmlConvert) converts months to years
+                // This isn't inkeeping with the spec, but of the bad choices... I choose this one
+                var yearsFromMonths = ((ulong)month) / 12;
+                var monthsAfterYears = ((ulong)month) % 12;
+                ticks += (ulong)(yearsFromMonths * TicksPerYear + monthsAfterYears * TicksPerMonth);
+            }
+
+            if (week != 0)
+            {
+                // ISO8601 defines weeks as 7 days, so don't convert weeks to months or years (even if that may seem more sensible)
+                ticks += ((ulong)week) * TicksPerWeek;
+            }
+
+            ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
+
+            if (ticks >= MaxTicks && !isNegative)
+            {
+                return TimeSpan.MaxValue;
+            }
+
+            if (ticks >= MinTicks && isNegative)
+            {
+                return TimeSpan.MinValue;
+            }
+
+            var ret = new TimeSpan((long)ticks);
+            if (isNegative)
+            {
+                ret = ret.Negate();
+            }
+
+            return ret;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void ISO8601TimeSpan_ReadTimePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
+        {
+            hour = minutes = seconds = 0;
+
+            bool hourSeen, minutesSeen, secondsSeen;
+            hourSeen = minutesSeen = secondsSeen = false;
+
+            var fracSeen = false;
+
+            while (ix != strLen)
+            {
+                if (fracSeen)
+                {
+                    throw new DeserializationException("Expected Time part of TimeSpan to end", ref reader, false);
+                }
+
+                int whole, fraction, fracLen;
+                var part = ISO8601TimeSpan_ReadPartThunkReader(ref reader, str, strLen, ref ix, out whole, out fraction, out fracLen);
+
+                if (fracLen != 0)
+                {
+                    fracSeen = true;
+                }
+
+                if (part == 'H')
+                {
+                    if (hourSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    if (minutesSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen after minutes already parsed", ref reader, false);
+                    }
+
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", ref reader, false);
+                    }
+
+                    hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    hourSeen = true;
+                    continue;
+                }
+
+                if (part == 'M')
+                {
+                    if (minutesSeen)
+                    {
+                        throw new DeserializationException("Minute part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", ref reader, false);
+                    }
+
+                    minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    minutesSeen = true;
+                    continue;
+                }
+
+                if (part == 'S')
+                {
+                    if (secondsSeen)
+                    {
+                        throw new DeserializationException("Seconds part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    secondsSeen = true;
+                    continue;
+                }
+
+                throw new DeserializationException("Expected H, M, or S but found: " + part, ref reader, false);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static char ISO8601TimeSpan_ReadPartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out int whole, out int fraction, out int fracLen)
+        {
+            var part = 0;
+            while (true)
+            {
+                var c = str[ix];
+
+                if (c == '.' || c == ',')
+                {
+                    whole = part;
+                    break;
+                }
+
+                ix++;
+                if (c < '0' || c > '9' || ix == strLen)
+                {
+                    whole = part;
+                    fraction = 0;
+                    fracLen = 0;
+                    return c;
+                }
+
+                part *= 10;
+                part += (c - '0');
+            }
+
+            var ixOfPeriod = ix;
+
+            ix++;   // skip the '.' or ','
+            part = 0;
+            while (true)
+            {
+                var c = str[ix];
+
+                ix++;
+                if (c < '0' || c > '9' || ix == strLen)
+                {
+                    fraction = part;
+                    fracLen = (ix - 1) - (ixOfPeriod + 1);
+                    return c;
+                }
+
+                part *= 10;
+                part += (c - '0');
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool ISO8601TimeSpan_ReadDatePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out long year, out long month, out long week, out long day)
+        {
+            year = month = week = day = -1;
+
+            bool yearSeen, monthSeen, weekSeen, daySeen;
+            yearSeen = monthSeen = weekSeen = daySeen = false;
+
+            while (ix != strLen)
+            {
+                if (str[ix] == 'T')
+                {
+                    return true;
+                }
+
+                int whole, fraction, fracLen;
+                var part = ISO8601TimeSpan_ReadPartThunkReader(ref reader, str, strLen, ref ix, out whole, out fraction, out fracLen);
+
+                if (fracLen != 0)
+                {
+                    throw new DeserializationException("Fractional values are not supported in the year, month, day, or week parts of an ISO8601 TimeSpan", ref reader, false);
+                }
+
+                if (part == 'Y')
+                {
+                    if (yearSeen)
+                    {
+                        throw new DeserializationException("Year part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    if (monthSeen)
+                    {
+                        throw new DeserializationException("Year part of TimeSpan seen after month already parsed", ref reader, false);
+                    }
+
+                    if (daySeen)
+                    {
+                        throw new DeserializationException("Year part of TimeSpan seen after day already parsed", ref reader, false);
+                    }
+
+                    year = (long)whole;
+                    yearSeen = true;
+                    continue;
+                }
+
+                if (part == 'M')
+                {
+                    if (monthSeen)
+                    {
+                        throw new DeserializationException("Month part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    if (daySeen)
+                    {
+                        throw new DeserializationException("Month part of TimeSpan seen after day already parsed", ref reader, false);
+                    }
+
+                    month = (long)whole;
+                    monthSeen = true;
+                    continue;
+                }
+
+                if (part == 'W')
+                {
+                    if (weekSeen)
+                    {
+                        throw new DeserializationException("Week part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    week = (long)whole;
+                    weekSeen = true;
+                    continue;
+                }
+
+                if (part == 'D')
+                {
+                    if (daySeen)
+                    {
+                        throw new DeserializationException("Day part of TimeSpan seen twice", ref reader, false);
+                    }
+
+                    day = (long)whole;
+                    daySeen = true;
+                    continue;
+                }
+
+                throw new DeserializationException("Expected Y, M, W, or D but found: " + part, ref reader, false);
+            }
+
+            return false;
+        }
     }
 }

@@ -280,5 +280,21 @@ namespace Jil.Deserialize
                     ReadISO8601DateWithOffset :
                     ReadISO8601DateWithOffsetThunkReader;
         }
+
+        public static MethodInfo GetReadNewtonsoftTimeSpan(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadNewtonsoftTimeSpan :
+                    ReadNewtonsoftTimeSpanThunkReader;
+        }
+
+        public static MethodInfo GetReadISO8601TimeSpan(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadISO8601TimeSpan :
+                    ReadISO8601TimeSpanThunkReader;
+        }
     }
 }
