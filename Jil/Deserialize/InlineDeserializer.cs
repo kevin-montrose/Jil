@@ -1309,7 +1309,17 @@ namespace Jil.Deserialize
         void LoadRecursiveTypeDelegate(Type recursiveType)
         {
             var typeCache = typeof(TypeCache<,>).MakeGenericType(OptionsType, recursiveType);
-            var thunk = typeCache.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+
+            FieldInfo thunk;
+            if(ReadingFromString)
+            {
+                thunk = typeCache.GetField("StringThunk", BindingFlags.Public | BindingFlags.Static);
+            }
+            else
+            {
+                thunk = typeCache.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
+            }
+
             Emit.LoadField(thunk);
         }
 
@@ -2158,7 +2168,16 @@ namespace Jil.Deserialize
 
             if (allowRecursion && RecursiveTypes.Contains(forType))
             {
-                var funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
+                Type funcType;
+
+                if (ReadingFromString)
+                {
+                    funcType = typeof(StringThunkDelegate<>).MakeGenericType(forType);
+                }
+                else
+                {
+                    funcType = typeof(Func<,,>).MakeGenericType(typeof(TextReader), typeof(int), forType);
+                }
                 var funcInvoke = funcType.GetMethod("Invoke");
 
                 LoadRecursiveTypeDelegate(forType); // Func<TextReader, int, memberType>
