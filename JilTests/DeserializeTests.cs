@@ -5738,6 +5738,29 @@ namespace JilTests
             }
         }
 
+        public class _Issue126
+        {
+            public decimal A { get; set; }
+            public decimal B { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue126()
+        {
+            try
+            {
+                var json = "{\"A\":-1,\"B\":\"20.00\"}";
+                var res = Jil.JSON.Deserialize<_Issue126>(json);
+                Assert.IsNotNull(res);
+                Assert.AreEqual(-1m, res.A);
+                Assert.AreEqual(20m, res.B);
+            }
+            catch (DeserializationException e)
+            {
+                Assert.Fail(e.Message);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
