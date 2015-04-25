@@ -6377,7 +6377,7 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]],\"A\":[1,2,3]}", res);
+                Assert.AreEqual("{\"A\":[1,2,3],\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
@@ -6414,7 +6414,7 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]],\"A\":[1,2,3]}", res);
+                Assert.AreEqual("{\"A\":[1,2,3],\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
