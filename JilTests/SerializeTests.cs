@@ -7920,11 +7920,12 @@ namespace JilTests
         [TestMethod]
         public void Issue127()
         {
-            var a = new _Issue127_A();
-            var b = new _Issue127_B();
+            var a = new _Issue127_A { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
+            var b = new _Issue127_B { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
             var jsonA = JSON.Serialize(a);
             var jsonB = JSON.Serialize(b);
-            Assert.AreEqual(jsonA, jsonB);
+            Assert.AreEqual("{\"A\":1,\"B\":{\"2\":3}}", jsonA);
+            Assert.AreEqual("{\"B\":{\"2\":3},\"A\":1}", jsonB);
         }
     }
 }
