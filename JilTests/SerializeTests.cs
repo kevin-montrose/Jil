@@ -7904,5 +7904,27 @@ namespace JilTests
                 }
             }
         }
+
+        public class _Issue127_A
+        {
+            public int A { get; set; }
+            public Dictionary<int, int?> B { get; set; }
+        }
+
+        public class _Issue127_B
+        {
+            public int? A { get; set; }
+            public Dictionary<int, int?> B { get; set; }
+        }
+        
+        [TestMethod]
+        public void Issue127()
+        {
+            var a = new _Issue127_A();
+            var b = new _Issue127_B();
+            var jsonA = JSON.Serialize(a);
+            var jsonB = JSON.Serialize(b);
+            Assert.AreEqual(jsonA, jsonB);
+        }
     }
 }
