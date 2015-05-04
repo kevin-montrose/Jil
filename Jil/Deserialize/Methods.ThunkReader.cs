@@ -926,6 +926,8 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
+            if (idx == 0) throw new DeserializationException("Expected a double value", ref reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1085,6 +1087,8 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
+            if (idx == 0) throw new DeserializationException("Expected a double value", ref reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1187,6 +1191,9 @@ namespace Jil.Deserialize
 
             var asStr = commonSb.ToString();
             var strLen = asStr.Length;
+
+            if (strLen == 0) throw new DeserializationException("Expected a double value", ref reader, false);
+
             if (asStr[strLen - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (strLen >= 2 && asStr[0] == '0')
             {
@@ -1299,6 +1306,8 @@ namespace Jil.Deserialize
                 reader.Read();
                 prev = c;
             }
+
+            if (idx == 0) throw new DeserializationException("Expected a float value", ref reader, false);
 
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
@@ -1460,6 +1469,8 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
+            if (idx == 0) throw new DeserializationException("Expected a float value", ref reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1561,6 +1572,9 @@ namespace Jil.Deserialize
 
             var asStr = commonSb.ToString();
             var strLen = asStr.Length;
+
+            if (strLen == 0) throw new DeserializationException("Expected a float value", ref reader, false);
+
             if (asStr[strLen - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (strLen >= 2 && asStr[0] == '0')
             {
@@ -1673,6 +1687,8 @@ namespace Jil.Deserialize
                 reader.Read();
                 prev = c;
             }
+
+            if (idx == 0) throw new DeserializationException("Expected a decimal value", ref reader, false);
 
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
@@ -1839,6 +1855,8 @@ namespace Jil.Deserialize
                 prev = c;
             }
 
+            if (idx == 0) throw new DeserializationException("Expected a decimal value", ref reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1941,6 +1959,9 @@ namespace Jil.Deserialize
 
             var asStr = commonSb.ToString();
             var strLen = asStr.Length;
+
+            if (strLen == 0) throw new DeserializationException("Expected a decimal value", ref reader, false);
+
             if (asStr[strLen - 1] == '.') throw new DeserializationException("Number cannot end with .", ref reader, false);
             if (strLen >= 2 && asStr[0] == '0')
             {

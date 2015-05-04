@@ -856,6 +856,7 @@ namespace Jil.Common
                 if (curType.IsNullableType())
                 {
                     var underlyingType = Nullable.GetUnderlyingType(curType);
+
                     pushIfNew(underlyingType);
 
                     continue;
@@ -896,7 +897,22 @@ namespace Jil.Common
                 }
             }
 
-            return counts.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
+            var reused = counts.Where(kv => kv.Value > 1).Select(kv => kv.Key).ToList();
+
+            return 
+                reused
+                    .Where(
+                        r => !(r.IsPrimitiveType() ||   // all the types we handle extra specially
+                               r.IsEnum || 
+                               r.IsNullableType() ||
+                               r.IsListType() ||
+                               r.IsDictionaryType() ||
+                               r.IsReadOnlyListType() ||
+                               r.IsReadOnlyDictionaryType() ||
+                               r.IsEnumerableType() ||
+                               r.IsCollectionType())
+                    )
+                    .ToList();
         }
 
         public static string SafeConvertFromUtf32(int utf32)

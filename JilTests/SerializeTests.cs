@@ -6377,7 +6377,7 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]],\"A\":[1,2,3]}", res);
+                Assert.AreEqual("{\"A\":[1,2,3],\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
@@ -6414,7 +6414,7 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]],\"A\":[1,2,3]}", res);
+                Assert.AreEqual("{\"A\":[1,2,3],\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
@@ -7903,6 +7903,29 @@ namespace JilTests
                     Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
                 }
             }
+        }
+
+        public class _Issue127_A
+        {
+            public int A { get; set; }
+            public Dictionary<int, int?> B { get; set; }
+        }
+
+        public class _Issue127_B
+        {
+            public int? A { get; set; }
+            public Dictionary<int, int?> B { get; set; }
+        }
+        
+        [TestMethod]
+        public void Issue127()
+        {
+            var a = new _Issue127_A { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
+            var b = new _Issue127_B { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
+            var jsonA = JSON.Serialize(a);
+            var jsonB = JSON.Serialize(b);
+            Assert.AreEqual("{\"A\":1,\"B\":{\"2\":3}}", jsonA);
+            Assert.AreEqual("{\"B\":{\"2\":3},\"A\":1}", jsonB);
         }
     }
 }

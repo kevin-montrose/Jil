@@ -5738,6 +5738,43 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue126()
+        {
+            try
+            {
+                var json = "\"20.00\"";
+                var res = Jil.JSON.Deserialize<decimal>(json);
+                Assert.Fail("Should be impossible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected a decimal value", e.Message);
+            }
+
+            try
+            {
+                var json = "\"20.00\"";
+                var res = Jil.JSON.Deserialize<float>(json);
+                Assert.Fail("Should be impossible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected a float value", e.Message);
+            }
+
+            try
+            {
+                var json = "\"20.00\"";
+                var res = Jil.JSON.Deserialize<double>(json);
+                Assert.Fail("Should be impossible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Expected a double value", e.Message);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

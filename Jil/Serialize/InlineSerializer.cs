@@ -3457,7 +3457,12 @@ namespace Jil.Serialize
         {
             BuildObjectWithNewImpl();
 
-            return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
+            //return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
+
+            string ops;
+            var ret = Emit.CreateDelegate<StringThunkDelegate<ForType>>(out ops, Utils.DelegateOptimizationOptions);
+
+            return ret;
         }
 
         HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
