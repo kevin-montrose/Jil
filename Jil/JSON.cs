@@ -2016,13 +2016,7 @@ namespace Jil
                 throw new ArgumentNullException("reader");
             }
 
-            var txt = reader.ReadToEnd();
-            return Deserialize<T>(txt, options);
-
-            // TODO: just testing deserializing from string
-            //       once that's done, restore the below
-
-            /*if (typeof(T) == typeof(object))
+            if (typeof(T) == typeof(object))
             {
                 return DeserializeDynamic(reader, options);
             }
@@ -2053,7 +2047,7 @@ namespace Jil
                 if (e is DeserializationException) throw;
 
                 throw new DeserializationException(e, reader, false);
-            }*/
+            }
         }
 
         /// <summary>

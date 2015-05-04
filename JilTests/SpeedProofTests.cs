@@ -1529,6 +1529,75 @@ namespace JilTests
 
             Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
+
+        class _DeserializeThunkReader
+        {
+            public string Str { get; set; }
+            public int Int { get; set; }
+            public List<string> List { get; set; }
+            public Dictionary<string, int> Dict { get; set; }
+            public _DeserializeThunkReader Recurs { get; set; }
+            public double Float { get; set; }
+        }
+
+        [TestMethod]
+        public void DeserializeThunkReader()
+        {
+            Func<TextReader, int, _DeserializeThunkReader> thunkReader;
+            Func<TextReader, int, _DeserializeThunkReader> streamReader;
+
+            thunkReader =
+                (tr, ix) =>
+                {
+                    var str = tr.ReadToEnd();
+
+                    return JSON.Deserialize<_DeserializeThunkReader>(str);
+                };
+
+            streamReader =
+                (tr, ix) =>
+                {
+                    // have to ReadToEnd for symmetry with `thunkReader`
+                    var str = tr.ReadToEnd();
+
+                    using(var r = new StringReader(str))
+                    {
+                        return JSON.Deserialize<_DeserializeThunkReader>(r);
+                    }
+                };
+
+            var rand = new Random(141026127);
+
+            var toDeserialize = new List<_DeserializeThunkReader>();
+            for (var i = 0; i < 5000; i++)
+            {
+                toDeserialize.Add(
+                    new _DeserializeThunkReader
+                    {
+                        Float = rand.NextDouble(),
+                        Int = rand.Next(),
+                        Str = _RandString(rand),
+                        Recurs = new _DeserializeThunkReader
+                        {
+                            Int = rand.Next(),
+                            Str = _RandString(rand),
+                            List = Enumerable.Range(0, rand.Next(5)).Select(r => _RandString(rand)).ToList(),
+                            Dict = Enumerable.Range(0, rand.Next(5)).ToDictionary(x => x+" "+_RandString(rand), _ => rand.Next()),
+                            Float = rand.NextDouble()
+                        },
+                        List = Enumerable.Range(0, rand.Next(5)).Select(r => _RandString(rand)).ToList(),
+                        Dict = Enumerable.Range(0, rand.Next(5)).ToDictionary(x => x + " " + _RandString(rand), _ => rand.Next())
+                    }
+                );
+            }
+
+            toDeserialize = toDeserialize.Select(_ => new { _ = _, Order = rand.Next() }).OrderBy(o => o.Order).Select(o => o._).Where((o, ix) => ix % 2 == 0).ToList();
+
+            double thunkReaderTime, streamReaderTime;
+            CompareTimes(toDeserialize, Options.RFC1123, thunkReader, streamReader, out thunkReaderTime, out streamReaderTime);
+
+            Assert.IsTrue(thunkReaderTime < streamReaderTime, "thunkReaderTime = " + thunkReaderTime + ", streamReaderTime = " + streamReaderTime);
+        }
 #endif
     }
 }
