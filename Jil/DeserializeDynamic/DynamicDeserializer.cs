@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Jil.DeserializeDynamic
 {
-    class DynamicDeserializer
+    sealed partial class DynamicDeserializer
     {
         internal static bool UseFastNumberParsing = true;
         internal static bool UseFastIntegerConversion = true;
@@ -32,21 +32,6 @@ namespace Jil.DeserializeDynamic
                 !readingFromString ?
                     DeserializeMember :
                     DeserializeMemberThunkReader;
-        }
-
-        static MethodInfo DeserializeMemberThunkReader = typeof(DynamicDeserializer).GetMethod("_DeserializeMemberThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
-        static void _DeserializeMemberThunkReader(ref Jil.Deserialize.ThunkReader reader, ObjectBuilder builder)
-        {
-            // TODO: actually use ThunkReader
-            using(var strReader = new StringReader(reader.Value))
-            {
-                for (var i = 0; i < reader.Index; i++)
-                {
-                    strReader.Read();
-                }
-
-                _DeserializeMember(strReader, builder);
-            }
         }
 
         static MethodInfo DeserializeMember = typeof(DynamicDeserializer).GetMethod("_DeserializeMember", BindingFlags.NonPublic | BindingFlags.Static);

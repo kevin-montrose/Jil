@@ -85,6 +85,12 @@ namespace Jil
             EndedUnexpectedly = endedEarly;
         }
 
+        internal DeserializationException(Exception inner, bool endedEarly)
+            : base(inner.Message, inner)
+        {
+            EndedUnexpectedly = endedEarly;
+        }
+
         void InspectReader(ref ThunkReader reader)
         {
             try

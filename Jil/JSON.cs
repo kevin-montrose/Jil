@@ -2101,7 +2101,7 @@ namespace Jil
             {
                 if (e is DeserializationException) throw;
 
-                throw new DeserializationException("", e, false);
+                throw new DeserializationException(e, false);
             }
         }
 
