@@ -2209,7 +2209,16 @@ namespace Jil.Deserialize
             var ret = forType.FindRecursiveOrReusedTypes();
             foreach (var primeType in ret)
             {
-                var loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                MethodInfo loadMtd;
+                if(ReadingFromString)
+                {
+                    loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("LoadFromString", BindingFlags.Public | BindingFlags.Static);
+                }
+                else
+                {
+                    loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                }
+
                 loadMtd.Invoke(null, new object[0]);
             }
 

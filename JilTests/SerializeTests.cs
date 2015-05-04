@@ -6747,6 +6747,26 @@ namespace JilTests
             }
         }
 
+        class _OddNullRefOuter
+        {
+            public List<_OddNullRef> Outer { get; set; }
+        }
+
+        class _OddNullRef
+        {
+            public List<_OddNullRef> Inner { get; set; }
+        }
+
+        [TestMethod]
+        public void OddNullRef()
+        {
+            var template = new _OddNullRefOuter { Outer = new List<_OddNullRef> { new _OddNullRef(), new _OddNullRef(), new _OddNullRef { Inner = new List<_OddNullRef> { new _OddNullRef() } } } };
+            var json = JSON.Serialize(template);
+
+            var res = JSON.Deserialize<_OddNullRefOuter>(json);
+            Assert.IsNotNull(res);
+        }
+
         class _Issue27
         {
             public DateTimeOffset TestDate { get; set; }
