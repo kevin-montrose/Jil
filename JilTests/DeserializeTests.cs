@@ -5775,6 +5775,35 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue128()
+        {
+            var str = "{\"Fields\":[{\"Field\":{\"Name\":{\"en\":\"Type\"}},\"Container\":{\"Name\":{\"en\":\"tt\"}}}]}";
+            using (var s = new StringReader(str))
+            {
+                var ret = JSON.Deserialize<DocumentType>(s);
+                Assert.IsNotNull(ret);
+            }
+        }
+
+        public class DocumentType
+        {
+            public IList<DocumentTypeField> Fields { get; set; }
+        }
+
+        public class DocumentTypeField
+        {
+            public FieldDescriptor Field { get; set; }
+            public FieldDescriptor Container { get; set; }
+        }
+
+        public class FieldDescriptor
+        {
+            public Dictionary<string, string> Name { get; set; }
+            [JilDirective(true)]
+            public System.Collections.Hashtable a { get; set; }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
