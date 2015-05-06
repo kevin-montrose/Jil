@@ -888,12 +888,18 @@ namespace Jil.Common
 
                 foreach (var field in curType.GetFields(BindingFlags.Instance | BindingFlags.Public))
                 {
-                    pushIfNew(field.FieldType);
+                    if (field.ShouldUseMember())
+                    {
+                        pushIfNew(field.FieldType);
+                    }
                 }
 
                 foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
                 {
-                    pushIfNew(prop.PropertyType);
+                    if (prop.ShouldUseMember())
+                    {
+                        pushIfNew(prop.PropertyType);
+                    }
                 }
             }
 
