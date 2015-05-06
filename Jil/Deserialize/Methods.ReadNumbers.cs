@@ -1067,6 +1067,8 @@ namespace Jil.Deserialize
 
             if (idx == 0) throw new DeserializationException("Expected a double value", reader, false);
 
+            if (idx == 0) throw new DeserializationException("Expected a double value", reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1193,6 +1195,8 @@ namespace Jil.Deserialize
                 reader.Read();
                 prev = c;
             }
+
+            if (firstDigitIdx == -1) throw new DeserializationException("Expected a double value", reader, false);
 
             if (firstDigitIdx == -1) throw new DeserializationException("Expected a double value", reader, false);
 
@@ -1462,6 +1466,8 @@ namespace Jil.Deserialize
 
             if (idx == 0) throw new DeserializationException("Expected a float value", reader, false);
 
+            if (idx == 0) throw new DeserializationException("Expected a float value", reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1587,6 +1593,8 @@ namespace Jil.Deserialize
                 reader.Read();
                 prev = c;
             }
+
+            if(firstDigitIdx == -1) throw new DeserializationException("Expected a float value", reader, false);
 
             if(firstDigitIdx == -1) throw new DeserializationException("Expected a float value", reader, false);
 
@@ -1857,6 +1865,8 @@ namespace Jil.Deserialize
 
             if (idx == 0) throw new DeserializationException("Expected a decimal value", reader, false);
 
+            if (idx == 0) throw new DeserializationException("Expected a decimal value", reader, false);
+
             if (buffer[idx - 1] == '.') throw new DeserializationException("Number cannot end with .", reader, false);
             if (idx >= 2 && buffer[0] == '0')
             {
@@ -1990,6 +2000,8 @@ namespace Jil.Deserialize
                 reader.Read();
                 prev = c;
             }
+
+            if (firstDigitIdx == -1) throw new DeserializationException("Expected a decimal value", reader, false);
 
             if (firstDigitIdx == -1) throw new DeserializationException("Expected a decimal value", reader, false);
 
