@@ -111,7 +111,7 @@ declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.micro
 Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options` parameter which controls:
 
   - The format of DateTimes, DateTimeOffsets, and TimeSpans; one of
-    * NewtonsoftStyleMillisecondsSinceUnixEpoch, a string
+    * MicrosoftStyleMillisecondsSinceUnixEpoch, a string
 	  - "\/Date(##...##)\/" for DateTimes & DateTimeOffsets
 	  - "1.23:45:56.78" for TimeSpans
 	* MillisecondsSinceUnixEpoch, a number

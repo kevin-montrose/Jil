@@ -850,7 +850,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void NewtonsoftTimeSpans()
+        public void MicrosoftTimeSpans()
         {
             var rand = new Random();
             var timeSpans = new List<TimeSpan>();

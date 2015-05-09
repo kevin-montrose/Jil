@@ -233,12 +233,12 @@ namespace Jil.Deserialize
                     SkipEncodedStringThunkReader;
         }
 
-        public static MethodInfo GetDiscardNewtonsoftTimeZoneOffset(bool readingFromString)
+        public static MethodInfo GetDiscardMicrosoftTimeZoneOffset(bool readingFromString)
         {
             return
                 !readingFromString ?
-                    DiscardNewtonsoftTimeZoneOffset :
-                    DiscardNewtonsoftTimeZoneOffsetThunkReader;
+                    DiscardMicrosoftTimeZoneOffset :
+                    DiscardMicrosoftTimeZoneOffsetThunkReader;
         }
 
         public static MethodInfo GetReadISO8601DateWithCharArray(bool readingFromString)

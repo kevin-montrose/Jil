@@ -545,7 +545,7 @@ namespace Jil.Deserialize
                 DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
             {
-                // All three of these formats either lack a timezone offset, or ignore it (looking at you Newtonsoft).
+                // All three of these formats either lack a timezone offset, or ignore it (looking at you Microsoft).
                 // So let's just reuse the DateTime reader
                 ReadDate();                             // DateTime
                 Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
@@ -707,7 +707,7 @@ namespace Jil.Deserialize
             ExpectChar('(');                                    // --empty--
             ReadPrimitive(typeof(long));                        // long
             Emit.LoadArgument(0);                               // long TextReader
-            Emit.Call(Methods.GetDiscardNewtonsoftTimeZoneOffset(ReadingFromString)); // long
+            Emit.Call(Methods.GetDiscardMicrosoftTimeZoneOffset(ReadingFromString)); // long
             ExpectChar(')');                                    // long
             ExpectChar('\\');                                   // long
             ExpectChar('/');                                    // long

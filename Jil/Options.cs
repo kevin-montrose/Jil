@@ -202,7 +202,7 @@ namespace Jil
 
 #pragma warning disable 618
             // upgrade from the obsolete DateTimeFormat enumeration; warning disabled to allow it, but all other references
-            //  to NewtonsoftStyleMillisecondsSinceUnixEpoch should be expunged
+            //  should be expunged
             if (dateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
             {
                 dateFormat = DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch;

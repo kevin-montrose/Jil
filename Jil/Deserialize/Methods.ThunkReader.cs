@@ -3112,9 +3112,9 @@ namespace Jil.Deserialize
             SkipEncodedStringWithLeadCharThunkReader(ref reader, reader.Read());
         }
 
-        static readonly MethodInfo DiscardNewtonsoftTimeZoneOffsetThunkReader = typeof(Methods).GetMethod("_DiscardNewtonsoftTimeZoneOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo DiscardMicrosoftTimeZoneOffsetThunkReader = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _DiscardNewtonsoftTimeZoneOffsetThunkReader(ref ThunkReader reader)
+        static void _DiscardMicrosoftTimeZoneOffsetThunkReader(ref ThunkReader reader)
         {
             // this is a special case when reading timezone information for NewtsonsoftStyle DateTimes
             //   so far as I can tell this is pointless data, the millisecond offset is still UTC relative

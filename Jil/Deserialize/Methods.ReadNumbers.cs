@@ -23,9 +23,9 @@ namespace Jil.Deserialize
     //      * *except* for long, where we accumulate into a ulong and do the special checked; because there's no larger type
     static partial class Methods
     {
-        static readonly MethodInfo DiscardNewtonsoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardNewtonsoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo DiscardMicrosoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _DiscardNewtonsoftTimeZoneOffset(TextReader reader)
+        static void _DiscardMicrosoftTimeZoneOffset(TextReader reader)
         {
             // this is a special case when reading timezone information for NewtsonsoftStyle DateTimes
             //   so far as I can tell this is pointless data, the millisecond offset is still UTC relative

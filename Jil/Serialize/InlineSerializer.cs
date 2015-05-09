@@ -842,7 +842,7 @@ namespace Jil.Serialize
                 DateFormat == DateTimeFormat.RFC1123)
             {
                 // No room for an offset in these forms, so just re-use DateTime logic
-                // One wrinkle, the Newtonsoft-style *can* include an offset... but the seconds
+                // One wrinkle, the Microsoft-style *can* include an offset... but the seconds
                 //   count is still from UTC.  Since the offset isn't necessary, we're not
                 //   going to emit it because it's a waste of time.
                 using (var loc = Emit.DeclareLocal<DateTimeOffset>())

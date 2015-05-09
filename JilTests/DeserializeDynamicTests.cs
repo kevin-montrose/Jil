@@ -1378,7 +1378,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void NewtonsoftDateTimesWithTimeZones()
+        public void MicrosoftDateTimesWithTimeZones()
         {
             var newtonsoft = Newtonsoft.Json.JsonSerializer.Create(new Newtonsoft.Json.JsonSerializerSettings
             {
@@ -2101,7 +2101,7 @@ namespace JilTests
 
                 Assert.AreEqual(str1, str2);
             }
-            // newtonsoft-style
+            // microsoft-style
             {
                 var now = DateTimeOffset.UtcNow;
                 var str1 = JSON.Serialize(now, Options.Default);
@@ -2194,7 +2194,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void TimeSpans_Newtonsoft()
+        public void TimeSpans_Microsoft()
         {
             var rand = new Random();
             var ts = new List<TimeSpan>();

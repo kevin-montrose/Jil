@@ -7043,7 +7043,7 @@ namespace JilTests
 
 #if EXHAUSTIVE_TEST
         [TestMethod]
-        public void NewtonsoftTimeSpans_Exhaustive()
+        public void MicrosoftTimeSpans_Exhaustive()
         {
             Enumerable
                 .Range(0, 365)
@@ -7100,7 +7100,7 @@ namespace JilTests
 #endif
 
         [TestMethod]
-        public void NewtonsoftTimeSpans()
+        public void MicrosoftTimeSpans()
         {
             var rand = new Random();
             var timeSpans = new List<TimeSpan>();
@@ -7794,13 +7794,13 @@ namespace JilTests
             var s = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.SecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
             var sControl = JSON.Serialize(specified, Options.SecondsSinceUnixEpoch);
 
-            var newtonsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
-            var newtonsoftControl = JSON.Serialize(specified, Options.Default);
+            var microsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
+            var microsoftControl = JSON.Serialize(specified, Options.Default);
 
             Assert.AreEqual(iso8601Control, iso8601);
             Assert.AreEqual(msControl, ms);
             Assert.AreEqual(sControl, s);
-            Assert.AreEqual(newtonsoftControl, newtonsoft);
+            Assert.AreEqual(microsoftControl, microsoft);
         }
 
         [TestMethod]

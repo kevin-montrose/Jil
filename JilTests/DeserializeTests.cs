@@ -1897,7 +1897,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void NewtonsoftDateTimesWithTimeZones()
+        public void MicrosoftDateTimesWithTimeZones()
         {
             var newtonsoft = Newtonsoft.Json.JsonSerializer.Create(new Newtonsoft.Json.JsonSerializerSettings
             {
@@ -5063,7 +5063,7 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void NewtonsoftTimeSpan()
+        public void MicrosoftTimeSpan()
         {
             var rand = new Random();
             var timeSpans = new List<TimeSpan>();
