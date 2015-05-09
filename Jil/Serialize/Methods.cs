@@ -1430,9 +1430,9 @@ namespace Jil.Serialize
             writer.Write("S\"");
         }
 
-        static readonly MethodInfo WriteTimeSpanNewtonsoft = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo WriteTimeSpanMicrosoft = typeof(Methods).GetMethod("_WriteTimeSpanMicrosoft", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _WriteTimeSpanNewtonsoft(TextWriter writer, TimeSpan ts, char[] buffer)
+        static void _WriteTimeSpanMicrosoft(TextWriter writer, TimeSpan ts, char[] buffer)
         {
             // can't negate this, have to handle it manually
             if(ts.Ticks == long.MinValue)

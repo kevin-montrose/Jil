@@ -11,38 +11,38 @@ namespace Jil
     public sealed class Options
     {
 #pragma warning disable 1591
-        public static readonly Options Default = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch);
-        public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
-        public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
-        public static readonly Options JSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true);
-        public static readonly Options IncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
-        public static readonly Options PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
-        public static readonly Options PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true);
-        public static readonly Options PrettyPrintIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, includeInherited: true);
-        public static readonly Options ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
-        public static readonly Options ExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, includeInherited: true);
-        public static readonly Options JSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true);
-        public static readonly Options PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true);
-        public static readonly Options PrettyPrintExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, includeInherited: true);
-        public static readonly Options PrettyPrintJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true);
-        public static readonly Options ExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true);
-        public static readonly Options PrettyPrintExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true);
-        public static readonly Options Utc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options ExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options JSONPUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options IncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintJSONPUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options ExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options ExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options JSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options ExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
-        public static readonly Options PrettyPrintExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options Default = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch);
+        public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
+        public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
+        public static readonly Options JSONP = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true);
+        public static readonly Options IncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, includeInherited: true);
+        public static readonly Options PrettyPrintExcludeNulls = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true);
+        public static readonly Options PrettyPrintJSONP = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true);
+        public static readonly Options PrettyPrintIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, includeInherited: true);
+        public static readonly Options ExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true);
+        public static readonly Options ExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, includeInherited: true);
+        public static readonly Options JSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true);
+        public static readonly Options PrettyPrintExcludeNullsJSONP = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true);
+        public static readonly Options PrettyPrintExcludeNullsIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, includeInherited: true);
+        public static readonly Options PrettyPrintJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true);
+        public static readonly Options ExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true);
+        public static readonly Options PrettyPrintExcludeNullsJSONPIncludeInherited = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true);
+        public static readonly Options Utc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options ExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options JSONPUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options IncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintExcludeNullsUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintJSONPUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options ExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options ExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options JSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintExcludeNullsJSONPUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintExcludeNullsIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options ExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        public static readonly Options PrettyPrintExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
 
         public static readonly Options MillisecondsSinceUnixEpoch = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch);
         public static readonly Options MillisecondsSinceUnixEpochPrettyPrint = new Options(dateFormat: DateTimeFormat.MillisecondsSinceUnixEpoch, prettyPrint: true);
@@ -193,13 +193,22 @@ namespace Jil
         ///   jsonp - whether or not the serialized json should be valid for use with JSONP
         ///   dateFormat - the style in which to serialize DateTimes and TimeSpans
         ///   includeInherited - whether or not to serialize members declared by an objects base types
-        ///   allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
         /// </summary>
-        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, UnspecifiedDateTimeKindBehavior unspecifiedDateTimeKindBehavior = UnspecifiedDateTimeKindBehavior.IsLocal)
+        public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, UnspecifiedDateTimeKindBehavior unspecifiedDateTimeKindBehavior = UnspecifiedDateTimeKindBehavior.IsLocal)
         {
             ShouldPrettyPrint = prettyPrint;
             ShouldExcludeNulls = excludeNulls;
             IsJSONP = jsonp;
+
+#pragma warning disable 618
+            // upgrade from the obsolete DateTimeFormat enumeration; warning disabled to allow it, but all other references
+            //  to NewtonsoftStyleMillisecondsSinceUnixEpoch should be expunged
+            if (dateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+            {
+                dateFormat = DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch;
+            }
+#pragma warning restore 618
+
             UseDateTimeFormat = dateFormat;
             ShouldIncludeInherited = includeInherited;
             UseUnspecifiedDateTimeKindBehavior = unspecifiedDateTimeKindBehavior;
@@ -231,25 +240,27 @@ namespace Jil
         {
             const int isoMask = 0x20;
             const int milliMask = isoMask * 2;
-            const int newtonMask = milliMask * 2;
-            const int secondsMask = newtonMask * 2;
+            const int microsoftMask = milliMask * 2;
+            const int secondsMask = microsoftMask * 2;
             const int rfc1123Mask = secondsMask * 2;
             const int localMask = rfc1123Mask * 2;
             const int utcMask = localMask * 2;
 
             int dateTimeMask;
-            switch(UseDateTimeFormat)
+            switch (UseDateTimeFormat)
             {
                 case DateTimeFormat.ISO8601: dateTimeMask = isoMask; break;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: dateTimeMask = milliMask; break;
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: dateTimeMask = newtonMask; break;
+
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: dateTimeMask = microsoftMask; break;
+
                 case DateTimeFormat.SecondsSinceUnixEpoch: dateTimeMask = secondsMask; break;
                 case DateTimeFormat.RFC1123: dateTimeMask = rfc1123Mask; break;
-                default: throw new Exception("Unexpected DateTimeFormat "+UseDateTimeFormat);
+                default: throw new Exception("Unexpected DateTimeFormat " + UseDateTimeFormat);
             }
 
             int unspecifiedMask;
-            switch(UseUnspecifiedDateTimeKindBehavior)
+            switch (UseUnspecifiedDateTimeKindBehavior)
             {
                 case UnspecifiedDateTimeKindBehavior.IsLocal: unspecifiedMask = localMask; break;
                 case UnspecifiedDateTimeKindBehavior.IsUTC: unspecifiedMask = utcMask; break;
@@ -271,7 +282,7 @@ namespace Jil
         public override bool Equals(object obj)
         {
             var other = obj as Options;
-            if(other == null) return false;
+            if (other == null) return false;
 
             return
                 other.UseDateTimeFormat == this.UseDateTimeFormat &&

@@ -1319,9 +1319,9 @@ namespace Jil.Serialize
             writer.Write("S\"");
         }
 
-        static readonly MethodInfo WriteTimeSpanNewtonsoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanNewtonsoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        static readonly MethodInfo WriteTimeSpanMicrosoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanMicrosoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void _WriteTimeSpanNewtonsoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
+        static void _WriteTimeSpanMicrosoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
             // can't negate this, have to handle it manually
             if (ts.Ticks == long.MinValue)

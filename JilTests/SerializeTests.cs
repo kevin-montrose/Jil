@@ -7770,13 +7770,13 @@ namespace JilTests
             var s = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.SecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsUTC));
             var sControl = JSON.Serialize(specified, Options.SecondsSinceUnixEpoch);
 
-            var newtonsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsUTC));
-            var newtonsoftControl = JSON.Serialize(specified, Options.Default);
+            var microsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsUTC));
+            var microsoftControl = JSON.Serialize(specified, Options.Default);
 
             Assert.AreEqual(iso8601Control, iso8601);
             Assert.AreEqual(msControl, ms);
             Assert.AreEqual(sControl, s);
-            Assert.AreEqual(newtonsoftControl, newtonsoft);
+            Assert.AreEqual(microsoftControl, microsoft);
         }
 
         [TestMethod]
@@ -7794,7 +7794,7 @@ namespace JilTests
             var s = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.SecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
             var sControl = JSON.Serialize(specified, Options.SecondsSinceUnixEpoch);
 
-            var newtonsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
+            var newtonsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
             var newtonsoftControl = JSON.Serialize(specified, Options.Default);
 
             Assert.AreEqual(iso8601Control, iso8601);

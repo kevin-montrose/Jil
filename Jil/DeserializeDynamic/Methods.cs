@@ -478,7 +478,7 @@ namespace Jil.DeserializeDynamic
             return ret;
         }
 
-        public static bool ReadNewtonsoftStyleDateTime(string str, out DateTime dt)
+        public static bool ReadMicrosoftStyleDateTime(string str, out DateTime dt)
         {
             // Format: /Date(#####+####)/
 
@@ -553,7 +553,7 @@ namespace Jil.DeserializeDynamic
                 100000000
             };
 
-        public static bool ReadNewtonsoftStyleTimeSpan(string str, out TimeSpan ts)
+        public static bool ReadMicrosoftStyleTimeSpan(string str, out TimeSpan ts)
         {
             if (str.Length == 0)
             {

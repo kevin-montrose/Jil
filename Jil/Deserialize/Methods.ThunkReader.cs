@@ -4481,8 +4481,8 @@ namespace Jil.Deserialize
             }
         }
 
-        static readonly MethodInfo ReadNewtonsoftTimeSpanThunkReader = typeof(Methods).GetMethod("_ReadNewtonsoftTimeSpanThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
-        static TimeSpan _ReadNewtonsoftTimeSpanThunkReader(ref ThunkReader reader, char[] buffer)
+        static readonly MethodInfo ReadMicrosoftTimeSpanThunkReader = typeof(Methods).GetMethod("_ReadMicrosoftTimeSpanThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        static TimeSpan _ReadMicrosoftTimeSpanThunkReader(ref ThunkReader reader, char[] buffer)
         {
             var strLen = ReadTimeSpanIntoThunkReader(ref reader, buffer);
 

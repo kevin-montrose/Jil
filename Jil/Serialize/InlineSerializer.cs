@@ -610,7 +610,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);
         }
 
-        void WriteNewtonsoftStyleDateTime()
+        void WriteMicrosoftStyleDateTime()
         {
             // top of stack:
             //   - DateTime
@@ -838,7 +838,7 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch ||
+                DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.RFC1123)
             {
                 // No room for an offset in these forms, so just re-use DateTime logic
@@ -924,8 +924,8 @@ namespace Jil.Serialize
                     return;
                 
                 case DateTimeFormat.RFC1123:
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    Emit.Call(Methods.GetWriteTimeSpanNewtonsoft(BuildingToString));    // --empty--
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    Emit.Call(Methods.GetWriteTimeSpanMicrosoft(BuildingToString));    // --empty--
                     return;
                 default: throw new Exception("Unexpected DateTimeFormat [" + DateFormat + "]");
             }
@@ -965,8 +965,8 @@ namespace Jil.Serialize
 
             switch (DateFormat)
             {
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    WriteNewtonsoftStyleDateTime();
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    WriteMicrosoftStyleDateTime();
                     return;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch:
                     WriteMillisecondsStyleDateTime();

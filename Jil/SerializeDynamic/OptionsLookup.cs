@@ -30,71 +30,71 @@ namespace Jil.SerializeDynamic
             {
                 case DateTimeFormat.ISO8601: return GetISO8601TypeCache(opts);
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: return GetMillisecondsTypeCache(opts);
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: return GetNewtonsoftTypeCache(opts);
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: return GetMicrosoftTypeCache(opts);
                 case DateTimeFormat.SecondsSinceUnixEpoch: return GetSecondsTypeCache(opts);
                 case DateTimeFormat.RFC1123: return GetRFC1123TypeCache(opts);
                 default: throw new Exception("Unexpected DateTimeFormat: " + opts.UseDateTimeFormat);
             }
         }
 
-        static Type GetNewtonsoftTypeCache(Options opts)
+        static Type GetMicrosoftTypeCache(Options opts)
         {
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONPInherited);
+                return typeof(Serialize.MicrosoftStylePrettyPrintExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsJSONP);
+                return typeof(Serialize.MicrosoftStylePrettyPrintExcludeNullsJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNullsInherited);
+                return typeof(Serialize.MicrosoftStylePrettyPrintExcludeNullsInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONPInherited);
+                return typeof(Serialize.MicrosoftStylePrettyPrintJSONPInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONPInherited);
+                return typeof(Serialize.MicrosoftStyleExcludeNullsJSONPInherited);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldExcludeNulls)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintExcludeNulls);
+                return typeof(Serialize.MicrosoftStylePrettyPrintExcludeNulls);
             }
 
             if (opts.ShouldPrettyPrint && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintJSONP);
+                return typeof(Serialize.MicrosoftStylePrettyPrintJSONP);
             }
 
             if (opts.ShouldPrettyPrint && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStylePrettyPrintInherited);
+                return typeof(Serialize.MicrosoftStylePrettyPrintInherited);
             }
 
             if (opts.ShouldExcludeNulls && opts.IsJSONP)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsJSONP);
+                return typeof(Serialize.MicrosoftStyleExcludeNullsJSONP);
             }
 
             if (opts.ShouldExcludeNulls && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleExcludeNullsInherited);
+                return typeof(Serialize.MicrosoftStyleExcludeNullsInherited);
             }
 
             if (opts.IsJSONP && opts.ShouldIncludeInherited)
             {
-                return typeof(Serialize.NewtonsoftStyleJSONPInherited);
+                return typeof(Serialize.MicrosoftStyleJSONPInherited);
             }
 
-            return typeof(Serialize.NewtonsoftStyle);
+            return typeof(Serialize.MicrosoftStyle);
         }
 
         static Type GetSecondsTypeCache(Options opts)

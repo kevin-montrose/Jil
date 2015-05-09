@@ -157,12 +157,12 @@ namespace Jil.Serialize
                     WriteTimeSpanISO8601_ThunkWriter;
         }
 
-        public static MethodInfo GetWriteTimeSpanNewtonsoft(bool needThunkWriter)
+        public static MethodInfo GetWriteTimeSpanMicrosoft(bool needThunkWriter)
         {
             return
                 !needThunkWriter ?
-                    WriteTimeSpanNewtonsoft :
-                    WriteTimeSpanNewtonsoft_ThunkWriter;
+                    WriteTimeSpanMicrosoft :
+                    WriteTimeSpanMicrosoft_ThunkWriter;
         }
 
         public static MethodInfo GetCustomISO8601WithOffsetToString(bool needThunkWriter)

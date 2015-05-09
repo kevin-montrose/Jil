@@ -12,11 +12,14 @@ namespace Jil
     public enum DateTimeFormat : byte
     {
         /// <summary>
+        /// Obsolete: Use MicrosoftStyleMillisecondsSinceUnixEpoch instead
+        /// 
         /// DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
         /// number of milliseconds since the unix epoch (January 1st, 1970 UTC).
         /// 
         /// TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
         /// </summary>
+        [Obsolete("Use MicrosoftStyleMillisecondsSinceUnixEpoch instead")]
         NewtonsoftStyleMillisecondsSinceUnixEpoch = 0,
         /// <summary>
         /// DateTimes will be formatted as ##...##, where ##...## is the number
@@ -64,6 +67,17 @@ namespace Jil
         ///     
         /// TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
         /// </summary>
-        RFC1123 = 4
+        RFC1123 = 4,
+        /// <summary>
+        /// DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
+        /// number of milliseconds since the unix epoch (January 1st, 1970 UTC).
+        /// See: https://msdn.microsoft.com/en-us/library/bb299886.aspx
+        /// 
+        /// Example:
+        ///     "\/Date(628318530718)\/"
+        ///     
+        /// TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+        /// </summary>
+        MicrosoftStyleMillisecondsSinceUnixEpoch = 5
     }
 }

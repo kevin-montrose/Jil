@@ -123,8 +123,8 @@ namespace Jil.DeserializeDynamic
 
                 switch (Options.UseDateTimeFormat)
                 {
-                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                        ret = Methods.ReadNewtonsoftStyleDateTime(StringValue, out res);
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        ret = Methods.ReadMicrosoftStyleDateTime(StringValue, out res);
                         dt = res;
                         return ret;
                     case DateTimeFormat.ISO8601:
@@ -238,8 +238,8 @@ namespace Jil.DeserializeDynamic
 
                 switch (Options.UseDateTimeFormat)
                 {
-                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                        ret = Methods.ReadNewtonsoftStyleTimeSpan(StringValue, out ts);
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        ret = Methods.ReadMicrosoftStyleTimeSpan(StringValue, out ts);
                         return ret;
                     case DateTimeFormat.ISO8601:
                         ret = Methods.ReadISO8601TimeSpan(StringValue, out ts);

@@ -122,8 +122,8 @@ namespace Jil
                     Seconds(data, output, options);
                     return;
 
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    NewtonsoftStyle(data, output, options);
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    MicrosoftStyle(data, output, options);
                     return;
 
                 case DateTimeFormat.RFC1123:
@@ -161,8 +161,8 @@ namespace Jil
                 case DateTimeFormat.SecondsSinceUnixEpoch:
                     return SecondsToString(data, options);
 
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                    return NewtonsoftStyleToString(data, options);
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    return MicrosoftStyleToString(data, options);
 
                 case DateTimeFormat.RFC1123:
                     return RFC1123ToString(data, options);
@@ -180,356 +180,356 @@ namespace Jil
             return writer.StaticToString();
         }
 
-        static void NewtonsoftStyle<T>(T data, TextWriter output, Options options)
+        static void MicrosoftStyle<T>(T data, TextWriter output, Options options)
         {
             if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
             {
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStyleExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintJSONPInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStyleExcludeNullsInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleExcludeNullsInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.IsJSONP)
                 {
-                    TypeCache<NewtonsoftStyleExcludeNullsJSONP, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldPrettyPrint && options.IsJSONP)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintJSONP, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintJSONP, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintExcludeNulls, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrintInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrintInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStyleJSONPInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleJSONPInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldExcludeNulls)
                 {
-                    TypeCache<NewtonsoftStyleExcludeNulls, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleExcludeNulls, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldPrettyPrint)
                 {
-                    TypeCache<NewtonsoftStylePrettyPrint, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStylePrettyPrint, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.IsJSONP)
                 {
-                    TypeCache<NewtonsoftStyleJSONP, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleJSONP, T>.Get()(output, data, 0);
                     return;
                 }
 
                 if (options.ShouldIncludeInherited)
                 {
-                    TypeCache<NewtonsoftStyleInherited, T>.Get()(output, data, 0);
+                    TypeCache<MicrosoftStyleInherited, T>.Get()(output, data, 0);
                     return;
                 }
 
-                TypeCache<NewtonsoftStyle, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyle, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
-                TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStyleExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStylePrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStylePrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStyleExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.IsJSONP)
             {
-                TypeCache<NewtonsoftStyleExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldPrettyPrint && options.IsJSONP)
             {
-                TypeCache<NewtonsoftStylePrettyPrintJSONPUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrooftStylePrettyPrintJSONPUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
             {
-                TypeCache<NewtonsoftStylePrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStylePrettyPrintInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.IsJSONP && options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStyleJSONPInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldExcludeNulls)
             {
-                TypeCache<NewtonsoftStyleExcludeNullsUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleExcludeNullsUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldPrettyPrint)
             {
-                TypeCache<NewtonsoftStylePrettyPrintUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.IsJSONP)
             {
-                TypeCache<NewtonsoftStyleJSONPUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleJSONPUtc, T>.Get()(output, data, 0);
                 return;
             }
 
             if (options.ShouldIncludeInherited)
             {
-                TypeCache<NewtonsoftStyleInheritedUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStyleInheritedUtc, T>.Get()(output, data, 0);
                 return;
             }
 
-            TypeCache<NewtonsoftStyleUtc, T>.Get()(output, data, 0);
+            TypeCache<MicrosoftStyleUtc, T>.Get()(output, data, 0);
             return;
         }
 
-        static string NewtonsoftStyleToString<T>(T data, Options options)
+        static string MicrosoftStyleToString<T>(T data, Options options)
         {
             if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
             {
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsJSONPInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintJSONPInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.IsJSONP)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsJSONP, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.GetToString(), data);
                 }
 
                 if (options.ShouldPrettyPrint && options.IsJSONP)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintJSONP, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONP, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNulls, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.GetToString(), data);
                 }
 
                 if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrintInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintInherited, T>.GetToString(), data);
                 }
 
                 if (options.IsJSONP && options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleJSONPInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleJSONPInherited, T>.GetToString(), data);
                 }
 
                 if (options.ShouldExcludeNulls)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleExcludeNulls, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleExcludeNulls, T>.GetToString(), data);
                 }
 
                 if (options.ShouldPrettyPrint)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStylePrettyPrint, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStylePrettyPrint, T>.GetToString(), data);
                 }
 
                 if (options.IsJSONP)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleJSONP, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleJSONP, T>.GetToString(), data);
                 }
 
                 if (options.ShouldIncludeInherited)
                 {
-                    return WriteToString(TypeCache<NewtonsoftStyleInherited, T>.GetToString(), data);
+                    return WriteToString(TypeCache<MicrosoftStyleInherited, T>.GetToString(), data);
                 }
 
-                return WriteToString(TypeCache<NewtonsoftStyle, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyle, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.IsJSONP)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsJSONPUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldPrettyPrint && options.IsJSONP)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintJSONPUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrooftStylePrettyPrintJSONPUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintExcludeNullsUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.IsJSONP && options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleJSONPInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleExcludeNullsUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldPrettyPrint)
             {
-                return WriteToString(TypeCache<NewtonsoftStylePrettyPrintUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintUtc, T>.GetToString(), data);
             }
 
             if (options.IsJSONP)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleJSONPUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleJSONPUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldIncludeInherited)
             {
-                return WriteToString(TypeCache<NewtonsoftStyleInheritedUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStyleInheritedUtc, T>.GetToString(), data);
             }
 
-            return WriteToString(TypeCache<NewtonsoftStyleUtc, T>.GetToString(), data);
+            return WriteToString(TypeCache<MicrosoftStyleUtc, T>.GetToString(), data);
         }
 
         static void Milliseconds<T>(T data, TextWriter output, Options options)
@@ -2028,8 +2028,8 @@ namespace Jil
 
                 switch (options.UseDateTimeFormat)
                 {
-                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                        return Jil.Deserialize.TypeCache<Jil.Deserialize.NewtonsoftStyle, T>.Get()(reader, 0);
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.Get()(reader, 0);
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
                         return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.Get()(reader, 0);
                     case DateTimeFormat.SecondsSinceUnixEpoch:
@@ -2077,8 +2077,8 @@ namespace Jil
 
                 switch (options.UseDateTimeFormat)
                 {
-                    case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch:
-                        return Jil.Deserialize.TypeCache<Jil.Deserialize.NewtonsoftStyle, T>.GetFromString()(ref thunk, 0);
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.GetFromString()(ref thunk, 0);
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
                         return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.GetFromString()(ref thunk, 0);
                     case DateTimeFormat.SecondsSinceUnixEpoch:

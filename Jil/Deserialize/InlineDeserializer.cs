@@ -71,7 +71,7 @@ namespace Jil.Deserialize
                 hasStringyTypes ||
                 involvedTypes.Any(t => t.IsNumberType()) ||         // we use `ref char[]` for these, so they're kind of stringy
                 (involvedTypes.Contains(typeof(DateTime)) && DateFormat == DateTimeFormat.ISO8601) ||
-                (involvedTypes.Contains(typeof(TimeSpan)) && (DateFormat == DateTimeFormat.ISO8601 || DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch));
+                (involvedTypes.Contains(typeof(TimeSpan)) && (DateFormat == DateTimeFormat.ISO8601 || DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch));
 
             if (needsCharBuffer)
             {
@@ -543,7 +543,7 @@ namespace Jil.Deserialize
         {
             if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch)
+                DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
             {
                 // All three of these formats either lack a timezone offset, or ignore it (looking at you Newtonsoft).
                 // So let's just reuse the DateTime reader
@@ -574,7 +574,7 @@ namespace Jil.Deserialize
             {
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsTimeSpan(); break;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsTimeSpan(); break;
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: ReadNewtonsoftStyleTimeSpan(); break;
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: ReadMicrosoftStyleTimeSpan(); break;
                 case DateTimeFormat.ISO8601: ReadISO8601TimeSpan(); break;
                 default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
             }
@@ -667,11 +667,11 @@ namespace Jil.Deserialize
             Emit.MarkLabel(done);                   // TimeSpan
         }
 
-        void ReadNewtonsoftStyleTimeSpan()
+        void ReadMicrosoftStyleTimeSpan()
         {
             Emit.LoadArgument(0);                                               // TextReader
             LoadCharBuffer();                                                   // TextReader char[]
-            Emit.Call(Methods.GetReadNewtonsoftTimeSpan(ReadingFromString));    // TimeSpan
+            Emit.Call(Methods.GetReadMicrosoftTimeSpan(ReadingFromString));    // TimeSpan
         }
 
         void ReadISO8601TimeSpan()
@@ -685,7 +685,7 @@ namespace Jil.Deserialize
         {
             switch (DateFormat)
             {
-                case DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch: ReadNewtosoftDateTime(); break;
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: ReadMicrosoftDateTime(); break;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsDateTime(); break;
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsDateTime(); break;
                 case DateTimeFormat.ISO8601: ReadISO8601DateTime(); break;
@@ -695,7 +695,7 @@ namespace Jil.Deserialize
             
         }
 
-        void ReadNewtosoftDateTime()
+        void ReadMicrosoftDateTime()
         {
             ExpectQuote();                                      // --empty--
             ExpectChar('\\');                                   // --empty--

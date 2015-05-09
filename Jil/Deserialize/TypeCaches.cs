@@ -68,9 +68,9 @@ namespace Jil.Deserialize
         }
     }
 
-    class NewtonsoftStyle : IDeserializeOptions
+    class MicrosoftStyle : IDeserializeOptions
     {
-        public DateTimeFormat DateFormat { get { return DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch; } }
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
     }
 
     class MillisecondStyle : IDeserializeOptions
