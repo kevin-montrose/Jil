@@ -278,7 +278,8 @@ If you think you're up to the challenge, I'd be really interested in seeing code
 Similarly to numbers, each of Jil's date formats has a custom Write() implementation.
 
  - [ISO8601](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/Methods.cs#L142) can be unrolled into a smaller number of `/` and `%` instructions
- - [Newtonsoft-style](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L471) is a subtraction and division, then fed into the custom `long` writing code
+ - [RFC1123](https://github.com/kevin-montrose/Jil/blob/fa66ef27b606f2d39512ed54073377730d065896/Jil/Serialize/Methods.cs#L1574) can be similarly decomposed
+ - [Microsoft-style](https://github.com/kevin-montrose/Jil/blob/fa66ef27b606f2d39512ed54073377730d065896/Jil/Serialize/InlineSerializer.cs#L613) is a subtraction and division, then fed into the custom `long` writing code
  - [Milliseconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L528) is essentially the same
  - [Seconds since the unix epoch](https://github.com/kevin-montrose/Jil/blob/519a0c552e9fb93a4df94eed0b2f9804271f2fef/Jil/Serialize/InlineSerializer.cs#L577) just has a different divisor
  
@@ -311,3 +312,5 @@ Rather than read a member name into a string or buffer when deserializing, Jil w
 ### Avoid Abstractions If Able
 
 If you're serializing to `string` (as indicated by using a particular [`Serialize<T>`](https://github.com/kevin-montrose/Jil/blob/7915b2e8897024e82628c514d63af596fcfd5013/Jil/JSON.cs#L140) method) Jil will avoid the overhead of virtually dispatching calls against `TextWriter`, and instead statically call against its own specialized [`StringBuilder`-eqsue class](https://github.com/kevin-montrose/Jil/blob/7915b2e8897024e82628c514d63af596fcfd5013/Jil/Serialize/ThunkWriter.cs#L133).  In the general case Jil prefers to write against a `TextWriter` so as to keep memory pressure low (a real concern in many real world deployments), but when Jil is going to allocate a `string` anyway avoiding virtual dispatch results in a noticeable speed up. 
+
+Simiarly, deserializing from `string` (as indicated by this [`Deserialize<T>`](https://github.com/kevin-montrose/Jil/blob/fa66ef27b606f2d39512ed54073377730d065896/Jil/JSON.cs#L2012) method) Jil avoid using `TextReader`, and instead issue static calls against a [lightweight wrapper of its own](https://github.com/kevin-montrose/Jil/blob/fa66ef27b606f2d39512ed54073377730d065896/Jil/Deserialize/ThunkReader.cs).
