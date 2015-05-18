@@ -827,6 +827,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
         static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetMethod;
+        static readonly MethodInfo DateTimeOffset_UtcTicks = typeof(DateTimeOffset).GetProperty("UtcTicks").GetMethod;
         static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetMethod;
         static readonly MethodInfo TimeSpan_Hours = typeof(TimeSpan).GetProperty("Hours").GetMethod;
         static readonly MethodInfo TimeSpan_Minutes = typeof(TimeSpan).GetProperty("Minutes").GetMethod;
@@ -838,13 +839,9 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch ||
                 DateFormat == DateTimeFormat.RFC1123)
             {
                 // No room for an offset in these forms, so just re-use DateTime logic
-                // One wrinkle, the Microsoft-style *can* include an offset... but the seconds
-                //   count is still from UTC.  Since the offset isn't necessary, we're not
-                //   going to emit it because it's a waste of time.
                 using (var loc = Emit.DeclareLocal<DateTimeOffset>())
                 {
                     Emit.StoreLocal(loc);               // TextWriter
@@ -853,6 +850,29 @@ namespace Jil.Serialize
 
                 Emit.Call(DateTimeOffset_UtcDateTime);  // TextWriter DateTime
                 WriteDateTime();
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
+            {
+                // Get the UtcTicks (long) and the offset on the stack
+                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>())
+                using (var tsLoc = Emit.DeclareLocal<TimeSpan>())
+                {
+                    Emit.StoreLocal(dtoLoc);            // TextWriter
+                    Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTimeOffset*
+                    Emit.Call(DateTimeOffset_UtcTicks); // TextWriter long
+                    Emit.LoadLocalAddress(dtoLoc);      // TextWriter long DateTimeOffset*
+                    Emit.Call(DateTimeOffset_Offset);   // TextWriter long TimeSpan
+                    Emit.StoreLocal(tsLoc);             // TextWriter long
+                    Emit.LoadLocalAddress(tsLoc);       // TextWriter long TimeSpan*
+                    Emit.Call(TimeSpan_Hours);          // TextWriter long int
+                    Emit.LoadLocalAddress(tsLoc);       // TextWriter long int TimeSpan*
+                    Emit.Call(TimeSpan_Minutes);        // TextWriter long int int
+                }
+
+                Emit.LoadLocal(CharBuffer);                                                     // TextWriter long int int char[]
+                Emit.Call(Methods.GetCustomWriteMicrosoftStyleWithOffset(BuildingToString));    // --empty--
                 return;
             }
 
@@ -873,8 +893,8 @@ namespace Jil.Serialize
                     Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime int TimeSpan*
                     Emit.Call(TimeSpan_Minutes);        // TextWriter DateTime int int
                 }
-                Emit.LoadLocal(CharBuffer);
-                Emit.Call(Methods.GetCustomISO8601WithOffsetToString(BuildingToString));
+                Emit.LoadLocal(CharBuffer);                                                 // TextWriter DateTime int int char[]
+                Emit.Call(Methods.GetCustomISO8601WithOffsetToString(BuildingToString));    // --empty--
                 return;
             }
 

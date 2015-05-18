@@ -193,6 +193,7 @@ namespace Jil
         ///   jsonp - whether or not the serialized json should be valid for use with JSONP
         ///   dateFormat - the style in which to serialize DateTimes and TimeSpans
         ///   includeInherited - whether or not to serialize members declared by an objects base types
+        ///   unspecifiedDateTimeKindBehavior - how to treat DateTime's with a DateTimeKind of Unspecified (Jil converts all DateTimes to Utc for serialization, use DateTimeOffset to preserve time zone information)
         /// </summary>
         public Options(bool prettyPrint = false, bool excludeNulls = false, bool jsonp = false, DateTimeFormat dateFormat = DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, bool includeInherited = false, UnspecifiedDateTimeKindBehavior unspecifiedDateTimeKindBehavior = UnspecifiedDateTimeKindBehavior.IsLocal)
         {

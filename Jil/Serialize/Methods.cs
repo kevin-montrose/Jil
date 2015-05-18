@@ -1669,6 +1669,40 @@ namespace Jil.Serialize
 
             throw new InvalidOperationException("NaN is not a permitted JSON number value");
         }
+
+        static readonly MethodInfo CustomWriteMicrosoftStyleWithOffset = typeof(Methods).GetMethod("_CustomWriteMicrosoftStyleWithOffset", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteMicrosoftStyleWithOffset(TextWriter writer, long utcTicks, int hours, int minutes, char[] buffer)
+        {
+            const long EpochTicks = 621355968000000000L;
+            const long TicksToMilliseconds = 10000L;
+
+            writer.Write(@"""\/Date(");
+            
+            var delta = (utcTicks - EpochTicks) / TicksToMilliseconds;
+            _CustomWriteLong(writer, delta, buffer);
+
+            if(hours < 0 || minutes < 0)
+            {
+                writer.Write('-');
+                hours = -hours;
+                minutes = -minutes;
+            }
+            else
+            {
+                writer.Write('+');
+            }
+
+            var digits = DigitPairs[hours];
+            writer.Write(digits.First);
+            writer.Write(digits.Second);
+            
+            digits = DigitPairs[minutes];
+            writer.Write(digits.First);
+            writer.Write(digits.Second);
+
+            writer.Write(@")\/""");
+        }
     }
 }
 

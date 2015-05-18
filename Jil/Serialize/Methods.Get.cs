@@ -172,5 +172,13 @@ namespace Jil.Serialize
                     CustomISO8601WithOffsetToString :
                     CustomISO8601WithOffsetToString_ThunkWriter;
         }
+
+        public static MethodInfo GetCustomWriteMicrosoftStyleWithOffset(bool needThunkWriter)
+        {
+            return
+                !needThunkWriter ?
+                    CustomWriteMicrosoftStyleWithOffset :
+                    CustomWriteMicrosoftStyleWithOffset_ThunkWriter;
+        }
     }
 }

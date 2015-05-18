@@ -1527,5 +1527,39 @@ namespace Jil.Serialize
 
             writer.WriteValueConstant(ConstantString_Value.SpaceGMTQuote);
         }
+
+        static readonly MethodInfo CustomWriteMicrosoftStyleWithOffset_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteMicrosoftStyleWithOffset_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _CustomWriteMicrosoftStyleWithOffset_ThunkWriter(ref ThunkWriter writer, long utcTicks, int hours, int minutes, char[] buffer)
+        {
+            const long EpochTicks = 621355968000000000L;
+            const long TicksToMilliseconds = 10000L;
+
+            writer.WriteValueConstant(ConstantString_Value.Date);
+
+            var delta = (utcTicks - EpochTicks) / TicksToMilliseconds;
+            _CustomWriteLong_ThunkWriter(ref writer, delta, buffer);
+
+            if (hours < 0 || minutes < 0)
+            {
+                writer.Write('-');
+                hours = -hours;
+                minutes = -minutes;
+            }
+            else
+            {
+                writer.Write('+');
+            }
+
+            var digits = DigitPairs[hours];
+            writer.Write(digits.First);
+            writer.Write(digits.Second);
+
+            digits = DigitPairs[minutes];
+            writer.Write(digits.First);
+            writer.Write(digits.Second);
+
+            writer.WriteValueConstant(ConstantString_Value.CloseDate);
+        }
     }
 }

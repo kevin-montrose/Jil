@@ -7957,35 +7957,38 @@ namespace JilTests
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
             settings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat;
 
-            var dto1 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-            var dto2 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1));
-            var dto3 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2));
-            var dto4 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3));
+            var dtos = 
+                new[] 
+                { 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-3)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(4, 30, 00)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(-4, -30, 00)),
+                };
 
-            var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(dto1, settings);
-            var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(dto2, settings);
-            var str3 = Newtonsoft.Json.JsonConvert.SerializeObject(dto3, settings);
-            var str4 = Newtonsoft.Json.JsonConvert.SerializeObject(dto4, settings);
-
-            var x = string.Join("\r\n", str1, str2, str3, str4);
-
+            foreach(var dto in dtos)
             {
-                var res = JSON.Serialize(dto1);
-                Assert.AreEqual(str1, res);
-            }
+                var val = Newtonsoft.Json.JsonConvert.SerializeObject(dto, settings);
 
-            {
-                var res = JSON.Serialize(dto2);
-                Assert.AreEqual(str2, res);
-            }
-            {
-                var res = JSON.Serialize(dto3);
-                Assert.AreEqual(str3, res);
-            }
+                // stream style
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(dto, str);
 
-            {
-                var res = JSON.Serialize(dto4);
-                Assert.AreEqual(str4, res);
+                    var res = str.ToString();
+                    Assert.AreEqual(val, res);
+                }
+
+                // string style
+                {
+                    var res = JSON.Serialize(dto);
+                    Assert.AreEqual(val, res);
+                }
             }
         }
     }
