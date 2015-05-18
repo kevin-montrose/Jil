@@ -7947,5 +7947,46 @@ namespace JilTests
             Assert.AreEqual("{\"A\":1,\"B\":{\"2\":3}}", jsonA);
             Assert.AreEqual("{\"B\":{\"2\":3},\"A\":1}", jsonB);
         }
+
+        [TestMethod]
+        public void MicrosoftDateTimeOffsets()
+        {
+            // While *DateTimes* in Microsoft format don't do anything with the offset (they just write it, then ignore it),
+            //   DateTimeOffsets do.
+
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
+            settings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat;
+
+            var dto1 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+            var dto2 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1));
+            var dto3 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2));
+            var dto4 = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3));
+
+            var str1 = Newtonsoft.Json.JsonConvert.SerializeObject(dto1, settings);
+            var str2 = Newtonsoft.Json.JsonConvert.SerializeObject(dto2, settings);
+            var str3 = Newtonsoft.Json.JsonConvert.SerializeObject(dto3, settings);
+            var str4 = Newtonsoft.Json.JsonConvert.SerializeObject(dto4, settings);
+
+            var x = string.Join("\r\n", str1, str2, str3, str4);
+
+            {
+                var res = JSON.Serialize(dto1);
+                Assert.AreEqual(str1, res);
+            }
+
+            {
+                var res = JSON.Serialize(dto2);
+                Assert.AreEqual(str2, res);
+            }
+            {
+                var res = JSON.Serialize(dto3);
+                Assert.AreEqual(str3, res);
+            }
+
+            {
+                var res = JSON.Serialize(dto4);
+                Assert.AreEqual(str4, res);
+            }
+        }
     }
 }

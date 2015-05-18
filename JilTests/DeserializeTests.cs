@@ -5804,6 +5804,37 @@ namespace JilTests
             public System.Collections.Hashtable a { get; set; }
         }
 
+        [TestMethod]
+        public void MicrosoftDateTimeOffsets()
+        {
+            {
+                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(0+0000)\/""");
+
+                Assert.AreEqual(dto, res);
+                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
+                Assert.AreEqual(dto.Offset, res.Offset);
+            }
+
+            {
+                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1));
+                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(-3600000+0100)\/""");
+
+                Assert.AreEqual(dto, res);
+                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
+                Assert.AreEqual(dto.Offset, res.Offset);
+            }
+
+            {
+                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1));
+                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(3600000-0100)\/""");
+
+                Assert.AreEqual(dto, res);
+                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
+                Assert.AreEqual(dto.Offset, res.Offset);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
