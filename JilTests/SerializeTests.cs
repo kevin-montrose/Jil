@@ -6780,7 +6780,7 @@ namespace JilTests
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 });
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 });
                 Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000)\\/\"}", str1);
+                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
             }
 
             {
@@ -6788,7 +6788,7 @@ namespace JilTests
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 }, Options.ExcludeNulls);
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 }, Options.ExcludeNulls);
                 Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000)\\/\"}", str1);
+                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
             }
 
             {
@@ -6796,7 +6796,7 @@ namespace JilTests
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 }, Options.ExcludeNulls);
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 }, Options.ExcludeNulls);
                 Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(0)\\/\"}", str1);
+                Assert.AreEqual("{\"TestDate\":\"\\/Date(0+0000)\\/\"}", str1);
             }
         }
 

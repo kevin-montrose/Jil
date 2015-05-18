@@ -5807,31 +5807,44 @@ namespace JilTests
         [TestMethod]
         public void MicrosoftDateTimeOffsets()
         {
+            // While *DateTimes* in Microsoft format don't do anything with the offset (they just write it, then ignore it),
+            //   DateTimeOffsets do.
+
+            var settings = new Newtonsoft.Json.JsonSerializerSettings();
+            settings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat;
+
+            var dtos = 
+                new[] 
+                { 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-3)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(4, 30, 00)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(-4, -30, 00)),
+                };
+
+            foreach (var dto in dtos)
             {
-                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(0+0000)\/""");
+                var val = Newtonsoft.Json.JsonConvert.SerializeObject(dto, settings);
 
-                Assert.AreEqual(dto, res);
-                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
-                Assert.AreEqual(dto.Offset, res.Offset);
-            }
+                // with streams
+                using (var str = new StringReader(val))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str);
+                    Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
+                    Assert.AreEqual(dto.Offset, res.Offset);
+                }
 
-            {
-                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1));
-                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(-3600000+0100)\/""");
-
-                Assert.AreEqual(dto, res);
-                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
-                Assert.AreEqual(dto.Offset, res.Offset);
-            }
-
-            {
-                var dto = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1));
-                var res = JSON.Deserialize<DateTimeOffset>(@"""\/Date(3600000-0100)\/""");
-
-                Assert.AreEqual(dto, res);
-                Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
-                Assert.AreEqual(dto.Offset, res.Offset);
+                // with strings
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(val);
+                    Assert.AreEqual(dto.UtcTicks, res.UtcTicks);
+                    Assert.AreEqual(dto.Offset, res.Offset);
+                }
             }
         }
 

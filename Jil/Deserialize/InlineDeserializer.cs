@@ -542,13 +542,18 @@ namespace Jil.Deserialize
         void ReadDateTimeOffset()
         {
             if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.SecondsSinceUnixEpoch ||
-                DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
+                DateFormat == DateTimeFormat.SecondsSinceUnixEpoch)
             {
-                // All three of these formats either lack a timezone offset, or ignore it (looking at you Microsoft).
+                // All of these formats lack a timezone offset
                 // So let's just reuse the DateTime reader
                 ReadDate();                             // DateTime
                 Emit.NewObject(DateTimeOffsetConst);    // DateTimeOffset
+                return;
+            }
+
+            if (DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
+            {
+                ReadMicrosoftDateTimeOffset();  // DateTimeOffset;
                 return;
             }
 
@@ -693,6 +698,25 @@ namespace Jil.Deserialize
                 default: throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
             }
             
+        }
+
+        void ReadMicrosoftDateTimeOffset()
+        {
+            ExpectQuote();                                      // --empty--
+            ExpectChar('\\');                                   // --empty--
+            ExpectChar('/');                                    // --empty--
+            ExpectChar('D');                                    // --empty--
+            ExpectChar('a');                                    // --empty--
+            ExpectChar('t');                                    // --empty--
+            ExpectChar('e');                                    // --empty--
+            ExpectChar('(');                                    // --empty--
+            Emit.LoadArgument(0);                               // TextReader      
+            Emit.Call(Methods.GetReadMicrosoftDateTimeOffset(ReadingFromString)); // DateTimeOffset
+            ExpectChar(')');                                                        // DateTimeOffset
+            ExpectChar('\\');                                                       // DateTimeOffset
+            ExpectChar('/');                                                        // DateTimeOffset
+
+            ExpectQuote();                  // DateTimeOffset
         }
 
         void ReadMicrosoftDateTime()

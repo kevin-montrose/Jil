@@ -296,5 +296,13 @@ namespace Jil.Deserialize
                     ReadISO8601TimeSpan :
                     ReadISO8601TimeSpanThunkReader;
         }
+
+        public static MethodInfo GetReadMicrosoftDateTimeOffset(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ReadMicrosoftDateTimeOffset :
+                    ReadMicrosoftDateTimeOffsetThunkReader;
+        }
     }
 }

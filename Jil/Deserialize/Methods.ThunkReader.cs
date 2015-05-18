@@ -4972,5 +4972,56 @@ namespace Jil.Deserialize
 
             return false;
         }
+
+        static readonly MethodInfo ReadMicrosoftDateTimeOffsetThunkReader = typeof(Methods).GetMethod("_ReadMicrosoftDateTimeOffsetThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static DateTimeOffset _ReadMicrosoftDateTimeOffsetThunkReader(ref ThunkReader reader)
+        {
+            const long EpochTicks = 621355968000000000L;
+            const long MillisecondsToTicks = 10000L;
+
+            var millis = _ReadInt64ThunkReader(ref reader);
+
+            var utcTicks = EpochTicks + (millis * MillisecondsToTicks);
+
+            var c = reader.Peek();
+            if (!(c == '+' || c == '-'))
+            {
+                // no timezone, means it's UTC
+                return new DateTimeOffset(utcTicks, TimeSpan.Zero);
+            }
+
+            reader.Read();
+            var isNegative = c == '-';
+
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            var hour = (c - '0');
+
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            hour *= 10;
+            hour += (c - '0');
+
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            var min = (c - '0');
+
+            c = reader.Read();
+            if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
+            min *= 10;
+            min += (c - '0');
+
+            var offset = new TimeSpan(hour, min, 0);
+
+            if (isNegative)
+            {
+                offset = offset.Negate();
+            }
+
+            utcTicks += offset.Ticks;
+
+            return new DateTimeOffset(utcTicks, offset);
+        }
     }
 }
