@@ -424,10 +424,12 @@ namespace JilTests
             Assert.AreEqual("\"c\"", JSON.SerializeDynamic(new _DynamicObject('c')));
 
             var now = DateTime.UtcNow;
-            Assert.AreEqual(JSON.Serialize(now), JSON.SerializeDynamic(new _DynamicObject(now)));
+            var nowStr = JSON.Serialize(now);
+            Assert.AreEqual(nowStr, JSON.SerializeDynamic(new _DynamicObject(now)));
 
             var nowOffset = DateTimeOffset.UtcNow;
-            Assert.AreEqual(JSON.Serialize(nowOffset), JSON.SerializeDynamic(new _DynamicObject(nowOffset)));
+            var nowOffsetStr = JSON.Serialize(nowOffset);
+            Assert.AreEqual(nowOffsetStr, JSON.SerializeDynamic(new _DynamicObject(nowOffset)));
 
             var g = Guid.NewGuid();
             Assert.AreEqual("\"" + g + "\"", JSON.SerializeDynamic(new _DynamicObject(g)));
@@ -1083,6 +1085,66 @@ namespace JilTests
 
             var diff = (now - res).Duration();
             Assert.IsTrue(diff.TotalSeconds < 1);
+        }
+
+        [TestMethod]
+        public void MicrosoftDateTimeOffsetSelfRoundtrip()
+        {
+            var dtos =
+                new[] 
+                { 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-3)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(4, 30, 00)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(-4, -30, 00)),
+                };
+
+            foreach (var dto in dtos)
+            {
+                var val = JSON.Serialize(dto);
+                var dyn = JSON.DeserializeDynamic(val);
+                var staticRes = (DateTimeOffset)dyn;
+                var diff = (dto - staticRes);
+                Assert.IsTrue(diff.TotalMilliseconds <= 0);
+
+                var res = JSON.SerializeDynamic(dyn);
+                Assert.AreEqual(val, res);
+            }
+        }
+
+        [TestMethod]
+        public void ISO8601DateTimeOffsetSelfRoundtrip()
+        {
+            var dtos =
+                new[] 
+                { 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)), 
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-2)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(3)),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-3)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(4, 30, 00)),
+                    new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(-4, -30, 00)),
+                };
+
+            foreach (var dto in dtos)
+            {
+                var val = JSON.Serialize(dto, Options.ISO8601);
+                var dyn = JSON.DeserializeDynamic(val, Options.ISO8601);
+                var staticRes = (DateTimeOffset)dyn;
+                var diff = (dto - staticRes);
+                Assert.IsTrue(diff.TotalMilliseconds <= 0);
+
+                var res = JSON.SerializeDynamic(dyn, Options.ISO8601);
+                Assert.AreEqual(val, res);
+            }
         }
     }
 }

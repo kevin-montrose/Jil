@@ -138,6 +138,67 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
+        public bool TryCastDateTimeOffset(out DateTimeOffset dto)
+        {
+            if (Type == JsonObjectType.FastNumber)
+            {
+                long res;
+                var ret = FastNumberToLong(out res);
+
+                if (!ret)
+                {
+                    dto = default(DateTimeOffset);
+                    return false;
+                }
+
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        dto = Methods.UnixEpoch + TimeSpan.FromMilliseconds(res);
+                        return true;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        dto = Methods.UnixEpoch + TimeSpan.FromSeconds(res);
+                        return true;
+                }
+            }
+
+            if (Type == JsonObjectType.Number)
+            {
+                long res = (long)NumberValue;
+
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        dto = Methods.UnixEpoch + TimeSpan.FromMilliseconds(res);
+                        return true;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        dto = Methods.UnixEpoch + TimeSpan.FromSeconds(res);
+                        return true;
+                }
+            }
+
+            if (Type == JsonObjectType.String)
+            {
+                DateTimeOffset res;
+                bool ret;
+
+                switch (Options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        ret = Methods.ReadMicrosoftStyleDateTimeOffset(StringValue, out res);
+                        dto = res;
+                        return ret;
+                    case DateTimeFormat.ISO8601:
+                        ret = Methods.ReadISO8601DateTimeOffset(StringValue, out res);
+                        dto = res;
+                        return ret;
+                }
+            }
+
+            dto = default(DateTime);
+            return false;
+        }
+
         public bool TryCastTimeSpan(out TimeSpan ts)
         {
             if (Type == JsonObjectType.FastNumber)

@@ -540,6 +540,113 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
+        public static bool ReadMicrosoftStyleDateTimeOffset(string str, out DateTimeOffset dto)
+        {
+            const long EpochTicks = 621355968000000000L;
+            const long MillisecondsToTicks = 10000L;
+
+            // Format: /Date(#####+####)/
+
+            dto = DateTimeOffset.MinValue;
+
+            if (str.Length < 9) return false;
+
+            if (str[0] != '/' || str[1] != 'D' || str[2] != 'a' || str[3] != 't' || str[4] != 'e' || str[5] != '(')
+            {
+                return false;
+            }
+
+            bool negative = false;
+
+            var ix = 6;
+            var c = str[ix];
+            if (c == '-')
+            {
+                negative = true;
+                ix++;
+                c = str[ix];
+            }
+
+            if (c < '0' || c > '9') return false;
+
+            long l = 0;
+            for (var i = 0; ix < str.Length - 1 && i < 20; i++)
+            {
+                l *= 10;
+                l += (c - '0');
+                ix++;
+                c = str[ix];
+                if (c < '0' || c > '9') break;
+            }
+
+            if (negative) l = -l;
+
+            if (ix == str.Length) return false;
+            var hasTimeZone = str[ix] == '+' || str[ix] == '-';
+
+            var tsHour = 0;
+            var tsMin = 0;
+            var tsIsNegative = false;
+            if (hasTimeZone)
+            {
+                tsIsNegative = str[ix] == '-';
+
+                ix++;
+
+                if (ix == str.Length) return false;
+                c = str[ix];
+                ix++;
+                if (c < '0' || c > '9') return false;
+                tsHour = c - '0';
+                
+                
+                if (ix == str.Length) return false;
+                c = str[ix];
+                ix++;
+                if (c < '0' || c > '9') return false;
+                tsHour *= 10;
+                tsHour += (c - '0');
+
+                if (ix == str.Length) return false;
+                c = str[ix];
+                ix++;
+                if (c < '0' || c > '9') return false;
+                tsMin= c - '0';
+
+                
+                if (ix == str.Length) return false;
+                c = str[ix];
+                ix++;
+                if (c < '0' || c > '9') return false;
+                tsMin *= 10;
+                tsMin += (c - '0');
+            }
+
+            var remainingLen = str.Length - ix;
+            if (remainingLen != 2) return false;
+            if (str[ix] != ')') return false;
+            ix++;
+            if (str[ix] != '/') return false;
+
+            var utcTicks = EpochTicks + l * MillisecondsToTicks;
+            if(!hasTimeZone)
+            {
+                dto = new DateTimeOffset(utcTicks, TimeSpan.Zero);
+                return true;
+            }
+
+            var offset = new TimeSpan(tsHour, tsMin, 0);
+            if (tsIsNegative)
+            {
+                offset = offset.Negate();
+            }
+
+            utcTicks += offset.Ticks;
+
+            dto = new DateTimeOffset(utcTicks, offset);
+            return true;
+        }
+
         static readonly double[] DivideFractionBy =
             new double[]
             { 

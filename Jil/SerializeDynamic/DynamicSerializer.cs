@@ -445,7 +445,6 @@ namespace Jil.SerializeDynamic
         }
 
         static readonly ConvertBinder DateTimeConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(DateTime), typeof(DynamicSerializer));
-        static readonly ConvertBinder DateTimeOffsetConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(DateTimeOffset), typeof(DynamicSerializer));
         static bool CanBeDateTime(object dyn, out DateTime dt)
         {
             var easyDyn = dyn as DynamicObject;
@@ -455,12 +454,6 @@ namespace Jil.SerializeDynamic
                 if (easyDyn.TryConvert(DateTimeConvertBinder, out ret))
                 {
                     dt = (DateTime)ret;
-                    return true;
-                }
-
-                if (easyDyn.TryConvert(DateTimeOffsetConvertBinder, out ret))
-                {
-                    dt = ((DateTimeOffset)ret).UtcDateTime;
                     return true;
                 }
 
@@ -487,16 +480,47 @@ namespace Jil.SerializeDynamic
             }
             catch { }
 
+            dt = DateTime.MinValue;
+            return false;
+        }
+
+        static readonly ConvertBinder DateTimeOffsetConvertBinder = (ConvertBinder)Microsoft.CSharp.RuntimeBinder.Binder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(DateTimeOffset), typeof(DynamicSerializer));
+        static bool CanBeDateTimeOffset(object dyn, out DateTimeOffset dt)
+        {
+            var easyDyn = dyn as DynamicObject;
+            if (easyDyn != null)
+            {
+                object ret;
+                if (easyDyn.TryConvert(DateTimeOffsetConvertBinder, out ret))
+                {
+                    dt = (DateTimeOffset)ret;
+                    return true;
+                }
+
+                dt = DateTimeOffset.MinValue;
+                return false;
+            }
+
+            var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
+            if (jilDyn != null)
+            {
+                return jilDyn.TryCastDateTimeOffset(out dt);
+            }
+
+            return CanBeDateTimeOffsetDynamic(dyn, out dt);
+        }
+
+        static bool CanBeDateTimeOffsetDynamic(dynamic dyn, out DateTimeOffset dto)
+        {
             try
             {
                 // note we actually have to do a cast here, since `is` and `as` bypass the DLR
-                var dto = (DateTimeOffset)dyn;
-                dt = dto.UtcDateTime;
+                dto = (DateTimeOffset)dyn;
                 return true;
             }
             catch { }
 
-            dt = DateTime.MinValue;
+            dto = DateTimeOffset.MinValue;
             return false;
         }
 
@@ -741,6 +765,13 @@ namespace Jil.SerializeDynamic
                 if (CanBeFloatingPoint(dynObject, out floatingPoint))
                 {
                     Serialize(stream, floatingPoint, opts, depth);
+                    return;
+                }
+
+                DateTimeOffset dto;
+                if(CanBeDateTimeOffset(dynObject, out dto))
+                {
+                    Serialize(stream, dto, opts, depth);
                     return;
                 }
 
