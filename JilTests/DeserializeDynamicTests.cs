@@ -2659,5 +2659,12 @@ namespace JilTests
                 Assert.IsTrue(diff.TotalSeconds < 1);
             }
         }
+
+        [TestMethod]
+        public void Issue134() {
+            var json = "{\"data\":{\"id\":\"1\",\"name\":null,\"url\":\"http://www.google.com\"}}";
+            var result = JSON.DeserializeDynamic(json); // or JSON.DeserializeDynamic(json);
+            var name = result.data["name"];
+        }
     }
 }
