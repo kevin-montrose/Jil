@@ -7,7 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 
 namespace JilTests
 {
@@ -307,25 +307,25 @@ namespace JilTests
             {
                 uint i = 1276679976;
                 var f = ULongToFloat(i, new byte[4]);
-                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R"), Format = "R", I = i });
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R", CultureInfo.InvariantCulture), Format = "R", I = i });
             }
 
             {
                 uint i = 1343554351;
                 var f = ULongToFloat(i, new byte[4]);
-                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R"), Format = "R", I = i });
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("R", CultureInfo.InvariantCulture), Format = "R", I = i });
             }
 
             {
                 uint i = 1593835550;
                 var f = ULongToFloat(i, new byte[4]);
-                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F"), Format = "F", I = i });
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F", CultureInfo.InvariantCulture), Format = "F", I = i });
             }
 
             {
                 uint i = 1602224307;
                 var f = ULongToFloat(i, new byte[4]);
-                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F"), Format = "F", I = i });
+                CheckFloat(new _AllFloatsStruct { Float = f, AsString = f.ToString("F", CultureInfo.InvariantCulture), Format = "F", I = i });
             }
         }
 

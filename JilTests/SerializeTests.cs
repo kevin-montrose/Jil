@@ -7257,7 +7257,7 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.SecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalSeconds.ToString();
+                var dotNetStr = ts.TotalSeconds.ToString(CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
