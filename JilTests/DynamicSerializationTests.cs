@@ -7,7 +7,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
 
 namespace JilTests
 {
@@ -25,15 +25,15 @@ namespace JilTests
             }
 
             {
-                var dyn1 = JSON.DeserializeDynamic(long.MaxValue.ToString());
-                var dyn2 = JSON.DeserializeDynamic(ulong.MaxValue.ToString());
-                var dyn3 = JSON.DeserializeDynamic(long.MinValue.ToString());
+                var dyn1 = JSON.DeserializeDynamic(long.MaxValue.ToString(CultureInfo.InvariantCulture));
+                var dyn2 = JSON.DeserializeDynamic(ulong.MaxValue.ToString(CultureInfo.InvariantCulture));
+                var dyn3 = JSON.DeserializeDynamic(long.MinValue.ToString(CultureInfo.InvariantCulture));
                 var res1 = dyn1.ToString();
                 var res2 = dyn2.ToString();
                 var res3 = dyn3.ToString();
-                Assert.AreEqual(long.MaxValue.ToString(), res1);
-                Assert.AreEqual(ulong.MaxValue.ToString(), res2);
-                Assert.AreEqual(long.MinValue.ToString(), res3);
+                Assert.AreEqual(long.MaxValue.ToString(CultureInfo.InvariantCulture), res1);
+                Assert.AreEqual(ulong.MaxValue.ToString(CultureInfo.InvariantCulture), res2);
+                Assert.AreEqual(long.MinValue.ToString(CultureInfo.InvariantCulture), res3);
             }
 
             {
@@ -950,7 +950,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.SecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalSeconds.ToString();
+                var dotNetStr = ts.TotalSeconds.ToString(CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
