@@ -823,6 +823,11 @@ namespace Jil.DeserializeDynamic
                     return false;
                 }
 
+                if (rawValue == null) {
+                    result = null;
+                    return true;
+                }
+
                 return rawValue.InnerTryConvert(returnType, out result);
             }
 
