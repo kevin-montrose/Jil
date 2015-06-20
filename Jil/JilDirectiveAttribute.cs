@@ -35,6 +35,14 @@ namespace Jil
         /// constructing the final object.
         /// </summary>
         public Type TreatEnumerationAs { get; set; }
+        /// <summary>
+        /// If true then multiple members (each of a different type) can have the same Name, forming a discriminant union.
+        /// This can be used to handle JSON which puts different types of values under the same key.
+        /// 
+        /// When deserializing if Jil encounters a value under the name of a union, it will set whichever member has a matching type.
+        /// When serializing, Jil will check each member under the name of the union and write whichever one has a non-default value.
+        /// </summary>
+        public bool IsUnion { get; set; }
 
         /// <summary>
         /// Create a new JilDirectiveAttribute

@@ -1465,7 +1465,7 @@ namespace Jil.Deserialize
 
                 var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
 
-                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+                var setters = (Dictionary<string, MemberInfo[]>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
 
                 // special case object w/ no deserializable properties
                 if (setters.Count == 0)
@@ -1485,7 +1485,7 @@ namespace Jil.Deserialize
                 var orderedSetters =
                     setters
                     .OrderBy(kv => kv.Key)
-                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setter = kv.Value, Label = Emit.DefineLabel() })
+                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setters = kv.Value, Label = Emit.DefineLabel() })
                     .ToList();
 
                 MethodInfo findSetterIdx;
@@ -1545,34 +1545,44 @@ namespace Jil.Deserialize
                 foreach (var kv in orderedSetters)
                 {
                     var label = kv.Label;
-                    var member = kv.Setter;
-                    var memberType = member.ReturnType();
+                    var members = kv.Setters;
 
-                    Emit.MarkLabel(label);      // objType(*?)
-
-                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                    if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                    if (members.Length == 1)
                     {
-                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+                        var member = members[0];
 
-                        Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        var memberType = member.ReturnType();
+
+                        Emit.MarkLabel(label);      // objType(*?)
+
+                        var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                        if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                        {
+                            var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                            Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                            Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        }
+                        else
+                        {
+                            Build(memberType);          // objType(*?) memberType
+                        }
+
+                        if (member is FieldInfo)
+                        {
+                            Emit.StoreField((FieldInfo)member); // --empty--
+                        }
+                        else
+                        {
+                            SetProperty((PropertyInfo)member);  // --empty--
+                        }
+
+                        Emit.Branch(loopStart);                 // --empty--
                     }
                     else
                     {
-                        Build(memberType);          // objType(*?) memberType
+                        throw new NotImplementedException("Unions!");
                     }
-
-                    if (member is FieldInfo)
-                    {
-                        Emit.StoreField((FieldInfo)member); // --empty--
-                    }
-                    else
-                    {
-                        SetProperty((PropertyInfo)member);  // --empty--
-                    }
-
-                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
@@ -1663,7 +1673,7 @@ namespace Jil.Deserialize
 
                 var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
 
-                var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
+                var setters = (Dictionary<string, MemberInfo[]>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
 
                 // special case object w/ no deserializable properties
                 if (setters.Count == 0)
@@ -1725,34 +1735,43 @@ namespace Jil.Deserialize
                 foreach (var kv in labels)
                 {
                     var label = kv.Value;
-                    var member = setters[kv.Key];
-                    var memberType = member.ReturnType();
+                    var members = setters[kv.Key];
 
-                    Emit.MarkLabel(label);      // objType(*?)
-
-                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                    if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                    if (members.Length == 1)
                     {
-                        var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+                        var member = members[0];
+                        var memberType = member.ReturnType();
 
-                        Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                        Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        Emit.MarkLabel(label);      // objType(*?)
+
+                        var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                        if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                        {
+                            var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                            Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                            Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+                        }
+                        else
+                        {
+                            Build(memberType);          // objType(*?) memberType
+                        }
+
+                        if (member is FieldInfo)
+                        {
+                            Emit.StoreField((FieldInfo)member); // --empty--
+                        }
+                        else
+                        {
+                            SetProperty((PropertyInfo)member);  // --empty--
+                        }
+
+                        Emit.Branch(loopStart);                 // --empty--
                     }
                     else
                     {
-                        Build(memberType);          // objType(*?) memberType
+                        throw new NotImplementedException("Unions!");
                     }
-
-                    if (member is FieldInfo)
-                    {
-                        Emit.StoreField((FieldInfo)member); // --empty--
-                    }
-                    else
-                    {
-                        SetProperty((PropertyInfo)member);  // --empty--
-                    }
-
-                    Emit.Branch(loopStart);                 // --empty--
                 }
 
                 var nextItem = Emit.DefineLabel();
