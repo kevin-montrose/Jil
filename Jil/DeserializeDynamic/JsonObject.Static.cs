@@ -195,7 +195,7 @@ namespace Jil.DeserializeDynamic
                 }
             }
 
-            dto = default(DateTime);
+            dto = default(DateTimeOffset);
             return false;
         }
 
