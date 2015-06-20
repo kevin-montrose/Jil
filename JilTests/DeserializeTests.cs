@@ -5848,6 +5848,31 @@ namespace JilTests
             }
         }
 
+        class _SimpleDiscriminateUnion
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public string AsStr { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public int AsInt { get; set; }
+        }
+
+        [TestMethod]
+        public void SimpleDiscriminateUnion()
+        {
+            const string StrJSON = "{\"Data\": \"hello world\"}";
+            const string IntJSON = "{\"Data\": 314159}";
+
+            var asStr = JSON.Deserialize<_SimpleDiscriminateUnion>(StrJSON);
+            Assert.IsNotNull(asStr);
+            Assert.AreEqual("hello world", asStr.AsStr);
+            Assert.AreEqual(0, asStr.AsInt);
+
+            var asInt = JSON.Deserialize<_SimpleDiscriminateUnion>(IntJSON);
+            Assert.IsNotNull(asInt);
+            Assert.AreEqual(314159, asInt.AsInt);
+            Assert.IsNull(asInt.AsStr);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
