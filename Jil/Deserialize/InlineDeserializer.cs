@@ -1544,6 +1544,7 @@ namespace Jil.Deserialize
 
                 foreach (var kv in orderedSetters)
                 {
+                    var memberName = kv.Name;
                     var label = kv.Label;
                     var members = kv.Setters;
 
@@ -1551,37 +1552,14 @@ namespace Jil.Deserialize
                     {
                         var member = members[0];
 
-                        var memberType = member.ReturnType();
-
                         Emit.MarkLabel(label);      // objType(*?)
-
-                        var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                        if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
-                        {
-                            var underlyingEnumType = Enum.GetUnderlyingType(memberType);
-
-                            Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                            Emit.Convert(underlyingEnumType);       // objType(*?) memberType
-                        }
-                        else
-                        {
-                            Build(memberType);          // objType(*?) memberType
-                        }
-
-                        if (member is FieldInfo)
-                        {
-                            Emit.StoreField((FieldInfo)member); // --empty--
-                        }
-                        else
-                        {
-                            SetProperty((PropertyInfo)member);  // --empty--
-                        }
-
-                        Emit.Branch(loopStart);                 // --empty--
+                        ReadAndSetMember(member);   // --empty--
+                        Emit.Branch(loopStart);     // --empty--
                     }
                     else
                     {
-                        throw new NotImplementedException("Unions!");
+                        Emit.MarkLabel(label);                                          // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members, loopStart);    // --empty--
                     }
                 }
 
@@ -1624,6 +1602,189 @@ namespace Jil.Deserialize
             {
                 Emit.LoadObject(objType);       // objType
             }
+        }
+
+        void ReadAndSetMember(MemberInfo member)
+        {
+            // Stack starts
+            // objType(*?)
+
+            var memberType = member.ReturnType();
+
+            var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
+            if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+            {
+                var underlyingEnumType = Enum.GetUnderlyingType(memberType);
+
+                Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                Emit.Convert(underlyingEnumType);       // objType(*?) memberType
+            }
+            else
+            {
+                Build(memberType);          // objType(*?) memberType
+            }
+
+            if (member is FieldInfo)
+            {
+                Emit.StoreField((FieldInfo)member); // --empty--
+            }
+            else
+            {
+                SetProperty((PropertyInfo)member);  // --empty--
+            }
+        }
+
+        void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union, Sigil.Label loopStart)
+        {
+            Dictionary<char, MemberInfo> discriminants;
+            CheckUnionLegality(memberName, union, out discriminants);
+            var expected = discriminants.Keys.ToArray();
+
+            var notEnd = Emit.DefineLabel();
+
+            RawPeekChar();                          // objType(*?) int
+            Emit.Duplicate();                       // objType(*?) int int
+            Emit.LoadConstant(-1);                  // objType(*?) int int -1
+            Emit.UnsignedBranchIfNotEqual(notEnd);  // objType(*?) int
+
+            ThrowExpectedButEnded(expected);        // --empty--
+
+            Emit.MarkLabel(notEnd);                 // objType(*?) int
+
+            foreach (var charToMember in discriminants)
+            {
+                var c = charToMember.Key;
+                var member = charToMember.Value;
+                var nextChar = Emit.DefineLabel();
+
+                Emit.Duplicate();                           // objType(*?) int int
+                Emit.LoadConstant((int)c);                  // objType(*?) int int int
+                Emit.UnsignedBranchIfNotEqual(nextChar);    // objType(*?) int
+
+                Emit.Pop();                                 // objType(*?)
+                ReadAndSetMember(member);                   // --empty--
+                Emit.Branch(loopStart);                     // --empty--
+
+                Emit.MarkLabel(nextChar);                   // objType(*?) int
+            }
+
+            ThrowExpected(expected);                        // --empty--
+        }
+
+        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars)
+        {
+            discriminantChars = new Dictionary<char, MemberInfo>();
+
+            foreach (var member in possible)
+            {
+                var dis = GetDescriminantCharacters(member.ReturnType());
+                foreach (var c in dis)
+                {
+                    if (discriminantChars.ContainsKey(c))
+                    {
+                        throw new ConstructionException("Can't construct discriminant union [" + memberName + "], more than one type would start with '" + c + "'");
+                    }
+
+                    discriminantChars[c] = member;
+                }
+            }
+        }
+
+        IEnumerable<char> GetDescriminantCharacters(Type memType)
+        {
+            if (memType.IsNullableType())
+            {
+                yield return 'n';
+
+                foreach(var c in GetDescriminantCharacters(Nullable.GetUnderlyingType(memType)))
+                {
+                    yield return c;
+                }
+
+                yield break;
+            }
+
+            if (memType.IsNumberType())
+            {
+                if (memType.IsSigned())
+                {
+                    yield return '-';
+                }
+
+                yield return '0';
+                yield return '1';
+                yield return '2';
+                yield return '3';
+                yield return '4';
+                yield return '5';
+                yield return '6';
+                yield return '7';
+                yield return '8';
+                yield return '9';
+
+                yield break;
+            }
+
+            if (memType.IsStringyType())
+            {
+                // for null
+                yield return 'n';
+                // for real value
+                yield return '"';
+
+                yield break;
+            }
+
+            if (memType.IsEnum)
+            {
+                var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr != null && attr.TreatEnumerationAs != null)
+                {
+                    foreach (var c in GetDescriminantCharacters(attr.TreatEnumerationAs))
+                    {
+                        yield return c;
+                    }
+
+                    yield break;
+                }
+
+                foreach (var c in GetDescriminantCharacters(typeof(string)))
+                {
+                    yield return c;
+                }
+
+                yield break;
+            }
+
+            if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
+            {
+                if (!memType.IsValueType)
+                {
+                    yield return 'n';
+                }
+
+                yield return '{';
+                yield break;
+            }
+
+            if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
+            {
+                if (!memType.IsValueType)
+                {
+                    yield return 'n';
+                }
+
+                yield return '[';
+                yield break;
+            }
+
+            // default, everything is an object!
+            if(!memType.IsValueType)
+            {
+                yield return 'n';
+            }
+
+            yield return '{';
         }
 
         void ReadObjectDictionaryLookup(Type objType)
@@ -1734,43 +1895,22 @@ namespace Jil.Deserialize
 
                 foreach (var kv in labels)
                 {
+                    var memberName = kv.Key;
                     var label = kv.Value;
                     var members = setters[kv.Key];
 
                     if (members.Length == 1)
                     {
                         var member = members[0];
-                        var memberType = member.ReturnType();
 
                         Emit.MarkLabel(label);      // objType(*?)
-
-                        var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                        if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
-                        {
-                            var underlyingEnumType = Enum.GetUnderlyingType(memberType);
-
-                            Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
-                            Emit.Convert(underlyingEnumType);       // objType(*?) memberType
-                        }
-                        else
-                        {
-                            Build(memberType);          // objType(*?) memberType
-                        }
-
-                        if (member is FieldInfo)
-                        {
-                            Emit.StoreField((FieldInfo)member); // --empty--
-                        }
-                        else
-                        {
-                            SetProperty((PropertyInfo)member);  // --empty--
-                        }
-
-                        Emit.Branch(loopStart);                 // --empty--
+                        ReadAndSetMember(member);   // --empty--
+                        Emit.Branch(loopStart);     // --empty--
                     }
                     else
                     {
-                        throw new NotImplementedException("Unions!");
+                        Emit.MarkLabel(label);                                          // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members, loopStart);    // --empty--
                     }
                 }
 
