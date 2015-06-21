@@ -1735,6 +1735,49 @@ namespace Jil.Deserialize
                 yield break;
             }
 
+            if (memType == typeof(bool))
+            {
+                yield return 't';
+                yield return 'f';
+                
+                yield break;
+            }
+
+            if (memType == typeof(Guid))
+            {
+                // null isn't legal
+                yield return '"';
+
+                yield break;
+            }
+
+            if (memType == typeof(DateTime) || memType == typeof(DateTimeOffset) || memType == typeof(TimeSpan))
+            {
+                IEnumerable<char> cs;
+                switch(DateFormat)
+                {
+                    case DateTimeFormat.RFC1123:
+                    case DateTimeFormat.ISO8601:
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: 
+                        cs = GetDescriminantCharacters(typeof(string));
+                        break;
+
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    case DateTimeFormat.SecondsSinceUnixEpoch: 
+                        cs = GetDescriminantCharacters(typeof(double));
+                        break;
+
+                    default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
+                }
+
+                foreach (var c in cs)
+                {
+                    yield return c;
+                }
+
+                yield break;
+            }
+
             if (memType.IsEnum)
             {
                 var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();

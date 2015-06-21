@@ -5873,6 +5873,44 @@ namespace JilTests
             Assert.IsNull(asInt.AsStr);
         }
 
+        class _ComplicatedDiscriminateUnion
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public DateTime ISODateTime { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public int Number { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public bool Boolean { get; set; }
+        }
+
+        [TestMethod]
+        public void ComplicatedDiscriminateUnion()
+        {
+            {
+                const string DateJSON = "{\"Data\": \"2015-06-20T11:11\"}";
+                const string IntJSON = "{\"Data\": 314159}";
+                const string BoolJSON = "{\"Data\":true}";
+
+                var asDate = JSON.Deserialize<_ComplicatedDiscriminateUnion>(DateJSON, Options.ISO8601);
+                Assert.IsNotNull(asDate);
+                Assert.AreEqual(new DateTime(2015, 06, 20, 11, 11, 00, 00, DateTimeKind.Utc), asDate.ISODateTime);
+                Assert.AreEqual(0, asDate.Number);
+                Assert.AreEqual(false, asDate.Boolean);
+
+                var asInt = JSON.Deserialize<_ComplicatedDiscriminateUnion>(IntJSON, Options.ISO8601);
+                Assert.IsNotNull(asInt);
+                Assert.AreEqual(default(DateTime), asInt.ISODateTime);
+                Assert.AreEqual(314159, asInt.Number);
+                Assert.AreEqual(false, asInt.Boolean);
+
+                var asBool = JSON.Deserialize<_ComplicatedDiscriminateUnion>(BoolJSON, Options.ISO8601);
+                Assert.IsNotNull(asBool);
+                Assert.AreEqual(default(DateTime), asBool.ISODateTime);
+                Assert.AreEqual(0, asBool.Number);
+                Assert.AreEqual(true, asBool.Boolean);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
