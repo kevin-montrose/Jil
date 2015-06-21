@@ -1558,8 +1558,9 @@ namespace Jil.Deserialize
                     }
                     else
                     {
-                        Emit.MarkLabel(label);                                          // objType(*?)
-                        ReadAndSetDiscriminantUnion(memberName, members, loopStart);    // --empty--
+                        Emit.MarkLabel(label);                              // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members);   // --empty--
+                        Emit.Branch(loopStart);                             // --empty--
                     }
                 }
 
@@ -1634,22 +1635,23 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union, Sigil.Label loopStart)
+        void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union)
         {
             Dictionary<char, MemberInfo> discriminants;
             CheckUnionLegality(memberName, union, out discriminants);
             var expected = discriminants.Keys.ToArray();
 
-            var notEnd = Emit.DefineLabel();
+            var streamNotEmpty = Emit.DefineLabel();
+            var end = Emit.DefineLabel();
 
-            RawPeekChar();                          // objType(*?) int
-            Emit.Duplicate();                       // objType(*?) int int
-            Emit.LoadConstant(-1);                  // objType(*?) int int -1
-            Emit.UnsignedBranchIfNotEqual(notEnd);  // objType(*?) int
+            RawPeekChar();                                  // objType(*?) int
+            Emit.Duplicate();                               // objType(*?) int int
+            Emit.LoadConstant(-1);                          // objType(*?) int int -1
+            Emit.UnsignedBranchIfNotEqual(streamNotEmpty);  // objType(*?) int
 
-            ThrowExpectedButEnded(expected);        // --empty--
+            ThrowExpectedButEnded(expected);                // --empty--
 
-            Emit.MarkLabel(notEnd);                 // objType(*?) int
+            Emit.MarkLabel(streamNotEmpty);                 // objType(*?) int
 
             // TODO: Chained ifs?  What are we, cavemen?
             foreach (var charToMember in discriminants)
@@ -1664,12 +1666,14 @@ namespace Jil.Deserialize
 
                 Emit.Pop();                                 // objType(*?)
                 ReadAndSetMember(member);                   // --empty--
-                Emit.Branch(loopStart);                     // --empty--
+                Emit.Branch(end);                           // --empty--
 
                 Emit.MarkLabel(nextChar);                   // objType(*?) int
             }
 
             ThrowExpected(expected);                        // --empty--
+
+            Emit.MarkLabel(end);                            // --empty--
         }
 
         void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars)
@@ -1965,8 +1969,9 @@ namespace Jil.Deserialize
                     }
                     else
                     {
-                        Emit.MarkLabel(label);                                          // objType(*?)
-                        ReadAndSetDiscriminantUnion(memberName, members, loopStart);    // --empty--
+                        Emit.MarkLabel(label);                              // objType(*?)
+                        ReadAndSetDiscriminantUnion(memberName, members);   // --empty--
+                        Emit.Branch(loopStart);                             // --empty--
                     }
                 }
 
