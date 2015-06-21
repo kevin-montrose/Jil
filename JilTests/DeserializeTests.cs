@@ -5931,11 +5931,38 @@ namespace JilTests
             try
             {
                 JSON.Deserialize<_UnionAttributeError>(json);
+                Assert.Fail("Shouldn't be possible");
             }
             catch (DeserializationException e)
             {
                 Assert.IsNotNull(e);
                 Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionAttributeError: Member [Data] isn't marked as part of a union, but other members share the same Name [Data]", e.Message);
+            }
+        }
+
+        class _NonDiscriminantUnion
+        {
+            [JilDirective(IsUnion = true)]
+            public string Data { get; set; }
+
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public DateTime AsDateTime { get; set; }
+        }
+
+        [TestMethod]
+        public void NonDiscriminantUnion()
+        {
+            const string json = "{\"Data\": \"hello world\" }";
+
+            try
+            {
+                JSON.Deserialize<_NonDiscriminantUnion>(json);
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_NonDiscriminantUnion: Can't construct discriminant union [Data], more than one type would start with '\"'", e.Message);
             }
         }
 

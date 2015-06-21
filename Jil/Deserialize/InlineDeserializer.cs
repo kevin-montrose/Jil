@@ -1765,8 +1765,10 @@ namespace Jil.Deserialize
                 {
                     case DateTimeFormat.RFC1123:
                     case DateTimeFormat.ISO8601:
-                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: 
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
                         cs = GetDescriminantCharacters(typeof(string));
+                        // not nullable
+                        cs = cs.Except(new[] { 'n' });
                         break;
 
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
@@ -1798,7 +1800,11 @@ namespace Jil.Deserialize
                     yield break;
                 }
 
-                foreach (var c in GetDescriminantCharacters(typeof(string)))
+                var cs = GetDescriminantCharacters(typeof(string));
+                // not nullable
+                cs = cs.Except(new[] { 'n' });
+
+                foreach (var c in cs)
                 {
                     yield return c;
                 }
