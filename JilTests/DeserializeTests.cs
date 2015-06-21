@@ -5914,6 +5914,31 @@ namespace JilTests
             //       Also, need to test failure cases
         }
 
+
+        class _UnionAttributeError
+        {
+            public string Data { get; set; }
+
+            [JilDirective(Name = "Data")]
+            public int AsInt { get; set; }
+        }
+
+        [TestMethod]
+        public void UnionAttributeError()
+        {
+            const string json = "{\"Data\": 31415 }";
+
+            try
+            {
+                JSON.Deserialize<_UnionAttributeError>(json);
+            }
+            catch (DeserializationException e)
+            {
+                Assert.IsNotNull(e);
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionAttributeError: Member [Data] isn't marked as part of a union, but other members share the same Name [Data]", e.Message);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

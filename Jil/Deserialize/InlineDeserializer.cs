@@ -1674,12 +1674,16 @@ namespace Jil.Deserialize
 
         void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars)
         {
-            // TODO: Make sure IsUnion is appropriate set for all members
-
             discriminantChars = new Dictionary<char, MemberInfo>();
 
             foreach (var member in possible)
             {
+                var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr == null || !attr.IsUnion)
+                {
+                    throw new ConstructionException("Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]");
+                }
+
                 var dis = GetDescriminantCharacters(member.ReturnType());
                 foreach (var c in dis)
                 {
