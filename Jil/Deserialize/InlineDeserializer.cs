@@ -1701,94 +1701,72 @@ namespace Jil.Deserialize
             }
         }
 
+        static readonly IEnumerable<char> UnionNullableSet = new [] { 'n' };
+        static readonly IEnumerable<char> UnionSignedSet = new[] { '-' };
+        static readonly IEnumerable<char> UnionNumberSet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        static readonly IEnumerable<char> UnionStringySet = new[] { '"' };
+        static readonly IEnumerable<char> UnionBoolSet = new[] { 't', 'f' };
+        static readonly IEnumerable<char> UnionObjectSet = new[] { '{' };
+        static readonly IEnumerable<char> UnionListySet = new[] { '[' };
         IEnumerable<char> GetDescriminantCharacters(Type memType)
         {
-            if (memType.IsNullableType())
+            IEnumerable<char> ret = Enumerable.Empty<char>();
+
+            if (memType.IsNullableType() || !memType.IsValueType)
             {
-                yield return 'n';
+                ret = ret.Concat(UnionNullableSet);
 
-                foreach(var c in GetDescriminantCharacters(Nullable.GetUnderlyingType(memType)))
+                if (memType.IsNullableType())
                 {
-                    yield return c;
+                    memType = Nullable.GetUnderlyingType(memType);
                 }
-
-                yield break;
             }
 
             if (memType.IsNumberType())
             {
                 if (memType.IsSigned())
                 {
-                    yield return '-';
+                    ret = ret.Concat(UnionSignedSet);
                 }
 
-                yield return '0';
-                yield return '1';
-                yield return '2';
-                yield return '3';
-                yield return '4';
-                yield return '5';
-                yield return '6';
-                yield return '7';
-                yield return '8';
-                yield return '9';
+                ret = ret.Concat(UnionNumberSet);
 
-                yield break;
+                return ret;
             }
 
-            if (memType.IsStringyType())
+            if (memType.IsStringyType() || memType == typeof(Guid))
             {
-                // for null
-                yield return 'n';
-                // for real value
-                yield return '"';
+                ret = ret.Concat(UnionStringySet);
 
-                yield break;
+                return ret;
             }
 
             if (memType == typeof(bool))
             {
-                yield return 't';
-                yield return 'f';
-                
-                yield break;
-            }
+                ret = ret.Concat(UnionBoolSet);
 
-            if (memType == typeof(Guid))
-            {
-                // null isn't legal
-                yield return '"';
-
-                yield break;
+                return ret;
             }
 
             if (memType == typeof(DateTime) || memType == typeof(DateTimeOffset) || memType == typeof(TimeSpan))
             {
-                IEnumerable<char> cs;
-                switch(DateFormat)
+                switch (DateFormat)
                 {
                     case DateTimeFormat.RFC1123:
                     case DateTimeFormat.ISO8601:
                     case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        cs = GetDescriminantCharacters(typeof(string));
-                        // not nullable
-                        cs = cs.Except(new[] { 'n' });
+                        ret = ret.Concat(UnionStringySet);
                         break;
 
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    case DateTimeFormat.SecondsSinceUnixEpoch: 
-                        cs = GetDescriminantCharacters(typeof(double));
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        ret = ret.Concat(UnionNumberSet);
                         break;
 
                     default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
                 }
 
-                foreach (var c in cs)
-                {
-                    yield return c;
-                }
-
-                yield break;
+                return ret;
             }
 
             if (memType.IsEnum)
@@ -1796,55 +1774,28 @@ namespace Jil.Deserialize
                 var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
                 if (attr != null && attr.TreatEnumerationAs != null)
                 {
-                    foreach (var c in GetDescriminantCharacters(attr.TreatEnumerationAs))
-                    {
-                        yield return c;
-                    }
-
-                    yield break;
+                    ret = ret.Concat(UnionNumberSet);
+                    return ret;
                 }
 
-                var cs = GetDescriminantCharacters(typeof(string));
-                // not nullable
-                cs = cs.Except(new[] { 'n' });
-
-                foreach (var c in cs)
-                {
-                    yield return c;
-                }
-
-                yield break;
+                ret = ret.Concat(UnionStringySet);
+                return ret;
             }
 
             if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
             {
-                if (!memType.IsValueType)
-                {
-                    yield return 'n';
-                }
-
-                yield return '{';
-                yield break;
+                ret = ret.Concat(UnionObjectSet);
+                return ret;
             }
 
             if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
             {
-                if (!memType.IsValueType)
-                {
-                    yield return 'n';
-                }
-
-                yield return '[';
-                yield break;
+                ret = ret.Concat(UnionListySet);
+                return ret;
             }
 
-            // default, everything is an object!
-            if(!memType.IsValueType)
-            {
-                yield return 'n';
-            }
-
-            yield return '{';
+            ret = ret.Concat(UnionObjectSet);
+            return ret;
         }
 
         void ReadObjectDictionaryLookup(Type objType)
