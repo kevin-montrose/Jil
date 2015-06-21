@@ -5909,6 +5909,9 @@ namespace JilTests
                 Assert.AreEqual(0, asBool.Number);
                 Assert.AreEqual(true, asBool.Boolean);
             }
+
+            // TODO: More type tests!  nullables, guids, timespans, unsigned numbers, etc. etc.
+            //       Also, need to test failure cases
         }
 
 #if !DEBUG

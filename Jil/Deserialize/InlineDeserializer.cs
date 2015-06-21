@@ -1651,6 +1651,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(notEnd);                 // objType(*?) int
 
+            // TODO: Chained ifs?  What are we, cavemen?
             foreach (var charToMember in discriminants)
             {
                 var c = charToMember.Key;
@@ -1673,6 +1674,8 @@ namespace Jil.Deserialize
 
         void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars)
         {
+            // TODO: Make sure IsUnion is appropriate set for all members
+
             discriminantChars = new Dictionary<char, MemberInfo>();
 
             foreach (var member in possible)
