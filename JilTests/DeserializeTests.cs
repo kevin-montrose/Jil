@@ -5966,6 +5966,44 @@ namespace JilTests
             }
         }
 
+        class _UnionTypeIndication
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public string AsStr { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public int AsInt { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true, IsUnionType = true)]
+            public Type WhatType { get; set; }
+        }
+
+        [TestMethod]
+        public void UnionTypeIndication()
+        {
+            const string StrJSON = "{\"Data\": \"hello world\"}";
+            const string IntJSON = "{\"Data\": 314159}";
+            const string EmptyJSON = "{}";
+
+            var asStr = JSON.Deserialize<_UnionTypeIndication>(StrJSON);
+            Assert.IsNotNull(asStr);
+            Assert.AreEqual("hello world", asStr.AsStr);
+            Assert.AreEqual(0, asStr.AsInt);
+            Assert.AreEqual(typeof(string), asStr.WhatType);
+
+            var asInt = JSON.Deserialize<_UnionTypeIndication>(IntJSON);
+            Assert.IsNotNull(asInt);
+            Assert.AreEqual(314159, asInt.AsInt);
+            Assert.IsNull(asInt.AsStr);
+            Assert.AreEqual(typeof(int), asInt.WhatType);
+
+            var empty = JSON.Deserialize<_UnionTypeIndication>(EmptyJSON);
+            Assert.IsNotNull(empty);
+            Assert.IsNull(empty.AsStr);
+            Assert.AreEqual(0, empty.AsInt);
+            Assert.IsNull(empty.WhatType);
+
+            // TODO: Test the misconfiguration errors for IsUnionType
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

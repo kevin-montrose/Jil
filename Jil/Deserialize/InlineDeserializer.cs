@@ -1635,10 +1635,12 @@ namespace Jil.Deserialize
             }
         }
 
+        static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union)
         {
             Dictionary<char, MemberInfo> discriminants;
-            CheckUnionLegality(memberName, union, out discriminants);
+            MemberInfo unionTypeIndicator;
+            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator);
             var expected = discriminants.Keys.ToArray();
 
             var streamNotEmpty = Emit.DefineLabel();
@@ -1665,6 +1667,27 @@ namespace Jil.Deserialize
                 Emit.UnsignedBranchIfNotEqual(nextChar);    // objType(*?) int
 
                 Emit.Pop();                                 // objType(*?)
+
+                // set the indicator, __if__ one has actually be registered
+                //   we don't want to do any work if they don't care to
+                if (unionTypeIndicator != null)
+                {
+                    Emit.Duplicate();                           // objType(*?) objType(*?)
+                    Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                    Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+
+                    if (unionTypeIndicator is FieldInfo)
+                    {
+                        var asField = (FieldInfo)unionTypeIndicator;
+                        Emit.StoreField(asField);               // objType(*?)
+                    }
+                    else
+                    {
+                        var asProp = (PropertyInfo)unionTypeIndicator;
+                        SetProperty(asProp);                    // objType(*?)
+                    }
+                }
+
                 ReadAndSetMember(member);                   // --empty--
                 Emit.Branch(end);                           // --empty--
 
@@ -1676,9 +1699,11 @@ namespace Jil.Deserialize
             Emit.MarkLabel(end);                            // --empty--
         }
 
-        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars)
+        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType)
         {
             discriminantChars = new Dictionary<char, MemberInfo>();
+
+            destinationType = null;
 
             foreach (var member in possible)
             {
@@ -1686,6 +1711,28 @@ namespace Jil.Deserialize
                 if (attr == null || !attr.IsUnion)
                 {
                     throw new ConstructionException("Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]");
+                }
+
+                if (attr.IsUnionType)
+                {
+                    if (member.ReturnType() != typeof(Type))
+                    {
+                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but is not of type System.Type");
+                    }
+
+                    var asProp = member as PropertyInfo;
+                    if (asProp != null && asProp.SetMethod == null)
+                    {
+                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but has no set method");
+                    }
+
+                    if (destinationType != null)
+                    {
+                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but IsUnionType is also set for [" + destinationType.Name + "]");
+                    }
+
+                    destinationType = member;
+                    continue;
                 }
 
                 var dis = GetDescriminantCharacters(member.ReturnType());
