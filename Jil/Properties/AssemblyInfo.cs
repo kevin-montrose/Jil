@@ -19,3 +19,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("JilTests")]
 [assembly: InternalsVisibleTo("Experiments")]
 #endif
+
+[assembly: InternalsVisibleTo("JilUnionConfigLookupTypes")]

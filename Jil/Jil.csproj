@@ -125,6 +125,7 @@
     <Compile Include="Deserialize\ThunkReader.cs" />
     <Compile Include="Deserialize\TypeCaches.cs" />
     <Compile Include="Common\ExtensionMethods.cs" />
+    <Compile Include="Deserialize\UnionLookup.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
     <Compile Include="JilDirectiveAttribute.cs" />
     <Compile Include="JSON.cs" />

@@ -21,6 +21,7 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataSwitches = true;
         public static bool UseNameAutomataBinarySearch = true;
         public static bool UseFastRFC1123Method = true;
+        public static bool UseFastUnionLookup = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -1640,7 +1641,8 @@ namespace Jil.Deserialize
         {
             Dictionary<char, MemberInfo> discriminants;
             MemberInfo unionTypeIndicator;
-            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator);
+            Dictionary<UnionCharsets, MemberInfo> charsets;
+            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator, out charsets);
             var expected = discriminants.Keys.ToArray();
 
             var streamNotEmpty = Emit.DefineLabel();
@@ -1655,52 +1657,131 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(streamNotEmpty);                 // objType(*?) int
 
-            // TODO: Chained ifs?  What are we, cavemen?
-            foreach (var charToMember in discriminants)
+            if (UseFastUnionLookup)
             {
-                var c = charToMember.Key;
-                var member = charToMember.Value;
-                var nextChar = Emit.DefineLabel();
-
-                Emit.Duplicate();                           // objType(*?) int int
-                Emit.LoadConstant((int)c);                  // objType(*?) int int int
-                Emit.UnsignedBranchIfNotEqual(nextChar);    // objType(*?) int
-
-                Emit.Pop();                                 // objType(*?)
-
-                // set the indicator, __if__ one has actually be registered
-                //   we don't want to do any work if they don't care to
-                if (unionTypeIndicator != null)
+                var allCharsets = UnionCharsets.None;
+                foreach (var kv in charsets)
                 {
-                    Emit.Duplicate();                           // objType(*?) objType(*?)
-                    Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
-                    Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
-
-                    if (unionTypeIndicator is FieldInfo)
-                    {
-                        var asField = (FieldInfo)unionTypeIndicator;
-                        Emit.StoreField(asField);               // objType(*?)
-                    }
-                    else
-                    {
-                        var asProp = (PropertyInfo)unionTypeIndicator;
-                        SetProperty(asProp);                    // objType(*?)
-                    }
+                    allCharsets |= kv.Key;
                 }
 
-                ReadAndSetMember(member);                   // --empty--
-                Emit.Branch(end);                           // --empty--
+                var config = UnionConfigLookup.Get(allCharsets);
+                var lookup = typeof(UnionLookup<>).MakeGenericType(config);
 
-                Emit.MarkLabel(nextChar);                   // objType(*?) int
+                var min = (int)lookup.GetField("MinimumChar").GetValue(null);
+                var lookupArr = lookup.GetField("Lookup");
+                var lookupArrLen = ((int[])lookupArr.GetValue(null)).Length;
+                var charsetsInOrder = (UnionCharsets[])lookup.GetField("CharsetOrder").GetValue(null);
+
+                var miss = Emit.DefineLabel();
+                var labels = charsetsInOrder.Select(c => Tuple.Create(Emit.DefineLabel(), charsets[c])).ToArray();
+                var labelsArr = labels.Select(t => t.Item1).ToArray();
+
+                Emit.LoadConstant(min);                 // objType(*?) int int
+                Emit.Subtract();                        // objType(*?) int
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(lookupArrLen);        // objType(*?) int int int
+                Emit.BranchIfGreaterOrEqual(miss);      // objType(*?) int
+                Emit.Duplicate();                       // objType(*?) int int
+                Emit.LoadConstant(0);                   // objType(*?) int int int
+                Emit.BranchIfLess(miss);                // objType(*?) int
+                using (var loc = Emit.DeclareLocal<int>())
+                {
+                    Emit.StoreLocal(loc);               // objType(*?)
+                    Emit.LoadField(lookupArr);          // objType(*?) int[]
+                    Emit.LoadLocal(loc);                // objType(*?) int[] int
+                }
+                Emit.LoadElement<int>();                // objType(*?) int
+                Emit.Switch(labelsArr);                 // objType(*?)
+
+                // fall through
+                ThrowExpected(expected);                // --empty--
+
+                foreach (var kv in labels)
+                {
+                    var label = kv.Item1;
+                    var member = kv.Item2;
+
+                    Emit.MarkLabel(label);
+
+                    // set the indicator, __if__ one has actually be registered
+                    //   we don't want to do any work if they don't care to
+                    if (unionTypeIndicator != null)
+                    {
+                        Emit.Duplicate();                           // objType(*?) objType(*?)
+                        Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                        Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+
+                        if (unionTypeIndicator is FieldInfo)
+                        {
+                            var asField = (FieldInfo)unionTypeIndicator;
+                            Emit.StoreField(asField);               // objType(*?)
+                        }
+                        else
+                        {
+                            var asProp = (PropertyInfo)unionTypeIndicator;
+                            SetProperty(asProp);                    // objType(*?)
+                        }
+                    }
+
+                    ReadAndSetMember(member);                   // --empty--
+                    Emit.Branch(end);                           // --empty--
+                }
+
+                Emit.MarkLabel(miss);           // objType(*?) int
+                ThrowExpected(expected);        // --empty--
+
+                Emit.MarkLabel(end);            // --empty--
             }
+            else
+            {
+                foreach (var charToMember in discriminants)
+                {
+                    var c = charToMember.Key;
+                    var member = charToMember.Value;
+                    var nextChar = Emit.DefineLabel();
 
-            ThrowExpected(expected);                        // --empty--
+                    Emit.Duplicate();                           // objType(*?) int int
+                    Emit.LoadConstant((int)c);                  // objType(*?) int int int
+                    Emit.UnsignedBranchIfNotEqual(nextChar);    // objType(*?) int
 
-            Emit.MarkLabel(end);                            // --empty--
+                    Emit.Pop();                                 // objType(*?)
+
+                    // set the indicator, __if__ one has actually be registered
+                    //   we don't want to do any work if they don't care to
+                    if (unionTypeIndicator != null)
+                    {
+                        Emit.Duplicate();                           // objType(*?) objType(*?)
+                        Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                        Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+
+                        if (unionTypeIndicator is FieldInfo)
+                        {
+                            var asField = (FieldInfo)unionTypeIndicator;
+                            Emit.StoreField(asField);               // objType(*?)
+                        }
+                        else
+                        {
+                            var asProp = (PropertyInfo)unionTypeIndicator;
+                            SetProperty(asProp);                    // objType(*?)
+                        }
+                    }
+
+                    ReadAndSetMember(member);                   // --empty--
+                    Emit.Branch(end);                           // --empty--
+
+                    Emit.MarkLabel(nextChar);                   // objType(*?) int
+                }
+
+                ThrowExpected(expected);                        // --empty--
+
+                Emit.MarkLabel(end);                            // --empty--
+            }
         }
 
-        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType)
+        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember)
         {
+            charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
             discriminantChars = new Dictionary<char, MemberInfo>();
 
             destinationType = null;
@@ -1735,7 +1816,15 @@ namespace Jil.Deserialize
                     continue;
                 }
 
-                var dis = GetDescriminantCharacters(member.ReturnType());
+                UnionCharsets perMember;
+                var dis = GetDescriminantCharacters(member.ReturnType(), out perMember);
+                foreach(var e in Enum.GetValues(typeof(UnionCharsets)).Cast<UnionCharsets>().Where(x => perMember.HasFlag(x)))
+                {
+                    charsetToMember[e] = member;
+                }
+
+                charsetToMember[perMember] = member;
+
                 foreach (var c in dis)
                 {
                     if (discriminantChars.ContainsKey(c))
@@ -1748,20 +1837,17 @@ namespace Jil.Deserialize
             }
         }
 
-        static readonly IEnumerable<char> UnionNullableSet = new [] { 'n' };
-        static readonly IEnumerable<char> UnionSignedSet = new[] { '-' };
-        static readonly IEnumerable<char> UnionNumberSet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        static readonly IEnumerable<char> UnionStringySet = new[] { '"' };
-        static readonly IEnumerable<char> UnionBoolSet = new[] { 't', 'f' };
-        static readonly IEnumerable<char> UnionObjectSet = new[] { '{' };
-        static readonly IEnumerable<char> UnionListySet = new[] { '[' };
-        IEnumerable<char> GetDescriminantCharacters(Type memType)
+        
+        IEnumerable<char> GetDescriminantCharacters(Type memType, out UnionCharsets charsets)
         {
+            charsets = UnionCharsets.None;
+
             IEnumerable<char> ret = Enumerable.Empty<char>();
 
             if (memType.IsNullableType() || !memType.IsValueType)
             {
-                ret = ret.Concat(UnionNullableSet);
+                charsets |= UnionCharsets.Nullable;
+                ret = ret.Concat(UnionCharsetArrays.UnionNullableSet);
 
                 if (memType.IsNullableType())
                 {
@@ -1773,24 +1859,28 @@ namespace Jil.Deserialize
             {
                 if (memType.IsSigned())
                 {
-                    ret = ret.Concat(UnionSignedSet);
+                    charsets |= UnionCharsets.Signed;
+                    ret = ret.Concat(UnionCharsetArrays.UnionSignedSet);
                 }
 
-                ret = ret.Concat(UnionNumberSet);
+                charsets |= UnionCharsets.Number;
+                ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
 
                 return ret;
             }
 
             if (memType.IsStringyType() || memType == typeof(Guid))
             {
-                ret = ret.Concat(UnionStringySet);
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
 
                 return ret;
             }
 
             if (memType == typeof(bool))
             {
-                ret = ret.Concat(UnionBoolSet);
+                charsets |= UnionCharsets.Bool;
+                ret = ret.Concat(UnionCharsetArrays.UnionBoolSet);
 
                 return ret;
             }
@@ -1802,12 +1892,14 @@ namespace Jil.Deserialize
                     case DateTimeFormat.RFC1123:
                     case DateTimeFormat.ISO8601:
                     case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        ret = ret.Concat(UnionStringySet);
+                        charsets |= UnionCharsets.Stringy;
+                        ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
                         break;
 
                     case DateTimeFormat.MillisecondsSinceUnixEpoch:
                     case DateTimeFormat.SecondsSinceUnixEpoch:
-                        ret = ret.Concat(UnionNumberSet);
+                        charsets |= UnionCharsets.Number;
+                        ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
                         break;
 
                     default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
@@ -1821,27 +1913,32 @@ namespace Jil.Deserialize
                 var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
                 if (attr != null && attr.TreatEnumerationAs != null)
                 {
-                    ret = ret.Concat(UnionNumberSet);
+                    charsets |= UnionCharsets.Number;
+                    ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
                     return ret;
                 }
 
-                ret = ret.Concat(UnionStringySet);
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
                 return ret;
             }
 
             if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
             {
-                ret = ret.Concat(UnionObjectSet);
+                charsets |= UnionCharsets.Object;
+                ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
                 return ret;
             }
 
             if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
             {
-                ret = ret.Concat(UnionListySet);
+                charsets |= UnionCharsets.Listy;
+                ret = ret.Concat(UnionCharsetArrays.UnionListySet);
                 return ret;
             }
 
-            ret = ret.Concat(UnionObjectSet);
+            charsets |= UnionCharsets.Object;
+            ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
             return ret;
         }
 

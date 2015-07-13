@@ -5,6 +5,7 @@ using System.Reflection;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using Jil.Deserialize;
 
 namespace JilTests
 {
@@ -740,6 +741,37 @@ namespace JilTests
 
             // Options
             Assert.IsNotNull(typeof(Jil.Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(Jil.DateTimeFormat), typeof(bool), typeof(Jil.UnspecifiedDateTimeKindBehavior) }));
+        }
+
+        [TestMethod]
+        public void UnionConfigs()
+        {
+            var all = new[] { 
+                UnionCharsets.None,
+                UnionCharsets.Nullable,
+                UnionCharsets.Signed,
+                UnionCharsets.Number,
+                UnionCharsets.Stringy,
+                UnionCharsets.Bool,
+                UnionCharsets.Object,
+                UnionCharsets.Listy
+            };
+
+            for (var a = 0; a < all.Length; a++)
+                for (var b = 0; b < all.Length; b++)
+                    for (var c = 0; c < all.Length; c++)
+                        for (var d = 0; d < all.Length; d++)
+                            for (var e = 0; e < all.Length; e++)
+                                for (var f = 0; f < all.Length; f++)
+                                    for (var g = 0; g < all.Length; g++)
+                                    {
+                                        var set = all[a] | all[b] | all[c] | all[d] | all[e] | all[f] | all[g];
+
+                                        var t = UnionConfigLookup.Get(set);
+                                        var i = (UnionLookupConfigBase)Activator.CreateInstance(t);
+
+                                        Assert.AreEqual(set, i.Charsets);
+                                    }
         }
     }
 }

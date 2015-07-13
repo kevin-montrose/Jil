@@ -107,10 +107,8 @@ namespace JilTests
             return new DateTime(year, month, day, hour, minute, second, DateTimeKind.Utc);
         }
 
-        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
+        private static void CompareTimes<T>(List<string> asStrings, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
         {
-            var asStrings = toSerialize.Select(o => Jil.JSON.Serialize(o, opts)).ToList();
-
             var aTimer = new Stopwatch();
             var bTimer = new Stopwatch();
 
@@ -169,6 +167,13 @@ namespace JilTests
 
             aTimeMS = aTimer.ElapsedMilliseconds;
             bTimeMS = bTimer.ElapsedMilliseconds;
+        }
+
+        private static void CompareTimes<T>(List<T> toSerialize, Jil.Options opts, Func<TextReader, int, T> a, Func<TextReader, int, T> b, out double aTimeMS, out double bTimeMS)
+        {
+            var asStrings = toSerialize.Select(o => Jil.JSON.Serialize(o, opts)).ToList();
+
+            CompareTimes(asStrings, opts, a, b, out aTimeMS, out bTimeMS);
         }
 
         private static void CompareTimes<T>(List<T> toSerialize, Action<TextWriter, T, int> a, Action<TextWriter, T, int> b, out double aTimeMS, out double bTimeMS, bool checkCorrectness = true)
@@ -1597,6 +1602,76 @@ namespace JilTests
             CompareTimes(toDeserialize, Options.RFC1123, thunkReader, streamReader, out thunkReaderTime, out streamReaderTime);
 
             Assert.IsTrue(thunkReaderTime < streamReaderTime, "thunkReaderTime = " + thunkReaderTime + ", streamReaderTime = " + streamReaderTime);
+        }
+
+        class _UseFastUnionLookup
+        {
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public object AsObject { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public List<int> AsList { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public int AsNum { get; set; }
+        }
+
+        [TestMethod]
+        public void UseFastUnionLookup()
+        {
+            Func<TextReader, int, _UseFastUnionLookup> fast;
+            Func<TextReader, int, _UseFastUnionLookup> normal;
+
+            try
+            {
+                {
+                    InlineDeserializer<_UseFastUnionLookup>.UseFastUnionLookup = true;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    fast = InlineDeserializerHelper.BuildFromStream<_UseFastUnionLookup>(typeof(Jil.Serialize.RFC1123), DateTimeFormat.RFC1123, out ignored);
+                }
+
+                {
+                    InlineDeserializer<_UseFastUnionLookup>.UseFastUnionLookup = false;
+                    Exception ignored;
+
+                    // Build the *actual* serializer method
+                    normal = InlineDeserializerHelper.BuildFromStream<_UseFastUnionLookup>(typeof(Jil.Serialize.RFC1123), DateTimeFormat.RFC1123, out ignored);
+                }
+            }
+            finally
+            {
+                InlineDeserializer<_UseFastUnionLookup>.UseFastUnionLookup = true;
+            }
+
+            var rand = new Random(270129617);
+
+            var json = new List<string>();
+            for (var i = 0; i < 1000; i++)
+            {
+                var part = rand.Next(4);
+                switch (part)
+                {
+                    case 0:
+                        json.Add("{\"Data\": " + JSON.Serialize(_RandString(rand)) + "}");
+                        break;
+                    case 1:
+                        json.Add("{\"Data\": {\"Foo\": \"Bar\"}}");
+                        break;
+                    case 2:
+                        json.Add("{\"Data\": [1,2,3]}");
+                        break;
+                    case 3:
+                        json.Add("{\"Data\": 456}");
+                        break;
+                    default:
+                        throw new InvalidOperationException();
+                }
+            }
+
+            double fastTime, normalTime;
+            CompareTimes(json, Options.RFC1123, fast, normal, out fastTime, out normalTime);
+
+            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 #endif
     }
