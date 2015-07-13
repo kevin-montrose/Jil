@@ -1153,14 +1153,30 @@ namespace JilTests
             public _Issue139 Prop2;
         }
 
+        public class _Issue139_2
+        {
+            public _Issue139_3 Foo;
+        }
+
+        public class _Issue139_3
+        {
+            public _Issue139_2 Bar;
+        }
+
         [TestMethod]
         public void Issue139()
         {
-            var content = new _Issue139() { Prop1 = "string", Prop2 = new _Issue139() { Prop1 = "string2" } };
+            {
+                var a = new _Issue139 { Prop1 = "string", Prop2 = new _Issue139() { Prop1 = "string2" } };
+                var res = JSON.SerializeDynamic(a);
+                Assert.AreEqual("{\"Prop2\":{\"Prop2\":null,\"Prop1\":\"string2\"},\"Prop1\":\"string\"}", res);
+            }
 
-            var val = JSON.SerializeDynamic(content);
-
-            Assert.IsNotNull(val);
+            {
+                var b = new _Issue139_2 { Foo = new _Issue139_3 { Bar = new _Issue139_2 { } } };
+                var res = JSON.SerializeDynamic(b);
+                Assert.AreEqual("{\"Foo\":{\"Bar\":{\"Foo\":null}}}", res);
+            }
         }
     }
 }
