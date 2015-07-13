@@ -1146,5 +1146,21 @@ namespace JilTests
                 Assert.AreEqual(val, res);
             }
         }
+
+        public class _Issue139
+        {
+            public string Prop1;
+            public _Issue139 Prop2;
+        }
+
+        [TestMethod]
+        public void Issue139()
+        {
+            var content = new _Issue139() { Prop1 = "string", Prop2 = new _Issue139() { Prop1 = "string2" } };
+
+            var val = JSON.SerializeDynamic(content);
+
+            Assert.IsNotNull(val);
+        }
     }
 }
