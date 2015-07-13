@@ -68,7 +68,7 @@ namespace Jil.Serialize
                 { '\u001D', @"\u001D" },
                 { '\u001E', @"\u001E" },
                 { '\u001F', @"\u001F" }
-        };
+            };
 
         private readonly Type RecursionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
         private readonly bool ExcludeNulls;
@@ -86,6 +86,8 @@ namespace Jil.Serialize
 
         private readonly bool BuildingToString;
 
+        private readonly Stack<Type> WritingDynamicObject;
+
         internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
@@ -99,6 +101,11 @@ namespace Jil.Serialize
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
 
             BuildingToString = buildToString;
+
+            if (CallOutOnPossibleDynamic)
+            {
+                WritingDynamicObject = new Stack<Type>();
+            }
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -1511,6 +1518,11 @@ namespace Jil.Serialize
         {
             if (DynamicCallOutCheck(forType, inLocal)) return;
 
+            if (CallOutOnPossibleDynamic)
+            {
+                WritingDynamicObject.Push(forType);
+            }
+
             if (!ExcludeNulls)
             {
                 WriteObjectWithNulls(forType, inLocal);
@@ -1518,6 +1530,15 @@ namespace Jil.Serialize
             else
             {
                 WriteObjectWithoutNulls(forType, inLocal);
+            }
+
+            if (CallOutOnPossibleDynamic)
+            {
+                var finished = WritingDynamicObject.Pop();
+                if (finished != forType)
+                {
+                    throw new ConstructionException("Internal type tracking in unexpected state, found [" + finished + "] expected [" + forType + "]");
+                }
             }
         }
 
@@ -2315,7 +2336,17 @@ namespace Jil.Serialize
         bool ShouldDynamicCallOut(Type onType)
         {
             // Exact god-damn match
-            if (onType == typeof(ForType)) return false;
+            var isThisType = onType == typeof(ForType);
+            
+            if (isThisType)
+            {
+                var alreadyWorkingOnThisType = CallOutOnPossibleDynamic && WritingDynamicObject.Contains(onType);
+
+                // actually detected recursion, it's time to bail
+                if (alreadyWorkingOnThisType) return true;
+
+                return false;
+            }
 
             if (CallOutOnPossibleDynamic && (onType.IsInterface || !onType.IsSealed))
             {
