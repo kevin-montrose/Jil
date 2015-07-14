@@ -268,12 +268,12 @@ namespace Jil.Serialize
             switch (str)
             {
                 case "Sun": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Mon": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Tue": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Wed": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Thu": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Fri": c = ConstantString_DaysOfWeek.Sunday; return true;
-                case "Sat": c = ConstantString_DaysOfWeek.Sunday; return true;
+                case "Mon": c = ConstantString_DaysOfWeek.Monday; return true;
+                case "Tue": c = ConstantString_DaysOfWeek.Tuesday; return true;
+                case "Wed": c = ConstantString_DaysOfWeek.Wednesday; return true;
+                case "Thu": c = ConstantString_DaysOfWeek.Thursday; return true;
+                case "Fri": c = ConstantString_DaysOfWeek.Friday; return true;
+                case "Sat": c = ConstantString_DaysOfWeek.Saturday; return true;
                 default: c = 0; return false;
             }
         }
