@@ -23,11 +23,12 @@ namespace Jil.Deserialize
     //      * *except* for long, where we accumulate into a ulong and do the special checked; because there's no larger type
     static partial class Methods
     {
+        // Note: This same method, but then for ThunkReader, is in Methods.ThunkReader.cs; it's called "_DiscardMicrosoftTimeZoneOffsetThunkReader".
         static readonly MethodInfo DiscardMicrosoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _DiscardMicrosoftTimeZoneOffset(TextReader reader)
         {
-            // this is a special case when reading timezone information for NewtsonsoftStyle DateTimes
+            // this is a special case when reading timezone information for MicrosoftStyle DateTimes
             //   so far as I can tell this is pointless data, the millisecond offset is still UTC relative
             //   so just use that... should validate that this correct though
             // max +9999
