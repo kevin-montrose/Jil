@@ -1828,8 +1828,13 @@ namespace JilTests
         public void Issue143DateTime() {
             var date = new DateTime(21, DateTimeKind.Utc);
             var str = JSON.Serialize(date, Options.ISO8601);
+            
+            // ThunkReader
             var result = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+            Assert.AreEqual(date.Ticks, result.Ticks);
 
+            // TextReader
+            result = JSON.Deserialize<DateTime>(new StringReader(str), Options.ISO8601);
             Assert.AreEqual(date.Ticks, result.Ticks);
         }
 
@@ -1837,8 +1842,13 @@ namespace JilTests
         public void Issue143TimeSpan() {
             var span = new TimeSpan(21);
             var str = JSON.Serialize(span, Options.ISO8601);
-            var result = JSON.Deserialize<DateTime>(str, Options.ISO8601);
 
+            // ThunkReader
+            var result = JSON.Deserialize<TimeSpan>(str, Options.ISO8601);
+            Assert.AreEqual(span.Ticks, result.Ticks);
+
+            // TextReader
+            result = JSON.Deserialize<TimeSpan>(new StringReader(str), Options.ISO8601);
             Assert.AreEqual(span.Ticks, result.Ticks);
         }
 

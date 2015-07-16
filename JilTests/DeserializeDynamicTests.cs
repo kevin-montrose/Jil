@@ -1282,6 +1282,24 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void Issue143DateTime() 
+        {
+            var date = new DateTime(21, DateTimeKind.Utc);
+            var str = JSON.Serialize(date, Options.ISO8601);
+            var result = (DateTime)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(date.Ticks, result.Ticks);
+        }
+
+        [TestMethod]
+        public void Issue143TimeSpan() 
+        {
+            var span = new TimeSpan(21);
+            var str = JSON.Serialize(span, Options.ISO8601);
+            var result = (TimeSpan)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(span.Ticks, result.Ticks);
+        }
+
+        [TestMethod]
         public void SecondDateTimes()
         {
             var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
