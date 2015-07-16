@@ -4584,7 +4584,7 @@ namespace JilTests
                 Assert.AreEqual(dto, res);
             }
 
-            // Newtsonsoft
+            // Newtonsoft
             {
                 var newtonsoft = 
                     Newtonsoft.Json.JsonSerializer.Create(
