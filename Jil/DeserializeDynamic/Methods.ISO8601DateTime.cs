@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
@@ -833,7 +834,7 @@ namespace Jil.DeserializeDynamic
                 if (fracLength == 0) return false;
 
                 long hoursAsTicks = hour * HoursToTicks;
-                hoursAsTicks += frac * 36 * (long)Math.Pow(10, 9 - fracLength);
+                hoursAsTicks += frac * 36 * Utils.Pow10(9 - fracLength);
 
                 ts = TimeSpan.FromTicks(hoursAsTicks);
                 return true;
@@ -910,7 +911,7 @@ namespace Jil.DeserializeDynamic
 
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
-                    minsAsMilliseconds += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
+                    minsAsMilliseconds += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
@@ -962,7 +963,7 @@ namespace Jil.DeserializeDynamic
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
                     long secsAsMilliseconds = secs * SecondsToTicks;
-                    secsAsMilliseconds += frac * (long)Math.Pow(10, 7 - fracLength);
+                    secsAsMilliseconds += frac * Utils.Pow10(7 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
@@ -1027,7 +1028,7 @@ namespace Jil.DeserializeDynamic
 
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
-                    minsAsMilliseconds += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
+                    minsAsMilliseconds += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
@@ -1078,7 +1079,7 @@ namespace Jil.DeserializeDynamic
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
                     long secsAsMilliseconds = secs * SecondsToTicks;
-                    secsAsMilliseconds += frac * (long)Math.Pow(10, 7 - fracLength);
+                    secsAsMilliseconds += frac * Utils.Pow10(7 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
