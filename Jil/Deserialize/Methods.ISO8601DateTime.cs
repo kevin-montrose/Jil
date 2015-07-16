@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.Deserialize
 {
@@ -679,7 +680,7 @@ namespace Jil.Deserialize
                 if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader, false);
 
                 long hoursAsTicks = hour * HoursToTicks;
-                hoursAsTicks += frac * 36 * (long)Math.Pow(10, 9 - fracLength);
+                hoursAsTicks += frac * 36 * Utils.Pow10(9 - fracLength);
 
                 return TimeSpan.FromTicks(hoursAsTicks);
             }
@@ -755,7 +756,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
+                    minsAsTicks += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -805,7 +806,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += frac * (long)Math.Pow(10, 7 - fracLength);
+                    secsAsTicks += frac * Utils.Pow10(7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
@@ -869,7 +870,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
+                    minsAsTicks += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -918,7 +919,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += frac * (long)Math.Pow(10, 7 - fracLength);
+                    secsAsTicks += frac * Utils.Pow10(7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
