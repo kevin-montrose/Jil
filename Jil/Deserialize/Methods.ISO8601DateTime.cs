@@ -666,17 +666,20 @@ namespace Jil.Deserialize
                 {
                     c = buffer[start];
                     if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
-                    frac *= 10;
-                    frac += (c - '0');
 
-                    fracLength++;
+                    if (fracLength < 9) {
+                        frac *= 10;
+                        frac += (c - '0');
+                        fracLength++;
+                    }
+
                     start++;
                 }
 
                 if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", reader, false);
 
                 long hoursAsTicks = hour * HoursToTicks;
-                hoursAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * HoursToTicks);
+                hoursAsTicks += frac * 36 * (long)Math.Pow(10, 9 - fracLength);
 
                 return TimeSpan.FromTicks(hoursAsTicks);
             }
@@ -737,10 +740,14 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -748,7 +755,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsTicks += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -783,10 +790,13 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        if (fracLength < 7) {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -795,7 +805,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsTicks += frac * (long)Math.Pow(10, 7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
@@ -844,10 +854,14 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -855,7 +869,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsTicks += frac * 6 * (long)Math.Pow(10, 8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -889,10 +903,13 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        if (fracLength < 7) {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -901,7 +918,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsTicks += frac * (long)Math.Pow(10, 7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
