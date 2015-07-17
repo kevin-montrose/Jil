@@ -1278,7 +1278,8 @@ namespace Jil.Common
             return false;
         }
 
-        private static long[] PowersOf10 = new[] {
+        private static long[] PowersOf10 = new[] 
+        {
             1L,
             10L, 
             100L, 
@@ -1291,7 +1292,8 @@ namespace Jil.Common
         };
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static long Pow10(int power) {
+        public static long Pow10(int power) 
+        {
             if (power < PowersOf10.Length)
                 return PowersOf10[power];
             return (long)Math.Pow(10, power);

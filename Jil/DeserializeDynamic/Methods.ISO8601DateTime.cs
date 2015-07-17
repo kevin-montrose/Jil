@@ -822,7 +822,9 @@ namespace Jil.DeserializeDynamic
                     c = str[start];
                     if (c < '0' || c > '9') return false;
 
-                    if (fracLength < 9) {
+                    // Max precision of TimeSpan.FromTicks
+                    if (fracLength < 9) 
+                    {
                         frac *= 10;
                         frac += (c - '0');
                         fracLength++;
@@ -898,7 +900,9 @@ namespace Jil.DeserializeDynamic
                         c = str[start];
                         if (c < '0' || c > '9') return false;
 
-                        if (fracLength < 8) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;
@@ -949,7 +953,9 @@ namespace Jil.DeserializeDynamic
                         c = str[start];
                         if (c < '0' || c > '9') return false;
 
-                        if (fracLength < 7) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;
@@ -1015,7 +1021,9 @@ namespace Jil.DeserializeDynamic
                         c = str[start];
                         if (c < '0' || c > '9') return false;
 
-                        if (fracLength < 8) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;                        
@@ -1065,7 +1073,9 @@ namespace Jil.DeserializeDynamic
                         c = str[start];
                         if (c < '0' || c > '9') return false;
 
-                        if (fracLength < 7) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;

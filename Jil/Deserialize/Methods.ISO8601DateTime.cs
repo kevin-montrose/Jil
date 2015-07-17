@@ -668,7 +668,9 @@ namespace Jil.Deserialize
                     c = buffer[start];
                     if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
 
-                    if (fracLength < 9) {
+                    // Max precision of TimeSpan.FromTicks
+                    if (fracLength < 9) 
+                    {
                         frac *= 10;
                         frac += (c - '0');
                         fracLength++;
@@ -743,7 +745,8 @@ namespace Jil.Deserialize
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
 
                         // Max precision of TimeSpan.FromTicks
-                        if (fracLength < 8) {
+                        if (fracLength < 8) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;
@@ -792,7 +795,9 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
 
-                        if (fracLength < 7) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;
@@ -857,7 +862,8 @@ namespace Jil.Deserialize
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
 
                         // Max precision of TimeSpan.FromTicks
-                        if (fracLength < 8) {
+                        if (fracLength < 8) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;
@@ -905,7 +911,9 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", reader, false);
 
-                        if (fracLength < 7) {
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
                             frac *= 10;
                             frac += (c - '0');
                             fracLength++;

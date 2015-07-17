@@ -3684,6 +3684,7 @@ namespace Jil.Deserialize
                     c = buffer[start];
                     if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
 
+                    // Max precision of TimeSpan.FromTicks
                     if (fracLength < 9) 
                     {
                         frac *= 10;
@@ -3759,6 +3760,7 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
 
+                        // Max precision of TimeSpan.FromTicks
                         if (fracLength < 8) 
                         {
                             frac *= 10;
@@ -3809,6 +3811,7 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
 
+                        // Max precision of TimeSpan.FromTicks
                         if (fracLength < 7) 
                         {
                             frac *= 10;
@@ -3874,6 +3877,7 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
 
+                        // Max precision of TimeSpan.FromTicks
                         if (fracLength < 8) 
                         {
                             frac *= 10;
@@ -3923,6 +3927,7 @@ namespace Jil.Deserialize
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
 
+                        // Max precision of TimeSpan.FromTicks
                         if (fracLength < 7) 
                         {
                             frac *= 10;
