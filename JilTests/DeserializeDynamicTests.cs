@@ -1291,12 +1291,49 @@ namespace JilTests
         }
 
         [TestMethod]
+        public void Issue143DateTimeFractionOverflow() 
+        {
+            var date = new DateTime(21, DateTimeKind.Utc);
+            var str = "\"0001-01-01T00:00:00.000002100001Z\"";
+            var result = (DateTime)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(date.Ticks, result.Ticks);
+        }
+
+        [TestMethod]
         public void Issue143TimeSpan() 
         {
             var span = new TimeSpan(21);
             var str = JSON.Serialize(span, Options.ISO8601);
             var result = (TimeSpan)JSON.DeserializeDynamic(str, Options.ISO8601);
             Assert.AreEqual(span.Ticks, result.Ticks);
+        }
+
+        [TestMethod]
+        public void Issue143TimeSpanFractionOverflow() 
+        {
+            var span = new TimeSpan(21);
+            var str = "\"PT0.000002100001S\"";
+            var result = (TimeSpan)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(span.Ticks, result.Ticks);
+        }
+
+        [TestMethod]
+        public void Issue143DateTimeOffset() 
+        {
+            var offset = new DateTimeOffset(new DateTime(21, DateTimeKind.Utc), TimeSpan.Zero);
+            var str = JSON.Serialize(offset, Options.ISO8601);
+            var result = (DateTimeOffset)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(offset.Ticks, result.Ticks);
+        }
+
+
+        [TestMethod]
+        public void Issue143DateTimeOffsetFractionOverflow() 
+        {
+            var offset = new DateTimeOffset(new DateTime(21, DateTimeKind.Utc), TimeSpan.Zero);
+            var str = "\"0001-01-01T00:00:00.000002100001Z\"";
+            var result = (DateTimeOffset)JSON.DeserializeDynamic(str, Options.ISO8601);
+            Assert.AreEqual(offset.Ticks, result.Ticks);
         }
 
         [TestMethod]
