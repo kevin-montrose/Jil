@@ -68,7 +68,7 @@ namespace Jil.Serialize
     enum ConstantString_Min : ushort
     {
         Int_MinValue = (0 << 8) | 11,
-        Long_MinValue = (12 << 8) | 20
+        Long_MinValue = (11 << 8) | 20
     }
 
     enum ConstantString_Value : ushort
