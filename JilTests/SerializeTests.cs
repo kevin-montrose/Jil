@@ -7991,5 +7991,16 @@ namespace JilTests
                 }
             }
         }
+
+
+        [TestMethod]
+        public void Issue147()
+        {
+            var res = JSON.Serialize(long.MinValue);
+            Assert.AreEqual("-9223372036854775808", res);
+
+            res = JSON.Serialize(int.MinValue);
+            Assert.AreEqual("-2147483648", res);
+        }
     }
 }
