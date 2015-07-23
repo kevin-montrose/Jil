@@ -3112,11 +3112,12 @@ namespace Jil.Deserialize
             SkipEncodedStringWithLeadCharThunkReader(ref reader, reader.Read());
         }
 
+        // Note: This same method, but then for TextReader, is in Methods.ReadNumbers.cs; it's called "_DiscardMicrosoftTimeZoneOffset".
         static readonly MethodInfo DiscardMicrosoftTimeZoneOffsetThunkReader = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _DiscardMicrosoftTimeZoneOffsetThunkReader(ref ThunkReader reader)
         {
-            // this is a special case when reading timezone information for NewtsonsoftStyle DateTimes
+            // this is a special case when reading timezone information for MicrosoftStyle DateTimes
             //   so far as I can tell this is pointless data, the millisecond offset is still UTC relative
             //   so just use that... should validate that this correct though
             // max +9999
@@ -3683,17 +3684,22 @@ namespace Jil.Deserialize
                 {
                     c = buffer[start];
                     if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
-                    frac *= 10;
-                    frac += (c - '0');
 
-                    fracLength++;
+                    // Max precision of TimeSpan.FromTicks
+                    if (fracLength < 9) 
+                    {
+                        frac *= 10;
+                        frac += (c - '0');
+                        fracLength++;                    
+                    }
+
                     start++;
                 }
 
                 if (fracLength == 0) throw new DeserializationException("Expected fractional part of ISO8601 time", ref reader, false);
 
                 long hoursAsTicks = hour * HoursToTicks;
-                hoursAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * HoursToTicks);
+                hoursAsTicks += frac * 36 * Utils.Pow10(9 - fracLength);
 
                 return TimeSpan.FromTicks(hoursAsTicks);
             }
@@ -3754,10 +3760,15 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;                        
+                        }
+
                         start++;
                     }
 
@@ -3765,7 +3776,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsTicks += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -3800,10 +3811,15 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -3812,7 +3828,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsTicks += frac * Utils.Pow10(7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
@@ -3861,10 +3877,15 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -3872,7 +3893,7 @@ namespace Jil.Deserialize
 
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
-                    minsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsTicks += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks);
                 }
@@ -3906,10 +3927,15 @@ namespace Jil.Deserialize
                     {
                         c = buffer[start];
                         if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, false);
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+                        
                         start++;
                     }
 
@@ -3918,7 +3944,7 @@ namespace Jil.Deserialize
                     long hoursAsTicks = hour * HoursToTicks;
                     long minsAsTicks = min * MinutesToTicks;
                     long secsAsTicks = secs * SecondsToTicks;
-                    secsAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsTicks += frac * Utils.Pow10(7 - fracLength);
 
                     return TimeSpan.FromTicks(hoursAsTicks + minsAsTicks + secsAsTicks);
                 }
@@ -4639,10 +4665,6 @@ namespace Jil.Deserialize
         static TimeSpan _ReadISO8601TimeSpanThunkReader(ref ThunkReader reader, char[] str)
         {
             const ulong TicksPerDay = 864000000000;
-            const ulong TicksPerHour = 36000000000;
-            const ulong TicksPerMinute = 600000000;
-            const ulong TicksPerSecond = 10000000;
-
             const ulong TicksPerWeek = TicksPerDay * 7;
             const ulong TicksPerMonth = TicksPerDay * 30;
             const ulong TicksPerYear = TicksPerDay * 365;
@@ -4699,16 +4721,16 @@ namespace Jil.Deserialize
             if (week == -1) week = 0;
             if (day == -1) day = 0;
 
-            double hour, minute, second;
+            ulong timeTicks;
 
             if (hasTimePart)
             {
                 ix++;   // skip 'T'
-                ISO8601TimeSpan_ReadTimePartThunkReader(ref reader, str, len, ref ix, out hour, out minute, out second);
+                ISO8601TimeSpan_ReadTimePartThunkReader(ref reader, str, len, ref ix, out timeTicks);
             }
             else
             {
-                hour = minute = second = 0;
+                timeTicks = 0;
             }
 
             ulong ticks = 0;
@@ -4732,7 +4754,7 @@ namespace Jil.Deserialize
                 ticks += ((ulong)week) * TicksPerWeek;
             }
 
-            ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
+            ticks += (ulong)(((ulong)day) * TicksPerDay + timeTicks);
 
             if (ticks >= MaxTicks && !isNegative)
             {
@@ -4754,9 +4776,13 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ISO8601TimeSpan_ReadTimePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
+        static void ISO8601TimeSpan_ReadTimePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out ulong ticks)
         {
-            hour = minutes = seconds = 0;
+            const ulong TicksPerHour = 36000000000;
+            const ulong TicksPerMinute = 600000000;
+            const ulong TicksPerSecond = 10000000;
+
+            ticks = 0;
 
             bool hourSeen, minutesSeen, secondsSeen;
             hourSeen = minutesSeen = secondsSeen = false;
@@ -4795,7 +4821,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", ref reader, false);
                     }
 
-                    hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerHour + ISO8601TimeSpan_FractionToTicks(9, fraction * 36, fracLen);
                     hourSeen = true;
                     continue;
                 }
@@ -4812,7 +4838,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", ref reader, false);
                     }
 
-                    minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerMinute + ISO8601TimeSpan_FractionToTicks(8, fraction * 6, fracLen);
                     minutesSeen = true;
                     continue;
                 }
@@ -4824,7 +4850,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Seconds part of TimeSpan seen twice", ref reader, false);
                     }
 
-                    seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerSecond + ISO8601TimeSpan_FractionToTicks(7, fraction, fracLen);
                     secondsSeen = true;
                     continue;
                 }

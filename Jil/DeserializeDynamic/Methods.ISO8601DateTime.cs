@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
@@ -820,17 +821,22 @@ namespace Jil.DeserializeDynamic
                 {
                     c = str[start];
                     if (c < '0' || c > '9') return false;
-                    frac *= 10;
-                    frac += (c - '0');
 
-                    fracLength++;
+                    // Max precision of TimeSpan.FromTicks
+                    if (fracLength < 9) 
+                    {
+                        frac *= 10;
+                        frac += (c - '0');
+                        fracLength++;
+                    }
+
                     start++;
                 }
 
                 if (fracLength == 0) return false;
 
                 long hoursAsTicks = hour * HoursToTicks;
-                hoursAsTicks += (long)(((double)frac) / Math.Pow(10, fracLength) * HoursToTicks);
+                hoursAsTicks += frac * 36 * Utils.Pow10(9 - fracLength);
 
                 ts = TimeSpan.FromTicks(hoursAsTicks);
                 return true;
@@ -893,10 +899,15 @@ namespace Jil.DeserializeDynamic
                     {
                         c = str[start];
                         if (c < '0' || c > '9') return false;
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -904,7 +915,7 @@ namespace Jil.DeserializeDynamic
 
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
-                    minsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsMilliseconds += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
@@ -941,10 +952,15 @@ namespace Jil.DeserializeDynamic
                     {
                         c = str[start];
                         if (c < '0' || c > '9') return false;
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+
                         start++;
                     }
 
@@ -953,7 +969,7 @@ namespace Jil.DeserializeDynamic
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
                     long secsAsMilliseconds = secs * SecondsToTicks;
-                    secsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsMilliseconds += frac * Utils.Pow10(7 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
@@ -1004,10 +1020,15 @@ namespace Jil.DeserializeDynamic
                     {
                         c = str[start];
                         if (c < '0' || c > '9') return false;
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 8) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;                        
+                        }
+
                         start++;
                     }
 
@@ -1015,7 +1036,7 @@ namespace Jil.DeserializeDynamic
 
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
-                    minsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * MinutesToTicks);
+                    minsAsMilliseconds += frac * 6 * Utils.Pow10(8 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds);
                     return true;
@@ -1051,10 +1072,15 @@ namespace Jil.DeserializeDynamic
                     {
                         c = str[start];
                         if (c < '0' || c > '9') return false;
-                        frac *= 10;
-                        frac += (c - '0');
 
-                        fracLength++;
+                        // Max precision of TimeSpan.FromTicks
+                        if (fracLength < 7) 
+                        {
+                            frac *= 10;
+                            frac += (c - '0');
+                            fracLength++;
+                        }
+   
                         start++;
                     }
 
@@ -1063,7 +1089,7 @@ namespace Jil.DeserializeDynamic
                     long hoursAsMilliseconds = hour * HoursToTicks;
                     long minsAsMilliseconds = min * MinutesToTicks;
                     long secsAsMilliseconds = secs * SecondsToTicks;
-                    secsAsMilliseconds += (long)(((double)frac) / Math.Pow(10, fracLength) * SecondsToTicks);
+                    secsAsMilliseconds += frac * Utils.Pow10(7 - fracLength);
 
                     ts = TimeSpan.FromTicks(hoursAsMilliseconds + minsAsMilliseconds + secsAsMilliseconds);
                     return true;
