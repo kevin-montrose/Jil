@@ -9,6 +9,7 @@ using System.Reflection.Emit;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace Jil.Common
 {
@@ -1275,6 +1276,27 @@ namespace Jil.Common
             }
 
             return false;
+        }
+
+        private static long[] PowersOf10 = new[] 
+        {
+            1L,
+            10L, 
+            100L, 
+            1000L, 
+            10000L, 
+            100000L,
+            1000000L,
+            10000000L,
+            100000000L
+        };
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static long Pow10(int power) 
+        {
+            if (power < PowersOf10.Length)
+                return PowersOf10[power];
+            return (long)Math.Pow(10, power);
         }
     }
 }

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.Deserialize
 {
@@ -19,9 +20,6 @@ namespace Jil.Deserialize
         static TimeSpan _ReadISO8601TimeSpan(TextReader reader, char[] str)
         {
             const ulong TicksPerDay = 864000000000;
-            const ulong TicksPerHour = 36000000000;
-            const ulong TicksPerMinute = 600000000;
-            const ulong TicksPerSecond = 10000000;
 
             const ulong TicksPerWeek = TicksPerDay * 7;
             const ulong TicksPerMonth = TicksPerDay * 30;
@@ -79,16 +77,16 @@ namespace Jil.Deserialize
             if (week == -1) week = 0;
             if (day == -1) day = 0;
 
-            double hour, minute, second;
+            ulong timeTicks;
 
             if (hasTimePart)
             {
                 ix++;   // skip 'T'
-                ISO8601TimeSpan_ReadTimePart(reader, str, len, ref ix, out hour, out minute, out second);
+                ISO8601TimeSpan_ReadTimePart(reader, str, len, ref ix, out timeTicks);
             }
             else
             {
-                hour = minute = second = 0;
+                timeTicks = 0;
             }
 
             ulong ticks = 0;
@@ -112,7 +110,7 @@ namespace Jil.Deserialize
                 ticks += ((ulong)week) * TicksPerWeek;
             }
 
-            ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
+            ticks += (ulong)(((ulong)day) * TicksPerDay + timeTicks);
 
             if (ticks >= MaxTicks && !isNegative)
             {
@@ -253,9 +251,13 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out double hour, out double minutes, out double seconds)
+        static void ISO8601TimeSpan_ReadTimePart(TextReader reader, char[] str, int strLen, ref int ix, out ulong ticks)
         {
-            hour = minutes = seconds = 0;
+            const ulong TicksPerHour = 36000000000;
+            const ulong TicksPerMinute = 600000000;
+            const ulong TicksPerSecond = 10000000;
+
+            ticks = 0;
 
             bool hourSeen, minutesSeen, secondsSeen;
             hourSeen = minutesSeen = secondsSeen = false;
@@ -294,7 +296,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Hour part of TimeSpan seen after seconds already parsed", reader, false);
                     }
 
-                    hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerHour + ISO8601TimeSpan_FractionToTicks(9, fraction * 36, fracLen);
                     hourSeen = true;
                     continue;
                 }
@@ -311,7 +313,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Minute part of TimeSpan seen after seconds already parsed", reader, false);
                     }
 
-                    minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerMinute + ISO8601TimeSpan_FractionToTicks(8, fraction * 6, fracLen);
                     minutesSeen = true;
                     continue;
                 }
@@ -323,7 +325,7 @@ namespace Jil.Deserialize
                         throw new DeserializationException("Seconds part of TimeSpan seen twice", reader, false);
                     }
 
-                    seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerSecond + ISO8601TimeSpan_FractionToTicks(7, fraction, fracLen);
                     secondsSeen = true;
                     continue;
                 }
@@ -332,19 +334,21 @@ namespace Jil.Deserialize
             }
         }
 
-        static double ISO8601TimeSpan_ToDouble(int whole, int fraction, int fracLen)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ulong ISO8601TimeSpan_FractionToTicks(int maxLen, int fraction, int fracLen) 
         {
-            double ret = whole;
-            double frac = fraction;
-
-            if (fracLen > 0)
+            if (fracLen == 0) 
             {
-                frac /= DivideFractionBy[fracLen - 1];
+                return 0;
             }
 
-            ret += frac;
+            if (fracLen > maxLen) 
+            {
+                fraction /= (int)Utils.Pow10(fracLen - maxLen);
+                fracLen = maxLen;
+            }
 
-            return ret;
+            return (ulong)(fraction * Utils.Pow10(maxLen - fracLen));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

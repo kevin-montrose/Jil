@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
@@ -14,9 +16,6 @@ namespace Jil.DeserializeDynamic
         public static bool ReadISO8601TimeSpan(string str, out TimeSpan ts)
         {
             const ulong TicksPerDay = 864000000000;
-            const ulong TicksPerHour = 36000000000;
-            const ulong TicksPerMinute = 600000000;
-            const ulong TicksPerSecond = 10000000;
 
             const ulong TicksPerWeek = TicksPerDay * 7;
             const ulong TicksPerMonth = TicksPerDay * 30;
@@ -82,12 +81,12 @@ namespace Jil.DeserializeDynamic
             if (week == -1) week = 0;
             if (day == -1) day = 0;
 
-            double hour, minute, second;
+            ulong timeTicks;
 
             if (hasTimePart)
             {
                 ix++;   // skip 'T'
-                if (!ISO8601TimeSpan_ReadTimePart(str, ref ix, out hour, out minute, out second))
+                if (!ISO8601TimeSpan_ReadTimePart(str, ref ix, out timeTicks))
                 {
                     ts = default(TimeSpan);
                     return false;
@@ -95,7 +94,7 @@ namespace Jil.DeserializeDynamic
             }
             else
             {
-                hour = minute = second = 0;
+                timeTicks = 0;
             }
 
             ulong ticks = 0;
@@ -119,7 +118,7 @@ namespace Jil.DeserializeDynamic
                 ticks += ((ulong)week) * TicksPerWeek;
             }
 
-            ticks += (ulong)(((ulong)day) * TicksPerDay + hour * TicksPerHour + minute * TicksPerMinute + second * TicksPerSecond);
+            ticks += (ulong)(((ulong)day) * TicksPerDay + timeTicks);
 
             if (ticks >= MaxTicks && !isNegative)
             {
@@ -235,9 +234,13 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
-        static bool ISO8601TimeSpan_ReadTimePart(string str, ref int ix, out double hour, out double minutes, out double seconds)
+        static bool ISO8601TimeSpan_ReadTimePart(string str, ref int ix, out ulong ticks)
         {
-            hour = minutes = seconds = 0;
+            const ulong TicksPerHour = 36000000000;
+            const ulong TicksPerMinute = 600000000;
+            const ulong TicksPerSecond = 10000000;
+
+            ticks = 0;
 
             bool hourSeen, minutesSeen, secondsSeen;
             hourSeen = minutesSeen = secondsSeen = false;
@@ -276,7 +279,7 @@ namespace Jil.DeserializeDynamic
                         return false;
                     }
 
-                    hour = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerHour + ISO8601TimeSpan_FractionToTicks(9, fraction * 36, fracLen);
                     hourSeen = true;
                     continue;
                 }
@@ -293,7 +296,7 @@ namespace Jil.DeserializeDynamic
                         return false;
                     }
 
-                    minutes = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerMinute + ISO8601TimeSpan_FractionToTicks(8, fraction * 6, fracLen);
                     minutesSeen = true;
                     continue;
                 }
@@ -305,7 +308,7 @@ namespace Jil.DeserializeDynamic
                         return false;
                     }
 
-                    seconds = ISO8601TimeSpan_ToDouble(whole, fraction, fracLen);
+                    ticks += (ulong)whole * TicksPerSecond + ISO8601TimeSpan_FractionToTicks(7, fraction, fracLen);
                     secondsSeen = true;
                     continue;
                 }
@@ -316,19 +319,21 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
-        static double ISO8601TimeSpan_ToDouble(int whole, int fraction, int fracLen)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static ulong ISO8601TimeSpan_FractionToTicks(int maxLen, int fraction, int fracLen) 
         {
-            double ret = whole;
-            double frac = fraction;
-
-            if (fracLen > 0)
+            if (fracLen == 0) 
             {
-                frac /= DivideFractionBy[fracLen - 1];
+                return 0;
             }
 
-            ret += frac;
+            if (fracLen > maxLen) 
+            {
+                fraction /= (int)Utils.Pow10(fracLen - maxLen);
+                fracLen = maxLen;
+            }
 
-            return ret;
+            return (ulong)(fraction * Utils.Pow10(maxLen - fracLen));
         }
 
         static char ISO8601TimeSpan_ReadPart(string str, ref int ix, out int whole, out int fraction, out int fracLen)
