@@ -22,6 +22,7 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataBinarySearch = true;
         public static bool UseFastRFC1123Method = true;
         public static bool UseFastUnionLookup = true;
+        //public static bool UseFastUnionLookup = false;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -1641,7 +1642,7 @@ namespace Jil.Deserialize
                 SetProperty((PropertyInfo)member);  // --empty--
             }
         }
-
+        
         static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union)
         {
@@ -1650,6 +1651,9 @@ namespace Jil.Deserialize
             Dictionary<UnionCharsets, MemberInfo> charsets;
             bool allowsNull;
             CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull);
+
+            var refMembers = discriminants.Where(kv => !kv.Value.ReturnType().IsValueType).Select(kv => kv.Value).ToList();
+            var nullableMembers = discriminants.Where(kv => kv.Value.ReturnType().IsNullableType()).Select(kv => kv.Value).ToList();
             var expected = discriminants.Keys.ToArray();
 
             var streamNotEmpty = Emit.DefineLabel();
@@ -1674,16 +1678,26 @@ namespace Jil.Deserialize
 
                 var config = UnionConfigLookup.Get(allCharsets, allowsNull);
                 var lookup = typeof(UnionLookup<>).MakeGenericType(config);
-
-                // TODO: Handle nulls
-
+                
                 var min = (int)lookup.GetField("MinimumChar").GetValue(null);
                 var lookupArr = lookup.GetField("Lookup");
                 var lookupArrLen = ((int[])lookupArr.GetValue(null)).Length;
                 var charsetsInOrder = (UnionCharsets[])lookup.GetField("CharsetOrder").GetValue(null);
 
                 var miss = Emit.DefineLabel();
-                var labels = charsetsInOrder.Select(c => Tuple.Create(Emit.DefineLabel(), charsets[c])).ToArray();
+                var labels = 
+                    charsetsInOrder
+                        .Select(
+                            c => 
+                            {
+                                MemberInfo member;
+
+                                if (!charsets.TryGetValue(c, out member)) member = null;
+
+                                return Tuple.Create(Emit.DefineLabel(), member, c);
+                            }
+                        )
+                        .ToArray();
                 var labelsArr = labels.Select(t => t.Item1).ToArray();
 
                 Emit.LoadConstant(min);                 // objType(*?) int int
@@ -1706,35 +1720,49 @@ namespace Jil.Deserialize
                 // fall through
                 ThrowExpected(expected);                // --empty--
 
-                foreach (var kv in labels)
+                foreach (var t in labels)
                 {
-                    var label = kv.Item1;
-                    var member = kv.Item2;
+                    var label = t.Item1;
+                    var member = t.Item2;
+                    var charset = t.Item3;
 
-                    Emit.MarkLabel(label);
+                    Emit.MarkLabel(label);                  // objType(*?)
 
-                    // set the indicator, __if__ one has actually be registered
-                    //   we don't want to do any work if they don't care to
-                    if (unionTypeIndicator != null)
+                    if (charset == UnionCharsets.Null)
                     {
-                        Emit.Duplicate();                           // objType(*?) objType(*?)
-                        Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
-                        Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
+                        // have to special case null, since it can mean clearning multiple members
+                        //   as there isn't a 1-to-1 type-to-member map for the null value
 
-                        if (unionTypeIndicator is FieldInfo)
-                        {
-                            var asField = (FieldInfo)unionTypeIndicator;
-                            Emit.StoreField(asField);               // objType(*?)
-                        }
-                        else
-                        {
-                            var asProp = (PropertyInfo)unionTypeIndicator;
-                            SetProperty(asProp);                    // objType(*?)
-                        }
+                        ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(refMembers, nullableMembers, unionTypeIndicator);
+
+                        Emit.Pop();             // --empty--
+                        Emit.Branch(end);       // --empty--
                     }
+                    else
+                    {
+                        // set the indicator, __if__ one has actually be registered
+                        //   we don't want to do any work if they don't care to
+                        if (unionTypeIndicator != null)
+                        {
+                            Emit.Duplicate();                           // objType(*?) objType(*?)
+                            Emit.LoadConstant(member.ReturnType());     // objType(*?) objType(*?) RuntimeTypeHandle
+                            Emit.Call(Type_GetTypeFromHandle);          // objType(*?) objType(*?) Type
 
-                    ReadAndSetMember(member);                   // --empty--
-                    Emit.Branch(end);                           // --empty--
+                            if (unionTypeIndicator is FieldInfo)
+                            {
+                                var asField = (FieldInfo)unionTypeIndicator;
+                                Emit.StoreField(asField);               // objType(*?)
+                            }
+                            else
+                            {
+                                var asProp = (PropertyInfo)unionTypeIndicator;
+                                SetProperty(asProp);                    // objType(*?)
+                            }
+                        }
+
+                        ReadAndSetMember(member);                   // --empty--
+                        Emit.Branch(end);                           // --empty--
+                    }
                 }
 
                 Emit.MarkLabel(miss);           // objType(*?) int
@@ -1746,73 +1774,15 @@ namespace Jil.Deserialize
             {
                 if (allowsNull)
                 {
-                    var refMembers = discriminants.Where(kv => !kv.Value.ReturnType().IsValueType).Select(kv => kv.Value).ToList();
-                    var nullableMembers = discriminants.Where(kv => kv.Value.ReturnType().IsNullableType()).Select(kv => kv.Value).ToList();
-
                     var notNull = Emit.DefineLabel();
 
                     Emit.Duplicate();                           // objType(*?) int int
                     Emit.LoadConstant('n');                     // objType(*?) int int 'n'
                     Emit.UnsignedBranchIfNotEqual(notNull);     // objType(*?) int
 
+                    Emit.Pop();
+                    ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(refMembers, nullableMembers, unionTypeIndicator);
                     
-                    Emit.Pop();                                 // objType(*?)
-                    ExpectChar('n');                            // objType(*?)
-                    ExpectChar('u');                            // objType(*?)
-                    ExpectChar('l');                            // objType(*?)
-                    ExpectChar('l');                            // objType(*?)
-
-                    foreach (var r in refMembers)
-                    {
-                        Emit.Duplicate();                       // objType(*?) objType(*?)
-                        Emit.LoadNull();                        // objType(*?) objType(*?) null
-                        var asProp = r as PropertyInfo;
-                        if(asProp != null)
-                        {
-                            SetProperty(asProp);                // objType(*?)
-                        }
-                        else
-                        {
-                            Emit.StoreField((FieldInfo)r);      // objType(*?)
-                        }
-                    }
-
-                    foreach(var n in nullableMembers)
-                    {
-                        Emit.Duplicate();                       // objType(*?) objType(*?)
-                        using (var nLoc = Emit.DeclareLocal(n.ReturnType()))
-                        {
-                            Emit.LoadLocalAddress(nLoc);            // objType(*?) objType(*?) Nullable<?>*
-                            Emit.InitializeObject(n.ReturnType());  // objType(*?) objType(*?)
-                            Emit.LoadLocal(nLoc);                   // objType(*?) objType(*?) Nullable<?>
-                        }
-                        var asProp = n as PropertyInfo;
-                        if (asProp != null)
-                        {
-                            SetProperty(asProp);                // objType(*?)
-                        }
-                        else
-                        {
-                            Emit.StoreField((FieldInfo)n);      // objType(*?)
-                        }
-                    }
-
-                    if(unionTypeIndicator != null)
-                    {
-                        Emit.Duplicate();                       // objType(*?) objType(*?)
-                        Emit.LoadNull();                        // objType(*?) objType(*?) null
-                        var asProp = unionTypeIndicator as PropertyInfo;
-                        if (asProp != null)
-                        {
-                            SetProperty(asProp);                // objType(*?)
-                        }
-                        else
-                        {
-                            var asField = (FieldInfo)unionTypeIndicator;
-                            Emit.StoreField(asField);           // objType(*?)
-                        }
-                    }
-
                     Emit.Pop();                                 // --empty--
                     Emit.Branch(end);                           // --empty--
 
@@ -1860,6 +1830,69 @@ namespace Jil.Deserialize
                 ThrowExpected(expected);                        // --empty--
 
                 Emit.MarkLabel(end);                            // --empty--
+            }
+        }
+
+        void ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(List<MemberInfo> refMembers, List<MemberInfo> nullableMembers, MemberInfo unionTypeIndicator)
+        {
+            // top of stack
+            // ------------
+            // objType(*?)
+
+            ExpectChar('n');                            // objType(*?)
+            ExpectChar('u');                            // objType(*?)
+            ExpectChar('l');                            // objType(*?)
+            ExpectChar('l');                            // objType(*?)
+
+            foreach (var r in refMembers)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                Emit.LoadNull();                        // objType(*?) objType(*?) null
+                var asProp = r as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    Emit.StoreField((FieldInfo)r);      // objType(*?)
+                }
+            }
+
+            foreach (var n in nullableMembers)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                using (var nLoc = Emit.DeclareLocal(n.ReturnType()))
+                {
+                    Emit.LoadLocalAddress(nLoc);            // objType(*?) objType(*?) Nullable<?>*
+                    Emit.InitializeObject(n.ReturnType());  // objType(*?) objType(*?)
+                    Emit.LoadLocal(nLoc);                   // objType(*?) objType(*?) Nullable<?>
+                }
+                var asProp = n as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    Emit.StoreField((FieldInfo)n);      // objType(*?)
+                }
+            }
+
+            if (unionTypeIndicator != null)
+            {
+                Emit.Duplicate();                       // objType(*?) objType(*?)
+                Emit.LoadNull();                        // objType(*?) objType(*?) null
+                var asProp = unionTypeIndicator as PropertyInfo;
+                if (asProp != null)
+                {
+                    SetProperty(asProp);                // objType(*?)
+                }
+                else
+                {
+                    var asField = (FieldInfo)unionTypeIndicator;
+                    Emit.StoreField(asField);           // objType(*?)
+                }
             }
         }
 

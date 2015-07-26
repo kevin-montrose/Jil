@@ -20,7 +20,9 @@ namespace Jil.Deserialize
         Stringy = 4,
         Bool = 8,
         Object = 16,
-        Listy = 32
+        Listy = 32,
+
+        Null = 128
     }
 
     abstract class UnionLookupConfigBase
@@ -37,8 +39,23 @@ namespace Jil.Deserialize
         public static readonly IEnumerable<char> UnionBoolSet = new[] { 't', 'f' };
         public static readonly IEnumerable<char> UnionObjectSet = new[] { '{' };
         public static readonly IEnumerable<char> UnionListySet = new[] { '[' };
+
+        /// <summary>
+        /// Special case, this shouldn't be used in conjuction with types like string or int?; only for the exact null value.
+        /// </summary>
+        public static readonly IEnumerable<char> UnionNull = new[] { 'n' };
     }
 
+    /// <summary>
+    /// Based on the given generic parameter, this classes memebers end up as follows.
+    /// 
+    /// MinimumChar is the smallest legal char allowed for the lookup, when constructing a switch subtract this from the
+    ///    character to be looked up.
+    /// 
+    /// Lookup is an array of indexes where you lookup by character (after subtracting MinimumCharacter), and get an index into
+    ///     CharsetOrder.  Whatever exists at CharsetOrder is the type corresponding to the looked up character.  If the index
+    ///     fetched from Lookup is out of range, that means their is no mapped type.
+    /// </summary>
     static class UnionLookup<Config> where Config : UnionLookupConfigBase, new()
     {
         public readonly static int MinimumChar;
@@ -52,6 +69,13 @@ namespace Jil.Deserialize
 
             var allChars = Enumerable.Empty<char>();
             var allSets = new List<UnionCharsets>();
+
+            if (config.AllowsNull)
+            {
+                allChars = allChars.Concat(UnionCharsetArrays.UnionNull);
+                allSets.Add(UnionCharsets.Null);
+            }
+
             if (charsets.HasFlag(UnionCharsets.Signed))
             {
                 allChars = allChars.Concat(UnionCharsetArrays.UnionSignedSet);
@@ -89,10 +113,14 @@ namespace Jil.Deserialize
             CharsetOrder = allSets.ToArray();
 
             var maxChar = inOrder.Last();
-            Lookup = Enumerable.Repeat(-1, maxChar - MinimumChar + 1).ToArray();
+
+            var flightSize = maxChar - MinimumChar + 1;
+            
+            Lookup = Enumerable.Repeat(-1, flightSize).ToArray();
 
             foreach (var c in allChars)
             {
+                var lIx = c - MinimumChar;
                 var set = UnionCharsets.None;
                 if (UnionCharsetArrays.UnionSignedSet.Contains(c)) set = UnionCharsets.Signed;
                 if (UnionCharsetArrays.UnionNumberSet.Contains(c)) set = UnionCharsets.Number;
@@ -100,11 +128,11 @@ namespace Jil.Deserialize
                 if (UnionCharsetArrays.UnionBoolSet.Contains(c)) set = UnionCharsets.Bool;
                 if (UnionCharsetArrays.UnionObjectSet.Contains(c)) set = UnionCharsets.Object;
                 if (UnionCharsetArrays.UnionListySet.Contains(c)) set = UnionCharsets.Listy;
-
+                if (UnionCharsetArrays.UnionNull.Contains(c)) set = UnionCharsets.Null;
+                
                 var ix = allSets.IndexOf(set);
                 if (ix == -1) throw new Exception("Unexpected UnionCharsetArrays [" + set + "]");
 
-                var lIx = c - MinimumChar;
                 Lookup[lIx] = ix;
             }
         }
