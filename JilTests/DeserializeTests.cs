@@ -5965,7 +5965,7 @@ namespace JilTests
             Assert.IsNull(asInt.AsStr);
         }
 
-        class _ComplicatedDiscriminateUnion
+        class _ComplicatedDiscriminateUnion_1
         {
             [JilDirective(Name = "Data", IsUnion = true)]
             public DateTime ISODateTime { get; set; }
@@ -5973,6 +5973,45 @@ namespace JilTests
             public int Number { get; set; }
             [JilDirective(Name = "Data", IsUnion = true)]
             public bool Boolean { get; set; }
+        }
+
+        class _ComplicatedDiscriminateUnion_2
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public Guid AsGuid { get; set; }
+
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public DateTime UnixDateTime{ get; set; }
+        }
+
+        class _ComplicatedDiscriminateUnion_3
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public uint AsUInt { get; set; }
+
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public TimeSpan AsTimeSpan { get; set; }
+        }
+
+        class _ComplicatedDiscriminateUnion_4
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public string A_AsString { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public double A_AsDouble { get; set; }
+            [JilDirective(Name = "A", IsUnion = true, IsUnionType = true)]
+            public Type A_Type { get; set; }
+
+            [JilDirective(Name = "B", IsUnion = true)]
+            public DateTime B_AsDateTime { get; set; }
+            [JilDirective(Name = "B", IsUnion = true)]
+            public int B_AsInt { get; set; }
+            [JilDirective(Name = "B", IsUnion = true)]
+            public List<string> B_AsList { get; set; }
+            [JilDirective(Name = "B", IsUnion = true, IsUnionType = true)]
+            public Type B_Type { get; set; }
+
+            public int NonUnion { get; set; }
         }
 
         [TestMethod]
@@ -5983,27 +6022,267 @@ namespace JilTests
                 const string IntJSON = "{\"Data\": 314159}";
                 const string BoolJSON = "{\"Data\":true}";
 
-                var asDate = JSON.Deserialize<_ComplicatedDiscriminateUnion>(DateJSON, Options.ISO8601);
+                var asDate = JSON.Deserialize<_ComplicatedDiscriminateUnion_1>(DateJSON, Options.ISO8601);
                 Assert.IsNotNull(asDate);
                 Assert.AreEqual(new DateTime(2015, 06, 20, 11, 11, 00, 00, DateTimeKind.Utc), asDate.ISODateTime);
                 Assert.AreEqual(0, asDate.Number);
                 Assert.AreEqual(false, asDate.Boolean);
 
-                var asInt = JSON.Deserialize<_ComplicatedDiscriminateUnion>(IntJSON, Options.ISO8601);
+                var asInt = JSON.Deserialize<_ComplicatedDiscriminateUnion_1>(IntJSON, Options.ISO8601);
                 Assert.IsNotNull(asInt);
                 Assert.AreEqual(default(DateTime), asInt.ISODateTime);
                 Assert.AreEqual(314159, asInt.Number);
                 Assert.AreEqual(false, asInt.Boolean);
 
-                var asBool = JSON.Deserialize<_ComplicatedDiscriminateUnion>(BoolJSON, Options.ISO8601);
+                var asBool = JSON.Deserialize<_ComplicatedDiscriminateUnion_1>(BoolJSON, Options.ISO8601);
                 Assert.IsNotNull(asBool);
                 Assert.AreEqual(default(DateTime), asBool.ISODateTime);
                 Assert.AreEqual(0, asBool.Number);
                 Assert.AreEqual(true, asBool.Boolean);
             }
 
-            // TODO: More type tests!  nullables, guids, timespans, unsigned numbers, etc. etc.
-            //       Also, need to test failure cases
+            {
+                var now = DateTime.UtcNow;
+                const string GuidJSON = "{\"Data\":\"E4A278B7-DA54-459A-9D1F-2FE1C82EE4CB\"}";
+                var IntDateJSON = "{\"Data\":" + JSON.Serialize(now, Options.SecondsSinceUnixEpoch) + "}";
+
+                var asGuid = JSON.Deserialize<_ComplicatedDiscriminateUnion_2>(GuidJSON, Options.SecondsSinceUnixEpoch);
+                Assert.IsNotNull(asGuid);
+                Assert.AreEqual(Guid.Parse("E4A278B7-DA54-459A-9D1F-2FE1C82EE4CB"), asGuid.AsGuid);
+                Assert.AreEqual(default(DateTime), asGuid.UnixDateTime);
+
+                var asDate = JSON.Deserialize<_ComplicatedDiscriminateUnion_2>(IntDateJSON, Options.SecondsSinceUnixEpoch);
+                Assert.IsNotNull(asDate);
+                Assert.AreEqual(default(Guid), asDate.AsGuid);
+                var dateDiff = (now - asDate.UnixDateTime).Duration();
+                Assert.IsTrue(dateDiff.TotalSeconds <= 1);
+            }
+
+            {
+                var ts = new TimeSpan(10, 9, 8, 7, 6);
+                const string UIntJSON = "{\"Data\": 1234567}";
+                var TimeSpanJSON = "{\"Data\": " + JSON.Serialize(ts) + "}";
+
+                var asUInt = JSON.Deserialize<_ComplicatedDiscriminateUnion_3>(UIntJSON);
+                Assert.IsNotNull(asUInt);
+                Assert.AreEqual(default(TimeSpan), asUInt.AsTimeSpan);
+                Assert.AreEqual(1234567U, asUInt.AsUInt);
+
+                var asTimeSpan = JSON.Deserialize<_ComplicatedDiscriminateUnion_3>(TimeSpanJSON);
+                Assert.IsNotNull(asTimeSpan);
+                Assert.AreEqual(default(uint), asTimeSpan.AsUInt);
+                Assert.AreEqual(ts, asTimeSpan.AsTimeSpan);
+            }
+
+            {
+                var now = DateTime.UtcNow;
+                const string EmptyJson = "{}";
+                const string A_StrJSON = "{\"A\": \"hello world\"}";
+                const string A_DoubleJSON = "{\"A\": 3.1415}";
+
+                var B_DateTimeJSON = "{\"B\": " + JSON.Serialize(now, Options.Default) + "}";
+                const string B_IntJSON = "{\"B\": 8675}";
+                const string B_ListJSON = "{\"B\": [\"foo\", \"bar\"]}";
+
+                var A_Str_B_DateTimeJSON = "{\"A\": \"hello world\", \"B\": " + JSON.Serialize(now, Options.Default) + "}";
+                const string A_Str_B_IntJSON = "{\"A\": \"hello world\", \"B\": 8675}";
+                const string A_Str_B_ListJSON = "{\"A\": \"hello world\", \"B\": [\"foo\", \"bar\"]}";
+
+                var A_Double_B_DateTimeJSON = "{\"A\": 3.1415, \"B\": " + JSON.Serialize(now, Options.Default) + "}";
+                const string A_Double_B_IntJSON = "{\"A\": 3.1415, \"B\": 8675}";
+                const string A_Double_B_ListJSON = "{\"A\": 3.1415, \"B\": [\"foo\", \"bar\"]}";
+                
+                var empty = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(EmptyJson);
+                Assert.IsNotNull(empty);
+                Assert.AreEqual(default(double), empty.A_AsDouble);
+                Assert.IsNull(empty.A_AsString);
+                Assert.IsNull(empty.A_Type);
+                Assert.AreEqual(default(DateTime), empty.B_AsDateTime);
+                Assert.AreEqual(default(int), empty.B_AsInt);
+                Assert.IsNull(empty.B_AsList);
+                Assert.IsNull(empty.B_Type);
+
+                var aStr = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_StrJSON);
+                Assert.IsNotNull(aStr);
+                Assert.AreEqual(default(double), aStr.A_AsDouble);
+                Assert.AreEqual("hello world", aStr.A_AsString);
+                Assert.AreEqual(typeof(string), aStr.A_Type);
+                Assert.AreEqual(default(DateTime), aStr.B_AsDateTime);
+                Assert.AreEqual(default(int), aStr.B_AsInt);
+                Assert.IsNull(aStr.B_AsList);
+                Assert.IsNull(aStr.B_Type);
+
+                var aDouble = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_DoubleJSON);
+                Assert.IsNotNull(aDouble);
+                Assert.AreEqual(3.1415, aDouble.A_AsDouble);
+                Assert.IsNull(aDouble.A_AsString);
+                Assert.AreEqual(typeof(double), aDouble.A_Type);
+                Assert.AreEqual(default(DateTime), aDouble.B_AsDateTime);
+                Assert.AreEqual(default(int), aDouble.B_AsInt);
+                Assert.IsNull(aDouble.B_AsList);
+                Assert.IsNull(aDouble.B_Type);
+
+                var bDateTime = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(B_DateTimeJSON);
+                Assert.IsNotNull(bDateTime);
+                Assert.AreEqual(default(double), bDateTime.A_AsDouble);
+                Assert.IsNull(bDateTime.A_AsString);
+                Assert.IsNull(bDateTime.A_Type);
+                var bdtOffset = (now - bDateTime.B_AsDateTime).Duration();
+                Assert.IsTrue(bdtOffset.TotalMilliseconds <= 1);
+                Assert.AreEqual(default(int), bDateTime.B_AsInt);
+                Assert.IsNull(bDateTime.B_AsList);
+                Assert.AreEqual(typeof(DateTime), bDateTime.B_Type);
+
+                var bInt = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(B_IntJSON);
+                Assert.IsNotNull(bInt);
+                Assert.AreEqual(default(double), bInt.A_AsDouble);
+                Assert.IsNull(bInt.A_AsString);
+                Assert.IsNull(bInt.A_Type);
+                Assert.AreEqual(default(DateTime), bInt.B_AsDateTime);
+                Assert.AreEqual(8675, bInt.B_AsInt);
+                Assert.IsNull(bInt.B_AsList);
+                Assert.AreEqual(typeof(int), bInt.B_Type);
+
+                var bList = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(B_ListJSON);
+                Assert.IsNotNull(bList);
+                Assert.AreEqual(default(double), bList.A_AsDouble);
+                Assert.IsNull(bList.A_AsString);
+                Assert.IsNull(bList.A_Type);
+                Assert.AreEqual(default(DateTime), bList.B_AsDateTime);
+                Assert.AreEqual(default(int), bList.B_AsInt);
+                Assert.IsNotNull(bList.B_AsList);
+                Assert.AreEqual(2, bList.B_AsList.Count);
+                Assert.AreEqual("foo", bList.B_AsList[0]);
+                Assert.AreEqual("bar", bList.B_AsList[1]);
+                Assert.AreEqual(typeof(List<string>), bList.B_Type);
+
+                var aStrBDateTime = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Str_B_DateTimeJSON);
+                Assert.IsNotNull(aStrBDateTime);
+                Assert.AreEqual(default(double), aStrBDateTime.A_AsDouble);
+                Assert.AreEqual("hello world", aStrBDateTime.A_AsString);
+                Assert.AreEqual(typeof(string), aStrBDateTime.A_Type);
+                var asbdtOffset = (now - aStrBDateTime.B_AsDateTime).Duration();
+                Assert.IsTrue(asbdtOffset.TotalMilliseconds <= 1);
+                Assert.AreEqual(default(int), aStrBDateTime.B_AsInt);
+                Assert.IsNull(aStrBDateTime.B_AsList);
+                Assert.AreEqual(typeof(DateTime), aStrBDateTime.B_Type);
+
+                var aStrBInt = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Str_B_IntJSON);
+                Assert.IsNotNull(aStrBInt);
+                Assert.AreEqual(default(double), aStrBInt.A_AsDouble);
+                Assert.AreEqual("hello world", aStrBInt.A_AsString);
+                Assert.AreEqual(typeof(string), aStrBInt.A_Type);
+                Assert.AreEqual(default(DateTime), aStrBInt.B_AsDateTime);
+                Assert.AreEqual(8675, aStrBInt.B_AsInt);
+                Assert.IsNull(aStrBInt.B_AsList);
+                Assert.AreEqual(typeof(int), aStrBInt.B_Type);
+
+                var aStrBList = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Str_B_ListJSON);
+                Assert.IsNotNull(aStrBList);
+                Assert.AreEqual(default(double), aStrBList.A_AsDouble);
+                Assert.AreEqual("hello world", aStrBList.A_AsString);
+                Assert.AreEqual(typeof(string), aStrBList.A_Type);
+                Assert.AreEqual(default(DateTime), aStrBList.B_AsDateTime);
+                Assert.AreEqual(default(int), aStrBList.B_AsInt);
+                Assert.IsNotNull(aStrBList.B_AsList);
+                Assert.AreEqual(2, aStrBList.B_AsList.Count);
+                Assert.AreEqual("foo", aStrBList.B_AsList[0]);
+                Assert.AreEqual("bar", aStrBList.B_AsList[1]);
+                Assert.AreEqual(typeof(List<string>), aStrBList.B_Type);
+
+                var aDoubleBDateTime = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Double_B_DateTimeJSON);
+                Assert.IsNotNull(aDoubleBDateTime);
+                Assert.AreEqual(3.1415, aDoubleBDateTime.A_AsDouble);
+                Assert.IsNull(aDoubleBDateTime.A_AsString);
+                Assert.AreEqual(typeof(double), aDoubleBDateTime.A_Type);
+                var adbdtOffset = (now - aDoubleBDateTime.B_AsDateTime).Duration();
+                Assert.IsTrue(adbdtOffset.TotalMilliseconds <= 1);
+                Assert.AreEqual(default(int), aDoubleBDateTime.B_AsInt);
+                Assert.IsNull(aDoubleBDateTime.B_AsList);
+                Assert.AreEqual(typeof(DateTime), aDoubleBDateTime.B_Type);
+
+                var aDoubleBInt = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Double_B_IntJSON);
+                Assert.IsNotNull(aDoubleBInt);
+                Assert.AreEqual(3.1415, aDoubleBInt.A_AsDouble);
+                Assert.IsNull(aDoubleBInt.A_AsString);
+                Assert.AreEqual(typeof(double), aDoubleBInt.A_Type);
+                Assert.AreEqual(default(DateTime), aDoubleBInt.B_AsDateTime);
+                Assert.AreEqual(8675, aDoubleBInt.B_AsInt);
+                Assert.IsNull(aDoubleBInt.B_AsList);
+                Assert.AreEqual(typeof(int), aDoubleBInt.B_Type);
+
+                var aDoubleBList = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(A_Double_B_ListJSON);
+                Assert.IsNotNull(aDoubleBList);
+                Assert.AreEqual(3.1415, aDoubleBList.A_AsDouble);
+                Assert.IsNull(aDoubleBList.A_AsString);
+                Assert.AreEqual(typeof(double), aDoubleBList.A_Type);
+                Assert.AreEqual(default(DateTime), aDoubleBList.B_AsDateTime);
+                Assert.AreEqual(default(int), aDoubleBList.B_AsInt);
+                Assert.IsNotNull(aDoubleBList.B_AsList);
+                Assert.AreEqual(2, aDoubleBList.B_AsList.Count);
+                Assert.AreEqual("foo", aDoubleBList.B_AsList[0]);
+                Assert.AreEqual("bar", aDoubleBList.B_AsList[1]);
+                Assert.AreEqual(typeof(List<string>), aDoubleBList.B_Type);
+            }
+
+            {
+                const string NonUnion = "{\"NonUnion\": 123}";
+                const string NonUnion_A = "{\"NonUnion\": 123, \"A\": \"hello world\"}";
+                const string NonUnion_B = "{\"NonUnion\": 123, \"B\": [\"hello\", \"world\"]}";
+                const string NonUnion_A_B = "{\"NonUnion\": 123, \"A\": \"hello world\", \"B\": [\"hello\", \"world\"]}";
+
+                var nu = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(NonUnion);
+                Assert.IsNotNull(nu);
+                Assert.AreEqual(123, nu.NonUnion);
+                Assert.AreEqual(default(double), nu.A_AsDouble);
+                Assert.IsNull(nu.A_AsString);
+                Assert.IsNull(nu.A_Type);
+                Assert.AreEqual(default(DateTime), nu.B_AsDateTime);
+                Assert.AreEqual(default(int), nu.B_AsInt);
+                Assert.IsNull(nu.B_AsList);
+                Assert.IsNull(nu.B_Type);
+
+                var nua = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(NonUnion_A);
+                Assert.IsNotNull(nua);
+                Assert.AreEqual(123, nua.NonUnion);
+                Assert.AreEqual(default(double), nua.A_AsDouble);
+                Assert.AreEqual("hello world", nua.A_AsString);
+                Assert.AreEqual(typeof(string), nua.A_Type);
+                Assert.AreEqual(default(DateTime), nua.B_AsDateTime);
+                Assert.AreEqual(default(int), nua.B_AsInt);
+                Assert.IsNull(nua.B_AsList);
+                Assert.IsNull(nua.B_Type);
+
+                var nub = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(NonUnion_B);
+                Assert.IsNotNull(nub);
+                Assert.AreEqual(123, nub.NonUnion);
+                Assert.AreEqual(default(double), nub.A_AsDouble);
+                Assert.IsNull(nub.A_AsString);
+                Assert.IsNull(nub.A_Type);
+                Assert.AreEqual(default(DateTime), nub.B_AsDateTime);
+                Assert.AreEqual(default(int), nub.B_AsInt);
+                Assert.IsNotNull(nub.B_AsList);
+                Assert.AreEqual(2, nub.B_AsList.Count);
+                Assert.AreEqual("hello", nub.B_AsList[0]);
+                Assert.AreEqual("world", nub.B_AsList[1]);
+                Assert.AreEqual(typeof(List<string>), nub.B_Type);
+
+                var nuab = JSON.Deserialize<_ComplicatedDiscriminateUnion_4>(NonUnion_A_B);
+                Assert.IsNotNull(nuab);
+                Assert.AreEqual(123, nuab.NonUnion);
+                Assert.AreEqual(default(double), nuab.A_AsDouble);
+                Assert.AreEqual("hello world", nuab.A_AsString);
+                Assert.AreEqual(typeof(string), nuab.A_Type);
+                Assert.AreEqual(default(DateTime), nuab.B_AsDateTime);
+                Assert.AreEqual(default(int), nuab.B_AsInt);
+                Assert.IsNotNull(nuab.B_AsList);
+                Assert.AreEqual(2, nuab.B_AsList.Count);
+                Assert.AreEqual("hello", nuab.B_AsList[0]);
+                Assert.AreEqual("world", nuab.B_AsList[1]);
+                Assert.AreEqual(typeof(List<string>), nuab.B_Type);
+            }
+
+            // TODO: Need to test failure cases
         }
 
         class _MultipleNullableDiscriminantUnion
