@@ -1607,11 +1607,13 @@ namespace JilTests
         class _UseFastUnionLookup
         {
             [JilDirective(IsUnion = true, Name = "Data")]
-            public object AsObject { get; set; }
+            public Dictionary<string, string> AsDict { get; set; }
             [JilDirective(IsUnion = true, Name = "Data")]
             public List<int> AsList { get; set; }
             [JilDirective(IsUnion = true, Name = "Data")]
             public int AsNum { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public string AsStr { get; set; }
         }
 
         [TestMethod]
@@ -1646,7 +1648,7 @@ namespace JilTests
             var rand = new Random(270129617);
 
             var json = new List<string>();
-            for (var i = 0; i < 1000; i++)
+            for (var i = 0; i < 100000; i++)
             {
                 var part = rand.Next(4);
                 switch (part)

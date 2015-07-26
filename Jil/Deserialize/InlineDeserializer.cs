@@ -22,7 +22,6 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataBinarySearch = true;
         public static bool UseFastRFC1123Method = true;
         public static bool UseFastUnionLookup = true;
-        //public static bool UseFastUnionLookup = false;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
