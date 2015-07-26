@@ -6428,10 +6428,55 @@ namespace JilTests
             Assert.IsNull(empty.AsStr);
             Assert.AreEqual(0, empty.AsInt);
             Assert.IsNull(empty.WhatType);
-
-            // TODO: Test the misconfiguration errors for IsUnionType
         }
 
+        class _UnionTypeMisconfiguration_1
+        {
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public string AStr { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public int AInt { get; set; }
+
+            [JilDirective(IsUnion = true, Name = "Data", IsUnionType = true)]
+            public string Data_Type { get; set; }
+        }
+
+        class _UnionTypeMisconfiguration_2
+        {
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public string AStr { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data")]
+            public int AInt { get; set; }
+
+            [JilDirective(IsUnion = true, Name = "Data", IsUnionType = true)]
+            public Type Data_Type1 { get; set; }
+            [JilDirective(IsUnion = true, Name = "Data", IsUnionType = true)]
+            public Type Data_Type2 { get; set; }
+        }
+
+        [TestMethod]
+        public void UnionTypeMisconfiguration()
+        {
+            try
+            {
+                JSON.Deserialize<_UnionTypeMisconfiguration_1>("{}");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionTypeMisconfiguration_1: Member [Data_Type] has IsUnionType set, but is not of type System.Type", e.Message);
+            }
+
+            try
+            {
+                JSON.Deserialize<_UnionTypeMisconfiguration_2>("{}");
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (DeserializationException e)
+            {
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionTypeMisconfiguration_2: Member [Data_Type2] has IsUnionType set, but IsUnionType is also set for [Data_Type1]", e.Message);
+            }
+        }
 #if !DEBUG
         #region SlowSpinUp Types
 
