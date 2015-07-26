@@ -15,23 +15,22 @@ namespace Jil.Deserialize
     {
         None = 0,
         
-        Nullable = 1,
-        Signed = 2,
-        Number = 4,
-        Stringy = 8,
-        Bool = 16,
-        Object = 32,
-        Listy = 64
+        Signed = 1,
+        Number = 2,
+        Stringy = 4,
+        Bool = 8,
+        Object = 16,
+        Listy = 32
     }
 
     abstract class UnionLookupConfigBase
     {
         public abstract UnionCharsets Charsets { get; }
+        public abstract bool AllowsNull { get; }
     }
 
     static class UnionCharsetArrays
     {
-        public static readonly IEnumerable<char> UnionNullableSet = new[] { 'n' };
         public static readonly IEnumerable<char> UnionSignedSet = new[] { '-' };
         public static readonly IEnumerable<char> UnionNumberSet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
         public static readonly IEnumerable<char> UnionStringySet = new[] { '"' };
@@ -53,11 +52,6 @@ namespace Jil.Deserialize
 
             var allChars = Enumerable.Empty<char>();
             var allSets = new List<UnionCharsets>();
-            if (charsets.HasFlag(UnionCharsets.Nullable))
-            {
-                allChars = allChars.Concat(UnionCharsetArrays.UnionNullableSet);
-                allSets.Add(UnionCharsets.Nullable);
-            }
             if (charsets.HasFlag(UnionCharsets.Signed))
             {
                 allChars = allChars.Concat(UnionCharsetArrays.UnionSignedSet);
@@ -100,7 +94,6 @@ namespace Jil.Deserialize
             foreach (var c in allChars)
             {
                 var set = UnionCharsets.None;
-                if (UnionCharsetArrays.UnionNullableSet.Contains(c)) set = UnionCharsets.Nullable;
                 if (UnionCharsetArrays.UnionSignedSet.Contains(c)) set = UnionCharsets.Signed;
                 if (UnionCharsetArrays.UnionNumberSet.Contains(c)) set = UnionCharsets.Number;
                 if (UnionCharsetArrays.UnionStringySet.Contains(c)) set = UnionCharsets.Stringy;
@@ -119,7 +112,8 @@ namespace Jil.Deserialize
 
     internal static class UnionConfigLookup
     {
-        static readonly Hashtable Cache = new Hashtable();
+        static readonly Hashtable NullCache = new Hashtable();
+        static readonly Hashtable NonNullCache = new Hashtable();
 
         static readonly ModuleBuilder ModBuilder;
         static readonly AssemblyBuilder AsmBuilder;
@@ -130,40 +124,50 @@ namespace Jil.Deserialize
             ModBuilder = AsmBuilder.DefineDynamicModule("UnionConfigLookupTypes");
         }
 
-        public static Type Get(UnionCharsets ucs)
+        public static Type Get(UnionCharsets ucs, bool allowsNull)
         {
-            var cached = (Type)Cache[ucs];
+            var cache = allowsNull ? NullCache : NonNullCache;
+
+            var cached = (Type)cache[ucs];
             if (cached != null) return cached;
 
-            lock (Cache)
+            lock (cache)
             {
-                cached = (Type)Cache[ucs];
+                cached = (Type)cache[ucs];
                 if (cached != null) return cached;
 
-                var newType = ModBuilder.DefineType(ucs.ToString(), TypeAttributes.NotPublic | TypeAttributes.Class, typeof(UnionLookupConfigBase));
+                // TODO: This should be done in Sigil, probably a defect that I can't
+                var newType = ModBuilder.DefineType(ucs.ToString()+"_"+allowsNull, TypeAttributes.NotPublic | TypeAttributes.Class, typeof(UnionLookupConfigBase));
                 var field = newType.DefineField("_Charsets", typeof(UnionCharsets), FieldAttributes.Private | FieldAttributes.InitOnly);
                 var prop = newType.DefineProperty("Charsets", PropertyAttributes.None, typeof(UnionCharsets), Type.EmptyTypes);
 
                 var getE = newType.DefineMethod("getCharsets", MethodAttributes.Public | MethodAttributes.Virtual, typeof(UnionCharsets), Type.EmptyTypes);
                 var il = getE.GetILGenerator();
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, field);
+                il.Emit(OpCodes.Ldc_I4, (int)ucs);
+                il.Emit(OpCodes.Conv_U1);
                 il.Emit(OpCodes.Ret);
 
                 var shouldOverride = typeof(UnionLookupConfigBase).GetProperty("Charsets").GetMethod;
                 newType.DefineMethodOverride(getE, shouldOverride);
 
-                var consE = newType.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
-                il = consE.GetILGenerator();
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldc_I4, (int)ucs);
-                il.Emit(OpCodes.Conv_I1);
-                il.Emit(OpCodes.Stfld, field);
+                var allowE = newType.DefineMethod("getAllowsNull", MethodAttributes.Public | MethodAttributes.Virtual, typeof(bool), Type.EmptyTypes);
+                il = allowE.GetILGenerator();
+                if (allowsNull)
+                {
+                    il.Emit(OpCodes.Ldc_I4_1);
+                }
+                else
+                {
+                    il.Emit(OpCodes.Ldc_I4_0);
+                }
                 il.Emit(OpCodes.Ret);
+
+                shouldOverride = typeof(UnionLookupConfigBase).GetProperty("AllowsNull").GetMethod;
+                newType.DefineMethodOverride(allowE, shouldOverride);
 
                 var type = newType.CreateType();
 
-                Cache[ucs] = cached = type;
+                cache[ucs] = cached = type;
 
                 return cached;
             }

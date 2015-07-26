@@ -748,7 +748,6 @@ namespace JilTests
         {
             var all = new[] { 
                 UnionCharsets.None,
-                UnionCharsets.Nullable,
                 UnionCharsets.Signed,
                 UnionCharsets.Number,
                 UnionCharsets.Stringy,
@@ -763,15 +762,20 @@ namespace JilTests
                         for (var d = 0; d < all.Length; d++)
                             for (var e = 0; e < all.Length; e++)
                                 for (var f = 0; f < all.Length; f++)
-                                    for (var g = 0; g < all.Length; g++)
-                                    {
-                                        var set = all[a] | all[b] | all[c] | all[d] | all[e] | all[f] | all[g];
+                                {
+                                    var set = all[a] | all[b] | all[c] | all[d] | all[e] | all[f];
 
-                                        var t = UnionConfigLookup.Get(set);
-                                        var i = (UnionLookupConfigBase)Activator.CreateInstance(t);
+                                    var t1 = UnionConfigLookup.Get(set, false);
+                                    var t2 = UnionConfigLookup.Get(set, true);
+                                    var i1 = (UnionLookupConfigBase)Activator.CreateInstance(t1);
+                                    var i2 = (UnionLookupConfigBase)Activator.CreateInstance(t2);
 
-                                        Assert.AreEqual(set, i.Charsets);
-                                    }
+                                    Assert.AreEqual(set, i1.Charsets);
+                                    Assert.AreEqual(set, i2.Charsets);
+
+                                    Assert.IsFalse(i1.AllowsNull);
+                                    Assert.IsTrue(i2.AllowsNull);
+                                }
         }
     }
 }

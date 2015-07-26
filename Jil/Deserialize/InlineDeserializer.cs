@@ -1642,7 +1642,8 @@ namespace Jil.Deserialize
             Dictionary<char, MemberInfo> discriminants;
             MemberInfo unionTypeIndicator;
             Dictionary<UnionCharsets, MemberInfo> charsets;
-            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator, out charsets);
+            bool allowsNull;
+            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull);
             var expected = discriminants.Keys.ToArray();
 
             var streamNotEmpty = Emit.DefineLabel();
@@ -1665,7 +1666,7 @@ namespace Jil.Deserialize
                     allCharsets |= kv.Key;
                 }
 
-                var config = UnionConfigLookup.Get(allCharsets);
+                var config = UnionConfigLookup.Get(allCharsets, allowsNull);
                 var lookup = typeof(UnionLookup<>).MakeGenericType(config);
 
                 var min = (int)lookup.GetField("MinimumChar").GetValue(null);
@@ -1779,11 +1780,12 @@ namespace Jil.Deserialize
             }
         }
 
-        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember)
+        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember, out bool allowsNull)
         {
             charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
             discriminantChars = new Dictionary<char, MemberInfo>();
 
+            allowsNull = false;
             destinationType = null;
 
             foreach (var member in possible)
@@ -1816,8 +1818,14 @@ namespace Jil.Deserialize
                     continue;
                 }
 
+                var memberType = member.ReturnType();
+                if(!memberType.IsValueType || memberType.IsNullableType())
+                {
+                    allowsNull = true;
+                }
+
                 UnionCharsets perMember;
-                var dis = GetDescriminantCharacters(member.ReturnType(), out perMember);
+                var dis = GetDescriminantCharacters(memberType, out perMember);
                 foreach(var e in Enum.GetValues(typeof(UnionCharsets)).Cast<UnionCharsets>().Where(x => perMember.HasFlag(x)))
                 {
                     charsetToMember[e] = member;
@@ -1843,16 +1851,10 @@ namespace Jil.Deserialize
             charsets = UnionCharsets.None;
 
             IEnumerable<char> ret = Enumerable.Empty<char>();
-
-            if (memType.IsNullableType() || !memType.IsValueType)
+            
+            if (memType.IsNullableType())
             {
-                charsets |= UnionCharsets.Nullable;
-                ret = ret.Concat(UnionCharsetArrays.UnionNullableSet);
-
-                if (memType.IsNullableType())
-                {
-                    memType = Nullable.GetUnderlyingType(memType);
-                }
+                memType = Nullable.GetUnderlyingType(memType);
             }
 
             if (memType.IsNumberType())
