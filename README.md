@@ -8,19 +8,19 @@ A fast JSON (de)serializer, built on [Sigil](https://github.com/kevin-montrose/S
 
 ### Serializing
 
-```
-    using(var output = new StringWriter())
-    {
-        JSON.Serialize(
-            new
-            {
-                MyInt = 1,
-                MyString = "hello world",
-                // etc.
-            },
-            output
-        );
-    }
+```C#
+using(var output = new StringWriter())
+{
+    JSON.Serialize(
+        new
+        {
+            MyInt = 1,
+            MyString = "hello world",
+            // etc.
+        },
+        output
+    );
+}
 ```
 
 There is also a `Serialize` method that returns a string.
@@ -37,11 +37,11 @@ types such as [ExpandoObject](http://msdn.microsoft.com/en-us/library/system.dyn
 
 ### Deserializing
 
-```
-    using(var input = new StringReader(myString))
-    {
-        var result = JSON.Deserialize<MyType>(input);
-    }
+```C#
+using(var input = new StringReader(myString))
+{
+    var result = JSON.Deserialize<MyType>(input);
+}
 ```
 
 There is also a `Deserialize` method that takes a string as input.
@@ -52,11 +52,11 @@ with an earlier "throw away" deserialization.
 
 ### Dynamic Deserialization
 
-```
-    using(var input = new StringReader(myString))
-    {
-    	var result = JSON.DeserializeDynamic(input);
-    }
+```C#
+using(var input = new StringReader(myString))
+{
+    var result = JSON.DeserializeDynamic(input);
+}
 ```
 
 There is also a `DeserializeDynamic` method that works directly on strings.
