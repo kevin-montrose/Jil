@@ -6281,8 +6281,199 @@ namespace JilTests
                 Assert.AreEqual("world", nuab.B_AsList[1]);
                 Assert.AreEqual(typeof(List<string>), nuab.B_Type);
             }
+        }
 
-            // TODO: Need to test failure cases
+        class _UnionMisconfigured_1
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public DateTime A_DateTime { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public string A_String { get; set; }
+        }
+
+        class _UnionMisconfigured_2
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public int A_Int { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public double A_Double { get; set; }
+        }
+
+        class _UnionMisconfigured_3
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public _UnionMisconfigured_1 A_Object { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public Dictionary<string, string> A_Dictionary { get; set; }
+        }
+
+        class _UnionMisconfigured_4
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public TimeSpan A_TimeSpan { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public string A_String { get; set; }
+        }
+
+        class _UnionMisconfigured_5
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public Guid A_Guid { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public string A_String { get; set; }
+        }
+
+        class _UnionMisconfigured_6
+        {
+            [JilDirective(Name = "A", IsUnion = true)]
+            public Guid A_Guid { get; set; }
+            [JilDirective(Name = "A", IsUnion = true)]
+            public DateTime A_DateTime { get; set; }
+        }
+
+        [TestMethod]
+        public void UnionMisconfigured()
+        {
+            {
+                JSON.Deserialize<_UnionMisconfigured_1>("{}", Options.SecondsSinceUnixEpoch);
+                JSON.Deserialize<_UnionMisconfigured_1>("{}", Options.MillisecondsSinceUnixEpoch);
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_1>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch(DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_1>("{}", Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_1>("{}", Options.RFC1123);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+            }
+
+            {
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_2>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_2: Can't construct discriminant union [A], more than one type would start with '0'", e.Message);
+                }
+            }
+
+            {
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_3>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_3: Can't construct discriminant union [A], more than one type would start with '{'", e.Message);
+                }
+            }
+
+            {
+                JSON.Deserialize<_UnionMisconfigured_4>("{}", Options.SecondsSinceUnixEpoch);
+                JSON.Deserialize<_UnionMisconfigured_4>("{}", Options.MillisecondsSinceUnixEpoch);
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_4>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_4>("{}", Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_4>("{}", Options.RFC1123);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+            }
+
+            {
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_5>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_5: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+            }
+
+            {
+                JSON.Deserialize<_UnionMisconfigured_6>("{}", Options.SecondsSinceUnixEpoch);
+                JSON.Deserialize<_UnionMisconfigured_6>("{}", Options.MillisecondsSinceUnixEpoch);
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_6>("{}", Options.Default);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_6>("{}", Options.ISO8601);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_UnionMisconfigured_6>("{}", Options.RFC1123);
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                }
+            }
         }
 
         class _MultipleNullableDiscriminantUnion
