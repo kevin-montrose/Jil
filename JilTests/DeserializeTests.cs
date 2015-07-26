@@ -6006,6 +6006,63 @@ namespace JilTests
             //       Also, need to test failure cases
         }
 
+        class _MultipleNullableDiscriminantUnion
+        {
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public string AsStr { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public int AsInt { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public bool? AsNullableBool { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true)]
+            public List<int> AsList { get; set; }
+            [JilDirective(Name = "Data", IsUnion = true, IsUnionType = true)]
+            public Type UnionType { get; set; }
+        }
+
+        [TestMethod]
+        public void MultipleNullableDiscriminantUnion()
+        {
+            {
+                const string StrJson = "{\"Data\": \"hello world\"}";
+                const string IntJson = "{\"Data\": 1234}";
+                const string NullableBoolJson = "{\"Data\": true}";
+                const string ListJson = "{\"Data\": [1,2,3]}";
+                const string NullJson = "{\"Data\": null}";
+
+                var asStr = JSON.Deserialize<_MultipleNullableDiscriminantUnion>(StrJson);
+                Assert.IsNotNull(asStr);
+                Assert.AreEqual("hello world", asStr.AsStr);
+                Assert.AreEqual(typeof(string), asStr.UnionType);
+
+                var asInt = JSON.Deserialize<_MultipleNullableDiscriminantUnion>(IntJson);
+                Assert.IsNotNull(asInt);
+                Assert.AreEqual(1234, asInt.AsInt);
+                Assert.AreEqual(typeof(int), asInt.UnionType);
+
+                var asNullableBool = JSON.Deserialize<_MultipleNullableDiscriminantUnion>(NullableBoolJson);
+                Assert.IsNotNull(asNullableBool);
+                Assert.AreEqual(true, asNullableBool.AsNullableBool);
+                Assert.AreEqual(typeof(bool?), asNullableBool.UnionType);
+
+                var asList = JSON.Deserialize<_MultipleNullableDiscriminantUnion>(ListJson);
+                Assert.IsNotNull(asList);
+                Assert.IsNotNull(asList.AsList);
+                Assert.AreEqual(3, asList.AsList.Count);
+                Assert.AreEqual(1, asList.AsList[0]);
+                Assert.AreEqual(2, asList.AsList[1]);
+                Assert.AreEqual(3, asList.AsList[2]);
+                Assert.AreEqual(typeof(List<int>), asList.UnionType);
+
+                var asNull = JSON.Deserialize<_MultipleNullableDiscriminantUnion>(NullJson);
+                Assert.IsNotNull(asNull);
+                Assert.IsNull(asNull.AsStr);
+                Assert.IsNull(asNull.AsList);
+                Assert.AreEqual(default(int), asNull.AsInt);
+                Assert.AreEqual(default(bool?), asNull.AsNullableBool);
+                Assert.IsNull(asNull.UnionType);
+            }
+        }
 
         class _UnionAttributeError
         {
