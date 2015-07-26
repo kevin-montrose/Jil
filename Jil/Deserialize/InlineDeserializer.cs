@@ -21,8 +21,7 @@ namespace Jil.Deserialize
         public static bool UseNameAutomataSwitches = true;
         public static bool UseNameAutomataBinarySearch = true;
         public static bool UseFastRFC1123Method = true;
-        //public static bool UseFastUnionLookup = true;
-        public static bool UseFastUnionLookup = false;
+        public static bool UseFastUnionLookup = true;
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
@@ -232,6 +231,12 @@ namespace Jil.Deserialize
             Emit.LoadConstant(false);                                   // string TextReader bool
             ThrowStringStreamBool();                                    // DeserializationException
             Emit.Throw();                                               // --empty--
+        }
+
+        void ThrowExpected(char[] cs)
+        {
+            var ps = cs.Cast<object>().ToArray();
+            ThrowExpected(ps);
         }
 
         void ExpectChar(char c)
