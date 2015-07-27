@@ -1,4 +1,5 @@
 ﻿using Jil.Common;
+using Sigil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -164,34 +165,27 @@ namespace Jil.Deserialize
                 cached = (Type)cache[ucs];
                 if (cached != null) return cached;
 
-                // TODO: This should be done in Sigil, probably a defect that I can't
                 var newType = ModBuilder.DefineType(ucs.ToString()+"_"+allowsNull, TypeAttributes.NotPublic | TypeAttributes.Class, typeof(UnionLookupConfigBase));
                 var field = newType.DefineField("_Charsets", typeof(UnionCharsets), FieldAttributes.Private | FieldAttributes.InitOnly);
                 var prop = newType.DefineProperty("Charsets", PropertyAttributes.None, typeof(UnionCharsets), Type.EmptyTypes);
 
-                var getE = newType.DefineMethod("getCharsets", MethodAttributes.Public | MethodAttributes.Virtual, typeof(UnionCharsets), Type.EmptyTypes);
-                var il = getE.GetILGenerator();
-                il.Emit(OpCodes.Ldc_I4, (int)ucs);
-                il.Emit(OpCodes.Conv_U1);
-                il.Emit(OpCodes.Ret);
+                var gcEmit = Emit<Func<UnionCharsets>>.BuildInstanceMethod(newType, "getCharsets", MethodAttributes.Public | MethodAttributes.Virtual, doVerify: Utils.DoVerify);
+                gcEmit.LoadConstant((int)ucs);
+                gcEmit.Convert(Enum.GetUnderlyingType(typeof(UnionCharsets)));
+                gcEmit.Return();
 
-                var shouldOverride = typeof(UnionLookupConfigBase).GetProperty("Charsets").GetMethod;
-                newType.DefineMethodOverride(getE, shouldOverride);
+                var gcMtd = gcEmit.CreateMethod(Utils.DelegateOptimizationOptions);
+                var gcShouldOverride = typeof(UnionLookupConfigBase).GetProperty("Charsets").GetMethod;
+                newType.DefineMethodOverride(gcMtd, gcShouldOverride);
 
-                var allowE = newType.DefineMethod("getAllowsNull", MethodAttributes.Public | MethodAttributes.Virtual, typeof(bool), Type.EmptyTypes);
-                il = allowE.GetILGenerator();
-                if (allowsNull)
-                {
-                    il.Emit(OpCodes.Ldc_I4_1);
-                }
-                else
-                {
-                    il.Emit(OpCodes.Ldc_I4_0);
-                }
-                il.Emit(OpCodes.Ret);
+                var aeEmit = Emit<Func<bool>>.BuildInstanceMethod(newType, "getAllowsNull", MethodAttributes.Public | MethodAttributes.Virtual, doVerify: Utils.DoVerify);
+                aeEmit.LoadConstant(allowsNull ? 1 : 0);
+                aeEmit.Convert<byte>();
+                aeEmit.Return();
 
-                shouldOverride = typeof(UnionLookupConfigBase).GetProperty("AllowsNull").GetMethod;
-                newType.DefineMethodOverride(allowE, shouldOverride);
+                var aeMtd = aeEmit.CreateMethod(Utils.DelegateOptimizationOptions);
+                var aeShouldOverride = typeof(UnionLookupConfigBase).GetProperty("AllowsNull").GetMethod;
+                newType.DefineMethodOverride(aeMtd, aeShouldOverride);
 
                 var type = newType.CreateType();
 
