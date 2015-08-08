@@ -322,7 +322,7 @@ namespace Jil
 
             if (options.ShouldPrettyPrint && options.IsJSONP)
             {
-                TypeCache<MicrooftStylePrettyPrintJSONPUtc, T>.Get()(output, data, 0);
+                TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.Get()(output, data, 0);
                 return;
             }
 
@@ -491,7 +491,7 @@ namespace Jil
 
             if (options.ShouldPrettyPrint && options.IsJSONP)
             {
-                return WriteToString(TypeCache<MicrooftStylePrettyPrintJSONPUtc, T>.GetToString(), data);
+                return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.GetToString(), data);
             }
 
             if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
