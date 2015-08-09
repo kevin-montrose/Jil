@@ -1,4 +1,4 @@
-﻿using Sigil;
+using Sigil;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -76,6 +76,7 @@ namespace Jil.Serialize
         }
     }
 
+    // Start OptionsGeneration.linq generated content
     class MicrosoftStyle : ISerializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
@@ -1674,4 +1675,5 @@ namespace Jil.Serialize
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
     }
+    // End OptionsGeneration.linq generated content
 }

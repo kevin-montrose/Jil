@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +11,7 @@ namespace Jil
     public sealed class Options
     {
 #pragma warning disable 1591
+        // Start OptionsGeneration.linq generated content
         public static readonly Options Default = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch);
         public static readonly Options PrettyPrint = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, prettyPrint: true);
         public static readonly Options ExcludeNulls = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, excludeNulls: true);
@@ -171,6 +172,7 @@ namespace Jil
         public static readonly Options SecondsSinceUnixEpochPrettyPrintJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
         public static readonly Options SecondsSinceUnixEpochExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
         public static readonly Options SecondsSinceUnixEpochPrettyPrintExcludeNullsJSONPIncludeInheritedUtc = new Options(dateFormat: DateTimeFormat.SecondsSinceUnixEpoch, prettyPrint: true, excludeNulls: true, jsonp: true, includeInherited: true, unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC);
+        // End OptionsGeneration.linq generated content
 #pragma warning restore 1591
 
         internal bool ShouldPrettyPrint { get; private set; }

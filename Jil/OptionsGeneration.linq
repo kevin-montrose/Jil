@@ -2,42 +2,32 @@
 
 void Main()
 {
-	const string t = "true", f = "false";
-	
-	var dateFormat = new Option {
-			ParamEverPresent = true,
-			NameFormat = "{0}",
-			ParamFormat = "dateFormat: DateTimeFormat.{0}",
-			PropertyFormat = "public DateTimeFormat DateFormat {{ get {{ return DateTimeFormat.{0}; }} }}",
-			Values = new[] { "MicrosoftStyleMillisecondsSinceUnixEpoch", "MillisecondsSinceUnixEpoch", "ISO8601", "SecondsSinceUnixEpoch", "RFC1123" },
-			TypeCacheNames = new[] { "MicrosoftStyle", "Milliseconds", null, "Seconds", null } };
-	var prettyPrint = new Option {
-			NameFormat = "PrettyPrint",
-			ParamFormat = "prettyPrint: {0}",
-			PropertyFormat = "public bool PrettyPrint {{ get {{ return {0}; }} }}",
-			Values = new[] { f, t } };
-	var excludeNulls =  new Option {
-			NameFormat = "ExcludeNulls",
-			ParamFormat = "excludeNulls: {0}",
-			PropertyFormat = "public bool ExcludeNulls {{ get {{ return {0}; }} }}",
-			Values = new[] { f, t } };
-	var jsonp =  new Option {
-			NameFormat = "JSONP",
-			ParamFormat = "jsonp: {0}",
-			PropertyFormat = "public bool JSONP {{ get {{ return {0}; }} }}",
-			Values = new[] { f, t } };
-	var includeInherited = new Option {
-			NameFormat = "IncludeInherited",
-			ParamFormat = "includeInherited: {0}",
-			PropertyFormat = "public bool IncludeInherited {{ get {{ return {0}; }} }}",
-			TypeCacheNames = new[] { "", "Inherited" },
-			Values = new[] { f, t } };
-	var dateBehavior = new Option {
-			NameFormat = "Utc",
-			ParamFormat = "unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.{0}",
-			PropertyFormat = "public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior {{ get {{ return UnspecifiedDateTimeKindBehavior.{0}; }} }}",
-		    Values = new[] { "IsLocal", "IsUTC" } };
-
+	var dateFormat = new Option<DateTimeFormat>("DateFormat", "UseDateTimeFormat")
+	{
+		ParamEverPresent = true,
+		GetTypeCacheName = v =>
+		{
+			switch (v)
+			{
+				case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch: return "MicrosoftStyle";
+				case DateTimeFormat.MillisecondsSinceUnixEpoch: return "Milliseconds";
+				case DateTimeFormat.SecondsSinceUnixEpoch: return "Seconds";
+				default: return v.ToString();
+			}
+		}
+	};
+	var prettyPrint = new Option<bool>("PrettyPrint", "ShouldPrettyPrint");
+	var excludeNulls = new Option<bool>("ExcludeNulls", "ShouldExcludeNulls");
+	var jsonp = new Option<bool>("JSONP", "IsJSONP");
+	var includeInherited = new Option<bool>("IncludeInherited", "ShouldIncludeInherited")
+	{
+		GetTypeCacheName = v => v ? "Inherited" : ""
+	};
+	var dateBehavior = new Option<UnspecifiedDateTimeKindBehavior>("UnspecifiedDateTimeKindBehavior", "UseUnspecifiedDateTimeKindBehavior") 
+	{
+		GetName = v => v == UnspecifiedDateTimeKindBehavior.IsUTC ? "Utc" : "",
+		TypeCachePropertyName = "DateTimeKindBehavior"
+	};
 
 	var permutations = from df in dateFormat.Permutations()
 					   from pp in prettyPrint.Permutations()
@@ -70,34 +60,80 @@ void Main()
     }}");
 	}
 
-	options.ToString().Dump("Options.cs");
-	typeCaches.ToString().Dump("TypeCaches.cs");
+	PipeToFile(@"Options.cs", options.ToString());
+	PipeToFile(@"Serialize\TypeCaches.cs", typeCaches.ToString());
+
+	//options.ToString().Dump("Options.cs");
+	//typeCaches.ToString().Dump(".cs");
 }
 
-public class Option
+public void PipeToFile(string filename, string codeBlock)
 {
+	const string startComment = @"// Start OptionsGeneration.linq generated content",
+				 endComment = @"// End OptionsGeneration\.linq generated content";
+	var currentPath = Path.GetDirectoryName(Util.CurrentQueryPath);
+	var filePath = Path.Combine(currentPath, filename);
+	var re = new Regex($@"({Regex.Escape(startComment)}\n)(.*)({Regex.Escape(endComment)}\n)", RegexOptions.Singleline);
+
+	string t = File.ReadAllText(filePath);
+
+	t = re.Replace(t, $"$1{codeBlock.Trim()}$2");
+	t.Dump(filename);
+	File.WriteAllText(filePath, t);
+}
+
+public class Option<T> where T : struct
+{
+	static bool[] boolOptions = new bool[] { false, true };
+
+	public Type Type => typeof(T);
+	public string TypeShortName => IsBool ? "bool" : Type.Name;
+	public bool IsBool => Type == typeof(bool);
 	public bool ParamEverPresent { get; set; }
 	public string NameFormat { get; set; }
-	public string ParamFormat { get; set; }
-	public string PropertyFormat { get; set; }
-	public string[] Values { get; set; }
-	public string[] TypeCacheNames { get; set; }
-	public string Default => Values[0];
+	public string PropertyName { get; }
+	public string TypeCachePropertyName { get; set; }
+	public string OptionProperty { get; }
+	private string ParamName => PropertyName.All(char.IsUpper) ? PropertyName.ToLower() : PropertyName.Substring(0, 1).ToLower() + PropertyName.Substring(1);
+	public Func<T, string> GetName { get; set; }
+	public Func<T, string> GetTypeCacheName { get; set; }
+	
+	private T[] _values;
+	public T[] Values
+	{
+		get
+		{
+			if (_values != null) return _values;
+			if (Type == typeof(bool)) _values = boolOptions as T[];
+			if (Type.IsEnum) _values = Enum.GetValues(Type).Cast<T>().ToArray();
+			return _values;
+		}
+	}
+
+	public Option(string propertyName, string optionProperty)
+	{
+		PropertyName = propertyName;
+		OptionProperty = OptionProperty;
+		if (IsBool) GetName = b => (bool)(object)b ? PropertyName : "";
+		else GetName = e => e.ToString();
+	}
 
 	public List<OptionPermutation> Permutations()
 	{
 		var perms = new List<OptionPermutation>();
 		for (var i = 0; i < Values.Length; i++)
 		{
+			var isDefault = i == 0;
 			var v = Values[i];
-			var name = v != Default ? string.Format(NameFormat, v) : "";
-			var typeCacheName = TypeCacheNames?[i] ?? name;
+			var vString = IsBool ? v.ToString().ToLower() : $"{Type.Name}.{v}";
+			var name = isDefault ? "" : GetName(v);
+			var typeCacheName = !isDefault || ParamEverPresent ? (GetTypeCacheName ?? GetName)(v) : "";
 			var opt = new OptionPermutation
 			{
 				Name = name,
-				Param = v != Default || ParamEverPresent ? string.Format(ParamFormat, v) : "",
+				Param = !isDefault || ParamEverPresent ? $"{ParamName}: {vString}" : "",
 				TypeCacheName = typeCacheName,
-				TypeCacheProperty = string.Format(PropertyFormat, v)
+				TypeCacheProperty = $"public {TypeShortName} {TypeCachePropertyName ?? PropertyName} {{ get {{ return {vString}; }} }}"
 			};
 			perms.Add(opt);
 		}
@@ -110,4 +146,18 @@ public struct OptionPermutation
 	public string TypeCacheName { get; set; }
 	public string Param { get; set; }
 	public string TypeCacheProperty { get; set; }
+}
+
+public enum UnspecifiedDateTimeKindBehavior : byte
+{
+	IsLocal = 0,
+	IsUTC
+}
+public enum DateTimeFormat : byte
+{
+	MicrosoftStyleMillisecondsSinceUnixEpoch = 0,
+    MillisecondsSinceUnixEpoch = 1,
+	SecondsSinceUnixEpoch = 2,
+	ISO8601 = 3,
+	RFC1123 = 4,
 }
