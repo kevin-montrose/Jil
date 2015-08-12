@@ -1,4 +1,4 @@
-﻿using Jil.Serialize;
+using Jil.Serialize;
 using Jil.SerializeDynamic;
 using System;
 using System.Collections;
@@ -108,30 +108,2226 @@ namespace Jil
 
             options = options ?? DefaultOptions;
 
+            GetWriterAction<T>(options)(output, data, 0);
+        }
+
+        /// <summary>
+        /// Generated giant switch of option finding via OptionsGeneration.linq
+        /// </summary>
+        static Action<TextWriter, T, int> GetWriterAction<T>(Options options)
+        {
+            // Start OptionsGeneration.linq generated content: GetWriterAction
             switch (options.UseDateTimeFormat)
             {
-                case DateTimeFormat.ISO8601:
-                    ISO8601(data, output, options);
-                    return;
-
-                case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    Milliseconds(data, output, options);
-                    return;
-
-                case DateTimeFormat.SecondsSinceUnixEpoch:
-                    Seconds(data, output, options);
-                    return;
-
                 case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                    MicrosoftStyle(data, output, options);
-                    return;
-
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyle, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrint, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<Milliseconds, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrint, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<Seconds, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrint, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.ISO8601:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601Utc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601Inherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601InheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601JSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601JSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601JSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601JSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrint, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
                 case DateTimeFormat.RFC1123:
-                    RFC1123(data, output, options);
-                    return;
-
-                default: throw new InvalidOperationException("Unexpected Options: " + options);
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123Utc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123Inherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123InheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123JSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123JSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123JSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123JSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrint, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNulls, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
             }
+            // End OptionsGeneration.linq generated content: GetWriterAction
+
+            throw new InvalidOperationException("Unexpected Options: " + options);
+        }
+
+
+        /// <summary>
+        /// Generated giant switch of option finding via OptionsGeneration.linq
+        /// </summary>
+        static StringThunkDelegate<T> GetThunkerDelegate<T>(Options options)
+        {
+            // Start OptionsGeneration.linq generated content: GetThunkerDelegate 
+switch (options.UseDateTimeFormat)
+            {
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyle, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrint, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<Milliseconds, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrint, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<Seconds, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrint, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.ISO8601:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601Utc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601Inherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601InheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601JSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601JSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601JSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601JSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrint, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+                case DateTimeFormat.RFC1123:
+                    switch (options.ShouldPrettyPrint)
+                    {
+                        case false:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123Utc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123Inherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123InheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123JSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123JSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123JSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123JSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                        case true:
+                            switch (options.ShouldExcludeNulls)
+                            {
+                                case false:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrint, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case true:
+                                    switch (options.IsJSONP)
+                                    {
+                                        case false:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNulls, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                        case true:
+                                            switch (options.ShouldIncludeInherited)
+                                            {
+                                                case false:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                                case true:
+                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
+                                                    {
+                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
+                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
+                                                            return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
+                                                    }
+                                                    break;
+                                            }
+                                            break;
+                                    }
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
+            }
+            // End OptionsGeneration.linq generated content: GetThunkerDelegate
+
+            throw new InvalidOperationException("Unexpected Options: " + options);
         }
 
         /// <summary>
@@ -150,1794 +2346,11 @@ namespace Jil
 
             options = options ?? DefaultOptions;
 
-            switch (options.UseDateTimeFormat)
-            {
-                case DateTimeFormat.ISO8601:
-                    return ISO8601ToString(data, options);
 
-                case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    return MillisecondsToString(data, options);
-
-                case DateTimeFormat.SecondsSinceUnixEpoch:
-                    return SecondsToString(data, options);
-
-                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                    return MicrosoftStyleToString(data, options);
-
-                case DateTimeFormat.RFC1123:
-                    return RFC1123ToString(data, options);
-
-                default: throw new InvalidOperationException("Unexpected Options: " + options);
-            }
-        }
-
-        static string WriteToString<T>(StringThunkDelegate<T> del, T data)
-        {
             var writer = new ThunkWriter();
             writer.Init();
-            del(ref writer, data, 0);
-
+            GetThunkerDelegate<T>(options)(ref writer, data, 0);
             return writer.StaticToString();
-        }
-
-        static void MicrosoftStyle<T>(T data, TextWriter output, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStyleExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStylePrettyPrintInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStyleJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    TypeCache<MicrosoftStyleExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    TypeCache<MicrosoftStylePrettyPrint, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP)
-                {
-                    TypeCache<MicrosoftStyleJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    TypeCache<MicrosoftStyleInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                TypeCache<MicrosoftStyle, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                TypeCache<MicrosoftStyleExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                TypeCache<MicrosoftStylePrettyPrintUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP)
-            {
-                TypeCache<MicrosoftStyleJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                TypeCache<MicrosoftStyleInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            TypeCache<MicrosoftStyleUtc, T>.Get()(output, data, 0);
-            return;
-        }
-
-        static string MicrosoftStyleToString<T>(T data, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrintInherited, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<MicrosoftStylePrettyPrint, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MicrosoftStyleInherited, T>.GetToString(), data);
-                }
-
-                return WriteToString(TypeCache<MicrosoftStyle, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<MicrosoftStylePrettyPrintUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MicrosoftStyleInheritedUtc, T>.GetToString(), data);
-            }
-
-            return WriteToString(TypeCache<MicrosoftStyleUtc, T>.GetToString(), data);
-        }
-
-        static void Milliseconds<T>(T data, TextWriter output, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    TypeCache<MillisecondsExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<MillisecondsPrettyPrintJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsPrettyPrintInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    TypeCache<MillisecondsExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    TypeCache<MillisecondsPrettyPrint, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP)
-                {
-                    TypeCache<MillisecondsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    TypeCache<MillisecondsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                TypeCache<Milliseconds, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                TypeCache<MillisecondsExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                TypeCache<MillisecondsPrettyPrintUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP)
-            {
-                TypeCache<MillisecondsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                TypeCache<MillisecondsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            TypeCache<MillisecondsUtc, T>.Get()(output, data, 0);
-            return;
-        }
-
-        static string MillisecondsToString<T>(T data, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MillisecondsExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrintInherited, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    return WriteToString(TypeCache<MillisecondsExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<MillisecondsPrettyPrint, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<MillisecondsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<MillisecondsInherited, T>.GetToString(), data);
-                }
-
-                return WriteToString(TypeCache<Milliseconds, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                return WriteToString(TypeCache<MillisecondsExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<MillisecondsPrettyPrintUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP)
-            {
-                return WriteToString(TypeCache<MillisecondsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<MillisecondsInheritedUtc, T>.GetToString(), data);
-            }
-
-            return WriteToString(TypeCache<MillisecondsUtc, T>.GetToString(), data);
-        }
-
-        static void Seconds<T>(T data, TextWriter output, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsPrettyPrintJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    TypeCache<SecondsExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<SecondsPrettyPrintJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    TypeCache<SecondsPrettyPrintExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsPrettyPrintInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    TypeCache<SecondsExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    TypeCache<SecondsPrettyPrint, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP)
-                {
-                    TypeCache<SecondsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    TypeCache<SecondsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                TypeCache<Seconds, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                TypeCache<SecondsExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<SecondsPrettyPrintJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsPrettyPrintInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                TypeCache<SecondsExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                TypeCache<SecondsPrettyPrintUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP)
-            {
-                TypeCache<SecondsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                TypeCache<SecondsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            TypeCache<SecondsUtc, T>.Get()(output, data, 0);
-            return;
-        }
-
-        static string SecondsToString<T>(T data, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<SecondsExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrintInherited, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    return WriteToString(TypeCache<SecondsExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<SecondsPrettyPrint, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<SecondsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<SecondsInherited, T>.GetToString(), data);
-                }
-
-                return WriteToString(TypeCache<Seconds, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<SecondsExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                return WriteToString(TypeCache<SecondsExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<SecondsPrettyPrintUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP)
-            {
-                return WriteToString(TypeCache<SecondsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<SecondsInheritedUtc, T>.GetToString(), data);
-            }
-
-            return WriteToString(TypeCache<SecondsUtc, T>.GetToString(), data);
-        }
-
-        static void RFC1123<T>(T data, TextWriter output, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123PrettyPrintJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123ExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    TypeCache<RFC1123ExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<RFC1123PrettyPrintJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    TypeCache<RFC1123PrettyPrintExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123PrettyPrintInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123JSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    TypeCache<RFC1123ExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    TypeCache<RFC1123PrettyPrint, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP)
-                {
-                    TypeCache<RFC1123JSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    TypeCache<RFC1123Inherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                TypeCache<RFC1123, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<RFC1123PrettyPrintJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123PrettyPrintInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123JSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                TypeCache<RFC1123ExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                TypeCache<RFC1123PrettyPrintUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP)
-            {
-                TypeCache<RFC1123JSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                TypeCache<RFC1123InheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            TypeCache<RFC1123Utc, T>.Get()(output, data, 0);
-            return;
-        }
-
-        static string RFC1123ToString<T>(T data, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123ExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<RFC1123ExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrintInherited, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123JSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    return WriteToString(TypeCache<RFC1123ExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<RFC1123PrettyPrint, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<RFC1123JSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<RFC1123Inherited, T>.GetToString(), data);
-                }
-
-                return WriteToString(TypeCache<RFC1123, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123JSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                return WriteToString(TypeCache<RFC1123ExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<RFC1123PrettyPrintUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP)
-            {
-                return WriteToString(TypeCache<RFC1123JSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<RFC1123InheritedUtc, T>.GetToString(), data);
-            }
-
-            return WriteToString(TypeCache<RFC1123Utc, T>.GetToString(), data);
-        }
-
-        static void ISO8601<T>(T data, TextWriter output, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601PrettyPrintJSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601ExcludeNullsInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    TypeCache<ISO8601ExcludeNullsJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    TypeCache<ISO8601PrettyPrintJSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    TypeCache<ISO8601PrettyPrintExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601PrettyPrintInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601JSONPInherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    TypeCache<ISO8601ExcludeNulls, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    TypeCache<ISO8601PrettyPrint, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.IsJSONP)
-                {
-                    TypeCache<ISO8601JSONP, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    TypeCache<ISO8601Inherited, T>.Get()(output, data, 0);
-                    return;
-                }
-
-                TypeCache<ISO8601, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                TypeCache<ISO8601PrettyPrintJSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601PrettyPrintInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601JSONPInheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                TypeCache<ISO8601ExcludeNullsUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                TypeCache<ISO8601PrettyPrintUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.IsJSONP)
-            {
-                TypeCache<ISO8601JSONPUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                TypeCache<ISO8601InheritedUtc, T>.Get()(output, data, 0);
-                return;
-            }
-
-            TypeCache<ISO8601Utc, T>.Get()(output, data, 0);
-            return;
-        }
-
-        static string ISO8601ToString<T>(T data, Options options)
-        {
-            if (options.UseUnspecifiedDateTimeKindBehavior == UnspecifiedDateTimeKindBehavior.IsLocal)
-            {
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintJSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601ExcludeNullsInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<ISO8601ExcludeNullsJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintJSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrintInherited, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP && options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601JSONPInherited, T>.GetToString(), data);
-                }
-
-                if (options.ShouldExcludeNulls)
-                {
-                    return WriteToString(TypeCache<ISO8601ExcludeNulls, T>.GetToString(), data);
-                }
-
-                if (options.ShouldPrettyPrint)
-                {
-                    return WriteToString(TypeCache<ISO8601PrettyPrint, T>.GetToString(), data);
-                }
-
-                if (options.IsJSONP)
-                {
-                    return WriteToString(TypeCache<ISO8601JSONP, T>.GetToString(), data);
-                }
-
-                if (options.ShouldIncludeInherited)
-                {
-                    return WriteToString(TypeCache<ISO8601Inherited, T>.GetToString(), data);
-                }
-
-                return WriteToString(TypeCache<ISO8601, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.IsJSONP)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintJSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls && options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP && options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601JSONPInheritedUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldExcludeNulls)
-            {
-                return WriteToString(TypeCache<ISO8601ExcludeNullsUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldPrettyPrint)
-            {
-                return WriteToString(TypeCache<ISO8601PrettyPrintUtc, T>.GetToString(), data);
-            }
-
-            if (options.IsJSONP)
-            {
-                return WriteToString(TypeCache<ISO8601JSONPUtc, T>.GetToString(), data);
-            }
-
-            if (options.ShouldIncludeInherited)
-            {
-                return WriteToString(TypeCache<ISO8601InheritedUtc, T>.GetToString(), data);
-            }
-
-            return WriteToString(TypeCache<ISO8601Utc, T>.GetToString(), data);
         }
 
         /// <summary>

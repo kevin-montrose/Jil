@@ -276,6 +276,7 @@ namespace Jil.Serialize
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
     }
+
     class MicrosoftStylePrettyPrintJSONPUtc : ISerializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
