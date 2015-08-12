@@ -1202,6 +1202,12 @@ namespace JilTests
                 public List<T> ListOfEnum { get; set; }
             }
 
+            public class _InEnumerable<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public IEnumerable<T> EnumerableOfEnum;
+            }
+
             public class _AsDictionaryKey<T>
             {
                 [JilDirective(TreatEnumerationAs = typeof(int))]
@@ -1213,12 +1219,6 @@ namespace JilTests
                 [JilDirective(TreatEnumerationAs = typeof(int))]
                 public Dictionary<int, T> DictionaryWithEnumValue;
             }
-        }
-
-        class Test
-        {
-            [JilDirective(Name = "Other")]
-            public string MeepMeep { get; set; }
         }
 
         [TestMethod]
@@ -1270,6 +1270,22 @@ namespace JilTests
 
                 var str = JSON.SerializeDynamic(obj);
                 Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A?>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
             }
 
             {

@@ -8020,6 +8020,18 @@ namespace JilTests
                 public List<T> ListOfEnum;
             }
 
+            public class _InListProp<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum { get; set; }
+            }
+
+            public class _InEnumerable<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public IEnumerable<T> EnumerableOfEnum;
+            }
+
             public class _AsDictionaryKey<T>
             {
                 [JilDirective(TreatEnumerationAs = typeof(int))]
@@ -8066,6 +8078,38 @@ namespace JilTests
 
                 var str = JSON.Serialize(obj);
                 Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A?>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
             }
 
             {
