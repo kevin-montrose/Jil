@@ -8002,5 +8002,136 @@ namespace JilTests
             res = JSON.Serialize(int.MinValue);
             Assert.AreEqual("-2147483648", res);
         }
+
+        // Also see DeserializeTests._Issue150
+        class _Issue150
+        {
+            public enum A { A, B, C }
+
+            public class _InArray<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public T[] ArrayOfEnum;
+            }
+
+            public class _InList<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum;
+            }
+
+            public class _AsDictionaryKey<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<T, int> DictionaryWithEnumKey;
+            }
+
+            public class _AsDictionaryValue<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<int, T> DictionaryWithEnumValue;
+            }
+        }
+
+        [TestMethod]
+        public void Issue150()
+        {
+            {
+                var obj = new _Issue150._InArray<_Issue150.A>();
+                obj.ArrayOfEnum = new[] { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InArray<_Issue150.A?>();
+                obj.ArrayOfEnum = new _Issue150.A?[] { _Issue150.A.A, null };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryKey<_Issue150.A>();
+                obj.DictionaryWithEnumKey = new Dictionary<_Issue150.A, int>
+                {
+                    { _Issue150.A.A, 10 },
+                    { _Issue150.A.B, 20 }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, _Issue150.A.B }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A?>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A?>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, null }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+            }
+        }
+
+        // Also see DeserializeTests._Issue151
+        class _Issue151
+        {
+            public enum A { A, B, C }
+
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public A? NullableEnum;
+        }
+
+        [TestMethod]
+        public void Issue151()
+        {
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = _Issue151.A.B;
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"NullableEnum\":1}", str);
+            }
+
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = null;
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"NullableEnum\":null}", str);
+            }
+        }
     }
 }
