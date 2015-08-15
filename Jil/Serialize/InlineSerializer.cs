@@ -77,7 +77,8 @@ namespace Jil.Serialize
         private readonly DateTimeFormat DateFormat;
         private readonly bool IncludeInherited;
         private readonly UnspecifiedDateTimeKindBehavior UnspecifiedDateTimeBehavior;
-        
+        private readonly SerializationNameFormat SerializationNameFormat;
+
         private Dictionary<Type, Sigil.Local> RecursiveTypes;
 
         private Emit Emit;
@@ -88,7 +89,7 @@ namespace Jil.Serialize
 
         private readonly Stack<Type> WritingDynamicObject;
 
-        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, bool callOutOnPossibleDynamic, bool buildToString)
+        internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
             PrettyPrint = pretty;
@@ -97,6 +98,7 @@ namespace Jil.Serialize
             DateFormat = dateFormat;
             IncludeInherited = includeInherited;
             UnspecifiedDateTimeBehavior = dateTimeBehavior;
+            SerializationNameFormat = serializationNameFormat;
 
             CallOutOnPossibleDynamic = callOutOnPossibleDynamic;
 
@@ -324,11 +326,11 @@ namespace Jil.Serialize
 
             if (PrettyPrint)
             {
-                stringEquiv = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ";
+                stringEquiv = "\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ";
             }
             else
             {
-                stringEquiv = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
+                stringEquiv = "\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
             }
 
             if (prependComma)
@@ -1478,12 +1480,12 @@ namespace Jil.Serialize
                         string keyString;
                         if (firstPass)
                         {
-                            keyString = "\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
+                            keyString = "\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
                             firstPass = false;
                         }
                         else
                         {
-                            keyString = ",\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":";
+                            keyString = ",\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
                         }
 
                         WriteString(keyString);         // --empty--
@@ -1500,7 +1502,7 @@ namespace Jil.Serialize
 
                         firstPass = false;
 
-                        WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");
+                        WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ");
 
                         WriteMember(member, inLocal);
                     }
@@ -1772,11 +1774,11 @@ namespace Jil.Serialize
             {
                 if (PrettyPrint)
                 {
-                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");     // --empty--
+                    WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ");     // --empty--
                 }
                 else
                 {
-                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":");      // --empty--
+                    WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":");      // --empty--
                 }
 
                 WriteMember(member, inLocal);           // --empty--
@@ -1851,11 +1853,11 @@ namespace Jil.Serialize
 
                 if (PrettyPrint)
                 {
-                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\": ");     // --empty--
+                    WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ");     // --empty--
                 }
                 else
                 {
-                    WriteString("\"" + member.GetSerializationName().JsonEscape(JSONP) + "\":");      // --empty--
+                    WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":");      // --empty--
                 }
 
                 WriteMember(member, inLocal);           // --empty--
@@ -3814,12 +3816,12 @@ namespace Jil.Serialize
             return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, out Exception exceptionDuringBuild)
+        public static Action<TextWriter, BuildForType, int> Build<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
         {
             Action<TextWriter, BuildForType, int> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, false, false);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, false, false);
 
                 ret = obj.Build();
                 exceptionDuringBuild = null;
@@ -3834,18 +3836,18 @@ namespace Jil.Serialize
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
-        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior)
+        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
         {
-            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, true, false);
+            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, true, false);
             return obj.Build();
         }
 
-        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
         {
             StringThunkDelegate<BuildForType> ret;
             try
             {
-                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, false, true);
+                var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, false, true);
 
                 ret = obj.BuildToString();
 

@@ -18,6 +18,7 @@ namespace Jil.Serialize
         bool JSONP { get; }
         bool IncludeInherited { get; }
         UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get; }
+        SerializationNameFormat SerializationNameFormat { get; }
     }
 
     static class TypeCache<TOptions, T>
@@ -50,7 +51,7 @@ namespace Jil.Serialize
 
                 var opts = new TOptions();
 
-                Thunk = InlineSerializerHelper.Build<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, exceptionDuringBuild: out ThunkExceptionDuringBuild);
+                Thunk = InlineSerializerHelper.Build<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out ThunkExceptionDuringBuild);
             }
         }
 
@@ -71,7 +72,7 @@ namespace Jil.Serialize
 
                 var opts = new TOptions();
 
-                StringThunk = InlineSerializerHelper.BuildToString<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, exceptionDuringBuild: out StringThunkExceptionDuringBuild);
+                StringThunk = InlineSerializerHelper.BuildToString<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out StringThunkExceptionDuringBuild);
             }
         }
     }
@@ -85,6 +86,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrint : ISerializeOptions
@@ -95,6 +97,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleExcludeNulls : ISerializeOptions
@@ -105,6 +108,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleJSONP : ISerializeOptions
@@ -115,6 +119,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleInherited : ISerializeOptions
@@ -125,6 +130,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleUtc : ISerializeOptions
@@ -135,6 +141,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNulls : ISerializeOptions
@@ -145,6 +163,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintJSONP : ISerializeOptions
@@ -155,6 +174,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintInherited : ISerializeOptions
@@ -165,6 +185,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintUtc : ISerializeOptions
@@ -175,6 +196,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleExcludeNullsJSONP : ISerializeOptions
@@ -185,6 +218,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleExcludeNullsInherited : ISerializeOptions
@@ -195,6 +229,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleExcludeNullsUtc : ISerializeOptions
@@ -205,6 +240,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleJSONPInherited : ISerializeOptions
@@ -215,6 +262,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleJSONPUtc : ISerializeOptions
@@ -225,6 +273,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleInheritedUtc : ISerializeOptions
@@ -235,6 +295,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsJSONP : ISerializeOptions
@@ -245,6 +328,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsInherited : ISerializeOptions
@@ -255,6 +339,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsUtc : ISerializeOptions
@@ -265,6 +350,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintJSONPInherited : ISerializeOptions
@@ -275,6 +372,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintJSONPUtc : ISerializeOptions
@@ -285,6 +383,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintInheritedUtc : ISerializeOptions
@@ -295,6 +405,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleExcludeNullsJSONPInherited : ISerializeOptions
@@ -305,6 +438,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStyleExcludeNullsJSONPUtc : ISerializeOptions
@@ -315,6 +449,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleExcludeNullsInheritedUtc : ISerializeOptions
@@ -325,6 +471,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleJSONPInheritedUtc : ISerializeOptions
@@ -335,6 +504,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
@@ -345,6 +548,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
@@ -355,6 +559,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
@@ -365,6 +581,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintJSONPInheritedUtc : ISerializeOptions
@@ -375,6 +614,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStyleExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -385,6 +658,51 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -395,6 +713,73 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStyleExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601 : ISerializeOptions
@@ -405,6 +790,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrint : ISerializeOptions
@@ -415,6 +801,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601ExcludeNulls : ISerializeOptions
@@ -425,6 +812,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601JSONP : ISerializeOptions
@@ -435,6 +823,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601Inherited : ISerializeOptions
@@ -445,6 +834,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601Utc : ISerializeOptions
@@ -455,6 +845,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601CamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintExcludeNulls : ISerializeOptions
@@ -465,6 +867,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintJSONP : ISerializeOptions
@@ -475,6 +878,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintInherited : ISerializeOptions
@@ -485,6 +889,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintUtc : ISerializeOptions
@@ -495,6 +900,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601ExcludeNullsJSONP : ISerializeOptions
@@ -505,6 +922,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601ExcludeNullsInherited : ISerializeOptions
@@ -515,6 +933,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601ExcludeNullsUtc : ISerializeOptions
@@ -525,6 +944,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601ExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601JSONPInherited : ISerializeOptions
@@ -535,6 +966,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601JSONPUtc : ISerializeOptions
@@ -545,6 +977,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601JSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601InheritedUtc : ISerializeOptions
@@ -555,6 +999,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601InheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601UtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsJSONP : ISerializeOptions
@@ -565,6 +1032,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsInherited : ISerializeOptions
@@ -575,6 +1043,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsUtc : ISerializeOptions
@@ -585,6 +1054,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintJSONPInherited : ISerializeOptions
@@ -595,6 +1076,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintJSONPUtc : ISerializeOptions
@@ -605,6 +1087,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintInheritedUtc : ISerializeOptions
@@ -615,6 +1109,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601ExcludeNullsJSONPInherited : ISerializeOptions
@@ -625,6 +1142,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601ExcludeNullsJSONPUtc : ISerializeOptions
@@ -635,6 +1153,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601ExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601ExcludeNullsInheritedUtc : ISerializeOptions
@@ -645,6 +1175,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601ExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601ExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601JSONPInheritedUtc : ISerializeOptions
@@ -655,6 +1208,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601JSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601JSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601InheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
@@ -665,6 +1252,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
@@ -675,6 +1263,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
@@ -685,6 +1285,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintJSONPInheritedUtc : ISerializeOptions
@@ -695,6 +1318,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601ExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -705,6 +1362,51 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601ExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601ExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601ExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601JSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -715,6 +1417,73 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601ExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class Milliseconds : ISerializeOptions
@@ -725,6 +1494,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrint : ISerializeOptions
@@ -735,6 +1505,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsExcludeNulls : ISerializeOptions
@@ -745,6 +1516,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsJSONP : ISerializeOptions
@@ -755,6 +1527,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsInherited : ISerializeOptions
@@ -765,6 +1538,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsUtc : ISerializeOptions
@@ -775,6 +1549,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintExcludeNulls : ISerializeOptions
@@ -785,6 +1571,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintJSONP : ISerializeOptions
@@ -795,6 +1582,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintInherited : ISerializeOptions
@@ -805,6 +1593,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintUtc : ISerializeOptions
@@ -815,6 +1604,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsExcludeNullsJSONP : ISerializeOptions
@@ -825,6 +1626,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsExcludeNullsInherited : ISerializeOptions
@@ -835,6 +1637,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsExcludeNullsUtc : ISerializeOptions
@@ -845,6 +1648,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsJSONPInherited : ISerializeOptions
@@ -855,6 +1670,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsJSONPUtc : ISerializeOptions
@@ -865,6 +1681,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsInheritedUtc : ISerializeOptions
@@ -875,6 +1703,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsJSONP : ISerializeOptions
@@ -885,6 +1736,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsInherited : ISerializeOptions
@@ -895,6 +1747,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsUtc : ISerializeOptions
@@ -905,6 +1758,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintJSONPInherited : ISerializeOptions
@@ -915,6 +1780,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintJSONPUtc : ISerializeOptions
@@ -925,6 +1791,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintInheritedUtc : ISerializeOptions
@@ -935,6 +1813,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsExcludeNullsJSONPInherited : ISerializeOptions
@@ -945,6 +1846,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsExcludeNullsJSONPUtc : ISerializeOptions
@@ -955,6 +1857,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsExcludeNullsInheritedUtc : ISerializeOptions
@@ -965,6 +1879,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsJSONPInheritedUtc : ISerializeOptions
@@ -975,6 +1912,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
@@ -985,6 +1956,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
@@ -995,6 +1967,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
@@ -1005,6 +1989,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintJSONPInheritedUtc : ISerializeOptions
@@ -1015,6 +2022,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1025,6 +2066,51 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1035,6 +2121,73 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123 : ISerializeOptions
@@ -1045,6 +2198,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrint : ISerializeOptions
@@ -1055,6 +2209,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123ExcludeNulls : ISerializeOptions
@@ -1065,6 +2220,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123JSONP : ISerializeOptions
@@ -1075,6 +2231,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123Inherited : ISerializeOptions
@@ -1085,6 +2242,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123Utc : ISerializeOptions
@@ -1095,6 +2253,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123CamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintExcludeNulls : ISerializeOptions
@@ -1105,6 +2275,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintJSONP : ISerializeOptions
@@ -1115,6 +2286,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintInherited : ISerializeOptions
@@ -1125,6 +2297,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintUtc : ISerializeOptions
@@ -1135,6 +2308,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123ExcludeNullsJSONP : ISerializeOptions
@@ -1145,6 +2330,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123ExcludeNullsInherited : ISerializeOptions
@@ -1155,6 +2341,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123ExcludeNullsUtc : ISerializeOptions
@@ -1165,6 +2352,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123ExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123JSONPInherited : ISerializeOptions
@@ -1175,6 +2374,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123JSONPUtc : ISerializeOptions
@@ -1185,6 +2385,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123JSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123InheritedUtc : ISerializeOptions
@@ -1195,6 +2407,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123InheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123UtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsJSONP : ISerializeOptions
@@ -1205,6 +2440,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsInherited : ISerializeOptions
@@ -1215,6 +2451,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsUtc : ISerializeOptions
@@ -1225,6 +2462,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintJSONPInherited : ISerializeOptions
@@ -1235,6 +2484,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintJSONPUtc : ISerializeOptions
@@ -1245,6 +2495,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintInheritedUtc : ISerializeOptions
@@ -1255,6 +2517,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123ExcludeNullsJSONPInherited : ISerializeOptions
@@ -1265,6 +2550,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123ExcludeNullsJSONPUtc : ISerializeOptions
@@ -1275,6 +2561,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123ExcludeNullsInheritedUtc : ISerializeOptions
@@ -1285,6 +2583,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123ExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123ExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123JSONPInheritedUtc : ISerializeOptions
@@ -1295,6 +2616,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123JSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123JSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123InheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
@@ -1305,6 +2660,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
@@ -1315,6 +2671,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
@@ -1325,6 +2693,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintJSONPInheritedUtc : ISerializeOptions
@@ -1335,6 +2726,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123ExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1345,6 +2770,51 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123ExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123JSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1355,6 +2825,73 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123ExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class Seconds : ISerializeOptions
@@ -1365,6 +2902,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrint : ISerializeOptions
@@ -1375,6 +2913,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsExcludeNulls : ISerializeOptions
@@ -1385,6 +2924,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsJSONP : ISerializeOptions
@@ -1395,6 +2935,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsInherited : ISerializeOptions
@@ -1405,6 +2946,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsUtc : ISerializeOptions
@@ -1415,6 +2957,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintExcludeNulls : ISerializeOptions
@@ -1425,6 +2979,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintJSONP : ISerializeOptions
@@ -1435,6 +2990,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintInherited : ISerializeOptions
@@ -1445,6 +3001,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintUtc : ISerializeOptions
@@ -1455,6 +3012,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsExcludeNullsJSONP : ISerializeOptions
@@ -1465,6 +3034,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsExcludeNullsInherited : ISerializeOptions
@@ -1475,6 +3045,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsExcludeNullsUtc : ISerializeOptions
@@ -1485,6 +3056,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsJSONPInherited : ISerializeOptions
@@ -1495,6 +3078,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsJSONPUtc : ISerializeOptions
@@ -1505,6 +3089,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsInheritedUtc : ISerializeOptions
@@ -1515,6 +3111,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintExcludeNullsJSONP : ISerializeOptions
@@ -1525,6 +3144,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintExcludeNullsInherited : ISerializeOptions
@@ -1535,6 +3155,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintExcludeNullsUtc : ISerializeOptions
@@ -1545,6 +3166,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintJSONPInherited : ISerializeOptions
@@ -1555,6 +3188,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintJSONPUtc : ISerializeOptions
@@ -1565,6 +3199,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintInheritedUtc : ISerializeOptions
@@ -1575,6 +3221,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsExcludeNullsJSONPInherited : ISerializeOptions
@@ -1585,6 +3254,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsExcludeNullsJSONPUtc : ISerializeOptions
@@ -1595,6 +3265,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsExcludeNullsInheritedUtc : ISerializeOptions
@@ -1605,6 +3287,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsJSONPInheritedUtc : ISerializeOptions
@@ -1615,6 +3320,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintExcludeNullsJSONPInherited : ISerializeOptions
@@ -1625,6 +3364,7 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondsPrettyPrintExcludeNullsJSONPUtc : ISerializeOptions
@@ -1635,6 +3375,18 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return false; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsJSONPCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintExcludeNullsInheritedUtc : ISerializeOptions
@@ -1645,6 +3397,29 @@ namespace Jil.Serialize
         public bool JSONP { get { return false; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintJSONPInheritedUtc : ISerializeOptions
@@ -1655,6 +3430,40 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1665,6 +3474,51 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 
     class SecondsPrettyPrintExcludeNullsJSONPInheritedUtc : ISerializeOptions
@@ -1675,6 +3529,73 @@ namespace Jil.Serialize
         public bool JSONP { get { return true; } }
         public bool IncludeInherited { get { return true; } }
         public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsLocal; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsJSONPUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return false; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return false; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return false; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return false; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase : ISerializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public bool PrettyPrint { get { return true; } }
+        public bool ExcludeNulls { get { return true; } }
+        public bool JSONP { get { return true; } }
+        public bool IncludeInherited { get { return true; } }
+        public UnspecifiedDateTimeKindBehavior DateTimeKindBehavior { get { return UnspecifiedDateTimeKindBehavior.IsUTC; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
     // End OptionsGeneration.linq generated content
 }

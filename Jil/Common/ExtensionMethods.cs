@@ -184,7 +184,7 @@ namespace Jil.Common
             return IsGenericContainer(forType, typeof(IReadOnlyDictionary<,>));
         }
 
-        public static string GetSerializationName(this MemberInfo member)
+        public static string GetSerializationName(this MemberInfo member, SerializationNameFormat serializationNameFormat)
         {
             var jilDirectiveAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
             if (jilDirectiveAttr != null && !string.IsNullOrEmpty(jilDirectiveAttr.Name)) return jilDirectiveAttr.Name;
@@ -192,7 +192,23 @@ namespace Jil.Common
             var dataMemberAttr = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
             if (dataMemberAttr != null && !string.IsNullOrEmpty(dataMemberAttr.Name)) return dataMemberAttr.Name;
 
-            return member.Name;
+            switch (serializationNameFormat)
+            {
+                case SerializationNameFormat.CamelCase:
+                    var s = member.Name;
+                    if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0])) return s;
+
+                    var cArr = s.ToCharArray();
+                    for (var i = 0; i < cArr.Length; i++)
+                    {
+                        if (i > 0 && i+1 < cArr.Length && !char.IsUpper(cArr[i+1])) break;
+                        cArr[i] = char.ToLowerInvariant(cArr[i]);
+                    }
+                    return new string(cArr);
+                default:
+                    return member.Name;
+            }
+
         }
 
         public static bool IsLoadArgumentOpCode(this OpCode op)

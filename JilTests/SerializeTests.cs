@@ -8002,5 +8002,79 @@ namespace JilTests
             res = JSON.Serialize(int.MinValue);
             Assert.AreEqual("-2147483648", res);
         }
+
+        public class SerilaizationTestObj
+        {
+            [DataMember(Name="ExplicitMember")]
+            public string MemberProperty { get; set; }
+
+            [JilDirective(Name = "Directive")]
+            public string DirectiveProperty { get; set; }
+            
+            public string NekkidProperty { get; set; }
+        }
+
+
+        [TestMethod]
+        public void TestSerializationNameFormatsSerialization()
+        {
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        oneTwo = "1",
+                        ThreeFour = "2",
+                        FIVESIX = "3"
+                    };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        oneTwo = "1",
+                        ThreeFour = "2",
+                        FIVESIX = "3"
+                    };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new SerilaizationTestObj
+                {
+                    DirectiveProperty = "DirectiveValue",
+                    MemberProperty = "MemberValue",
+                    NekkidProperty = "NekkidValie"
+                };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new SerilaizationTestObj
+                {
+                    DirectiveProperty = "DirectiveValue",
+                    MemberProperty = "MemberValue",
+                    NekkidProperty = "NekkidValie"
+                };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+            }
+        }
     }
 }

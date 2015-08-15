@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -27,6 +28,7 @@ namespace Jil.Deserialize
         
         readonly Type OptionsType;
         readonly DateTimeFormat DateFormat;
+        readonly SerializationNameFormat SerializationNameFormat;
         readonly bool ReadingFromString;
 
         bool UsingCharBuffer;
@@ -34,10 +36,11 @@ namespace Jil.Deserialize
 
         Emit Emit;
 
-        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat, bool readingFromString)
+        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, bool readingFromString)
         {
             OptionsType = optionsType;
             DateFormat = dateFormat;
+            SerializationNameFormat = serializationNameFormat;
             ReadingFromString = readingFromString;
         }
 
@@ -1462,8 +1465,9 @@ namespace Jil.Deserialize
                 }
 
                 var loopStart = Emit.DefineLabel();
+                var serializationType = SerializationNameFormat.GetGenericTypeArgument();
 
-                var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
+                var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
 
                 var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
 
@@ -1660,8 +1664,9 @@ namespace Jil.Deserialize
                 }
 
                 var loopStart = Emit.DefineLabel();
+                var serializationType = SerializationNameFormat.GetGenericTypeArgument();
 
-                var setterLookup = typeof(SetterLookup<>).MakeGenericType(objType);
+                var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
 
                 var setters = (Dictionary<string, MemberInfo>)setterLookup.GetMethod("GetSetters", BindingFlags.Public | BindingFlags.Static).Invoke(null, new object[0]);
 
@@ -2109,7 +2114,7 @@ namespace Jil.Deserialize
             }
         }
 
-        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(UnspecifiedDateTimeKindBehavior) });
+        static ConstructorInfo OptionsCons = typeof(Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(DateTimeFormat), typeof(bool), typeof(UnspecifiedDateTimeKindBehavior), typeof(SerializationNameFormat) });
         static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
         void ReadDynamic()
         {
@@ -2122,6 +2127,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant((byte)DateFormat);                                        // TextReader bool bool bool byte
                 Emit.LoadConstant(false);                                                   // TextReader bool bool bool byte bool
                 Emit.LoadConstant((byte)UnspecifiedDateTimeKindBehavior.IsLocal);           // TextReader bool bool bool byte bool byte
+                Emit.LoadConstant((byte)SerializationNameFormat.Verbatim);                  // TextReader bool bool bool byte bool byte byte
                 Emit.NewObject(OptionsCons);                                                // TextReader Options
                 Emit.NewObject(ObjectBuilderCons);                                          // TextReader ObjectBuilder
                 Emit.StoreLocal(dyn);                                                       // TextReader
@@ -2325,15 +2331,15 @@ namespace Jil.Deserialize
             return emit.CreateDelegate<StringThunkDelegate<ReturnType>>(Utils.DelegateOptimizationOptions);
         }
 
-        public static Func<TextReader, int, ReturnType> BuildFromStream<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
-        {
-            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, readingFromString: false);
+        public static Func<TextReader, int, ReturnType> BuildFromStream<ReturnType>(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
+        {      
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false);
 
             Func<TextReader, int, ReturnType> ret;
             try
             {
                 ret = obj.BuildWithNewDelegate();
-                exceptionDuringBuild = null;
+                 exceptionDuringBuild = null;
             }
             catch (ConstructionException e)
             {
@@ -2344,9 +2350,9 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        public static StringThunkDelegate<ReturnType> BuildFromString<ReturnType>(Type optionsType, DateTimeFormat dateFormat, out Exception exceptionDuringBuild)
+        public static StringThunkDelegate<ReturnType> BuildFromString<ReturnType>(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
         {
-            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, readingFromString: true);
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true);
 
             StringThunkDelegate<ReturnType> ret;
             try

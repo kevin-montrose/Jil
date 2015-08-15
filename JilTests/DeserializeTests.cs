@@ -5940,6 +5940,68 @@ namespace JilTests
             }
         }
 
+        public class CamelCaseTestObject
+        {
+            public string oneTwo { get; set; }
+            public string ThreeFour { get; set; }
+            public string FIVESIX { get; set; }
+        }
+
+        public class SerilaizationTestObj
+        {
+            [DataMember(Name = "ExplicitMember")]
+            public string MemberProperty { get; set; }
+
+            [JilDirective(Name = "Directive")]
+            public string DirectiveProperty { get; set; }
+
+            public string NekkidProperty { get; set; }
+        }
+
+        [TestMethod]
+        public void TestSerializationNameFormatsDeserialization()
+        {
+            var verbtaimStr = "{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}";
+            var verbatimDynamic = JSON.DeserializeDynamic(verbtaimStr, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+                
+            Assert.AreEqual(verbatimDynamic.oneTwo, "1");
+            Assert.AreEqual(verbatimDynamic.ThreeFour, "2");
+            Assert.AreEqual(verbatimDynamic.FIVESIX, "3");
+
+            var verbatimStatic = JSON.Deserialize<CamelCaseTestObject>(verbtaimStr, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+            Assert.AreEqual(verbatimStatic.oneTwo, "1");
+            Assert.AreEqual(verbatimStatic.ThreeFour, "2");
+            Assert.AreEqual(verbatimStatic.FIVESIX, "3");
+
+            var camelStr = "{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}";
+            var camelDynamic = JSON.DeserializeDynamic(camelStr, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+            Assert.AreEqual(camelDynamic.oneTwo, "1");
+            Assert.AreEqual(camelDynamic.threeFour, "2");
+            Assert.AreEqual(camelDynamic.fivesix, "3");
+
+            var camelStatic = JSON.Deserialize<CamelCaseTestObject>(camelStr, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+            Assert.AreEqual(camelStatic.oneTwo, "1");
+            Assert.AreEqual(camelStatic.ThreeFour, "2");
+            Assert.AreEqual(camelStatic.FIVESIX, "3");
+
+            var verbatimStr2 = "{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
+            var verbatimStatic2 = JSON.Deserialize<SerilaizationTestObj>(verbatimStr2, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+            Assert.AreEqual(verbatimStatic2.NekkidProperty, "NekkidValie");
+            Assert.AreEqual(verbatimStatic2.DirectiveProperty, "DirectiveValue");
+            Assert.AreEqual(verbatimStatic2.MemberProperty, "MemberValue");
+
+            var camelStr2 = "{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
+            var camelStatic2 = JSON.Deserialize<SerilaizationTestObj>(camelStr2, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+            Assert.AreEqual(camelStatic2.NekkidProperty, "NekkidValie");
+            Assert.AreEqual(camelStatic2.DirectiveProperty, "DirectiveValue");
+            Assert.AreEqual(camelStatic2.MemberProperty, "MemberValue");
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

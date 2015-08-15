@@ -10,6 +10,7 @@ namespace Jil.Deserialize
     interface IDeserializeOptions
     {
         DateTimeFormat DateFormat { get; }
+        SerializationNameFormat SerializationNameFormat { get; }
     }
 
     static class TypeCache<TOptions, T>
@@ -42,7 +43,7 @@ namespace Jil.Deserialize
 
                 var options = new TOptions();
 
-                Thunk = InlineDeserializerHelper.BuildFromStream<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuildFromStream);
+                Thunk = InlineDeserializerHelper.BuildFromStream<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromStream);
             }
         }
 
@@ -63,7 +64,7 @@ namespace Jil.Deserialize
 
                 var options = new TOptions();
 
-                StringThunk = InlineDeserializerHelper.BuildFromString<T>(typeof(TOptions), options.DateFormat, exceptionDuringBuild: out ExceptionDuringBuildFromString);
+                StringThunk = InlineDeserializerHelper.BuildFromString<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromString);
             }
         }
     }
@@ -71,25 +72,60 @@ namespace Jil.Deserialize
     class MicrosoftStyle : IDeserializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get {  return SerializationNameFormat.Verbatim; } }
     }
 
     class MillisecondStyle : IDeserializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class SecondStyle : IDeserializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class ISO8601Style : IDeserializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
     }
 
     class RFC1123Style : IDeserializeOptions
     {
         public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.Verbatim; } }
+    }
+
+    class MicrosoftStyleCamelCase : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class MillisecondStyleCamelCase : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.MillisecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class SecondStyleCamelCase : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.SecondsSinceUnixEpoch; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class ISO8601StyleCamelCase : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.ISO8601; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
+    }
+
+    class RFC1123StyleCamelCase : IDeserializeOptions
+    {
+        public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
+        public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
 }

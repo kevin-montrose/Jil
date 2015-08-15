@@ -12,7 +12,7 @@ namespace Jil.Deserialize
 {
     delegate int SetterLookupThunkReaderDelegate(ref ThunkReader reader);
 
-    static class SetterLookup<ForType>
+    static class SetterLookup<ForType, SerializationNameFormatType>
     {
         private static readonly IReadOnlyList<Tuple<string, MemberInfo>> _nameOrderedSetters;
         private static Func<TextReader, int> _findMember;
@@ -37,6 +37,11 @@ namespace Jil.Deserialize
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
+            var serializatioNameFormat = SerializationNameFormat.Verbatim;
+            if (typeof (SerializationNameFormatType) == typeof (SerializationNameFormatCamelCase))
+            {
+                serializatioNameFormat = SerializationNameFormat.CamelCase;
+            }
 
             var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
             var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
@@ -44,7 +49,7 @@ namespace Jil.Deserialize
             return
                 fields.Cast<MemberInfo>()
                 .Concat(props.Cast<MemberInfo>())
-                .Select(member => Tuple.Create(member.GetSerializationName(), member))
+                .Select(member => Tuple.Create(member.GetSerializationName(serializatioNameFormat), member))
                 .OrderBy(info => info.Item1)
                 .ToList()
                 .AsReadOnly();
