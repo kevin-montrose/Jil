@@ -1219,6 +1219,12 @@ namespace JilTests
                 [JilDirective(TreatEnumerationAs = typeof(int))]
                 public Dictionary<int, T> DictionaryWithEnumValue;
             }
+
+            public class _MultipleLists<T> {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> List1;
+                public List<T> List2;
+            }
         }
 
         [TestMethod]
@@ -1322,6 +1328,15 @@ namespace JilTests
 
                 var str = JSON.SerializeDynamic(obj);
                 Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+            }
+
+            {
+                var obj = new _Issue150._MultipleLists<_Issue150.A>();
+                obj.List1 = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+                obj.List2 = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"List1\":[0,1],\"List2\":[\"A\",\"B\"]}", str);
             }
         }
 

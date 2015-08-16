@@ -157,7 +157,17 @@ namespace Jil.SerializeDynamic
         {
             var type = typeof(ForType);
 
-            var key = Tuple.Create(typeof(ForType), opts);
+            Type treatEnumerationAs = null;
+            if (dynamicMember != null)
+            {
+                var attr = dynamicMember.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr != null && attr.TreatEnumerationAs != null)
+                {
+                    treatEnumerationAs = attr.TreatEnumerationAs;
+                }
+            }
+
+            var key = Tuple.Create(treatEnumerationAs, typeof(ForType), opts);
 
             var ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
             if (ret != null) return ret;
