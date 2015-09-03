@@ -5940,14 +5940,14 @@ namespace JilTests
             }
         }
 
-        public class CamelCaseTestObject
+        public class SerializationNameFormatsDeserialization_CamelCase
         {
             public string oneTwo { get; set; }
             public string ThreeFour { get; set; }
             public string FIVESIX { get; set; }
         }
 
-        public class SerilaizationTestObj
+        public class SerializationNameFormatsDeserialization_AttributeNames
         {
             [DataMember(Name = "ExplicitMember")]
             public string MemberProperty { get; set; }
@@ -5959,16 +5959,16 @@ namespace JilTests
         }
 
         [TestMethod]
-        public void TestSerializationNameFormatsDeserialization()
+        public void SerializationNameFormatsDeserialization()
         {
             var verbtaimStr = "{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}";
             var verbatimDynamic = JSON.DeserializeDynamic(verbtaimStr, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
                 
-            Assert.AreEqual(verbatimDynamic.oneTwo, "1");
-            Assert.AreEqual(verbatimDynamic.ThreeFour, "2");
-            Assert.AreEqual(verbatimDynamic.FIVESIX, "3");
+            Assert.AreEqual((string)verbatimDynamic.oneTwo, "1");
+            Assert.AreEqual((string)verbatimDynamic.ThreeFour, "2");
+            Assert.AreEqual((string)verbatimDynamic.FIVESIX, "3");
 
-            var verbatimStatic = JSON.Deserialize<CamelCaseTestObject>(verbtaimStr, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+            var verbatimStatic = JSON.Deserialize<SerializationNameFormatsDeserialization_CamelCase>(verbtaimStr, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
 
             Assert.AreEqual(verbatimStatic.oneTwo, "1");
             Assert.AreEqual(verbatimStatic.ThreeFour, "2");
@@ -5977,25 +5977,25 @@ namespace JilTests
             var camelStr = "{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}";
             var camelDynamic = JSON.DeserializeDynamic(camelStr, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
-            Assert.AreEqual(camelDynamic.oneTwo, "1");
-            Assert.AreEqual(camelDynamic.threeFour, "2");
-            Assert.AreEqual(camelDynamic.fivesix, "3");
+            Assert.AreEqual((string)camelDynamic.oneTwo, "1");
+            Assert.AreEqual((string)camelDynamic.threeFour, "2");
+            Assert.AreEqual((string)camelDynamic.fivesix, "3");
 
-            var camelStatic = JSON.Deserialize<CamelCaseTestObject>(camelStr, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+            var camelStatic = JSON.Deserialize<SerializationNameFormatsDeserialization_CamelCase>(camelStr, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
             Assert.AreEqual(camelStatic.oneTwo, "1");
             Assert.AreEqual(camelStatic.ThreeFour, "2");
             Assert.AreEqual(camelStatic.FIVESIX, "3");
 
             var verbatimStr2 = "{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
-            var verbatimStatic2 = JSON.Deserialize<SerilaizationTestObj>(verbatimStr2, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+            var verbatimStatic2 = JSON.Deserialize<SerializationNameFormatsDeserialization_AttributeNames>(verbatimStr2, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
 
             Assert.AreEqual(verbatimStatic2.NekkidProperty, "NekkidValie");
             Assert.AreEqual(verbatimStatic2.DirectiveProperty, "DirectiveValue");
             Assert.AreEqual(verbatimStatic2.MemberProperty, "MemberValue");
 
             var camelStr2 = "{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
-            var camelStatic2 = JSON.Deserialize<SerilaizationTestObj>(camelStr2, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+            var camelStatic2 = JSON.Deserialize<SerializationNameFormatsDeserialization_AttributeNames>(camelStr2, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
             Assert.AreEqual(camelStatic2.NekkidProperty, "NekkidValie");
             Assert.AreEqual(camelStatic2.DirectiveProperty, "DirectiveValue");
