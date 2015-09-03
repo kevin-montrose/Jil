@@ -60,19 +60,21 @@ namespace Jil.Common
         //   declaration order.
         internal static int[] MemberOrdering = new int[] { -1, 3, 4, -2 };
 
-        public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
+        public static List<List<MemberInfo>> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<List<MemberInfo>> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
 
-            var simpleTypes = members.Where(m => m.ReturnType().IsValueType && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
-            var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
-            var recursive = members.Where(m => recursiveTypes.Contains(m.ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
+            var simpleTypes = members.Where(m => m.First().ReturnType().IsValueType && !m.First().ReturnType().IsNullableType() && m.First().ReturnType().IsPrimitiveType()).ToList();
+            var otherPrimitive = members.Where(m => (m.First().ReturnType().IsPrimitiveType() || m.First().ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
+            var recursive = members.Where(m => recursiveTypes.Contains(m.First().ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
             var everythingElse = members.Where(m => !simpleTypes.Contains(m) && !otherPrimitive.Contains(m) && !recursive.Contains(m)).ToList();
 
-            Func<MemberInfo, int> byAccessOrder =
-                m =>
+            Func<List<MemberInfo>, int> byAccessOrder =
+                ms =>
                 {
+                    var m = ms.First();
+
                     var asField = m as FieldInfo;
                     if (asField != null)
                     {
@@ -114,9 +116,15 @@ namespace Jil.Common
                     return int.MaxValue;
                 };
 
-            Func<MemberInfo, int> fieldsFirst = m => m is FieldInfo ? 0 : 1;
+            Func<List<MemberInfo>, int> fieldsFirst =
+                ms =>
+                {
+                    var m = ms.First();
 
-            var ret = new List<MemberInfo>();
+                    return m is FieldInfo ? 0 : 1;
+                };
+
+            var ret = new List<List<MemberInfo>>();
 
             foreach (var ix in MemberOrdering)
             {

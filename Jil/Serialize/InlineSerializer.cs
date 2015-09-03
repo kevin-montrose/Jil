@@ -290,7 +290,49 @@ namespace Jil.Serialize
             }
         }
 
-        List<MemberInfo> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
+        IEnumerable<List<MemberInfo>> GroupAndVerifyUnions(IEnumerable<MemberInfo> members)
+        {
+            var ret = new Dictionary<string, List<MemberInfo>>();
+
+            foreach(var member in members)
+            {
+                var name = member.GetSerializationName();
+                List<MemberInfo> byName;
+                if(!ret.TryGetValue(name, out byName))
+                {
+                    ret[name] = byName = new List<MemberInfo>();
+                }
+
+                byName.Add(member);
+            }
+
+            foreach(var kv in ret)
+            {
+                if (kv.Value.Count == 1) continue;
+
+                if(!kv.Value.All(v => v.GetCustomAttribute<JilDirectiveAttribute>() != null))
+                {
+                    throw new ConstructionException("Multiple members share name [" + kv.Key + "], but not all have [JilDirective]s");
+                }
+
+                if(!kv.Value.All(v => v.GetCustomAttribute<JilDirectiveAttribute>().IsUnion))
+                {
+                    throw new ConstructionException("Multiple members share name [" + kv.Key + "], but not all are part of a Union");
+                }
+
+                if(kv.Value.Count(v => v.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType) > 1)
+                {
+                    throw new ConstructionException("Multiple members of Union [" + kv.Key + "] have IsUnionType set");
+                }
+
+                // TODO: Make sure the combinations are legal w.r.t. characters to write
+                //   we want to emit JSON that we can accept
+            }
+
+            return ret.Select(kv => kv.Value).ToList();
+        }
+
+        List<List<MemberInfo>> OrderMembersForAccess(Type forType, Dictionary<Type, Sigil.Local> recursiveTypes)
         {
             var flags = BindingFlags.Public | BindingFlags.Instance;
 
@@ -304,16 +346,18 @@ namespace Jil.Serialize
 
             var members = props.Cast<MemberInfo>().Concat(fields).Where(f => f.ShouldUseMember());
 
+            var withUnions = GroupAndVerifyUnions(members);
+
             if (forType.IsValueType)
             {
-                return members.ToList();
+                return withUnions.ToList();
             }
 
             // This order appears to be the "best" for access speed purposes
             var ret =
                 !ReorderMembers ?
-                    members :
-                    Utils.IdealMemberOrderForWriting(forType, recursiveTypes.Keys, members);
+                    withUnions :
+                    Utils.IdealMemberOrderForWriting(forType, recursiveTypes.Keys, withUnions);
 
             return ret.ToList();
         }
@@ -1424,7 +1468,7 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteObjectWithNullsWithoutConditionalSerialization(Type forType, Sigil.Local inLocal, List<MemberInfo> writeOrder)
+        void WriteObjectWithNullsWithoutConditionalSerialization(Type forType, Sigil.Local inLocal, List<List<MemberInfo>> writeOrder)
         {
             var notNull = Emit.DefineLabel();
 
@@ -1464,8 +1508,15 @@ namespace Jil.Serialize
             IncreaseIndent();
 
             var firstPass = true;
-            foreach (var member in writeOrder)
+            foreach (var members in writeOrder)
             {
+                if(members.Count > 1)
+                {
+                    throw new NotImplementedException("TODO: Unions!");
+                }
+
+                var member = members[0];
+
                 if (PropagateConstants && member.IsConstant())
                 {
                     WriteConstantMember(member, prependComma: !firstPass);
@@ -1542,7 +1593,7 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteObjectWithNullsWithConditionalSerialization(Type forType, Sigil.Local inLocal, List<MemberInfo> writeOrder)
+        void WriteObjectWithNullsWithConditionalSerialization(Type forType, Sigil.Local inLocal, List<List<MemberInfo>> writeOrder)
         {
             var notNull = Emit.DefineLabel();
 
@@ -1661,8 +1712,15 @@ namespace Jil.Serialize
                 Emit.LoadConstant(true);        // obj(*?) true
                 Emit.StoreLocal(isFirst);       // obj(*?) true
 
-                foreach (var member in writeOrder)
+                foreach (var members in writeOrder)
                 {
+                    if(members.Count > 1)
+                    {
+                        throw new NotImplementedException("TODO: Unions!");
+                    }
+
+                    var member = members[0];
+
                     Emit.Duplicate();                                         // obj(*?) obj(*?)
                     WriteMemberIfNonNull(forType, member, inLocal, isFirst);  // obj(*?)
                 }
@@ -1785,10 +1843,17 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteMemberConditionally(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
+        void WriteMemberConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
             // top of stack
             //  - obj(*?)
+
+            if (members.Count > 1)
+            {
+                throw new NotImplementedException("TODO: Unions!");
+            }
+
+            var member = members[0];
 
             var asField = member as FieldInfo;
             var asProp = member as PropertyInfo;
