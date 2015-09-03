@@ -55,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Jil.StrongName.snk" />
-    <Compile Include="..\Jil\**\*.cs" Exclude="..\Jil\bin\**;..\Jil\obj\**" />
+    <Compile Include="..\Jil\**\*.cs" Exclude="..\Jil\bin\**;..\Jil\obj\**">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
