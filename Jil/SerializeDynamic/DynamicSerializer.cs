@@ -153,11 +153,21 @@ namespace Jil.SerializeDynamic
 
         static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();
         static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod("_GetSemiStaticInlineSerializerFor", BindingFlags.NonPublic | BindingFlags.Static);
-        static Action<TextWriter, ForType, int> _GetSemiStaticInlineSerializerFor<ForType>(Options opts)
+        static Action<TextWriter, ForType, int> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
         {
             var type = typeof(ForType);
 
-            var key = Tuple.Create(typeof(ForType), opts);
+            Type treatEnumerationAs = null;
+            if (dynamicMember != null)
+            {
+                var attr = dynamicMember.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr != null && attr.TreatEnumerationAs != null)
+                {
+                    treatEnumerationAs = attr.TreatEnumerationAs;
+                }
+            }
+
+            var key = Tuple.Create(treatEnumerationAs, typeof(ForType), opts);
 
             var ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
             if (ret != null) return ret;
@@ -169,29 +179,32 @@ namespace Jil.SerializeDynamic
             {
                 ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
                 if (ret != null) return ret;
-                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
+
+                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { dynamicMember, cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
             }
 
             return ret;
         }
 
         static Hashtable GetSemiStaticSerializerForCache = new Hashtable();
-        static Action<TextWriter, object, int> GetSemiStaticSerializerFor(Type type, Options opts)
+        static Action<MemberInfo, TextWriter, object, int> GetSemiStaticSerializerFor(Type type, Options opts)
         {
             var key = Tuple.Create(type, opts);
-            var ret = (Action<TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+            var ret = (Action<MemberInfo, TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
             if (ret != null) return ret;
 
             var getSemiStaticSerializer = GetSemiStaticInlineSerializerFor.MakeGenericMethod(type);
             var invoke = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), type, typeof(int)).GetMethod("Invoke");
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
             var optsFiled = OptionsLookup.GetOptionsFieldFor(opts);
-            emit.LoadField(optsFiled);                              // Options
+
+            emit.LoadArgument(0);                                   // MemberInfo
+            emit.LoadField(optsFiled);                              // MemberInfo Options
             emit.Call(getSemiStaticSerializer);                     // Action<TextWriter, Type, int>
-            emit.LoadArgument(0);                                   // Action<TextWriter, Type, int> TextWriter
-            emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter object
+            emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
+            emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
 
             if (type.IsValueType)
             {
@@ -202,26 +215,26 @@ namespace Jil.SerializeDynamic
                 emit.CastClass(type);                               // Action<TextWriter, Type, int> TextWriter type
             }
 
-            emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter type int
+            emit.LoadArgument(3);                                   // Action<TextWriter, Type, int> TextWriter type int
             emit.Call(invoke);                                      // --empty--
             emit.Return();                                          // --empty--
 
             lock (GetSemiStaticSerializerForCache)
             {
-                ret = (Action<TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+                ret = (Action<MemberInfo, TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
                 if (ret != null) return ret;
 
-                GetSemiStaticSerializerForCache[key] = ret = emit.CreateDelegate<Action<TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
+                GetSemiStaticSerializerForCache[key] = ret = emit.CreateDelegate<Action<MemberInfo, TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
             }
 
             return ret;
         }
 
-        static void SerializeSemiStatically(TextWriter stream, object val, Options opts, int depth)
+        static void SerializeSemiStatically(MemberInfo dynamicMember, TextWriter stream, object val, Options opts, int depth)
         {
             var serializer = GetSemiStaticSerializerFor(val.GetType(), opts);
 
-            serializer(stream, val, depth);
+            serializer(dynamicMember, stream, val, depth);
         }
 
         static void SerializeList(TextWriter stream, IEnumerable e, Options opts, int depth)
@@ -730,6 +743,11 @@ namespace Jil.SerializeDynamic
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
         public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
         {
+            SerializeInternal(null, stream, obj, opts, depth);
+        }
+
+        public static readonly MethodInfo SerializeInternalMtd = typeof(DynamicSerializer).GetMethod("SerializeInternal", BindingFlags.NonPublic | BindingFlags.Static);
+        private static void SerializeInternal(MemberInfo dynamicMember, TextWriter stream, object obj, Options opts, int depth) { 
             if (obj == null)
             {
                 stream.Write("null");
@@ -814,7 +832,7 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
-            SerializeSemiStatically(stream, obj, opts, depth);
+            SerializeSemiStatically(dynamicMember, stream, obj, opts, depth);
         }
     }
 }

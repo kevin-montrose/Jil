@@ -6002,6 +6002,133 @@ namespace JilTests
             Assert.AreEqual(camelStatic2.MemberProperty, "MemberValue");
         }
 
+        // Also see DeserializeTests._Issue150
+        class _Issue150
+        {
+            public enum A { A, B, C }
+
+            public class _InArray<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public T[] ArrayOfEnum = null;
+            }
+
+            public class _InList<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum = null;
+            }
+
+            public class _InListProp<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum { get; set; }
+            }
+
+            public class _InEnumerable<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public IEnumerable<T> EnumerableOfEnum = null;
+            }
+
+            public class _AsDictionaryKey<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<T, int> DictionaryWithEnumKey = null;
+            }
+
+            public class _AsDictionaryValue<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<int, T> DictionaryWithEnumValue = null;
+            }
+        }
+
+        [TestMethod]
+        public void Issue150()
+        {
+            {
+                var obj = JSON.Deserialize<_Issue150._InArray<_Issue150.A>>("{\"ArrayOfEnum\":[0,1]}");
+                CollectionAssert.AreEqual(new[] { _Issue150.A.A, _Issue150.A.B }, obj.ArrayOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._InArray<_Issue150.A?>>("{\"ArrayOfEnum\":[0,null]}");
+                CollectionAssert.AreEqual(new _Issue150.A?[] { _Issue150.A.A, null }, obj.ArrayOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._InList<_Issue150.A>>("{\"ListOfEnum\":[0,1]}");
+                CollectionAssert.AreEqual(new[] { _Issue150.A.A, _Issue150.A.B }, obj.ListOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._InList<_Issue150.A?>>("{\"ListOfEnum\":[0,null]}");
+                CollectionAssert.AreEqual(new _Issue150.A?[] { _Issue150.A.A, null }, obj.ListOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._InListProp<_Issue150.A>>("{\"ListOfEnum\":[0,1]}");
+                CollectionAssert.AreEqual(new[] { _Issue150.A.A, _Issue150.A.B }, obj.ListOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._InListProp<_Issue150.A?>>("{\"ListOfEnum\":[0,null]}");
+                CollectionAssert.AreEqual(new _Issue150.A?[] { _Issue150.A.A, null }, obj.ListOfEnum);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._AsDictionaryKey<_Issue150.A>>("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}");
+                CollectionAssert.AreEqual(new Dictionary<_Issue150.A, int>
+                {
+                    { _Issue150.A.A, 10 },
+                    { _Issue150.A.B, 20 }
+                }, obj.DictionaryWithEnumKey);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._AsDictionaryValue<_Issue150.A>>("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}");
+                CollectionAssert.AreEqual(new Dictionary<int, _Issue150.A>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, _Issue150.A.B }
+                }, obj.DictionaryWithEnumValue);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue150._AsDictionaryValue<_Issue150.A?>>("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}");
+                CollectionAssert.AreEqual(new Dictionary<int, _Issue150.A?>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, null }
+                }, obj.DictionaryWithEnumValue);
+            }
+        }
+
+        // Also see SeserializeTests._Issue151
+        class _Issue151
+        {
+            public enum A { A, B, C }
+
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public A? NullableEnum = null;
+        }
+
+        [TestMethod]
+        public void Issue151()
+        {
+            {
+                var obj = JSON.Deserialize<_Issue151>("{\"NullableEnum\":1}");
+                Assert.IsTrue(obj.NullableEnum.HasValue);
+                Assert.AreEqual(_Issue151.A.B, obj.NullableEnum.Value);
+            }
+
+            {
+                var obj = JSON.Deserialize<_Issue151>("{\"NullableEnum\":null}");
+                Assert.IsFalse(obj.NullableEnum.HasValue);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

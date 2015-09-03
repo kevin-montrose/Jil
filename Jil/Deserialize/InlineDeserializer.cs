@@ -1030,7 +1030,7 @@ namespace Jil.Deserialize
             throw new ConstructionException("Unexpected type: " + type);
         }
 
-        void ReadNullable(Type nullableType)
+        void ReadNullable(MemberInfo nullableMember, Type nullableType)
         {
             var underlying = Nullable.GetUnderlyingType(nullableType);
 
@@ -1045,7 +1045,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant('n');             // int n
                 Emit.BranchIfEqual(maybeNull);      // --empty--
 
-                Build(underlying);                  // underlying
+                Build(nullableMember, underlying);                  // underlying
                 Emit.NewObject(nullableConst);      // nullableType
                 Emit.Branch(done);                  // nullableType
 
@@ -1063,7 +1063,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadList(Type listType)
+        void ReadList(MemberInfo listMember, Type listType)
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
@@ -1144,7 +1144,7 @@ namespace Jil.Deserialize
                 RawPeekChar();                                  // listType int 
                 Emit.LoadConstant(']');                         // listType int ']'
                 Emit.BranchIfEqual(done);                       // listType(*?)
-                Build(elementType);                             // listType(*?) elementType
+                Build(listMember, elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
 
                 var startLoop = Emit.DefineLabel();
@@ -1167,7 +1167,7 @@ namespace Jil.Deserialize
                 Emit.MarkLabel(nextItem);           // listType(*?) int
                 Emit.Pop();                         // listType(*?)
                 ConsumeWhiteSpace();                // listType(*?)
-                Build(elementType);                 // listType(*?) elementType
+                Build(listMember, elementType);                 // listType(*?) elementType
                 Emit.CallVirtual(addMtd);           // --empty--
                 Emit.Branch(startLoop);             // --empty--
 
@@ -1187,7 +1187,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadDictionary(Type dictType)
+        void ReadDictionary(MemberInfo dictionaryMember, Type dictType)
         {
             var keyType = dictType.GetDictionaryInterface().GetGenericArguments()[0];
 
@@ -1255,25 +1255,25 @@ namespace Jil.Deserialize
                 Emit.BranchIfEqual(done);   // dictType(*?)
                 if (keyType == typeof(string))
                 {
-                    Build(typeof(string));  // dictType(*?) string
+                    Build(dictionaryMember, typeof(string));  // dictType(*?) string
                 }
                 else
                 {
-                    if (keyIsInteger)
+                    if (keyIsInteger || (keyIsEnum && dictionaryMember != null && dictionaryMember.ShouldConvertEnum(keyType)))
                     {
                         ExpectQuote();          // dictType(*?)
-                        Build(keyType);         // dictType(*?) integer
+                        Build(dictionaryMember, keyType);         // dictType(*?) integer
                         ExpectQuote();          // dictType(*?) integer
                     }
                     else
                     {
-                        Build(keyType);         // dictType(*?) enum
+                        Build(dictionaryMember, keyType);         // dictType(*?) enum
                     }
                 }
                 ReadSkipWhitespace();        // dictType(*?) (integer|string|enum)
                 CheckChar(':');              // dictType(*?) (integer|string|enum)
                 ConsumeWhiteSpace();         // dictType(*?) (integer|string|enum)
-                Build(valType);              // dictType(*?) (integer|string|enum) valType
+                Build(dictionaryMember, valType);              // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);    // --empty--
 
                 var nextItem = Emit.DefineLabel();
@@ -1297,25 +1297,25 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();                // dictType(*?)
                 if (keyType == typeof(string))
                 {
-                    Build(typeof(string));  // dictType(*?) string
+                    Build(dictionaryMember, typeof(string));  // dictType(*?) string
                 }
                 else
                 {
-                    if (keyIsInteger)
+                    if (keyIsInteger || (keyIsEnum && dictionaryMember != null && dictionaryMember.ShouldConvertEnum(keyType)))
                     {
                         ExpectQuote();          // dictType(*?)
-                        Build(keyType);         // dictType(*?) integer
+                        Build(dictionaryMember, keyType);         // dictType(*?) integer
                         ExpectQuote();          // dictType(*?) integer
                     }
                     else
                     {
-                        Build(keyType);         // dictType(*?) enum
+                        Build(dictionaryMember, keyType);         // dictType(*?) enum
                     }
                 }
                 ReadSkipWhitespace();               // dictType(*?) (integer|string|enum)
                 CheckChar(':');                     // dictType(*?) (integer|string|enum)
                 ConsumeWhiteSpace();                // dictType(*?) (integer|string|enum)
-                Build(valType);                     // dictType(*?) (integer|string|enum) valType
+                Build(dictionaryMember, valType);                     // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);           // --empty--
                 Emit.Branch(loopStart);             // --empty--
             }
@@ -1554,17 +1554,17 @@ namespace Jil.Deserialize
 
                     Emit.MarkLabel(label);      // objType(*?)
 
-                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                    if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                    Type convertEnumTo;
+                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
                     {
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
-                        Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                        Build(member, convertEnumTo);   // objType(*?) SerializeEnumerationAsType
                         Emit.Convert(underlyingEnumType);       // objType(*?) memberType
                     }
                     else
                     {
-                        Build(memberType);          // objType(*?) memberType
+                        Build(member, memberType);          // objType(*?) memberType
                     }
 
                     if (member is FieldInfo)
@@ -1699,7 +1699,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant('}');     // objType(*?) int '}'
                 Emit.BranchIfEqual(done);   // objType(*?)
                 Emit.LoadField(order);      // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));      // obType(*?) Dictionary<string, int> string
+                Build(null, typeof(string));      // obType(*?) Dictionary<string, int> string
                 ReadSkipWhitespace();       // objType(*?) Dictionary<string, int> string
                 CheckChar(':');             // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
@@ -1735,17 +1735,17 @@ namespace Jil.Deserialize
 
                     Emit.MarkLabel(label);      // objType(*?)
 
-                    var memberAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                    if (memberType.IsEnum && memberAttr != null && memberAttr.TreatEnumerationAs != null)
+                    Type convertEnumTo;
+                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
                     {
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
-                        Build(memberAttr.TreatEnumerationAs);   // objType(*?) SerializeEnumerationAsType
+                        Build(member, convertEnumTo);   // objType(*?) SerializeEnumerationAsType
                         Emit.Convert(underlyingEnumType);       // objType(*?) memberType
                     }
                     else
                     {
-                        Build(memberType);          // objType(*?) memberType
+                        Build(member, memberType);          // objType(*?) memberType
                     }
 
                     if (member is FieldInfo)
@@ -1780,7 +1780,7 @@ namespace Jil.Deserialize
                 Emit.Pop();                         // objType(*?)
                 ConsumeWhiteSpace();
                 Emit.LoadField(order);              // objType(*?) Dictionary<string, int> string
-                Build(typeof(string));              // objType(*?) Dictionary<string, int> string
+                Build(null, typeof(string));              // objType(*?) Dictionary<string, int> string
                 ReadSkipWhitespace();               // objType(*?) Dictionary<string, int> string
                 CheckChar(':');                     // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();                // objType(*?) Dictionary<string, int> string
@@ -1858,7 +1858,7 @@ namespace Jil.Deserialize
             Emit.LoadConstant('}');             // int '}'
             Emit.BranchIfEqual(doneNotNull);    // --empty--
             Emit.LoadField(order);              // Dictionary<string, int> string
-            Build(typeof(string));              // Dictionary<string, int> string
+            Build(null, typeof(string));              // Dictionary<string, int> string
             ReadSkipWhitespace();               // Dictionary<string, int> string
             CheckChar(':');                     // Dictionary<string, int> string
             ConsumeWhiteSpace();                // Dictionary<string, int> string
@@ -1891,7 +1891,7 @@ namespace Jil.Deserialize
                 var local = localMap[kv.Key];
 
                 Emit.MarkLabel(label);  // --empty--
-                Build(local.LocalType); // localType
+                Build(null, local.LocalType); // localType
 
                 Emit.StoreLocal(local); // --empty--
 
@@ -1920,7 +1920,7 @@ namespace Jil.Deserialize
             Emit.Pop();                         // --empty--
             ConsumeWhiteSpace();                // --empty--
             Emit.LoadField(order);              // Dictionary<string, int> string
-            Build(typeof(string));              // Dictionary<string, int> string
+            Build(null, typeof(string));              // Dictionary<string, int> string
             ReadSkipWhitespace();               // Dictionary<string, int> string
             CheckChar(':');                     // Dictionary<string, int> string
             ConsumeWhiteSpace();                // Dictionary<string, int> string
@@ -2048,7 +2048,7 @@ namespace Jil.Deserialize
                 var local = localMap[kv.Key];
 
                 Emit.MarkLabel(label);  // --empty--
-                Build(local.LocalType); // localType
+                Build(null, local.LocalType); // localType
 
                 Emit.StoreLocal(local); // --empty--
 
@@ -2141,7 +2141,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void Build(Type forType, bool allowRecursion = true)
+        void Build(MemberInfo forMember, Type forType, bool allowRecursion = true)
         {
             // EXACT MATCH, this is the best way to detect `dynamic`
             if (forType == typeof(object))
@@ -2152,7 +2152,7 @@ namespace Jil.Deserialize
 
             if (forType.IsNullableType())
             {
-                ReadNullable(forType);
+                ReadNullable(forMember, forType);
                 return;
             }
 
@@ -2164,7 +2164,7 @@ namespace Jil.Deserialize
 
             if (forType.IsDictionaryType())
             {
-                ReadDictionary(forType);
+                ReadDictionary(forMember, forType);
                 return;
             }
 
@@ -2173,13 +2173,13 @@ namespace Jil.Deserialize
                 var keyType = forType.GetGenericArguments()[0];
                 var valueType = forType.GetGenericArguments()[1];
                 var fakeDictionary = typeof(Dictionary<,>).MakeGenericType(keyType, valueType);
-                ReadDictionary(fakeDictionary);
+                ReadDictionary(forMember, fakeDictionary);
                 return;
             }
 
             if (forType.IsListType())
             {
-                ReadList(forType);
+                ReadList(forMember, forType);
                 return;
             }
 
@@ -2189,12 +2189,22 @@ namespace Jil.Deserialize
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
-                ReadList(fakeList);
+                ReadList(forMember, fakeList);
                 return;
             }
 
             if (forType.IsEnum)
             {
+                Type convertEnumTo;
+                if (forMember != null && forMember.ShouldConvertEnum(forType, out convertEnumTo))
+                {
+                    var underlyingEnumType = Enum.GetUnderlyingType(forType);
+
+                    Build(forMember, convertEnumTo);
+                    Emit.Convert(underlyingEnumType);
+                    return;
+                }
+
                 ReadEnum(forType);
                 return;
             }
@@ -2261,7 +2271,7 @@ namespace Jil.Deserialize
 
             ConsumeWhiteSpace();
 
-            Build(forType, allowRecursion: false);
+            Build(null, forType, allowRecursion: false);
 
             // we have to consume this, otherwise we might succeed with invalid JSON
             ConsumeWhiteSpace();
