@@ -344,7 +344,17 @@ namespace Jil
         internal SerializationNameFormat SerializationNameFormat { get; private set; }
 
         /// <summary>
-        /// Compatibility shim.
+        /// For compatibility with earlier Jil versions.
+        /// 
+        /// Configuration for Jil serialization options.
+        /// 
+        /// Available options:
+        ///   prettyPrint - whether or not to include whitespace and newlines for ease of reading
+        ///   excludeNulls - whether or not to write object members whose value is null
+        ///   jsonp - whether or not the serialized json should be valid for use with JSONP
+        ///   dateFormat - the style in which to serialize DateTimes and TimeSpans
+        ///   includeInherited - whether or not to serialize members declared by an objects base types
+        ///   unspecifiedDateTimeKindBehavior - how to treat DateTime's with a DateTimeKind of Unspecified (Jil converts all DateTimes to Utc for serialization, use DateTimeOffset to preserve time zone information)
         /// </summary>
         public Options(bool prettyPrint, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior unspecifiedDateTimeKindBehavior) :
             this(prettyPrint, excludeNulls, jsonp, dateFormat, includeInherited, unspecifiedDateTimeKindBehavior, SerializationNameFormat.Verbatim)
