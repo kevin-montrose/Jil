@@ -739,6 +739,7 @@ namespace JilTests
             Assert.IsNotNull(typeof(Jil.JilDirectiveAttribute).GetConstructor(new[] { typeof(Type) }));
 
             // Options
+            Assert.IsNotNull(typeof(Jil.Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(Jil.DateTimeFormat), typeof(bool), typeof(Jil.UnspecifiedDateTimeKindBehavior) }));
             Assert.IsNotNull(typeof(Jil.Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(Jil.DateTimeFormat), typeof(bool), typeof(Jil.UnspecifiedDateTimeKindBehavior), typeof(Jil.SerializationNameFormat) }));
         }
     }

@@ -342,7 +342,14 @@ namespace Jil
         internal bool ShouldIncludeInherited { get; private set; }
         internal UnspecifiedDateTimeKindBehavior UseUnspecifiedDateTimeKindBehavior { get; private set; }
         internal SerializationNameFormat SerializationNameFormat { get; private set; }
-        
+
+        /// <summary>
+        /// Compatibility shim.
+        /// </summary>
+        public Options(bool prettyPrint, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior unspecifiedDateTimeKindBehavior) :
+            this(prettyPrint, excludeNulls, jsonp, dateFormat, includeInherited, unspecifiedDateTimeKindBehavior, SerializationNameFormat.Verbatim)
+        { }
+
         /// <summary>
         /// Configuration for Jil serialization options.
         /// 
