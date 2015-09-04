@@ -135,6 +135,11 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
   - Whether or not to include inherited members when serializing
+  - The way to format member names; one of
+    * Verbatim
+	  - As it appears in source, unless modified by a `[MemberName]` or `[JilDirective]`
+	* CamelCase
+	  - lowercasing the first letter of members, ie. `"CamelCase"` would become `"camelCase"`
 
 ## Benchmarks
 
