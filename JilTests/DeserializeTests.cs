@@ -4665,86 +4665,69 @@ namespace JilTests
             }
         }
 
-
-        [TestMethod]
-        public void DateTimeZone()
-        {  
-            var res = JSON.Deserialize<DateTime>("\"2015-09-30T13:14:15.167+02:00\"", Options.ISO8601);
-            Assert.AreEqual(new DateTime(2015, 09, 30, 11, 14, 15, 167, DateTimeKind.Utc), res);
-
-
-            res = JSON.Deserialize<DateTime>("\"2015-09-30T23:14:15.167-02:00\"", Options.ISO8601);
-            Assert.AreEqual(new DateTime(2015, 10, 01, 1, 14, 15, 167, DateTimeKind.Utc), res);
-
-            using (var reader = new StringReader("\"2015-09-01T00:14:15.167+02:00\""))
-                res = JSON.Deserialize<DateTime>(reader, Options.ISO8601);
-
-            Assert.AreEqual(new DateTime(2015, 8, 31, 22, 14, 15, 167, DateTimeKind.Utc), res);            
-        }
-
         [TestMethod]
         public void DateTimeOffsets()
         {
             // ISO8601
             using (var str = new StringReader("\"1900-01-01 12:30Z\""))
+            {
+                var dto = new DateTimeOffset(1900, 1, 1, 12, 30, 0, TimeSpan.Zero);
+                var res = JSON.Deserialize<DateTimeOffset>(str, Options.ISO8601);
+                Assert.AreEqual(dto, res);
+            }
+
+            // Newtonsoft
+            {
+                var newtonsoft = 
+                    Newtonsoft.Json.JsonSerializer.Create(
+                        new Newtonsoft.Json.JsonSerializerSettings
+                        {
+                            DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat
+                        }
+                    );
+
+                var now = DateTime.UtcNow;
+                string newtonsoftStyle;
+                using(var str = new StringWriter())
                 {
-                    var dto = new DateTimeOffset(1900, 1, 1, 12, 30, 0, TimeSpan.Zero);
-                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.ISO8601);
-                    Assert.AreEqual(dto, res);
+                   newtonsoft.Serialize(str, now);
+                   newtonsoftStyle = str.ToString();
                 }
 
-                // Newtonsoft
+                using (var str = new StringReader(newtonsoftStyle))
                 {
-                    var newtonsoft =
-                        Newtonsoft.Json.JsonSerializer.Create(
-                            new Newtonsoft.Json.JsonSerializerSettings
-                            {
-                                DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat
-                            }
-                        );
-
-                    var now = DateTime.UtcNow;
-                    string newtonsoftStyle;
-                    using (var str = new StringWriter())
-                    {
-                        newtonsoft.Serialize(str, now);
-                        newtonsoftStyle = str.ToString();
-                    }
-
-                    using (var str = new StringReader(newtonsoftStyle))
-                    {
-                        var res = JSON.Deserialize<DateTimeOffset>(str, Options.Default).UtcDateTime;
-                        var delta = (now - res).Duration();
-                        Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
-                    }
-                }
-
-                // Milliseconds
-                {
-                    var now = DateTime.UtcNow;
-                    var asStr = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
-
-                    using (var str = new StringReader(asStr))
-                    {
-                        var res = JSON.Deserialize<DateTimeOffset>(str, Options.MillisecondsSinceUnixEpoch);
-                        var delta = (now - res).Duration();
-                        Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
-                    }
-                }
-
-                // Seconds
-                {
-                    var now = DateTime.UtcNow;
-                    var asStr = JSON.Serialize(now, Options.SecondsSinceUnixEpoch);
-
-                    using (var str = new StringReader(asStr))
-                    {
-                        var res = JSON.Deserialize<DateTimeOffset>(str, Options.SecondsSinceUnixEpoch);
-                        var delta = (now - res).Duration();
-                        Assert.IsTrue(delta < TimeSpan.FromSeconds(1));
-                    }
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.Default).UtcDateTime;
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
                 }
             }
+
+            // Milliseconds
+            {
+                var now = DateTime.UtcNow;
+                var asStr = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
+
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.MillisecondsSinceUnixEpoch);
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromMilliseconds(1));
+                }
+            }
+
+            // Seconds
+            {
+                var now = DateTime.UtcNow;
+                var asStr = JSON.Serialize(now, Options.SecondsSinceUnixEpoch);
+
+                using (var str = new StringReader(asStr))
+                {
+                    var res = JSON.Deserialize<DateTimeOffset>(str, Options.SecondsSinceUnixEpoch);
+                    var delta = (now - res).Duration();
+                    Assert.IsTrue(delta < TimeSpan.FromSeconds(1));
+                }
+            }
+        }
 
         [TestMethod]
         public void Issue43()
