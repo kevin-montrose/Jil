@@ -8251,5 +8251,23 @@ namespace JilTests
                 Assert.AreEqual("{\"NullableEnum\":null}", str);
             }
         }
+
+        [TestMethod]
+        public void Issue165()
+        {
+            var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
+            var str = JSON.Serialize(dto, Options.ISO8601);
+            Assert.AreEqual("\"2015-09-09T18:37:40+02:00\"", str);
+        }
+
+        [TestMethod]
+        public void Issue165_2()
+        {
+            var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
+            var str = JSON.Serialize(dto, Options.ISO8601);
+            var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+
+            Assert.AreEqual(dto.UtcDateTime, dt);
+        }
     }
 }
