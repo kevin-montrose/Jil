@@ -8269,5 +8269,51 @@ namespace JilTests
 
             Assert.AreEqual(dto.UtcDateTime, dt);
         }
+
+        public enum _Issue159_Enum
+        {
+            Unknown,
+            None,
+            RadioButtonVertical,
+            RadioButtonHorizontal,
+            ComboList,
+            EditableComboList,
+            List,
+            Slider,
+            Numeric,
+            Rating,
+            Inherited,
+            ImageHorizontal,
+            ImageVertical,
+            Text,
+            Html,
+            TreeView,
+            CheckboxList,
+            CheckBox,
+            HourMinute
+        }
+
+        public class _Issue159
+        {
+            public bool? AllowMultipleSelection { get; set; }
+            public _Issue159_Enum? DefaultUserControlMode { get; set; }
+            public int? MaxSelectedValues { get; set; }
+            public bool? EnableKwManagement { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue159()
+        {
+            var json = 
+                JSON.Serialize(
+                    new _Issue159
+                    {
+                        DefaultUserControlMode = _Issue159_Enum.CheckBox
+                    }
+                );
+
+            var bean = JSON.Deserialize<_Issue159>(json);
+            Assert.AreEqual(bean.DefaultUserControlMode, _Issue159_Enum.CheckBox);
+        }
     }
 }
