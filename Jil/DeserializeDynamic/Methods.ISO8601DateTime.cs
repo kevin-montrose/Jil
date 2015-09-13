@@ -145,7 +145,7 @@ namespace Jil.DeserializeDynamic
                     return true;
                 }
 
-                dt = DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
+                dt = DateTime.SpecifyKind(date, DateTimeKind.Utc) + time - timezoneOffset;
                 return true;
             }
             catch (Exception)

@@ -938,346 +938,525 @@ namespace JilTests
         [TestMethod]
         public void ISO8601DateTimeOffsets()
         {
+            using (var str = new StringReader("\"1900\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1991-02\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1991, 02, 1, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+            using (var str = new StringReader("\"19890131\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"1989-01-31T12:34:56.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T12.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T1234.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456,5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"19890131T123456.5\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Local), dt);
+            }
+
             using (var str = new StringReader("\"1989-01-31T12Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 0, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T12Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 0, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T12,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T12.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T1234Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T1234,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T1234.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 30, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T123456Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T123456,5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"19890131T123456.5Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1989, 01, 31, 12, 34, 56, 500, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 00, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12,5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12.5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34,5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34.5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56,5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56.5+01:23\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 0, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12,5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12.5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234,5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234.5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456,5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456.5+0123\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(1, 23, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(01, 23, 00));
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 0, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12,5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12.5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34,5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34.5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56,5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1989-01-31T12:34:56.5-11:45\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 0, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 0, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12,5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T12.5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 30, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 30, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 0, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 0, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234,5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T1234.5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 30, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 30, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456,5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"19890131T123456.5-1145\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, new TimeSpan(-11, -45, 00)), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                var shouldMatch = new DateTimeOffset(1989, 01, 31, 12, 34, 56, 500, (new TimeSpan(11, 45, 0)).Negate());
+                Assert.AreEqual(shouldMatch.UtcDateTime, dt);
             }
 
             using (var str = new StringReader("\"1900-01-01 12:30Z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1900, 01, 01, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1900-01-01t12:30+00\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1900, 01, 01, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
             }
 
             using (var str = new StringReader("\"1900-01-01 12:30z\""))
             {
-                var dt = JSON.DeserializeDynamic(str, Options.ISO8601);
-                Assert.AreEqual(new DateTimeOffset(1900, 01, 01, 12, 30, 0, TimeSpan.Zero), (DateTimeOffset)dt);
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(1900, 01, 01, 12, 30, 0, DateTimeKind.Utc), dt);
+            }
+
+            using (var str = new StringReader("\"2004-366\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2004, 12, 31, 0, 0, 0, DateTimeKind.Local), dt);
+            }
+
+            using (var str = new StringReader("\"2004366\""))
+            {
+                DateTime dt = JSON.DeserializeDynamic(str, Options.ISO8601);
+                Assert.AreEqual(new DateTime(2004, 12, 31, 0, 0, 0, DateTimeKind.Local), dt);
             }
         }
 
