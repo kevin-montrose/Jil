@@ -201,19 +201,33 @@ namespace Jil.Deserialize
                     if (d.SkipWhitespace && pos == 0)
                         namesToFinish.Add(Tuple.Create(' ', onMatchChar));
 
-                    var next = d.Emit.DefineLabel("_" + items[0].Name.Substring(0, pos + 1));
+                    Label next = null;
                     if (d.CaseSensitive)
                     {
+                        next = d.Emit.DefineLabel("_" + items[0].Name.Substring(0, pos + 1));
                         namesToFinish.Add(Tuple.Create((char)ch, next));
                     }
                     else
                     {
                         var lower = char.ToLower((char)ch);
                         var upper = char.ToUpper((char)ch);
-                        namesToFinish.Add(Tuple.Create(lower, next));
-                        namesToFinish.Add(Tuple.Create(upper, next));
+
+                        var alreadyInUse = 
+                            namesToFinish.Any(t => t.Item1 == lower) || 
+                            namesToFinish.Any(t => t.Item1 == upper);
+
+                        if (!alreadyInUse)
+                        {
+                            next = d.Emit.DefineLabel("_" + items[0].Name.Substring(0, pos + 1));
+                            namesToFinish.Add(Tuple.Create(lower, next));
+                            namesToFinish.Add(Tuple.Create(upper, next));
+                        }
                     }
-                    NextChar(readerType, d, items, pos + 1, next);
+
+                    if (next != null)
+                    {
+                        NextChar(readerType, d, items, pos + 1, next);
+                    }
                 }
             }
 
@@ -242,7 +256,6 @@ namespace Jil.Deserialize
 
         static void DoCharBranches<V>(Data<V> d, List<Tuple<char, Label>> namesToFinish)
         {
-
             if (NameAutomataConfig.UseBinarySearch)
             {
                 var bsComparisons = (int)Math.Ceiling(Math.Log(namesToFinish.Count, 2)) + 1;
