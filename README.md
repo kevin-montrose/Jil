@@ -100,7 +100,7 @@ The following types (and any user defined types composed of them) are supported:
     * Including \[Flags\]
   - Guids
     * Only the ["D" format](http://msdn.microsoft.com/en-us/library/97af8hh4.aspx)
-  - IList&lt;T&gt; implementations
+  - IList&lt;T&gt;, ICollection&lt;T&gt;, and IReadOnlyList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
 Jil deserializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
