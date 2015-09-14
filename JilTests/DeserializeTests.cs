@@ -6172,8 +6172,8 @@ namespace JilTests
             Assert.IsNotNull(res);
             Assert.AreEqual(3, res.Count);
             Assert.AreEqual(1, res.ElementAt(0));
-            Assert.AreEqual(2, res.ElementAt(0));
-            Assert.AreEqual(3, res.ElementAt(0));
+            Assert.AreEqual(2, res.ElementAt(1));
+            Assert.AreEqual(3, res.ElementAt(2));
         }
 
 #if !DEBUG

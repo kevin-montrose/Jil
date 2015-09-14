@@ -2183,9 +2183,9 @@ namespace Jil.Deserialize
                 return;
             }
 
-            // Final, special, case for IEnumerable<X> if *not* a List
+            // Final, special, case for ICollection<T>, IEnumerable<X>, and IReadOnlyList<T> if *not* a List<T>
             // We can make this work by just acting like it *is* a List<X>
-            if (forType.IsGenericEnumerable() || forType.IsGenericReadOnlyList())
+            if (forType.IsCollectionType() || forType.IsGenericEnumerable() || forType.IsGenericReadOnlyList())
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
