@@ -6165,6 +6165,17 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue162()
+        {
+            var res = JSON.Deserialize<ICollection<int>>("[1, 2, 3]");
+            Assert.IsNotNull(res);
+            Assert.AreEqual(3, res.Count);
+            Assert.AreEqual(1, res.ElementAt(0));
+            Assert.AreEqual(2, res.ElementAt(0));
+            Assert.AreEqual(3, res.ElementAt(0));
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
