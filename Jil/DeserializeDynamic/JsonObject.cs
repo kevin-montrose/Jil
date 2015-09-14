@@ -33,7 +33,7 @@ namespace Jil.DeserializeDynamic
 
         bool FastNumberNegative;
         ulong FastNumberPart1;
-        uint FastNumberPart2;
+        ulong FastNumberPart2;
         byte FastNumberPart2Length;
         long FastNumberPart3;
 
@@ -52,7 +52,7 @@ namespace Jil.DeserializeDynamic
             return new JsonObject { Type = JsonObjectType.Number, NumberValue = num, Options = options };
         }
 
-        internal static JsonObject ForFastNumber(bool neg, ulong a, uint b, byte bLen, long c, Options options)
+        internal static JsonObject ForFastNumber(bool neg, ulong a, ulong b, byte bLen, long c, Options options)
         {
             return new JsonObject { Type = JsonObjectType.FastNumber, FastNumberNegative = neg, FastNumberPart1 = a, FastNumberPart2 = b, FastNumberPart2Length = bLen, FastNumberPart3 = c, Options = options };
         }

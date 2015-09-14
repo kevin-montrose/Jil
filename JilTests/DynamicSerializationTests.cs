@@ -1372,14 +1372,35 @@ namespace JilTests
         [TestMethod]
         public void Issue158()
         {
-            const string json = "4.3563456344358765e+10";
+            {
+                const string json = "4.3563456344358765e+10";
 
-            double res = JSON.DeserializeDynamic(json);
-            var shouldMatch = double.Parse(json);
-            var diff = Math.Abs(res - shouldMatch);
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
 
-            // TODO: This probably isn't right
-            Assert.AreEqual(shouldMatch, res);
+                Assert.AreEqual(shouldMatch, res);
+            }
+
+            {
+                const string json = "4.356345634435876535634563443587653563456344358765356345634435876535634563443587653563456344358765e+10";
+
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
+
+                Assert.AreEqual(shouldMatch, res);
+            }
+
+            {
+                const string json = "4.444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444445e+10";
+
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
+
+                Assert.AreEqual(shouldMatch, res);
+            }
         }
     }
 }
