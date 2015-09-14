@@ -1368,5 +1368,18 @@ namespace JilTests
                 Assert.AreEqual("{\"NullableEnum\":null}", str);
             }
         }
+
+        [TestMethod]
+        public void Issue158()
+        {
+            const string json = "4.3563456344358765e+10";
+
+            double res = JSON.DeserializeDynamic(json);
+            var shouldMatch = double.Parse(json);
+            var diff = Math.Abs(res - shouldMatch);
+
+            // TODO: This probably isn't right
+            Assert.AreEqual(shouldMatch, res);
+        }
     }
 }
