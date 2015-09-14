@@ -7829,7 +7829,15 @@ namespace JilTests
 
             foreach(var testDto in toTest)
             {
-                var shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffffzzz") + "\"";
+                string shouldMatch;
+                if (testDto.Offset == TimeSpan.Zero)
+                {
+                    shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffff\Z") + "\"";
+                }
+                else
+                {
+                    shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffffzzz") + "\"";
+                }
                 var strStr = JSON.Serialize(testDto, Options.ISO8601);
                 string streamStr;
                 using (var str = new StringWriter())
