@@ -8287,9 +8287,33 @@ namespace JilTests
         [TestMethod]
         public void Issue159()
         {
-
             var bean = JSON.Deserialize<_Issue159>("\"CheckBox\"");
             Assert.AreEqual(bean, _Issue159.CheckBox);
+        }
+
+        [TestMethod]
+        public void Issue169()
+        {
+            var obj = 
+                new
+                {
+                    Filter = 
+                        new
+                        {
+                            And = 
+                                new List<dynamic> 
+                                {
+                                    new 
+                                    { 
+                                        Term = new { Category = "a" }
+                                    }
+                                }
+                        }
+                };
+
+            var json = Jil.JSON.SerializeDynamic(obj, Jil.Options.CamelCase);
+
+            Assert.AreEqual(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
         }
     }
 }
