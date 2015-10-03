@@ -25,24 +25,23 @@ namespace Jil.Serialize
             }
         }
 
-        private static readonly TwoDigits[] DigitPairs;
-        private static readonly char[] DigitTriplets;
-        static Methods()
-        {
-            DigitPairs = new TwoDigits[100];
-            for (var i = 0; i < 100; ++i)
-            {
-                DigitPairs[i] = new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10)));
-            }
-
-            DigitTriplets = new char[1000 * 3];
-            for (var i = 0; i < 1000; ++i)
-            {
-                DigitTriplets[i * 3 + 0] = (char)('0' + i / 100 % 10);
-                DigitTriplets[i * 3 + 1] = (char)('0' + i / 10 % 10);
-                DigitTriplets[i * 3 + 2] = (char)('0' + i % 10);
-            }
-        }
+        private static readonly TwoDigits[] DigitPairs =
+            Common.Utils.CreateArray(100, i => new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10))));
+        private static readonly char[] DigitTriplets =
+            Common.Utils.CreateArray(3 * 1000, i =>
+	    {
+	        switch (i % 3)
+		{
+		    case 0:
+		        return (char)('0' + i / 100 % 10);
+                    case 1:
+		        return (char)('0' + i / 10 % 10);
+                    case 2:
+		        return (char)('0' + i % 10);
+                    default:
+		        throw new InvalidOperationException("Unexpectedly reached default case in switch block.");
+                }
+            });
 
         [StructLayout(LayoutKind.Explicit, Pack = 1)]
         struct GuidStruct
