@@ -29,17 +29,18 @@ namespace Jil.Serialize
             Common.Utils.CreateArray(100, i => new TwoDigits((char)('0' + (i / 10)), (char)+('0' + (i % 10))));
         private static readonly char[] DigitTriplets =
             Common.Utils.CreateArray(3 * 1000, i =>
-	    {
-	        switch (i % 3)
-		{
-		    case 0:
-		        return (char)('0' + i / 100 % 10);
+            {
+                var ibase = i / 3;
+                switch (i % 3)
+                {
+                    case 0:
+                        return (char)('0' + ibase / 100 % 10);
                     case 1:
-		        return (char)('0' + i / 10 % 10);
+                        return (char)('0' + ibase / 10 % 10);
                     case 2:
-		        return (char)('0' + i % 10);
+                        return (char)('0' + ibase % 10);
                     default:
-		        throw new InvalidOperationException("Unexpectedly reached default case in switch block.");
+                        throw new InvalidOperationException("Unexpectedly reached default case in switch block.");
                 }
             });
 
