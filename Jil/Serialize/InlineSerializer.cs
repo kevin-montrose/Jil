@@ -1645,7 +1645,7 @@ namespace Jil.Serialize
                 foreach (var member in writeOrder)
                 {
                     Emit.Duplicate();                                               // obj(*?) obj(*?)
-                    WriteMemberConditionally(forType, member, inLocal, isFirst);    // obj(*?)
+                    WriteMembersConditionally(forType, member, inLocal, isFirst);   // obj(*?)
                 }
             }
 
@@ -1909,7 +1909,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new [] { typeof(Type) });
-        void WriteMemberConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
+        void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
             // top of stack
             //  - obj(*?)

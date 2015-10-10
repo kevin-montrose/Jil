@@ -8360,9 +8360,9 @@ namespace JilTests
                 }
 
                 {
-                    var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(double), WithDouble = 1.234 };
-                    var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":1.234}", str);
+                    var obj1 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(double), WithDouble = 1.234 };
+                    var str1 = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":1.234}", str1);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(double) };
                     var str2 = JSON.Serialize(obj2);
                     Assert.AreEqual("{\"Foo\":0}", str2);
@@ -8401,6 +8401,63 @@ namespace JilTests
                     Assert.AreEqual("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2) };
                     var str2 = JSON.Serialize(obj2);
+                    Assert.AreEqual("{\"Foo\":null}", str2);
+                }
+            }
+
+            // conditional serialization, without nulls
+            {
+                {
+                    var obj1 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int), WithInt = 123 };
+                    var str1 = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":123}", str1);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":0}", str2);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(double), WithDouble = 1.234 };
+                    var str1 = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":1.234}", str1);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(double) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":0}", str2);
+                }
+
+                {
+                    var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string), WithString = "bar" };
+                    var str = JSON.Serialize(obj, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":\"bar\"}", str);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":null}", str2);
+                }
+
+                {
+                    var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>), WithList = new List<string> { "fizz", "buzz" } };
+                    var str = JSON.Serialize(obj, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":null}", str2);
+                }
+
+                {
+                    var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>), WithDictionary = new Dictionary<string, string> { { "fizz", "buzz" } } };
+                    var str = JSON.Serialize(obj, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":null}", str2);
+                }
+
+                {
+                    var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2), WithObject = new _DiscriminantUnionsWithUnionType_2 { Bar = "Foo" } };
+                    var str = JSON.Serialize(obj, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
+                    var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2) };
+                    var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
                     Assert.AreEqual("{\"Foo\":null}", str2);
                 }
             }
