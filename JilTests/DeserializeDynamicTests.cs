@@ -2892,6 +2892,8 @@ namespace JilTests
             Assert.IsTrue(diff.TotalSeconds < 1);
         }
 
+#if !DEBUG
+
         [TestMethod]
         public void RFC1123DateTimes()
         {
@@ -2928,6 +2930,7 @@ namespace JilTests
                 Assert.IsTrue(diff.TotalSeconds < 1);
             }
         }
+#endif
 
         [TestMethod]
         public void Issue134() {
