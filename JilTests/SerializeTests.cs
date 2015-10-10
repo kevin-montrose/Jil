@@ -2298,7 +2298,7 @@ namespace JilTests
         [TestMethod]
         public void ConditionalSerialization()
         {
-            var rand = new Random();
+            var rand = new Random(0);
 
             for (var i = 0; i < 1000; i++)
             {

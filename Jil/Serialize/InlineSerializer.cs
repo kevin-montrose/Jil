@@ -1444,7 +1444,7 @@ namespace Jil.Serialize
         void WriteObjectWithNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
-            var hasConditionalSerialization = writeOrder.OfType<PropertyInfo>().Any(p => p.ShouldSerializeMethod(forType) != null);
+            var hasConditionalSerialization = writeOrder.SelectMany(w => w).OfType<PropertyInfo>().Any(p => p.ShouldSerializeMethod(forType) != null);
 
             if (hasConditionalSerialization)
             {
