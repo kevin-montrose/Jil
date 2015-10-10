@@ -42,7 +42,7 @@
   <ItemGroup>
     <Reference Include="Sigil, Version=4.4.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sigil.4.4.0\lib\net45\Sigil.dll</HintPath>
+      <HintPath>..\packages\Sigil.4.5.0\lib\net45\Sigil.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,7 +55,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Jil.StrongName.snk" />
-    <Compile Include="..\Jil\**\*.cs" Exclude="..\Jil\bin\**;..\Jil\obj\**" />
+    <Compile Include="..\Jil\**\*.cs" Exclude="..\Jil\bin\**;..\Jil\obj\**">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -7829,7 +7829,15 @@ namespace JilTests
 
             foreach(var testDto in toTest)
             {
-                var shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffffzzz") + "\"";
+                string shouldMatch;
+                if (testDto.Offset == TimeSpan.Zero)
+                {
+                    shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffff\Z") + "\"";
+                }
+                else
+                {
+                    shouldMatch = "\"" + testDto.ToString(@"yyyy-MM-ddTHH\:mm\:ss.fffffffzzz") + "\"";
+                }
                 var strStr = JSON.Serialize(testDto, Options.ISO8601);
                 string streamStr;
                 using (var str = new StringWriter())
@@ -8001,6 +8009,311 @@ namespace JilTests
 
             res = JSON.Serialize(int.MinValue);
             Assert.AreEqual("-2147483648", res);
+        }
+
+        public class SerilaizationTestObj
+        {
+            [DataMember(Name="ExplicitMember")]
+            public string MemberProperty { get; set; }
+
+            [JilDirective(Name = "Directive")]
+            public string DirectiveProperty { get; set; }
+            
+            public string NekkidProperty { get; set; }
+        }
+
+
+        [TestMethod]
+        public void TestSerializationNameFormatsSerialization()
+        {
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        oneTwo = "1",
+                        ThreeFour = "2",
+                        FIVESIX = "3"
+                    };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj =
+                    new
+                    {
+                        oneTwo = "1",
+                        ThreeFour = "2",
+                        FIVESIX = "3"
+                    };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new SerilaizationTestObj
+                {
+                    DirectiveProperty = "DirectiveValue",
+                    MemberProperty = "MemberValue",
+                    NekkidProperty = "NekkidValie"
+                };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+            }
+
+            using (var str = new StringWriter())
+            {
+                var obj = new SerilaizationTestObj
+                {
+                    DirectiveProperty = "DirectiveValue",
+                    MemberProperty = "MemberValue",
+                    NekkidProperty = "NekkidValie"
+                };
+                JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
+
+                var res = str.ToString();
+                Assert.AreEqual("{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+            }
+        }
+
+        // Also see DeserializeTests._Issue150
+        class _Issue150
+        {
+            public enum A { A, B, C }
+
+            public class _InArray<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public T[] ArrayOfEnum;
+            }
+
+            public class _InList<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum;
+            }
+
+            public class _InListProp<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum { get; set; }
+            }
+
+            public class _InEnumerable<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public IEnumerable<T> EnumerableOfEnum;
+            }
+
+            public class _AsDictionaryKey<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<T, int> DictionaryWithEnumKey;
+            }
+
+            public class _AsDictionaryValue<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<int, T> DictionaryWithEnumValue;
+            }
+        }
+
+        [TestMethod]
+        public void Issue150()
+        {
+            {
+                var obj = new _Issue150._InArray<_Issue150.A>();
+                obj.ArrayOfEnum = new[] { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InArray<_Issue150.A?>();
+                obj.ArrayOfEnum = new _Issue150.A?[] { _Issue150.A.A, null };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A?>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryKey<_Issue150.A>();
+                obj.DictionaryWithEnumKey = new Dictionary<_Issue150.A, int>
+                {
+                    { _Issue150.A.A, 10 },
+                    { _Issue150.A.B, 20 }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, _Issue150.A.B }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A?>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A?>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, null }
+                };
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+            }
+        }
+
+        // Also see DeserializeTests._Issue151
+        class _Issue151
+        {
+            public enum A { A, B, C }
+
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public A? NullableEnum;
+        }
+
+        [TestMethod]
+        public void Issue151()
+        {
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = _Issue151.A.B;
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"NullableEnum\":1}", str);
+            }
+
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = null;
+
+                var str = JSON.Serialize(obj);
+                Assert.AreEqual("{\"NullableEnum\":null}", str);
+            }
+        }
+
+        [TestMethod]
+        public void Issue165()
+        {
+            var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
+            var str = JSON.Serialize(dto, Options.ISO8601);
+            Assert.AreEqual("\"2015-09-09T18:37:40+02:00\"", str);
+        }
+
+        [TestMethod]
+        public void Issue165_2()
+        {
+            var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
+            var str = JSON.Serialize(dto, Options.ISO8601);
+            var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
+
+            Assert.AreEqual(dto.UtcDateTime, dt);
+        }
+
+        public enum _Issue159
+        {
+            CheckboxList,
+            CheckBox
+        }
+
+        [TestMethod]
+        public void Issue159()
+        {
+            var bean = JSON.Deserialize<_Issue159>("\"CheckBox\"");
+            Assert.AreEqual(bean, _Issue159.CheckBox);
+        }
+
+        [TestMethod]
+        public void Issue169()
+        {
+            var obj = 
+                new
+                {
+                    Filter = 
+                        new
+                        {
+                            And = 
+                                new List<dynamic> 
+                                {
+                                    new 
+                                    { 
+                                        Term = new { Category = "a" }
+                                    }
+                                }
+                        }
+                };
+
+            var json = Jil.JSON.SerializeDynamic(obj, Jil.Options.CamelCase);
+
+            Assert.AreEqual(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
         }
     }
 }

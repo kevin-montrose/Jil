@@ -1178,5 +1178,229 @@ namespace JilTests
                 Assert.AreEqual("{\"Foo\":{\"Bar\":{\"Foo\":null}}}", res);
             }
         }
+
+        // Also see DeserializeDynamicTests._Issue150
+        class _Issue150
+        {
+            public enum A { A, B, C }
+
+            public class _InArray<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public T[] ArrayOfEnum;
+            }
+
+            public class _InList<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum;
+            }
+
+            public class _InListProp<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> ListOfEnum { get; set; }
+            }
+
+            public class _InEnumerable<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public IEnumerable<T> EnumerableOfEnum;
+            }
+
+            public class _AsDictionaryKey<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<T, int> DictionaryWithEnumKey;
+            }
+
+            public class _AsDictionaryValue<T>
+            {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public Dictionary<int, T> DictionaryWithEnumValue;
+            }
+
+            public class _MultipleLists<T> {
+                [JilDirective(TreatEnumerationAs = typeof(int))]
+                public List<T> List1;
+                public List<T> List2;
+            }
+        }
+
+        [TestMethod]
+        public void Issue150()
+        {
+            {
+                var obj = new _Issue150._InArray<_Issue150.A>();
+                obj.ArrayOfEnum = new[] { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InArray<_Issue150.A?>();
+                obj.ArrayOfEnum = new _Issue150.A?[] { _Issue150.A.A, null };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ArrayOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InList<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A>();
+                obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InListProp<_Issue150.A?>();
+                obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+            }
+
+            {
+                var obj = new _Issue150._InEnumerable<_Issue150.A?>();
+                obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryKey<_Issue150.A>();
+                obj.DictionaryWithEnumKey = new Dictionary<_Issue150.A, int>
+                {
+                    { _Issue150.A.A, 10 },
+                    { _Issue150.A.B, 20 }
+                };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, _Issue150.A.B }
+                };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
+            }
+
+            {
+                var obj = new _Issue150._AsDictionaryValue<_Issue150.A?>();
+                obj.DictionaryWithEnumValue = new Dictionary<int, _Issue150.A?>
+                {
+                    { 10, _Issue150.A.A },
+                    { 20, null }
+                };
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+            }
+
+            {
+                var obj = new _Issue150._MultipleLists<_Issue150.A>();
+                obj.List1 = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+                obj.List2 = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"List1\":[0,1],\"List2\":[\"A\",\"B\"]}", str);
+            }
+        }
+
+        // Also see DeserializeDynamicTests._Issue151
+        class _Issue151
+        {
+            public enum A { A, B, C }
+
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public A? NullableEnum;
+        }
+
+        [TestMethod]
+        public void Issue151()
+        {
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = _Issue151.A.B;
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"NullableEnum\":1}", str);
+            }
+
+            {
+                var obj = new _Issue151();
+                obj.NullableEnum = null;
+
+                var str = JSON.SerializeDynamic(obj);
+                Assert.AreEqual("{\"NullableEnum\":null}", str);
+            }
+        }
+
+        [TestMethod]
+        public void Issue158()
+        {
+            {
+                const string json = "4.3563456344358765e+10";
+
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
+
+                Assert.AreEqual(shouldMatch, res);
+            }
+
+            {
+                const string json = "4.356345634435876535634563443587653563456344358765356345634435876535634563443587653563456344358765e+10";
+
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
+
+                Assert.AreEqual(shouldMatch, res);
+            }
+
+            {
+                const string json = "4.444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444445e+10";
+
+                double res = JSON.DeserializeDynamic(json);
+                var shouldMatch = double.Parse(json);
+                var diff = Math.Abs(res - shouldMatch);
+
+                Assert.AreEqual(shouldMatch, res);
+            }
+        }
     }
 }

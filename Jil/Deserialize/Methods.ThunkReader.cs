@@ -3297,7 +3297,7 @@ namespace Jil.Deserialize
                     return DateTime.SpecifyKind(date, DateTimeKind.Unspecified) + time;
                 }
 
-                return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time + timezoneOffset;
+                return DateTime.SpecifyKind(date, DateTimeKind.Utc) + time - timezoneOffset;
             }
             catch (Exception e)
             {

@@ -776,6 +776,7 @@ namespace JilTests
                                     Assert.IsFalse(i1.AllowsNull);
                                     Assert.IsTrue(i2.AllowsNull);
                                 }
+            Assert.IsNotNull(typeof(Jil.Options).GetConstructor(new[] { typeof(bool), typeof(bool), typeof(bool), typeof(Jil.DateTimeFormat), typeof(bool), typeof(Jil.UnspecifiedDateTimeKindBehavior), typeof(Jil.SerializationNameFormat) }));
         }
     }
 }

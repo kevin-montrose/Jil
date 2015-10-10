@@ -12,7 +12,7 @@ namespace Jil.Deserialize
 {
     delegate int SetterLookupThunkReaderDelegate(ref ThunkReader reader);
 
-    static class SetterLookup<ForType>
+    static class SetterLookup<ForType, SerializationNameFormatType>
     {
         private static readonly IReadOnlyList<Tuple<string, MemberInfo[]>> _nameOrderedSetters;
         private static Func<TextReader, int> _findMember;
@@ -37,15 +37,20 @@ namespace Jil.Deserialize
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
+            var serializatioNameFormat = SerializationNameFormat.Verbatim;
+            if (typeof(SerializationNameFormatType) == typeof(SerializationNameFormatCamelCase))
+            {
+                serializatioNameFormat = SerializationNameFormat.CamelCase;
+            }
 
             var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
             var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
 
             var setters = new Dictionary<string, List<MemberInfo>>();
 
-            foreach(var member in fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>()))
+            foreach (var member in fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>()))
             {
-                var name = member.GetSerializationName();
+                var name = member.GetSerializationName(serializatioNameFormat);
                 List<MemberInfo> members;
                 if (!setters.TryGetValue(name, out members))
                 {
@@ -55,7 +60,7 @@ namespace Jil.Deserialize
                 members.Add(member);
             }
 
-            var ret = 
+            var ret =
                 setters
                     .Select(kv => Tuple.Create(kv.Key, kv.Value.ToArray()))
                     .OrderBy(t => t.Item1)

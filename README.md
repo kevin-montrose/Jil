@@ -100,7 +100,7 @@ The following types (and any user defined types composed of them) are supported:
     * Including \[Flags\]
   - Guids
     * Only the ["D" format](http://msdn.microsoft.com/en-us/library/97af8hh4.aspx)
-  - IList&lt;T&gt; implementations
+  - IList&lt;T&gt;, ICollection&lt;T&gt;, and IReadOnlyList&lt;T&gt; implementations
   - IDictionary&lt;TKey, TValue&gt; implementations where TKey is a string or enumeration
 
 Jil deserializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
@@ -135,6 +135,11 @@ Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options`
   - Whether or not to "pretty print" while serializing, which adds extra linebreaks and whitespace for presentation's sake
   - Whether or not the serialized JSON will be used as JSONP (which requires slightly more work be done w.r.t. escaping)
   - Whether or not to include inherited members when serializing
+  - The way to format member names; one of
+    * Verbatim
+	  - As it appears in source, unless modified by a `[MemberName]` or `[JilDirective]`
+	* CamelCase
+	  - lowercasing the first letter of members, ie. `"CamelCase"` would become `"camelCase"`
 
 ## Benchmarks
 
