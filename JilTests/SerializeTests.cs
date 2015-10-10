@@ -8431,7 +8431,7 @@ namespace JilTests
                     Assert.AreEqual("{\"Foo\":\"bar\"}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.AreEqual("{}", str2);
                 }
 
                 {
@@ -8440,7 +8440,7 @@ namespace JilTests
                     Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.AreEqual("{}", str2);
                 }
 
                 {
@@ -8449,7 +8449,7 @@ namespace JilTests
                     Assert.AreEqual("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.AreEqual("{}", str2);
                 }
 
                 {
@@ -8458,7 +8458,7 @@ namespace JilTests
                     Assert.AreEqual("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.AreEqual("{}", str2);
                 }
             }
         }
