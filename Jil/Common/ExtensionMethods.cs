@@ -839,6 +839,11 @@ namespace Jil.Common
                 t == typeof(TimeSpan);
         }
 
+        public static bool IsPrimitiveWrapper(this Type type)
+        {
+            return type.GetCustomAttribute<JilPrimitiveWrapper>() != null;
+        }
+
         public static bool IsStringyType(this MemberInfo member)
         {
             var asField = member as FieldInfo;

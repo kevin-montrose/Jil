@@ -31,7 +31,7 @@ namespace Jil.Serialize
         internal const int CharBufferSize = 36;
         internal const int RecursionLimit = 50;
 
-        static Dictionary<char, string> CharacterEscapes = 
+        static Dictionary<char, string> CharacterEscapes =
             new Dictionary<char, string>
             {
                 { '\\',  @"\\" },
@@ -124,7 +124,7 @@ namespace Jil.Serialize
             }
         }
 
-        static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
+        static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new[] { typeof(string) });
         static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod("Write", new[] { typeof(string) });
         static MethodInfo ThunkWriter_WriteCommonConstant = typeof(ThunkWriter).GetMethod("WriteCommonConstant", new[] { typeof(ConstantString_Common) });
         static MethodInfo ThunkWriter_WriteFormatingContant = typeof(ThunkWriter).GetMethod("WriteFormattingConstant", new[] { typeof(ConstantString_Formatting) });
@@ -404,10 +404,10 @@ namespace Jil.Serialize
             }
 
             // Only put this on the stack if we'll need it
-            var preloadTextWriter = 
+            var preloadTextWriter =
                 serializingType.IsPrimitiveType() ||
                 (serializingType.IsEnum && member.ShouldConvertEnum(serializingType)) ||
-                isRecursive || 
+                isRecursive ||
                 serializingType.IsNullableType();
             if (preloadTextWriter)
             {
@@ -479,6 +479,11 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (serializingType.IsPrimitiveWrapper())
+            {
+                WritePrimitiveWrapper(serializingType, qoutesNeedHandling: true);
+            }
+
             if (serializingType.IsNullableType())
             {
                 WriteNullable(member, serializingType, quotesNeedHandling: true);
@@ -503,6 +508,40 @@ namespace Jil.Serialize
 
                 WriteObject(serializingType, loc);
             }
+        }
+
+        void WritePrimitiveWrapper(Type primitiveWrapperType, bool qoutesNeedHandling)
+        {
+            // Top of stack is
+            //  - primitive wrapper
+            //  - TextWriter
+
+            var primitiveProperty = primitiveWrapperType
+                .GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .Single(p => p.PropertyType.IsPrimitiveType());
+
+            var primitiveType = primitiveProperty.PropertyType;
+            var done = Emit.DefineLabel();
+
+            using (var loc = Emit.DeclareLocal(primitiveWrapperType))
+            {
+                var notNull = Emit.DefineLabel();
+
+                Emit.StoreLocal(loc);           // TextWriter
+                Emit.LoadLocal(loc);            // TextWriter primitiveWrapperType
+                Emit.BranchIfTrue(notNull);     // TextWriter
+
+                Emit.Pop();                 // --empty--
+                WriteString("null");        // --empty--
+                Emit.Branch(done);          // --empty--
+
+                Emit.MarkLabel(notNull);    // TextWriter
+                Emit.LoadLocal(loc);        // TextWriter primitiveWrapperType
+                LoadProperty(primitiveProperty);        // TextValue value
+            }
+
+            WritePrimitive(primitiveType, qoutesNeedHandling);
+            Emit.MarkLabel(done);
         }
 
         void WriteNullable(MemberInfo nullableMember, Type nullableType, bool quotesNeedHandling)
@@ -561,7 +600,7 @@ namespace Jil.Serialize
                             {
                                 act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
                             }
-                            
+
                             var invoke = act.GetMethod("Invoke");
 
                             Emit.Pop();                                     // --empty--
@@ -770,7 +809,7 @@ namespace Jil.Serialize
             if (!UseCustomISODateFormatting)
             {
                 var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
-                
+
                 using (var loc = Emit.DeclareLocal<DateTime>())
                 {
                     Emit.StoreLocal(loc);       // TextWriter
@@ -932,12 +971,12 @@ namespace Jil.Serialize
 
             Emit.LoadLocal(CharBuffer);                                         // TextWriter TimeSpan char[]
 
-            switch(DateFormat)
+            switch (DateFormat)
             {
-                case DateTimeFormat.ISO8601: 
+                case DateTimeFormat.ISO8601:
                     Emit.Call(Methods.GetWriteTimeSpanISO8601(BuildingToString));       // --empty--
                     return;
-                
+
                 case DateTimeFormat.RFC1123:
                 case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
                     Emit.Call(Methods.GetWriteTimeSpanMicrosoft(BuildingToString));    // --empty--
@@ -966,13 +1005,13 @@ namespace Jil.Serialize
                 Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
                 LoadProperty(kind);                                 // TextWriter DateTimeKind
                 Emit.LoadConstant((int)DateTimeKind.Unspecified);   // TextWriter DateTimeKind DateTimeKind
-                
+
                 Emit.UnsignedBranchIfNotEqual(noChange);            // TextWriter
                 Emit.LoadLocal(loc);                                // TextWriter DateTime
                 Emit.LoadConstant((int)convertToKind);              // TextWriter DateTime DateTimeKind
                 Emit.Call(specifyKind);                             // TextWriter DateTime
                 Emit.StoreLocal(loc);                               // TextWriter
-                
+
                 Emit.MarkLabel(noChange);                           // TextWriter
                 Emit.LoadLocalAddress(loc);                         // TextWriter DateTime*
                 Emit.Call(toUniversalTime);                         // TextWriter DateTime
@@ -1053,11 +1092,11 @@ namespace Jil.Serialize
                 {
                     Emit.Call(GetWriteEncodedStringMethod());
                 }
-                
+
                 return;
             }
 
-            if(primitiveType == typeof(TimeSpan))
+            if (primitiveType == typeof(TimeSpan))
             {
                 WriteTimeSpan();
                 return;
@@ -1081,7 +1120,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            if(primitiveType == typeof(bool))
+            if (primitiveType == typeof(bool))
             {
                 var trueLabel = Emit.DefineLabel();
                 var done = Emit.DefineLabel();
@@ -1188,7 +1227,7 @@ namespace Jil.Serialize
             //  so we have to bail on them
 
             MethodInfo validateCall;
-            if(type == typeof(double))
+            if (type == typeof(double))
             {
                 validateCall = Methods.GetValidateDouble();
             }
@@ -1197,7 +1236,8 @@ namespace Jil.Serialize
                 if (type == typeof(float))
                 {
                     validateCall = Methods.GetValidateFloat();
-                }else
+                }
+                else
                 {
                     // decimal has no NaN values, so no checks are needed
                     return;
@@ -1218,7 +1258,7 @@ namespace Jil.Serialize
 
             Emit.LoadLocal(CharBuffer);                         // TextWriter Guid char[]
             Emit.Call(Methods.GetWriteGuid(BuildingToString));  // --empty--
-            
+
             if (quotesNeedHandling)
             {
                 WriteString("\"");                              // --empty--
@@ -1298,7 +1338,7 @@ namespace Jil.Serialize
                 var label = Emit.DefineLabel();
 
                 labels.Add(Tuple.Create(label, pair.Item2));
-                
+
                 prev = pair.Item1;
             }
 
@@ -1642,7 +1682,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);                    // obj(*?)
             WriteString("{");                           // obj(*?)
 
-            IncreaseIndent();           
+            IncreaseIndent();
 
             using (var isFirst = Emit.DeclareLocal<bool>())
             {
@@ -1882,7 +1922,7 @@ namespace Jil.Serialize
             var accessorMtd = listInterface.GetProperty("Item").GetMethod;
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || (listMember != null && elementType.IsEnum && listMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = elementType.IsPrimitiveType() || elementType.IsPrimitiveWrapper() || (listMember != null && elementType.IsEnum && listMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
 
             var notNull = Emit.DefineLabel();
 
@@ -2257,6 +2297,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (elementType.IsPrimitiveWrapper())
+            {
+                WritePrimitiveWrapper(elementType, qoutesNeedHandling: true);
+                return;
+            }
+
             if (elementType.IsNullableType())
             {
                 WriteNullable(listMember, elementType, quotesNeedHandling: true);
@@ -2295,7 +2341,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            using(var loc = Emit.DeclareLocal(elementType))
+            using (var loc = Emit.DeclareLocal(elementType))
             {
                 Emit.StoreLocal(loc);
 
@@ -2325,7 +2371,7 @@ namespace Jil.Serialize
         {
             // Exact god-damn match
             var isThisType = onType == typeof(ForType);
-            
+
             if (isThisType)
             {
                 var alreadyWorkingOnThisType = CallOutOnPossibleDynamic && WritingDynamicObject.Contains(onType);
@@ -2617,7 +2663,7 @@ namespace Jil.Serialize
             }
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || (dictionaryMember != null && elementType.IsEnum && dictionaryMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = elementType.IsPrimitiveType() || elementType.IsPrimitiveWrapper() || (dictionaryMember != null && elementType.IsEnum && dictionaryMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
 
             var notNull = Emit.DefineLabel();
 
@@ -2873,6 +2919,15 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (elementType.IsPrimitiveWrapper())
+            {
+                WritePrimitiveWrapper(elementType, qoutesNeedHandling: true);
+
+                Emit.MarkLabel(done);
+
+                return;
+            }
+
             if (elementType.IsNullableType())
             {
                 WriteNullable(dictionaryMember, elementType, quotesNeedHandling: true);
@@ -2954,17 +3009,17 @@ namespace Jil.Serialize
 
         public MethodInfo GetWriteEncodedStringWithQuotesMethod()
         {
-            return 
-                JSONP ? 
-                    Methods.GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(BuildingToString) : 
+            return
+                JSONP ?
+                    Methods.GetWriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe(BuildingToString) :
                     Methods.GetWriteEncodedStringWithQuotesWithNullsInlineUnsafe(BuildingToString);
         }
 
         MethodInfo GetWriteEncodedStringMethod()
         {
             return
-                JSONP ? 
-                    Methods.GetWriteEncodedStringWithNullsInlineJSONPUnsafe(BuildingToString) : 
+                JSONP ?
+                    Methods.GetWriteEncodedStringWithNullsInlineJSONPUnsafe(BuildingToString) :
                     Methods.GetWriteEncodedStringWithNullsInlineUnsafe(BuildingToString);
         }
 
@@ -3059,6 +3114,12 @@ namespace Jil.Serialize
             if (elementType.IsPrimitiveType())
             {
                 WritePrimitive(elementType, quotesNeedHandling: true);
+                return;
+            }
+
+            if (elementType.IsPrimitiveWrapper())
+            {
+                WritePrimitiveWrapper(elementType, qoutesNeedHandling: true);
                 return;
             }
 
@@ -3182,7 +3243,7 @@ namespace Jil.Serialize
             }
 
             Emit.MarkLabel(done);           // TextWriter?
-            
+
             if (popTextWriter)
             {
                 Emit.Pop();
@@ -3196,7 +3257,7 @@ namespace Jil.Serialize
                 throw new ConstructionException("Unexpected type: " + type);
             }
         }
-        
+
         void WriteDiscontiguousEnumeration(Type enumType, bool popTextWriter)
         {
             // top of stack
@@ -3391,35 +3452,35 @@ namespace Jil.Serialize
             var underlying = Enum.GetUnderlyingType(enumType);
 
             IEnumerable<Tuple<object, ulong>> asUlongs = null;
-            if(underlying == typeof(byte))
+            if (underlying == typeof(byte))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(byte)v));
             }
-            if(underlying == typeof(sbyte))
+            if (underlying == typeof(sbyte))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(sbyte)v));
             }
-            if(underlying == typeof(short))
+            if (underlying == typeof(short))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(short)v));
             }
-            if(underlying == typeof(ushort))
+            if (underlying == typeof(ushort))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(ushort)v));
             }
-            if(underlying == typeof(int))
+            if (underlying == typeof(int))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(int)v));
             }
-            if(underlying == typeof(uint))
+            if (underlying == typeof(uint))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(uint)v));
             }
-            if(underlying == typeof(long))
+            if (underlying == typeof(long))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)(long)v));
             }
-            if(underlying == typeof(ulong))
+            if (underlying == typeof(ulong))
             {
                 asUlongs = allValues.Cast<object>().Select(v => Tuple.Create(v, (ulong)v));
             }
@@ -3671,7 +3732,7 @@ namespace Jil.Serialize
 
         Action<TextWriter, ForType, int> BuildDictionaryWithNewDelegate(MemberInfo dynamicMember)
         {
-            BuildDictionaryWithNewImpl(dynamicMember);   
+            BuildDictionaryWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
@@ -3729,6 +3790,20 @@ namespace Jil.Serialize
             Emit.Return();
         }
 
+        void BuildPrimitiveWrapperWithNewImpl()
+        {
+            Emit = MakeEmit(typeof(ForType));
+
+            AddCharBuffer(typeof(ForType));
+
+            Emit.LoadArgument(0);
+            Emit.LoadArgument(1);
+
+            WritePrimitiveWrapper(typeof(ForType), qoutesNeedHandling: true);
+
+            Emit.Return();
+        }
+
         Action<TextWriter, ForType, int> BuildNullableWithNewDelegate(MemberInfo dynamicMember)
         {
             BuildNullableWithNewImpl(dynamicMember);
@@ -3736,9 +3811,23 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
+        Action<TextWriter, ForType, int> BuildPrimitiveWrapperWithNewDelegate()
+        {
+            BuildPrimitiveWrapperWithNewImpl();
+
+            return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
+        }
+
         StringThunkDelegate<ForType> BuildNullableWithNewDelegateToString()
         {
             BuildNullableWithNewImpl(null);
+
+            return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
+        }
+
+        StringThunkDelegate<ForType> BuildPrimitiveWrapperWithNewDelegateToString()
+        {
+            BuildPrimitiveWrapperWithNewImpl();
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -3785,6 +3874,11 @@ namespace Jil.Serialize
                 return BuildNullableWithNewDelegate(dynamicMember);
             }
 
+            if (forType.IsPrimitiveWrapper())
+            {
+                return BuildPrimitiveWrapperWithNewDelegate();
+            }
+
             if (forType.IsPrimitiveType())
             {
                 return BuildPrimitiveWithNewDelegate();
@@ -3820,6 +3914,11 @@ namespace Jil.Serialize
             if (forType.IsNullableType())
             {
                 return BuildNullableWithNewDelegateToString();
+            }
+
+            if (forType.IsPrimitiveWrapper())
+            {
+                return BuildPrimitiveWrapperWithNewDelegateToString();
             }
 
             if (forType.IsPrimitiveType())
@@ -3927,4 +4026,4 @@ namespace Jil.Serialize
             return ret;
         }
     }
-} 
+}
