@@ -1498,52 +1498,7 @@ namespace Jil.Serialize
             var firstPass = true;
             foreach (var members in writeOrder)
             {
-                if(members.Count > 1)
-                {
-                    throw new NotImplementedException("TODO: Unions!");
-                }
-
-                var member = members[0];
-
-                if (PropagateConstants && member.IsConstant())
-                {
-                    WriteConstantMember(member, prependComma: !firstPass);
-                    firstPass = false;
-                }
-                else
-                {
-                    if (!PrettyPrint)
-                    {
-                        string keyString;
-                        if (firstPass)
-                        {
-                            keyString = "\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
-                            firstPass = false;
-                        }
-                        else
-                        {
-                            keyString = ",\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
-                        }
-
-                        WriteString(keyString);         // --empty--
-                        WriteMember(member, inLocal);   // --empty--
-                    }
-                    else
-                    {
-                        if (!firstPass)
-                        {
-                            WriteString(",");
-                        }
-
-                        LineBreakAndIndent();
-
-                        firstPass = false;
-
-                        WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ");
-
-                        WriteMember(member, inLocal);
-                    }
-                }
+                WriteMembersWithNullsWithoutConditionalSerialization(members, inLocal, ref firstPass);
             }
 
             DecreaseIndent();
@@ -1551,6 +1506,61 @@ namespace Jil.Serialize
             WriteString("}");       // --empty--
 
             Emit.MarkLabel(end);
+        }
+
+        void WriteMemberWithNullsWithoutConditionalSerialization(MemberInfo member, Sigil.Local inLocal, ref bool firstPass)
+        {
+            if (PropagateConstants && member.IsConstant())
+            {
+                WriteConstantMember(member, prependComma: !firstPass);
+                firstPass = false;
+            }
+            else
+            {
+                if (!PrettyPrint)
+                {
+                    string keyString;
+                    if (firstPass)
+                    {
+                        keyString = "\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
+                        firstPass = false;
+                    }
+                    else
+                    {
+                        keyString = ",\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\":";
+                    }
+
+                    WriteString(keyString);         // --empty--
+                    WriteMember(member, inLocal);   // --empty--
+                }
+                else
+                {
+                    if (!firstPass)
+                    {
+                        WriteString(",");
+                    }
+
+                    LineBreakAndIndent();
+
+                    firstPass = false;
+
+                    WriteString("\"" + member.GetSerializationName(SerializationNameFormat).JsonEscape(JSONP) + "\": ");
+
+                    WriteMember(member, inLocal);
+                }
+            }
+        }
+
+        void WriteMembersWithNullsWithoutConditionalSerialization(List<MemberInfo> members, Sigil.Local inLocal, ref bool firstPass)
+        {
+            if (members.Count > 1)
+            {
+                throw new NotImplementedException("TODO: Unions!");
+            }
+
+            var member = members[0];
+
+            WriteMemberWithNullsWithoutConditionalSerialization(member, inLocal, ref firstPass);
         }
 
         void WriteObject(Type forType, Sigil.Local inLocal = null)
