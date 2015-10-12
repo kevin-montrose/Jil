@@ -1799,7 +1799,10 @@ namespace Jil.Serialize
 
         void WriteMembersIfNotNull(Type forType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
-            __WriteMembers(true, true, forType, members, inLocal, isFirst, WriteMemberIfNonNull);
+            WriteMemberDelegate write =
+                (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberIfNonNull(t, m, iL, iF);
+
+            __WriteMembers(true, true, forType, members, inLocal, isFirst, null, write);
         }
 
         void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -1987,9 +1990,10 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
+        delegate void WriteMemberDelegate(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass);
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new[] { typeof(Type) });
-        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, Action<Type, MemberInfo, Sigil.Local, Sigil.Local> doWriteMember)
+        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, bool? firstPass, WriteMemberDelegate doWriteMember)
         {
             // top of stack
             //  - obj(*?)
@@ -2054,10 +2058,10 @@ namespace Jil.Serialize
                                 }
                             }
                         }
-                        doWriteMember(onType, toWriteMember, inLocal, isFirst);             // [obj(*?)] obj(*?) 
-                        Emit.Branch(done);                                                  // [obj(*?)]
+                        doWriteMember(onType, toWriteMember, inLocal, isFirst, ref firstPass);  // [obj(*?)] obj(*?) 
+                        Emit.Branch(done);                                                      // [obj(*?)]
 
-                        Emit.MarkLabel(next);                                               // obj(*?) Type
+                        Emit.MarkLabel(next);                                                   // obj(*?) Type
                     }
 
                     // TODO: Include the wrong type & the expected types
@@ -2081,12 +2085,15 @@ namespace Jil.Serialize
             {
                 Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
             }
-            doWriteMember(onType, member, inLocal, isFirst);                                // [obj(*?)]
+            doWriteMember(onType, member, inLocal, isFirst, ref firstPass);                 // [obj(*?)]
         }
 
         void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
-            __WriteMembers(true, false, onType, members, inLocal, isFirst, WriteMemberConditionally);
+            WriteMemberDelegate write = 
+                (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberConditionally(t, m, iL, iF);
+
+            __WriteMembers(true, false, onType, members, inLocal, isFirst, null, write);
         }
 
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
