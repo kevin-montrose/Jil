@@ -1562,7 +1562,7 @@ namespace Jil.Serialize
                  };
 
             bool? firstPassProxy = firstPass;
-            __WriteMembers(false, false, onType, members, inLocal, null, ref firstPassProxy, write);
+            UnionAwareWriteMembers(false, false, onType, members, inLocal, null, ref firstPassProxy, write);
             firstPass = firstPassProxy.Value;
         }
 
@@ -1733,7 +1733,7 @@ namespace Jil.Serialize
                 (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberIfNonNull(t, m, iL, iF);
 
             bool? ignored = null;
-            __WriteMembers(true, true, forType, members, inLocal, isFirst, ref ignored, write);
+            UnionAwareWriteMembers(true, true, forType, members, inLocal, isFirst, ref ignored, write);
         }
 
         void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -1924,7 +1924,7 @@ namespace Jil.Serialize
         delegate void WriteMemberDelegate(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass);
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new[] { typeof(Type) });
-        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass, WriteMemberDelegate doWriteMember)
+        void UnionAwareWriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass, WriteMemberDelegate doWriteMember)
         {
             // top of stack
             //  - obj(*?)
@@ -2039,7 +2039,7 @@ namespace Jil.Serialize
                 (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberConditionally(t, m, iL, iF);
 
             bool? ignored = null;
-            __WriteMembers(true, false, onType, members, inLocal, isFirst, ref ignored, write);
+            UnionAwareWriteMembers(true, false, onType, members, inLocal, isFirst, ref ignored, write);
         }
 
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
