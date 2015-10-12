@@ -1799,7 +1799,7 @@ namespace Jil.Serialize
 
         void WriteMembersIfNotNull(Type forType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
-            __WriteMembers(true, forType, members, inLocal, isFirst, WriteMemberIfNonNull);
+            __WriteMembers(true, true, forType, members, inLocal, isFirst, WriteMemberIfNonNull);
         }
 
         void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -1989,7 +1989,7 @@ namespace Jil.Serialize
 
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new[] { typeof(Type) });
-        void __WriteMembers(bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, Action<Type, MemberInfo, Sigil.Local, Sigil.Local> doWriteMember)
+        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, Action<Type, MemberInfo, Sigil.Local, Sigil.Local> doWriteMember)
         {
             // top of stack
             //  - obj(*?)
@@ -2038,7 +2038,21 @@ namespace Jil.Serialize
                         Emit.Pop();                                                         // obj(*?) 
                         if (leaveObjectOnStack)
                         {
-                            Emit.Duplicate();                                               // obj(*?) obj(*?)
+                            if (objectOnStack)
+                            {
+                                Emit.Duplicate();                                           // obj(*?) obj(*?)
+                            }
+                            else
+                            {
+                                if (inLocal != null)
+                                {
+                                    Emit.LoadLocal(inLocal);                                // obj(*?) obj(*?)
+                                }
+                                else
+                                {
+                                    Emit.LoadArgument(1);                                   // obj(*?) obj(*?)
+                                }
+                            }
                         }
                         doWriteMember(onType, toWriteMember, inLocal, isFirst);             // [obj(*?)] obj(*?) 
                         Emit.Branch(done);                                                  // [obj(*?)]
@@ -2072,7 +2086,7 @@ namespace Jil.Serialize
 
         void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
-            __WriteMembers(false, onType, members, inLocal, isFirst, WriteMemberConditionally);
+            __WriteMembers(true, false, onType, members, inLocal, isFirst, WriteMemberConditionally);
         }
 
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
