@@ -1955,11 +1955,21 @@ namespace Jil.Serialize
                         Emit.LoadField((FieldInfo)memberType);          // [obj(*?)] Type
                     }
 
+                    var typeIsSet = Emit.DefineLabel();
+
+                    Emit.Duplicate();                                   // [obj(*?)] Type Type
+                    Emit.BranchIfTrue(typeIsSet);                       // [obj(*?)] Type
+
+                    // type signal member was null, we need to set the sigil
+                    Emit.Pop();                                         // [obj(*?)]
+                    Emit.LoadConstant(typeof(UnionMembersNullSigil));   // [obj(*?)] RuntimeTypeHandle
+                    Emit.Call(Type_GetTypeFromTypeHandle);              // [obj(*?)] Type
+
+                    Emit.MarkLabel(typeIsSet);                          // [obj(*?)] Type
                 }
                 else
                 {
                     DetermineNonNullMember(members, inLocal);           // [obj(*?)] Type
-                    //throw new NotImplementedException("TODO: Unions that don't have type members");
                 }
 
                 var done = Emit.DefineLabel();
@@ -2010,12 +2020,42 @@ namespace Jil.Serialize
                     Emit.MarkLabel(next);                                                       // [obj(*?)] Type
                 }
 
-                if (updateFirstPassTo != null)
+                var notNullSigil = Emit.DefineLabel();
+
+                Emit.Duplicate();                                       // [obj(*?)] Type Type
+                Emit.LoadConstant(typeof(UnionMembersNullSigil));       // [obj(*?)] Type Type RuntimeTypeHandle
+                Emit.Call(Type_GetTypeFromTypeHandle);                  // [obj(*?)] Type Type Type
+                Emit.Call(Type_Equals);                                 // [obj(*?)] Type bool
+                Emit.BranchIfFalse(notNullSigil);                       // [obj(*?)] Type
+
+                Emit.Pop();                                             // [obj(*?)]
+
+                if (ExcludeNulls)
                 {
-                    firstPass = updateFirstPassTo.Value;
+                    // nothing to be done, move on
+                    Emit.Branch(done);
+                }
+                else
+                {
+                    // they're all null so go ahead and hit the first member, and be done
+                    if (leaveObjectOnStack)
+                    {
+                        Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
+                    }
+
+                    var wouldBeFirst = firstPass;
+                    doWriteMember(onType, members[0], inLocal, isFirst, ref wouldBeFirst);          // [obj(*?)]
+                    Emit.Branch(done);                                                              // [obj(*?)]
+
+                    if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
+                    {
+                        updateFirstPassTo = wouldBeFirst;
+                    }
                 }
 
-                // TODO: Include the wrong type & the expected types
+                // what we got was unexpected, time to signal
+                Emit.MarkLabel(notNullSigil);                           // [obj(*?)] Type
+
                 var expectedOneOf = string.Join(", ", members.Select(m => m.ReturnType().Name));
 
                 Emit.LoadConstant(expectedOneOf);                                       // obj(*?) Type string
@@ -2096,11 +2136,10 @@ namespace Jil.Serialize
             }
 
             // No match, signal appropriately
-            // TODO: Deal with this case
-            Emit.LoadConstant(typeof(object));              // RuntimeTypeHandle
+            Emit.LoadConstant(typeof(UnionMembersNullSigil));   // RuntimeTypeHandle
 
-            Emit.MarkLabel(done);                           // RuntimeTypeHandle
-            Emit.Call(Type_GetTypeFromTypeHandle);          // Type
+            Emit.MarkLabel(done);                               // RuntimeTypeHandle
+            Emit.Call(Type_GetTypeFromTypeHandle);              // Type
         }
 
         void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -3826,8 +3865,6 @@ namespace Jil.Serialize
         StringThunkDelegate<ForType> BuildObjectWithNewDelegateToString()
         {
             BuildObjectWithNewImpl();
-
-            //return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
 
             string ops;
             var ret = Emit.CreateDelegate<StringThunkDelegate<ForType>>(out ops, Utils.DelegateOptimizationOptions);
