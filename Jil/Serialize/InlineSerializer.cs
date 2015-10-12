@@ -1927,7 +1927,7 @@ namespace Jil.Serialize
         void UnionAwareWriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass, WriteMemberDelegate doWriteMember)
         {
             // top of stack
-            //  - obj(*?)
+            //  - [obj(*?)]
 
             if (members.Count > 1)
             {
@@ -1939,87 +1939,90 @@ namespace Jil.Serialize
                 {
                     if (inLocal != null)
                     {
-                        Emit.LoadLocal(inLocal);                        // obj(*?) ForType(*?)
+                        Emit.LoadLocal(inLocal);                        // [obj(*?)] ForType(*?)
                     }
                     else
                     {
-                        Emit.LoadArgument(1);                           //  obj(*?) ForType(*?)
+                        Emit.LoadArgument(1);                           // [obj(*?)] ForType(*?)
                     }
 
                     if (memberType is PropertyInfo)
                     {
-                        LoadProperty((PropertyInfo)memberType);         // obj(*?)  Type
+                        LoadProperty((PropertyInfo)memberType);         // [obj(*?)]  Type
                     }
                     else
                     {
-                        Emit.LoadField((FieldInfo)memberType);          // obj(*?)  Type
+                        Emit.LoadField((FieldInfo)memberType);          // [obj(*?)] Type
                     }
 
-                    var done = Emit.DefineLabel();
-
-                    bool? updateFirstPassTo = null;
-                    foreach (var toWriteMember in withoutUnionType)
-                    {
-                        var next = Emit.DefineLabel();
-
-                        var type = toWriteMember.ReturnType();
-
-                        Emit.Duplicate();                                                   // obj(*?) Type Type
-                        Emit.LoadConstant(type);                                            // obj(*?) Type Type RuntimeTypeHandle
-                        Emit.Call(Type_GetTypeFromTypeHandle);                              // obj(*?) Type Type Type
-
-                        Emit.Call(Type_Equals);                                             // obj(*?) Type bool
-                        Emit.BranchIfFalse(next);                                           // obj(*?) Type
-
-                        Emit.Pop();                                                         // obj(*?) 
-                        if (leaveObjectOnStack)
-                        {
-                            if (objectOnStack)
-                            {
-                                Emit.Duplicate();                                           // obj(*?) obj(*?)
-                            }
-                            else
-                            {
-                                if (inLocal != null)
-                                {
-                                    Emit.LoadLocal(inLocal);                                // obj(*?) obj(*?)
-                                }
-                                else
-                                {
-                                    Emit.LoadArgument(1);                                   // obj(*?) obj(*?)
-                                }
-                            }
-                        }
-
-                        // make firstPass work damn it!
-                        var wouldBeFirst = firstPass;
-                        doWriteMember(onType, toWriteMember, inLocal, isFirst, ref wouldBeFirst);   // [obj(*?)] obj(*?) 
-                        Emit.Branch(done);                                                          // [obj(*?)]
-
-                        if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
-                        {
-                            updateFirstPassTo = wouldBeFirst;
-                        }
-
-                        Emit.MarkLabel(next);                                                       // obj(*?) Type
-                    }
-
-                    if (updateFirstPassTo != null)
-                    {
-                        firstPass = updateFirstPassTo.Value;
-                    }
-
-                    // TODO: Include the wrong type & the expected types
-                    Emit.LoadConstant("Unexpected type in IsUnionType member");             // obj(*?) Type string
-                    Emit.NewObject<Exception, string>();                                    // obj(*?) Type Exception
-                    Emit.Throw();                                                           // --empty--
-
-                    Emit.MarkLabel(done);                                                   // [obj(*?)]
                 }
                 else
                 {
-                    throw new NotImplementedException("TODO: Unions that don't have type members");
+                    DetermineNonNullMember(members, inLocal);           // [obj(*?)] Type
+                    //throw new NotImplementedException("TODO: Unions that don't have type members");
                 }
+
+                var done = Emit.DefineLabel();
+
+                bool? updateFirstPassTo = null;
+                foreach (var toWriteMember in withoutUnionType)
+                {
+                    var next = Emit.DefineLabel();
+
+                    var type = toWriteMember.ReturnType();
+
+                    Emit.Duplicate();                                                   // [obj(*?)] Type Type
+                    Emit.LoadConstant(type);                                            // [obj(*?)] Type Type RuntimeTypeHandle
+                    Emit.Call(Type_GetTypeFromTypeHandle);                              // [obj(*?)] Type Type Type
+
+                    Emit.Call(Type_Equals);                                             // [obj(*?)] Type bool
+                    Emit.BranchIfFalse(next);                                           // [obj(*?)] Type
+
+                    Emit.Pop();                                                         // [obj(*?)] 
+                    if (leaveObjectOnStack)
+                    {
+                        if (objectOnStack)
+                        {
+                            Emit.Duplicate();                                           // obj(*?) obj(*?)
+                        }
+                        else
+                        {
+                            if (inLocal != null)
+                            {
+                                Emit.LoadLocal(inLocal);                                // obj(*?) obj(*?)
+                            }
+                            else
+                            {
+                                Emit.LoadArgument(1);                                   // obj(*?) obj(*?)
+                            }
+                        }
+                    }
+
+                    var wouldBeFirst = firstPass;
+                    doWriteMember(onType, toWriteMember, inLocal, isFirst, ref wouldBeFirst);   // [obj(*?)] obj(*?) 
+                    Emit.Branch(done);                                                          // [obj(*?)]
+
+                    if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
+                    {
+                        updateFirstPassTo = wouldBeFirst;
+                    }
+
+                    Emit.MarkLabel(next);                                                       // [obj(*?)] Type
+                }
+
+                if (updateFirstPassTo != null)
+                {
+                    firstPass = updateFirstPassTo.Value;
+                }
+
+                // TODO: Include the wrong type & the expected types
+                var expectedOneOf = string.Join(", ", members.Select(m => m.ReturnType().Name));
+
+                Emit.LoadConstant(expectedOneOf);                                       // obj(*?) Type string
+                Emit.Call(CreateUnexpectedTypeException);                               // obj(*?) Exception
+                Emit.Throw();                                                           // --empty--
+
+                Emit.MarkLabel(done);                                                   // [obj(*?)]
 
                 return;
             }
@@ -2031,6 +2034,73 @@ namespace Jil.Serialize
                 Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
             }
             doWriteMember(onType, member, inLocal, isFirst, ref firstPass);                 // [obj(*?)]
+        }
+
+        static readonly MethodInfo CreateUnexpectedTypeException = typeof(InlineSerializer<ForType>).GetMethod("_CreateUnexpectedTypeException", BindingFlags.NonPublic | BindingFlags.Static);
+        static Exception _CreateUnexpectedTypeException(Type observedType, string oneOf)
+        {
+            return new Exception("Unexpected type provided during union serialization [" + observedType.Name + "], expected one of " + oneOf);
+        }
+
+        void DetermineNonNullMember(List<MemberInfo> members, Sigil.Local inLocal)
+        {
+            // treat stack as if empty
+            
+            var done = Emit.DefineLabel();
+
+            foreach (var member in members)
+            {
+                var next = Emit.DefineLabel();
+
+                var memberType = member.ReturnType();
+
+                if (inLocal != null)
+                {
+                    Emit.LoadLocal(inLocal);                // obj(*?)
+                }
+                else
+                {
+                    Emit.LoadArgument(1);                   // obj(*?)
+                }
+
+                var asProp = member as PropertyInfo;
+                if (asProp != null)
+                {
+                    LoadProperty(asProp);                   // memberType
+                }
+                else
+                {
+                    Emit.LoadField((FieldInfo)member);      // memberType
+                }
+
+                if (memberType.IsValueType)
+                {
+                    using(var loc = Emit.DeclareLocal(member.ReturnType()))
+                    {
+                        Emit.StoreLocal(loc);
+                        Emit.LoadLocalAddress(loc);         // memberType(*?)
+                    }
+                }
+
+                if (memberType.IsNullableType())
+                {
+                    var hasValue = memberType.GetProperty("HasValue").GetMethod;
+                    Emit.Call(hasValue);                    // bool
+                }
+
+                Emit.BranchIfFalse(next);                   // --empty--
+                Emit.LoadConstant(memberType);              // RuntimeTypeHandle
+                Emit.Branch(done);                          // RuntimeTypeHandle
+
+                Emit.MarkLabel(next);
+            }
+
+            // No match, signal appropriately
+            // TODO: Deal with this case
+            Emit.LoadConstant(typeof(object));              // RuntimeTypeHandle
+
+            Emit.MarkLabel(done);                           // RuntimeTypeHandle
+            Emit.Call(Type_GetTypeFromTypeHandle);          // Type
         }
 
         void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
