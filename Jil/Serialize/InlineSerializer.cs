@@ -1799,77 +1799,7 @@ namespace Jil.Serialize
 
         void WriteMembersIfNotNull(Type forType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
         {
-            // top of stack is
-            // obj(*?)
-
-            if (members.Count > 1)
-            {
-                var memberType = members.SingleOrDefault(m => m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType);
-                var withoutUnionType = members.Where(m => !m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType).ToList();
-
-                // handle the case where there's a Type member to switch on
-                if (memberType != null)
-                {
-                    if (inLocal != null)
-                    {
-                        Emit.LoadLocal(inLocal);                        // obj(*?) ForType(*?)
-                    }
-                    else
-                    {
-                        Emit.LoadArgument(1);                           //  obj(*?) ForType(*?)
-                    }
-
-                    if (memberType is PropertyInfo)
-                    {
-                        LoadProperty((PropertyInfo)memberType);         // obj(*?)  Type
-                    }
-                    else
-                    {
-                        Emit.LoadField((FieldInfo)memberType);          // obj(*?)  Type
-                    }
-
-                    var done = Emit.DefineLabel();
-
-                    foreach (var toWriteMember in withoutUnionType)
-                    {
-                        var next = Emit.DefineLabel();
-
-                        var type = toWriteMember.ReturnType();
-
-                        Emit.Duplicate();                                                   // obj(*?) Type Type
-                        Emit.LoadConstant(type);                                            // obj(*?) Type Type RuntimeTypeHandle
-                        Emit.Call(Type_GetTypeFromTypeHandle);                              // obj(*?) Type Type Type
-
-                        Emit.Call(Type_Equals);                                             // obj(*?) Type bool
-                        Emit.BranchIfFalse(next);                                           // obj(*?) Type
-
-                        Emit.Pop();                                                         // obj(*?) 
-                        Emit.Duplicate();                                                   // obj(*?) obj(*?)
-                        WriteMemberIfNonNull(forType, toWriteMember, inLocal, isFirst);     // obj(*?) 
-                        Emit.Branch(done);                                                  // obj(*?)
-
-                        Emit.MarkLabel(next);                                               // obj(*?) Type
-                    }
-
-                    // TODO: Include the wrong type & the expected types
-                    Emit.LoadConstant("Unexpected type in IsUnionType member");             // obj(*?) Type string
-                    Emit.NewObject<Exception, string>();                                    // obj(*?) Type Exception
-                    Emit.Throw();                                                           // --empty--
-
-                    Emit.MarkLabel(done);                                                   // obj(*?)
-
-                    return;
-                }
-                else
-                {
-                    throw new NotImplementedException("TODO: Unions that don't have type members");
-                }
-            }
-
-            var member = members[0];
-
-            Emit.Duplicate();                                         // obj(*?) obj(*?)
-            WriteMemberIfNonNull(forType, member, inLocal, isFirst);  // obj(*?)
+            __WriteMembers(true, forType, members, inLocal, isFirst, WriteMemberIfNonNull);
         }
 
         void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -2058,8 +1988,8 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
-        static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new [] { typeof(Type) });
-        void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
+        static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new[] { typeof(Type) });
+        void __WriteMembers(bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, Action<Type, MemberInfo, Sigil.Local, Sigil.Local> doWriteMember)
         {
             // top of stack
             //  - obj(*?)
@@ -2106,10 +2036,14 @@ namespace Jil.Serialize
                         Emit.BranchIfFalse(next);                                           // obj(*?) Type
 
                         Emit.Pop();                                                         // obj(*?) 
-                        WriteMemberConditionally(onType, toWriteMember, inLocal, isFirst);  // obj(*?) 
-                        Emit.Branch(done);                                                  // --empty--
+                        if (leaveObjectOnStack)
+                        {
+                            Emit.Duplicate();                                               // obj(*?) obj(*?)
+                        }
+                        doWriteMember(onType, toWriteMember, inLocal, isFirst);             // [obj(*?)] obj(*?) 
+                        Emit.Branch(done);                                                  // [obj(*?)]
 
-                        Emit.MarkLabel(next);                                               // obj(*?)  Type
+                        Emit.MarkLabel(next);                                               // obj(*?) Type
                     }
 
                     // TODO: Include the wrong type & the expected types
@@ -2117,7 +2051,7 @@ namespace Jil.Serialize
                     Emit.NewObject<Exception, string>();                                    // obj(*?) Type Exception
                     Emit.Throw();                                                           // --empty--
 
-                    Emit.MarkLabel(done);                                                   // --empty--
+                    Emit.MarkLabel(done);                                                   // [obj(*?)]
                 }
                 else
                 {
@@ -2129,7 +2063,16 @@ namespace Jil.Serialize
 
             // single member case
             var member = members[0];
-            WriteMemberConditionally(onType, member, inLocal, isFirst);
+            if (leaveObjectOnStack)
+            {
+                Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
+            }
+            doWriteMember(onType, member, inLocal, isFirst);                                // [obj(*?)]
+        }
+
+        void WriteMembersConditionally(Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst)
+        {
+            __WriteMembers(false, onType, members, inLocal, isFirst, WriteMemberConditionally);
         }
 
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
