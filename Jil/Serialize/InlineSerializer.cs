@@ -1553,13 +1553,86 @@ namespace Jil.Serialize
 
         void WriteMembersWithNullsWithoutConditionalSerialization(List<MemberInfo> members, Sigil.Local inLocal, ref bool firstPass)
         {
+            // top of stack
+            // --empty--
+
             if (members.Count > 1)
             {
-                throw new NotImplementedException("TODO: Unions!");
+                var memberType = members.SingleOrDefault(m => m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType);
+                var withoutUnionType = members.Where(m => !m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType).ToList();
+
+                // handle the case where there's a Type member to switch on
+                if (memberType != null)
+                {
+                    if (inLocal != null)
+                    {
+                        Emit.LoadLocal(inLocal);                        // ForType(*?)
+                    }
+                    else
+                    {
+                        Emit.LoadArgument(1);                           // ForType(*?)
+                    }
+
+                    if (memberType is PropertyInfo)
+                    {
+                        LoadProperty((PropertyInfo)memberType);         // Type
+                    }
+                    else
+                    {
+                        Emit.LoadField((FieldInfo)memberType);          // Type
+                    }
+
+                    var done = Emit.DefineLabel();
+
+                    bool? updateFirstPassTo = null;
+                    foreach (var toWriteMember in withoutUnionType)
+                    {
+                        var next = Emit.DefineLabel();
+
+                        var type = toWriteMember.ReturnType();
+
+                        Emit.Duplicate();                                                                               // Type Type
+                        Emit.LoadConstant(type);                                                                        // Type Type RuntimeTypeHandle
+                        Emit.Call(Type_GetTypeFromTypeHandle);                                                          // Type Type Type
+
+                        Emit.Call(Type_Equals);                                                                         // Type bool
+                        Emit.BranchIfFalse(next);                                                                       // Type
+
+                        Emit.Pop();                                                                                     // --emtpy--
+                        var wouldBeFirst = firstPass;
+                        WriteMemberWithNullsWithoutConditionalSerialization(toWriteMember, inLocal, ref wouldBeFirst);  // --empty--
+                        Emit.Branch(done);                                                                              // --empty--
+                        if (wouldBeFirst != firstPass && updateFirstPassTo == null)
+                        {
+                            updateFirstPassTo = wouldBeFirst;
+                        }
+
+                        Emit.MarkLabel(next);                                                                           // Type
+                    }
+
+                    if (updateFirstPassTo != null)
+                    {
+                        firstPass = updateFirstPassTo.Value;
+                    }
+
+                    // TODO: Include the wrong type & the expected types
+                    Emit.LoadConstant("Unexpected type in IsUnionType member");             // Type string
+                    Emit.NewObject<Exception, string>();                                    // Type Exception
+                    Emit.Throw();                                                           // --empty--
+
+                    Emit.MarkLabel(done);                                                   // --empty--
+                }
+                else
+                {
+                    throw new NotImplementedException("TODO: Unions that don't have type members");
+                }
+
+                return;
             }
 
-            var member = members[0];
+            // single member case
 
+            var member = members[0];
             WriteMemberWithNullsWithoutConditionalSerialization(member, inLocal, ref firstPass);
         }
 
