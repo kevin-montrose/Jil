@@ -1498,7 +1498,7 @@ namespace Jil.Serialize
             var firstPass = true;
             foreach (var members in writeOrder)
             {
-                WriteMembersWithNullsWithoutConditionalSerialization(members, inLocal, ref firstPass);
+                WriteMembersWithNullsWithoutConditionalSerialization(forType, members, inLocal, ref firstPass);
             }
 
             DecreaseIndent();
@@ -1551,89 +1551,19 @@ namespace Jil.Serialize
             }
         }
 
-        void WriteMembersWithNullsWithoutConditionalSerialization(List<MemberInfo> members, Sigil.Local inLocal, ref bool firstPass)
+        void WriteMembersWithNullsWithoutConditionalSerialization(Type onType, List<MemberInfo> members, Sigil.Local inLocal, ref bool firstPass)
         {
-            // top of stack
-            // --empty--
+            WriteMemberDelegate write =
+                 (Type _, MemberInfo m, Sigil.Local iL, Sigil.Local __, ref bool? b) =>
+                 {
+                     var copyB = b.Value;
+                     WriteMemberWithNullsWithoutConditionalSerialization(m, iL, ref copyB);
+                     b = copyB;
+                 };
 
-            if (members.Count > 1)
-            {
-                var memberType = members.SingleOrDefault(m => m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType);
-                var withoutUnionType = members.Where(m => !m.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType).ToList();
-
-                // handle the case where there's a Type member to switch on
-                if (memberType != null)
-                {
-                    if (inLocal != null)
-                    {
-                        Emit.LoadLocal(inLocal);                        // ForType(*?)
-                    }
-                    else
-                    {
-                        Emit.LoadArgument(1);                           // ForType(*?)
-                    }
-
-                    if (memberType is PropertyInfo)
-                    {
-                        LoadProperty((PropertyInfo)memberType);         // Type
-                    }
-                    else
-                    {
-                        Emit.LoadField((FieldInfo)memberType);          // Type
-                    }
-
-                    var done = Emit.DefineLabel();
-
-                    bool? updateFirstPassTo = null;
-                    foreach (var toWriteMember in withoutUnionType)
-                    {
-                        var next = Emit.DefineLabel();
-
-                        var type = toWriteMember.ReturnType();
-
-                        Emit.Duplicate();                                                                               // Type Type
-                        Emit.LoadConstant(type);                                                                        // Type Type RuntimeTypeHandle
-                        Emit.Call(Type_GetTypeFromTypeHandle);                                                          // Type Type Type
-
-                        Emit.Call(Type_Equals);                                                                         // Type bool
-                        Emit.BranchIfFalse(next);                                                                       // Type
-
-                        Emit.Pop();                                                                                     // --emtpy--
-                        var wouldBeFirst = firstPass;
-                        WriteMemberWithNullsWithoutConditionalSerialization(toWriteMember, inLocal, ref wouldBeFirst);  // --empty--
-                        Emit.Branch(done);                                                                              // --empty--
-                        if (wouldBeFirst != firstPass && updateFirstPassTo == null)
-                        {
-                            updateFirstPassTo = wouldBeFirst;
-                        }
-
-                        Emit.MarkLabel(next);                                                                           // Type
-                    }
-
-                    if (updateFirstPassTo != null)
-                    {
-                        firstPass = updateFirstPassTo.Value;
-                    }
-
-                    // TODO: Include the wrong type & the expected types
-                    Emit.LoadConstant("Unexpected type in IsUnionType member");             // Type string
-                    Emit.NewObject<Exception, string>();                                    // Type Exception
-                    Emit.Throw();                                                           // --empty--
-
-                    Emit.MarkLabel(done);                                                   // --empty--
-                }
-                else
-                {
-                    throw new NotImplementedException("TODO: Unions that don't have type members");
-                }
-
-                return;
-            }
-
-            // single member case
-
-            var member = members[0];
-            WriteMemberWithNullsWithoutConditionalSerialization(member, inLocal, ref firstPass);
+            bool? firstPassProxy = firstPass;
+            __WriteMembers(false, false, onType, members, inLocal, null, ref firstPassProxy, write);
+            firstPass = firstPassProxy.Value;
         }
 
         void WriteObject(Type forType, Sigil.Local inLocal = null)
@@ -1802,7 +1732,8 @@ namespace Jil.Serialize
             WriteMemberDelegate write =
                 (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberIfNonNull(t, m, iL, iF);
 
-            __WriteMembers(true, true, forType, members, inLocal, isFirst, null, write);
+            bool? ignored = null;
+            __WriteMembers(true, true, forType, members, inLocal, isFirst, ref ignored, write);
         }
 
         void WriteMemberIfNonNull(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst)
@@ -1993,7 +1924,7 @@ namespace Jil.Serialize
         delegate void WriteMemberDelegate(Type onType, MemberInfo member, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass);
         static readonly MethodInfo Type_GetTypeFromTypeHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         static readonly MethodInfo Type_Equals = typeof(Type).GetMethod("Equals", new[] { typeof(Type) });
-        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, bool? firstPass, WriteMemberDelegate doWriteMember)
+        void __WriteMembers(bool objectOnStack, bool leaveObjectOnStack, Type onType, List<MemberInfo> members, Sigil.Local inLocal, Sigil.Local isFirst, ref bool? firstPass, WriteMemberDelegate doWriteMember)
         {
             // top of stack
             //  - obj(*?)
@@ -2026,6 +1957,7 @@ namespace Jil.Serialize
 
                     var done = Emit.DefineLabel();
 
+                    bool? updateFirstPassTo = null;
                     foreach (var toWriteMember in withoutUnionType)
                     {
                         var next = Emit.DefineLabel();
@@ -2058,10 +1990,23 @@ namespace Jil.Serialize
                                 }
                             }
                         }
-                        doWriteMember(onType, toWriteMember, inLocal, isFirst, ref firstPass);  // [obj(*?)] obj(*?) 
-                        Emit.Branch(done);                                                      // [obj(*?)]
 
-                        Emit.MarkLabel(next);                                                   // obj(*?) Type
+                        // make firstPass work damn it!
+                        var wouldBeFirst = firstPass;
+                        doWriteMember(onType, toWriteMember, inLocal, isFirst, ref wouldBeFirst);   // [obj(*?)] obj(*?) 
+                        Emit.Branch(done);                                                          // [obj(*?)]
+
+                        if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
+                        {
+                            updateFirstPassTo = wouldBeFirst;
+                        }
+
+                        Emit.MarkLabel(next);                                                       // obj(*?) Type
+                    }
+
+                    if (updateFirstPassTo != null)
+                    {
+                        firstPass = updateFirstPassTo.Value;
                     }
 
                     // TODO: Include the wrong type & the expected types
@@ -2093,7 +2038,8 @@ namespace Jil.Serialize
             WriteMemberDelegate write = 
                 (Type t, MemberInfo m, Sigil.Local iL, Sigil.Local iF, ref bool? _) => WriteMemberConditionally(t, m, iL, iF);
 
-            __WriteMembers(true, false, onType, members, inLocal, isFirst, null, write);
+            bool? ignored = null;
+            __WriteMembers(true, false, onType, members, inLocal, isFirst, ref ignored, write);
         }
 
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
