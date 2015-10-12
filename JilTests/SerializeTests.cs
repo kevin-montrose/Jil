@@ -8595,5 +8595,158 @@ namespace JilTests
                 }
             }
         }
+
+        class _DiscriminantUnionWithoutUnionType_1
+        {
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public int? AsNumber { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public Dictionary<string, string> AsDictionary { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public List<string> AsList { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public string AsString { get; set; }
+
+            public bool ShouldSerializeAsNumber() { return true; }
+        }
+
+        class _DiscriminantUnionWithoutUnionType_2
+        {
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public int? AsNumber { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public _DiscriminantUnionWithoutUnionType_3 AsObject { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public List<string> AsList { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public string AsString { get; set; }
+
+            public bool ShouldSerializeAsNumber() { return true; }
+        }
+
+        class _DiscriminantUnionWithoutUnionType_3
+        {
+            public string Fizz { get; set; }
+        }
+
+        [TestMethod]
+        public void DiscriminantUnionWithoutUnionType()
+        {
+            // Conditional serialization, with nulls
+            {
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsNumber = 123 };
+                    var json1 = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":123}", json1);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsList = new List<string> { "hello", "world" } };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsString = "nope" };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsNumber = 123 };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":123}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsList = new List<string> { "hello", "world" } };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsString = "nope" };
+                    var json = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1();
+                    var json1 = JSON.Serialize(obj1);
+                    Assert.AreEqual("{\"Foo\":null}", json1);
+                }
+            }
+
+            // Conditional serialization, without nulls
+            {
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsNumber = 123 };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":123}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsList = new List<string> { "hello", "world" } };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsString = "nope" };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsNumber = 123 };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":123}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsList = new List<string> { "hello", "world" } };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsString = "nope" };
+                    var json = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                }
+
+                {
+                    var obj1 = new _DiscriminantUnionWithoutUnionType_1();
+                    var json1 = JSON.Serialize(obj1, Options.ExcludeNulls);
+                    Assert.AreEqual("{}", json1);
+                }
+            }
+
+            // TODO: Unconditional serialization
+        }
     }
 }
