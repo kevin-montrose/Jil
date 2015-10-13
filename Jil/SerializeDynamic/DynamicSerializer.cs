@@ -198,10 +198,10 @@ namespace Jil.SerializeDynamic
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
-            var optsFiled = OptionsLookup.GetOptionsFieldFor(opts);
+            var optsField = OptionsLookup.GetOptionsFieldFor(opts);
 
             emit.LoadArgument(0);                                   // MemberInfo
-            emit.LoadField(optsFiled);                              // MemberInfo Options
+            emit.LoadField(optsField);                              // MemberInfo Options
             emit.Call(getSemiStaticSerializer);                     // Action<TextWriter, Type, int>
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
@@ -747,7 +747,8 @@ namespace Jil.SerializeDynamic
         }
 
         public static readonly MethodInfo SerializeInternalMtd = typeof(DynamicSerializer).GetMethod("SerializeInternal", BindingFlags.NonPublic | BindingFlags.Static);
-        private static void SerializeInternal(MemberInfo dynamicMember, TextWriter stream, object obj, Options opts, int depth) { 
+        private static void SerializeInternal(MemberInfo dynamicMember, TextWriter stream, object obj, Options opts, int depth) 
+        { 
             if (obj == null)
             {
                 stream.Write("null");

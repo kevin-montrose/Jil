@@ -2388,7 +2388,7 @@ namespace Jil.Serialize
                     Emit.LoadArgument(1);           // TextWriter object
                 }
 
-                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited);
+                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited, this.UnspecifiedDateTimeBehavior, this.SerializationNameFormat);
                 var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
 
                 Emit.LoadField(optionsField);       // TextWriter object Options
