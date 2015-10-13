@@ -4656,6 +4656,124 @@ switch (options.UseDateTimeFormat)
         }
 
         /// <summary>
+        /// Deserializes multiple JSON objects from the given TextReader.
+        /// 
+        /// Pass an Options object to specify the particulars (such as DateTime formats) of
+        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+        /// called with a different Options object.
+        /// </summary>
+        /// <remarks>
+        ///   This method can be used to deserialize and iterate objects while new data is still written to the stream.
+        ///   The JSON objects contained in the stream must not be separated by any delimiter (whitespaces are ignored).        
+        /// </remarks>
+        public static IEnumerable<T> DeserializeStream<T>(TextReader reader, Options options = null)
+        {
+            if (reader == null)
+            {
+                throw new ArgumentNullException("reader");
+            }
+
+            if (typeof(T) == typeof(object))
+            {
+                throw new NotSupportedException("Dynamic/Object data types are currently not supported.");
+            }
+
+            Func<TextReader, int, T> deserializer = null;
+
+            try
+            {
+                options = options ?? DefaultOptions;
+                reader = reader.MakeSupportPeek();
+
+
+                switch (options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.MicrosoftStyle>, T>.Get();
+                                break;
+                            case SerializationNameFormat.CamelCase:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.MicrosoftStyleCamelCase>, T>.Get();
+                                break;
+                        }
+                        break;
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.MillisecondStyle>, T>.Get();
+                                break;
+                            case SerializationNameFormat.CamelCase:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.MillisecondStyleCamelCase>, T>.Get();
+                                break;
+                        }
+                        break;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.SecondStyle>, T>.Get();
+                                break;
+                            case SerializationNameFormat.CamelCase:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.SecondStyleCamelCase>, T>.Get();
+                                break;
+                        }
+                        break;
+                    case DateTimeFormat.ISO8601:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.ISO8601Style>, T>.Get();
+                                break;
+                            case SerializationNameFormat.CamelCase:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.ISO8601StyleCamelCase>, T>.Get();
+                                break;
+                        }
+                        break;
+                    case DateTimeFormat.RFC1123:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.RFC1123Style>, T>.Get();
+                                break;
+                            case SerializationNameFormat.CamelCase:
+                                deserializer = Jil.Deserialize.TypeCache<Jil.Deserialize.StreamedOption<Jil.Deserialize.RFC1123StyleCamelCase>, T>.Get();
+                                break;
+                        }
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unexpected Options: " + options);
+                }                
+            }
+            catch (Exception e)
+            {
+                if (e is DeserializationException) throw;
+
+                throw new DeserializationException(e, reader, false);
+            }
+
+            if (deserializer == null) throw new DeserializationException("No deserializer available.", reader, false);
+
+            while (reader.Peek() != -1)
+            {
+                T item;
+                try
+                {
+                    item = deserializer(reader, 0);
+                }
+                catch (Exception e)
+                {
+                    if (e is DeserializationException) throw;
+
+                    throw new DeserializationException(e, reader, false);
+                }
+                yield return item;
+            }
+        }
+
+        /// <summary>
         /// Deserializes JSON from the given TextReader.
         /// 
         /// Pass an Options object to specify the particulars (such as DateTime formats) of

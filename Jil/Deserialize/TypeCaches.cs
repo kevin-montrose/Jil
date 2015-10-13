@@ -128,4 +128,25 @@ namespace Jil.Deserialize
         public DateTimeFormat DateFormat { get { return DateTimeFormat.RFC1123; } }
         public SerializationNameFormat SerializationNameFormat { get { return SerializationNameFormat.CamelCase; } }
     }
+
+
+    class StreamedOption<TOptions> : IDeserializeOptions where TOptions : class, IDeserializeOptions, new()
+    {
+        private TOptions wrapped;
+        
+        private TOptions Wrapped
+        {
+            get { return wrapped ?? (wrapped = new TOptions()); }
+        }
+
+        public DateTimeFormat DateFormat
+        {
+            get { return Wrapped.DateFormat; }
+        }
+
+        public SerializationNameFormat SerializationNameFormat
+        {
+            get { return Wrapped.SerializationNameFormat; }
+        }
+    }
 }
