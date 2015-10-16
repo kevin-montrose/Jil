@@ -69,9 +69,11 @@ namespace Jil
 
     /// <summary>
     /// Marks the given class as a simple wrapper around primitive type.
-    /// The marked class should have only one property, which will be used to set and read primitive value from.
+    /// The marked class should either:
+    /// - have a non default ctor, with this only value.
+    /// - have only one property, which will be used to set and read primitive value from.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class JilPrimitiveWrapper : Attribute
-    {}
+    { }
 }

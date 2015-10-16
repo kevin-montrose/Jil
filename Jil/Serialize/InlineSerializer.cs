@@ -516,11 +516,17 @@ namespace Jil.Serialize
             //  - primitive wrapper
             //  - TextWriter
 
-            var primitiveProperty = primitiveWrapperType
-                .GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
-                .Single(p => p.PropertyType.IsPrimitiveType());
+            var primitiveMember = primitiveWrapperType.GetPrimitiveWrapperPropertyOrField();
+            Type primitiveType;
+            if (primitiveMember is FieldInfo)
+            {
+                primitiveType = ((FieldInfo) primitiveMember).FieldType;
+            }
+            else
+            {
+                primitiveType = ((PropertyInfo) primitiveMember).PropertyType;
+            }
 
-            var primitiveType = primitiveProperty.PropertyType;
             var done = Emit.DefineLabel();
 
             using (var loc = Emit.DeclareLocal(primitiveWrapperType))
@@ -537,7 +543,16 @@ namespace Jil.Serialize
 
                 Emit.MarkLabel(notNull);    // TextWriter
                 Emit.LoadLocal(loc);        // TextWriter primitiveWrapperType
-                LoadProperty(primitiveProperty);        // TextValue value
+
+                if (primitiveMember is FieldInfo)
+                {
+                    Emit.LoadField((FieldInfo) primitiveMember);
+                }
+                else
+                {
+                    LoadProperty((PropertyInfo)primitiveMember);        // TextValue value
+                }
+                
             }
 
             WritePrimitive(primitiveType, qoutesNeedHandling);
