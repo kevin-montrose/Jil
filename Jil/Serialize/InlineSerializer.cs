@@ -2031,26 +2031,39 @@ namespace Jil.Serialize
                 else
                 {
                     // they're all null
-                    if (leaveObjectOnStack)
+
+                    // if there was a IsUnionType member, leaving it null is an error!
+                    if (memberType != null)
                     {
-                        Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
+                        var expectedTypes = string.Join(", ", withoutUnionType.Select(m => m.ReturnType().Name).OrderBy(_ => _));
+                        var msg = "Expected one of [" + expectedTypes + "] to be present in [" + memberType.Name + "] on [" + memberType.DeclaringType.Name + "], instead found null";
+
+                        Emit.LoadConstant(msg);                                                     // [obj(*?)] string
+                        Emit.NewObject<SerializerException, string>();                              // [obj(*?)] SerializerException
+                        Emit.Throw();                                                               // --empty--
                     }
-
-                    // TODO: Think harder about whether this behavior makes sense
-                    var wouldBeFirst = firstPass;
-                    doWriteMember(onType, members[0], inLocal, isFirst, ref wouldBeFirst);          // [obj(*?)]
-                    Emit.Branch(done);                                                              // [obj(*?)]
-
-                    if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
+                    else
                     {
-                        updateFirstPassTo = wouldBeFirst;
+                        if (leaveObjectOnStack)
+                        {
+                            Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
+                        }
+
+                        var wouldBeFirst = firstPass;
+                        doWriteMember(onType, members[0], inLocal, isFirst, ref wouldBeFirst);          // [obj(*?)]
+                        Emit.Branch(done);                                                              // [obj(*?)]
+
+                        if (wouldBeFirst != updateFirstPassTo && updateFirstPassTo == null)
+                        {
+                            updateFirstPassTo = wouldBeFirst;
+                        }
                     }
                 }
 
                 // what we got was unexpected, time to signal
                 Emit.MarkLabel(notNullSigil);                                                       // [obj(*?)] Type
 
-                var expectedOneOf = string.Join(", ", withoutUnionType.Select(m => m.ReturnType().Name));
+                var expectedOneOf = string.Join(", ", withoutUnionType.Select(m => m.ReturnType().Name).OrderBy(_ => _));
 
                 Emit.LoadConstant(members[0].GetSerializationName(SerializationNameFormat));        // obj(*?) Type string
                 Emit.LoadConstant(members[0].DeclaringType.Name);                                   // obj(*?) Type string string
