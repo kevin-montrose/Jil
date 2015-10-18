@@ -146,6 +146,7 @@
     <Compile Include="Serialize\Methods.ThunkWriter.cs">
       <DependentUpon>Methods.cs</DependentUpon>
     </Compile>
+    <Compile Include="SerializerException.cs" />
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
     <Compile Include="Serialize\ThunkWriter.cs" />
     <Compile Include="Serialize\TypeCaches.cs" />

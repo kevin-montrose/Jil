@@ -6265,11 +6265,9 @@ namespace JilTests
                 JSON.Serialize(new Dictionary<double, int>());
                 Assert.Fail();
             }
-            catch (Exception e)
+            catch (SerializerException e)
             {
-                Assert.AreEqual("Error occurred building a serializer for System.Collections.Generic.Dictionary`2[System.Double,System.Int32]", e.Message);
-                Assert.IsNotNull(e.InnerException);
-                Assert.AreEqual("JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", e.InnerException.Message);
+                Assert.AreEqual("Error occurred building a serializer for System.Collections.Generic.Dictionary`2[System.Double,System.Int32]: JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", e.Message);
             }
         }
 
@@ -8821,9 +8819,9 @@ namespace JilTests
                 JSON.Serialize(new _BadUnions_1());
                 Assert.Fail("Shouldn't be possible");
             }
-            catch (Exception e)
+            catch (SerializerException e)
             {
-                Assert.AreEqual("", e.Message);
+                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_BadUnions_1: The members  [AsInt, AsDouble] cannot be distiguished in a union because they can each start with these characters [-, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", e.Message);
             }
         }
     }

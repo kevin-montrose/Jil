@@ -4151,7 +4151,7 @@ namespace Jil.Serialize
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(BuildForType), typeof(int) });
             emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
             emit.LoadField(stashField);
-            emit.NewObject<Exception, string, Exception>();
+            emit.NewObject<SerializerException, string, Exception>();
             emit.Throw();
 
             return emit.CreateDelegate<Action<TextWriter, BuildForType, int>>(Utils.DelegateOptimizationOptions);
@@ -4165,7 +4165,7 @@ namespace Jil.Serialize
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(ThunkWriter).MakeByRefType(), typeof(BuildForType), typeof(int) });
             emit.LoadConstant("Error occurred building a serializer for " + typeof(BuildForType));
             emit.LoadField(stashField);
-            emit.NewObject<Exception, string, Exception>();
+            emit.NewObject<SerializerException, string, Exception>();
             emit.Throw();
 
             return emit.CreateDelegate<StringThunkDelegate<BuildForType>>(Utils.DelegateOptimizationOptions);
