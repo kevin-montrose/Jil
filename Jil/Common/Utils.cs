@@ -1310,16 +1310,17 @@ namespace Jil.Common
         public static bool CheckUnionLegality(DateTimeFormat dateFormat, string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember, out bool allowsNull, out string errorMessage)
         {
             charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
-            discriminantChars = new Dictionary<char, MemberInfo>();
-
             allowsNull = false;
             destinationType = null;
+
+            var charsToMembers = new Dictionary<char, List<MemberInfo>>();
 
             foreach (var member in possible)
             {
                 var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
                 if (attr == null || !attr.IsUnion)
                 {
+                    discriminantChars = null;
                     errorMessage = "Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]";
                     return false;
                 }
@@ -1328,6 +1329,7 @@ namespace Jil.Common
                 {
                     if (member.ReturnType() != typeof(Type))
                     {
+                        discriminantChars = null;
                         errorMessage = "Member [" + member.Name + "] has IsUnionType set, but is not of type System.Type";
                         return false;
                     }
@@ -1335,12 +1337,14 @@ namespace Jil.Common
                     var asProp = member as PropertyInfo;
                     if (asProp != null && asProp.SetMethod == null)
                     {
+                        discriminantChars = null;
                         errorMessage = "Member [" + member.Name + "] has IsUnionType set, but has no set method";
                         return false;
                     }
 
                     if (destinationType != null)
                     {
+                        discriminantChars = null;
                         errorMessage = "Member [" + member.Name + "] has IsUnionType set, but IsUnionType is also set for [" + destinationType.Name + "]";
                         return false;
                     }
@@ -1366,18 +1370,87 @@ namespace Jil.Common
 
                 foreach (var c in dis)
                 {
-                    if (discriminantChars.ContainsKey(c))
+                    List<MemberInfo> mems;
+                    if (!charsToMembers.TryGetValue(c, out mems))
                     {
-                        errorMessage = "Can't construct discriminant union [" + memberName + "], more than one type would start with '" + c + "'";
-                        return false;
+                        charsToMembers[c] = mems = new List<MemberInfo>();
                     }
 
-                    discriminantChars[c] = member;
+                    mems.Add(member);
                 }
             }
 
+            var ambiguousCharsToMembers = charsToMembers.Where(kv => kv.Value.Count > 1).ToDictionary(kv => kv.Key, kv => new MemberGroup(kv.Value));
+            if(ambiguousCharsToMembers.Any())
+            {
+                var conflicts = 
+                    ambiguousCharsToMembers
+                        .GroupBy(kv => kv.Value)
+                        .Select(
+                            g => 
+                                Tuple.Create(
+                                    g.Select(kv => kv.Key).Distinct().OrderBy(_ => _).ToList(), 
+                                    g.Key.Members
+                                )
+                        )
+                        .ToList();
+
+                errorMessage =
+                    string.Join("; ",
+                        conflicts
+                            .Select(
+                                t =>
+                                    "The members  [" +
+                                        string.Join(", ", t.Item2.Select(m => m.Name)) +
+                                    "] cannot be distiguished in a union because they can each start with these characters [" +
+                                        string.Join(", ", t.Item1) +
+                                    "]"
+                            )
+                            .OrderBy(_ => _)
+                    );
+
+                discriminantChars = null;
+                return false;
+            }
+
+            discriminantChars = charsToMembers.ToDictionary(kv => kv.Key, kv => kv.Value.Single());
             errorMessage = null;
             return true;
+        }
+
+        class MemberGroup : IEquatable<MemberGroup>
+        {
+            public List<MemberInfo> Members {get; private set;}
+
+            public MemberGroup(List<MemberInfo> members)
+            {
+                Members = members;
+            }
+
+            public void Add(MemberInfo member)
+            {
+                Members.Add(member);
+            }
+
+            public override bool Equals(object other)
+            {
+                var asMemberGroup = other as MemberGroup;
+                if(asMemberGroup == null) return false;
+
+                return Equals(asMemberGroup);
+            }
+
+            public override int GetHashCode()
+            {
+                return Members.Select(m => m.GetHashCode()).OrderBy(_ => _).Aggregate((cur, val) => cur ^ val);
+            }
+
+            public bool Equals(MemberGroup other)
+            {
+                if (other.Members.Count != this.Members.Count) return false;
+
+                return this.Members.All(m => other.Members.Contains(m));
+            }
         }
 
         static IEnumerable<char> GetDescriminantCharacters(Type memType, DateTimeFormat dateFormat, out UnionCharsets charsets)

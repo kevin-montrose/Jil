@@ -6383,7 +6383,7 @@ namespace JilTests
                 }
                 catch(DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: The members  [A_DateTime, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6393,7 +6393,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: The members  [A_DateTime, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6403,7 +6403,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_1: The members  [A_DateTime, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
             }
 
@@ -6415,7 +6415,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_2: Can't construct discriminant union [A], more than one type would start with '0'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_2: The members  [A_Int, A_Double] cannot be distiguished in a union because they can each start with these characters [-, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", e.Message);
                 }
             }
 
@@ -6427,7 +6427,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_3: Can't construct discriminant union [A], more than one type would start with '{'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_3: The members  [A_Object, A_Dictionary] cannot be distiguished in a union because they can each start with these characters [{]", e.Message);
                 }
             }
 
@@ -6442,7 +6442,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: The members  [A_TimeSpan, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6452,7 +6452,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: The members  [A_TimeSpan, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6462,7 +6462,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_4: The members  [A_TimeSpan, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
             }
 
@@ -6474,7 +6474,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_5: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_5: The members  [A_Guid, A_String] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
             }
 
@@ -6489,7 +6489,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: The members  [A_Guid, A_DateTime] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6499,7 +6499,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: The members  [A_Guid, A_DateTime] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
 
                 try
@@ -6509,7 +6509,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: Can't construct discriminant union [A], more than one type would start with '\"'", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionMisconfigured_6: The members  [A_Guid, A_DateTime] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
                 }
             }
         }
@@ -6619,7 +6619,7 @@ namespace JilTests
             catch (DeserializationException e)
             {
                 Assert.IsNotNull(e);
-                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_NonDiscriminantUnion: Can't construct discriminant union [Data], more than one type would start with '\"'", e.Message);
+                Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_NonDiscriminantUnion: The members  [Data, AsDateTime] cannot be distiguished in a union because they can each start with these characters [\"]", e.Message);
             }
         }
 
