@@ -8811,9 +8811,20 @@ namespace JilTests
             public double AsDouble { get; set; }
         }
 
+        class _BadUnions_2
+        {
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public string AsString { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public int AsInt { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true, IsUnionType = true)]
+            public Type DiscriminantType { get; set; }
+        }
+
         [TestMethod]
         public void BadUnions()
         {
+            // just prove that the proper verification code is wired up, DeserializeTests cover the rest of the types
             try
             {
                 JSON.Serialize(new _BadUnions_1());
@@ -8822,6 +8833,19 @@ namespace JilTests
             catch (SerializerException e)
             {
                 Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_BadUnions_1: The members  [AsInt, AsDouble] cannot be distiguished in a union because they can each start with these characters [-, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", e.Message);
+            }
+
+            try
+            {
+                var obj = new _BadUnions_2();
+                obj.DiscriminantType = typeof(object);
+
+                JSON.Serialize(obj);
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (SerializerException e)
+            {
+                Assert.AreEqual("Unexpected type [Object] provided for union [Foo] on [_BadUnions_2], expected one of [String, Int32]", e.Message);
             }
         }
     }

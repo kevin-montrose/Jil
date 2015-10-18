@@ -14,5 +14,9 @@ namespace Jil
         internal SerializerException(string message, Exception innerException) :
             base(message + ": " + innerException.Message, innerException)
         { }
+
+        internal SerializerException(string message) : base(message)
+        {
+        }
     }
 }

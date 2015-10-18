@@ -2030,12 +2030,13 @@ namespace Jil.Serialize
                 }
                 else
                 {
-                    // they're all null so go ahead and hit the first member, and be done
+                    // they're all null
                     if (leaveObjectOnStack)
                     {
                         Emit.Duplicate();                                                           // [obj(*?)] obj(*?)
                     }
 
+                    // TODO: Think harder about whether this behavior makes sense
                     var wouldBeFirst = firstPass;
                     doWriteMember(onType, members[0], inLocal, isFirst, ref wouldBeFirst);          // [obj(*?)]
                     Emit.Branch(done);                                                              // [obj(*?)]
@@ -2047,15 +2048,17 @@ namespace Jil.Serialize
                 }
 
                 // what we got was unexpected, time to signal
-                Emit.MarkLabel(notNullSigil);                           // [obj(*?)] Type
+                Emit.MarkLabel(notNullSigil);                                                       // [obj(*?)] Type
 
-                var expectedOneOf = string.Join(", ", members.Select(m => m.ReturnType().Name));
+                var expectedOneOf = string.Join(", ", withoutUnionType.Select(m => m.ReturnType().Name));
 
-                Emit.LoadConstant(expectedOneOf);                                       // obj(*?) Type string
-                Emit.Call(CreateUnexpectedTypeException);                               // obj(*?) Exception
-                Emit.Throw();                                                           // --empty--
+                Emit.LoadConstant(members[0].GetSerializationName(SerializationNameFormat));        // obj(*?) Type string
+                Emit.LoadConstant(members[0].DeclaringType.Name);                                   // obj(*?) Type string string
+                Emit.LoadConstant(expectedOneOf);                                                   // obj(*?) Type string string string
+                Emit.Call(CreateUnexpectedTypeException);                                           // obj(*?) Exception
+                Emit.Throw();                                                                       // --empty--
 
-                Emit.MarkLabel(done);                                                   // [obj(*?)]
+                Emit.MarkLabel(done);                                                               // [obj(*?)]
 
                 return;
             }
@@ -2069,10 +2072,14 @@ namespace Jil.Serialize
             doWriteMember(onType, member, inLocal, isFirst, ref firstPass);                 // [obj(*?)]
         }
 
+        // TODO: Move this out into Methods
         static readonly MethodInfo CreateUnexpectedTypeException = typeof(InlineSerializer<ForType>).GetMethod("_CreateUnexpectedTypeException", BindingFlags.NonPublic | BindingFlags.Static);
-        static Exception _CreateUnexpectedTypeException(Type observedType, string oneOf)
+        static SerializerException _CreateUnexpectedTypeException(Type observedType, string memberName, string onTypeName, string oneOf)
         {
-            return new Exception("Unexpected type provided during union serialization [" + observedType.Name + "], expected one of " + oneOf);
+            return
+                new SerializerException(
+                    "Unexpected type [" + observedType.Name + "] provided for union [" + memberName + "] on [" + onTypeName + "], expected one of [" + oneOf + "]"
+                );
         }
 
         void DetermineNonNullMember(List<MemberInfo> members, Sigil.Local inLocal)
