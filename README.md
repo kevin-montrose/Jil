@@ -106,6 +106,50 @@ The following types (and any user defined types composed of them) are supported:
 Jil deserializes public fields and properties; the order in which they are serialized is not defined (it is unlikely to be in
 declaration order).  The [`DataMemberAttribute.Name` property](http://msdn.microsoft.com/en-us/library/ms584759(v=vs.110).aspx) and [`IgnoreDataMemberAttribute`](http://msdn.microsoft.com/en-us/library/system.runtime.serialization.ignoredatamemberattribute.aspx) are respected by Jil, as is the [ShouldSerializeXXX() pattern](http://msdn.microsoft.com/en-us/library/53b8022e(v=vs.110).aspx).  For situations where `DataMemberAttribute` and `IgnoreDataMemberAttribute` cannot be used, Jil provides the [`JilDirectiveAttribute`](https://github.com/kevin-montrose/Jil/blob/master/Jil/JilDirectiveAttribute.cs) which provides equivalent functionality.
 
+## Unions
+
+Jil has limited support for "unions" (fields on JSON objects that may contain one of several types), provided that they can be distiguished by their first character.
+
+In other words:
+```csharp
+class LegalUnion
+{
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public string FooString { get; set; }
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public int FooInt { get; set; }
+}
+```
+Is allowed because the first character of a JSON string is always `"`, while the first character of a JSON number is a digit or `-`.
+
+The following would not be legal, however.
+```csharp
+class IllegalUnion
+{
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public uint FooUInt { get; set; }
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public double FooDouble { get; set; }
+}
+```
+Since both properties could start with a digit.
+
+You can also use a `Type` member to determine which field was (de)serialized.
+```csharp
+class WithUnionType
+{
+	[JilDirective(Name = "Foo", IsUnion = true, IsUnionType = true)]
+	public Type FooType { get; set; }
+
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public uint FooUInt { get; set; }
+	[JilDirective(Name = "Foo", IsUnion = true)]
+	public List<int> FooList { get; set; }
+
+}
+```
+When serializing this field _must_ be set.
+
 ## Configuration
 
 Jil's `JSON.Serialize` and `JSON.Deserialize` methods take an optional `Options` parameter which controls:
