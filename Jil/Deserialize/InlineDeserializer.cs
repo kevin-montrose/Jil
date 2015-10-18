@@ -1654,7 +1654,12 @@ namespace Jil.Deserialize
             MemberInfo unionTypeIndicator;
             Dictionary<UnionCharsets, MemberInfo> charsets;
             bool allowsNull;
-            CheckUnionLegality(memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull);
+
+            string errorMessage;
+            if(!Utils.CheckUnionLegality(DateFormat, memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull, out errorMessage))
+            {
+                throw new ConstructionException(errorMessage);
+            }
 
             var refMembers = discriminants.Where(kv => !kv.Value.ReturnType().IsValueType).Select(kv => kv.Value).ToList();
             var nullableMembers = discriminants.Where(kv => kv.Value.ReturnType().IsNullableType()).Select(kv => kv.Value).ToList();
@@ -1898,170 +1903,6 @@ namespace Jil.Deserialize
                     Emit.StoreField(asField);           // objType(*?)
                 }
             }
-        }
-
-        void CheckUnionLegality(string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember, out bool allowsNull)
-        {
-            charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
-            discriminantChars = new Dictionary<char, MemberInfo>();
-
-            allowsNull = false;
-            destinationType = null;
-
-            foreach (var member in possible)
-            {
-                var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
-                if (attr == null || !attr.IsUnion)
-                {
-                    throw new ConstructionException("Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]");
-                }
-
-                if (attr.IsUnionType)
-                {
-                    if (member.ReturnType() != typeof(Type))
-                    {
-                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but is not of type System.Type");
-                    }
-
-                    var asProp = member as PropertyInfo;
-                    if (asProp != null && asProp.SetMethod == null)
-                    {
-                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but has no set method");
-                    }
-
-                    if (destinationType != null)
-                    {
-                        throw new ConstructionException("Member [" + member.Name + "] has IsUnionType set, but IsUnionType is also set for [" + destinationType.Name + "]");
-                    }
-
-                    destinationType = member;
-                    continue;
-                }
-
-                var memberType = member.ReturnType();
-                if(!memberType.IsValueType || memberType.IsNullableType())
-                {
-                    allowsNull = true;
-                }
-
-                UnionCharsets perMember;
-                var dis = GetDescriminantCharacters(memberType, out perMember);
-                foreach(var e in Enum.GetValues(typeof(UnionCharsets)).Cast<UnionCharsets>().Where(x => perMember.HasFlag(x)))
-                {
-                    charsetToMember[e] = member;
-                }
-
-                charsetToMember[perMember] = member;
-
-                foreach (var c in dis)
-                {
-                    if (discriminantChars.ContainsKey(c))
-                    {
-                        throw new ConstructionException("Can't construct discriminant union [" + memberName + "], more than one type would start with '" + c + "'");
-                    }
-
-                    discriminantChars[c] = member;
-                }
-            }
-        }
-
-        
-        IEnumerable<char> GetDescriminantCharacters(Type memType, out UnionCharsets charsets)
-        {
-            charsets = UnionCharsets.None;
-
-            IEnumerable<char> ret = Enumerable.Empty<char>();
-            
-            if (memType.IsNullableType())
-            {
-                memType = Nullable.GetUnderlyingType(memType);
-            }
-
-            if (memType.IsNumberType())
-            {
-                if (memType.IsSigned())
-                {
-                    charsets |= UnionCharsets.Signed;
-                    ret = ret.Concat(UnionCharsetArrays.UnionSignedSet);
-                }
-
-                charsets |= UnionCharsets.Number;
-                ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
-
-                return ret;
-            }
-
-            if (memType.IsStringyType() || memType == typeof(Guid))
-            {
-                charsets |= UnionCharsets.Stringy;
-                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
-
-                return ret;
-            }
-
-            if (memType == typeof(bool))
-            {
-                charsets |= UnionCharsets.Bool;
-                ret = ret.Concat(UnionCharsetArrays.UnionBoolSet);
-
-                return ret;
-            }
-
-            if (memType == typeof(DateTime) || memType == typeof(DateTimeOffset) || memType == typeof(TimeSpan))
-            {
-                switch (DateFormat)
-                {
-                    case DateTimeFormat.RFC1123:
-                    case DateTimeFormat.ISO8601:
-                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        charsets |= UnionCharsets.Stringy;
-                        ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
-                        break;
-
-                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    case DateTimeFormat.SecondsSinceUnixEpoch:
-                        charsets |= UnionCharsets.Number;
-                        ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
-                        break;
-
-                    default: throw new Exception("Unexpected DateTimeFormat: " + DateFormat);
-                }
-
-                return ret;
-            }
-
-            if (memType.IsEnum)
-            {
-                var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
-                if (attr != null && attr.TreatEnumerationAs != null)
-                {
-                    charsets |= UnionCharsets.Number;
-                    ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
-                    return ret;
-                }
-
-                charsets |= UnionCharsets.Stringy;
-                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
-                return ret;
-            }
-
-            if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
-            {
-                charsets |= UnionCharsets.Object;
-                ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
-                return ret;
-            }
-
-            if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
-            {
-                charsets |= UnionCharsets.Listy;
-                ret = ret.Concat(UnionCharsetArrays.UnionListySet);
-                return ret;
-            }
-
-            charsets |= UnionCharsets.Object;
-            ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
-            return ret;
         }
 
         void ReadObjectDictionaryLookup(Type objType)

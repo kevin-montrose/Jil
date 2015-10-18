@@ -312,23 +312,16 @@ namespace Jil.Serialize
             {
                 if (kv.Value.Count == 1) continue;
 
-                if(!kv.Value.All(v => v.GetCustomAttribute<JilDirectiveAttribute>() != null))
-                {
-                    throw new ConstructionException("Multiple members share name [" + kv.Key + "], but not all have [JilDirective]s");
-                }
+                Dictionary<char, MemberInfo> ignored1;
+                MemberInfo ignored2;
+                Dictionary<UnionCharsets, MemberInfo> ignored3;
+                bool ignored4;
 
-                if(!kv.Value.All(v => v.GetCustomAttribute<JilDirectiveAttribute>().IsUnion))
+                string errorMessage;
+                if(!Utils.CheckUnionLegality(DateFormat, kv.Key, kv.Value, out ignored1, out ignored2, out ignored3, out ignored4, out errorMessage))
                 {
-                    throw new ConstructionException("Multiple members share name [" + kv.Key + "], but not all are part of a Union");
+                    throw new ConstructionException(errorMessage);
                 }
-
-                if(kv.Value.Count(v => v.GetCustomAttribute<JilDirectiveAttribute>().IsUnionType) > 1)
-                {
-                    throw new ConstructionException("Multiple members of Union [" + kv.Key + "] have IsUnionType set");
-                }
-
-                // TODO: Make sure the combinations are legal w.r.t. characters to write
-                //   we want to emit JSON that we can accept
             }
 
             return ret.Select(kv => kv.Value).ToList();

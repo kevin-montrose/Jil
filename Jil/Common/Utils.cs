@@ -1306,5 +1306,176 @@ namespace Jil.Common
                 return PowersOf10[power];
             return (long)Math.Pow(10, power);
         }
+
+        public static bool CheckUnionLegality(DateTimeFormat dateFormat, string memberName, IEnumerable<MemberInfo> possible, out Dictionary<char, MemberInfo> discriminantChars, out MemberInfo destinationType, out Dictionary<UnionCharsets, MemberInfo> charsetToMember, out bool allowsNull, out string errorMessage)
+        {
+            charsetToMember = new Dictionary<UnionCharsets, MemberInfo>();
+            discriminantChars = new Dictionary<char, MemberInfo>();
+
+            allowsNull = false;
+            destinationType = null;
+
+            foreach (var member in possible)
+            {
+                var attr = member.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr == null || !attr.IsUnion)
+                {
+                    errorMessage = "Member [" + member.Name + "] isn't marked as part of a union, but other members share the same Name [" + memberName + "]";
+                    return false;
+                }
+
+                if (attr.IsUnionType)
+                {
+                    if (member.ReturnType() != typeof(Type))
+                    {
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but is not of type System.Type";
+                        return false;
+                    }
+
+                    var asProp = member as PropertyInfo;
+                    if (asProp != null && asProp.SetMethod == null)
+                    {
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but has no set method";
+                        return false;
+                    }
+
+                    if (destinationType != null)
+                    {
+                        errorMessage = "Member [" + member.Name + "] has IsUnionType set, but IsUnionType is also set for [" + destinationType.Name + "]";
+                        return false;
+                    }
+
+                    destinationType = member;
+                    continue;
+                }
+
+                var memberType = member.ReturnType();
+                if (!memberType.IsValueType || memberType.IsNullableType())
+                {
+                    allowsNull = true;
+                }
+
+                UnionCharsets perMember;
+                var dis = GetDescriminantCharacters(memberType, dateFormat, out perMember);
+                foreach (var e in Enum.GetValues(typeof(UnionCharsets)).Cast<UnionCharsets>().Where(x => perMember.HasFlag(x)))
+                {
+                    charsetToMember[e] = member;
+                }
+
+                charsetToMember[perMember] = member;
+
+                foreach (var c in dis)
+                {
+                    if (discriminantChars.ContainsKey(c))
+                    {
+                        errorMessage = "Can't construct discriminant union [" + memberName + "], more than one type would start with '" + c + "'";
+                        return false;
+                    }
+
+                    discriminantChars[c] = member;
+                }
+            }
+
+            errorMessage = null;
+            return true;
+        }
+
+        static IEnumerable<char> GetDescriminantCharacters(Type memType, DateTimeFormat dateFormat, out UnionCharsets charsets)
+        {
+            charsets = UnionCharsets.None;
+
+            IEnumerable<char> ret = Enumerable.Empty<char>();
+
+            if (memType.IsNullableType())
+            {
+                memType = Nullable.GetUnderlyingType(memType);
+            }
+
+            if (memType.IsNumberType())
+            {
+                if (memType.IsSigned() || memType.IsFloatingPointNumberType())
+                {
+                    charsets |= UnionCharsets.Signed;
+                    ret = ret.Concat(UnionCharsetArrays.UnionSignedSet);
+                }
+
+                charsets |= UnionCharsets.Number;
+                ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+
+                return ret;
+            }
+
+            if (memType.IsStringyType() || memType == typeof(Guid))
+            {
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+
+                return ret;
+            }
+
+            if (memType == typeof(bool))
+            {
+                charsets |= UnionCharsets.Bool;
+                ret = ret.Concat(UnionCharsetArrays.UnionBoolSet);
+
+                return ret;
+            }
+
+            if (memType == typeof(DateTime) || memType == typeof(DateTimeOffset) || memType == typeof(TimeSpan))
+            {
+                switch (dateFormat)
+                {
+                    case DateTimeFormat.RFC1123:
+                    case DateTimeFormat.ISO8601:
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        charsets |= UnionCharsets.Stringy;
+                        ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+                        break;
+
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        charsets |= UnionCharsets.Number;
+                        ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+                        break;
+
+                    default: throw new Exception("Unexpected DateTimeFormat: " + dateFormat);
+                }
+
+                return ret;
+            }
+
+            if (memType.IsEnum)
+            {
+                var attr = memType.GetCustomAttribute<JilDirectiveAttribute>();
+                if (attr != null && attr.TreatEnumerationAs != null)
+                {
+                    charsets |= UnionCharsets.Number;
+                    ret = ret.Concat(UnionCharsetArrays.UnionNumberSet);
+                    return ret;
+                }
+
+                charsets |= UnionCharsets.Stringy;
+                ret = ret.Concat(UnionCharsetArrays.UnionStringySet);
+                return ret;
+            }
+
+            if (memType.IsDictionaryType() || memType.IsGenericReadOnlyDictionary())
+            {
+                charsets |= UnionCharsets.Object;
+                ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
+                return ret;
+            }
+
+            if (memType.IsListType() || memType.IsGenericEnumerable() || memType.IsGenericReadOnlyList())
+            {
+                charsets |= UnionCharsets.Listy;
+                ret = ret.Concat(UnionCharsetArrays.UnionListySet);
+                return ret;
+            }
+
+            charsets |= UnionCharsets.Object;
+            ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
+            return ret;
+        }
     }
 }

@@ -63,6 +63,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\ConstructionException.cs" />
+    <Compile Include="Common\UnionCharsetArrays.cs" />
+    <Compile Include="Common\UnionCharsets.cs" />
     <Compile Include="DateTimeFormat.cs" />
     <Compile Include="DeserializationException.cs" />
     <Compile Include="DeserializeDynamic\DynamicDeserializer.cs" />

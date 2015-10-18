@@ -8884,5 +8884,27 @@ namespace JilTests
                 }
             }
         }
+
+        class _BadUnions_1
+        {
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public int AsInt { get; set; }
+            [JilDirective(Name = "Foo", IsUnion = true)]
+            public double AsDouble { get; set; }
+        }
+
+        [TestMethod]
+        public void BadUnions()
+        {
+            try
+            {
+                JSON.Serialize(new _BadUnions_1());
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual("", e.Message);
+            }
+        }
     }
 }

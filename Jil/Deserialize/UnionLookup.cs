@@ -11,40 +11,10 @@ using System.Threading.Tasks;
 
 namespace Jil.Deserialize
 {
-    [Flags]
-    internal enum UnionCharsets : byte
-    {
-        None = 0,
-        
-        Signed = 1,
-        Number = 2,
-        Stringy = 4,
-        Bool = 8,
-        Object = 16,
-        Listy = 32,
-
-        Null = 128
-    }
-
     abstract class UnionLookupConfigBase
     {
         public abstract UnionCharsets Charsets { get; }
         public abstract bool AllowsNull { get; }
-    }
-
-    static class UnionCharsetArrays
-    {
-        public static readonly IEnumerable<char> UnionSignedSet = new[] { '-' };
-        public static readonly IEnumerable<char> UnionNumberSet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-        public static readonly IEnumerable<char> UnionStringySet = new[] { '"' };
-        public static readonly IEnumerable<char> UnionBoolSet = new[] { 't', 'f' };
-        public static readonly IEnumerable<char> UnionObjectSet = new[] { '{' };
-        public static readonly IEnumerable<char> UnionListySet = new[] { '[' };
-
-        /// <summary>
-        /// Special case, this shouldn't be used in conjuction with types like string or int?; only for the exact null value.
-        /// </summary>
-        public static readonly IEnumerable<char> UnionNull = new[] { 'n' };
     }
 
     /// <summary>
