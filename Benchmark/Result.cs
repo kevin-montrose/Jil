@@ -11,5 +11,6 @@ namespace Benchmark
         public string Serializer { get; set; }
         public string TypeName { get; set; }
         public TimeSpan Elapsed { get; set; }
+        public int[] GCCounts { get; set; }
     }
 }

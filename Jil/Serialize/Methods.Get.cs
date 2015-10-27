@@ -9,6 +9,12 @@ namespace Jil.Serialize
 {
     static partial class Methods
     {
+        public static MethodInfo GetCachedCharBuffer()
+        {
+            // no difference depending on thunk writer here
+            return GetThreadLocalCharBuffer;
+        }
+
         public static MethodInfo GetValidateDouble()
         {
             // no difference depending on thunk writer here

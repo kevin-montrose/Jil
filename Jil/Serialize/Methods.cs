@@ -6,13 +6,30 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Jil.Serialize
 {
     static partial class Methods
     {
+        /// <summary>
+        /// Thread-local, cached character buffers.
+        /// </summary>
+        /// <remarks>
+        /// Caching the character buffers improves performance by avoiding allocation
+        /// (and subsequent collection) of a short-lived array each time an instance/value
+        /// of a primitive type is serialized.
+        /// </remarks>
+        [ThreadStatic]
+        private static char[] _threadLocalCharBuffer;
+
+        static readonly MethodInfo GetThreadLocalCharBuffer = typeof(Methods).GetMethod("_GetThreadLocalCharBuffer", BindingFlags.Static | BindingFlags.NonPublic);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static char[] _GetThreadLocalCharBuffer()
+        {
+            return _threadLocalCharBuffer ?? (_threadLocalCharBuffer = new char[InlineSerializer.CharBufferSize]);
+        }
+
         struct TwoDigits
         {
             public readonly char First;
@@ -866,7 +883,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             uint copy;
             if (number < 0)
@@ -894,7 +911,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo CustomWriteIntUnrolledSigned = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1054,7 +1071,7 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteUInt(TextWriter writer, uint number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             var copy = number;
 
@@ -1073,7 +1090,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo CustomWriteUIntUnrolled = typeof(Methods).GetMethod("_CustomWriteUIntUnrolled", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1193,7 +1210,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             ulong copy;
             if (number < 0)
@@ -1221,14 +1238,14 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
         
         static readonly MethodInfo CustomWriteULong = typeof(Methods).GetMethod("_CustomWriteULong", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong(TextWriter writer, ulong number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             var copy = number;
 
@@ -1247,7 +1264,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo ProxyFloat = typeof(Methods).GetMethod("_ProxyFloat", BindingFlags.Static | BindingFlags.NonPublic);

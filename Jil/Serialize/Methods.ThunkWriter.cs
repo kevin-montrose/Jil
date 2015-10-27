@@ -782,7 +782,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             uint copy;
             if (number < 0)
@@ -810,7 +810,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo CustomWriteIntUnrolledSigned_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
@@ -970,7 +970,7 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteUInt_ThunkWriter(ref ThunkWriter writer, uint number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             var copy = number;
 
@@ -989,7 +989,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo CustomWriteUIntUnrolled_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteUIntUnrolled_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1109,7 +1109,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             ulong copy;
             if (number < 0)
@@ -1137,14 +1137,14 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo CustomWriteULong_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteULong_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _CustomWriteULong_ThunkWriter(ref ThunkWriter writer, ulong number, char[] buffer)
         {
-            var ptr = InlineSerializer<object>.CharBufferSize - 1;
+            var ptr = InlineSerializer.CharBufferSize - 1;
 
             var copy = number;
 
@@ -1163,7 +1163,7 @@ namespace Jil.Serialize
                 ptr++;
             }
 
-            writer.Write(buffer, ptr + 1, InlineSerializer<object>.CharBufferSize - 1 - ptr);
+            writer.Write(buffer, ptr + 1, InlineSerializer.CharBufferSize - 1 - ptr);
         }
 
         static readonly MethodInfo ProxyFloat_ThunkWriter = typeof(Methods).GetMethod("_ProxyFloat_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
