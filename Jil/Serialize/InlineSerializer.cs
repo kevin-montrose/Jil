@@ -13,25 +13,24 @@ using Jil.SerializeDynamic;
 
 namespace Jil.Serialize
 {
-    class InlineSerializer<ForType>
+    internal static class InlineSerializer
     {
-        public static bool ReorderMembers = true;
-        public static bool UseCustomIntegerToString = true;
-        public static bool SkipDateTimeMathMethods = true;
-        public static bool UseCustomISODateFormatting = true;
-        public static bool UseFastLists = true;
-        public static bool UseFastArrays = true;
-        public static bool UseFastGuids = true;
-        public static bool AllocationlessDictionaries = true;
-        public static bool PropagateConstants = true;
-        public static bool UseCustomWriteIntUnrolled = true;
-        public static bool UseCustomRFC1123DateTimeFormatting = true;
+        /// <summary>
+        /// Name used for character buffer local variables.
+        /// </summary>
+        public const string CharBuffer = "char_buffer";
 
-        static string CharBuffer = "char_buffer";
-        internal const int CharBufferSize = 36;
-        internal const int RecursionLimit = 50;
+        /// <summary>
+        /// The maximum length of the character buffer needed to serialize any primitive type.
+        /// </summary>
+        public const int CharBufferSize = 36;
 
-        static Dictionary<char, string> CharacterEscapes = 
+        public const int RecursionLimit = 50;
+
+        /// <summary>
+        /// Escape sequences for special characters.
+        /// </summary>
+        public static readonly Dictionary<char, string> CharacterEscapes =
             new Dictionary<char, string>
             {
                 { '\\',  @"\\" },
@@ -69,6 +68,22 @@ namespace Jil.Serialize
                 { '\u001E', @"\u001E" },
                 { '\u001F', @"\u001F" }
             };
+    }
+
+    class InlineSerializer<ForType>
+    {
+        public static bool ReorderMembers = true;
+        public static bool UseCustomIntegerToString = true;
+        public static bool SkipDateTimeMathMethods = true;
+        public static bool UseCustomISODateFormatting = true;
+        public static bool UseFastLists = true;
+        public static bool UseFastArrays = true;
+        public static bool UseFastGuids = true;
+        public static bool AllocationlessDictionaries = true;
+        public static bool PropagateConstants = true;
+        public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseCustomRFC1123DateTimeFormatting = true;
+        public static bool UseCachedCharBuffers = true;
 
         private readonly Type RecursionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
         private readonly bool ExcludeNulls;
@@ -791,8 +806,16 @@ namespace Jil.Serialize
                 return;
             }
 
-            Emit.LoadLocal(CharBuffer);                                     // TextWriter DateTime char[]
-            Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));  // --empty--
+            if (UseCachedCharBuffers)
+            {
+                Emit.Call(Methods.GetCachedCharBuffer());                       // TextWriter DateTime char[]
+            }
+            else
+            {
+                Emit.LoadLocal(InlineSerializer.CharBuffer);                    // TextWriter DateTime char[]
+            }
+
+            Emit.Call(Methods.GetCustomISO8601ToString(BuildingToString));      // --empty--
         }
 
         static readonly MethodInfo DateTime_ToString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
@@ -866,7 +889,14 @@ namespace Jil.Serialize
                     Emit.Call(TimeSpan_Minutes);        // TextWriter long int int
                 }
 
-                Emit.LoadLocal(CharBuffer);                                                     // TextWriter long int int char[]
+                if (UseCachedCharBuffers)
+                {
+                    Emit.Call(Methods.GetCachedCharBuffer());                                   // TextWriter long int int char[]
+                }
+                else
+                {
+                    Emit.LoadLocal(InlineSerializer.CharBuffer);                                // TextWriter long int int char[]
+                }
                 Emit.Call(Methods.GetCustomWriteMicrosoftStyleWithOffset(BuildingToString));    // --empty--
                 return;
             }
@@ -888,7 +918,15 @@ namespace Jil.Serialize
                     Emit.LoadLocalAddress(tsLoc);       // TextWriter DateTime int TimeSpan*
                     Emit.Call(TimeSpan_Minutes);        // TextWriter DateTime int int
                 }
-                Emit.LoadLocal(CharBuffer);                                                 // TextWriter DateTime int int char[]
+
+                if (UseCachedCharBuffers)
+                {
+                    Emit.Call(Methods.GetCachedCharBuffer());                               // TextWriter DateTime int int char[]
+                }
+                else
+                {
+                    Emit.LoadLocal(InlineSerializer.CharBuffer);                            // TextWriter DateTime int int char[]
+                }
                 Emit.Call(Methods.GetCustomISO8601WithOffsetToString(BuildingToString));    // --empty--
                 return;
             }
@@ -930,7 +968,14 @@ namespace Jil.Serialize
                 return;
             }
 
-            Emit.LoadLocal(CharBuffer);                                         // TextWriter TimeSpan char[]
+            if (UseCachedCharBuffers)
+            {
+                Emit.Call(Methods.GetCachedCharBuffer());                               // TextWriter TimeSpan char[]
+            }
+            else
+            {
+                Emit.LoadLocal(InlineSerializer.CharBuffer);                            // TextWriter TimeSpan char[]
+            }
 
             switch(DateFormat)
             {
@@ -1114,32 +1159,60 @@ namespace Jil.Serialize
             {
                 if (primitiveType == typeof(int))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    CallWriteInt();                     // --empty--
+                    if (UseCachedCharBuffers)
+                    {
+                        Emit.Call(Methods.GetCachedCharBuffer());           // TextWriter int char[]
+                    }
+                    else
+                    {
+                        Emit.LoadLocal(InlineSerializer.CharBuffer);        // TextWriter int char[]
+                    }
+                    CallWriteInt();                                         // --empty--
 
                     return;
                 }
 
                 if (primitiveType == typeof(uint))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    CallWriteUInt();                    // --empty--
+                    if (UseCachedCharBuffers)
+                    {
+                        Emit.Call(Methods.GetCachedCharBuffer());           // TextWriter uint char[]
+                    }
+                    else
+                    {
+                        Emit.LoadLocal(InlineSerializer.CharBuffer);        // TextWriter uint char[]
+                    }
+                    CallWriteUInt();                                        // --empty--
 
                     return;
                 }
 
                 if (primitiveType == typeof(long))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    CallWriteLong();                    // --empty--
+                    if (UseCachedCharBuffers)
+                    {
+                        Emit.Call(Methods.GetCachedCharBuffer());           // TextWriter long char[]
+                    }
+                    else
+                    {
+                        Emit.LoadLocal(InlineSerializer.CharBuffer);        // TextWriter long char[]
+                    }
+                    CallWriteLong();                                        // --empty--
 
                     return;
                 }
 
                 if (primitiveType == typeof(ulong))
                 {
-                    Emit.LoadLocal(CharBuffer);         // TextWriter int char[]
-                    CallWriteULong();                   // --empty--
+                    if (UseCachedCharBuffers)
+                    {
+                        Emit.Call(Methods.GetCachedCharBuffer());           // TextWriter ulong char[]
+                    }
+                    else
+                    {
+                        Emit.LoadLocal(InlineSerializer.CharBuffer);        // TextWriter ulong char[]
+                    }
+                    CallWriteULong();                                       // --empty--
 
                     return;
                 }
@@ -1213,15 +1286,22 @@ namespace Jil.Serialize
         {
             if (quotesNeedHandling)
             {
-                WriteString("\"");                              // TextWriter Guid
+                WriteString("\"");                                  // TextWriter Guid
             }
 
-            Emit.LoadLocal(CharBuffer);                         // TextWriter Guid char[]
-            Emit.Call(Methods.GetWriteGuid(BuildingToString));  // --empty--
+            if (UseCachedCharBuffers)
+            {
+                Emit.Call(Methods.GetCachedCharBuffer());           // TextWriter Guid char[]
+            }
+            else
+            {
+                Emit.LoadLocal(InlineSerializer.CharBuffer);        // TextWriter Guid char[]
+            }
+            Emit.Call(Methods.GetWriteGuid(BuildingToString));      // --empty--
             
             if (quotesNeedHandling)
             {
-                WriteString("\"");                              // --empty--
+                WriteString("\"");                                  // --empty--
             }
         }
 
@@ -1284,9 +1364,9 @@ namespace Jil.Serialize
                 writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
             }
 
-            var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
+            var lowestCharNeedingEncoding = (int)InlineSerializer.CharacterEscapes.Keys.OrderBy(c => (int)c).First();
 
-            var needLabels = CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
+            var needLabels = InlineSerializer.CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
 
             var labels = new List<Tuple<Sigil.Label, string>>();
 
@@ -3508,10 +3588,10 @@ namespace Jil.Serialize
                 return;
             }
 
-            Emit.DeclareLocal<char[]>(CharBuffer);
-            Emit.LoadConstant(CharBufferSize);
+            Emit.DeclareLocal<char[]>(InlineSerializer.CharBuffer);
+            Emit.LoadConstant(InlineSerializer.CharBufferSize);
             Emit.NewArray<char>();
-            Emit.StoreLocal(CharBuffer);
+            Emit.StoreLocal(InlineSerializer.CharBuffer);
         }
 
         Emit MakeEmit(Type forType)
@@ -3538,9 +3618,9 @@ namespace Jil.Serialize
             {
                 var goOn = Emit.DefineLabel();
 
-                Emit.LoadArgument(2);               // int
-                Emit.LoadConstant(RecursionLimit);  // int int
-                Emit.BranchIfLess(goOn);            // --empty--
+                Emit.LoadArgument(2);                               // int
+                Emit.LoadConstant(InlineSerializer.RecursionLimit); // int int
+                Emit.BranchIfLess(goOn);                            // --empty--
 
                 Emit.NewObject(typeof(InfiniteRecursionException)); // infiniteRecursionException
                 Emit.Throw();                                       // --empty--
@@ -3548,7 +3628,10 @@ namespace Jil.Serialize
                 Emit.MarkLabel(goOn);               // --empty--
             }
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -3605,7 +3688,10 @@ namespace Jil.Serialize
 
             Emit = MakeEmit(typeof(ForType));
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -3633,7 +3719,10 @@ namespace Jil.Serialize
 
             Emit = MakeEmit(typeof(ForType));
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -3661,7 +3750,10 @@ namespace Jil.Serialize
 
             Emit = MakeEmit(typeof(ForType));
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
@@ -3687,7 +3779,10 @@ namespace Jil.Serialize
         {
             Emit = MakeEmit(typeof(ForType));
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             Emit.LoadArgument(0);
             Emit.LoadArgument(1);
@@ -3717,7 +3812,10 @@ namespace Jil.Serialize
 
             Emit = MakeEmit(typeof(ForType));
 
-            AddCharBuffer(typeof(ForType));
+            if (!UseCachedCharBuffers)
+            {
+                AddCharBuffer(typeof(ForType));
+            }
 
             RecursiveTypes = PreloadRecursiveTypes(recursiveTypes);
 
