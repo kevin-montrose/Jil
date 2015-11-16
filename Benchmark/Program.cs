@@ -14,7 +14,7 @@ using System.Diagnostics;
 
 namespace Benchmark
 {
-    class Program
+    static class Program
     {
         // "Nothing up my sleeves" number, first 9 digits of PI
         static Random Rand;
@@ -26,11 +26,14 @@ namespace Benchmark
 
         static List<Type> GetModels()
         {
-            var ret =
-                Assembly
-                    .GetExecutingAssembly()
+#if COREFX
+            var assembly = typeof(Program).GetTypeInfo().Assembly;
+#else
+            var assembly = typeof(Program).Assembly;
+#endif
+            var ret = assembly
                     .GetTypes()
-                    .Where(t => t.Namespace == "Benchmark.Models" && !t.IsEnum && !t.IsInterface && !t.IsAbstract)
+                    .Where(t => t.Namespace == "Benchmark.Models" && !t._IsEnum() && !t._IsInterface() && !t._IsAbstract())
                     .ToList();
 
             return ret;
@@ -177,7 +180,7 @@ namespace Benchmark
                     )
                 ).ToList();
         }
-
+#if !COREFXTODO
         static byte[] ProtobufSerialize<T>(T obj)
         {
             using (var mem = new MemoryStream())
@@ -194,7 +197,7 @@ namespace Benchmark
                 return ProtoBuf.Serializer.Deserialize<T>(mem);
             }
         }
-
+#endif
         static MethodInfo _NewtonsoftSerialize = typeof(Program).GetMethod("NewtonsoftSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string NewtonsoftSerialize<T>(T obj)
         {
@@ -206,7 +209,7 @@ namespace Benchmark
             var mtd = _NewtonsoftSerialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             ret.DynamicInvoke(new object[] { null });
 
@@ -236,11 +239,11 @@ namespace Benchmark
         {
             var mtd = _NewtonsoftDeserializeDynamic.MakeGenericMethod(forType);
             var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             return ret;
         }
-
+#if !COREFXTODO
         static MethodInfo _ServiceStackSerialize = typeof(Program).GetMethod("ServiceStackSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string ServiceStackSerialize<T>(T obj)
         {
@@ -252,7 +255,7 @@ namespace Benchmark
             var mtd = _ServiceStackSerialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             ret.DynamicInvoke(new object[] { null });
 
@@ -282,11 +285,11 @@ namespace Benchmark
         {
             var mtd = _ServiceStackDeserializeDynamic.MakeGenericMethod(forType);
             var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             return ret;
         }
-
+#endif
         static MethodInfo _JilSerialize = typeof(Program).GetMethod("JilSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string JilSerialize<T>(T obj)
         {
@@ -303,7 +306,7 @@ namespace Benchmark
             var mtd = _JilSerialize.MakeGenericMethod(forType);
 
             var funcType = typeof(Func<,>).MakeGenericType(forType, typeof(string));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             ret.DynamicInvoke(new object[] { null });
 
@@ -395,7 +398,7 @@ namespace Benchmark
         {
             var mtd = _JilDeserialize.MakeGenericMethod(forType);
             var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, forType);
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             return ret;
         }
@@ -404,7 +407,7 @@ namespace Benchmark
         {
             var mtd = _JilDeserializeDynamic.MakeGenericMethod(forType);
             var funcType = typeof(Func<,,>).MakeGenericType(typeof(string), forType, typeof(object));
-            var ret = Delegate.CreateDelegate(funcType, mtd);
+            var ret = mtd.CreateDelegate(funcType);
 
             return ret;
         }
@@ -808,16 +811,22 @@ namespace Benchmark
         {
             Action<string> jilDeserializer = a => JilDeserialize(a, obj);
             Action<string> newtonSoftDeserializer = a => NewtonsoftDeserialize<T>(a);
+#if !COREFXTODO
             Action<byte[]> protobufDeserializer = a => ProtobufDeserialize<T>(a);
             Action<string> serviceStackDeserializer = a => ServiceStackDeserialize<T>(a);
+#endif
 
             var json = JilSerialize(obj);
+#if !COREFXTODO
             var bytes = ProtobufSerialize(obj);
+#endif
 
             jilDeserializer(json);
             newtonSoftDeserializer(json);
+#if !COREFXTODO
             protobufDeserializer(bytes);
             serviceStackDeserializer(json);
+#endif
 
             double[] ret = null;
 
@@ -836,7 +845,7 @@ namespace Benchmark
                     System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
                     ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftDeserializer(json), testRuns);
                 };
-
+#if !COREFXTODO
             // Protobuf
             Action protobuf =
                 () =>
@@ -852,8 +861,9 @@ namespace Benchmark
                     System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
                     ret[ServiceStackIndex] = AverageRuntime(() => serviceStackDeserializer(json), testRuns);
                 };
-
+#endif
             var allRuns = new List<double[]>();
+
 
             foreach (var perm in Permutate(4))
             {
@@ -864,8 +874,14 @@ namespace Benchmark
                     {
                         case 0: jil(); break;
                         case 1: newtonSoft(); break;
+#if COREFXTODO
+                        case 2:
+                        case 3:
+                            break;
+#else
                         case 2: protobuf(); break;
                         case 3: serviceStack(); break;
+#endif
                         default: throw new InvalidOperationException();
                     }
                 }
@@ -891,14 +907,18 @@ namespace Benchmark
         {
             Action<T> jilSerializer = a => JilSerialize(a);
             Action<T> newtonSoftSerializer = a => NewtonsoftSerialize(a);
+#if !COREFXTODO
             Action<T> protobufSerializer = a => ProtobufSerialize(a);
             Action<T> serviceStackSerializer = a => ServiceStackSerialize(a);
+#endif
 
             jilSerializer(obj);
             newtonSoftSerializer(obj);
+#if !COREFXTODO
             protobufSerializer(obj);
             serviceStackSerializer(obj);
-            
+#endif
+
             double[] ret = null;
             
             // Jil
@@ -917,6 +937,7 @@ namespace Benchmark
                     ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftSerializer(obj), testRuns);
                 };
 
+#if !COREFXTODO
             // Protobuf
             Action protobuf =
                 () =>
@@ -932,7 +953,7 @@ namespace Benchmark
                     System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
                     ret[ServiceStackIndex] = AverageRuntime(() => serviceStackSerializer(obj), testRuns);
                 };
-
+#endif
             var allRuns = new List<double[]>();
 
             foreach (var perm in Permutate(4))
@@ -944,8 +965,14 @@ namespace Benchmark
                     {
                         case 0: jil(); break;
                         case 1: newtonSoft(); break;
+#if COREFXTODO
+                        case 2:
+                        case 3:
+                            break;
+#else
                         case 2: protobuf(); break;
                         case 3: serviceStack(); break;
+#endif
                         default: throw new InvalidOperationException();
                     }
                 }
@@ -1001,13 +1028,11 @@ namespace Benchmark
                     foreach (T[] restPermuted in Permutate(rest))
                     {
                         i = -1;
-                        yield return Array.ConvertAll<T, T>(
-                            array,
-                            delegate(T p)
+                        yield return array.Select(delegate (T p)
                             {
                                 return ++i == 0 ? item : restPermuted[i - 1];
                             }
-                        );
+                        ).ToArray();
                     }
                 }
             }
@@ -1030,15 +1055,22 @@ namespace Benchmark
         static void Main(string[] args)
         {
             // single core
+#if !COREFXTODO
             var proc = Process.GetCurrentProcess();
             proc.ProcessorAffinity = (IntPtr)1;             // only use the first processor
+#endif
 
             Console.WriteLine("1. Quick Graph");
             Console.WriteLine("2. Comparison Graph");
 
             Console.WriteLine();
             Console.Write("Selection? ");
+#if COREFX
+            var k = Console.ReadLine().Single();
+#else
             var k = Console.ReadKey().KeyChar;
+#endif
+
             Console.WriteLine();
 
             if (k == '1')
@@ -1063,7 +1095,11 @@ namespace Benchmark
             Console.WriteLine("== Finished ==");
 
 #if DEBUG
+#if COREFX
+            Console.ReadLine();
+#else
             Console.ReadKey();
+#endif
 #endif
         }
     }

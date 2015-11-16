@@ -1745,7 +1745,7 @@ namespace JilTests
                 Assert.AreEqual((long?)-1, (long?)res.ElementAt(1));
             }
         }
-#if !NOBENCH
+
         [TestMethod]
         public void BenchmarkFailure()
         {
@@ -1757,7 +1757,7 @@ namespace JilTests
 
             Assert.IsTrue(eq);
         }
-#endif
+
         [TestMethod]
         public void MemberAccess()
         {
