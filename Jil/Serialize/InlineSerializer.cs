@@ -124,15 +124,15 @@ namespace Jil.Serialize
             }
         }
 
-        static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod("Write", new [] { typeof(string) });
-        static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod("Write", new[] { typeof(string) });
-        static MethodInfo ThunkWriter_WriteCommonConstant = typeof(ThunkWriter).GetMethod("WriteCommonConstant", new[] { typeof(ConstantString_Common) });
-        static MethodInfo ThunkWriter_WriteFormatingContant = typeof(ThunkWriter).GetMethod("WriteFormattingConstant", new[] { typeof(ConstantString_Formatting) });
-        static MethodInfo ThunkWriter_WriteMinConstant = typeof(ThunkWriter).GetMethod("WriteMinConstant", new[] { typeof(ConstantString_Min) });
-        static MethodInfo ThunkWriter_WriteValueConstant = typeof(ThunkWriter).GetMethod("WriteValueConstant", new[] { typeof(ConstantString_Value) });
-        static MethodInfo ThunkWriter_Write000EscapeConstant = typeof(ThunkWriter).GetMethod("Write000EscapeConstant", new[] { typeof(ConstantString_000Escape) });
-        static MethodInfo ThunkWriter_Write001EscapeConstant = typeof(ThunkWriter).GetMethod("Write001EscapeConstant", new[] { typeof(ConstantString_001Escape) });
-        static MethodInfo ThunkWriter_WriteDayOfWeek = typeof(ThunkWriter).GetMethod("WriteDayOfWeek", new[] { typeof(ConstantString_DaysOfWeek) });
+        static MethodInfo TextWriter_WriteString = typeof(TextWriter).GetMethod(nameof(TextWriter.Write), new [] { typeof(string) }).AssertNotNull(nameof(TextWriter.Write));
+        static MethodInfo ThunkWriter_WriteString = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.Write), new[] { typeof(string) }).AssertNotNull(nameof(ThunkWriter.Write));
+        static MethodInfo ThunkWriter_WriteCommonConstant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.WriteCommonConstant), new[] { typeof(ConstantString_Common) }).AssertNotNull(nameof(ThunkWriter.WriteCommonConstant));
+        static MethodInfo ThunkWriter_WriteFormatingContant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.WriteFormattingConstant), new[] { typeof(ConstantString_Formatting) }).AssertNotNull(nameof(ThunkWriter.WriteFormattingConstant));
+        static MethodInfo ThunkWriter_WriteMinConstant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.WriteMinConstant), new[] { typeof(ConstantString_Min) }).AssertNotNull(nameof(ThunkWriter.WriteMinConstant));
+        static MethodInfo ThunkWriter_WriteValueConstant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.WriteValueConstant), new[] { typeof(ConstantString_Value) }).AssertNotNull(nameof(ThunkWriter.WriteValueConstant));
+        static MethodInfo ThunkWriter_Write000EscapeConstant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.Write000EscapeConstant), new[] { typeof(ConstantString_000Escape) }).AssertNotNull(nameof(ThunkWriter.Write000EscapeConstant));
+        static MethodInfo ThunkWriter_Write001EscapeConstant = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.Write001EscapeConstant), new[] { typeof(ConstantString_001Escape) }).AssertNotNull(nameof(ThunkWriter.Write001EscapeConstant));
+        static MethodInfo ThunkWriter_WriteDayOfWeek = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.WriteDayOfWeek), new[] { typeof(ConstantString_DaysOfWeek) }).AssertNotNull(nameof(ThunkWriter.WriteDayOfWeek));
         void WriteString(string str)
         {
             if (BuildingToString)
@@ -2347,7 +2347,7 @@ namespace Jil.Serialize
 #if COREFX
         private static MethodInfo _TypeGetProperty = typeof(Type)._GetPublicStaticMethod(nameof(TypeExtensions.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(TypeExtensions.GetProperty));
 #else
-        private static MethodInfo _TypeGetProperty = typeof(Type)._GetPublicStaticMethod(nameof(Type.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(Type.GetProperty));
+        private static MethodInfo _TypeGetProperty = typeof(Type).GetMethod(nameof(Type.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(Type.GetProperty));
 #endif
 
         private static MethodInfo _TypeFromHandle = typeof(Type)._GetPublicStaticMethod(nameof(Type.GetTypeFromHandle), new[] { typeof(RuntimeTypeHandle) }).AssertNotNull(nameof(Type.GetTypeFromHandle));

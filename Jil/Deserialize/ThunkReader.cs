@@ -25,7 +25,7 @@ namespace Jil.Deserialize
             Index = -1;
         }
 
-        internal int Peek()
+        public int Peek()
         {
             var ix = Index + 1;
             if(ix >= Value.Length)

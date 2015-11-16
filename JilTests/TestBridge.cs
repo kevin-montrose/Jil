@@ -65,6 +65,10 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
 {
     class TestClassAttribute : Attribute { }
     class TestMethodAttribute : Xunit.FactAttribute { }
+
+    // lazy way of isolating a single test even with limited tools
+    //class TestMethodAttribute : Attribute{ }
+    //class ActualTestMethodAttribute : Xunit.FactAttribute { }
 }
 
 namespace System.Diagnostics.CodeAnalysis
