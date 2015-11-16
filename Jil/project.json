@@ -1,0 +1,36 @@
+﻿{
+  "version": "2.12.2",
+  "description": "A fast JSON serializer and deserializer.",
+  "authors": [ "Kevin Montrose" ],
+  "owners": [ "kmontrose" ],
+  "tags": [ "json" ],
+  "releaseNotes": "tbd",
+  "projectUrl": "https://github.com/kevin-montrose/Jil",
+  "licenseUrl": "https://github.com/kevin-montrose/Jil/blob/master/LICENSE",
+  "copyright": "Copyright (c) 2013 - 2015 Kevin Montrose",
+  "compilationOptions": {
+    "allowUnsafe": true
+  },
+  "runtimes": { "win": { } },
+  "dependencies": {
+    "Sigil": "4.5.1"
+  },
+  "frameworks": {
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "4.0.0.0"
+      }
+    },
+    "dnxcore50": {
+      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+      "dependencies": {
+        "System.Runtime.Serialization.Primitives": "4.0.11-beta-*"
+      }
+    }
+  }
+}

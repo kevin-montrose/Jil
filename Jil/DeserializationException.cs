@@ -37,55 +37,95 @@ namespace Jil
         /// </summary>
         public bool EndedUnexpectedly { get; private set; }
 
-        internal DeserializationException(Exception inner, TextReader reader, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(Exception inner, TextReader reader, bool endedEarly)
             : base(inner.Message, inner)
         {
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(Exception inner, ref ThunkReader reader, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(Exception inner, ref ThunkReader reader, bool endedEarly)
             : base(inner.Message, inner)
         {
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, TextReader reader, bool endedEarly) 
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(string msg, TextReader reader, bool endedEarly) 
             : base(msg) 
         {
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, ref ThunkReader reader, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(string msg, ref ThunkReader reader, bool endedEarly)
             : base(msg)
         {
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly)
             : base(msg, inner)
         {
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, ref ThunkReader reader, Exception inner, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(string msg, ref ThunkReader reader, Exception inner, bool endedEarly)
             : base(msg, inner)
         {
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(string msg, Exception inner, bool endedEarly) 
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(string msg, Exception inner, bool endedEarly) 
             : base(msg + ": " + inner.Message, inner) 
         {
             EndedUnexpectedly = endedEarly;
         }
 
-        internal DeserializationException(Exception inner, bool endedEarly)
+#if COREFX
+        public
+#else
+        internal
+#endif
+            DeserializationException(Exception inner, bool endedEarly)
             : base(inner.Message, inner)
         {
             EndedUnexpectedly = endedEarly;

@@ -21,7 +21,11 @@ namespace Jil.Deserialize
  
         static AnonymousTypeLookup()
         {
+#if COREFXTODO
+            ParametersToTypeAndIndex = new Dictionary<string, Tuple<Type, int>>();
+#else
             ParametersToTypeAndIndex = Utils.GetAnonymousNameToConstructorMap(typeof(ForType));
+#endif
 
             var orderedNames =
                 ParametersToTypeAndIndex

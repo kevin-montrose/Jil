@@ -101,7 +101,7 @@ namespace Jil.Deserialize
                 }
             }
 
-            Proxy = typeBuilder.CreateType();
+            Proxy = typeBuilder._CreateType();
         }
     }
 

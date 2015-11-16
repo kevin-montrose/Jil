@@ -1745,7 +1745,7 @@ namespace JilTests
                 Assert.AreEqual((long?)-1, (long?)res.ElementAt(1));
             }
         }
-
+#if !NOBENCH
         [TestMethod]
         public void BenchmarkFailure()
         {
@@ -1757,7 +1757,7 @@ namespace JilTests
 
             Assert.IsTrue(eq);
         }
-
+#endif
         [TestMethod]
         public void MemberAccess()
         {
@@ -2543,7 +2543,7 @@ namespace JilTests
             Hello = 1,
             World = 2
         }
-
+#if !COREFXTODO
         [TestMethod]
         public void DynamicTypeConverter()
         {
@@ -2775,7 +2775,7 @@ namespace JilTests
                 Assert.AreEqual(456.7, (double)tc.ConvertTo(d[_DynamicTypeConverter.World], typeof(double)));
             }
         }
-
+#endif
         [TestMethod]
         public void Issue117()
         {

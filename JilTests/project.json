@@ -1,0 +1,32 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "JilTests Console Application",
+  "authors": [ "Kevin Montrose" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "runtimes": { "win": { } },
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
+  "compilationOptions": { "define": [ "XUNIT", "NOBENCH" ] },
+  "dependencies": {
+    "Sigil": "4.5.1",
+    "Jil": { "target": "project", "version": "2.12.2" },
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-beta6-build191",
+    "Benchmark": { "target": "project", "version": "1.0.0" }
+  },
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+        "AspNetMvc": "4.0.20710.0"
+      }
+    },
+    "dnxcore50": {
+      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+      "dependencies": {
+      }
+    }
+  }
+}

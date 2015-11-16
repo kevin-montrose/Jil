@@ -146,6 +146,7 @@
     <Compile Include="Serialize\SerializeDynamicThunk.cs" />
     <Compile Include="Serialize\ThunkWriter.cs" />
     <Compile Include="Serialize\TypeCaches.cs" />
+    <Compile Include="TypeHelpers.cs" />
     <Compile Include="UnspecifiedDateTimeKindBehavior.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Globalization;
-
+using System.Reflection;
 namespace JilTests
 {
     [TestClass]
@@ -217,9 +217,9 @@ namespace JilTests
                 };
             }
 
-            if (t.IsValueType) throw new Exception("Unexpected valuetype: " + t.Name);
+            if (t._IsValueType()) throw new Exception("Unexpected valuetype: " + t.Name);
 
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>))
+            if (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(List<>))
             {
                 return Describe(t.GetGenericArguments()[0], "--array--");
             }

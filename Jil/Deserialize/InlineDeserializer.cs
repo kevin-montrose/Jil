@@ -94,13 +94,13 @@ namespace Jil.Deserialize
                 involvedTypes.Contains(typeof(float)) ||
                 involvedTypes.Contains(typeof(double)) ||
                 involvedTypes.Contains(typeof(decimal)) ||
-                involvedTypes.Any(t => t.IsEnum) ||
+                involvedTypes.Any(t => t._IsEnum()) ||
                 involvedTypes.Any(t => t.IsUserDefinedType()) ||
-                (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
+                (!UseNameAutomataForEnums && involvedTypes.Any(t => t._IsEnum()));
 
             if (mayNeedStringBuilder)
             {
-                var gonnaUseAStringBuilderAnyway = (!UseNameAutomataForEnums && involvedTypes.Any(t => t.IsEnum));
+                var gonnaUseAStringBuilderAnyway = (!UseNameAutomataForEnums && involvedTypes.Any(t => t._IsEnum()));
 
                 if (!UseCharArrayOverStringBuilder || gonnaUseAStringBuilderAnyway)
                 {
@@ -159,8 +159,8 @@ namespace Jil.Deserialize
             ThrowExpectedButEnded("" + c);
         }
 
-        static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) }, null);
-        static readonly ConstructorInfo DeserializationException_Cons_string_TextReader_bool = typeof(DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(TextReader), typeof(bool) }, null);
+        static readonly ConstructorInfo DeserializationException_Cons_string_ThunkWriter_bool = typeof(DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), typeof(ThunkReader).MakeByRefType(), typeof(bool) }).AssertNotNull(nameof(DeserializationException));
+        static readonly ConstructorInfo DeserializationException_Cons_string_TextReader_bool = typeof(DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), typeof(TextReader), typeof(bool) }).AssertNotNull(nameof(DeserializationException));
         void ThrowStringStreamBool()
         {
             // top of stack is:
@@ -1067,7 +1067,7 @@ namespace Jil.Deserialize
         {
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
 
-            if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
+            if (listType._IsGenericType() && listType.GetGenericTypeDefinition() == typeof(IList<>))
             {
                 listType = typeof(List<>).MakeGenericType(elementType);
             }
@@ -1093,7 +1093,7 @@ namespace Jil.Deserialize
             {
                 Action loadList;
 
-                if (!listType.IsValueType)
+                if (!listType._IsValueType())
                 {
                     loadList = () => Emit.LoadLocal(loc);
 
@@ -1124,14 +1124,14 @@ namespace Jil.Deserialize
                 }
 
                 Emit.MarkLabel(doRead);                 // --empty--
-                if (listType.IsValueType)
+                if (listType._IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);         // listType*
                     Emit.InitializeObject(listType);    // --empty--
                 }
                 else
                 {
-                    var listCons = listType.GetPublicOrPrivateConstructor();
+                    var listCons = listType._GetPublicOrPrivateConstructor();
                     if (listCons == null) throw new ConstructionException("Expected a parameterless constructor for " + listType);
 
                     Emit.NewObject(listCons);   // listType
@@ -1193,12 +1193,12 @@ namespace Jil.Deserialize
 
             var keyIsString = keyType == typeof(string);
             var keyIsInteger = keyType.IsIntegerNumberType();
-            var keyIsEnum = keyType.IsEnum;
+            var keyIsEnum = keyType._IsEnum();
 
             if (!(keyIsString || keyIsInteger || keyIsEnum)) throw new ConstructionException("Only dictionaries with strings, integers, or enums for keys can be deserialized");
             var valType = dictType.GetDictionaryInterface().GetGenericArguments()[1];
 
-            if (dictType.IsGenericType && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+            if (dictType._IsGenericType() && dictType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
             {
                 dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valType);
             }
@@ -1208,7 +1208,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!dictType.IsValueType)
+            if (!dictType._IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1228,7 +1228,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(dictType))
             {
                 Action loadDict;
-                if (dictType.IsValueType)
+                if (dictType._IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);         // dictType*
                     Emit.InitializeObject(dictType);    // --empty--
@@ -1237,7 +1237,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var dictCons = dictType.GetPublicOrPrivateConstructor();
+                    var dictCons = dictType._GetPublicOrPrivateConstructor();
                     if (dictCons == null) throw new ConstructionException("Expected a parameterless constructor for " + dictType);
 
                     Emit.NewObject(dictCons);                                   // dictType
@@ -1426,7 +1426,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!objType.IsValueType)
+            if (!objType._IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1446,7 +1446,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(objType))
             {
                 Action loadObj;
-                if (objType.IsValueType)
+                if (objType._IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);     // objType*
                     Emit.InitializeObject(objType); // --empty--
@@ -1455,7 +1455,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetPublicOrPrivateConstructor();
+                    var cons = objType._GetPublicOrPrivateConstructor();
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
@@ -1476,7 +1476,7 @@ namespace Jil.Deserialize
                 {
                     loadObj();                          // objType(*?)
 
-                    if (objType.IsValueType)
+                    if (objType._IsValueType())
                     {
                         Emit.LoadObject(objType);       // objType
                     }
@@ -1555,7 +1555,7 @@ namespace Jil.Deserialize
                     Emit.MarkLabel(label);      // objType(*?)
 
                     Type convertEnumTo;
-                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
+                    if (memberType._IsEnum() && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
                     {
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
@@ -1614,7 +1614,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
 
-            if (objType.IsValueType)
+            if (objType._IsValueType())
             {
                 Emit.LoadObject(objType);       // objType
             }
@@ -1625,7 +1625,7 @@ namespace Jil.Deserialize
             var done = Emit.DefineLabel();
             var doneSkipChar = Emit.DefineLabel();
 
-            if (!objType.IsValueType)
+            if (!objType._IsValueType())
             {
                 ExpectRawCharOrNull(
                     '{',
@@ -1645,7 +1645,7 @@ namespace Jil.Deserialize
             using (var loc = Emit.DeclareLocal(objType))
             {
                 Action loadObj;
-                if (objType.IsValueType)
+                if (objType._IsValueType())
                 {
                     Emit.LoadLocalAddress(loc);     // objType*
                     Emit.InitializeObject(objType); // --empty--
@@ -1654,7 +1654,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    var cons = objType.GetPublicOrPrivateConstructor();
+                    var cons = objType._GetPublicOrPrivateConstructor();
                     if (cons == null) throw new ConstructionException("Expected a parameterless constructor for " + objType);
 
                     Emit.NewObject(cons);   // objType
@@ -1675,7 +1675,7 @@ namespace Jil.Deserialize
                 {
                     loadObj();                      // objType(*?)
 
-                    if (objType.IsValueType)
+                    if (objType._IsValueType())
                     {
                         Emit.LoadObject(objType);   // objType
                     }
@@ -1736,7 +1736,7 @@ namespace Jil.Deserialize
                     Emit.MarkLabel(label);      // objType(*?)
 
                     Type convertEnumTo;
-                    if (memberType.IsEnum && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
+                    if (memberType._IsEnum() && member != null && member.ShouldConvertEnum(memberType, out convertEnumTo))
                     {
                         var underlyingEnumType = Enum.GetUnderlyingType(memberType);
 
@@ -1793,7 +1793,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
 
-            if(objType.IsValueType)
+            if(objType._IsValueType())
             {
                 Emit.LoadObject(objType);       // objType
             }
@@ -2193,7 +2193,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            if (forType.IsEnum)
+            if (forType._IsEnum())
             {
                 Type convertEnumTo;
                 if (forMember != null && forMember.ShouldConvertEnum(forType, out convertEnumTo))

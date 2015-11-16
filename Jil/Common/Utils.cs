@@ -63,9 +63,11 @@ namespace Jil.Common
         public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
+#if !COREFXTODO
             var props = Utils.PropertyFieldUsage(forType);
+#endif
 
-            var simpleTypes = members.Where(m => m.ReturnType().IsValueType && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
+            var simpleTypes = members.Where(m => m.ReturnType()._IsValueType() && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
             var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
             var recursive = members.Where(m => recursiveTypes.Contains(m.ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
             var everythingElse = members.Where(m => !simpleTypes.Contains(m) && !otherPrimitive.Contains(m) && !recursive.Contains(m)).ToList();
@@ -85,10 +87,12 @@ namespace Jil.Common
                         return int.MaxValue;
                     }
 
+#if !COREFXTODO
                     var asProp = m as PropertyInfo;
                     if (asProp != null)
                     {
                         List<FieldInfo> usesFields;
+
                         if (!props.TryGetValue(asProp, out usesFields))
                         {
                             return int.MaxValue;
@@ -110,7 +114,7 @@ namespace Jil.Common
                                 }
                            ).Min();
                     }
-
+#endif
                     return int.MaxValue;
                 };
 
@@ -163,7 +167,7 @@ namespace Jil.Common
 
             return ret;
         }
-
+#if !COREFXTODO
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
@@ -415,7 +419,7 @@ namespace Jil.Common
                 default: throw new Exception("Unexpected operand type [" + op.OperandType + "]");
             }
         }
-
+#endif
         public static Dictionary<FieldInfo, int> FieldOffsetsInMemory(Type t)
         {
             try
@@ -495,6 +499,7 @@ namespace Jil.Common
             }
         }
 
+#if !COREFXTODO
         /// <summary>
         /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
         /// We need this for anonymous types because we can't set properties (they're read-only).
@@ -567,6 +572,7 @@ namespace Jil.Common
 
             return nameToTypeAndConsIndex;
         }
+#endif
 
         static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
         static IEnumerable<T> _DynamicProjectTo<T>(IEnumerable<object> e)
@@ -774,7 +780,7 @@ namespace Jil.Common
                 var curType = curNode.Value;
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType._IsEnum()) continue;
 
                 if (curType.IsNullableType())
                 {
@@ -849,7 +855,7 @@ namespace Jil.Common
                 var curType = pending.Pop();
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType._IsEnum()) continue;
 
                 if (!counts.ContainsKey(curType)) counts[curType] = 0;
                 counts[curType]++;
@@ -910,7 +916,7 @@ namespace Jil.Common
                 reused
                     .Where(
                         r => !(r.IsPrimitiveType() ||   // all the types we handle extra specially
-                               r.IsEnum || 
+                               r._IsEnum() || 
                                r.IsNullableType() ||
                                r.IsListType() ||
                                r.IsDictionaryType() ||

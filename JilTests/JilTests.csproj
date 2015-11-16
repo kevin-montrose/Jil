@@ -110,6 +110,7 @@
     <Compile Include="BadlySpecifiedTypeTests.cs" />
     <Compile Include="SerializeTests.cs" />
     <Compile Include="SpeedProofTests.cs" />
+    <Compile Include="TypeHelpers.cs" />
     <Compile Include="UtilsTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

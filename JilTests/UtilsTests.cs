@@ -68,6 +68,7 @@ namespace JilTests
         }
 #pragma warning restore 0649
 
+#if !COREFXTODO
         [TestMethod]
         public void PropertyFieldUsage()
         {
@@ -81,6 +82,7 @@ namespace JilTests
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][0]);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
         }
+#endif
 
         private static string CapacityEstimatorToString<T>(Action<TextWriter, T, int> act, T data)
         {
@@ -704,19 +706,19 @@ namespace JilTests
             //   we want B not to break if Jil#1 is a higher version than Jil#2; unless Jil#1 is a major version upgrade
 
             // DeserializationException
-            Assert.IsNotNull(typeof(Jil.DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(Exception), typeof(TextReader), typeof(bool) }, null));
-            Assert.IsNotNull(typeof(Jil.DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(TextReader), typeof(bool) }, null));
-            Assert.IsNotNull(typeof(Jil.DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(TextReader), typeof(Exception), typeof(bool) }, null));
-            Assert.IsNotNull(typeof(Jil.DeserializationException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new[] { typeof(string), typeof(Exception), typeof(bool) }, null));
+            Assert.IsNotNull(typeof(Jil.DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(Exception), typeof(TextReader), typeof(bool) }));
+            Assert.IsNotNull(typeof(Jil.DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), typeof(TextReader), typeof(bool) }));
+            Assert.IsNotNull(typeof(Jil.DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), typeof(TextReader), typeof(Exception), typeof(bool) }));
+            Assert.IsNotNull(typeof(Jil.DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), typeof(Exception), typeof(bool) }));
 
             // InfiniteRecursionException
-            Assert.IsNotNull(typeof(Jil.InfiniteRecursionException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null));
+            Assert.IsNotNull(typeof(Jil.InfiniteRecursionException)._GetPublicOrPrivateConstructor(Type.EmptyTypes));
 
             // JSON
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("SetDefaultOptions", BindingFlags.Public | BindingFlags.Static, null, new [] { typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("GetDefaultOptions", BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("SerializeDynamic", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(object), typeof(TextWriter), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("SerializeDynamic", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(object), typeof(Jil.Options) }, null));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("SetDefaultOptions", new [] { typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("GetDefaultOptions", Type.EmptyTypes));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("SerializeDynamic", new[] { typeof(object), typeof(TextWriter), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("SerializeDynamic", new[] { typeof(object), typeof(Jil.Options) }));
             Assert.IsNotNull(
                 typeof(Jil.JSON).GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .SingleOrDefault(m => m.Name == "Serialize" && m.GetParameters().Length == 3 && m.GetParameters()[0].ParameterType.IsGenericParameter && m.GetParameters()[1].ParameterType == typeof(TextWriter) &&  m.GetParameters()[2].ParameterType == typeof(Jil.Options))
@@ -725,12 +727,12 @@ namespace JilTests
                 typeof(Jil.JSON).GetMethods(BindingFlags.Public | BindingFlags.Static)
                     .SingleOrDefault(m => m.Name == "Serialize" && m.GetParameters().Length == 2 && m.GetParameters()[0].ParameterType.IsGenericParameter && m.GetParameters()[1].ParameterType == typeof(Jil.Options))
             );
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("Deserialize", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(TextReader), typeof(Type), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("Deserialize", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(Type), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("Deserialize", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(TextReader), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("Deserialize", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("DeserializeDynamic", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(TextReader), typeof(Jil.Options) }, null));
-            Assert.IsNotNull(typeof(Jil.JSON).GetMethod("DeserializeDynamic", BindingFlags.Public | BindingFlags.Static, null, new[] { typeof(string), typeof(Jil.Options) }, null));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("Deserialize", new[] { typeof(TextReader), typeof(Type), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("Deserialize", new[] { typeof(string), typeof(Type), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("Deserialize", new[] { typeof(TextReader), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("Deserialize", new[] { typeof(string), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("DeserializeDynamic", new[] { typeof(TextReader), typeof(Jil.Options) }));
+            Assert.IsNotNull(typeof(Jil.JSON)._GetPublicStaticMethod("DeserializeDynamic", new[] { typeof(string), typeof(Jil.Options) }));
 
             // JilDirectiveAttribute
             Assert.IsNotNull(typeof(Jil.JilDirectiveAttribute).GetConstructor(Type.EmptyTypes));
