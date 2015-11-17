@@ -29,13 +29,15 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
         //{
         //    Xunit.Assert.NotEqual<T>(x, y);
         //}
-        public static void IsFalse(bool value)
+        public static void IsFalse(bool value, string message = null)
         {
-            Xunit.Assert.False(value);
+            if (string.IsNullOrWhiteSpace(message)) Xunit.Assert.False(value);
+            else if (value) Fail(message);
         }
         public static void IsTrue(bool value, string message = null)
         {
-            Xunit.Assert.True(value);
+            if (string.IsNullOrWhiteSpace(message)) Xunit.Assert.True(value);
+            else if (!value) Fail(message);
         }
         public static void Fail()
         {
