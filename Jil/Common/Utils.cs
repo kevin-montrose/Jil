@@ -186,7 +186,8 @@ namespace Jil.Common
                     fieldInfos.AddRange(allFields[prop.Name]); // Foo / foo
                     fieldInfos.AddRange(allFields["_" + prop.Name]); // Foo / _foo
                     fieldInfos.AddRange(allFields["m_" + prop.Name]); // Foo / m_Foo
-                    fieldInfos.AddRange(allFields["<" + prop.Name + ">k__BackingField"]); // auto-prop convention
+                    fieldInfos.AddRange(allFields["<" + prop.Name + ">k__BackingField"]); // auto-prop convention (see GeneratedNameKind.cs in Roslyn)
+                    fieldInfos.AddRange(allFields["<" + prop.Name + ">i__Field"]); // anon-type convention
 #else
                     var getMtd = prop.GetMethod;
                     var mtdBody = getMtd.GetMethodBody();

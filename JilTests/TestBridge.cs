@@ -1,4 +1,5 @@
-﻿#if XUNIT
+﻿// #define ACTUALTESTONLY
+#if XUNIT
 using System;
 using System.Collections.Generic;
 
@@ -66,12 +67,15 @@ namespace Microsoft.VisualStudio.TestTools.UnitTesting
 namespace Microsoft.VisualStudio.TestTools.UnitTesting
 {
     class TestClassAttribute : Attribute { }
+
+#if ACTUALTESTONLY
+    // lazy way of isolating a single test even with limited tools
+    class TestMethodAttribute : Attribute { }
+    class ActualTestMethodAttribute : Xunit.FactAttribute { }
+#else
     class TestMethodAttribute : Xunit.FactAttribute { }
     class ActualTestMethodAttribute : Attribute { }
-
-    // lazy way of isolating a single test even with limited tools
-    //class TestMethodAttribute : Attribute { }
-    //class ActualTestMethodAttribute : Xunit.FactAttribute { }
+#endif
 }
 
 namespace System.Diagnostics.CodeAnalysis
