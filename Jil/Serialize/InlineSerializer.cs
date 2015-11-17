@@ -2345,7 +2345,7 @@ namespace Jil.Serialize
         }
 
 #if COREFX
-        private static MethodInfo _TypeGetProperty = typeof(Type)._GetPublicStaticMethod(nameof(TypeExtensions.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(TypeExtensions.GetProperty));
+        private static MethodInfo _TypeGetProperty = typeof(TypeExtensions)._GetPublicStaticMethod(nameof(TypeExtensions.GetProperty), new[] { typeof(Type), typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(TypeExtensions.GetProperty));
 #else
         private static MethodInfo _TypeGetProperty = typeof(Type).GetMethod(nameof(Type.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(Type.GetProperty));
 #endif

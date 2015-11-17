@@ -374,9 +374,12 @@ namespace Jil.Common
                 OpCodes.Ldnull
             };
 
-#if !COREFXTODO
+
         public static bool IsConstant(this PropertyInfo prop)
         {
+#if COREFXTODO
+            return false;
+#else
             var getMtd = prop.GetMethod;
 
             // virtual methods can't be proven constant, who knows what overrides are out there
@@ -394,8 +397,9 @@ namespace Jil.Common
             if (numberOfConstants != 1) return false;
 
             return true;
-        }
 #endif
+        }
+
         public static string GetConstantJSONStringEquivalent(this MemberInfo member, bool jsonp)
         {
             var asField = member as FieldInfo;

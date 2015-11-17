@@ -70,7 +70,23 @@ namespace Benchmark
         }
         public static ConstructorInfo _GetPublicOrPrivateConstructor(this Type onType, params Type[] parameterTypes)
         {
-            return onType.GetConstructor(parameterTypes ?? Type.EmptyTypes);
+            if (parameterTypes == null) parameterTypes = Type.EmptyTypes;
+            foreach(var ctor in onType.GetTypeInfo().DeclaredConstructors)
+            {
+                var args = ctor.GetParameters();
+                if (args.Length != parameterTypes.Length) continue;
+                bool match = true;
+                for(int i = 0; i < args.Length; i++)
+                {
+                    if(args[i].ParameterType != parameterTypes[i])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) return ctor;
+            }
+            return null;
         }
         public static bool _IsDefined(this Type type, Type attributeType)
         {

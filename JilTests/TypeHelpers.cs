@@ -38,6 +38,14 @@ namespace JilTests
         {
             return type.GetTypeInfo().IsInterface;
         }
+        public static bool _IsAbstract(this Type type)
+        {
+            return type.GetTypeInfo().IsAbstract;
+        }
+        public static bool _IsPrimitive(this Type type)
+        {
+            return type.GetTypeInfo().IsPrimitive;
+        }
         public static bool _IsSealed(this Type type)
         {
             return type.GetTypeInfo().IsSealed;
@@ -62,7 +70,23 @@ namespace JilTests
         }
         public static ConstructorInfo _GetPublicOrPrivateConstructor(this Type onType, params Type[] parameterTypes)
         {
-            return onType.GetConstructor(parameterTypes ?? Type.EmptyTypes);
+            if (parameterTypes == null) parameterTypes = Type.EmptyTypes;
+            foreach(var ctor in onType.GetTypeInfo().DeclaredConstructors)
+            {
+                var args = ctor.GetParameters();
+                if (args.Length != parameterTypes.Length) continue;
+                bool match = true;
+                for(int i = 0; i < args.Length; i++)
+                {
+                    if(args[i].ParameterType != parameterTypes[i])
+                    {
+                        match = false;
+                        break;
+                    }
+                }
+                if (match) return ctor;
+            }
+            return null;
         }
         public static bool _IsDefined(this Type type, Type attributeType)
         {
@@ -88,6 +112,14 @@ namespace JilTests
         public static bool _IsInterface(this Type type)
         {
             return type.IsInterface;
+        }
+        public static bool _IsAbstract(this Type type)
+        {
+            return type.IsAbstract;
+        }
+        public static bool _IsPrimitive(this Type type)
+        {
+            return type.IsPrimitive;
         }
         public static bool _IsSealed(this Type type)
         {

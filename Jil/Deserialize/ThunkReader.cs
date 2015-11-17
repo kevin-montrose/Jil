@@ -7,12 +7,7 @@ using System.Threading.Tasks;
 namespace Jil.Deserialize
 {
     delegate T StringThunkDelegate<T>(ref ThunkReader writer, int depth);
-#if COREFX
-    public
-#else
-    internal
-#endif
-    struct ThunkReader
+    internal struct ThunkReader
     {
         string Value;
         int Index;
