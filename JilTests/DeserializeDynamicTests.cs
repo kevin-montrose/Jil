@@ -2895,38 +2895,35 @@ namespace JilTests
         [TestMethod]
         public void RFC1123DateTimes()
         {
-            var toTest = new List<DateTime>();
-
             var now = DateTime.UtcNow;
-            toTest.Add(now);
+            TestRFC1123DateTime(now, now);
 
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             for (var i = 0; i < 357; i++)
             {
-                toTest.Add(epoch + TimeSpan.FromDays(i));
+                TestRFC1123DateTime(now, epoch + TimeSpan.FromDays(i));
                 for (var j = 0; j < 24; j++)
                 {
-                    toTest.Add(epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j));
+                    TestRFC1123DateTime(now, epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j));
                     for (var k = 0; k < 60; k++)
                     {
-                        toTest.Add(epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j) + TimeSpan.FromMinutes(k));
+                        TestRFC1123DateTime(now, epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j) + TimeSpan.FromMinutes(k));
                         for (var l = 0; l < 60; l++)
                         {
-                            toTest.Add(epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j) + TimeSpan.FromMinutes(k) + TimeSpan.FromSeconds(l));
+                            TestRFC1123DateTime(now, epoch + TimeSpan.FromDays(i) + TimeSpan.FromHours(j) + TimeSpan.FromMinutes(k) + TimeSpan.FromSeconds(l));
                         }
                     }
                 }
             }
+        }
+        static void TestRFC1123DateTime(DateTime now, DateTime dt)
+        {
+            var json = "\"" + dt.ToString("R") + "\"";
+            var dyn = JSON.DeserializeDynamic(json, Options.RFC1123);
+            DateTime res = dyn;
 
-            foreach (var dt in toTest)
-            {
-                var json = "\"" + dt.ToString("R") + "\"";
-                var dyn = JSON.DeserializeDynamic(json, Options.RFC1123);
-                DateTime res = dyn;
-
-                var diff = dt - res;
-                Assert.IsTrue(diff.TotalSeconds < 1);
-            }
+            var diff = dt - res;
+            Assert.IsTrue(diff.TotalSeconds < 1);
         }
 
         [TestMethod]
