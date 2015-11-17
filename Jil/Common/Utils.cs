@@ -508,7 +508,6 @@ namespace Jil.Common
             }
         }
 
-#if !COREFXTODO
         /// <summary>
         /// This returns a map of "name of member" => [Type of member, index of argument to constructor].
         /// We need this for anonymous types because we can't set properties (they're read-only).
@@ -528,15 +527,35 @@ namespace Jil.Common
         /// It then decompiles all properties to find out which fields back which properties.
         /// Then it finally works backwards from each property, taking the property's name type and using it's backing
         /// field to lookup which index to pass it in as when constructing the anonymous object.
+        /// 
+        /// =================
+        /// 
+        /// Note: if decompilation isn't supported, it just relies on the compiler convention
+        /// 
         /// </summary>
         public static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap(Type objType)
         {
             var cons = objType.GetConstructors().Single();
-
+#if COREFXTODO
+            var nameToTypeAndConsIndex = new Dictionary<string, Tuple<Type, int>>();
+            var @params = cons.GetParameters().ToDictionary(x => x.Name);
+            var props = objType.GetProperties();
+            foreach (var prop in props)
+            {
+                ParameterInfo p;
+                if (@params.TryGetValue(prop.Name, out p)) // parameter name matches property name
+                {
+                    nameToTypeAndConsIndex.Add(prop.Name, Tuple.Create(prop.PropertyType, p.Position));
+                }
+                else
+                {
+                    throw new NotSupportedException("Unable to determing property/paramater map for anonymous type member: " + prop.Name);
+                }
+            }
+            return nameToTypeAndConsIndex;
+#else
             var consInstrs = Utils.Decompile(cons);
-
             var fieldToArgumentIndex = new Dictionary<FieldInfo, int>();
-
             var fields = objType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
 
             foreach (var field in fields)
@@ -578,12 +597,12 @@ namespace Jil.Common
                         d => d.Key.Name,
                         d => Tuple.Create(d.Key.PropertyType, fieldToArgumentIndex[d.Value] - 1)    // -1 here because `this` adds 1 in the IL
                     );
-
+#endif
             return nameToTypeAndConsIndex;
         }
-#endif
 
-        static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
+
+            static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
         static IEnumerable<T> _DynamicProjectTo<T>(IEnumerable<object> e)
         {
             return e.Cast<T>();
