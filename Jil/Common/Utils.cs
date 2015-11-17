@@ -63,9 +63,7 @@ namespace Jil.Common
         public static List<MemberInfo> IdealMemberOrderForWriting(Type forType, IEnumerable<Type> recursiveTypes, IEnumerable<MemberInfo> members)
         {
             var fields = Utils.FieldOffsetsInMemory(forType);
-#if !COREFXTODO
             var props = Utils.PropertyFieldUsage(forType);
-#endif
 
             var simpleTypes = members.Where(m => m.ReturnType()._IsValueType() && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
             var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
@@ -87,7 +85,6 @@ namespace Jil.Common
                         return int.MaxValue;
                     }
 
-#if !COREFXTODO
                     var asProp = m as PropertyInfo;
                     if (asProp != null)
                     {
@@ -114,7 +111,7 @@ namespace Jil.Common
                                 }
                            ).Min();
                     }
-#endif
+
                     return int.MaxValue;
                 };
 
@@ -167,19 +164,30 @@ namespace Jil.Common
 
             return ret;
         }
-#if !COREFXTODO
+
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
             var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
-
+#if COREFXTODO
+            var allFields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).ToLookup(x => x.Name, StringComparer.OrdinalIgnoreCase);
+#else
             var module = t.Module;
+#endif
 
             foreach (var prop in props)
             {
                 try
                 {
+#if COREFXTODO
+                    // take a wild stab in the dark, using conventions
+                    var fieldInfos = new List<FieldInfo>();
+                    fieldInfos.AddRange(allFields[prop.Name]); // Foo / foo
+                    fieldInfos.AddRange(allFields["_" + prop.Name]); // Foo / _foo
+                    fieldInfos.AddRange(allFields["m_" + prop.Name]); // Foo / m_Foo
+                    fieldInfos.AddRange(allFields["<" + prop.Name + ">k__BackingField"]); // auto-prop convention
+#else
                     var getMtd = prop.GetMethod;
                     var mtdBody = getMtd.GetMethodBody();
                     var il = mtdBody.GetILAsByteArray();
@@ -196,7 +204,7 @@ namespace Jil.Common
                                     return module.ResolveField(f, genArgs, null);
                                 }
                             ).ToList();
-
+#endif
                     ret[prop] = fieldInfos;
                 }
                 catch { /* Anything that goes wrong in here, we can't really do anything about; just continue with less knowledge */ }
@@ -204,7 +212,7 @@ namespace Jil.Common
 
             return ret;
         }
-
+#if !COREFXTODO
         public static List<Tuple<OpCode, int?, long?, double?, FieldInfo>> Decompile(MethodBase mtd)
         {
             var mtdBody = mtd.GetMethodBody();

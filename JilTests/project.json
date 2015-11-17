@@ -5,7 +5,6 @@
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
-  "runtimes": { "win": { } },
   "commands": {
     "test": "xunit.runner.dnx"
   },
@@ -13,14 +12,12 @@
   "dependencies": {
     "Sigil": "4.5.1",
     "Jil": {
-      "target": "project",
-      "version": "2.12.2"
+      "target": "project"
     },
     "xunit": "2.1.0",
     "xunit.runner.dnx": "2.1.0-beta6-build191",
     "Benchmark": {
-      "target": "project",
-      "version": "1.0.0"
+      "target": "project"
     }
   },
   "frameworks": {

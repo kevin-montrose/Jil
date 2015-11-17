@@ -68,7 +68,6 @@ namespace JilTests
         }
 #pragma warning restore 0649
 
-#if !COREFXTODO
         [TestMethod]
         public void PropertyFieldUsage()
         {
@@ -78,11 +77,15 @@ namespace JilTests
             Assert.AreEqual(1, use[typeof(_PropertyFieldUsage).GetProperty("Foo")].Count);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("Foo")][0]);
 
+#if COREFXTODO
+            // doesn't decompile; there is no someProp, _someProp etc field, so expect failure
+            Assert.AreEqual(0, use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")].Count);
+#else
             Assert.AreEqual(2, use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")].Count);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Foo", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][0]);
             Assert.AreEqual(typeof(_PropertyFieldUsage).GetField("_Scaler", BindingFlags.NonPublic | BindingFlags.Instance), use[typeof(_PropertyFieldUsage).GetProperty("SomeProp")][1]);
-        }
 #endif
+        }
 
         private static string CapacityEstimatorToString<T>(Action<TextWriter, T, int> act, T data)
         {

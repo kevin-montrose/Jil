@@ -5,3 +5,4 @@ obj/
 *.user
 .vs/
 project.lock.json
+JilTests/testoutput.txt
