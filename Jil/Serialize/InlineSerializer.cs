@@ -13,25 +13,21 @@ using Jil.SerializeDynamic;
 
 namespace Jil.Serialize
 {
-    class InlineSerializer<ForType>
+    internal static class InlineSerializer
     {
-        public static bool ReorderMembers = true;
-        public static bool UseCustomIntegerToString = true;
-        public static bool SkipDateTimeMathMethods = true;
-        public static bool UseCustomISODateFormatting = true;
-        public static bool UseFastLists = true;
-        public static bool UseFastArrays = true;
-        public static bool UseFastGuids = true;
-        public static bool AllocationlessDictionaries = true;
-        public static bool PropagateConstants = true;
-        public static bool UseCustomWriteIntUnrolled = true;
-        public static bool UseCustomRFC1123DateTimeFormatting = true;
+#if COREFX
+        internal static readonly MethodInfo TypeGetProperty = typeof(TypeExtensions)._GetPublicStaticMethod(nameof(TypeExtensions.GetProperty), new[] { typeof(Type), typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(TypeExtensions.GetProperty));
+#else
+        internal static readonly MethodInfo TypeGetProperty = typeof(Type).GetMethod(nameof(Type.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(Type.GetProperty));
+#endif
 
-        static string CharBuffer = "char_buffer";
-        internal const int CharBufferSize = 36;
-        internal const int RecursionLimit = 50;
-
-        static Dictionary<char, string> CharacterEscapes = 
+        internal static readonly MethodInfo TypeFromHandle = typeof(Type)._GetPublicStaticMethod(nameof(Type.GetTypeFromHandle), new[] { typeof(RuntimeTypeHandle) }).AssertNotNull(nameof(Type.GetTypeFromHandle));
+        internal static readonly MethodInfo FieldInfoFromHandle = typeof(FieldInfo)._GetPublicStaticMethod(nameof(FieldInfo.GetFieldFromHandle), new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) }).AssertNotNull(nameof(FieldInfo.GetFieldFromHandle));
+        internal static readonly int LowestCharNeedingEncoding;
+        internal static readonly Tuple<int, string>[] CharEncodingLabelsNeeded;
+        static InlineSerializer()
+        {
+            Dictionary<char, string> characterEscapes =
             new Dictionary<char, string>
             {
                 { '\\',  @"\\" },
@@ -69,6 +65,28 @@ namespace Jil.Serialize
                 { '\u001E', @"\u001E" },
                 { '\u001F', @"\u001F" }
             };
+            LowestCharNeedingEncoding = characterEscapes.Keys.Min(c => (int)c);
+            CharEncodingLabelsNeeded = characterEscapes.Select(kv => Tuple.Create(kv.Key - LowestCharNeedingEncoding, kv.Value)).ToArray();
+            Array.Sort(CharEncodingLabelsNeeded, (x, y) => x.Item1.CompareTo(y.Item1));
+        }
+    }
+    class InlineSerializer<ForType>
+    {
+        public static bool ReorderMembers = true;
+        public static bool UseCustomIntegerToString = true;
+        public static bool SkipDateTimeMathMethods = true;
+        public static bool UseCustomISODateFormatting = true;
+        public static bool UseFastLists = true;
+        public static bool UseFastArrays = true;
+        public static bool UseFastGuids = true;
+        public static bool AllocationlessDictionaries = true;
+        public static bool PropagateConstants = true;
+        public static bool UseCustomWriteIntUnrolled = true;
+        public static bool UseCustomRFC1123DateTimeFormatting = true;
+
+        static string CharBuffer = "char_buffer";
+        internal const int CharBufferSize = 36;
+        internal const int RecursionLimit = 50;
 
         private readonly Type RecursionLookupOptionsType; // This is a type that implements ISerializeOptions and has an empty, public constructor
         private readonly bool ExcludeNulls;
@@ -1284,14 +1302,10 @@ namespace Jil.Serialize
                 writeChar = typeof(TextWriter).GetMethod("Write", new[] { typeof(char) });
             }
 
-            var lowestCharNeedingEncoding = (int)CharacterEscapes.Keys.OrderBy(c => (int)c).First();
-
-            var needLabels = CharacterEscapes.OrderBy(kv => kv.Key).Select(kv => Tuple.Create(kv.Key - lowestCharNeedingEncoding, kv.Value)).ToList();
-
             var labels = new List<Tuple<Sigil.Label, string>>();
 
             int? prev = null;
-            foreach (var pair in needLabels)
+            foreach (var pair in InlineSerializer.CharEncodingLabelsNeeded)
             {
                 if (prev != null && pair.Item1 - prev != 1) break;
 
@@ -1317,7 +1331,7 @@ namespace Jil.Serialize
 
             Emit.Duplicate();                               // TextWriter char char
             Emit.Convert<int>();
-            Emit.LoadConstant(lowestCharNeedingEncoding);   // TextWriter char char int
+            Emit.LoadConstant(InlineSerializer.LowestCharNeedingEncoding);   // TextWriter char char int
             Emit.Subtract();                                // TextWriter char int
 
             Emit.Switch(labels.Select(s => s.Item1).ToArray()); // TextWriter char
@@ -2344,14 +2358,6 @@ namespace Jil.Serialize
             return false;
         }
 
-#if COREFX
-        private static MethodInfo _TypeGetProperty = typeof(TypeExtensions)._GetPublicStaticMethod(nameof(TypeExtensions.GetProperty), new[] { typeof(Type), typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(TypeExtensions.GetProperty));
-#else
-        private static MethodInfo _TypeGetProperty = typeof(Type).GetMethod(nameof(Type.GetProperty), new[] { typeof(string), typeof(BindingFlags) }).AssertNotNull(nameof(Type.GetProperty));
-#endif
-
-        private static MethodInfo _TypeFromHandle = typeof(Type)._GetPublicStaticMethod(nameof(Type.GetTypeFromHandle), new[] { typeof(RuntimeTypeHandle) }).AssertNotNull(nameof(Type.GetTypeFromHandle));
-        private static MethodInfo _FieldInfoFromHandle = typeof(FieldInfo)._GetPublicStaticMethod(nameof(FieldInfo.GetFieldFromHandle), new[] { typeof(RuntimeFieldHandle), typeof(RuntimeTypeHandle) }).AssertNotNull(nameof(FieldInfo.GetFieldFromHandle));
         bool DynamicCallOutCheck(MemberInfo dynamicMember, Type onType, Sigil.Local inLocal)
         {
             if (ShouldDynamicCallOut(onType))
@@ -2366,7 +2372,7 @@ namespace Jil.Serialize
                         // Load the field from a RuntimeFieldHandle constant
                         Emit.LoadConstant((FieldInfo)dynamicMember); // RuntimeFieldHandle
                         Emit.LoadConstant(dynamicMember.DeclaringType); // RuntimeTypeHandle
-                        Emit.Call(_FieldInfoFromHandle); // FieldInfo
+                        Emit.Call(InlineSerializer.FieldInfoFromHandle); // FieldInfo
                         Emit.CastClass(typeof(MemberInfo)); // MemberInfo
                     }
                     else
@@ -2378,10 +2384,10 @@ namespace Jil.Serialize
 #else
                         Emit.LoadConstant(dynamicMember.ReflectedType); // RuntimeTypeHandle
 #endif
-                        Emit.Call(_TypeFromHandle); // Type
+                        Emit.Call(InlineSerializer.TypeFromHandle); // Type
                         Emit.LoadConstant(dynamicMember.Name); // Type string
                         Emit.LoadConstant((int)(BindingFlags.Public | BindingFlags.Instance)); // Type string int
-                        Emit.Call(_TypeGetProperty); // PropertyInfo
+                        Emit.Call(InlineSerializer.TypeGetProperty); // PropertyInfo
                         Emit.CastClass(typeof(MemberInfo)); // MemberInfo
                     }
                 }

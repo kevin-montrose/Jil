@@ -201,9 +201,11 @@ namespace JilTests
             public ULongEnum ULE { get { return ULongEnum.A; } }
         }
 
+
         [TestMethod]
         public void ConstantProperties()
         {
+            if (!TestConstProps) return;
             Assert.AreEqual("\" \"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("C1"), false));
             Assert.AreEqual("\"\\\"\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantProperties).GetProperty("C2"), false));
 
@@ -500,70 +502,76 @@ namespace JilTests
         }
 #pragma warning restore 0649
 
+#if COREFXTODO
+        bool TestConstProps = false;
+#else
+        bool TestConstProps = true;
+#endif
+
         [TestMethod]
         public void IsConstant()
         {
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstBoolProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstBoolProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstBoolProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstBoolField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstBoolField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstCharProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstCharField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstCharField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstStringProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstStringProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstStringProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstStringField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstStringField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstByteProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstByteProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstByteProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstByteField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstByteField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstSByteProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstSByteProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstSByteProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstSByteField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstSByteField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstShortProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstShortProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstShortProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstShortField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstShortField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUShortProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUShortProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUShortProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUShortField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUShortField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstIntProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstIntProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstIntProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstIntField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstIntField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUIntProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUIntProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUIntProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstUIntField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstUIntField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstLongProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstLongProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstLongProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstLongField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstLongField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstULongProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstULongProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstULongProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstULongField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstULongField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstFloatProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstFloatProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstFloatProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstFloatField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstFloatField").Single()));
 
-            Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstDoubleProp").Single()));
+            if (TestConstProps) Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstDoubleProp").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstDoubleProp").Single()));
             Assert.IsTrue(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("ConstDoubleField").Single()));
             Assert.IsFalse(Jil.Common.ExtensionMethods.IsConstant(typeof(_IsConstant).GetMember("NonConstDoubleField").Single()));

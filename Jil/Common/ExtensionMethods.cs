@@ -405,14 +405,17 @@ namespace Jil.Common
             var asField = member as FieldInfo;
             if (asField != null) return asField.GetConstantJSONStringEquivalent(jsonp);
 
-#if COREFXTODO
-            throw new Exception("Expected member to be a FieldInfo, found: " + member);
-#else
             var asProp = member as PropertyInfo;
-            if (asProp != null) return asProp.GetConstantJSONStringEquivalent(jsonp);
+            if (asProp != null)
+            {
+#if COREFXTODO
+                throw new NotSupportedException("Constant properties are not currently supported on this runtime");
+#else
+                return asProp.GetConstantJSONStringEquivalent(jsonp);
+#endif
+            }
 
             throw new Exception("Expected member to be a FieldInfo or PropetyInfo, found: " + member);
-#endif
         }
 #if !COREFXTODO
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
