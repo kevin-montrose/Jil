@@ -18,7 +18,7 @@
   },
   "runtimes": { "win": { } },
   "dependencies": {
-    "Sigil": "4.5.1"
+    "Sigil": "4.5.1-beta1"
   },
   "frameworks": {
     "dnx451": {

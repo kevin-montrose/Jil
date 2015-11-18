@@ -10,7 +10,7 @@
   },
   "compilationOptions": { "define": [ "XUNIT" ] },
   "dependencies": {
-    "Sigil": "4.5.1",
+    "Sigil": "4.5.1-beta1",
     "Jil": {
       "target": "project"
     },

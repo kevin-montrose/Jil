@@ -1,5 +1,5 @@
 ﻿{
-  "version": "2.12.2",
+  "version": "2.12.2-beta1",
   "description": "A fast JSON serializer and deserializer.",
   "authors": [ "Kevin Montrose" ],
   "owners": [ "kmontrose" ],
@@ -12,7 +12,7 @@
     "allowUnsafe": true
   },
   "dependencies": {
-    "Sigil": "4.5.1"
+    "Sigil": "4.5.1-beta1"
   },
   "frameworks": {
     "dnx451": {

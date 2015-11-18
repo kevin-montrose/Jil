@@ -12,7 +12,7 @@
 
   "dependencies": {
     "Jil": { "target": "project", "version": "2.12.2" },
-    "Sigil": "4.5.1"
+    "Sigil": "4.5.1-beta1"
   },  
   "frameworks": {
     "dnx451": {
