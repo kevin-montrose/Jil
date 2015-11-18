@@ -4,7 +4,7 @@
   "authors": [ "Kevin Montrose" ],
   "owners": [ "kmontrose" ],
   "tags": [ "json" ],
-  "releaseNotes": "tbd",
+  "releaseNotes": "Core CLR support",
   "projectUrl": "https://github.com/kevin-montrose/Jil",
   "licenseUrl": "https://github.com/kevin-montrose/Jil/blob/master/LICENSE",
   "copyright": "Copyright (c) 2013 - 2015 Kevin Montrose",
