@@ -5,13 +5,12 @@
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
-  "runtimes": { "win": { } },
   "commands": {
     "Benchmark": "Benchmark"
   },
   "dependencies": {
     "Sigil": "4.5.1-beta1",
-    "Jil": { "target": "project", "version": "2.12.2" },
+    "Jil": { "target": "project" },
     "Newtonsoft.Json": "7.0.1",
     "SimpleSpeedTester": "1.1.1"
   },

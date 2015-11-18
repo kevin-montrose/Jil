@@ -5,13 +5,12 @@
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
-  "runtimes": { "win": { } },
   "commands": {
     "Experiments": "Experiments"
   },
 
   "dependencies": {
-    "Jil": { "target": "project", "version": "2.12.2" },
+    "Jil": { "target": "project" },
     "Sigil": "4.5.1-beta1"
   },  
   "frameworks": {

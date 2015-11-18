@@ -16,7 +16,6 @@
     "allowUnsafe": true,
     "define": [ "STRONG_NAME" ]
   },
-  "runtimes": { "win": { } },
   "dependencies": {
     "Sigil": "4.5.1-beta1"
   },
