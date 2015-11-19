@@ -15,20 +15,15 @@
     "Sigil": "4.5.1-beta1"
   },
   "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Runtime.Serialization": "4.0.0.0"
-      }
-    },
     "net45": {
       "frameworkAssemblies": {
         "System.Runtime.Serialization": "4.0.0.0"
       }
     },
-    "dnxcore50": {
+    "dotnet5.4": {
       "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.0.11-beta-*"
+        "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516"
       }
     }
   }
