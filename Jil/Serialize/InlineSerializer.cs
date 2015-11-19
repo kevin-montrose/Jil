@@ -1266,7 +1266,7 @@ namespace Jil.Serialize
                 Emit.LoadLocalAddress(loc); // TextWriter Guid*
             }
 
-            var toString = typeof(Guid).GetMethod("ToString", Type.EmptyTypes);
+            var toString = typeof(Guid).GetMethod("ToString", TypeHelpers.EmptyTypes);
 
             // non-virtual, since we're calling the correct method directly
             Emit.Call(toString);                // TextWriter string

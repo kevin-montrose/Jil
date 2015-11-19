@@ -17,7 +17,7 @@ namespace Jil
             return method;
         }
 #if COREFX
-
+        public static Type[] EmptyTypes = new Type[0];
         public static object _GetRawConstantValue(this FieldInfo field)
         {
             return field.GetValue(null);
@@ -70,7 +70,7 @@ namespace Jil
         }
         public static ConstructorInfo _GetPublicOrPrivateConstructor(this Type onType, params Type[] parameterTypes)
         {
-            if (parameterTypes == null) parameterTypes = Type.EmptyTypes;
+            if (parameterTypes == null) parameterTypes = TypeHelpers.EmptyTypes;
             foreach (var ctor in onType.GetTypeInfo().DeclaredConstructors)
             {
                 var args = ctor.GetParameters();
@@ -93,6 +93,7 @@ namespace Jil
             return type.GetTypeInfo().IsDefined(attributeType);
         }
 #else
+        public static Type[] EmptyTypes = Type.EmptyTypes;
         public static object _GetRawConstantValue(this FieldInfo field)
         {
             return field.GetRawConstantValue();

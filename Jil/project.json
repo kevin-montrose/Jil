@@ -12,7 +12,7 @@
     "allowUnsafe": true
   },
   "dependencies": {
-    "Sigil": "4.5.1-beta1"
+    "Sigil": "4.5.1-*"
   },
   "frameworks": {
     "net45": {
@@ -20,10 +20,10 @@
         "System.Runtime.Serialization": "4.0.0.0"
       }
     },
-    "dotnet5.4": {
+    "dotnet5.2": {
       "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516"
+        "System.Runtime.Serialization.Primitives": "4.1.0-*"
       }
     }
   }

@@ -124,8 +124,8 @@ namespace Jil.Deserialize
             Emit.LoadLocalAddress(StringBuilderName);
         }
 
-        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-        static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", Type.EmptyTypes);
+        static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", TypeHelpers.EmptyTypes);
+        static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", TypeHelpers.EmptyTypes);
         void ReadCharFromStream()
         {
             Emit.LoadArgument(0);                   // (TextReader|ref ThunkReader)

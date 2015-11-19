@@ -10,12 +10,12 @@
   },
   "compilationOptions": { "define": [ "XUNIT" ] },
   "dependencies": {
-    "Sigil": "4.5.1-beta1",
+    "Sigil": "4.5.1-*",
     "Jil": {
       "target": "project"
     },
     "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-build204",
+    "xunit.runner.dnx": "2.1.0-*",
     "Benchmark": {
       "target": "project"
     }

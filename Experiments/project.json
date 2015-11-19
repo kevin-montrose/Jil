@@ -11,7 +11,7 @@
 
   "dependencies": {
     "Jil": { "target": "project" },
-    "Sigil": "4.5.1-beta1"
+    "Sigil": "4.5.1-*"
   },
   "frameworks": {
     "net45": {
@@ -21,8 +21,8 @@
     },
     "dotnet5.4": {
       "dependencies": {
-        "System.Runtime.Serialization.Primitives":"4.1.0-beta-23516",
-        "System.Collections.Concurrent": "4.0.11-beta-23516"
+        "System.Runtime.Serialization.Primitives":"4.1.0-*",
+        "System.Collections.Concurrent": "4.0.11-*"
       }
     }
   }

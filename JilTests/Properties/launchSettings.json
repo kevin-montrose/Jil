@@ -1,8 +1,7 @@
 {
   "profiles": {
     "test": {
-      "commandName": "test",
-      "sdkVersion": "dnx-clr-win-x64.1.0.0-beta8"
+      "commandName": "test"
     }
   }
 }

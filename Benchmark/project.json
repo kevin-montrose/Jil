@@ -9,7 +9,7 @@
     "Benchmark": "Benchmark"
   },
   "dependencies": {
-    "Sigil": "4.5.1-beta1",
+    "Sigil": "4.5.1-*",
     "Jil": { "target": "project" },
     "Newtonsoft.Json": "7.0.1",
     "SimpleSpeedTester": "1.1.1"
@@ -38,7 +38,7 @@
     "dotnet5.4": {
       "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516"
+        "System.Runtime.Serialization.Primitives": "4.1.0-*"
       }
     }
   }
