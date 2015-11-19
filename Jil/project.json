@@ -25,6 +25,15 @@
       "dependencies": {
         "System.Runtime.Serialization.Primitives": "4.1.0-*"
       }
+    },
+    "dotnet5.4": {
+      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+      "dependencies": {
+        "System.Runtime.Serialization.Primitives": "4.1.0-*"
+      }
     }
-  }
+  },
+  "dev-notes": [
+    "why is there an identical 5.4 build? because Sigil has a 5.2 vs 5.4; 5.4 uses compiled regex - and we want that"
+  ]
 }
