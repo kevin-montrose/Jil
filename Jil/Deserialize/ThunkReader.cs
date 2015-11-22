@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 namespace Jil.Deserialize
 {
     delegate T StringThunkDelegate<T>(ref ThunkReader writer, int depth);
-
-    struct ThunkReader
+    internal struct ThunkReader
     {
         string Value;
         int Index;
 
         public int Position { get { return Index + 1; } }
 
-        public ThunkReader(string val) : this()
+        internal ThunkReader(string val) : this()
         {
             Value = val;
             Index = -1;

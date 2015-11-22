@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Globalization;
-
+using System.Reflection;
 namespace JilTests
 {
     [TestClass]
@@ -217,9 +217,9 @@ namespace JilTests
                 };
             }
 
-            if (t.IsValueType) throw new Exception("Unexpected valuetype: " + t.Name);
+            if (t._IsValueType()) throw new Exception("Unexpected valuetype: " + t.Name);
 
-            if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(List<>))
+            if (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(List<>))
             {
                 return Describe(t.GetGenericArguments()[0], "--array--");
             }
@@ -1012,6 +1012,43 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void ISO8601TimeSpansWithForcedZeroSeconds()
+        {
+            var ts = new TimeSpan(2, 4, 3, seconds: 0);
+            string streamJson, stringJson;
+            using (var str = new StringWriter())
+            {
+                JSON.SerializeDynamic(ts, str, Options.ISO8601);
+                streamJson = str.ToString();
+            }
+
+            {
+                stringJson = JSON.SerializeDynamic(ts, Options.ISO8601);
+            }
+
+            Assert.IsTrue(streamJson == stringJson);
+
+            var dotNetStr = System.Xml.XmlConvert.ToString(ts);
+
+            streamJson = streamJson.Trim('"');
+            stringJson = stringJson.Trim('"');
+
+            if (streamJson.IndexOf('.') != -1)
+            {
+                var lastChar = streamJson[streamJson.Length - 1];
+                streamJson = streamJson.Substring(0, streamJson.Length - 1).TrimEnd('0') + lastChar;
+            }
+
+            if (stringJson.IndexOf('.') != -1)
+            {
+                var lastChar = stringJson[stringJson.Length - 1];
+                stringJson = stringJson.Substring(0, stringJson.Length - 1).TrimEnd('0') + lastChar;
+            }
+
+            Assert.AreEqual(dotNetStr, streamJson);
+            Assert.AreEqual(dotNetStr, stringJson);
+        }
         [TestMethod]
         public void ISO8601TimeSpans()
         {

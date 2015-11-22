@@ -1,0 +1,29 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "Experiments Console Application",
+  "authors": [ "Kevin Montrose" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+  "commands": {
+    "Experiments": "Experiments"
+  },
+
+  "dependencies": {
+    "Jil": { "target": "project" },
+    "Sigil": "4.5.1-*"
+  },
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "4.0.0.0"
+      }
+    },
+    "dotnet5.4": {
+      "dependencies": {
+        "System.Runtime.Serialization.Primitives":"4.1.0-*",
+        "System.Collections.Concurrent": "4.0.11-*"
+      }
+    }
+  }
+}

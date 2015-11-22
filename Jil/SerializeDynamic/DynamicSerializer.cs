@@ -206,7 +206,7 @@ namespace Jil.SerializeDynamic
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
 
-            if (type.IsValueType)
+            if (type._IsValueType())
             {
                 emit.UnboxAny(type);                                // Action<TextWriter, Type, int> TextWriter type
             }

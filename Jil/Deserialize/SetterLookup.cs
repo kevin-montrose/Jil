@@ -33,7 +33,7 @@ namespace Jil.Deserialize
             _findMemberThunkReader = CreateFindMemberThunkReader(_nameOrderedSetters.Select(setter => setter.Item1));
         }
 
-        private static IReadOnlyList<Tuple<string, MemberInfo>> GetOrderedSetters()
+        private static Tuple<string, MemberInfo>[] GetOrderedSetters()
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
@@ -51,8 +51,7 @@ namespace Jil.Deserialize
                 .Concat(props.Cast<MemberInfo>())
                 .Select(member => Tuple.Create(member.GetSerializationName(serializatioNameFormat), member))
                 .OrderBy(info => info.Item1)
-                .ToList()
-                .AsReadOnly();
+                .ToArray();
         }
 
         private static Func<TextReader, int> CreateFindMember(IEnumerable<string> names)

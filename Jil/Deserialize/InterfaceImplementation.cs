@@ -32,7 +32,7 @@ namespace Jil.Deserialize
             {
                 var propType = prop.ReturnType();
 
-                var propBuilder = typeBuilder.DefineProperty(prop.Name, prop.Attributes, propType, Type.EmptyTypes);
+                var propBuilder = typeBuilder.DefineProperty(prop.Name, prop.Attributes, propType, TypeHelpers.EmptyTypes);
 
                 var iGetter = prop.GetMethod;
                 var iSetter = prop.SetMethod;
@@ -59,7 +59,7 @@ namespace Jil.Deserialize
 
                     accessor &= ~MethodAttributes.Abstract;
 
-                    var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(propType, Type.EmptyTypes, typeBuilder, name, accessor);
+                    var emit = Sigil.NonGeneric.Emit.BuildInstanceMethod(propType, TypeHelpers.EmptyTypes, typeBuilder, name, accessor);
 
                     // property could be populated, so we need a real implementation
                     emit.LoadArgument(0);
@@ -101,7 +101,7 @@ namespace Jil.Deserialize
                 }
             }
 
-            Proxy = typeBuilder.CreateType();
+            Proxy = typeBuilder._CreateType();
         }
     }
 

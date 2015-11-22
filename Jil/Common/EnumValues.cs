@@ -16,7 +16,11 @@ namespace Jil.Common
 
         static EnumValues()
         {
+#if COREFXTODO
+            PreCalculated = new Dictionary<string, TEnum>(StringComparer.OrdinalIgnoreCase);
+#else
             PreCalculated = new Dictionary<string, TEnum>(StringComparer.InvariantCultureIgnoreCase);
+#endif
 
             foreach (var val in Enum.GetValues(typeof(TEnum)))
             {

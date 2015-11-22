@@ -65,7 +65,7 @@ namespace Jil.Common
             var fields = Utils.FieldOffsetsInMemory(forType);
             var props = Utils.PropertyFieldUsage(forType);
 
-            var simpleTypes = members.Where(m => m.ReturnType().IsValueType && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
+            var simpleTypes = members.Where(m => m.ReturnType()._IsValueType() && !m.ReturnType().IsNullableType() && m.ReturnType().IsPrimitiveType()).ToList();
             var otherPrimitive = members.Where(m => (m.ReturnType().IsPrimitiveType() || m.ReturnType().IsNullableType()) && !simpleTypes.Contains(m)).ToList();
             var recursive = members.Where(m => recursiveTypes.Contains(m.ReturnType()) && !simpleTypes.Contains(m) && !otherPrimitive.Contains(m)).ToList();
             var everythingElse = members.Where(m => !simpleTypes.Contains(m) && !otherPrimitive.Contains(m) && !recursive.Contains(m)).ToList();
@@ -89,6 +89,7 @@ namespace Jil.Common
                     if (asProp != null)
                     {
                         List<FieldInfo> usesFields;
+
                         if (!props.TryGetValue(asProp, out usesFields))
                         {
                             return int.MaxValue;
@@ -169,13 +170,25 @@ namespace Jil.Common
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
             var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
-
+#if COREFXTODO
+            var allFields = t.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).ToLookup(x => x.Name, StringComparer.OrdinalIgnoreCase);
+#else
             var module = t.Module;
+#endif
 
             foreach (var prop in props)
             {
                 try
                 {
+#if COREFXTODO
+                    // take a wild stab in the dark, using conventions
+                    var fieldInfos = new List<FieldInfo>();
+                    fieldInfos.AddRange(allFields[prop.Name]); // Foo / foo
+                    fieldInfos.AddRange(allFields["_" + prop.Name]); // Foo / _foo
+                    fieldInfos.AddRange(allFields["m_" + prop.Name]); // Foo / m_Foo
+                    fieldInfos.AddRange(allFields["<" + prop.Name + ">k__BackingField"]); // auto-prop convention (see GeneratedNameKind.cs in Roslyn)
+                    fieldInfos.AddRange(allFields["<" + prop.Name + ">i__Field"]); // anon-type convention
+#else
                     var getMtd = prop.GetMethod;
                     var mtdBody = getMtd.GetMethodBody();
                     var il = mtdBody.GetILAsByteArray();
@@ -192,7 +205,7 @@ namespace Jil.Common
                                     return module.ResolveField(f, genArgs, null);
                                 }
                             ).ToList();
-
+#endif
                     ret[prop] = fieldInfos;
                 }
                 catch { /* Anything that goes wrong in here, we can't really do anything about; just continue with less knowledge */ }
@@ -200,7 +213,7 @@ namespace Jil.Common
 
             return ret;
         }
-
+#if !COREFXTODO
         public static List<Tuple<OpCode, int?, long?, double?, FieldInfo>> Decompile(MethodBase mtd)
         {
             var mtdBody = mtd.GetMethodBody();
@@ -415,7 +428,7 @@ namespace Jil.Common
                 default: throw new Exception("Unexpected operand type [" + op.OperandType + "]");
             }
         }
-
+#endif
         public static Dictionary<FieldInfo, int> FieldOffsetsInMemory(Type t)
         {
             try
@@ -514,15 +527,35 @@ namespace Jil.Common
         /// It then decompiles all properties to find out which fields back which properties.
         /// Then it finally works backwards from each property, taking the property's name type and using it's backing
         /// field to lookup which index to pass it in as when constructing the anonymous object.
+        /// 
+        /// =================
+        /// 
+        /// Note: if decompilation isn't supported, it just relies on the compiler convention
+        /// 
         /// </summary>
         public static Dictionary<string, Tuple<Type, int>> GetAnonymousNameToConstructorMap(Type objType)
         {
             var cons = objType.GetConstructors().Single();
-
+#if COREFXTODO
+            var nameToTypeAndConsIndex = new Dictionary<string, Tuple<Type, int>>();
+            var @params = cons.GetParameters().ToDictionary(x => x.Name);
+            var props = objType.GetProperties();
+            foreach (var prop in props)
+            {
+                ParameterInfo p;
+                if (@params.TryGetValue(prop.Name, out p)) // parameter name matches property name
+                {
+                    nameToTypeAndConsIndex.Add(prop.Name, Tuple.Create(prop.PropertyType, p.Position));
+                }
+                else
+                {
+                    throw new NotSupportedException("Unable to determing property/paramater map for anonymous type member: " + prop.Name);
+                }
+            }
+            return nameToTypeAndConsIndex;
+#else
             var consInstrs = Utils.Decompile(cons);
-
             var fieldToArgumentIndex = new Dictionary<FieldInfo, int>();
-
             var fields = objType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic);
 
             foreach (var field in fields)
@@ -564,11 +597,13 @@ namespace Jil.Common
                         d => d.Key.Name,
                         d => Tuple.Create(d.Key.PropertyType, fieldToArgumentIndex[d.Value] - 1)    // -1 here because `this` adds 1 in the IL
                     );
-
             return nameToTypeAndConsIndex;
+#endif
+
         }
 
-        static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
+
+            static MethodInfo DynamicProjectTo = typeof(Utils).GetMethod("_DynamicProjectTo", BindingFlags.NonPublic | BindingFlags.Static);
         static IEnumerable<T> _DynamicProjectTo<T>(IEnumerable<object> e)
         {
             return e.Cast<T>();
@@ -774,7 +809,7 @@ namespace Jil.Common
                 var curType = curNode.Value;
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType._IsEnum()) continue;
 
                 if (curType.IsNullableType())
                 {
@@ -849,7 +884,7 @@ namespace Jil.Common
                 var curType = pending.Pop();
 
                 // these can't have members, bail
-                if (curType.IsPrimitiveType() || curType.IsEnum) continue;
+                if (curType.IsPrimitiveType() || curType._IsEnum()) continue;
 
                 if (!counts.ContainsKey(curType)) counts[curType] = 0;
                 counts[curType]++;
@@ -910,7 +945,7 @@ namespace Jil.Common
                 reused
                     .Where(
                         r => !(r.IsPrimitiveType() ||   // all the types we handle extra specially
-                               r.IsEnum || 
+                               r._IsEnum() || 
                                r.IsNullableType() ||
                                r.IsListType() ||
                                r.IsDictionaryType() ||

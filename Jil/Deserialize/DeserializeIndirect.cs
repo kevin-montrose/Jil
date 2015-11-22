@@ -35,7 +35,7 @@ namespace Jil.Deserialize
                         emit.LoadArgument(0);   // TextReader
                         emit.LoadArgument(1);   // TextReader Options
                         emit.Call(mtd);         // type
-                        if (type.IsValueType)
+                        if (type._IsValueType())
                         {
                             emit.Box(type);     // object
                         }
@@ -67,7 +67,7 @@ namespace Jil.Deserialize
                         emit.LoadArgument(0);   // TextReader
                         emit.LoadArgument(1);   // TextReader Options
                         emit.Call(mtd);         // type
-                        if (type.IsValueType)
+                        if (type._IsValueType())
                         {
                             emit.Box(type);     // object
                         }

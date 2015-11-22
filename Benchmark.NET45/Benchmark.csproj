@@ -69,48 +69,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Models\AccessToken.cs" />
-    <Compile Include="Models\AccountMerge.cs" />
-    <Compile Include="Models\Answer.cs" />
-    <Compile Include="Models\Badge.cs" />
-    <Compile Include="Models\Comment.cs" />
-    <Compile Include="Models\Error.cs" />
-    <Compile Include="Models\Event.cs" />
-    <Compile Include="Models\Feed.cs" />
-    <Compile Include="Models\FlagOption.cs" />
-    <Compile Include="Models\InboxItem.cs" />
-    <Compile Include="Models\Info.cs" />
-    <Compile Include="Models\NetworkUser.cs" />
-    <Compile Include="Models\Notification.cs" />
-    <Compile Include="Models\Post.cs" />
-    <Compile Include="Models\Privilege.cs" />
-    <Compile Include="Models\Question.cs" />
-    <Compile Include="Models\QuestionTimeline.cs" />
-    <Compile Include="Models\Reputation.cs" />
-    <Compile Include="Models\ReputationHistory.cs" />
-    <Compile Include="Models\Revision.cs" />
-    <Compile Include="Models\SearchExcerpt.cs" />
-    <Compile Include="Models\ShallowUser.cs" />
-    <Compile Include="Models\SuggestedEdit.cs" />
-    <Compile Include="Models\Tag.cs" />
-    <Compile Include="Models\TagScore.cs" />
-    <Compile Include="Models\TagSynonym.cs" />
-    <Compile Include="Models\TagWiki.cs" />
-    <Compile Include="Models\TopTag.cs" />
-    <Compile Include="Models\User.cs" />
-    <Compile Include="Models\UserTimeline.cs" />
-    <Compile Include="Models\WritePermission.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Result.cs" />
+    <Compile Include="../Benchmark/**/*.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jil\Jil.csproj">
+    <ProjectReference Include="..\Jil.NET45\Jil.csproj">
       <Project>{73d243e7-dd9b-4546-9b71-4ee8bf5ed6c3}</Project>
       <Name>Jil</Name>
     </ProjectReference>

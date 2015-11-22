@@ -1357,7 +1357,7 @@ namespace JilTests
 
             Assert.IsTrue(binarySearchTime < normalTime, "binarySearchTime = " + binarySearchTime + ", normalTime = " + normalTime);
         }
-
+#if !COREFXTODO
         [TestMethod]
         public void DynamicTypeConverter()
         {
@@ -1422,6 +1422,7 @@ namespace JilTests
 
             Assert.IsTrue(typeConverterTime < trialCastTime, "typeConverterTime = " + typeConverterTime + ", trialCastTime = " + trialCastTime);
         }
+#endif
 
         public class _CustomRFC1123DateFormatting
         {

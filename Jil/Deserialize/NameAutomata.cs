@@ -10,6 +10,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+#if COREFXTODO
+using ApplicationException = System.InvalidOperationException;
+#endif
+
 namespace Jil.Deserialize
 {
     internal static class NameAutomataConfig
@@ -81,8 +85,8 @@ namespace Jil.Deserialize
                 return Methods.ReadHexQuadThunkReader(ref reader);
             }
 
-            static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
-            static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", Type.EmptyTypes);
+            static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", TypeHelpers.EmptyTypes);
+            static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", TypeHelpers.EmptyTypes);
 
             public static MethodInfo GetRead(Type forType)
             {
@@ -386,7 +390,7 @@ namespace Jil.Deserialize
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
 
-            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(string), readerType, typeof(bool) }, null);
+            var cons = typeof(DeserializationException)._GetPublicOrPrivateConstructor(new[] { typeof(string), readerType, typeof(bool) }).AssertNotNull(nameof(DeserializationException));
 
             if (defaultValue == null)
             {

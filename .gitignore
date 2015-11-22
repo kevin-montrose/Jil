@@ -3,3 +3,6 @@ obj/
 *.suo
 *.sln.ide/
 *.user
+.vs/
+project.lock.json
+JilTests/testoutput.txt

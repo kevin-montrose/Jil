@@ -6077,7 +6077,7 @@ namespace JilTests
                 Assert.AreEqual("{\"K\":\"syn\",\"J\":null,\"I\":\"bar\",\"H\":\"foo\",\"G\":null,\"F\":\"buzz\",\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":\"hello\",\"A\":null}", res);
             }
         }
-
+#if !COREFXTODO
         // Type fairly similar to one in the Stack Exchange API that gave Jil some trouble
         class _Inherited<T> : System.Web.Mvc.ContentResult
             where T : class
@@ -6143,7 +6143,7 @@ namespace JilTests
                 Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"Content\":null,\"ContentType\":null,\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
         }
-
+#endif
         [TestMethod]
         public void AllocationlessVsNormalDictionaries()
         {
@@ -6289,7 +6289,7 @@ namespace JilTests
                 Assert.AreEqual("{\"Id\":1234}", res);
             }
         }
-
+#if !COREFXTODO
         class _DoubleWeirdCulture : IDisposable
         {
             CultureInfo RestoreToCulture;
@@ -6352,7 +6352,7 @@ namespace JilTests
                 }
             }
         }
-
+#endif
         class _Enumerables
         {
             public IEnumerable<int> A;

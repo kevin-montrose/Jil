@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Reflection;
 namespace Benchmark
 {
     public interface IGenericEquality<T>
@@ -175,36 +175,36 @@ namespace Benchmark
         public static bool IsList(this Type t)
         {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ||
-                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+                (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(IList<>)) ||
+                t.GetInterfaces().Any(i => i._IsGenericType() && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
         public static Type GetListInterface(this Type t)
         {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IList<>)) ?
+                (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(IList<>)) ?
                 t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IList<>));
+                t.GetInterfaces().First(i => i._IsGenericType() && i.GetGenericTypeDefinition() == typeof(IList<>));
         }
 
         public static bool IsDictionary(this Type t)
         {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ||
-                t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+                (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ||
+                t.GetInterfaces().Any(i => i._IsGenericType() && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
         }
 
         public static Type GetDictionaryInterface(this Type t)
         {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ?
+                (t._IsGenericType() && t.GetGenericTypeDefinition() == typeof(IDictionary<,>)) ?
                 t :
-                t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
+                t.GetInterfaces().First(i => i._IsGenericType() && i.GetGenericTypeDefinition() == typeof(IDictionary<,>));
         }
 
         public static object RandomValue(this Type t, Random rand, int depth = 0)
         {
-            if (t.IsPrimitive)
+            if (t._IsPrimitive())
             {
                 if (t == typeof(byte))
                 {
@@ -332,7 +332,7 @@ namespace Benchmark
                 return cons.Invoke(new object[] { val });
             }
 
-            if (t.IsEnum)
+            if (t._IsEnum())
             {
                 var allValues = Enum.GetValues(t);
                 var ix = rand.Next(allValues.Length);
