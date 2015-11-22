@@ -597,8 +597,9 @@ namespace Jil.Common
                         d => d.Key.Name,
                         d => Tuple.Create(d.Key.PropertyType, fieldToArgumentIndex[d.Value] - 1)    // -1 here because `this` adds 1 in the IL
                     );
-#endif
             return nameToTypeAndConsIndex;
+#endif
+
         }
 
 

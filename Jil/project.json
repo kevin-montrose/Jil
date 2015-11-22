@@ -23,13 +23,15 @@
     "dotnet5.2": {
       "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*"
+        "System.Runtime.Serialization.Primitives": "4.1.0-*",
+        "System.Collections.NonGeneric": "4.0.1-*"
       }
     },
     "dotnet5.4": {
       "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
       "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*"
+        "System.Runtime.Serialization.Primitives": "4.1.0-*",
+        "System.Collections.NonGeneric": "4.0.1-*"
       }
     }
   },

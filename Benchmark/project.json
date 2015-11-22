@@ -12,7 +12,7 @@
     "Sigil": "4.5.1-*",
     "Jil": { "target": "project" },
     "Newtonsoft.Json": "7.0.1",
-    "SimpleSpeedTester": "1.1.1"
+    "SimpleSpeedTester":"1.1.1"
   },
   "frameworks": {
     "dnx451": {

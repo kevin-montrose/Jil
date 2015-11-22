@@ -24,10 +24,11 @@
     "dnx451": {
       "dependencies": {
         "AspNetMvc": "4.0.20710.0"
-      }
+      },
+      "compilationOptions": { "define": [ "NO_BENCH" ] }
     },
     "dnxcore50": {
-      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+      "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_BENCH" ] },
       "dependencies": {
       }
     }
