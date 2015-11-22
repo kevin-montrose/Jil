@@ -41,6 +41,13 @@
         "System.Runtime.Serialization.Primitives": "4.1.0-*",
         "protobuf-net": "2.1.0-alpha-1"
       }
-    }
+    },
+    "dnxcore50": {
+      "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_SERVICESTACK" ] },
+      "dependencies": {
+        "System.Runtime.Serialization.Primitives": "4.1.0-*",
+        "protobuf-net": "2.1.0-alpha-1"
+      }
+    },
   }
 }
