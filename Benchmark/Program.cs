@@ -180,7 +180,7 @@ namespace Benchmark
                     )
                 ).ToList();
         }
-#if !COREFXTODO
+
         static byte[] ProtobufSerialize<T>(T obj)
         {
             using (var mem = new MemoryStream())
@@ -197,7 +197,7 @@ namespace Benchmark
                 return ProtoBuf.Serializer.Deserialize<T>(mem);
             }
         }
-#endif
+
         static MethodInfo _NewtonsoftSerialize = typeof(Program).GetMethod("NewtonsoftSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string NewtonsoftSerialize<T>(T obj)
         {
@@ -243,7 +243,7 @@ namespace Benchmark
 
             return ret;
         }
-#if !COREFXTODO
+#if !NO_SERVICESTACK
         static MethodInfo _ServiceStackSerialize = typeof(Program).GetMethod("ServiceStackSerialize", BindingFlags.NonPublic | BindingFlags.Static);
         static string ServiceStackSerialize<T>(T obj)
         {
@@ -811,20 +811,19 @@ namespace Benchmark
         {
             Action<string> jilDeserializer = a => JilDeserialize(a, obj);
             Action<string> newtonSoftDeserializer = a => NewtonsoftDeserialize<T>(a);
-#if !COREFXTODO
             Action<byte[]> protobufDeserializer = a => ProtobufDeserialize<T>(a);
+#if !NO_SERVICESTACK
             Action<string> serviceStackDeserializer = a => ServiceStackDeserialize<T>(a);
 #endif
 
             var json = JilSerialize(obj);
-#if !COREFXTODO
             var bytes = ProtobufSerialize(obj);
-#endif
 
             jilDeserializer(json);
             newtonSoftDeserializer(json);
-#if !COREFXTODO
+
             protobufDeserializer(bytes);
+#if !NO_SERVICESTACK
             serviceStackDeserializer(json);
 #endif
 
@@ -845,7 +844,7 @@ namespace Benchmark
                     System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
                     ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftDeserializer(json), testRuns);
                 };
-#if !COREFXTODO
+
             // Protobuf
             Action protobuf =
                 () =>
@@ -853,7 +852,7 @@ namespace Benchmark
                     System.GC.Collect(2, GCCollectionMode.Forced, blocking: true);
                     ret[ProtobufIndex] = AverageRuntime(() => protobufDeserializer(bytes), testRuns);
                 };
-
+#if !NO_SERVICESTACK
             // ServiceStack
             Action serviceStack =
                 () =>
@@ -874,13 +873,11 @@ namespace Benchmark
                     {
                         case 0: jil(); break;
                         case 1: newtonSoft(); break;
-#if COREFXTODO
-                        case 2:
-                        case 3:
-                            break;
-#else
                         case 2: protobuf(); break;
-                        case 3: serviceStack(); break;
+                        case 3:
+#if !NO_SERVICESTACK
+                            serviceStack();
+                            break;
 #endif
                         default: throw new InvalidOperationException();
                     }
@@ -907,15 +904,15 @@ namespace Benchmark
         {
             Action<T> jilSerializer = a => JilSerialize(a);
             Action<T> newtonSoftSerializer = a => NewtonsoftSerialize(a);
-#if !COREFXTODO
             Action<T> protobufSerializer = a => ProtobufSerialize(a);
+#if !NO_SERVICESTACK
             Action<T> serviceStackSerializer = a => ServiceStackSerialize(a);
 #endif
 
             jilSerializer(obj);
             newtonSoftSerializer(obj);
-#if !COREFXTODO
             protobufSerializer(obj);
+#if !NO_SERVICESTACK
             serviceStackSerializer(obj);
 #endif
 
@@ -937,7 +934,6 @@ namespace Benchmark
                     ret[NewtonSoftIndex] = AverageRuntime(() => newtonSoftSerializer(obj), testRuns);
                 };
 
-#if !COREFXTODO
             // Protobuf
             Action protobuf =
                 () =>
@@ -946,6 +942,7 @@ namespace Benchmark
                     ret[ProtobufIndex] = AverageRuntime(() => protobufSerializer(obj), testRuns);
                 };
 
+#if !NO_SERVICESTACK
             // ServiceStack
             Action serviceStack =
                 () =>
@@ -965,14 +962,13 @@ namespace Benchmark
                     {
                         case 0: jil(); break;
                         case 1: newtonSoft(); break;
-#if COREFXTODO
-                        case 2:
-                        case 3:
-                            break;
-#else
                         case 2: protobuf(); break;
-                        case 3: serviceStack(); break;
+                        case 3:
+#if !NO_SERVICESTACK
+                            serviceStack();
 #endif
+                            break;
+
                         default: throw new InvalidOperationException();
                     }
                 }
