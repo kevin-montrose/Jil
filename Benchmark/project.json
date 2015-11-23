@@ -1,53 +1,53 @@
-﻿{
-  "version": "1.0.0",
-  "description": "Benchmark Console Application",
-  "authors": [ "Kevin Montrose" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
-  "commands": {
-    "Benchmark": "Benchmark"
-  },
-  "dependencies": {
-    "Sigil": "4.5.1-*",
-    "Jil": { "target": "project" },
-    "Newtonsoft.Json": "7.0.1",
-    "SimpleSpeedTester":"1.1.1"
-  },
-  "frameworks": {
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.Runtime.Serialization": "4.0.0.0",
-        "System.Xml": "4.0.0.0"
-      },
-      "dependencies": {
-        "ServiceStack.Text": "3.9.67",
-        "protobuf-net": "2.1.0-alpha-1"
-      }
+{
+    "version": "1.0.0",
+    "description": "Benchmark Console Application",
+    "authors": [ "Kevin Montrose" ],
+    "tags": [ "" ],
+    "projectUrl": "",
+    "licenseUrl": "",
+    "commands": {
+        "Benchmark": "Benchmark"
     },
-    "net45": {
-      "frameworkAssemblies": {
-        "System.Runtime.Serialization": "4.0.0.0",
-        "System.Xml": "4.0.0.0"
-      },
-      "dependencies": {
-        "ServiceStack.Text": "3.9.67",
-        "protobuf-net": "2.1.0-alpha-1"
-      }
+    "dependencies": {
+        "Sigil": "4.5.1",
+        "Jil": { "target": "project" },
+        "Newtonsoft.Json": "7.0.1",
+        "SimpleSpeedTester": "1.1.1"
     },
-    "dotnet5.4": {
-      "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_SERVICESTACK" ] },
-      "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*",
-        "protobuf-net": "2.1.0-alpha-1"
-      }
-    },
-    "dnxcore50": {
-      "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_SERVICESTACK" ] },
-      "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*",
-        "protobuf-net": "2.1.0-alpha-1"
-      }
-    },
-  }
+    "frameworks": {
+        "dnx451": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "4.0.0.0",
+                "System.Xml": "4.0.0.0"
+            },
+            "dependencies": {
+                "ServiceStack.Text": "3.9.67",
+                "protobuf-net": "2.1.0-alpha-1"
+            }
+        },
+        "net45": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "4.0.0.0",
+                "System.Xml": "4.0.0.0"
+            },
+            "dependencies": {
+                "ServiceStack.Text": "3.9.67",
+                "protobuf-net": "2.1.0-alpha-1"
+            }
+        },
+        "dotnet5.4": {
+            "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_SERVICESTACK" ] },
+            "dependencies": {
+                "System.Runtime.Serialization.Primitives": "4.1.0-*",
+                "protobuf-net": "2.1.0-alpha-1"
+            }
+        },
+        "dnxcore50": {
+            "compilationOptions": { "define": [ "COREFX", "COREFXTODO", "NO_SERVICESTACK" ] },
+            "dependencies": {
+                "System.Runtime.Serialization.Primitives": "4.1.0-*",
+                "protobuf-net": "2.1.0-alpha-1"
+            }
+        },
+    }
 }

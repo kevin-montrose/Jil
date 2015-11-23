@@ -1,44 +1,44 @@
-﻿{
-  "version": "2.12.2-beta1",
-  "description": "A fast JSON serializer and deserializer.",
-  "authors": [ "Kevin Montrose" ],
-  "owners": [ "kmontrose" ],
-  "tags": [ "json" ],
-  "releaseNotes": "Core CLR support",
-  "projectUrl": "https://github.com/kevin-montrose/Jil",
-  "licenseUrl": "https://github.com/kevin-montrose/Jil/blob/master/LICENSE",
-  "copyright": "Copyright (c) 2013 - 2015 Kevin Montrose",
-  "compile": [
-    "../Jil/**/*.cs"
-  ],
-  "compilationOptions": {
-    "keyFile": "Properties/Jil.StrongName.snk",
-    "allowUnsafe": true,
-    "define": [ "STRONG_NAME" ]
-  },
-  "dependencies": {
-    "Sigil": "4.5.1-*"
-  },
-  "frameworks": {
-    "net45": {
-      "frameworkAssemblies": {
-        "System.Runtime.Serialization": "4.0.0.0"
-      }
+{
+    "version": "2.13.0-beta1",
+    "description": "A fast JSON serializer and deserializer.",
+    "authors": [ "Kevin Montrose" ],
+    "owners": [ "kmontrose" ],
+    "tags": [ "json" ],
+    "releaseNotes": "Core CLR support",
+    "projectUrl": "https://github.com/kevin-montrose/Jil",
+    "licenseUrl": "https://github.com/kevin-montrose/Jil/blob/master/LICENSE",
+    "copyright": "Copyright (c) 2013 - 2015 Kevin Montrose",
+    "compile": [
+        "../Jil/**/*.cs"
+    ],
+    "compilationOptions": {
+        "keyFile": "Properties/Jil.StrongName.snk",
+        "allowUnsafe": true,
+        "define": [ "STRONG_NAME" ]
     },
-    "dotnet5.2": {
-      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
-      "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*",
-        "System.Collections.NonGeneric": "4.0.1-*"
-      }
+    "dependencies": {
+        "Sigil": "4.5.1"
     },
-    "dotnet5.4": {
-      "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
-      "dependencies": {
-        "System.Runtime.Serialization.Primitives": "4.1.0-*",
-        "System.Collections.NonGeneric": "4.0.1-*"
-      }
-    }
-  },
-  "dev-notes": "see main project.json"
+    "frameworks": {
+        "net45": {
+            "frameworkAssemblies": {
+                "System.Runtime.Serialization": "4.0.0.0"
+            }
+        },
+        "dotnet5.2": {
+            "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+            "dependencies": {
+                "System.Runtime.Serialization.Primitives": "4.1.0-*",
+                "System.Collections.NonGeneric": "4.0.1-*"
+            }
+        },
+        "dotnet5.4": {
+            "compilationOptions": { "define": [ "COREFX", "COREFXTODO" ] },
+            "dependencies": {
+                "System.Runtime.Serialization.Primitives": "4.1.0-*",
+                "System.Collections.NonGeneric": "4.0.1-*"
+            }
+        }
+    },
+    "dev-notes": "see main project.json"
 }
