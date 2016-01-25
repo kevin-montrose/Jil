@@ -34,7 +34,7 @@ namespace Jil.Deserialize
                     : CreateFindEnumThunkReader(enumValues);
         }
 
-        private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
+        private static IList<Tuple<string, object>> GetEnumValues()
         {
             return
                 Enum.GetValues(typeof(EnumType))
@@ -86,7 +86,7 @@ namespace Jil.Deserialize
             return (EnumThunkReaderDelegate<EnumType>)ret;
         }
 
-        private static Func<TextReader, EnumType> CreateFindFlagsEnum(IReadOnlyList<Tuple<string, object>> names)
+        private static Func<TextReader, EnumType> CreateFindFlagsEnum(IList<Tuple<string, object>> names)
         {
             var underlyingType = Enum.GetUnderlyingType(typeof(EnumType));
 
@@ -132,7 +132,7 @@ namespace Jil.Deserialize
             return (Func<TextReader, EnumType>)ret;
         }
 
-        private static EnumThunkReaderDelegate<EnumType> CreateFindFlagsEnumThunkReader(IReadOnlyList<Tuple<string, object>> names)
+        private static EnumThunkReaderDelegate<EnumType> CreateFindFlagsEnumThunkReader(IList<Tuple<string, object>> names)
         {
             var thunkReaderRef = typeof(ThunkReader).MakeByRefType();
 

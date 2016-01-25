@@ -13,7 +13,7 @@ namespace Jil.Deserialize
     static partial class Methods
     {
         static readonly MethodInfo ReadISO8601DateWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadISO8601DateWithCharArray(TextReader reader, ref char[] buffer)
         {
             InitDynamicBuffer(ref buffer);
@@ -21,7 +21,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601Date = typeof(Methods).GetMethod("_ReadISO8601Date", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadISO8601Date(TextReader reader, char[] buffer)
         {
             // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
@@ -150,7 +150,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateWithOffsetWithCharArray = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetWithCharArray", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadISO8601DateWithOffsetWithCharArray(TextReader reader, ref char[] buffer)
         {
             InitDynamicBuffer(ref buffer);
@@ -158,7 +158,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateWithOffset = typeof(Methods).GetMethod("_ReadISO8601DateWithOffset", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadISO8601DateWithOffset(TextReader reader, char[] buffer)
         {
             // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
@@ -288,7 +288,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime ParseISO8601Date(TextReader reader, char[] buffer, int start, int stop, out bool? hasSeparators)
         {
             // Here are the possible formats for dates
@@ -609,7 +609,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static TimeSpan ParseISO8601Time(TextReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
             const long HoursToTicks   = 36000000000;
@@ -936,7 +936,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static TimeSpan ParseISO8601TimeZoneOffset(TextReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
@@ -1031,7 +1031,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime ConvertWeekDateToDateTime(int year, int week, int day)
         {
             // January 4th will always be in week 1

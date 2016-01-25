@@ -168,7 +168,7 @@ namespace Jil.Common
         {
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
 
-            var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Count() == 0);
+            var props = t.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic).Where(p => p.GetGetMethod(true) != null && p.GetGetMethod(true).GetParameters().Count() == 0);
 
             var module = t.Module;
 
@@ -176,7 +176,7 @@ namespace Jil.Common
             {
                 try
                 {
-                    var getMtd = prop.GetMethod;
+                    var getMtd = prop.GetGetMethod(true);
                     var mtdBody = getMtd.GetMethodBody();
                     var il = mtdBody.GetILAsByteArray();
 
@@ -552,7 +552,7 @@ namespace Jil.Common
             var propertyToBackingField = new Dictionary<PropertyInfo, FieldInfo>();
             foreach (var prop in objType.GetProperties())
             {
-                var propInstrs = Utils.Decompile(prop.GetMethod);
+                var propInstrs = Utils.Decompile(prop.GetGetMethod(true));
                 var backingField = propInstrs.Single(p => p.Item1 == OpCodes.Ldfld);
 
                 propertyToBackingField[prop] = backingField.Item5;
@@ -816,7 +816,7 @@ namespace Jil.Common
                     }
                 }
 
-                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetGetMethod(true) != null))
                 {
                     if (prop.ShouldUseMember())
                     {
@@ -895,7 +895,7 @@ namespace Jil.Common
                     }
                 }
 
-                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                foreach (var prop in curType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetGetMethod(true) != null))
                 {
                     if (prop.ShouldUseMember())
                     {
@@ -1291,7 +1291,7 @@ namespace Jil.Common
             100000000L
         };
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public static long Pow10(int power) 
         {
             if (power < PowersOf10.Length)

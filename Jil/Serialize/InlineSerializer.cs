@@ -112,7 +112,7 @@ namespace Jil.Serialize
 
         void LoadProperty(PropertyInfo prop)
         {
-            var getMtd = prop.GetMethod;
+            var getMtd = prop.GetGetMethod(true);
 
             if (getMtd.IsVirtual)
             {
@@ -301,7 +301,7 @@ namespace Jil.Serialize
                 flags |= BindingFlags.DeclaredOnly;
             }
 
-            var props = forType.GetProperties(flags).Where(p => p.GetMethod != null && p.GetIndexParameters().Length == 0);
+            var props = forType.GetProperties(flags).Where(p => p.GetGetMethod(true) != null && p.GetIndexParameters().Length == 0);
             var fields = forType.GetFields(flags);
 
             var members = props.Cast<MemberInfo>().Concat(fields).Where(f => f.ShouldUseMember());
@@ -820,12 +820,12 @@ namespace Jil.Serialize
             Emit.Call(Methods.GetCustomRFC1123(BuildingToString));  // --empty--
         }
 
-        static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetMethod;
-        static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetMethod;
-        static readonly MethodInfo DateTimeOffset_UtcTicks = typeof(DateTimeOffset).GetProperty("UtcTicks").GetMethod;
-        static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetMethod;
-        static readonly MethodInfo TimeSpan_Hours = typeof(TimeSpan).GetProperty("Hours").GetMethod;
-        static readonly MethodInfo TimeSpan_Minutes = typeof(TimeSpan).GetProperty("Minutes").GetMethod;
+        static readonly MethodInfo DateTimeOffset_UtcDateTime = typeof(DateTimeOffset).GetProperty("UtcDateTime").GetGetMethod(true);
+        static readonly MethodInfo DateTimeOffset_DateTime = typeof(DateTimeOffset).GetProperty("DateTime").GetGetMethod(true);
+        static readonly MethodInfo DateTimeOffset_UtcTicks = typeof(DateTimeOffset).GetProperty("UtcTicks").GetGetMethod(true);
+        static readonly MethodInfo DateTimeOffset_Offset = typeof(DateTimeOffset).GetProperty("Offset").GetGetMethod(true);
+        static readonly MethodInfo TimeSpan_Hours = typeof(TimeSpan).GetProperty("Hours").GetGetMethod(true);
+        static readonly MethodInfo TimeSpan_Minutes = typeof(TimeSpan).GetProperty("Minutes").GetGetMethod(true);
         void WriteDateTimeOffset()
         {
             // top of stack:
@@ -896,8 +896,8 @@ namespace Jil.Serialize
             throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
         }
 
-        static readonly MethodInfo TimeSpan_TotalSeconds = typeof(TimeSpan).GetProperty("TotalSeconds").GetMethod;
-        static readonly MethodInfo TimeSpan_TotalMilliseconds = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetMethod;
+        static readonly MethodInfo TimeSpan_TotalSeconds = typeof(TimeSpan).GetProperty("TotalSeconds").GetGetMethod(true);
+        static readonly MethodInfo TimeSpan_TotalMilliseconds = typeof(TimeSpan).GetProperty("TotalMilliseconds").GetGetMethod(true);
         void WriteTimeSpan()
         {
             // top of stack:
@@ -1726,7 +1726,7 @@ namespace Jil.Serialize
                         Emit.LoadLocalAddress(temp);    // value*
                     }
 
-                    var hasValue = serializingType.GetProperty("HasValue").GetMethod;
+                    var hasValue = serializingType.GetProperty("HasValue").GetGetMethod(true);
                     Emit.Call(hasValue);        // bool
                 }
 
@@ -1878,8 +1878,8 @@ namespace Jil.Serialize
                     : listType.GetReadOnlyCollectionInterface();
 
             var elementType = listInterface.GetGenericArguments()[0];
-            var countMtd = collectionInterface.GetProperty("Count").GetMethod;
-            var accessorMtd = listInterface.GetProperty("Item").GetMethod;
+            var countMtd = collectionInterface.GetProperty("Count").GetGetMethod(true);
+            var accessorMtd = listInterface.GetProperty("Item").GetGetMethod(true);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || (listMember != null && elementType.IsEnum && listMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
@@ -2004,7 +2004,7 @@ namespace Jil.Serialize
                 };
 
             var elementType = listType.GetListInterface().GetGenericArguments()[0];
-            var countMtd = listType.GetProperty("Length").GetMethod;
+            var countMtd = listType.GetProperty("Length").GetGetMethod(true);
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = elementType.IsPrimitiveType() || (arrayMember != null && elementType.IsEnum && arrayMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
@@ -2760,7 +2760,7 @@ namespace Jil.Serialize
                         Emit.LoadLocalAddress(temp);    // kvp value*
                     }
 
-                    var hasValue = elementType.GetProperty("HasValue").GetMethod;
+                    var hasValue = elementType.GetProperty("HasValue").GetGetMethod(true);
 
                     Emit.Call(hasValue);                // kvp bool
                 }

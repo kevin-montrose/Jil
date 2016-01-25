@@ -1210,7 +1210,7 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool ReadRFC1123Month(string str, ref int ix, out int res)
         {
             if (ix >= str.Length)
@@ -1545,7 +1545,7 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool ReadRFC1123DayOfWeek(string str, ref int ix, out DayOfWeek res)
         {
             if(ix >= str.Length)

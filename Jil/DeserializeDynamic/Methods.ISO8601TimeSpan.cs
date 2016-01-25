@@ -319,7 +319,7 @@ namespace Jil.DeserializeDynamic
             return true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static ulong ISO8601TimeSpan_FractionToTicks(int maxLen, int fraction, int fracLen) 
         {
             if (fracLen == 0) 

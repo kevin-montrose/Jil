@@ -25,7 +25,7 @@ namespace Jil.Deserialize
     {
         // Note: This same method, but then for ThunkReader, is in Methods.ThunkReader.cs; it's called "_DiscardMicrosoftTimeZoneOffsetThunkReader".
         static readonly MethodInfo DiscardMicrosoftTimeZoneOffset = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffset", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _DiscardMicrosoftTimeZoneOffset(TextReader reader)
         {
             // this is a special case when reading timezone information for MicrosoftStyle DateTimes
@@ -80,7 +80,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt8 = typeof(Methods).GetMethod("_ReadUInt8", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static byte _ReadUInt8(TextReader reader)
         {
             // max:  512
@@ -123,7 +123,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt8 = typeof(Methods).GetMethod("_ReadInt8", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static sbyte _ReadInt8(TextReader reader)
         {
             // max:  127
@@ -175,7 +175,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt16 = typeof(Methods).GetMethod("_ReadInt16", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static short _ReadInt16(TextReader reader)
         {
             // max:  32767
@@ -243,7 +243,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt16 = typeof(Methods).GetMethod("_ReadUInt16", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static ushort _ReadUInt16(TextReader reader)
         {
             // max: 65535
@@ -303,7 +303,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt32 = typeof(Methods).GetMethod("_ReadInt32", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static int _ReadInt32(TextReader reader)
         {
             // max:  2147483647
@@ -411,7 +411,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt32 = typeof(Methods).GetMethod("_ReadUInt32", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static uint _ReadUInt32(TextReader reader)
         {
             // max: 4294967295
@@ -511,7 +511,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt64 = typeof(Methods).GetMethod("_ReadInt64", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static long _ReadInt64(TextReader reader)
         {
             // max:  9223372036854775807
@@ -698,7 +698,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt64 = typeof(Methods).GetMethod("_ReadUInt64", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static ulong _ReadUInt64(TextReader reader)
         {
             // max: 18446744073709551615
@@ -880,7 +880,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDouble = typeof(Methods).GetMethod("_ReadDouble", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDouble(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -985,7 +985,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDoubleCharArray = typeof(Methods).GetMethod("_ReadDoubleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDoubleCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1108,7 +1108,7 @@ namespace Jil.Deserialize
         };
 
         static readonly MethodInfo ReadDoubleFast = typeof(Methods).GetMethod("_ReadDoubleFast", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDoubleFast(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1279,7 +1279,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSingle = typeof(Methods).GetMethod("_ReadSingle", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingle(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -1384,7 +1384,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSingleCharArray = typeof(Methods).GetMethod("_ReadSingleCharArray", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingleCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1506,7 +1506,7 @@ namespace Jil.Deserialize
         };
 
         static readonly MethodInfo ReadSingleFast = typeof(Methods).GetMethod("_ReadSingleFast", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingleFast(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1678,7 +1678,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDecimal = typeof(Methods).GetMethod("_ReadDecimal", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimal(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -1783,7 +1783,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDecimalCharArray = typeof(Methods).GetMethod("_ReadDecimalCharArray", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimalCharArray(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1913,7 +1913,7 @@ namespace Jil.Deserialize
             };
 
         static readonly MethodInfo ReadDecimalFast = typeof(Methods).GetMethod("_ReadDecimalFast", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimalFast(TextReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -2089,7 +2089,7 @@ namespace Jil.Deserialize
             return decimal.Parse(new string(buffer, 0, idx), NumberStyles.Float, CultureInfo.InvariantCulture);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void AssertNotFollowedByDigit(TextReader reader)
         {
             var next = reader.Peek();

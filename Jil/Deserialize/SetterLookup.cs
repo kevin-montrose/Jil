@@ -14,7 +14,7 @@ namespace Jil.Deserialize
 
     static class SetterLookup<ForType, SerializationNameFormatType>
     {
-        private static readonly IReadOnlyList<Tuple<string, MemberInfo>> _nameOrderedSetters;
+        private static readonly IList<Tuple<string, MemberInfo>> _nameOrderedSetters;
         private static Func<TextReader, int> _findMember;
         private static SetterLookupThunkReaderDelegate _findMemberThunkReader;
 
@@ -33,7 +33,7 @@ namespace Jil.Deserialize
             _findMemberThunkReader = CreateFindMemberThunkReader(_nameOrderedSetters.Select(setter => setter.Item1));
         }
 
-        private static IReadOnlyList<Tuple<string, MemberInfo>> GetOrderedSetters()
+        private static IList<Tuple<string, MemberInfo>> GetOrderedSetters()
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
@@ -44,7 +44,7 @@ namespace Jil.Deserialize
             }
 
             var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
-            var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
+            var props = forType.GetProperties(flags).Where(p => p.GetSetMethod(true) != null && p.ShouldUseMember());
 
             return
                 fields.Cast<MemberInfo>()
