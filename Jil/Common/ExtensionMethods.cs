@@ -176,12 +176,12 @@ namespace Jil.Common
 
         public static bool IsGenericReadOnlyList(this Type forType)
         {
-            return IsGenericContainer(forType, typeof(IReadOnlyList<>));
+            return IsGenericContainer(forType, typeof(IList<>));
         }
 
         public static bool IsGenericReadOnlyDictionary(this Type forType)
         {
-            return IsGenericContainer(forType, typeof(IReadOnlyDictionary<,>));
+            return IsGenericContainer(forType, typeof(IDictionary<,>));
         }
 
         public static string GetSerializationName(this MemberInfo member, SerializationNameFormat serializationNameFormat)
@@ -381,7 +381,7 @@ namespace Jil.Common
 
         public static bool IsConstant(this PropertyInfo prop)
         {
-            var getMtd = prop.GetMethod;
+            var getMtd = prop.GetGetMethod(true);
 
             // virtual methods can't be proven constant, who knows what overrides are out there
             if (getMtd == null || getMtd.IsVirtual) return false;
@@ -413,7 +413,7 @@ namespace Jil.Common
 
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
         {
-            var instrs = Utils.Decompile(prop.GetMethod);
+            var instrs = Utils.Decompile(prop.GetGetMethod(true));
 
             var constInstr = instrs.Single(o => ConstantLoadOpCodes.Contains(o.Item1) || o.Item2.HasValue || o.Item3.HasValue || o.Item4.HasValue);
 
@@ -692,12 +692,12 @@ namespace Jil.Common
 
         public static bool IsReadOnlyListType(this Type t)
         {
-            return t.IsContainerType(typeof(IReadOnlyList<>));
+            return t.IsContainerType(typeof(IList<>));
         }
 
         public static bool IsReadOnlyDictionaryType(this Type t)
         {
-            return t.IsContainerType(typeof(IReadOnlyDictionary<,>));
+            return t.IsContainerType(typeof(IDictionary<,>));
         }
 
         public static Type GetListInterface(this Type t)
@@ -707,7 +707,7 @@ namespace Jil.Common
 
         public static Type GetReadOnlyListInterface(this Type t)
         {
-            return t.GetContainerInterface(typeof(IReadOnlyList<>));
+            return t.GetContainerInterface(typeof(IList<>));
         }
 
         public static Type GetEnumerableInterface(this Type t)
@@ -722,7 +722,7 @@ namespace Jil.Common
 
         public static Type GetReadOnlyCollectionInterface(this Type t)
         {
-            return t.GetContainerInterface(typeof(IReadOnlyCollection<>));
+            return t.GetContainerInterface(typeof(ICollection<>));
         }
 
         public static bool IsDictionaryType(this Type t)
@@ -745,7 +745,7 @@ namespace Jil.Common
 
         public static Type GetReadOnlyDictionaryInterface(this Type t)
         {
-            return t.GetContainerInterface(typeof(IReadOnlyDictionary<,>));
+            return t.GetContainerInterface(typeof(IDictionary<,>));
         }
 
         public static bool IsExactlyDictionaryType(this Type t)
@@ -774,7 +774,7 @@ namespace Jil.Common
             if (mtds.Count + props.Count != members.Count) return false;
 
             // any methods that aren't property accessors? bail
-            if (mtds.Any(m => !props.Any(p => p.GetMethod == m || p.SetMethod == m))) return false;
+            if (mtds.Any(m => !props.Any(p => p.GetGetMethod(true) == m || p.GetSetMethod(true) == m))) return false;
             
             // define a property that takes parameters? bail
             if (props.Any(p => p.GetIndexParameters().Length != 0)) return false;
@@ -1097,7 +1097,7 @@ namespace Jil.Common
                 }
 
                 cur.GetFields().ForEach(f => pending.Push(f.FieldType));
-                cur.GetProperties().Where(p => p.GetMethod != null && p.GetMethod.GetParameters().Length == 0).ForEach(p => pending.Push(p.PropertyType));
+                cur.GetProperties().Where(p => p.GetGetMethod(true) != null && p.GetGetMethod(true).GetParameters().Length == 0).ForEach(p => pending.Push(p.PropertyType));
             }
 
             return ret;

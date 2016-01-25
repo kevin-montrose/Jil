@@ -13,7 +13,7 @@ namespace Jil.Deserialize
     static partial class Methods
     {
         static readonly MethodInfo ConsumeWhiteSpaceThunkReader = typeof(Methods).GetMethod("_ConsumeWhiteSpaceThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _ConsumeWhiteSpaceThunkReader(ref ThunkReader reader)
         {
             int c;
@@ -26,7 +26,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt8ThunkReader = typeof(Methods).GetMethod("_ReadUInt8ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static byte _ReadUInt8ThunkReader(ref ThunkReader reader)
         {
             // max:  512
@@ -69,7 +69,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt8ThunkReader = typeof(Methods).GetMethod("_ReadInt8ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static sbyte _ReadInt8ThunkReader(ref ThunkReader reader)
         {
             // max:  127
@@ -121,7 +121,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt16ThunkReader = typeof(Methods).GetMethod("_ReadInt16ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static short _ReadInt16ThunkReader(ref ThunkReader reader)
         {
             // max:  32767
@@ -189,7 +189,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt16ThunkReader = typeof(Methods).GetMethod("_ReadUInt16ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static ushort _ReadUInt16ThunkReader(ref ThunkReader reader)
         {
             // max: 65535
@@ -249,7 +249,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt32ThunkReader = typeof(Methods).GetMethod("_ReadInt32ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static int _ReadInt32ThunkReader(ref ThunkReader reader)
         {
             // max:  2147483647
@@ -357,7 +357,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt32ThunkReader = typeof(Methods).GetMethod("_ReadUInt32ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static uint _ReadUInt32ThunkReader(ref ThunkReader reader)
         {
             // max: 4294967295
@@ -457,7 +457,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadInt64ThunkReader = typeof(Methods).GetMethod("_ReadInt64ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static long _ReadInt64ThunkReader(ref ThunkReader reader)
         {
             // max:  9223372036854775807
@@ -644,7 +644,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadUInt64ThunkReader = typeof(Methods).GetMethod("_ReadUInt64ThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static ulong _ReadUInt64ThunkReader(ref ThunkReader reader)
         {
             // max: 18446744073709551615
@@ -825,7 +825,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void AssertNotFollowedByDigit(ref ThunkReader reader)
         {
             var next = reader.Peek();
@@ -837,7 +837,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDoubleFastThunkReader = typeof(Methods).GetMethod("_ReadDoubleFastThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDoubleFastThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1006,7 +1006,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDoubleCharArrayThunkReader = typeof(Methods).GetMethod("_ReadDoubleCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDoubleCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1113,7 +1113,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDoubleThunkReader = typeof(Methods).GetMethod("_ReadDoubleThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static double _ReadDoubleThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -1218,7 +1218,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSingleFastThunkReader = typeof(Methods).GetMethod("_ReadSingleFastThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingleFastThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1388,7 +1388,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSingleCharArrayThunkReader = typeof(Methods).GetMethod("_ReadSingleCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingleCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1494,7 +1494,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSingleThunkReader = typeof(Methods).GetMethod("_ReadSingleThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static float _ReadSingleThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -1599,7 +1599,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDecimalFastThunkReader = typeof(Methods).GetMethod("_ReadDecimalFastThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimalFastThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1774,7 +1774,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDecimalCharArrayThunkReader = typeof(Methods).GetMethod("_ReadDecimalCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimalCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             var idx = 0;
@@ -1881,7 +1881,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadDecimalThunkReader = typeof(Methods).GetMethod("_ReadDecimalThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static decimal _ReadDecimalThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -1986,7 +1986,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedCharThunkReader = typeof(Methods).GetMethod("_ReadEncodedCharThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static char _ReadEncodedCharThunkReader(ref ThunkReader reader)
         {
             var first = reader.Read();
@@ -2268,7 +2268,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedStringWithBufferThunkReader = typeof(Methods).GetMethod("_ReadEncodedStringWithBufferThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static string _ReadEncodedStringWithBufferThunkReader(ref ThunkReader reader, char[] buffer, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -2375,7 +2375,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void ReadHexQuadToBuilder(ref ThunkReader reader, StringBuilder commonSb)
         {
             var encodedChar = 0;
@@ -2508,7 +2508,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedStringThunkReader = typeof(Methods).GetMethod("_ReadEncodedStringThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static string _ReadEncodedStringThunkReader(ref ThunkReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -2559,7 +2559,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadGuidThunkReader = typeof(Methods).GetMethod("_ReadGuidThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static Guid _ReadGuidThunkReader(ref ThunkReader reader)
         {
             // 1314FAD4-7505-439D-ABD2-DBD89242928C
@@ -2673,7 +2673,7 @@ namespace Jil.Deserialize
             return (byte)(a * 16 + b);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public static int ReadHexQuadThunkReader(ref ThunkReader reader)
         {
             int unescaped = 0;
@@ -2858,7 +2858,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSkipWhitespaceThunkReader = typeof(Methods).GetMethod("_ReadSkipWhitespaceThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static int _ReadSkipWhitespaceThunkReader(ref ThunkReader reader)
         {
             int c;
@@ -2868,7 +2868,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo SkipThunkReader = typeof(Methods).GetMethod("_SkipThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _SkipThunkReader(ref ThunkReader reader)
         {
             SkipWithLeadCharThunkReader(ref reader, reader.Read());
@@ -2952,7 +2952,7 @@ namespace Jil.Deserialize
             throw new DeserializationException("Expected digit, -, \", {, n, t, f, or [", ref reader, leadChar == -1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipEncodedStringWithLeadCharThunkReader(ref ThunkReader reader, int leadChar)
         {
             if (leadChar != '"') throw new DeserializationException("Expected \"", ref reader, leadChar == -1);
@@ -3002,7 +3002,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipObjectThunkReader(ref ThunkReader reader, int leadChar)
         {
             if (leadChar != '{') throw new DeserializationException("Expected {", ref reader, leadChar == -1);
@@ -3035,7 +3035,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipListThunkReader(ref ThunkReader reader, int leadChar)
         {
             if (leadChar != '[') throw new DeserializationException("Expected [", ref reader, leadChar == -1);
@@ -3059,7 +3059,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipNumberThunkReader(ref ThunkReader reader, int leadChar)
         {
             // leadChar should be a start of the number
@@ -3106,7 +3106,7 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo SkipEncodedStringThunkReader = typeof(Methods).GetMethod("_SkipEncodedStringThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _SkipEncodedStringThunkReader(ref ThunkReader reader)
         {
             SkipEncodedStringWithLeadCharThunkReader(ref reader, reader.Read());
@@ -3114,7 +3114,7 @@ namespace Jil.Deserialize
 
         // Note: This same method, but then for TextReader, is in Methods.ReadNumbers.cs; it's called "_DiscardMicrosoftTimeZoneOffset".
         static readonly MethodInfo DiscardMicrosoftTimeZoneOffsetThunkReader = typeof(Methods).GetMethod("_DiscardMicrosoftTimeZoneOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _DiscardMicrosoftTimeZoneOffsetThunkReader(ref ThunkReader reader)
         {
             // this is a special case when reading timezone information for MicrosoftStyle DateTimes
@@ -3169,7 +3169,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateWithCharArrayThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateWithCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadISO8601DateWithCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             InitDynamicBuffer(ref buffer);
@@ -3177,7 +3177,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadISO8601DateThunkReader(ref ThunkReader reader, char[] buffer)
         {
             // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
@@ -3305,7 +3305,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime ParseISO8601DateThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, out bool? hasSeparators)
         {
             // Here are the possible formats for dates
@@ -3626,7 +3626,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static TimeSpan ParseISO8601TimeThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators)
         {
             const long HoursToTicks = 36000000000;
@@ -3953,7 +3953,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static TimeSpan ParseISO8601TimeZoneOffsetThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
@@ -4049,7 +4049,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadRFC1123DateThunkReader = typeof(Methods).GetMethod("_ReadRFC1123DateThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadRFC1123DateThunkReader(ref ThunkReader reader)
         {
             // ddd, dd MMM yyyy HH:mm:ss GMT'"
@@ -4152,7 +4152,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static byte ReadRFC1123MonthThunkReader(ref ThunkReader reader)
         {
             var c = reader.Read();
@@ -4273,7 +4273,7 @@ namespace Jil.Deserialize
             throw new DeserializationException("Expected J, F, M, A, S, O, N, or D", ref reader, false);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DayOfWeek ReadRFC1123DayOfWeekThunkReader(ref ThunkReader reader)
         {
             var c = reader.Read();
@@ -4369,7 +4369,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateWithOffsetWithCharArrayThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetWithCharArrayThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadISO8601DateWithOffsetWithCharArrayThunkReader(ref ThunkReader reader, ref char[] buffer)
         {
             InitDynamicBuffer(ref buffer);
@@ -4377,7 +4377,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601DateWithOffsetThunkReader = typeof(Methods).GetMethod("_ReadISO8601DateWithOffsetThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadISO8601DateWithOffsetThunkReader(ref ThunkReader reader, char[] buffer)
         {
             // ISO8601 / RFC3339 (the internet "profile"* of ISO8601) is a plague
@@ -4633,7 +4633,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static int ReadTimeSpanIntoThunkReader(ref ThunkReader reader, char[] buffer)
         {
             var i = reader.Peek();
@@ -4661,7 +4661,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadISO8601TimeSpanThunkReader = typeof(Methods).GetMethod("_ReadISO8601TimeSpanThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static TimeSpan _ReadISO8601TimeSpanThunkReader(ref ThunkReader reader, char[] str)
         {
             const ulong TicksPerDay = 864000000000;
@@ -4775,7 +4775,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void ISO8601TimeSpan_ReadTimePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out ulong ticks)
         {
             const ulong TicksPerHour = 36000000000;
@@ -4859,7 +4859,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static char ISO8601TimeSpan_ReadPartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out int whole, out int fraction, out int fracLen)
         {
             var part = 0;
@@ -4907,7 +4907,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool ISO8601TimeSpan_ReadDatePartThunkReader(ref ThunkReader reader, char[] str, int strLen, ref int ix, out long year, out long month, out long week, out long day)
         {
             year = month = week = day = -1;
@@ -5000,7 +5000,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadMicrosoftDateTimeOffsetThunkReader = typeof(Methods).GetMethod("_ReadMicrosoftDateTimeOffsetThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadMicrosoftDateTimeOffsetThunkReader(ref ThunkReader reader)
         {
             const long EpochTicks = 621355968000000000L;

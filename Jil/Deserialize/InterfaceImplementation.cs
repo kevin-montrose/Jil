@@ -34,8 +34,8 @@ namespace Jil.Deserialize
 
                 var propBuilder = typeBuilder.DefineProperty(prop.Name, prop.Attributes, propType, Type.EmptyTypes);
 
-                var iGetter = prop.GetMethod;
-                var iSetter = prop.SetMethod;
+                var iGetter = prop.GetGetMethod(true);
+                var iSetter = prop.GetSetMethod(true);
 
                 Func<FieldInfo> getBackingField;
                 {
@@ -113,7 +113,8 @@ namespace Jil.Deserialize
 
         static AssemblyBuilderContainer()
         {
-            AsmBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("JilInterfaceTypeProxies"), AssemblyBuilderAccess.Run);
+            AsmBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(new AssemblyName("JilInterfaceTypeProxies"), AssemblyBuilderAccess.Run);
+            //AsmBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("JilInterfaceTypeProxies"), AssemblyBuilderAccess.Run);
             ModBuilder = AsmBuilder.DefineDynamicModule("InterfaceProxies");
         }
     }

@@ -12,7 +12,7 @@ namespace Jil.Serialize
     static partial class Methods
     {
         static readonly MethodInfo WriteGuid_ThunkWriter = typeof(Methods).GetMethod("_WriteGuid_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _WriteGuid_ThunkWriter(ref ThunkWriter writer, Guid guid, char[] buffer)
         {
             // 1314FAD4-7505-439D-ABD2-DBD89242928C
@@ -136,7 +136,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomISO8601ToString_ThunkWriter = typeof(Methods).GetMethod("_CustomISO8601ToString_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomISO8601ToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, char[] buffer)
         {
             // "yyyy-mm-ddThh:mm:ss.fffffffZ"
@@ -272,7 +272,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomISO8601WithOffsetToString_ThunkWriter = typeof(Methods).GetMethod("_CustomISO8601WithOffsetToString_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomISO8601WithOffsetToString_ThunkWriter(ref ThunkWriter writer, DateTime dt, int hours, int minutes, char[] buffer)
         {
             if (hours == 0 && minutes == 0)
@@ -440,7 +440,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineUnsafe_ThunkWriter(ref ThunkWriter writer, string strRef)
         {
             if (strRef == null)
@@ -519,7 +519,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static unsafe void _WriteEncodedStringWithQuotesWithNullsInlineJSONPUnsafe_ThunkWriter(ref ThunkWriter writer, string strRef)
         {
             if (strRef == null)
@@ -610,7 +610,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo WriteEncodedStringWithNullsInlineJSONPUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineJSONPUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static unsafe void _WriteEncodedStringWithNullsInlineJSONPUnsafe_ThunkWriter(ref ThunkWriter writer, string strRef)
         {
             if (strRef == null)
@@ -697,7 +697,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo WriteEncodedStringWithNullsInlineUnsafe_ThunkWriter = typeof(Methods).GetMethod("_WriteEncodedStringWithNullsInlineUnsafe_ThunkWriter", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static unsafe void _WriteEncodedStringWithNullsInlineUnsafe_ThunkWriter(ref ThunkWriter writer, string strRef)
         {
             if (strRef == null)
@@ -772,7 +772,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteInt_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteInt_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteInt_ThunkWriter(ref ThunkWriter writer, int number, char[] buffer)
         {
             // Gotta special case this, we can't negate it
@@ -814,7 +814,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteIntUnrolledSigned_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteIntUnrolledSigned_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteIntUnrolledSigned_ThunkWriter(ref ThunkWriter writer, int num, char[] buffer)
         {
             // Why signed integers?
@@ -967,7 +967,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteUInt_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteUInt_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteUInt_ThunkWriter(ref ThunkWriter writer, uint number, char[] buffer)
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
@@ -1099,7 +1099,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteLong_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteLong_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteLong_ThunkWriter(ref ThunkWriter writer, long number, char[] buffer)
         {
             // Gotta special case this, we can't negate it
@@ -1141,7 +1141,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteULong_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteULong_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteULong_ThunkWriter(ref ThunkWriter writer, ulong number, char[] buffer)
         {
             var ptr = InlineSerializer<object>.CharBufferSize - 1;
@@ -1167,28 +1167,28 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo ProxyFloat_ThunkWriter = typeof(Methods).GetMethod("_ProxyFloat_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _ProxyFloat_ThunkWriter(ref ThunkWriter writer, float f)
         {
             writer.Write(f);
         }
 
         static readonly MethodInfo ProxyDouble_ThunkWriter = typeof(Methods).GetMethod("_ProxyDouble_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _ProxyDouble_ThunkWriter(ref ThunkWriter writer, double d)
         {
             writer.Write(d);
         }
 
         static readonly MethodInfo ProxyDecimal_ThunkWriter = typeof(Methods).GetMethod("_ProxyDecimal_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _ProxyDecimal_ThunkWriter(ref ThunkWriter writer, decimal d)
         {
             writer.Write(d);
         }
 
         public static readonly MethodInfo WriteTimeSpanISO8601_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanISO8601_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _WriteTimeSpanISO8601_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
             // can't negate this, have to handle it manually
@@ -1320,7 +1320,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo WriteTimeSpanMicrosoft_ThunkWriter = typeof(Methods).GetMethod("_WriteTimeSpanMicrosoft_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _WriteTimeSpanMicrosoft_ThunkWriter(ref ThunkWriter writer, TimeSpan ts, char[] buffer)
         {
             // can't negate this, have to handle it manually
@@ -1529,7 +1529,7 @@ namespace Jil.Serialize
         }
 
         static readonly MethodInfo CustomWriteMicrosoftStyleWithOffset_ThunkWriter = typeof(Methods).GetMethod("_CustomWriteMicrosoftStyleWithOffset_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _CustomWriteMicrosoftStyleWithOffset_ThunkWriter(ref ThunkWriter writer, long utcTicks, int hours, int minutes, char[] buffer)
         {
             const long EpochTicks = 621355968000000000L;

@@ -50,7 +50,7 @@ namespace Jil.Deserialize
             // value
             // object(*?)
 
-            var setMtd = prop.SetMethod;
+            var setMtd = prop.GetSetMethod(true);
 
             if (setMtd.IsVirtual)
             {
@@ -794,7 +794,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo DateTime_TryParseExact = typeof(DateTime).GetMethod("TryParseExact", new[] { typeof(string), typeof(string), typeof(IFormatProvider), typeof(DateTimeStyles), typeof(DateTime).MakeByRefType() });
-        static readonly MethodInfo CultureInfo_InvariantCulture = typeof(CultureInfo).GetProperty("InvariantCulture").GetMethod;
+        static readonly MethodInfo CultureInfo_InvariantCulture = typeof(CultureInfo).GetProperty("InvariantCulture").GetGetMethod(true);
         void ReadRFC1123DateTime()
         {
             if (!UseFastRFC1123Method)
@@ -2183,7 +2183,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            // Final, special, case for ICollection<T>, IEnumerable<X>, and IReadOnlyList<T> if *not* a List<T>
+            // Final, special, case for ICollection<T>, IEnumerable<X>, and IList<T> if *not* a List<T>
             // We can make this work by just acting like it *is* a List<X>
             if (forType.IsCollectionType() || forType.IsGenericEnumerable() || forType.IsGenericReadOnlyList())
             {

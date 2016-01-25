@@ -16,13 +16,13 @@ namespace Jil.Deserialize
         public const int DynamicCharBufferInitialSize = 128;
         public const int CharBufferSize = 33;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void InitDynamicBuffer(ref char[] dynBuffer)
         {
             dynBuffer = dynBuffer ?? new char[DynamicCharBufferInitialSize];
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void GrowDynamicBuffer(ref char[] dynBuffer)
         {
             var newLen = dynBuffer.Length * 2;
@@ -77,7 +77,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadGuid = typeof(Methods).GetMethod("_ReadGuid", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static Guid _ReadGuid(TextReader reader)
         {
             // 1314FAD4-7505-439D-ABD2-DBD89242928C
@@ -192,7 +192,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo Skip = typeof(Methods).GetMethod("_Skip", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _Skip(TextReader reader)
         {
             SkipWithLeadChar(reader, reader.Read());
@@ -276,7 +276,7 @@ namespace Jil.Deserialize
             throw new DeserializationException("Expected digit, -, \", {, n, t, f, or [", reader, leadChar == -1);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipObject(TextReader reader, int leadChar)
         {
             if (leadChar != '{') throw new DeserializationException("Expected {", reader, leadChar == -1);
@@ -309,7 +309,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipList(TextReader reader, int leadChar)
         {
             if (leadChar != '[') throw new DeserializationException("Expected [", reader, leadChar == -1);
@@ -334,13 +334,13 @@ namespace Jil.Deserialize
         }
 
         static MethodInfo SkipEncodedString = typeof(Methods).GetMethod("_SkipEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _SkipEncodedString(TextReader reader)
         {
             SkipEncodedStringWithLeadChar(reader, reader.Read());
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipEncodedStringWithLeadChar(TextReader reader, int leadChar)
         {
             if (leadChar != '"') throw new DeserializationException("Expected \"", reader, leadChar == -1);
@@ -390,7 +390,7 @@ namespace Jil.Deserialize
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void SkipNumber(TextReader reader, int leadChar)
         {
             // leadChar should be a start of the number
@@ -437,7 +437,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ConsumeWhiteSpace = typeof(Methods).GetMethod("_ConsumeWhiteSpace", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void _ConsumeWhiteSpace(TextReader reader)
         {
             int c;
@@ -450,7 +450,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadSkipWhitespace = typeof(Methods).GetMethod("_ReadSkipWhitespace", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static int _ReadSkipWhitespace(TextReader reader)
         {
             int c;
@@ -459,7 +459,7 @@ namespace Jil.Deserialize
             return c;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool IsWhiteSpace(int c)
         {
             // per http://www.ietf.org/rfc/rfc4627.txt
@@ -477,7 +477,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedString = typeof(Methods).GetMethod("_ReadEncodedString", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static string _ReadEncodedString(TextReader reader, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -631,7 +631,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedStringWithBuffer = typeof(Methods).GetMethod("_ReadEncodedStringWithBuffer", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static string _ReadEncodedStringWithBuffer(TextReader reader, char[] buffer, ref StringBuilder commonSb)
         {
             commonSb = commonSb ?? new StringBuilder();
@@ -739,7 +739,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadEncodedChar = typeof(Methods).GetMethod("_ReadEncodedChar", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static char _ReadEncodedChar(TextReader reader)
         {
             var first = reader.Read();
@@ -888,7 +888,7 @@ namespace Jil.Deserialize
             return (char)ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         public static int ReadHexQuad(TextReader reader)
         {
             int unescaped = 0;
@@ -1016,7 +1016,7 @@ namespace Jil.Deserialize
             return unescaped;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static void ReadHexQuadToBuilder(TextReader reader, StringBuilder commonSb)
         {
             var encodedChar = 0;
@@ -1350,7 +1350,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadRFC1123Date = typeof(Methods).GetMethod("_ReadRFC1123Date", BindingFlags.Static | BindingFlags.NonPublic);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTime _ReadRFC1123Date(TextReader reader)
         {
             // ddd, dd MMM yyyy HH:mm:ss GMT'"
@@ -1453,7 +1453,7 @@ namespace Jil.Deserialize
             return ret;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static byte ReadRFC1123Month(TextReader reader)
         {
             var c = reader.Read();
@@ -1574,7 +1574,7 @@ namespace Jil.Deserialize
             throw new DeserializationException("Expected J, F, M, A, S, O, N, or D", reader, false);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DayOfWeek ReadRFC1123DayOfWeek(TextReader reader)
         {
             var c = reader.Read();
@@ -1670,7 +1670,7 @@ namespace Jil.Deserialize
         }
 
         static readonly MethodInfo ReadMicrosoftDateTimeOffset = typeof(Methods).GetMethod("_ReadMicrosoftDateTimeOffset", BindingFlags.NonPublic | BindingFlags.Static);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static DateTimeOffset _ReadMicrosoftDateTimeOffset(TextReader reader)
         {
             const long EpochTicks = 621355968000000000L;
