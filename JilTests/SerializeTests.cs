@@ -8316,6 +8316,11 @@ namespace JilTests
             Assert.AreEqual(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
         }
 
+        struct _TopLevelNulls
+        {
+            public string A { get; set; }
+        }
+
         [TestMethod]
         public void TopLevelNulls()
         {
@@ -8339,6 +8344,14 @@ namespace JilTests
             Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
             var propObjArrJsonExcludesNull = JSON.Serialize(propObjArr, Options.ExcludeNulls);
             Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+
+            _TopLevelNulls? nullable = new _TopLevelNulls { A = "test" };
+            var nullableArr = new[] { nullable, null, null, null };
+
+            var nullableArrJson = JSON.Serialize(nullableArr);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
+            var nullableArrJsonExcludesNull = JSON.Serialize(nullableArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
     }
 }
