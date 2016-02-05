@@ -9135,19 +9135,7 @@ namespace JilTests
             }
             catch (SerializerException e)
             {
-                Assert.AreEqual("Unexpected type [Object] provided for union [Foo] on [_BadUnions_2], expected one of [Int32, String]", e.Message);
-            }
-
-            try {
-                var obj = new _BadUnions_2();
-                obj.DiscriminantType = null;
-
-                JSON.Serialize(obj);
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (SerializerException e)
-            {
-                Assert.AreEqual("Expected one of [Int32, String] to be present in [DiscriminantType] on [_BadUnions_2], instead found null", e.Message);
+                Assert.AreEqual("Unexpected type provided during union serialization [Object], expected one of String, Int32", e.Message);
             }
         }
 

@@ -1491,7 +1491,7 @@ namespace Jil.Serialize
         void WriteObjectWithNulls(Type forType, Sigil.Local inLocal)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
-            var hasConditionalSerialization = writeOrder.OfType<PropertyInfo>().Any(p => p.ShouldSerializeMethod(forType) != null);
+            var hasConditionalSerialization = writeOrder.SelectMany(wo => wo).OfType<PropertyInfo>().Any(p => p.ShouldSerializeMethod(forType) != null);
 
             if (hasConditionalSerialization)
             {
@@ -1863,7 +1863,8 @@ namespace Jil.Serialize
                 // what we got was unexpected, time to signal
                 Emit.MarkLabel(notNullSigil);                           // [obj(*?)] Type
 
-                var expectedOneOf = string.Join(", ", members.Select(m => m.ReturnType().Name));
+                var anyOfType = withoutUnionType.Select(m => m.ReturnType().Name);
+                var expectedOneOf = string.Join(", ", anyOfType);
 
                 Emit.LoadConstant(expectedOneOf);                                       // obj(*?) Type string
                 Emit.Call(CreateUnexpectedTypeException);                               // obj(*?) Exception
@@ -1886,7 +1887,7 @@ namespace Jil.Serialize
         static readonly MethodInfo CreateUnexpectedTypeException = typeof(InlineSerializer<ForType>).GetMethod("_CreateUnexpectedTypeException", BindingFlags.NonPublic | BindingFlags.Static);
         static Exception _CreateUnexpectedTypeException(Type observedType, string oneOf)
         {
-            return new Exception("Unexpected type provided during union serialization [" + observedType.Name + "], expected one of " + oneOf);
+            return new SerializerException("Unexpected type provided during union serialization [" + observedType.Name + "], expected one of " + oneOf);
         }
 
         void DetermineNonNullMember(List<MemberInfo> members, Sigil.Local inLocal)
