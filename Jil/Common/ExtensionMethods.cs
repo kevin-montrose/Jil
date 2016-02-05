@@ -195,20 +195,24 @@ namespace Jil.Common
             switch (serializationNameFormat)
             {
                 case SerializationNameFormat.CamelCase:
-                    var s = member.Name;
-                    if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0])) return s;
-
-                    var cArr = s.ToCharArray();
-                    for (var i = 0; i < cArr.Length; i++)
-                    {
-                        if (i > 0 && i+1 < cArr.Length && !char.IsUpper(cArr[i+1])) break;
-                        cArr[i] = char.ToLowerInvariant(cArr[i]);
-                    }
-                    return new string(cArr);
+                    return member.Name.ToCamelCase();
                 default:
                     return member.Name;
             }
+        }
 
+        public static string ToCamelCase(this string s)
+        {
+            if (string.IsNullOrEmpty(s) || !char.IsUpper(s[0])) return s;
+
+            var cArr = s.ToCharArray();
+            for (var i = 0; i < cArr.Length; i++)
+            {
+                if (i > 0 && i + 1 < cArr.Length && !char.IsUpper(cArr[i + 1])) break;
+                cArr[i] = char.ToLowerInvariant(cArr[i]);
+            }
+
+            return new string(cArr);
         }
 
         public static bool IsLoadArgumentOpCode(this OpCode op)

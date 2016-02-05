@@ -39,6 +39,13 @@ namespace Jil.SerializeDynamic
             return cached;
         }
 
+        static string EnforceSerializationName(string name, Options opts)
+        {
+            if (opts.SerializationNameFormat == SerializationNameFormat.Verbatim) return name;
+
+            return name.ToCamelCase();
+        }
+
         static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
         static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
         {
@@ -55,9 +62,10 @@ namespace Jil.SerializeDynamic
             if (asJilDyn != null)
             {
                 var first = true;
-                foreach (var memberName in asJilDyn.GetMemberNames())
+                foreach (var rawMemberName in asJilDyn.GetMemberNames())
                 {
-                    var val = asJilDyn.GetMember(memberName);
+                    var val = asJilDyn.GetMember(rawMemberName);
+                    var memberName = EnforceSerializationName(rawMemberName, opts);
 
                     if (val == null && opts.ShouldExcludeNulls) continue;
 
@@ -91,9 +99,10 @@ namespace Jil.SerializeDynamic
                 var metaObj = dyn.GetMetaObject(CachedParameterExp);
 
                 var first = true;
-                foreach (var memberName in metaObj.GetDynamicMemberNames())
+                foreach (var rawMemberName in metaObj.GetDynamicMemberNames())
                 {
-                    var getter = GetGetMember(dynType, memberName);
+                    var getter = GetGetMember(dynType, rawMemberName);
+                    var memberName = EnforceSerializationName(rawMemberName, opts);
                     var val = getter(dyn);
 
                     if (val == null && opts.ShouldExcludeNulls) continue;
@@ -755,10 +764,14 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
+            // if the names are camel case, we have to munge the members and _that_
+            //    means we have to treat ExpandoObject and IDictionary<string, object> differently
+            var canTreatExpandoAsDictionary = opts.SerializationNameFormat != SerializationNameFormat.CamelCase;
+
             var dynObject = obj as IDynamicMetaObjectProvider;
             // we can treat ExpandoObject as a static IDictionary<string, object> and 
             //   serialize much more quickly (no try/catch control flow)
-            if (dynObject != null && !(dynObject is ExpandoObject))
+            if (dynObject != null && !(canTreatExpandoAsDictionary && dynObject is ExpandoObject))
             {
                 bool bit;
                 if(CanBeBool(dynObject, out bit))

@@ -1440,5 +1440,15 @@ namespace JilTests
             var nullableArrJsonExcludesNull = JSON.SerializeDynamic(nullableArr, Options.ExcludeNulls);
             Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
+
+        [TestMethod]
+        public void Issue200()
+        {
+            dynamic dyn = new ExpandoObject();
+            dyn.FooBar = "blah";
+
+            var json = JSON.SerializeDynamic(dyn, Options.CamelCase);
+            Assert.AreEqual("{\"fooBar\":\"blah\"}", json);
+        }
     }
 }
