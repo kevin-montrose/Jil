@@ -2000,7 +2000,6 @@ namespace Jil.Serialize
 
                 foreach (var members in writeOrder)
                 {
-                    Emit.Duplicate();                                           // obj(*?) obj(*?)
                     WriteMembersIfNotNull(forType, members, inLocal, isFirst);  // obj(*?)
                 }
             }
