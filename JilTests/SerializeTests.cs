@@ -8643,9 +8643,7 @@ namespace JilTests
             var nullableArrJsonExcludesNull = JSON.Serialize(nullableArr, Options.ExcludeNulls);
             Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
-
-
-
+        
         [JilPrimitiveWrapper]
         class _BadPrimitiveWrapper1
         {
