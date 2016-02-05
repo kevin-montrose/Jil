@@ -3244,6 +3244,62 @@ namespace JilTests
             }
         }
 
+        [JilPrimitiveWrapper]
+        public class PrimitiveWrapperWithDefaultCtor
+        {
+            public int Value { get; private set; }
+        }
+
+        [JilPrimitiveWrapper]
+        public class PrimitiveWrapperWithNonDefaultCtor
+        {
+            public PrimitiveWrapperWithNonDefaultCtor(int value)
+            {
+                Value = value;
+            }
+
+            public int Value { get; private set; }
+        }
+
+        [JilPrimitiveWrapper]
+        public struct PrimitiveWrapperAsStructWithNonDefaultCtor
+        {
+            public PrimitiveWrapperAsStructWithNonDefaultCtor(int value)
+            {
+                Value = value;
+            }
+
+            public readonly int Value;
+        }
+
+        [TestMethod]
+        public void PrimitiveWrappers()
+        {
+            using (var str = new StringReader("1"))
+            {
+                var val = JSON.Deserialize<PrimitiveWrapperWithDefaultCtor>(str);
+
+                Assert.AreEqual(1, val.Value);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("1"))
+            {
+                var val = JSON.Deserialize<PrimitiveWrapperWithNonDefaultCtor>(str);
+
+                Assert.AreEqual(1, val.Value);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("1"))
+            {
+                var val = JSON.Deserialize<PrimitiveWrapperAsStructWithNonDefaultCtor>(str);
+
+                Assert.AreEqual(1, val.Value);
+                Assert.AreEqual(-1, str.Peek());
+            }
+        }
+
         [TestMethod]
         public void Bools()
         {

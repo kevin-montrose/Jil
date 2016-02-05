@@ -839,6 +839,27 @@ namespace Jil.Common
                 t == typeof(TimeSpan);
         }
 
+        public static bool IsPrimitiveWrapper(this Type type)
+        {
+            return type.GetCustomAttribute<JilPrimitiveWrapper>() != null;
+        }
+
+        public static MemberInfo GetPrimitiveWrapperPropertyOrField(this Type primitiveWrapperType)
+        {
+            return primitiveWrapperType
+                .GetMembers(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+                .Single(m =>
+                {
+                    var f = m as FieldInfo;
+                    if (f != null)
+                        return f.GetCustomAttribute<CompilerGeneratedAttribute>() == null && f.FieldType.IsPrimitiveType();
+                    var p = m as PropertyInfo;
+                    if (p != null)
+                        return p.PropertyType.IsPrimitiveType();
+                    return false;
+                });
+        }
+
         public static bool IsStringyType(this MemberInfo member)
         {
             var asField = member as FieldInfo;

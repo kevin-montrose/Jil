@@ -880,6 +880,53 @@ namespace Jil.Deserialize
             ReadNumber(primitiveType);
         }
 
+        void ReadPrimitiveTypeWrapper(Type primitiveTypeWrapper)
+        {
+            var primitiveMember = primitiveTypeWrapper.GetPrimitiveWrapperPropertyOrField();
+            Type wrappedType;
+            if (primitiveMember is FieldInfo)
+            {
+                wrappedType = ((FieldInfo)primitiveMember).FieldType;
+            }
+            else
+            {
+                wrappedType = ((PropertyInfo)primitiveMember).PropertyType;
+            }
+            
+            var wrapperConst = primitiveTypeWrapper.GetConstructor(new[] {wrappedType});
+            if (wrapperConst != null)
+            {
+                // use ctor
+                ReadPrimitive(wrappedType); // value
+                Emit.NewObject(wrapperConst); // object
+            }
+            else
+            {
+                var defaultConst = primitiveTypeWrapper.GetConstructor(Type.EmptyTypes);
+                if (defaultConst == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("Primitive wrapper type {0} has no ctor accepting primitive nor default ctor.",
+                            primitiveTypeWrapper.FullName));
+                }
+                Emit.NewObject(defaultConst);
+                using (var loc = Emit.DeclareLocal(primitiveTypeWrapper))
+                {
+                    // wrapper
+                    Emit.StoreLocal(loc);       // --empty--
+                    Emit.LoadLocal(loc);        // wrapper
+                    ReadPrimitive(wrappedType); // wrapper value
+
+                    if (primitiveMember is FieldInfo)
+                    {
+                        throw new InvalidOperationException("Don't use fields to set value. Provide non default constructor.");
+                    }
+                    SetProperty((PropertyInfo)primitiveMember);      // --empty--
+                    Emit.LoadLocal(loc);        // wrapper
+                }
+            }
+        }
+        
         void ConsumeWhiteSpace()
         {
             Emit.LoadArgument(0);                                       // TextReader
@@ -2159,6 +2206,12 @@ namespace Jil.Deserialize
             if (forType.IsPrimitiveType())
             {
                 ReadPrimitive(forType);
+                return;
+            }
+
+            if (forType.IsPrimitiveWrapper())
+            {
+                ReadPrimitiveTypeWrapper(forType);
                 return;
             }
 
