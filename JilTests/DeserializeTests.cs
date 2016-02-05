@@ -3272,6 +3272,17 @@ namespace JilTests
             public readonly int Value;
         }
 
+        [JilPrimitiveWrapper]
+        public class PrimitiveWrapperWithNonDefaultCtorWithField
+        {
+            public PrimitiveWrapperWithNonDefaultCtorWithField(int value)
+            {
+                Value = value;
+            }
+
+            public int Value;
+        }
+
         [TestMethod]
         public void PrimitiveWrappers()
         {
@@ -3294,6 +3305,14 @@ namespace JilTests
             using (var str = new StringReader("1"))
             {
                 var val = JSON.Deserialize<PrimitiveWrapperAsStructWithNonDefaultCtor>(str);
+
+                Assert.AreEqual(1, val.Value);
+                Assert.AreEqual(-1, str.Peek());
+            }
+
+            using (var str = new StringReader("1"))
+            {
+                var val = JSON.Deserialize<PrimitiveWrapperWithNonDefaultCtorWithField>(str);
 
                 Assert.AreEqual(1, val.Value);
                 Assert.AreEqual(-1, str.Peek());

@@ -1135,135 +1135,272 @@ namespace JilTests
             public T Value { get; set; }
         }
 
+        [JilPrimitiveWrapper]
+        public class WrapField<T>
+        {
+            public T Value;
+        }
+
         [TestMethod]
         public void PrimitiveWrappers()
         {
+            // properties
             {
-                using (var str = new StringWriter())
                 {
-                    JSON.Serialize<Wrap<byte>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<byte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<byte> { Value = 123 }, str);
+                        Assert.AreEqual("123", str.ToString());
+                    }
                 }
 
-                using (var str = new StringWriter())
                 {
-                    JSON.Serialize(new Wrap<byte> { Value = 123 }, str);
-                    Assert.AreEqual("123", str.ToString());
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<sbyte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<int> { Value = -123 }, str);
+                        Assert.AreEqual("-123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<short>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<short> { Value = -1024 }, str);
+                        Assert.AreEqual("-1024", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<ushort>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<ushort> { Value = 2048 }, str);
+                        Assert.AreEqual("2048", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<int>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<int> { Value = -1234567 }, str);
+                        Assert.AreEqual("-1234567", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<uint>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<uint> { Value = 123456789 }, str);
+                        Assert.AreEqual("123456789", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<long>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<long> { Value = long.MinValue }, str);
+                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<ulong>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<ulong> { Value = ulong.MaxValue }, str);
+                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<string>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<string> { Value = "test" }, str);
+                        Assert.AreEqual("\"test\"", str.ToString());
+                    }
                 }
             }
 
+            // fields
             {
-                using (var str = new StringWriter())
                 {
-                    JSON.Serialize<Wrap<sbyte>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<byte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<byte> { Value = 123 }, str);
+                        Assert.AreEqual("123", str.ToString());
+                    }
                 }
 
-                using (var str = new StringWriter())
                 {
-                    JSON.Serialize(new Wrap<int>{Value=-123}, str);
-                    Assert.AreEqual("-123", str.ToString());
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<sbyte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<int> { Value = -123 }, str);
+                        Assert.AreEqual("-123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<short>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<short> { Value = -1024 }, str);
+                        Assert.AreEqual("-1024", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<ushort>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<ushort> { Value = 2048 }, str);
+                        Assert.AreEqual("2048", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<int>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<int> { Value = -1234567 }, str);
+                        Assert.AreEqual("-1234567", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<uint>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<uint> { Value = 123456789 }, str);
+                        Assert.AreEqual("123456789", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<long>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<long> { Value = long.MinValue }, str);
+                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<ulong>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<ulong> { Value = ulong.MaxValue }, str);
+                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<string>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<string> { Value = "test" }, str);
+                        Assert.AreEqual("\"test\"", str.ToString());
+                    }
                 }
             }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<short>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<short>{Value =-1024}, str);
-                    Assert.AreEqual("-1024", str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<ushort>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<ushort>{Value =2048}, str);
-                    Assert.AreEqual("2048", str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<int>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<int>{Value =-1234567}, str);
-                    Assert.AreEqual("-1234567", str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<uint>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<uint>{Value = 123456789}, str);
-                    Assert.AreEqual("123456789", str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<long>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<long>{Value = long.MinValue}, str);
-                    Assert.AreEqual(long.MinValue.ToString(), str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<ulong>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<ulong>{Value = ulong.MaxValue}, str);
-                    Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
-                }
-            }
-
-            {
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize<Wrap<string>>(null, str);
-                    Assert.AreEqual("null", str.ToString());
-                }
-
-                using (var str = new StringWriter())
-                {
-                    JSON.Serialize(new Wrap<string> { Value = "test" }, str);
-                    Assert.AreEqual("\"test\"", str.ToString());
-                }
-            }
-
         }
 
         [TestMethod]
