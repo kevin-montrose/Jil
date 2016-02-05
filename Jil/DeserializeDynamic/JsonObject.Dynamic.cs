@@ -1342,8 +1342,8 @@ namespace Jil.DeserializeDynamic
                         var coerced = new Dictionary<object, object>(ObjectMembers.Count);
                         foreach (var kv in ObjectMembers)
                         {
-                            object innerResult;
-                            if (!kv.Value.InnerTryConvert(valType, out innerResult))
+                            object innerResult = null;
+                            if (kv.Value != null && !kv.Value.InnerTryConvert(valType, out innerResult))
                             {
                                 result = null;
                                 return false;
