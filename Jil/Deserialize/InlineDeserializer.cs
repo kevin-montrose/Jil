@@ -1731,7 +1731,15 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(streamNotEmpty);                 // objType(*?) int
 
-            if (UseFastUnionLookup)
+            // _sigh_ strong names fuck with dynamic linking the UnionConfigLookup ASM
+            //    just have to live with it for now
+#if !STRONG_NAME
+            var canUseFastUnionLookup = true;
+#else
+            var canUseFastUnionLookup = false;
+#endif
+
+            if (UseFastUnionLookup && canUseFastUnionLookup)
             {
                 var allCharsets = UnionCharsets.None;
                 foreach (var kv in charsets)

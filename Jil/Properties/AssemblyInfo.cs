@@ -18,6 +18,5 @@ using System.Runtime.InteropServices;
 #if !STRONG_NAME
 [assembly: InternalsVisibleTo("JilTests")]
 [assembly: InternalsVisibleTo("Experiments")]
-#endif
-
 [assembly: InternalsVisibleTo("JilUnionConfigLookupTypes")]
+#endif
