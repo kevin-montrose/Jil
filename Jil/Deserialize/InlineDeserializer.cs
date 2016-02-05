@@ -892,8 +892,8 @@ namespace Jil.Deserialize
             {
                 wrappedType = ((PropertyInfo)primitiveMember).PropertyType;
             }
-            
-            var wrapperConst = primitiveTypeWrapper.GetConstructor(new[] {wrappedType});
+
+            var wrapperConst = primitiveTypeWrapper.GetConstructor(new[] { wrappedType });
             if (wrapperConst != null)
             {
                 // use ctor
@@ -905,9 +905,13 @@ namespace Jil.Deserialize
                 var defaultConst = primitiveTypeWrapper.GetConstructor(Type.EmptyTypes);
                 if (defaultConst == null)
                 {
-                    throw new InvalidOperationException(
-                        string.Format("Primitive wrapper type {0} has no ctor accepting primitive nor default ctor.",
-                            primitiveTypeWrapper.FullName));
+                    throw 
+                        new ConstructionException(
+                            string.Format("Primitive wrapper {0} needs a default constructor, or a constructor taking a single {1} parameter",
+                                primitiveTypeWrapper.FullName,
+                                wrappedType.FullName
+                            )
+                        );
                 }
                 Emit.NewObject(defaultConst);
                 using (var loc = Emit.DeclareLocal(primitiveTypeWrapper))
@@ -919,9 +923,12 @@ namespace Jil.Deserialize
 
                     if (primitiveMember is FieldInfo)
                     {
-                        throw new InvalidOperationException("Don't use fields to set value. Provide non default constructor.");
+                        Emit.StoreField((FieldInfo)primitiveMember);    // --empty--
                     }
-                    SetProperty((PropertyInfo)primitiveMember);      // --empty--
+                    else
+                    {
+                        SetProperty((PropertyInfo)primitiveMember);      // --empty--
+                    }
                     Emit.LoadLocal(loc);        // wrapper
                 }
             }
