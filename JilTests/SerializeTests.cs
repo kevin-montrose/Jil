@@ -1129,6 +1129,280 @@ namespace JilTests
             }
         }
 
+        [JilPrimitiveWrapper]
+        public class Wrap<T>
+        {
+            public T Value { get; set; }
+        }
+
+        [JilPrimitiveWrapper]
+        public class WrapField<T>
+        {
+            public T Value;
+        }
+
+        [TestMethod]
+        public void PrimitiveWrappers()
+        {
+            // properties
+            {
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<byte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<byte> { Value = 123 }, str);
+                        Assert.AreEqual("123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<sbyte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<int> { Value = -123 }, str);
+                        Assert.AreEqual("-123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<short>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<short> { Value = -1024 }, str);
+                        Assert.AreEqual("-1024", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<ushort>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<ushort> { Value = 2048 }, str);
+                        Assert.AreEqual("2048", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<int>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<int> { Value = -1234567 }, str);
+                        Assert.AreEqual("-1234567", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<uint>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<uint> { Value = 123456789 }, str);
+                        Assert.AreEqual("123456789", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<long>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<long> { Value = long.MinValue }, str);
+                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<ulong>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<ulong> { Value = ulong.MaxValue }, str);
+                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<Wrap<string>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new Wrap<string> { Value = "test" }, str);
+                        Assert.AreEqual("\"test\"", str.ToString());
+                    }
+                }
+            }
+
+            // fields
+            {
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<byte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<byte> { Value = 123 }, str);
+                        Assert.AreEqual("123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<sbyte>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<int> { Value = -123 }, str);
+                        Assert.AreEqual("-123", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<short>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<short> { Value = -1024 }, str);
+                        Assert.AreEqual("-1024", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<ushort>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<ushort> { Value = 2048 }, str);
+                        Assert.AreEqual("2048", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<int>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<int> { Value = -1234567 }, str);
+                        Assert.AreEqual("-1234567", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<uint>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<uint> { Value = 123456789 }, str);
+                        Assert.AreEqual("123456789", str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<long>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<long> { Value = long.MinValue }, str);
+                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<ulong>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<ulong> { Value = ulong.MaxValue }, str);
+                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                    }
+                }
+
+                {
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize<WrapField<string>>(null, str);
+                        Assert.AreEqual("null", str.ToString());
+                    }
+
+                    using (var str = new StringWriter())
+                    {
+                        JSON.Serialize(new WrapField<string> { Value = "test" }, str);
+                        Assert.AreEqual("\"test\"", str.ToString());
+                    }
+                }
+            }
+        }
+
         [TestMethod]
         public void NullablePrimitives()
         {
@@ -1242,6 +1516,22 @@ namespace JilTests
                     JSON.Serialize<ulong?>(ulong.MaxValue, str);
                     Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
                 }
+            }
+        }
+
+        [TestMethod]
+        public void PrimitiveWrapperMembers()
+        {
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new List<Wrap<int>> { new Wrap<int> { Value = 0 }, null, new Wrap<int> { Value = 1 }, null, new Wrap<int> { Value = 2 }, null, new Wrap<int> { Value = 3 } }, str);
+                Assert.AreEqual("[0,null,1,null,2,null,3]", str.ToString());
+            }
+
+            using (var str = new StringWriter())
+            {
+                JSON.Serialize(new Dictionary<string, Wrap<double>> { { "hello", null }, { "world", new Wrap<double> { Value = 3.21 } } }, str);
+                Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
 
@@ -1571,7 +1861,7 @@ namespace JilTests
                 Assert.AreEqual("\"1980-01-01T00:00:00Z\"", res);
             }
 
-            using(var str = new StringWriter())
+            using (var str = new StringWriter())
             {
                 JSON.Serialize(
                     new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc),
@@ -1667,7 +1957,7 @@ namespace JilTests
                     }
 
                     var expected = "\"" + rndDt.ToString("R") + "\"";
-                    var actual =JSON.Serialize(rndDt, Options.RFC1123);
+                    var actual = JSON.Serialize(rndDt, Options.RFC1123);
 
                     Assert.AreEqual(expected, actual);
                 }
@@ -6104,21 +6394,21 @@ namespace JilTests
         {
             var obj =
                 new _Inherited<string>
-                    {
-                        ContentEncoding = Encoding.UTF8,
+                {
+                    ContentEncoding = Encoding.UTF8,
 
-                        total = 1,
-                        page_size = 2,
-                        page = 3,
-                        type = "foo",
-                        items = new List<string> { "bar", "bizz", "buzz", "baz" },
-                        quota_remaining = 4,
-                        quota_max = 5,
-                        backoff = 6,
-                        error_id = 7,
-                        error_message = "you don goofed",
-                        has_more = true
-                    };
+                    total = 1,
+                    page_size = 2,
+                    page = 3,
+                    type = "foo",
+                    items = new List<string> { "bar", "bizz", "buzz", "baz" },
+                    quota_remaining = 4,
+                    quota_max = 5,
+                    backoff = 6,
+                    error_id = 7,
+                    error_message = "you don goofed",
+                    has_more = true
+                };
 
             using (var str = new StringWriter())
             {
@@ -6218,7 +6508,7 @@ namespace JilTests
             var items = new Dictionary<string, Dictionary<string, simplePoco>>();
             items.Add("a", new Dictionary<string, simplePoco>
             {
-                {"a", new simplePoco {Id = 1, Name = "a"}}, 
+                {"a", new simplePoco {Id = 1, Name = "a"}},
                 {"b", new simplePoco {Id = 2, Name = "b"}}
             });
             var json = JSON.Serialize(items);
@@ -7825,7 +8115,7 @@ namespace JilTests
                 }
             }
 
-            foreach(var testDto in toTest)
+            foreach (var testDto in toTest)
             {
                 string shouldMatch;
                 if (testDto.Offset == TimeSpan.Zero)
@@ -7942,7 +8232,7 @@ namespace JilTests
             public int? A { get; set; }
             public Dictionary<int, int?> B { get; set; }
         }
-        
+
         [TestMethod]
         public void Issue127()
         {
@@ -7963,11 +8253,11 @@ namespace JilTests
             var settings = new Newtonsoft.Json.JsonSerializerSettings();
             settings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.MicrosoftDateFormat;
 
-            var dtos = 
-                new[] 
-                { 
-                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero), 
-                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)), 
+            var dtos =
+                new[]
+                {
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero),
+                    new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(1)),
                     new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-1)),
                     new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(2)),
                     new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.FromHours(-2)),
@@ -7977,7 +8267,7 @@ namespace JilTests
                     new DateTimeOffset(1234, 5, 6, 7, 8, 9, new TimeSpan(-4, -30, 00)),
                 };
 
-            foreach(var dto in dtos)
+            foreach (var dto in dtos)
             {
                 var val = Newtonsoft.Json.JsonConvert.SerializeObject(dto, settings);
 
@@ -8011,12 +8301,12 @@ namespace JilTests
 
         public class SerilaizationTestObj
         {
-            [DataMember(Name="ExplicitMember")]
+            [DataMember(Name = "ExplicitMember")]
             public string MemberProperty { get; set; }
 
             [JilDirective(Name = "Directive")]
             public string DirectiveProperty { get; set; }
-            
+
             public string NekkidProperty { get; set; }
         }
 
@@ -8292,17 +8582,17 @@ namespace JilTests
         [TestMethod]
         public void Issue169()
         {
-            var obj = 
+            var obj =
                 new
                 {
-                    Filter = 
+                    Filter =
                         new
                         {
-                            And = 
-                                new List<dynamic> 
+                            And =
+                                new List<dynamic>
                                 {
-                                    new 
-                                    { 
+                                    new
+                                    {
                                         Term = new { Category = "a" }
                                     }
                                 }
@@ -8848,8 +9138,7 @@ namespace JilTests
                 Assert.AreEqual("Unexpected type [Object] provided for union [Foo] on [_BadUnions_2], expected one of [Int32, String]", e.Message);
             }
 
-            try
-            {
+            try {
                 var obj = new _BadUnions_2();
                 obj.DiscriminantType = null;
 
@@ -8859,6 +9148,102 @@ namespace JilTests
             catch (SerializerException e)
             {
                 Assert.AreEqual("Expected one of [Int32, String] to be present in [DiscriminantType] on [_BadUnions_2], instead found null", e.Message);
+            }
+        }
+
+        struct _TopLevelNulls
+        {
+            public string A { get; set; }
+        }
+
+        [TestMethod]
+        public void TopLevelNulls()
+        {
+            object obj = null;
+
+            Assert.AreEqual("null", JSON.Serialize(obj));
+
+            var arr = new[] { "test", null, null, null };
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr));
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr, Options.ExcludeNulls));
+
+            var propObj =
+                new
+                {
+                    Fields = arr
+                };
+
+            var propObjArr = new[] { propObj, null, null, null };
+
+            var propObjArrJson = JSON.Serialize(propObjArr);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
+            var propObjArrJsonExcludesNull = JSON.Serialize(propObjArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+
+            _TopLevelNulls? nullable = new _TopLevelNulls { A = "test" };
+            var nullableArr = new[] { nullable, null, null, null };
+
+            var nullableArrJson = JSON.Serialize(nullableArr);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
+            var nullableArrJsonExcludesNull = JSON.Serialize(nullableArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
+        }
+
+        [JilPrimitiveWrapper]
+        class _BadPrimitiveWrapper1
+        {
+            public int Prop1 { get; set; }
+            public int Prop2 { get; set; }
+        }
+
+        [JilPrimitiveWrapper]
+        class _BadPrimitiveWrapper2
+        {
+
+        }
+
+        [JilPrimitiveWrapper]
+        class _BadPrimitiveWrapper3
+        {
+            public int Field1;
+            public int Field2;
+        }
+
+        [TestMethod]
+        public void BadPrimitiveWrapper()
+        {
+            try
+            {
+                JSON.Serialize(new _BadPrimitiveWrapper1 { Prop1 = 1 });
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper1", e.InnerException.Message);
+            }
+
+            try
+            {
+                JSON.Serialize(new _BadPrimitiveWrapper2 { });
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 0 for _BadPrimitiveWrapper2", e.InnerException.Message);
+            }
+
+            try
+            {
+
+                JSON.Serialize(new _BadPrimitiveWrapper3 { Field1 = 1, Field2 = 2 });
+                Assert.Fail();
+            }
+            catch (Exception e)
+            {
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", e.InnerException.Message);
             }
         }
     }

@@ -1402,5 +1402,43 @@ namespace JilTests
                 Assert.AreEqual(shouldMatch, res);
             }
         }
+
+        struct _TopLevelNulls
+        {
+            public string A { get; set; }
+        }
+
+        [TestMethod]
+        public void TopLevelNulls()
+        {
+            object obj = null;
+
+            Assert.AreEqual("null", JSON.SerializeDynamic(obj));
+
+            var arr = new[] { "test", null, null, null };
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.SerializeDynamic(arr));
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.SerializeDynamic(arr, Options.ExcludeNulls));
+
+            var propObj =
+                new
+                {
+                    Fields = arr
+                };
+
+            var propObjArr = new[] { propObj, null, null, null };
+
+            var propObjArrJson = JSON.SerializeDynamic(propObjArr);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
+            var propObjArrJsonExcludesNull = JSON.SerializeDynamic(propObjArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+
+            _TopLevelNulls? nullable = new _TopLevelNulls { A = "test" };
+            var nullableArr = new[] { nullable, null, null, null };
+
+            var nullableArrJson = JSON.SerializeDynamic(nullableArr);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
+            var nullableArrJsonExcludesNull = JSON.SerializeDynamic(nullableArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
+        }
     }
 }

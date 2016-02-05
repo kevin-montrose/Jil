@@ -2737,14 +2737,15 @@ namespace JilTests
 
             // Dictionary<string, dynamic>
             {
-                var dyn = JSON.DeserializeDynamic("{\"hello\":123, \"world\": 456.7 }");
+                var dyn = JSON.DeserializeDynamic("{\"hello\":123, \"world\": 456.7, \"goodbye\": null }");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
 
                 Assert.IsTrue(tc.CanConvertTo(typeof(IDictionary<string, dynamic>)));
                 var d = (Dictionary<string, dynamic>)tc.ConvertTo(dyn, typeof(IDictionary<string, dynamic>));
-                Assert.AreEqual(2, d.Count);
-                Assert.IsTrue(d.ContainsKey("hello"));
+                Assert.AreEqual(3, d.Count);
+                Assert.IsTrue(d.ContainsKey("hello"));                
                 Assert.IsTrue(d.ContainsKey("world"));
+                Assert.IsTrue(d.ContainsKey("goodbye"));
 
                 tc = System.ComponentModel.TypeDescriptor.GetConverter(d["hello"]);
                 Assert.IsTrue(tc.CanConvertTo(typeof(int)));
@@ -2753,6 +2754,8 @@ namespace JilTests
                 tc = System.ComponentModel.TypeDescriptor.GetConverter(d["world"]);
                 Assert.IsTrue(tc.CanConvertTo(typeof(double)));
                 Assert.AreEqual(456.7, (double)tc.ConvertTo(d["world"], typeof(double)));
+
+                Assert.IsNull((d["goodbye"]));
             }
 
             // Dictionary<enum, dynamic>

@@ -1550,5 +1550,35 @@ namespace Jil.Common
             ret = ret.Concat(UnionCharsetArrays.UnionObjectSet);
             return ret;
         }
+
+        /// <summary>
+        /// Functional-style helper method for creating and initializing a new array.
+        /// </summary>
+        /// <typeparam name="T">The element type of the array.</typeparam>
+        /// <param name="count">The length of the array to create.</param>
+        /// <param name="generator">
+        /// The function used to initialize each element of the array.
+        /// The integer applied to the function represents the index of the element being initialized.
+        /// </param>
+        /// <returns>An array with element type <typeparamref>T</typeparamref> and length <paramref>count</paramref>.</returns>
+        internal static T[] CreateArray<T>(int count, Func<int, T> generator)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException("count");
+            }
+            else if (generator == null)
+            {
+                throw new ArgumentNullException("generator");
+            }
+            //Contract.EndContractBlock();
+
+            var arr = new T[count];
+            for (var i = 0; i < arr.Length; i++)
+            {
+                arr[i] = generator(i);
+            }
+            return arr;
+        }
     }
 }
