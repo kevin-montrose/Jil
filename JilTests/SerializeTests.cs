@@ -8315,5 +8315,30 @@ namespace JilTests
 
             Assert.AreEqual(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
         }
+
+        [TestMethod]
+        public void TopLevelNulls()
+        {
+            object obj = null;
+
+            Assert.AreEqual("null", JSON.Serialize(obj));
+
+            var arr = new[] { "test", null, null, null };
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr));
+            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr, Options.ExcludeNulls));
+
+            var propObj =
+                new
+                {
+                    Fields = arr
+                };
+
+            var propObjArr = new[] { propObj, null, null, null };
+
+            var propObjArrJson = JSON.Serialize(propObjArr);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
+            var propObjArrJsonExcludesNull = JSON.Serialize(propObjArr, Options.ExcludeNulls);
+            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+        }
     }
 }
