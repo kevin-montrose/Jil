@@ -9234,5 +9234,18 @@ namespace JilTests
                 Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", e.InnerException.Message);
             }
         }
+
+        class _Issue189
+        {
+            [JilDirective(Name = "")]
+            public int ZeroWidthParam { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue189()
+        {
+            var json = JSON.Serialize(new _Issue189 { ZeroWidthParam = 31415 });
+            Assert.AreEqual("{\"\":31415}", json);
+        }
     }
 }

@@ -187,10 +187,10 @@ namespace Jil.Common
         public static string GetSerializationName(this MemberInfo member, SerializationNameFormat serializationNameFormat)
         {
             var jilDirectiveAttr = member.GetCustomAttribute<JilDirectiveAttribute>();
-            if (jilDirectiveAttr != null && !string.IsNullOrEmpty(jilDirectiveAttr.Name)) return jilDirectiveAttr.Name;
+            if (jilDirectiveAttr != null && jilDirectiveAttr.Name != null) return jilDirectiveAttr.Name;
 
             var dataMemberAttr = member.GetCustomAttribute<System.Runtime.Serialization.DataMemberAttribute>();
-            if (dataMemberAttr != null && !string.IsNullOrEmpty(dataMemberAttr.Name)) return dataMemberAttr.Name;
+            if (dataMemberAttr != null && dataMemberAttr.Name != null) return dataMemberAttr.Name;
 
             switch (serializationNameFormat)
             {
