@@ -7058,6 +7058,83 @@ namespace JilTests
                 Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_UnionTypeMisconfiguration_2: Member [Data_Type2] has IsUnionType set, but IsUnionType is also set for [Data_Type1]", e.Message);
             }
         }
+
+
+
+        public enum _Issue193Enum
+        {
+            T001 = 0,
+            T002 = 1,
+            T003 = 2,
+            T004 = 3,
+            T005 = 4,
+            T006 = 11,
+            T007 = 12,
+            T008 = 13,
+            T009 = 21,
+            T010 = 22,
+            T011 = 23,
+            T012 = 31,
+            T013 = 32,
+            T014 = 33,
+            T015 = 34,
+            T016 = 35,
+            T017 = 36,
+            T018 = 37,
+            T019 = 41,
+            T020 = 42,
+            T021 = 43,
+            T022 = 51,
+            T023 = 52,
+            T024 = 53,
+            T025 = 61,
+            T026 = 63,
+            T027 = 62,
+            T028 = 64,
+            T029 = 71,
+            T030 = 72,
+            T031 = 81,
+            T032 = 82,
+            T033 = 83,
+            T034 = 91,
+            T035 = 101,
+            T036 = 102,
+            T037 = 103,
+            T038 = 111,
+            T039 = 112,
+            T040 = 113,
+            T041 = 121,
+            T042 = 131,
+            T043 = 141,
+            T044 = 142,
+            T045 = 143,
+            T046 = 144,
+            T047 = 145,
+            T048 = 146,
+            T049 = 147,
+            T050 = 148,
+            T051 = 149,
+
+            /* Comment out T052 and it works fine */
+            T052 = 148,
+        }
+
+        public class _Issue193
+        {
+            public _Issue193Enum[] AnEnumArray { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue193()
+        {
+            var json = JSON.Serialize(new _Issue193() { AnEnumArray = new[] { _Issue193Enum.T001 } });
+            var obj = JSON.Deserialize<_Issue193>(json);
+            Assert.IsNotNull(obj);
+            Assert.IsNotNull(obj.AnEnumArray);
+            Assert.AreEqual(1, obj.AnEnumArray.Length);
+            Assert.AreEqual(_Issue193Enum.T001, obj.AnEnumArray[0]);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
