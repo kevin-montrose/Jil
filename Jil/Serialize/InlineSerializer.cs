@@ -1557,7 +1557,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
-        void WriteObject(Type forType, Sigil.Local inLocal = null)
+        void WriteObject(Type forType, Sigil.Local inLocal = null, bool mustBeWritten = false)
         {
             if (DynamicCallOutCheck(null, forType, inLocal)) return;
 
@@ -1572,7 +1572,7 @@ namespace Jil.Serialize
             }
             else
             {
-                WriteObjectWithoutNulls(forType, inLocal);
+                WriteObjectWithoutNulls(forType, inLocal, mustBeWritten);
             }
 
             if (CallOutOnPossibleDynamic)
@@ -1662,7 +1662,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);                            // --empty--
         }
 
-        void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal)
+        void WriteObjectWithoutNulls(Type forType, Sigil.Local inLocal, bool mustBeWritten)
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
@@ -1692,6 +1692,12 @@ namespace Jil.Serialize
 
             Emit.Duplicate();               // obj(*?) obj(*?)
             Emit.BranchIfTrue(notNull);     // obj(*?)
+
+            if(mustBeWritten)
+            {
+                WriteString("null");
+            }
+
             Emit.Branch(end);               // obj(*?)
 
             Emit.MarkLabel(notNull);                    // obj(*?)
@@ -2378,7 +2384,7 @@ namespace Jil.Serialize
                     return;
                 }
 
-                WriteObject(elementType, loc);
+                WriteObject(elementType, loc, mustBeWritten: true);
             }
         }
 
