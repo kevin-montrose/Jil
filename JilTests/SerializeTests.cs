@@ -8507,6 +8507,8 @@ namespace JilTests
             Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
 
+
+
         [JilPrimitiveWrapper]
         class _BadPrimitiveWrapper1
         {
@@ -8523,21 +8525,8 @@ namespace JilTests
         [JilPrimitiveWrapper]
         class _BadPrimitiveWrapper3
         {
-#pragma warning disable 0649
             public int Field1;
             public int Field2;
-#pragma warning restore 0649
-        }
-
-        [JilPrimitiveWrapper]
-        class _BadPrimitiveWrapper4
-        {
-            public int A1;
-
-            public _BadPrimitiveWrapper4(int a1, int a2)
-            {
-                A1 = a1;
-            }
         }
 
         [TestMethod]
@@ -8545,42 +8534,35 @@ namespace JilTests
         {
             try
             {
-                var foo = JSON.Deserialize<_BadPrimitiveWrapper1>("1");
-                Assert.Fail("Shouldn't be possible");
+                JSON.Serialize(new _BadPrimitiveWrapper1 { Prop1 = 1 });
+                Assert.Fail();
             }
-            catch (DeserializationException e)
+            catch (Exception e)
             {
-                Assert.AreEqual("Error occurred building a deserializer for JilTests.SerializeTests+_BadPrimitiveWrapper1: Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper1", e.Message);
-            }
-
-            try
-            {
-                var foo = JSON.Deserialize<_BadPrimitiveWrapper2>("1");
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (DeserializationException e)
-            {
-                Assert.AreEqual("Error occurred building a deserializer for JilTests.SerializeTests+_BadPrimitiveWrapper2: Primitive wrappers can only have 1 declared primitive member, found 0 for _BadPrimitiveWrapper2", e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper1", e.InnerException.Message);
             }
 
             try
             {
-                var foo = JSON.Deserialize<_BadPrimitiveWrapper3>("1");
-                Assert.Fail("Shouldn't be possible");
+                JSON.Serialize(new _BadPrimitiveWrapper2 {});
+                Assert.Fail();
             }
-            catch (DeserializationException e)
+            catch (Exception e)
             {
-                Assert.AreEqual("Error occurred building a deserializer for JilTests.SerializeTests+_BadPrimitiveWrapper3: Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 0 for _BadPrimitiveWrapper2", e.InnerException.Message);
             }
 
             try
             {
-                var foo = JSON.Deserialize<_BadPrimitiveWrapper4>("1");
-                Assert.Fail("Shouldn't be possible");
+                JSON.Serialize(new _BadPrimitiveWrapper3 { Field1 = 1, Field2 =2 });
+                Assert.Fail();
             }
-            catch (DeserializationException e)
+            catch (Exception e)
             {
-                Assert.AreEqual("Error occurred building a deserializer for JilTests.SerializeTests+_BadPrimitiveWrapper4: Primitive wrapper JilTests.SerializeTests+_BadPrimitiveWrapper4 needs a default constructor, or a constructor taking a single System.Int32 parameter", e.Message);
+                Assert.IsNotNull(e.InnerException);
+                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", e.InnerException.Message);
             }
         }
     }
