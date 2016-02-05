@@ -36,12 +36,26 @@ namespace Jil.Deserialize
 
         private static IReadOnlyList<Tuple<string, object>> GetEnumValues()
         {
-            return
-                Enum.GetValues(typeof(EnumType))
-                .Cast<object>()
-                .Select(enumVal => Tuple.Create(typeof(EnumType).GetEnumValueName(enumVal), enumVal))
-                .ToList()
-                .AsReadOnly();
+            var names = Enum.GetNames(typeof(EnumType));
+            var ret = new List<Tuple<string, object>>();
+
+            foreach(var name in names)
+            {
+                object val = Enum.Parse(typeof(EnumType), name);
+
+                var field = typeof(EnumType).GetField(name);
+                var enumMember = field.GetCustomAttribute<System.Runtime.Serialization.EnumMemberAttribute>();
+                if(enumMember != null)
+                {
+                    ret.Add(Tuple.Create(enumMember.Value, val));
+                }
+                else
+                {
+                    ret.Add(Tuple.Create(name, val));
+                }
+            }
+
+            return ret.AsReadOnly();
         }
 
         private static Func<TextReader, EnumType> CreateFindEnum(IEnumerable<Tuple<string, object>> names)
@@ -52,7 +66,7 @@ namespace Jil.Deserialize
                 names
                 .Select(name => NameAutomata<EnumType>.CreateName(typeof(TextReader), name.Item1, emit => LoadConstantOfType(emit, name.Item2, underlyingType)))
                 .ToList();
-
+            
             var ret =
                 NameAutomata<EnumType>.Create<Func<TextReader, EnumType>>(
                     typeof(TextReader),

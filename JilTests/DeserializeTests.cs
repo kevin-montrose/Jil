@@ -7127,12 +7127,13 @@ namespace JilTests
         [TestMethod]
         public void Issue193()
         {
-            var json = JSON.Serialize(new _Issue193() { AnEnumArray = new[] { _Issue193Enum.T001 } });
-            var obj = JSON.Deserialize<_Issue193>(json);
-            Assert.IsNotNull(obj);
-            Assert.IsNotNull(obj.AnEnumArray);
-            Assert.AreEqual(1, obj.AnEnumArray.Length);
-            Assert.AreEqual(_Issue193Enum.T001, obj.AnEnumArray[0]);
+            var data = JSON.Deserialize<_Issue193>("{\"AnEnumArray\":[\"T052\",\"T050\",\"T001\"]}");
+            Assert.IsNotNull(data);
+            Assert.IsNotNull(data.AnEnumArray);
+            Assert.AreEqual(3, data.AnEnumArray.Length);
+            Assert.AreEqual(_Issue193Enum.T052, data.AnEnumArray[0]);
+            Assert.AreEqual(_Issue193Enum.T050, data.AnEnumArray[1]);
+            Assert.AreEqual(_Issue193Enum.T001, data.AnEnumArray[2]);
         }
 
 #if !DEBUG

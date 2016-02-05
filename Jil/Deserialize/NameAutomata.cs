@@ -179,7 +179,7 @@ namespace Jil.Deserialize
                 {
                     if (charGroup.Count() != 1)
                     {
-                        throw new ApplicationException("");
+                        throw new ConstructionException("Couldn't build parsing automata, found duplicate terminals for " + string.Join(", ", charGroup.Select(c => c.Name)));
                     }
 
                     var completeName = d.Emit.DefineLabel("complete_" + items[0].Name);
