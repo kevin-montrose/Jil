@@ -129,7 +129,7 @@ namespace Jil.Deserialize
                     emit =>
                     {
                         emit.DeclareLocal(underlyingType, resultValue);
-                        LoadConstantOfType(emit, 0, underlyingType);
+                        LoadConstantOfType(emit, Convert.ChangeType(0, underlyingType), underlyingType);
                         emit.StoreLocal(resultValue);
                     },
                     emit =>
@@ -177,7 +177,7 @@ namespace Jil.Deserialize
                     emit =>
                     {
                         emit.DeclareLocal(underlyingType, resultValue);
-                        LoadConstantOfType(emit, 0, underlyingType);
+                        LoadConstantOfType(emit, Convert.ChangeType(0, underlyingType), underlyingType);
                         emit.StoreLocal(resultValue);
                     },
                     emit =>
@@ -196,27 +196,25 @@ namespace Jil.Deserialize
 
         static void LoadConstantOfType(Emit Emit, object val, Type type)
         {
-            dynamic dynamicVal = (dynamic) val;
-
             if (type == typeof(byte))
             {
-                Emit.LoadConstant((byte)dynamicVal);
+                Emit.LoadConstant((byte)val);
             }
             else if (type == typeof(sbyte))
             {
-                Emit.LoadConstant((sbyte)dynamicVal);
+                Emit.LoadConstant((sbyte)val);
             }
             else if (type == typeof(short))
             {
-                Emit.LoadConstant((short)dynamicVal);
+                Emit.LoadConstant((short)val);
             }
             else if (type == typeof(ushort))
             {
-                Emit.LoadConstant((ushort)dynamicVal);
+                Emit.LoadConstant((ushort)val);
             }
             else if (type == typeof(int))
             {
-                Emit.LoadConstant((int)dynamicVal);
+                Emit.LoadConstant((int)val);
             }
             else if (type == typeof(uint))
             {
@@ -224,11 +222,11 @@ namespace Jil.Deserialize
             }
             else if (type == typeof(long))
             {
-                Emit.LoadConstant((long)dynamicVal);
+                Emit.LoadConstant((long)val);
             }
             else if (type == typeof(ulong))
             {
-                Emit.LoadConstant((ulong)dynamicVal);
+                Emit.LoadConstant((ulong)val);
             }
             else
             {
