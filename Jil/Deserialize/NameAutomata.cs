@@ -421,10 +421,13 @@ namespace Jil.Deserialize
                         emit.Call(Helper.GetConsume(readerType));
 
                         // strip of the ? if it exists
-                        var type = typeof(T);
+                        var type = defaultValue.GetType();
                         type = Nullable.GetUnderlyingType(type) ?? type;
 
-                        Utils.LoadConstantOfType(emit, defaultValue, type);
+                        if(!Utils.LoadConstantOfType(emit, defaultValue, type))
+                        {
+                            throw new Exception("Couldn't load constant for " + type.Name);
+                        }
 
                         emit.Return();
                     }

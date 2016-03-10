@@ -169,6 +169,7 @@ namespace Jil.Deserialize
                         }))
                 .ToList();
 
+            var underlyingDefault = underlyingType.DefaultValue();
 
             var ret =
                 NameAutomata<EnumType>.CreateFold<EnumThunkReaderDelegate<EnumType>>(
@@ -188,7 +189,7 @@ namespace Jil.Deserialize
                     true,
                     true,
                     false,
-                    defaultValue: null
+                    defaultValue: underlyingDefault
                 );
 
             return (EnumThunkReaderDelegate<EnumType>)ret;
