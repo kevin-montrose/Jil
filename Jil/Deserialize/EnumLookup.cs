@@ -129,7 +129,7 @@ namespace Jil.Deserialize
                     emit =>
                     {
                         emit.DeclareLocal(underlyingType, resultValue);
-                        LoadConstantOfType(emit, 0, underlyingType);
+                        LoadConstantOfType(emit, Convert.ChangeType(0, underlyingType), underlyingType);
                         emit.StoreLocal(resultValue);
                     },
                     emit =>
@@ -177,7 +177,7 @@ namespace Jil.Deserialize
                     emit =>
                     {
                         emit.DeclareLocal(underlyingType, resultValue);
-                        LoadConstantOfType(emit, 0, underlyingType);
+                        LoadConstantOfType(emit, Convert.ChangeType(0, underlyingType), underlyingType);
                         emit.StoreLocal(resultValue);
                     },
                     emit =>
