@@ -7159,6 +7159,24 @@ namespace JilTests
             Assert.AreEqual(_Issue210_2.A, res2);
         }
 
+        [Flags]
+        public enum _Issue203
+        {
+            Type1 = 1 << 0,
+            Type2 = 1 << 1,
+            Type3 = 1 << 2,
+            Type4 = 1 << 3
+        }
+
+        [TestMethod]
+        public void Issue203()
+        {
+            var json = JSON.Serialize((_Issue203)0);
+
+            var res = JSON.Deserialize<_Issue203>(json);
+            Assert.AreEqual((_Issue203)0, res);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
