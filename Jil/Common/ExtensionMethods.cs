@@ -709,6 +709,11 @@ namespace Jil.Common
             return t.GetContainerInterface(typeof(IList<>));
         }
 
+        public static Type GetSetInterface(this Type t)
+        {
+            return t.GetContainerInterface(typeof(ISet<>));
+        }
+
         public static Type GetReadOnlyListInterface(this Type t)
         {
             return t.GetContainerInterface(typeof(IReadOnlyList<>));
@@ -732,6 +737,11 @@ namespace Jil.Common
         public static bool IsDictionaryType(this Type t)
         {
             return t.IsContainerType(typeof(IDictionary<,>));
+        }
+
+        public static bool IsSetType(this Type t)
+        {
+            return t.IsContainerType(typeof(ISet<>));
         }
 
         public static Type GetContainerInterface(this Type t, Type containerType)

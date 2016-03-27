@@ -1124,13 +1124,22 @@ namespace Jil.Deserialize
             }
         }
 
-        void ReadList(MemberInfo listMember, Type listType)
+        void ReadList(MemberInfo listMember, Type listType, bool isSet)
         {
-            var elementType = listType.GetListInterface().GetGenericArguments()[0];
+            var elementType = isSet 
+                ? listType.GetSetInterface().GetGenericArguments()[0]
+                : listType.GetListInterface().GetGenericArguments()[0];
 
-            if (listType.IsGenericType && listType.GetGenericTypeDefinition() == typeof(IList<>))
+            if (listType.IsGenericType)
             {
-                listType = typeof(List<>).MakeGenericType(elementType);
+                if (!isSet && listType.GetGenericTypeDefinition() == typeof(IList<>))
+                {
+                    listType = typeof(List<>).MakeGenericType(elementType);
+                }
+                else if (isSet && listType.GetGenericTypeDefinition() == typeof(ISet<>))
+                {
+                    listType = typeof(HashSet<>).MakeGenericType(elementType);
+                }
             }
 
             var addMtd = listType.GetMethod("Add");
@@ -1207,6 +1216,8 @@ namespace Jil.Deserialize
                 Emit.BranchIfEqual(done);                       // listType(*?)
                 Build(listMember, elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
+                if (isSet)
+                    Emit.Pop(); // if it's a set, Add returns a bool
 
                 var startLoop = Emit.DefineLabel();
                 var nextItem = Emit.DefineLabel();
@@ -1230,6 +1241,8 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();                // listType(*?)
                 Build(listMember, elementType);                 // listType(*?) elementType
                 Emit.CallVirtual(addMtd);           // --empty--
+                if (isSet)
+                    Emit.Pop(); // if it's a set, Add returns a bool
                 Emit.Branch(startLoop);             // --empty--
 
                 Emit.MarkLabel(done);               // listType(*?)
@@ -2521,7 +2534,13 @@ namespace Jil.Deserialize
 
             if (forType.IsListType())
             {
-                ReadList(forMember, forType);
+                ReadList(forMember, forType, false);
+                return;
+            }
+
+            if (forType.IsSetType())
+            {
+                ReadList(forMember, forType, true);
                 return;
             }
 
@@ -2531,7 +2550,7 @@ namespace Jil.Deserialize
             {
                 var elementType = forType.GetGenericArguments()[0];
                 var fakeList = typeof(List<>).MakeGenericType(elementType);
-                ReadList(forMember, fakeList);
+                ReadList(forMember, fakeList, false);
                 return;
             }
 
