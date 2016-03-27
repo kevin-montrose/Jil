@@ -811,6 +811,44 @@ namespace JilTests
         }
 
 #pragma warning disable 0649
+        class _ISets
+        {
+            public ISet<int> IntSet;
+            public HashSet<string> StringHashSet;
+            public SortedSet<int> IntSortedSet;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void ISets()
+        {
+            using (var str = new StringReader("{\"IntSet\":[17,23],\"StringHashSet\":[\"Hello\",\"Hash\",\"Set\"],\"IntSortedSet\":[1,2,3]}"))
+            {
+                var res = JSON.Deserialize<_ISets>(str);
+                Assert.IsNotNull(res);
+
+
+                Assert.IsNotNull(res.IntSet);
+                Assert.IsInstanceOfType(res.IntSet, typeof(HashSet<int>));
+                Assert.AreEqual(2, res.IntSet.Count);
+                Assert.IsTrue(res.IntSet.Contains(17));
+                Assert.IsTrue(res.IntSet.Contains(23));
+
+                Assert.IsNotNull(res.StringHashSet);
+                Assert.AreEqual(3, res.StringHashSet.Count);
+                Assert.IsTrue(res.StringHashSet.Contains("Hello"));
+                Assert.IsTrue(res.StringHashSet.Contains("Hash"));
+                Assert.IsTrue(res.StringHashSet.Contains("Set"));
+
+                Assert.IsNotNull(res.IntSortedSet);
+                Assert.AreEqual(3, res.IntSortedSet.Count);
+                Assert.IsTrue(res.IntSortedSet.Contains(1));
+                Assert.IsTrue(res.IntSortedSet.Contains(2));
+                Assert.IsTrue(res.IntSortedSet.Contains(3));
+            }
+        }
+
+#pragma warning disable 0649
         class _InfoFailure
         {
             public decimal? questions_per_minute;
