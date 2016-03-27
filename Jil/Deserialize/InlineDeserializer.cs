@@ -1216,8 +1216,7 @@ namespace Jil.Deserialize
                 Emit.BranchIfEqual(done);                       // listType(*?)
                 Build(listMember, elementType);                             // listType(*?) elementType
                 Emit.CallVirtual(addMtd);                       // --empty--
-                if (isSet)
-                    Emit.Pop(); // if it's a set, Add returns a bool
+                if (isSet) Emit.Pop();                          // if it's a set, Add() returns a bool which we need to pop off the stack
 
                 var startLoop = Emit.DefineLabel();
                 var nextItem = Emit.DefineLabel();
@@ -1241,8 +1240,7 @@ namespace Jil.Deserialize
                 ConsumeWhiteSpace();                // listType(*?)
                 Build(listMember, elementType);                 // listType(*?) elementType
                 Emit.CallVirtual(addMtd);           // --empty--
-                if (isSet)
-                    Emit.Pop(); // if it's a set, Add returns a bool
+                if (isSet) Emit.Pop();              // if it's a set, Add() returns a bool which we need to pop off the stack
                 Emit.Branch(startLoop);             // --empty--
 
                 Emit.MarkLabel(done);               // listType(*?)
