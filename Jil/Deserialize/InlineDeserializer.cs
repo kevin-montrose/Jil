@@ -1136,9 +1136,12 @@ namespace Jil.Deserialize
                 {
                     listType = typeof(List<>).MakeGenericType(elementType);
                 }
-                else if (isSet && listType.GetGenericTypeDefinition() == typeof(ISet<>))
+                else
                 {
-                    listType = typeof(HashSet<>).MakeGenericType(elementType);
+                    if (isSet && listType.GetGenericTypeDefinition() == typeof(ISet<>))
+                    {
+                        listType = typeof(HashSet<>).MakeGenericType(elementType);
+                    }
                 }
             }
 
