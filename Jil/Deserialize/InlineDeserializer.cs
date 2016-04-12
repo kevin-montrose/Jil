@@ -1000,8 +1000,33 @@ namespace Jil.Deserialize
             Emit.Call(specific);            // enum
         }
 
-        void ReadEnum(Type enumType)
+        void ReadEnum(Type enumType, bool cameFromNullable)
         {
+            if (Enum.GetNames(enumType).Count() == 0)
+            {
+                if (cameFromNullable)
+                {
+                    var message = enumType.FullName + "  has no defined values and thus cannot be deserialized";
+                    var constr = ReadingFromString ?
+                        DeserializationException_Cons_string_ThunkWriter_bool :
+                        DeserializationException_Cons_string_TextReader_bool;
+
+                    // need to proxy this through a different method, just so Sigil can't tell
+                    //   it's unreachable code
+                    var mtd = Methods.GetThrowNoDefinedValueInEnum(ReadingFromString);
+
+                    Emit.LoadConstant(message);     // string
+                    Emit.LoadArgument(0);           // TextReader
+                    Emit.Call(mtd);                 // --empty--
+
+                    // fall through
+                }
+                else
+                {
+                    throw new ConstructionException(enumType.FullName + " has no values, and cannot be deserialized; add a value, make nullable, or treat as integer");
+                }
+            }
+
             if (UseNameAutomataForEnums)
             {
                 var setterLookup = typeof(EnumLookup<>).MakeGenericType(enumType);
@@ -1106,7 +1131,7 @@ namespace Jil.Deserialize
                 Emit.LoadConstant('n');             // int n
                 Emit.BranchIfEqual(maybeNull);      // --empty--
 
-                Build(nullableMember, underlying);                  // underlying
+                Build(nullableMember, underlying, fromNullable: true);  // underlying
                 Emit.NewObject(nullableConst);      // nullableType
                 Emit.Branch(done);                  // nullableType
 
@@ -2491,7 +2516,7 @@ namespace Jil.Deserialize
             }
         }
 
-        void Build(MemberInfo forMember, Type forType, bool allowRecursion = true)
+        void Build(MemberInfo forMember, Type forType, bool allowRecursion = true, bool fromNullable = false)
         {
             // EXACT MATCH, this is the best way to detect `dynamic`
             if (forType == typeof(object))
@@ -2567,7 +2592,7 @@ namespace Jil.Deserialize
                     return;
                 }
 
-                ReadEnum(forType);
+                ReadEnum(forType, fromNullable);
                 return;
             }
 

@@ -528,7 +528,7 @@ namespace Jil.Serialize
 
             if (serializingType.IsEnum)
             {
-                WriteEnumOrPrimitive(member, serializingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false);
+                WriteEnumOrPrimitive(member, serializingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false, containedInNullable: false);
                 return;
             }
 
@@ -632,7 +632,7 @@ namespace Jil.Serialize
             {
                 if (underlyingType.IsEnum)
                 {
-                    WriteEnumOrPrimitive(nullableMember, underlyingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: true);
+                    WriteEnumOrPrimitive(nullableMember, underlyingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: true, containedInNullable: true);
                 }
                 else
                 {
@@ -2629,7 +2629,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnumOrPrimitive(listMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false);
+                WriteEnumOrPrimitive(listMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false, containedInNullable: false);
                 return;
             }
 
@@ -3213,7 +3213,7 @@ namespace Jil.Serialize
                     Emit.Duplicate();       // kvp kvp
                     LoadProperty(key);      // kvp enum
 
-                    WriteEnumOrPrimitive(dictionaryMember, keyType, true, hasTextWriter: false, popTextWriter: false);
+                    WriteEnumOrPrimitive(dictionaryMember, keyType, true, hasTextWriter: false, popTextWriter: false, containedInNullable: false);
 
                     if (PrettyPrint)
                     {
@@ -3257,7 +3257,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnumOrPrimitive(dictionaryMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false);
+                WriteEnumOrPrimitive(dictionaryMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false, containedInNullable: false);
                 return;
             }
 
@@ -3414,7 +3414,7 @@ namespace Jil.Serialize
                     Emit.Duplicate();           // kvp kvp
                     LoadProperty(key);          // kvp enum
 
-                    WriteEnumOrPrimitive(dictionaryMember, keyType, requiresQuotes: true, hasTextWriter: false, popTextWriter: false);   // kvp
+                    WriteEnumOrPrimitive(dictionaryMember, keyType, requiresQuotes: true, hasTextWriter: false, popTextWriter: false, containedInNullable: false);   // kvp
 
                     if (PrettyPrint)
                     {
@@ -3449,7 +3449,7 @@ namespace Jil.Serialize
 
             if (elementType.IsEnum)
             {
-                WriteEnumOrPrimitive(dictionaryMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false);
+                WriteEnumOrPrimitive(dictionaryMember, elementType, requiresQuotes: false, hasTextWriter: true, popTextWriter: false, containedInNullable: false);
                 return;
             }
 
@@ -3721,7 +3721,7 @@ namespace Jil.Serialize
             Emit.MarkLabel(done);
         }
 
-        void WriteEnumOrPrimitive(MemberInfo member, Type enumType, bool requiresQuotes, bool hasTextWriter, bool popTextWriter)
+        void WriteEnumOrPrimitive(MemberInfo member, Type enumType, bool requiresQuotes, bool hasTextWriter, bool popTextWriter, bool containedInNullable)
         {
             // top of stack
             //   - enum
@@ -3761,10 +3761,10 @@ namespace Jil.Serialize
 
                 return;
             }
-            WriteEnum(enumType, popTextWriter);
+            WriteEnum(enumType, popTextWriter, containedInNullable);
         }
 
-        void WriteEnum(Type enumType, bool popTextWriter)
+        void WriteEnum(Type enumType, bool popTextWriter, bool containedInNullable)
         {
             var allValues = Enum.GetValues(enumType);
             var underlying = Enum.GetUnderlyingType(enumType);
@@ -3804,6 +3804,28 @@ namespace Jil.Serialize
             }
 
             var distinctValues = asUlongs.GroupBy(g => g.Item2).ToDictionary(g => g.Key, g => g.First().Item1);
+
+            if(distinctValues.Count == 0)
+            {
+                if (containedInNullable)
+                {
+                    // hitting this code means we're the non-null case... but there's no legal value!
+                    //   so freak out
+
+                    var message = enumType.FullName + " has no defined values and thus cannot be serialized";
+
+                    Emit.LoadConstant(message);                                 // string                                 
+                    Emit.NewObject(SerializerException.Constructor_String);     // SerializerException
+                    Emit.Throw();                                               // --empty--
+
+                    return;
+                }
+                else
+                {
+                    // we can't write this, no matter what we encounter
+                    throw new ConstructionException(enumType.FullName + " has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer");
+                }
+            }
 
             if (enumType.IsFlagsEnum())
             {
@@ -4156,12 +4178,12 @@ namespace Jil.Serialize
             {
                 Emit.LoadArgument(0); // TextWriter
                 Emit.LoadArgument(1); // ForType
-                WriteEnumOrPrimitive(dynamicMember, typeof(ForType), requiresQuotes: false, hasTextWriter: true, popTextWriter: false);
+                WriteEnumOrPrimitive(dynamicMember, typeof(ForType), requiresQuotes: false, hasTextWriter: true, popTextWriter: false, containedInNullable: false);
             }
             else
             {
                 Emit.LoadArgument(1); // ForType
-                WriteEnum(typeof(ForType), popTextWriter: false);
+                WriteEnum(typeof(ForType), popTextWriter: false, containedInNullable: false);
             }
 
             Emit.Return();

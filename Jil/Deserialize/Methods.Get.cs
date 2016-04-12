@@ -304,5 +304,13 @@ namespace Jil.Deserialize
                     ReadMicrosoftDateTimeOffset :
                     ReadMicrosoftDateTimeOffsetThunkReader;
         }
+
+        public static MethodInfo GetThrowNoDefinedValueInEnum(bool readingFromString)
+        {
+            return
+                !readingFromString ?
+                    ThrowNoDefinedValueInEnum :
+                    ThrowNoDefinedValueInEnumThunkReader;
+        }
     }
 }

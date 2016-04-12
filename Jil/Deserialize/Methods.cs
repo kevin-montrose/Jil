@@ -1719,5 +1719,12 @@ namespace Jil.Deserialize
 
             return new DateTimeOffset(utcTicks, offset);
         }
+
+        public static readonly MethodInfo ThrowNoDefinedValueInEnum = typeof(Methods).GetMethod("_ThrowNoDefinedValueInEnum", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ThrowNoDefinedValueInEnum(string message, TextReader reader)
+        {
+            throw new DeserializationException(message, reader, false);
+        }
     }
 }

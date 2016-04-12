@@ -7215,6 +7215,88 @@ namespace JilTests
             Assert.AreEqual((_Issue203)0, res);
         }
 
+        enum _EmptyEnum
+        {
+            // nothing here, by design
+        }
+
+#pragma warning disable 0649
+        class _EmptyEnumWrapper1
+        {
+            [JilDirective(Ignore = true)]
+            public _EmptyEnum A;
+        }
+
+        class _EmptyEnumWrapper2
+        {
+            public _EmptyEnum? A;
+        }
+
+        class _EmptyEnumWrapper3
+        {
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public _EmptyEnum A;
+        }
+
+        class _EmptyEnumWrapper4
+        {
+            public _EmptyEnum A;
+        }
+#pragma warning restore 0649
+
+        [TestMethod]
+        public void EmptyEnum()
+        {
+            {
+                try
+                {
+                    JSON.Deserialize<_EmptyEnum>("0");
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnum: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or treat as integer", e.Message);
+                }
+
+                try
+                {
+                    JSON.Deserialize<_EmptyEnumWrapper4>("null");
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (DeserializationException e)
+                {
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnumWrapper4: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or treat as integer", e.Message);
+                }
+            }
+
+            {
+                var res = JSON.Deserialize<_EmptyEnumWrapper1>("{}");
+                Assert.IsNotNull(res);
+            }
+            
+            {
+                var res = JSON.Deserialize<_EmptyEnumWrapper2>("{\"A\":null}");
+                Assert.IsTrue(res.A == null);
+            }
+            
+            {
+                var res = JSON.Deserialize<_EmptyEnum?>("null");
+                Assert.IsTrue(res == null);
+            }
+
+            {
+                var res = JSON.Deserialize<_EmptyEnumWrapper3>("{\"A\":0}");
+                Assert.IsNotNull(res);
+                Assert.IsTrue(res.A == default(_EmptyEnum));
+            }
+
+            {
+                var res = JSON.Deserialize<_EmptyEnumWrapper3>("{\"A\":1}");
+                Assert.IsNotNull(res);
+                Assert.IsTrue(res.A == (_EmptyEnum)1);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

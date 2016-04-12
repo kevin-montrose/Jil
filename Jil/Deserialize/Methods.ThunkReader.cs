@@ -5049,5 +5049,12 @@ namespace Jil.Deserialize
 
             return new DateTimeOffset(utcTicks, offset);
         }
+
+        public static readonly MethodInfo ThrowNoDefinedValueInEnumThunkReader = typeof(Methods).GetMethod("_ThrowNoDefinedValueInEnumThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void _ThrowNoDefinedValueInEnumThunkReader(string message, ref ThunkReader reader)
+        {
+            throw new DeserializationException(message, ref reader, false);
+        }
     }
 }

@@ -9247,5 +9247,87 @@ namespace JilTests
             var json = JSON.Serialize(new _Issue189 { ZeroWidthParam = 31415 });
             Assert.AreEqual("{\"\":31415}", json);
         }
+
+        enum _EmptyEnum
+        {
+            // nothing here, by design
+        }
+
+        class _EmptyEnumWrapper1
+        {
+#pragma warning disable 0649
+            public _EmptyEnum A;
+#pragma warning restore 0649
+        }
+
+        class _EmptyEnumWrapper2
+        {
+            public _EmptyEnum? A;
+        }
+
+        class _EmptyEnumWrapper3
+        {
+            [JilDirective(TreatEnumerationAs = typeof(int))]
+            public _EmptyEnum A;
+        }
+        
+        [TestMethod]
+        public void EmptyEnum()
+        {
+            {
+                try
+                {
+                    JSON.Serialize<_EmptyEnum>(default(_EmptyEnum));
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (SerializerException e)
+                {
+                    Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnum: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer", e.Message);
+                }
+            }
+
+            try
+            {
+                JSON.Serialize<_EmptyEnumWrapper1>(new _EmptyEnumWrapper1());
+                Assert.Fail("Shouldn't be possible");
+            }
+            catch (SerializerException e)
+            {
+                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnumWrapper1: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer", e.Message);
+            }
+
+            // a nullable empty enum should work...
+            {
+                Assert.AreEqual("{\"A\":null}", JSON.Serialize(new _EmptyEnumWrapper2()));
+                Assert.AreEqual("null", JSON.Serialize<_EmptyEnum?>(null));
+
+                // unless it has a value
+                try
+                {
+                    JSON.Serialize(new _EmptyEnumWrapper2 { A = default(_EmptyEnum) });
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (SerializerException e)
+                {
+                    Assert.AreEqual("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", e.Message);
+                }
+
+                try
+                {
+                    JSON.Serialize<_EmptyEnum?>(default(_EmptyEnum));
+                    Assert.Fail("Shouldn't be possible");
+                }
+                catch (SerializerException e)
+                {
+                    Assert.AreEqual("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", e.Message);
+                }
+            }
+
+            // if it's an int, all things are legal
+            {
+                Assert.AreEqual("{\"A\":0}", JSON.Serialize(new _EmptyEnumWrapper3 { }));
+                Assert.AreEqual("{\"A\":1}", JSON.Serialize(new _EmptyEnumWrapper3 { A = (_EmptyEnum)1 }));
+            }
+        }
     }
 }
