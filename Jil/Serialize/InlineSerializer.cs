@@ -3823,7 +3823,7 @@ namespace Jil.Serialize
                 else
                 {
                     // we can't write this, no matter what we encounter
-                    throw new ConstructionException(enumType.FullName + " has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer");
+                    throw new ConstructionException(enumType.FullName + " has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer");
                 }
             }
 

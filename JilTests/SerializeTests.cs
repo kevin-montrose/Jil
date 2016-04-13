@@ -9282,7 +9282,7 @@ namespace JilTests
                 }
                 catch (SerializerException e)
                 {
-                    Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnum: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer", e.Message);
+                    Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnum: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", e.Message);
                 }
             }
 
@@ -9293,7 +9293,7 @@ namespace JilTests
             }
             catch (SerializerException e)
             {
-                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnumWrapper1: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configurate to treat as integer", e.Message);
+                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnumWrapper1: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", e.Message);
             }
 
             // a nullable empty enum should work...

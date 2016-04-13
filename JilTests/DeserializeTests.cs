@@ -7255,7 +7255,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnum: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or treat as integer", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnum: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or configure to treat as integer", e.Message);
                 }
 
                 try
@@ -7265,7 +7265,7 @@ namespace JilTests
                 }
                 catch (DeserializationException e)
                 {
-                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnumWrapper4: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or treat as integer", e.Message);
+                    Assert.AreEqual("Error occurred building a deserializer for JilTests.DeserializeTests+_EmptyEnumWrapper4: JilTests.DeserializeTests+_EmptyEnum has no values, and cannot be deserialized; add a value, make nullable, or configure to treat as integer", e.Message);
                 }
             }
 

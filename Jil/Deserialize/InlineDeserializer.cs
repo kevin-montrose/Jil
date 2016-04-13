@@ -1023,7 +1023,7 @@ namespace Jil.Deserialize
                 }
                 else
                 {
-                    throw new ConstructionException(enumType.FullName + " has no values, and cannot be deserialized; add a value, make nullable, or treat as integer");
+                    throw new ConstructionException(enumType.FullName + " has no values, and cannot be deserialized; add a value, make nullable, or configure to treat as integer");
                 }
             }
 
