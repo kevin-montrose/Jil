@@ -1,10 +1,7 @@
 ﻿using Jil.Deserialize;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Jil
 {
@@ -13,13 +10,21 @@ namespace Jil
     /// </summary>
     public class DeserializationException : Exception
     {
+        private long? _position;
+        private string _snippetAfterError;
+        private bool _endedUnexpectedly;
+
         /// <summary>
         /// The position in the TextReader where an error occurred, if it is available.
         /// 
         /// This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
         /// and throw an exception is an implementation detail.
         /// </summary>
-        public long? Position { get; private set; }
+        public long? Position
+        {
+            get { return _position; }
+            private set { Data["Jil-Position"] = _position = value; }
+        }
 
         /// <summary>
         /// A snippet of text immediately after an error occurred.
@@ -27,7 +32,11 @@ namespace Jil
         /// This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
         /// and throw an exception is an implementation detail.
         /// </summary>
-        public string SnippetAfterError { get; private set; }
+        public string SnippetAfterError
+        {
+            get { return _snippetAfterError; }
+            private set { Data["Jil-SnippetAfterError"] = _snippetAfterError = value; }
+        }
 
         /// <summary>
         /// Whether or not the TextReader ended sooner than Jil expected.
@@ -35,7 +44,11 @@ namespace Jil
         /// This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
         /// and throw an exception is an implementation detail.
         /// </summary>
-        public bool EndedUnexpectedly { get; private set; }
+        public bool EndedUnexpectedly
+        {
+            get { return _endedUnexpectedly; }
+            private set { Data["Jil-EndedUnexpectedly"] = _endedUnexpectedly = value; }
+        }
 
         internal DeserializationException(Exception inner, TextReader reader, bool endedEarly)
             : base(inner.Message, inner)
