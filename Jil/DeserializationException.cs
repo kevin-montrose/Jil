@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Text;
+using Jil.Common;
 
 namespace Jil
 {
@@ -10,10 +11,7 @@ namespace Jil
     /// </summary>
     public class DeserializationException : Exception
     {
-        private long? _position;
-        private string _snippetAfterError;
-        private bool _endedUnexpectedly;
-
+        long? _Position;
         /// <summary>
         /// The position in the TextReader where an error occurred, if it is available.
         /// 
@@ -22,10 +20,15 @@ namespace Jil
         /// </summary>
         public long? Position
         {
-            get { return _position; }
-            private set { Data["Jil-Position"] = _position = value; }
+            get { return _Position; }
+            private set
+            {
+                const string dataKey = Utils.ExceptionDataKeyPrefix + nameof(Position);
+                Data[dataKey] = _Position = value;
+            }
         }
 
+        string _SnippetAfterError;
         /// <summary>
         /// A snippet of text immediately after an error occurred.
         /// 
@@ -34,10 +37,15 @@ namespace Jil
         /// </summary>
         public string SnippetAfterError
         {
-            get { return _snippetAfterError; }
-            private set { Data["Jil-SnippetAfterError"] = _snippetAfterError = value; }
+            get { return _SnippetAfterError; }
+            private set
+            {
+                const string dataKey = Utils.ExceptionDataKeyPrefix + nameof(SnippetAfterError);
+                Data[dataKey] = _SnippetAfterError = value;
+            }
         }
 
+        bool _EndedUnexpectedly;
         /// <summary>
         /// Whether or not the TextReader ended sooner than Jil expected.
         /// 
@@ -46,13 +54,33 @@ namespace Jil
         /// </summary>
         public bool EndedUnexpectedly
         {
-            get { return _endedUnexpectedly; }
-            private set { Data["Jil-EndedUnexpectedly"] = _endedUnexpectedly = value; }
+            get { return _EndedUnexpectedly; }
+            private set
+            {
+                const string dataKey = Utils.ExceptionDataKeyPrefix + nameof(EndedUnexpectedly);
+                Data[dataKey] = _EndedUnexpectedly = value;
+            }
+        }
+
+        const string MessageDataKey = Utils.ExceptionDataKeyPrefix + nameof(Message);
+
+        /// <summary>
+        /// Gets a message that describes the current exception.
+        /// </summary>
+        public override string Message
+        {
+            // this is overridden just so I can make _really_ damn sure
+            //   that Message is always stashed in Data
+            get
+            {
+                return (string)Data[MessageDataKey];
+            }
         }
 
         internal DeserializationException(Exception inner, TextReader reader, bool endedEarly)
             : base(inner.Message, inner)
         {
+            SetMessage(inner.Message);
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -60,6 +88,7 @@ namespace Jil
         internal DeserializationException(Exception inner, ref ThunkReader reader, bool endedEarly)
             : base(inner.Message, inner)
         {
+            SetMessage(inner.Message);
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -67,6 +96,7 @@ namespace Jil
         internal DeserializationException(string msg, TextReader reader, bool endedEarly) 
             : base(msg) 
         {
+            SetMessage(msg);
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -74,6 +104,7 @@ namespace Jil
         internal DeserializationException(string msg, ref ThunkReader reader, bool endedEarly)
             : base(msg)
         {
+            SetMessage(msg);
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -81,6 +112,7 @@ namespace Jil
         internal DeserializationException(string msg, TextReader reader, Exception inner, bool endedEarly)
             : base(msg, inner)
         {
+            SetMessage(msg);
             InspectReader(reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -88,6 +120,7 @@ namespace Jil
         internal DeserializationException(string msg, ref ThunkReader reader, Exception inner, bool endedEarly)
             : base(msg, inner)
         {
+            SetMessage(msg);
             InspectReader(ref reader);
             EndedUnexpectedly = endedEarly;
         }
@@ -95,13 +128,20 @@ namespace Jil
         internal DeserializationException(string msg, Exception inner, bool endedEarly) 
             : base(msg + ": " + inner.Message, inner) 
         {
+            SetMessage(msg + ": " + inner.Message);
             EndedUnexpectedly = endedEarly;
         }
 
         internal DeserializationException(Exception inner, bool endedEarly)
             : base(inner.Message, inner)
         {
+            SetMessage(inner.Message);
             EndedUnexpectedly = endedEarly;
+        }
+
+        void SetMessage(string msg)
+        {
+            Data[MessageDataKey] = msg;
         }
 
         void InspectReader(ref ThunkReader reader)

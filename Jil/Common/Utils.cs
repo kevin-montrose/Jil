@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace Jil.Common
 {
-    partial class Utils
+    class Utils
     {
 #if DEBUG
         public const bool DoVerify = true;
@@ -21,6 +21,8 @@ namespace Jil.Common
         public const bool DoVerify = false;
 #endif
         public const OptimizationOptions DelegateOptimizationOptions = OptimizationOptions.All & ~OptimizationOptions.EnableBranchPatching;
+
+        public const string ExceptionDataKeyPrefix = "Jil-";
 
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;
