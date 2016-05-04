@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Jil.Common;
+using System;
 
 namespace Jil
 {
@@ -14,6 +11,22 @@ namespace Jil
     /// </summary>
     public class InfiniteRecursionException : Exception
     {
-        internal InfiniteRecursionException() { }
+        /// <summary>
+        /// Gets a message that describes the current exception.
+        /// </summary>
+        public override string Message
+        {
+            // this is overridden just so I can make _really_ damn sure
+            //   that Message is always stashed in Data
+            get
+            {
+                return (string)Data[Utils.ExceptionMessageDataKey];
+            }
+        }
+
+        internal InfiniteRecursionException() : base("Jil detected and infinite recursion and bailed")
+        {
+            Data[Utils.ExceptionMessageDataKey] = "Jil detected and infinite recursion and bailed";
+        }
     }
 }

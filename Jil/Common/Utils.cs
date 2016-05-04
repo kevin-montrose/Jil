@@ -23,6 +23,7 @@ namespace Jil.Common
         public const OptimizationOptions DelegateOptimizationOptions = OptimizationOptions.All & ~OptimizationOptions.EnableBranchPatching;
 
         public const string ExceptionDataKeyPrefix = "Jil-";
+        public const string ExceptionMessageDataKey = ExceptionDataKeyPrefix + nameof(Exception.Message);
 
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;

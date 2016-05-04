@@ -62,8 +62,6 @@ namespace Jil
             }
         }
 
-        const string MessageDataKey = Utils.ExceptionDataKeyPrefix + nameof(Message);
-
         /// <summary>
         /// Gets a message that describes the current exception.
         /// </summary>
@@ -73,7 +71,7 @@ namespace Jil
             //   that Message is always stashed in Data
             get
             {
-                return (string)Data[MessageDataKey];
+                return (string)Data[Utils.ExceptionMessageDataKey];
             }
         }
 
@@ -141,7 +139,7 @@ namespace Jil
 
         void SetMessage(string msg)
         {
-            Data[MessageDataKey] = msg;
+            Data[Utils.ExceptionMessageDataKey] = msg;
         }
 
         void InspectReader(ref ThunkReader reader)
