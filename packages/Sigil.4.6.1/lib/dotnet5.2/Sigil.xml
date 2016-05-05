@@ -94,20 +94,6 @@
             Returns an enumerator which steps over the Operations that are in this DisassembledOperations.
             </summary>
         </member>
-        <member name="T:Sigil.Disassembler`1">
-            <summary>
-            Helper for disassembling delegates into a series of Emit operations.
-            
-            This can be used to inspect delegates, or combine them via Sigil.
-            </summary>
-            <typeparam name="DelegateType">The type of delegate being disassembled</typeparam>
-        </member>
-        <member name="M:Sigil.Disassembler`1.Disassemble(`0)">
-            <summary>
-            Disassembles a delegate into a DisassembledOperations object.
-            </summary>
-            <param name="del">The delegate to disassemble</param>
-        </member>
         <member name="T:Sigil.Emit`1">
             <summary>
             Helper for CIL generation that fails as soon as a sequence of instructions
@@ -1232,6 +1218,16 @@
             To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
             </summary>
         </member>
+        <member name="M:Sigil.Emit`1.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
+            </summary>
+        </member>
         <member name="M:Sigil.Emit`1.LoadIndirect``1(System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Pops a pointer from the stack and pushes the value (of the given type) at that address onto the stack.
@@ -1295,6 +1291,16 @@
             Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
             
             For static or non-virtual functions, use LoadFunctionPointer
+            </summary>
+        </member>
+        <member name="M:Sigil.Emit`1.LoadVirtualFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
+            
+            For static or non-virtual functions, use LoadFunctionPointer
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.LocalAllocate">
@@ -1364,20 +1370,6 @@
             Jil will reuse local index on the stack if the corresponding Local instance has been disposed.
             By default Jil will set reused locals to their default value, you can change this behavior
             by passing initializeReused = false.
-            </summary>
-        </member>
-        <member name="M:Sigil.Emit`1.MakeReferenceAny``1">
-            <summary>
-            Converts a pointer or reference to a value on the stack into a TypedReference of the given type.
-            
-            TypedReferences can be used with ReferenceAnyType and ReferenceAnyValue to pass arbitrary types as parameters.
-            </summary>
-        </member>
-        <member name="M:Sigil.Emit`1.MakeReferenceAny(System.Type)">
-            <summary>
-            Converts a pointer or reference to a value on the stack into a TypedReference of the given type.
-            
-            TypedReferences can be used with ReferenceAnyType and ReferenceAnyValue to pass arbitrary types as parameters.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.NewArray``1">
@@ -1501,27 +1493,6 @@
         <member name="M:Sigil.Emit`1.Pop">
             <summary>
             Removes the top value on the stack.
-            </summary>
-        </member>
-        <member name="M:Sigil.Emit`1.ReferenceAnyType">
-            <summary>
-            Converts a TypedReference on the stack into a RuntimeTypeHandle for the type contained with it.
-            
-            __makeref(int) on the stack would become the RuntimeTypeHandle for typeof(int), for example.
-            </summary>
-        </member>
-        <member name="M:Sigil.Emit`1.ReferenceAnyValue``1">
-            <summary>
-            Converts a TypedReference on the stack into a reference to the contained object, given the type contained in the TypedReference.
-            
-            __makeref(int) on the stack would become an int&amp;, for example.
-            </summary>
-        </member>
-        <member name="M:Sigil.Emit`1.ReferenceAnyValue(System.Type)">
-            <summary>
-            Converts a TypedReference on the stack into a reference to the contained object, given the type contained in the TypedReference.
-            
-            __makeref(int) on the stack would become an int&amp;, for example.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.ReThrow">
@@ -2584,11 +2555,6 @@
             This is meant for debugging purposes, and should not be called during normal operation.
             </summary>
         </member>
-        <member name="M:Sigil.SigilVerificationException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
-            <summary>
-            Implementation for ISerializable.
-            </summary>
-        </member>
         <member name="M:Sigil.SigilVerificationException.ToString">
             <summary>
             Returns the message and stacks on this exception, in string form.
@@ -2631,6 +2597,12 @@
             Raw pointers are often of type native int.
             
             This type is exposed to allow for stack assertions containing native int via Emit.MarkLabel.
+            </summary>
+        </member>
+        <member name="T:Sigil.Impl.TypeHelpers">
+            <summary>
+            Contains helper methods to shim over the difference between different Type APIs in
+            different frameworks
             </summary>
         </member>
         <member name="M:Sigil.Impl.TypeOnStack.Mark(Sigil.Impl.InstructionAndTransitions,System.Int32)">
@@ -3762,6 +3734,16 @@
             To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
             </summary>
         </member>
+        <member name="M:Sigil.NonGeneric.Emit.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
+            </summary>
+        </member>
         <member name="M:Sigil.NonGeneric.Emit.LoadIndirect``1(System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Pops a pointer from the stack and pushes the value (of the given type) at that address onto the stack.
@@ -3827,6 +3809,16 @@
             For static or non-virtual functions, use LoadFunctionPointer
             </summary>
         </member>
+        <member name="M:Sigil.NonGeneric.Emit.LoadVirtualFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
+            
+            For static or non-virtual functions, use LoadFunctionPointer.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
+            </summary>
+        </member>
         <member name="M:Sigil.NonGeneric.Emit.LocalAllocate">
             <summary>
             Pops a size from the stack, allocates size bytes on the local dynamic memory pool, and pushes a pointer to the allocated block.
@@ -3878,20 +3870,6 @@
             
             Be aware that each local takes some space on the stack, inefficient use of locals
             could lead to StackOverflowExceptions at runtime.
-            </summary>
-        </member>
-        <member name="M:Sigil.NonGeneric.Emit.MakeReferenceAny``1">
-            <summary>
-            Converts a pointer or reference to a value on the stack into a TypedReference of the given type.
-            
-            TypedReferences can be used with ReferenceAnyType and ReferenceAnyValue to pass arbitrary types as parameters.
-            </summary>
-        </member>
-        <member name="M:Sigil.NonGeneric.Emit.MakeReferenceAny(System.Type)">
-            <summary>
-            Converts a pointer or reference to a value on the stack into a TypedReference of the given type.
-            
-            TypedReferences can be used with ReferenceAnyType and ReferenceAnyValue to pass arbitrary types as parameters.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.NewArray``1">
@@ -4015,27 +3993,6 @@
         <member name="M:Sigil.NonGeneric.Emit.Pop">
             <summary>
             Removes the top value on the stack.
-            </summary>
-        </member>
-        <member name="M:Sigil.NonGeneric.Emit.ReferenceAnyType">
-            <summary>
-            Converts a TypedReference on the stack into a RuntimeTypeHandle for the type contained with it.
-            
-            __makeref(int) on the stack would become the RuntimeTypeHandle for typeof(int), for example.
-            </summary>
-        </member>
-        <member name="M:Sigil.NonGeneric.Emit.ReferenceAnyValue``1">
-            <summary>
-            Converts a TypedReference on the stack into a reference to the contained object, given the type contained in the TypedReference.
-            
-            __makeref(int) on the stack would become an int&amp;, for example.
-            </summary>
-        </member>
-        <member name="M:Sigil.NonGeneric.Emit.ReferenceAnyValue(System.Type)">
-            <summary>
-            Converts a TypedReference on the stack into a reference to the contained object, given the type contained in the TypedReference.
-            
-            __makeref(int) on the stack would become an int&amp;, for example.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.ReThrow">

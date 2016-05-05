@@ -1232,6 +1232,16 @@
             To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
             </summary>
         </member>
+        <member name="M:Sigil.Emit`1.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
+            </summary>
+        </member>
         <member name="M:Sigil.Emit`1.LoadIndirect``1(System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Pops a pointer from the stack and pushes the value (of the given type) at that address onto the stack.
@@ -1295,6 +1305,16 @@
             Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
             
             For static or non-virtual functions, use LoadFunctionPointer
+            </summary>
+        </member>
+        <member name="M:Sigil.Emit`1.LoadVirtualFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
+            
+            For static or non-virtual functions, use LoadFunctionPointer
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.LocalAllocate">
@@ -2633,6 +2653,12 @@
             This type is exposed to allow for stack assertions containing native int via Emit.MarkLabel.
             </summary>
         </member>
+        <member name="T:Sigil.Impl.TypeHelpers">
+            <summary>
+            Contains helper methods to shim over the difference between different Type APIs in
+            different frameworks
+            </summary>
+        </member>
         <member name="M:Sigil.Impl.TypeOnStack.Mark(Sigil.Impl.InstructionAndTransitions,System.Int32)">
             <summary>
             Call to indicate that something on the stack was used
@@ -3762,6 +3788,16 @@
             To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
             </summary>
         </member>
+        <member name="M:Sigil.NonGeneric.Emit.LoadFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pushes a pointer to the given function onto the stack, as a native int.
+            
+            To resolve a method at runtime using an object, use LoadVirtualFunctionPointer instead.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
+            </summary>
+        </member>
         <member name="M:Sigil.NonGeneric.Emit.LoadIndirect``1(System.Boolean,System.Nullable{System.Int32})">
             <summary>
             Pops a pointer from the stack and pushes the value (of the given type) at that address onto the stack.
@@ -3825,6 +3861,16 @@
             Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
             
             For static or non-virtual functions, use LoadFunctionPointer
+            </summary>
+        </member>
+        <member name="M:Sigil.NonGeneric.Emit.LoadVirtualFunctionPointer(System.Reflection.Emit.MethodBuilder,System.Type[])">
+            <summary>
+            Pops an object reference off the stack, and pushes a pointer to the given method's implementation on that object.
+            
+            For static or non-virtual functions, use LoadFunctionPointer.
+            
+            This method is provided as MethodBuilder cannot be inspected for parameter information at runtime.  If the passed parameterTypes
+            do not match the given method, the produced code will be invalid.
             </summary>
         </member>
         <member name="M:Sigil.NonGeneric.Emit.LocalAllocate">
