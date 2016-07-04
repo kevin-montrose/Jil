@@ -32,7 +32,8 @@ void Main()
 			GetName = v => v == UnspecifiedDateTimeKindBehavior.IsUTC ? "Utc" : "",
 			TypeCachePropertyName = "DateTimeKindBehavior"
 		},
-		new Option<SerializationNameFormat>("SerializationNameFormat", "SerializationNameFormat")
+		new Option<SerializationNameFormat>("SerializationNameFormat", "SerializationNameFormat"),
+		new Option<bool>("DontCoerceToDateOnSerialize", "ShouldNotCoerceToDateOnSerialize")
 	};
 
 	var permutations = from df in optionList[0].Permutations
@@ -42,8 +43,9 @@ void Main()
 					   from ii in optionList[4].Permutations
 					   from db in optionList[5].Permutations
 					   from sn in optionList[6].Permutations
+					   from cd in optionList[7].Permutations
 					   select new List<OptionPermutation> {
-							   df, pp, en, jp, ii, db, sn
+							   df, pp, en, jp, ii, db, sn, cd
 					   };
 	permutations = permutations.Reverse()
 							   .OrderBy (p => p[0].Name)
