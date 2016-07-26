@@ -10,6 +10,11 @@ namespace Jil
     /// </summary>
     public sealed class Options
     {
+        #region  Defined Options
+
+
+
+
 #pragma warning disable 1591
         // Start OptionsGeneration.linq generated content
         public static readonly Options Default = new Options(dateFormat: DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch);
@@ -335,6 +340,9 @@ namespace Jil
         // End OptionsGeneration.linq generated content
 #pragma warning restore 1591
 
+
+        #endregion
+
         internal bool ShouldPrettyPrint { get; private set; }
         internal bool ShouldExcludeNulls { get; private set; }
         internal DateTimeFormat UseDateTimeFormat { get; private set; }
@@ -483,6 +491,21 @@ namespace Jil
                 other.ShouldIncludeInherited == this.ShouldIncludeInherited &&
                 other.UseUnspecifiedDateTimeKindBehavior == this.UseUnspecifiedDateTimeKindBehavior &&
                 other.SerializationNameFormat == this.SerializationNameFormat;
+        }
+
+        private Deserialize.IDeserializeTypeCache _deserializeTypeCache;
+
+        internal Deserialize.IDeserializeTypeCache DeserializeTypeCache
+        {
+            get { return _deserializeTypeCache ?? (_deserializeTypeCache = JSON.CreateDeserializeTypeCache(this)); }
+        }
+
+
+        private Serialize.ISerializeTypeCache _serializeTypeCache;
+
+        internal Serialize.ISerializeTypeCache SerializeTypeCache
+        {
+            get { return _serializeTypeCache ?? (_serializeTypeCache = JSON.CreateSerializeTypeCache(this)); }
         }
     }
 }

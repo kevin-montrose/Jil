@@ -1,73 +1,93 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Jil.Deserialize
 {
+    
     interface IDeserializeOptions
     {
         DateTimeFormat DateFormat { get; }
         SerializationNameFormat SerializationNameFormat { get; }
     }
 
-    static class TypeCache<TOptions, T>
+
+    internal interface IDeserializeTypeCache
+    {
+        Func<TextReader, int, T> Get<T>();
+        StringThunkDelegate<T> GetFromString<T>();
+    }
+
+     class TypeCache<TOptions> : IDeserializeTypeCache
         where TOptions : IDeserializeOptions, new()
     {
-        static readonly object ThunkInitLock = new object();
-        static volatile bool ThunkBeingBuilt = false;
-        public static volatile Func<TextReader, int, T> Thunk;
-        public static Exception ExceptionDuringBuildFromStream;
-
-        static readonly object StringThunkInitLock = new object();
-        static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
-        public static Exception ExceptionDuringBuildFromString;
-
-        public static Func<TextReader, int, T> Get()
+        internal static class InnerTypeCache<T>
         {
-            Load();
-            return Thunk;
-        }
+            static readonly object ThunkInitLock = new object();
+            static volatile bool ThunkBeingBuilt = false;
+            public static volatile Func<TextReader, int, T> Thunk;
+            public static Exception ExceptionDuringBuildFromStream;
 
-        public static void Load()
-        {
-            if (Thunk != null) return;
+            static readonly object StringThunkInitLock = new object();
+            static volatile bool StringThunkBeingBuilt = false;
+            public static volatile StringThunkDelegate<T> StringThunk;
+            public static Exception ExceptionDuringBuildFromString;
 
-            lock (ThunkInitLock)
+            public static Func<TextReader, int, T> Get()
             {
-                if (Thunk != null || ThunkBeingBuilt) return;
-                ThunkBeingBuilt = true;
+                Load();
+                return Thunk;
+            }
 
-                var options = new TOptions();
+            public static void Load()
+            {
+                if (Thunk != null) return;
 
-                Thunk = InlineDeserializerHelper.BuildFromStream<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromStream);
+                lock (ThunkInitLock)
+                {
+                    if (Thunk != null || ThunkBeingBuilt) return;
+                    ThunkBeingBuilt = true;
+
+                    var options = new TOptions();
+
+                    Thunk = InlineDeserializerHelper.BuildFromStream<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromStream);
+                }
+            }
+
+            public static StringThunkDelegate<T> GetFromString()
+            {
+                LoadFromString();
+                return StringThunk;
+            }
+
+            public static void LoadFromString()
+            {
+                if (StringThunk != null) return;
+
+                lock (StringThunkInitLock)
+                {
+                    if (StringThunk != null || StringThunkBeingBuilt) return;
+                    StringThunkBeingBuilt = true;
+
+                    var options = new TOptions();
+
+                    StringThunk = InlineDeserializerHelper.BuildFromString<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromString);
+                }
             }
         }
 
-        public static StringThunkDelegate<T> GetFromString()
+        public Func<TextReader, int, T> Get<T>()
         {
-            LoadFromString();
-            return StringThunk;
+            return InnerTypeCache<T>.Get();
         }
 
-        public static void LoadFromString()
+        public StringThunkDelegate<T> GetFromString<T>()
         {
-            if (StringThunk != null) return;
-
-            lock (StringThunkInitLock)
-            {
-                if (StringThunk != null || StringThunkBeingBuilt) return;
-                StringThunkBeingBuilt = true;
-
-                var options = new TOptions();
-
-                StringThunk = InlineDeserializerHelper.BuildFromString<T>(typeof(TOptions), options.DateFormat, options.SerializationNameFormat, exceptionDuringBuild: out ExceptionDuringBuildFromString);
-            }
+            return InnerTypeCache<T>.GetFromString();
         }
     }
+
+  
 
     class MicrosoftStyle : IDeserializeOptions
     {

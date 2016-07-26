@@ -970,9 +970,8 @@ namespace JilTests
                 {
                     InlineDeserializer<_UseNameAutomataWhenMatchingEnums>.UseNameAutomataForEnums = true;
                     Exception ignored;
-
                     // Build the *actual* deserializer method
-                    automata = InlineDeserializerHelper.BuildFromStream<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, _UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, serializationNameFormat: SerializationNameFormat.Verbatim, exceptionDuringBuild: out ignored);
+                    automata = InlineDeserializerHelper.BuildFromStream<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle>.InnerTypeCache<_UseNameAutomataWhenMatchingEnums>), dateFormat: Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, serializationNameFormat: SerializationNameFormat.Verbatim, exceptionDuringBuild: out ignored);
                 }
 
                 {
@@ -980,7 +979,7 @@ namespace JilTests
                     Exception ignored;
 
                     // Build the *actual* deserializer method
-                    method = InlineDeserializerHelper.BuildFromStream<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, _UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, serializationNameFormat: SerializationNameFormat.Verbatim, exceptionDuringBuild: out ignored);
+                    method = InlineDeserializerHelper.BuildFromStream<_UseNameAutomataWhenMatchingEnums>(typeof(Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle>.InnerTypeCache<_UseHashWhenMatchingMembers>), dateFormat: Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, serializationNameFormat: SerializationNameFormat.Verbatim, exceptionDuringBuild: out ignored);
                 }
             }
             finally
