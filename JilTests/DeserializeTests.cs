@@ -4530,6 +4530,24 @@ namespace JilTests
             Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, JSON.Deserialize<_FlagsEnum>("\"C,B,A\""));
         }
 
+        enum _EnumMemberAttributeDefault
+        {
+            [EnumMember]
+            A = 1,
+            [EnumMember]
+            B = 2,
+            [EnumMember]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeDefault()
+        {
+            Assert.AreEqual(_EnumMemberAttributeDefault.A, JSON.Deserialize<_EnumMemberAttributeDefault>("\"A\""));
+            Assert.AreEqual(_EnumMemberAttributeDefault.B, JSON.Deserialize<_EnumMemberAttributeDefault>("\"B\""));
+            Assert.AreEqual(_EnumMemberAttributeDefault.C, JSON.Deserialize<_EnumMemberAttributeDefault>("\"C\""));
+        }
+
         enum _EnumMemberAttributeOverride
         {
             [EnumMember(Value = "1")]
