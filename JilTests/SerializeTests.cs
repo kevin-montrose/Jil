@@ -9329,5 +9329,28 @@ namespace JilTests
                 Assert.AreEqual("{\"A\":1}", JSON.Serialize(new _EmptyEnumWrapper3 { A = (_EmptyEnum)1 }));
             }
         }
+
+        [JilPrimitiveWrapper]
+        public struct _Issue238_1
+        {
+            public _Issue238_1(long value)
+            {
+                this.Value = value;
+            }
+
+            public long Value { get; }
+        }
+
+        public class _Issue238
+        {
+            public _Issue238_1 Id { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue238()
+        {
+            var str = JSON.Serialize(new _Issue238()/*, Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase*/);
+            Assert.IsNotNull(str);
+        }
     }
 }
