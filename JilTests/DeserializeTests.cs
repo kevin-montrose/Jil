@@ -7318,11 +7318,29 @@ namespace JilTests
         [TestMethod]
         public void Issue235()
         {
-            var res1 = JSON.Deserialize<decimal>("-100000000000001");
-            Assert.AreEqual(-100000000000001m, res1);
-            
-            var res2 = JSON.Deserialize<decimal>("-100000000000002");
-            Assert.AreEqual(-100000000000002m, res2);
+            // strings
+            {
+                var res1 = JSON.Deserialize<decimal>("-100000000000001");
+                Assert.AreEqual(-100000000000001m, res1);
+
+                var res2 = JSON.Deserialize<decimal>("-100000000000002");
+                Assert.AreEqual(-100000000000002m, res2);
+            }
+
+            // streams
+            {
+                using (var stream = new StringReader("-100000000000001"))
+                {
+                    var res = JSON.Deserialize<decimal>(stream);
+                    Assert.AreEqual(-100000000000001m, res);
+                }
+
+                using (var stream = new StringReader("-100000000000002"))
+                {
+                    var res = JSON.Deserialize<decimal>(stream);
+                    Assert.AreEqual(-100000000000002m, res);
+                }
+            }
         }
 
 #if !DEBUG

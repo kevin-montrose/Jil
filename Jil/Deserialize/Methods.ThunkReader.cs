@@ -1758,6 +1758,11 @@ namespace Jil.Deserialize
                             idx++;
                         }
 
+                        if (negative)
+                        {
+                            n2 = -n2;
+                        }
+
                         result = (long)n1 * multiplier + (long)n2;
                     }
 
