@@ -7365,6 +7365,35 @@ namespace JilTests
             Assert.AreEqual(_Issue227_1.AddInSettingsDetail, val);
         }
 
+        [DataContract]
+        public enum _Issue225_1
+        {
+            [EnumMember]
+            Value0 = 0,
+            [EnumMember]
+            Value1 = 1
+        }
+
+        [DataContract]
+        public class _Issue225
+        {
+            [DataMember(Name = "PT")]
+            public _Issue225_1 PackagedType;
+        }
+
+        [TestMethod]
+        public void Issue225()
+        {
+            var json = JSON.Serialize(new _Issue225
+            {
+                PackagedType = _Issue225_1.Value0
+            });
+
+            var bean = JSON.Deserialize<_Issue225>(json);
+            Assert.IsNotNull(bean);
+            Assert.AreEqual(_Issue225_1.Value0, bean.PackagedType);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
