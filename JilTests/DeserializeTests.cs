@@ -7343,6 +7343,29 @@ namespace JilTests
             }
         }
 
+        public class _Issue227
+        {
+            public _Issue227_1 EnumProperty { get; set; }
+        }
+
+        public enum _Issue227_1
+        {
+            Addin,
+            AddInSettingsDetail,
+            AddInSettingsEncryptionHelper,
+            UpdatePayments
+        }
+
+        [TestMethod]
+        public void Issue227()
+        {
+            var obj = new _Issue227() { EnumProperty = _Issue227_1.AddInSettingsDetail };
+            var ser = JSON.Serialize(obj);
+
+            var val = JSON.Deserialize<_Issue227>(ser);
+            Assert.IsNull(val);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
