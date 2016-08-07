@@ -2802,6 +2802,37 @@ namespace Jil.Serialize
         {
             if (DynamicCallOutCheck(dictionaryMember, dictType, inLocal)) return;
 
+            if (dictType.IsValueType)
+            {
+                var dictGet = dictType.GetDictionaryInterface();
+                using (var genLoc = Emit.DeclareLocal(dictGet))
+                {
+                    if (inLocal != null)
+                    {
+                        Emit.LoadLocal(inLocal);        // dictType
+                    }
+                    else
+                    {
+                        Emit.LoadArgument(1);           // dictType
+                    }
+
+                    Emit.Box(dictType);                 // object
+                    Emit.CastClass(dictGet);            // IDictionary<K,V>
+                    Emit.StoreLocal(genLoc);
+
+                    if (!ExcludeNulls)
+                    {
+                        WriteDictionaryWithNulls(dictionaryMember, dictType, genLoc);
+                    }
+                    else
+                    {
+                        WriteDictionaryWithoutNulls(dictionaryMember, dictType, genLoc);
+                    }
+
+                    return;
+                }
+            }
+
             if (!ExcludeNulls)
             {
                 WriteDictionaryWithNulls(dictionaryMember, dictType, inLocal);
