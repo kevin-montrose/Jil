@@ -9349,8 +9349,8 @@ namespace JilTests
         [TestMethod]
         public void Issue238()
         {
-            var str = JSON.Serialize(new _Issue238()/*, Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase*/);
-            Assert.IsNotNull(str);
+            var json = JSON.Serialize(new _Issue238(), Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase);
+            Assert.AreEqual("{\n \"id\": 0\n}", json);
         }
     }
 }

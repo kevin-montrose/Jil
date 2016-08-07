@@ -444,7 +444,8 @@ namespace Jil.Serialize
                 serializingType.IsPrimitiveType() ||
                 (serializingType.IsEnum && member.ShouldConvertEnum(serializingType)) ||
                 isRecursive ||
-                serializingType.IsNullableType();
+                serializingType.IsNullableType() ||
+                serializingType.IsPrimitiveWrapper();
             if (preloadTextWriter)
             {
                 Emit.LoadArgument(0);   // TextWriter
@@ -518,6 +519,7 @@ namespace Jil.Serialize
             if (serializingType.IsPrimitiveWrapper())
             {
                 WritePrimitiveWrapper(serializingType, qoutesNeedHandling: true);
+                return;
             }
 
             if (serializingType.IsNullableType())
@@ -570,15 +572,22 @@ namespace Jil.Serialize
                 var notNull = Emit.DefineLabel();
 
                 Emit.StoreLocal(loc);           // TextWriter
-                Emit.LoadLocal(loc);            // TextWriter primitiveWrapperType
-                Emit.BranchIfTrue(notNull);     // TextWriter
+                if (!primitiveWrapperType.IsValueType)
+                {
+                    Emit.LoadLocal(loc);            // TextWriter primitiveWrapperType
+                    Emit.BranchIfTrue(notNull);     // TextWriter
 
-                Emit.Pop();                 // --empty--
-                WriteString("null");        // --empty--
-                Emit.Branch(done);          // --empty--
+                    Emit.Pop();                 // --empty--
+                    WriteString("null");        // --empty--
+                    Emit.Branch(done);          // --empty--
 
-                Emit.MarkLabel(notNull);    // TextWriter
-                Emit.LoadLocal(loc);        // TextWriter primitiveWrapperType
+                    Emit.MarkLabel(notNull);    // TextWriter
+                    Emit.LoadLocal(loc);        // TextWriter primitiveWrapperType
+                }
+                else
+                {
+                    Emit.LoadLocalAddress(loc); // TextWriter primitiveWrapperType*
+                }
 
                 if (primitiveMember is FieldInfo)
                 {
@@ -588,7 +597,6 @@ namespace Jil.Serialize
                 {
                     LoadProperty((PropertyInfo)primitiveMember);        // TextValue value
                 }
-
             }
 
             WritePrimitive(primitiveType, qoutesNeedHandling);
