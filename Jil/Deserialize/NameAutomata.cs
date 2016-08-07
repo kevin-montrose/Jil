@@ -167,7 +167,19 @@ namespace Jil.Deserialize
         {
             var chars =
                 nameValues
-                .GroupBy(nv => pos >= nv.Name.Length ? -1 : nv.Name[pos])
+                .GroupBy(
+                    nv =>
+                    {
+                        // we're off the end, group by something that can't be a real char
+                        if (pos >= nv.Name.Length) return -1;
+
+                        var c = nv.Name[pos];
+                        if (d.CaseSensitive) return c;
+
+                        // if we're case sensitive, group by the char with no regard to case
+                        return char.ToLowerInvariant(c);
+                    }
+                )
                 .ToList();
 
             var namesToFinish = new List<Tuple<char, Label>>();
