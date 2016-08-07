@@ -9352,5 +9352,24 @@ namespace JilTests
             var json = JSON.Serialize(new _Issue238(), Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase);
             Assert.AreEqual("{\n \"id\": 0\n}", json);
         }
+
+        public class _Issue231
+        {
+            public ArraySegment<byte> Payload { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue231()
+        {
+            var arr = new byte[] { 1, 2, 3 };
+
+            var obj =
+                new _Issue231
+                {
+                    Payload = new ArraySegment<byte>(arr)
+                };
+            var json = JSON.Serialize(obj);
+            Assert.IsNotNull(json);
+        }
     }
 }
