@@ -9369,7 +9369,7 @@ namespace JilTests
                     Payload = new ArraySegment<byte>(arr)
                 };
             var json = JSON.Serialize(obj);
-            Assert.IsNotNull(json);
+            Assert.AreEqual("{\"Payload\":[1,2,3]}", json);
         }
     }
 }
