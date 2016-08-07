@@ -7315,6 +7315,16 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue235()
+        {
+            var res1 = JSON.Deserialize<decimal>("-100000000000001");
+            Assert.AreEqual(-100000000000001m, res1);
+            
+            var res2 = JSON.Deserialize<decimal>("-100000000000002");
+            Assert.AreEqual(-100000000000002m, res2);
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
