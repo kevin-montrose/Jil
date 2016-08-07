@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Collections;
 
 namespace JilTests
 {
@@ -9370,6 +9371,150 @@ namespace JilTests
                 };
             var json = JSON.Serialize(obj);
             Assert.AreEqual("{\"Payload\":[1,2,3]}", json);
+        }
+
+        struct _DictionaryValueType : IDictionary<int, int>
+        {
+            int Key;
+            int Value;
+
+            public int this[int key]
+            {
+                get
+                {
+                    if (key == Key) return Value;
+
+                    throw new KeyNotFoundException();
+                }
+
+                set
+                {
+                    Key = key;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return 1;
+                }
+            }
+
+            public bool IsReadOnly
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            public ICollection<int> Keys
+            {
+                get
+                {
+                    return new[] { Key };
+                }
+            }
+
+            public ICollection<int> Values
+            {
+                get
+                {
+                    return new[] { Value };
+                }
+            }
+
+            public void Add(KeyValuePair<int, int> item)
+            {
+                Key = item.Key;
+                Value = item.Value;
+            }
+
+            public void Add(int key, int value)
+            {
+                Key = key;
+                Value = value;
+            }
+
+            public void Clear()
+            {
+                Key = Value = 0;
+            }
+
+            public bool Contains(KeyValuePair<int, int> item)
+            {
+                return Key == item.Key && Value == item.Value;
+            }
+
+            public bool ContainsKey(int key)
+            {
+                return Key == key;
+            }
+
+            public void CopyTo(KeyValuePair<int, int>[] array, int arrayIndex)
+            {
+                array[arrayIndex] = new KeyValuePair<int, int>(Key, Value);
+            }
+
+            IEnumerable<KeyValuePair<int, int>> InnerEnumerable()
+            {
+                yield return new KeyValuePair<int, int>(Key, Value);
+            }
+
+            public IEnumerator<KeyValuePair<int, int>> GetEnumerator()
+            {
+                return InnerEnumerable().GetEnumerator();
+            }
+
+            public bool Remove(KeyValuePair<int, int> item)
+            {
+                if(item.Key == Key && item.Value == Value)
+                {
+                    Clear();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public bool Remove(int key)
+            {
+                if(Key == key)
+                {
+                    Clear();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public bool TryGetValue(int key, out int value)
+            {
+                if(Key == key)
+                {
+                    value = Value;
+                    return true;
+                }
+
+                value = default(int);
+                return false;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        [TestMethod]
+        public void DictionaryValueType()
+        {
+            var val = new _DictionaryValueType();
+            val[1] = 2;
+
+            var json = JSON.Serialize(val);
+            Assert.IsNotNull(json);
         }
     }
 }
