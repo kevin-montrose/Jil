@@ -2490,6 +2490,29 @@ namespace Jil.Serialize
 
             if (UseFastLists)
             {
+                if (listType.IsValueType)
+                {
+                    var genericList = listType.GetListInterface();
+                    using (var boxedLoc = Emit.DeclareLocal(genericList))
+                    {
+                        if (inLocal != null)
+                        {
+                            Emit.LoadLocal(inLocal);    // IList<T>
+                        }
+                        else
+                        {
+                            Emit.LoadArgument(1);       // IList<T>
+                        }
+
+                        Emit.Box(listType);             // object
+                        Emit.CastClass(genericList);    // IList<T>
+                        Emit.StoreLocal(boxedLoc);      // --empty--
+
+                        WriteListFast(listMember, listType, boxedLoc);  // --empty--
+                        return;
+                    }
+                }
+
                 WriteListFast(listMember, listType, inLocal);
                 return;
             }
