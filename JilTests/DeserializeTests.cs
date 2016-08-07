@@ -7359,11 +7359,10 @@ namespace JilTests
         [TestMethod]
         public void Issue227()
         {
-            var obj = new _Issue227() { EnumProperty = _Issue227_1.AddInSettingsDetail };
-            var ser = JSON.Serialize(obj);
+            var ser = JSON.Serialize(_Issue227_1.AddInSettingsDetail);
 
-            var val = JSON.Deserialize<_Issue227>(ser);
-            Assert.IsNull(val);
+            var val = JSON.Deserialize<_Issue227_1>(ser);
+            Assert.AreEqual(_Issue227_1.AddInSettingsDetail, val);
         }
 
 #if !DEBUG
