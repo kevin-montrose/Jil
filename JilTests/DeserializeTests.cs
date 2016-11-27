@@ -7441,8 +7441,8 @@ namespace JilTests
                 Assert.IsNotNull(res.Foo);
                 Assert.AreEqual(3, res.Foo.Length);
                 Assert.AreEqual(1, res.Foo[0]);
-                Assert.AreEqual(2, res.Foo[0]);
-                Assert.AreEqual(3, res.Foo[0]);
+                Assert.AreEqual(2, res.Foo[1]);
+                Assert.AreEqual(3, res.Foo[2]);
             }
 
             {
