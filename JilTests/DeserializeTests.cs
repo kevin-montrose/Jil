@@ -7394,6 +7394,65 @@ namespace JilTests
             Assert.AreEqual(_Issue225_1.Value0, bean.PackagedType);
         }
 
+        class _Issue176_1
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_1_Derived : _Issue176_1
+        {
+            public new int Foo { get; set; }
+        }
+
+        class _Issue176_2
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_2_Derived : _Issue176_2
+        {
+            public new int[] Foo { get; set; }
+        }
+
+        class _Issue176_3
+        {
+            public int Foo { get; set; }
+        }
+
+        class _Issue176_3_Derived : _Issue176_3
+        {
+            public new string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue176()
+        {
+            {
+                JSON.Deserialize<_Issue176_1_Derived>("{}");
+                var res = JSON.Deserialize<_Issue176_1_Derived>("{\"Foo\":123}");
+                Assert.IsNotNull(res);
+                Assert.AreEqual(123, res.Foo);
+            }
+
+            {
+                JSON.Deserialize<_Issue176_2_Derived>("{}");
+                var res = JSON.Deserialize<_Issue176_2_Derived>("{\"Foo\":[1,2,3]}");
+                Assert.IsNotNull(res);
+                Assert.IsNotNull(res.Foo);
+                Assert.AreEqual(3, res.Foo.Length);
+                Assert.AreEqual(1, res.Foo[0]);
+                Assert.AreEqual(2, res.Foo[0]);
+                Assert.AreEqual(3, res.Foo[0]);
+            }
+
+            {
+                JSON.Deserialize<_Issue176_3_Derived>("{}");
+                var res = JSON.Deserialize< _Issue176_3_Derived>("{\"Foo\":\"Bar\"}");
+                Assert.IsNotNull(res);
+                Assert.AreEqual("Bar", res.Foo);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

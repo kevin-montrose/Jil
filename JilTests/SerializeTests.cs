@@ -9516,5 +9516,54 @@ namespace JilTests
             var json = JSON.Serialize(val);
             Assert.IsNotNull(json);
         }
+
+        class _Issue176_1
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_1_Derived : _Issue176_1
+        {
+            public new int Foo { get; set; }
+        }
+
+        class _Issue176_2
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_2_Derived : _Issue176_2
+        {
+            public new int[] Foo { get; set; }
+        }
+
+        class _Issue176_3
+        {
+            public int Foo { get; set; }
+        }
+
+        class _Issue176_3_Derived : _Issue176_3
+        {
+            public new string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue176()
+        {
+            {
+                var json = JSON.Serialize(new _Issue176_1_Derived { Foo = 123 });
+                Assert.AreEqual("{\"Foo\":123}", json);
+            }
+
+            {
+                var json = JSON.Serialize(new _Issue176_2_Derived { Foo = new[] { 1, 2, 3 } });
+                Assert.AreEqual("{\"Foo\":[1,2,3]}", json);
+            }
+
+            {
+                var json = JSON.Serialize(new _Issue176_3_Derived { Foo = "Bar" });
+                Assert.AreEqual("{\"Foo\":\"Bar\"}", json);
+            }
+        }
     }
 }
