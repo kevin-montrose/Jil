@@ -1464,5 +1464,14 @@ namespace JilTests
             var json = JSON.SerializeDynamic(tokenResponse);
             Assert.AreEqual("{\"userName\":\"test@123\",\"access_token\":\"my access token\",\"token_type\":\"bearer\"}", json);
         }
+
+        [TestMethod]
+        public void Issue230()
+        {
+            var dyn = JSON.DeserializeDynamic("\"2000\"", Options.ISO8601);
+            var json = JSON.SerializeDynamic(dyn, Options.ISO8601);
+
+            Assert.AreEqual("\"2000\"", json);
+        }
     }
 }
