@@ -740,6 +740,18 @@ namespace Jil.SerializeDynamic
                     return false;
                 }
                 catch { }
+                try
+                {
+                    var otherDictType = ((object)dyn).GetType().GetDictionaryInterface();
+                    // aha, you implement IDictionary<T, V>, but do so in a way we can't cast to!
+                    if (otherDictType != null)
+                    {
+                        var key = otherDictType.GetGenericArguments()[0];
+                        // ok, your key is something we can work with, so indicate that this thing could be a Dictionary
+                        if (key.IsStringyType() || key.IsEnum) return false;
+                    }
+                }
+                catch { }
 
                 return true;
             }
