@@ -7453,6 +7453,21 @@ namespace JilTests
             }
         }
 
+        [TestMethod]
+        public void Issue229()
+        {
+            var expected = new DateTime(2016, 05, 06, 15, 57, 34, DateTimeKind.Utc);
+
+            var result = JSON.Deserialize<_Issue229>("{\"createdate\":\"2016-05-06T15:57:34.000+0000\"}", new Options(dateFormat: Jil.DateTimeFormat.ISO8601));
+
+            Assert.AreEqual(expected, result.createdate);
+        }
+
+        class _Issue229
+        {
+            public DateTime createdate { get; set; }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 
