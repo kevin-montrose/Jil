@@ -28,7 +28,7 @@ namespace Jil
             Data[Utils.ExceptionMessageDataKey] = message + ": " + innerException.Message;
         }
 
-        internal static readonly ConstructorInfo Constructor_String = typeof(SerializerException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new [] { typeof(string) }, null);
+        internal static readonly ConstructorInfo Constructor_String = typeof(SerializerException).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new [] { typeof(string) });
         internal SerializerException(string message) : base(message)
         {
             Data[Utils.ExceptionMessageDataKey] = message;

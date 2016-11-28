@@ -398,7 +398,7 @@ namespace Jil.Deserialize
             var ch = emit.DeclareLocal(typeof(int), "ch");
             var failure = emit.DefineLabel("failure");
 
-            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(string), readerType, typeof(bool) }, null);
+            var cons = typeof(DeserializationException).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, new[] { typeof(string), readerType, typeof(bool) });
 
             if (defaultValue == null)
             {

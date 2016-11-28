@@ -157,7 +157,8 @@ namespace Jil.Deserialize
                 var aeShouldOverride = typeof(UnionLookupConfigBase).GetProperty("AllowsNull").GetMethod;
                 newType.DefineMethodOverride(aeMtd, aeShouldOverride);
 
-                var type = newType.CreateType();
+                var typeInfo = newType.CreateTypeInfo();
+                var type = typeInfo.AsType();
 
                 cache[ucs] = cached = type;
 

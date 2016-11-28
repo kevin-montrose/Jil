@@ -4673,7 +4673,7 @@ namespace JilTests
 
         class __Issue25 {  /* nothing here .. yet */ }
 
-        static T Issue25DeserializeByExample<T>(T example, string json, Options opts)
+        static T ___Issue25DeserializeByExample<T>(T example, string json, Options opts)
         {
             return JSON.Deserialize<T>(json, opts);
         }
@@ -4699,7 +4699,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = Issue25DeserializeByExample(example, json, Options.Default);
+                var res = ___Issue25DeserializeByExample(example, json, Options.Default);
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
@@ -4707,7 +4707,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = Issue25DeserializeByExample(example, json, new Options());
+                var res = ___Issue25DeserializeByExample(example, json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);

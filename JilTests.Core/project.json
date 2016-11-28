@@ -1,0 +1,27 @@
+﻿{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "define": [ "NETCORE" ],
+    "allowUnsafe": true,
+    "compile": {
+      "include": [ "..\\JilTests\\**\\*.cs" ],
+      "exclude": [ "..\\JilTests\\Properties\\AssemblyInfo.cs" ]
+    }
+  },
+
+  "dependencies": {
+    "Jil.Core": "1.0.0-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.0.1"
+    },
+    "Newtonsoft.Json": "9.0.2-beta1"
+  },
+
+  "frameworks": {
+    "netcoreapp1.0": {
+      "imports": "dnxcore50"
+    }
+  }
+}

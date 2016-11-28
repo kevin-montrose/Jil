@@ -61,7 +61,7 @@ namespace Jil.Deserialize
                     while(cur != null)
                     {
                         path.Push(cur);
-                        cur = cur.BaseType;
+                        cur = cur.BaseType();
                     }
 
                     paths[member] = path.Count;

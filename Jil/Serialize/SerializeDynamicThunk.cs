@@ -24,7 +24,7 @@ namespace Jil.Serialize
             var emit = Emit<Action<object, TextWriter, Options>>.NewDynamicMethod();
             
             emit.LoadArgument(0);       // obj
-            if (t.IsValueType)
+            if (t.IsValueType())
             {
                 emit.UnboxAny<T>();     // T
             }

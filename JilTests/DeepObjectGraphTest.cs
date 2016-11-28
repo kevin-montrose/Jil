@@ -4,7 +4,7 @@ using System.Text;
 using Jil;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace JilDeepGraphTest
+namespace JilTests
 {
     [TestClass]
     public class DeepObjectGraphTests

@@ -1,0 +1,30 @@
+{
+  "version": "1.0.0-*",
+
+  "dependencies": {
+    "Microsoft.CSharp": "4.3.0",
+    "NETStandard.Library": "1.6.1",
+    "Sigil": "4.7.0",
+    "System.Collections": "4.3.0",
+    "System.Collections.NonGeneric": "4.3.0",
+    "System.ComponentModel": "4.3.0",
+    "System.ComponentModel.TypeConverter": "4.3.0",
+    "System.Dynamic.Runtime": "4.3.0",
+    "System.Reflection": "4.3.0",
+    "System.Runtime.Serialization.Primitives": "4.3.0"
+  },
+
+  "frameworks": {
+    "netstandard1.6": {
+      "imports": "dnxcore50"
+    }
+  },
+
+  "buildOptions": {
+    "define": [ "NETCORE" ],
+    "allowUnsafe": true,
+    "compile": {
+      "include": [ "..\\Jil\\**\\*.cs" ]
+    }
+  }
+}

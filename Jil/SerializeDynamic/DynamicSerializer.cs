@@ -215,7 +215,7 @@ namespace Jil.SerializeDynamic
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
 
-            if (type.IsValueType)
+            if (type.IsValueType())
             {
                 emit.UnboxAny(type);                                // Action<TextWriter, Type, int> TextWriter type
             }
@@ -760,7 +760,7 @@ namespace Jil.SerializeDynamic
                     {
                         var key = otherDictType.GetGenericArguments()[0];
                         // ok, your key is something we can work with, so indicate that this thing could be a Dictionary
-                        if (key.IsStringyType() || key.IsEnum) return false;
+                        if (key.IsStringyType() || key.IsEnum()) return false;
                     }
                 }
                 catch { }
