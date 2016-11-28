@@ -3269,16 +3269,14 @@ namespace Jil.Deserialize
                     }
                 }
             }
-
-            bool? hasSeparators;
-
-            var date = ParseISO8601DateThunkReader(ref reader, buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
+            
+            var date = ParseISO8601DateThunkReader(ref reader, buffer, 0, tPos ?? ix); // this is in *LOCAL TIME* because that's what the spec says
             if (!tPos.HasValue)
             {
                 return date;
             }
 
-            var time = ParseISO8601TimeThunkReader(ref reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
+            var time = ParseISO8601TimeThunkReader(ref reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix);
             if (!zPlusOrMinus.HasValue)
             {
                 try
@@ -3293,7 +3291,7 @@ namespace Jil.Deserialize
 
             bool unknownLocalOffset;
             // only +1 here because the separator is significant (oy vey)
-            var timezoneOffset = ParseISO8601TimeZoneOffsetThunkReader(ref reader, buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
+            var timezoneOffset = ParseISO8601TimeZoneOffsetThunkReader(ref reader, buffer, zPlusOrMinus.Value + 1, ix, out unknownLocalOffset);
 
             try
             {
@@ -3311,7 +3309,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static DateTime ParseISO8601DateThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, out bool? hasSeparators)
+        static DateTime ParseISO8601DateThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop)
         {
             // Here are the possible formats for dates
             // YYYY-MM-DD
@@ -3323,6 +3321,8 @@ namespace Jil.Deserialize
             // YYYYWww
             // YYYYWwwD
             // YYYYDDD
+
+            bool? hasSeparators = null;
 
             var len = (stop - start) + 1;
             if (len < 4) throw new DeserializationException("ISO8601 date must begin with a 4 character year", ref reader, false);
@@ -3632,7 +3632,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TimeSpan ParseISO8601TimeThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators)
+        static TimeSpan ParseISO8601TimeThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop)
         {
             const long HoursToTicks = 36000000000;
             const long MinutesToTicks = 600000000;
@@ -3655,6 +3655,8 @@ namespace Jil.Deserialize
             // hh:mm:ss,fff
             // hh:mm.fff
             // hh:mm:ss.fff
+
+            bool? hasSeparators = null;
 
             var len = (stop - start) + 1;
             if (len < 2) throw new DeserializationException("ISO8601 time must begin with a 2 character hour", ref reader, false);
@@ -3959,7 +3961,7 @@ namespace Jil.Deserialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static TimeSpan ParseISO8601TimeZoneOffsetThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, ref bool? hasSeparators, out bool unknownLocalOffset)
+        static TimeSpan ParseISO8601TimeZoneOffsetThunkReader(ref ThunkReader reader, char[] buffer, int start, int stop, out bool unknownLocalOffset)
         {
             // Here are the possible formats for timezones
             // Z
@@ -3969,6 +3971,8 @@ namespace Jil.Deserialize
             // -hh
             // -hh:mm
             // -hhmm
+
+            bool? hasSeparators = null;
 
             int c = buffer[start];
             // no need to validate, the caller has done that
@@ -4469,16 +4473,14 @@ namespace Jil.Deserialize
                     }
                 }
             }
-
-            bool? hasSeparators;
-
-            var date = ParseISO8601DateThunkReader(ref reader, buffer, 0, tPos ?? ix, out hasSeparators); // this is in *LOCAL TIME* because that's what the spec says
+            
+            var date = ParseISO8601DateThunkReader(ref reader, buffer, 0, tPos ?? ix); // this is in *LOCAL TIME* because that's what the spec says
             if (!tPos.HasValue)
             {
                 return date;
             }
 
-            var time = ParseISO8601TimeThunkReader(ref reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix, ref hasSeparators);
+            var time = ParseISO8601TimeThunkReader(ref reader, buffer, tPos.Value + 2, zPlusOrMinus ?? ix);
             if (!zPlusOrMinus.HasValue)
             {
                 try
@@ -4493,7 +4495,7 @@ namespace Jil.Deserialize
 
             bool unknownLocalOffset;
             // only +1 here because the separator is significant (oy vey)
-            var timezoneOffset = ParseISO8601TimeZoneOffsetThunkReader(ref reader, buffer, zPlusOrMinus.Value + 1, ix, ref hasSeparators, out unknownLocalOffset);
+            var timezoneOffset = ParseISO8601TimeZoneOffsetThunkReader(ref reader, buffer, zPlusOrMinus.Value + 1, ix, out unknownLocalOffset);
 
             try
             {

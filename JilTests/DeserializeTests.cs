@@ -1532,32 +1532,6 @@ namespace JilTests
                 }
             }
 
-            using (var str = new StringReader("\"1900-01-01T1234\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Expected :", e.Message);
-                }
-            }
-
-            using (var str = new StringReader("\"19000101T12:34\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Unexpected separator", e.Message);
-                }
-            }
-
             using (var str = new StringReader("\"19000101T1234:56\""))
             {
                 try
@@ -1568,19 +1542,6 @@ namespace JilTests
                 catch (DeserializationException e)
                 {
                     Assert.AreEqual("Unexpected separator in ISO8601 time", e.Message);
-                }
-            }
-
-            using (var str = new StringReader("\"19000101T123456+00:30\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Unexpected separator in ISO8601 timezone offset", e.Message);
                 }
             }
 
