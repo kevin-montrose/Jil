@@ -77,6 +77,31 @@ namespace Jil.DeserializeDynamic
             return false;
         }
 
+        public bool IsAmbiguousAsDateTime()
+        {
+            // ambiguity can happen if this is a blob of JSON
+            //   with ISO8601 dates
+            // Example:
+            //   "2000" is ambiguous between "2000-01-01" and the string "2000"
+
+            // ambiguity can only happen in this format
+            if (Options?.UseDateTimeFormat != DateTimeFormat.ISO8601) return false;
+
+            // and only for string members
+            if (Type != JsonObjectType.String) return false;
+
+            for(var i = 0; i < StringValue.Length; i++)
+            {
+                var c = StringValue[i];
+                // non-ascii digit character means there's no ambiguity, this thing is clearly a datetime or not
+                if (c < '0' || c > '9') return false;
+            }
+
+            // we have a string composed only of numbers, it could very well be a datetime
+            //   or it could just be a string ¯\_(ツ)_/¯
+            return true;
+        }
+
         public bool TryCastDateTime(out DateTime dt)
         {
             if (Type == JsonObjectType.FastNumber)

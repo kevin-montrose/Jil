@@ -486,6 +486,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTime.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTime(out dt);
             }
 
@@ -526,6 +532,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTimeOffset.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTimeOffset(out dt);
             }
 
