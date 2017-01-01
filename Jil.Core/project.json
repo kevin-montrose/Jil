@@ -1,6 +1,5 @@
 {
   "version": "1.0.0-*",
-
   "dependencies": {
     "Microsoft.CSharp": "4.3.0",
     "NETStandard.Library": "1.6.1",
@@ -13,18 +12,24 @@
     "System.Reflection": "4.3.0",
     "System.Runtime.Serialization.Primitives": "4.3.0"
   },
-
   "frameworks": {
     "netstandard1.6": {
       "imports": "dnxcore50"
     }
   },
-
   "buildOptions": {
     "define": [ "NETCORE" ],
     "allowUnsafe": true,
     "compile": {
       "include": [ "..\\Jil\\**\\*.cs" ]
     }
+  },
+  "configurations": {
+    "Release_ExhaustiveTest": {
+      "compilationOptions": {
+        "define": [ "EXHAUSTIVE_TEST" ] 
+      }
+    }
+
   }
 }

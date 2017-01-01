@@ -11,6 +11,20 @@ namespace JilTests.Core
     {
         public static void Main(string[] args)
         {
+            Console.WriteLine($"Starting test run: {DateTime.UtcNow:u}");
+#if DEBUG
+            Console.WriteLine("\tDEBUG");
+#endif
+#if RELEASE
+            Console.WriteLine("\tRELEASE");
+#endif
+#if NETCORE
+            Console.WriteLine("\tNETCORE");
+#endif
+#if EXHAUSTIVE_TEST
+            Console.WriteLine("\tEXHAUSTIVE_TEST");
+#endif
+
             var asm = Assembly.GetEntryAssembly();
             var testGroups = asm.GetTypes();
 
@@ -70,6 +84,8 @@ namespace JilTests.Core
                     Console.WriteLine("\t" + fail);
                 }
             }
+
+            Console.WriteLine($"Test run completed: {DateTime.UtcNow:u}");
 
             Console.ReadKey();
         }

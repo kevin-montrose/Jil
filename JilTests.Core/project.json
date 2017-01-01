@@ -9,7 +9,6 @@
       "exclude": [ "..\\JilTests\\Properties\\AssemblyInfo.cs" ]
     }
   },
-
   "dependencies": {
     "Jil.Core": "1.0.0-*",
     "Microsoft.NETCore.App": {
@@ -18,10 +17,16 @@
     },
     "Newtonsoft.Json": "9.0.2-beta1"
   },
-
   "frameworks": {
     "netcoreapp1.0": {
       "imports": "dnxcore50"
+    }
+  },
+  "configurations": {
+    "Release_ExhaustiveTest": {
+      "buildOptions": {
+        "define": [ "EXHAUSTIVE_TEST" ]
+      }
     }
   }
 }
