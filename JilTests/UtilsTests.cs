@@ -431,7 +431,7 @@ namespace JilTests
             Assert.AreEqual("\"A\"", Jil.Common.ExtensionMethods.GetConstantJSONStringEquivalent(typeof(_ConstantFields).GetField("ULE"), false));
         }
 
-#if !NETCORE
+#if !NETCORE && !DEBUG
 
 #pragma warning disable 0649
         class _IsConstant
