@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-*",
+  "version": "2.15.0",
   "dependencies": {
     "Microsoft.CSharp": "4.3.0",
     "NETStandard.Library": "1.6.1",
@@ -22,12 +22,13 @@
     "allowUnsafe": true,
     "compile": {
       "include": [ "..\\Jil\\**\\*.cs" ]
-    }
+    },
+    "xmlDoc": true
   },
   "configurations": {
     "Release_ExhaustiveTest": {
-      "compilationOptions": {
-        "define": [ "EXHAUSTIVE_TEST" ] 
+      "buildOptions": {
+        "define": [ "EXHAUSTIVE_TEST" ]
       }
     }
 
