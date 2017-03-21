@@ -393,23 +393,16 @@ namespace Jil.Serialize
             // It's a list or dictionary, go and build that code
             if (serializingType.IsListType() || serializingType.IsDictionaryType() || serializingType.IsReadOnlyListType() || serializingType.IsReadOnlyDictionaryType())
             {
-                if (inLocal != null)
-                {
-                    Emit.LoadLocal(inLocal);
-                }
-                else
-                {
-                    Emit.LoadArgument(1);
-                }
+                LoadLocalOrArgumentAsReference(inLocal, member.DeclaringType);
 
                 if (asField != null)
                 {
-                    Emit.LoadField(asField);
+                    Emit.LoadField(asField);  // field
                 }
 
                 if (asProp != null)
                 {
-                    LoadProperty(asProp);
+                    LoadProperty(asProp);  // prop
                 }
 
                 using (var loc = Emit.DeclareLocal(serializingType))
@@ -451,28 +444,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(0);   // TextWriter
             }
 
-            if (inLocal == null)
-            {
-                if (member.DeclaringType.IsValueType())
-                {
-                    Emit.LoadArgumentAddress(1);    // TextWriter obj*
-                }
-                else
-                {
-                    Emit.LoadArgument(1);           // TextWriter obj
-                }
-            }
-            else
-            {
-                if (inLocal.LocalType.IsValueType())
-                {
-                    Emit.LoadLocalAddress(inLocal); // TextWriter obj*
-                }
-                else
-                {
-                    Emit.LoadLocal(inLocal);        // TextWriter obj
-                }
-            }
+            LoadLocalOrArgumentAsReference(inLocal, member.DeclaringType);  // TextWriter obj
 
             if (asField != null)
             {
@@ -545,6 +517,34 @@ namespace Jil.Serialize
                 }
 
                 WriteObject(serializingType, loc);
+            }
+        }
+
+        // if it's a reference type, load the argument directly (it's a pointer)
+        // if it's a value type, load a pointer to the argument
+        private void LoadLocalOrArgumentAsReference(Sigil.Local inLocal, Type type)
+        {
+            if (inLocal == null)
+            {
+                if (type.IsValueType())
+                {
+                    Emit.LoadArgumentAddress(1);
+                }
+                else
+                {
+                    Emit.LoadArgument(1);
+                }
+            }
+            else
+            {
+                if (inLocal.LocalType.IsValueType())
+                {
+                    Emit.LoadLocalAddress(inLocal);
+                }
+                else
+                {
+                    Emit.LoadLocal(inLocal);
+                }
             }
         }
 
