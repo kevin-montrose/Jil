@@ -9622,5 +9622,27 @@ namespace JilTests
                 Assert.AreEqual("{\"Foo\":\"Bar\"}", json);
             }
         }
+        
+
+        struct _Issue258
+        {
+            public string[] Elements { get; }
+            public _Issue258(string[] elements)
+            {
+                Elements = elements;
+            }
+        }
+        [TestMethod]
+        public void Issue258()
+        {
+            {
+                var json = JSON.Serialize(new _Issue258(new[] { "foo" }));
+                Assert.AreEqual("{\"Elements\":[\"foo\"]}", json);
+            }
+            {
+                var json = JSON.Serialize(new _Issue258(null));
+                Assert.AreEqual("{\"Elements\":null}", json);
+            }
+        }
     }
 }
