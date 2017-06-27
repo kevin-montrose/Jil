@@ -1,17 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jil", "Jil\Jil.csproj", "{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JilTests", "JilTests\JilTests.csproj", "{9D12CD30-3BCE-4CC4-BC8A-94C951802804}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C918E754-B4AA-43CC-81DE-CC0D0B806A59}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jil", "Jil\Jil.csproj", "{73D243E7-DD9B-4546-9B71-4EE8BF5ED6C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JilTests", "JilTests\JilTests.csproj", "{9D12CD30-3BCE-4CC4-BC8A-94C951802804}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Experiments", "Experiments\Experiments.csproj", "{E26CA103-9746-4038-876F-19218F47C29C}"
 EndProject
@@ -19,9 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmark", "Benchmark\Benc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jil.StrongName", "Jil.StrongName\Jil.StrongName.csproj", "{0EDD50BE-0CCD-48E1-A613-4A623F543492}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Jil.Core", "Jil.Core\Jil.Core.xproj", "{03029B62-21DB-4CE4-9FAB-41D3A1615EE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jil.Core", "Jil.Core\Jil.Core.csproj", "{03029B62-21DB-4CE4-9FAB-41D3A1615EE8}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "JilTests.Core", "JilTests.Core\JilTests.Core.xproj", "{5F76B615-53A4-4DE0-8131-2F4BC49929EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JilTests.Core", "JilTests.Core\JilTests.Core.csproj", "{5F76B615-53A4-4DE0-8131-2F4BC49929EF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
