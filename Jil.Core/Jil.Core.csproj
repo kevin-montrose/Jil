@@ -16,6 +16,8 @@
     <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <Version>2.15.1</Version>
+    <PackageReleaseNotes>Bug fixes.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
