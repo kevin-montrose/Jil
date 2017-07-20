@@ -7429,6 +7429,33 @@ namespace JilTests
             public DateTime createdate { get; set; }
         }
 
+        [JilPrimitiveWrapper]
+        struct _Issue270
+        {
+            public _Issue270(int val)
+            {
+                Val = val;
+            }
+#pragma warning disable 649
+            public int Val;
+#pragma warning restore 649
+        }
+
+        [TestMethod]
+        public void Issue270()
+        {
+            {
+                var res = JSON.Deserialize<_Issue270?>("123");
+                Assert.IsTrue(res != null);
+                Assert.AreEqual(123, res.Value.Val);
+            }
+
+            {
+                var res = JSON.Deserialize<_Issue270?>("null");
+                Assert.IsTrue(res == null);
+            }
+        }
+
 #if !DEBUG
         #region SlowSpinUp Types
 

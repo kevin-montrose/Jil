@@ -9644,5 +9644,15 @@ namespace JilTests
                 Assert.AreEqual("{\"Elements\":null}", json);
             }
         }
+
+        [JilPrimitiveWrapper]
+        struct _Issue270 { public int Val; }
+
+        [TestMethod]
+        public void Issue270()
+        {
+            Assert.AreEqual("123", JSON.Serialize<_Issue270?>(new _Issue270 { Val = 123 }));
+            Assert.AreEqual("null", JSON.Serialize<_Issue270?>(null));
+        }
     }
 }
