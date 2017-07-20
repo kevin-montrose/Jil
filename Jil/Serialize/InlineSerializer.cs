@@ -638,60 +638,67 @@ namespace Jil.Serialize
             }
             else
             {
-                if (underlyingType.IsEnum())
+                if (underlyingType.IsPrimitiveWrapper())
                 {
-                    WriteEnumOrPrimitive(nullableMember, underlyingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: true, containedInNullable: true);
+                    WritePrimitiveWrapper(underlyingType, quotesNeedHandling);
                 }
                 else
                 {
-                    using (var loc = Emit.DeclareLocal(underlyingType))
+                    if (underlyingType.IsEnum())
                     {
-                        Emit.StoreLocal(loc);   // TextWriter
-
-                        if (RecursiveTypes.ContainsKey(underlyingType))
+                        WriteEnumOrPrimitive(nullableMember, underlyingType, requiresQuotes: false, hasTextWriter: true, popTextWriter: true, containedInNullable: true);
+                    }
+                    else
+                    {
+                        using (var loc = Emit.DeclareLocal(underlyingType))
                         {
-                            Type act;
-                            if (BuildingToString)
-                            {
-                                act = typeof(StringThunkDelegate<>).MakeGenericType(underlyingType);
-                            }
-                            else
-                            {
-                                act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
-                            }
+                            Emit.StoreLocal(loc);   // TextWriter
 
-                            var invoke = act.GetMethod("Invoke");
-
-                            Emit.Pop();                                     // --empty--
-                            Emit.LoadLocal(RecursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
-                            Emit.LoadArgument(0);                           // Action<,> TextWriter
-                            Emit.LoadLocal(loc);                            // Action<,> TextWriter value
-                            Emit.LoadArgument(2);                           // Action<,> TextWriter value int
-                            Emit.Call(invoke);                              // --empty--
-                        }
-                        else
-                        {
-                            if (underlyingType.IsListType())
+                            if (RecursiveTypes.ContainsKey(underlyingType))
                             {
-                                WriteList(nullableMember, underlyingType, loc);
-                            }
-                            else
-                            {
-                                if (underlyingType.IsDictionaryType())
+                                Type act;
+                                if (BuildingToString)
                                 {
-                                    WriteDictionary(nullableMember, underlyingType, loc);
+                                    act = typeof(StringThunkDelegate<>).MakeGenericType(underlyingType);
                                 }
                                 else
                                 {
-                                    if (underlyingType.IsEnumerableType())
+                                    act = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), underlyingType, typeof(int));
+                                }
+
+                                var invoke = act.GetMethod("Invoke");
+
+                                Emit.Pop();                                     // --empty--
+                                Emit.LoadLocal(RecursiveTypes[underlyingType]); // Action<TextWriter, underlyingType>
+                                Emit.LoadArgument(0);                           // Action<,> TextWriter
+                                Emit.LoadLocal(loc);                            // Action<,> TextWriter value
+                                Emit.LoadArgument(2);                           // Action<,> TextWriter value int
+                                Emit.Call(invoke);                              // --empty--
+                            }
+                            else
+                            {
+                                if (underlyingType.IsListType())
+                                {
+                                    WriteList(nullableMember, underlyingType, loc);
+                                }
+                                else
+                                {
+                                    if (underlyingType.IsDictionaryType())
                                     {
-                                        WriteEnumerable(nullableMember, underlyingType, loc);
+                                        WriteDictionary(nullableMember, underlyingType, loc);
                                     }
                                     else
                                     {
-                                        Emit.Pop();
+                                        if (underlyingType.IsEnumerableType())
+                                        {
+                                            WriteEnumerable(nullableMember, underlyingType, loc);
+                                        }
+                                        else
+                                        {
+                                            Emit.Pop();
 
-                                        WriteObject(underlyingType, loc);
+                                            WriteObject(underlyingType, loc);
+                                        }
                                     }
                                 }
                             }
