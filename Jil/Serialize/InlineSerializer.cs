@@ -3730,6 +3730,10 @@ namespace Jil.Serialize
             using (var notFirst = Emit.DeclareLocal<bool>())
             {
                 Emit.StoreLocal(enumLoc);       // TextWriter?
+
+                Emit.LoadConstant(false);       // TextWriter? false
+                Emit.StoreLocal(notFirst);      // TextWriter?
+
                 if (popTextWriter)
                 {
                     Emit.Pop();                 // --empty--

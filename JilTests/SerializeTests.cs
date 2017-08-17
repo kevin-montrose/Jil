@@ -9669,12 +9669,14 @@ namespace JilTests
         {
             var repro = new _Issue272();
             repro.EnumMap = new Dictionary<_Issue272Enum, int>();
+            repro.EnumMap.Add(_Issue272Enum.Zero, 0);
             repro.EnumMap.Add(_Issue272Enum.One, 1);
             repro.EnumMap.Add(_Issue272Enum.Two, 2);
+            repro.EnumMap.Add(_Issue272Enum.One | _Issue272Enum.Two, 2 | 1);
 
             var json = JSON.Serialize(repro, Options.ExcludeNulls);
 
-            Assert.AreEqual("{\"EnumMap\":{\"One\":1,\"Two\":2}}", json);
+            Assert.AreEqual("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
         }
     }
 }
