@@ -9654,5 +9654,27 @@ namespace JilTests
             Assert.AreEqual("123", JSON.Serialize<_Issue270?>(new _Issue270 { Val = 123 }));
             Assert.AreEqual("null", JSON.Serialize<_Issue270?>(null));
         }
+
+        
+        [Flags]
+        private enum _Issue272Enum { Zero, One, Two }
+
+        private class _Issue272
+        {
+            public Dictionary<_Issue272Enum, int> EnumMap { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue272()
+        {
+            var repro = new _Issue272();
+            repro.EnumMap = new Dictionary<_Issue272Enum, int>();
+            repro.EnumMap.Add(_Issue272Enum.One, 1);
+            repro.EnumMap.Add(_Issue272Enum.Two, 2);
+
+            var json = JSON.Serialize(repro, Options.ExcludeNulls);
+
+            Assert.AreEqual("{\"EnumMap\":{\"One\":1,\"Two\":2}}", json);
+        }
     }
 }
