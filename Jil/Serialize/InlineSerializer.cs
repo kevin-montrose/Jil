@@ -433,12 +433,8 @@ namespace Jil.Serialize
             }
 
             // Only put this on the stack if we'll need it
-            var preloadTextWriter =
-                serializingType.IsPrimitiveType() ||
-                (serializingType.IsEnum() && member.ShouldConvertEnum(serializingType)) ||
-                isRecursive ||
-                serializingType.IsNullableType() ||
-                serializingType.IsPrimitiveWrapper();
+            var preloadTextWriter = NeedsPreloadTextWriter(member, serializingType);
+
             if (preloadTextWriter)
             {
                 Emit.LoadArgument(0);   // TextWriter
@@ -2225,6 +2221,18 @@ namespace Jil.Serialize
             Emit.MarkLabel(end);
         }
 
+        bool NeedsPreloadTextWriter(MemberInfo listMember, Type elementType)
+        {
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
+
+            return 
+                elementType.IsPrimitiveType() || 
+                elementType.IsPrimitiveWrapper() || 
+                (listMember != null && elementType.IsEnum() && listMember.ShouldConvertEnum(elementType)) || 
+                isRecursive || 
+                elementType.IsNullableType();
+        }
+
         void WriteListFast(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
         {
             Action loadList =
@@ -2255,7 +2263,7 @@ namespace Jil.Serialize
             var accessorMtd = listInterface.GetProperty("Item").GetMethod;
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || elementType.IsPrimitiveWrapper() || (listMember != null && elementType.IsEnum() && listMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = NeedsPreloadTextWriter(listMember, elementType);
 
             var notNull = Emit.DefineLabel();
 
@@ -2380,7 +2388,7 @@ namespace Jil.Serialize
             var countMtd = listType.GetProperty("Length").GetMethod;
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || (arrayMember != null && elementType.IsEnum() && arrayMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = NeedsPreloadTextWriter(arrayMember, elementType);
 
             var notNull = Emit.DefineLabel();
 
@@ -2539,7 +2547,7 @@ namespace Jil.Serialize
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || (enumerableMember != null && elementType.IsEnum() && enumerableMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = NeedsPreloadTextWriter(enumerableMember, elementType);
 
             var notNull = Emit.DefineLabel();
 
@@ -2903,7 +2911,7 @@ namespace Jil.Serialize
             }
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || (dictionaryMember != null && elementType.IsEnum() && dictionaryMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = NeedsPreloadTextWriter(dictionaryMember, elementType);
 
             var notNull = Emit.DefineLabel();
 
@@ -3050,7 +3058,7 @@ namespace Jil.Serialize
             }
 
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
-            var preloadTextWriter = elementType.IsPrimitiveType() || elementType.IsPrimitiveWrapper() || (dictionaryMember != null && elementType.IsEnum() && dictionaryMember.ShouldConvertEnum(elementType)) || isRecursive || elementType.IsNullableType();
+            var preloadTextWriter = NeedsPreloadTextWriter(dictionaryMember, elementType);
 
             var notNull = Emit.DefineLabel();
 

@@ -9702,11 +9702,33 @@ namespace JilTests
             public int Val { get; }
         }
 
+        IEnumerable<_Issue275> _Issue275Enumerable()
+        {
+            yield break;
+        }
+
         [TestMethod]
         public void Issue275()
         {
-            var res = JSON.Serialize(new _Issue275[0]);
-            Assert.AreEqual("[]", res);
+            {
+                var res = JSON.Serialize(new _Issue275[0]);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(new List<_Issue275>());
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(_Issue275Enumerable());
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(new Dictionary<string, _Issue275>() { ["foo"] = new _Issue275() });
+                Assert.AreEqual(@"{""foo"":0}", res);
+            }
         }
     }
 }
