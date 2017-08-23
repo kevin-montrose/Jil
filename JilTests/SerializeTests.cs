@@ -9678,5 +9678,35 @@ namespace JilTests
 
             Assert.AreEqual("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
         }
+
+        struct _Issue257 : IEnumerable<object>
+        {
+            public IEnumerator<object> GetEnumerator()
+            {
+                yield break;
+            }
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        }
+
+        [TestMethod]
+        public void Issue257()
+        {
+            _Issue257? enumerable = new _Issue257();
+            var res = JSON.Serialize(enumerable);
+            Assert.AreEqual("[]", res);
+        }
+
+        [JilPrimitiveWrapper]
+        class _Issue275
+        {
+            public int Val { get; }
+        }
+
+        [TestMethod]
+        public void Issue275()
+        {
+            var res = JSON.Serialize(new _Issue275[0]);
+            Assert.AreEqual("[]", res);
+        }
     }
 }
