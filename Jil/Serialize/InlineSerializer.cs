@@ -673,27 +673,27 @@ namespace Jil.Serialize
                             }
                             else
                             {
+                                Emit.Pop();                                                             // --empty--
+
                                 if (underlyingType.IsListType())
                                 {
-                                    WriteList(nullableMember, underlyingType, loc);
+                                    WriteList(nullableMember, underlyingType, loc);                     // --empty--
                                 }
                                 else
                                 {
                                     if (underlyingType.IsDictionaryType())
                                     {
-                                        WriteDictionary(nullableMember, underlyingType, loc);
+                                        WriteDictionary(nullableMember, underlyingType, loc);           // --empty--
                                     }
                                     else
                                     {
                                         if (underlyingType.IsEnumerableType())
-                                        {
-                                            WriteEnumerable(nullableMember, underlyingType, loc);
+                                        {   
+                                            WriteEnumerable(nullableMember, underlyingType, loc);       // --empty--
                                         }
                                         else
                                         {
-                                            Emit.Pop();
-
-                                            WriteObject(underlyingType, loc);
+                                            WriteObject(underlyingType, loc);                           // --empty--
                                         }
                                     }
                                 }
@@ -2542,7 +2542,19 @@ namespace Jil.Serialize
             var elementType = enumerableType.GetEnumerableInterface().GetGenericArguments()[0];
 
             var iEnumerable = typeof(IEnumerable<>).MakeGenericType(elementType);
-            var iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
+
+            bool virtualCallGetEnumerator;
+            MethodInfo iEnumerableGetEnumerator;
+            if (enumerableType.IsValueType())
+            {
+                virtualCallGetEnumerator = false;
+                iEnumerableGetEnumerator = enumerableType.GetMethod("GetEnumerator");
+            }
+            else
+            {
+                virtualCallGetEnumerator = true;
+                iEnumerableGetEnumerator = iEnumerable.GetMethod("GetEnumerator");
+            }
             var enumeratorMoveNext = typeof(System.Collections.IEnumerator).GetMethod("MoveNext");
             var enumeratorCurrent = iEnumerableGetEnumerator.ReturnType.GetProperty("Current");
 
@@ -2551,39 +2563,60 @@ namespace Jil.Serialize
 
             var notNull = Emit.DefineLabel();
 
-            if (inLocal != null)
-            {
-                Emit.LoadLocal(inLocal);
-            }
-            else
-            {
-                Emit.LoadArgument(1);
-            }
+            Action loadLocal =
+                () =>
+                {
+                    if (enumerableType.IsValueType())
+                    {
+                        if (inLocal != null)
+                        {
+                            Emit.LoadLocalAddress(inLocal); // IEnumerable*
+                        }
+                        else
+                        {
+                            Emit.LoadArgumentAddress(1);    // IEnumerable*
+                        }
+                    }
+                    else
+                    {
+                        if (inLocal != null)
+                        {
+                            Emit.LoadLocal(inLocal);        // IEnumerable
+                        }
+                        else
+                        {
+                            Emit.LoadArgument(1);           // IEnumerable
+                        }
+                    }
+                };
+
+            loadLocal();                        // IEnumerable(*)
 
             var end = Emit.DefineLabel();
 
-            Emit.BranchIfTrue(notNull);
-            WriteString("null");
-            Emit.Branch(end);
+            Emit.BranchIfTrue(notNull);         // --empty--
+            WriteString("null");                // --empty--
+            Emit.Branch(end);                   // --empty--
 
-            Emit.MarkLabel(notNull);
-            WriteString("[");
+            Emit.MarkLabel(notNull);            // --empty--
+            WriteString("[");                   // --empty--
 
             var done = Emit.DefineLabel();
 
             using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
             {
-                if (inLocal != null)
+                loadLocal();
+
+                if (virtualCallGetEnumerator)
                 {
-                    Emit.LoadLocal(inLocal);
+                    Emit.CallVirtual(iEnumerableGetEnumerator);     // IEnumerator<>
                 }
                 else
                 {
-                    Emit.LoadArgument(1);
+                    Emit.Call(iEnumerableGetEnumerator);            // IEnumerator<T>
                 }
 
-                Emit.CallVirtual(iEnumerableGetEnumerator);   // IEnumerator<>
-                Emit.StoreLocal(e);                           // --empty--
+                Emit.StoreLocal(e);                                 // --empty--
 
                 // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {

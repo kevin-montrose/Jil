@@ -9679,7 +9679,7 @@ namespace JilTests
             Assert.AreEqual("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
         }
 
-        struct _Issue257 : IEnumerable<object>
+        struct _Issue257_IEnumerable : IEnumerable<object>
         {
             public IEnumerator<object> GetEnumerator()
             {
@@ -9688,12 +9688,133 @@ namespace JilTests
             IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
         }
 
+        struct _Issue257_List : IList<object>
+        {
+            public object this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public int Count => 0;
+
+            public bool IsReadOnly => true;
+
+            public void Add(object item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(object item) => false;
+
+            public void CopyTo(object[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<object> GetEnumerator()
+            {
+                yield break;
+            }
+
+            public int IndexOf(object item) => -1;
+
+            public void Insert(int index, object item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Remove(object item) => false;
+
+            public void RemoveAt(int index)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        struct _Issue257_Dictionary : IDictionary<string, string>
+        {
+            public string this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public ICollection<string> Keys => throw new NotImplementedException();
+
+            public ICollection<string> Values => throw new NotImplementedException();
+
+            public int Count => 0;
+
+            public bool IsReadOnly => true;
+
+            public void Add(string key, string value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Add(KeyValuePair<string, string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(KeyValuePair<string, string> item) => false;
+
+            public bool ContainsKey(string key) => false;
+
+            public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+            {
+                yield break;
+            }
+
+            public bool Remove(string key) => false;
+
+            public bool Remove(KeyValuePair<string, string> item) => false;
+
+            public bool TryGetValue(string key, out string value)
+            {
+                value = null;
+                return false;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
         [TestMethod]
         public void Issue257()
         {
-            _Issue257? enumerable = new _Issue257();
-            var res = JSON.Serialize(enumerable);
-            Assert.AreEqual("[]", res);
+            {
+                _Issue257_IEnumerable? enumerable = new _Issue257_IEnumerable();
+                var res = JSON.Serialize(enumerable);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                _Issue257_List? list = new _Issue257_List();
+                var res = JSON.Serialize(list);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                _Issue257_Dictionary? dict = new _Issue257_Dictionary();
+                var res = JSON.Serialize(dict);
+                Assert.AreEqual("{}", res);
+            }
         }
 
         [JilPrimitiveWrapper]
