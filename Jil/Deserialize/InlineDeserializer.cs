@@ -960,16 +960,19 @@ namespace Jil.Deserialize
             Emit.LoadArgument(1);                   // int
             Emit.LoadConstant(0);                   // int
             Emit.UnsignedBranchIfNotEqual(success); // --empty --
-            ReadCharFromStream();                   // int
-            Emit.LoadConstant(-1);                  // int -1
-            Emit.BranchIfEqual(success);            // --empty--
 
-            Emit.LoadConstant("Expected end of stream");    // string
-            Emit.LoadArgument(0);                           // string TextReader
-            Emit.LoadConstant(false);                       // string TextReader bool
-            ThrowStringStreamBool();                        // DeserializationException
-            Emit.Throw();                                   // --empty--
+            if (!OptionsType.IsGenericType || OptionsType.GetGenericTypeDefinition() != typeof(StreamedOption<>))
+            {
+                ReadCharFromStream();                   // int
+                Emit.LoadConstant(-1);                  // int -1
+                Emit.BranchIfEqual(success);            // --empty--
 
+                Emit.LoadConstant("Expected end of stream");    // string
+                Emit.LoadArgument(0);                           // string TextReader
+                Emit.LoadConstant(false);                       // string TextReader bool
+                ThrowStringStreamBool();                        // DeserializationException
+                Emit.Throw();                                   // --empty--
+            }
             Emit.MarkLabel(success);        // --empty--
         }
 
