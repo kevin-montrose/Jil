@@ -111,6 +111,7 @@
     <Compile Include="ExhaustiveTests.cs" />
     <Compile Include="BadlySpecifiedTypeTests.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="RawPropertyNameTest.cs" />
     <Compile Include="SerializeTests.cs" />
     <Compile Include="SpeedProofTests.cs" />
     <Compile Include="UtilsTests.cs" />
