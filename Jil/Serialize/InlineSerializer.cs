@@ -3981,8 +3981,10 @@ namespace Jil.Serialize
                 }
                 else
                 {
+
+
                     // static case
-                    var cacheType = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, type);
+                    var cacheType = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(RecursionLookupOptionsType, type);
                     FieldInfo thunk;
 
                     if (BuildingToString)
@@ -4099,11 +4101,11 @@ namespace Jil.Serialize
                 MethodInfo loadMtd;
                 if (BuildingToString)
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("LoadToString", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("LoadToString", BindingFlags.Public | BindingFlags.Static);
                 }
                 else
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(RecursionLookupOptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 }
 
                 loadMtd.Invoke(null, new object[0]);
@@ -4406,7 +4408,7 @@ namespace Jil.Serialize
     {
         static Action<TextWriter, BuildForType, int> BuildAlwaysFailsWith<BuildForType>(Type optionsType)
         {
-            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(BuildForType));
+            var specificTypeCache = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(optionsType, typeof(BuildForType));
             var stashField = specificTypeCache.GetField("ThunkExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(TextWriter), typeof(BuildForType), typeof(int) });
@@ -4420,7 +4422,7 @@ namespace Jil.Serialize
 
         static StringThunkDelegate<BuildForType> BuildAlwaysFailsWithToString<BuildForType>(Type optionsType)
         {
-            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(BuildForType));
+            var specificTypeCache = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(optionsType, typeof(BuildForType));
             var stashField = specificTypeCache.GetField("StringThunkExceptionDuringBuild", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(ThunkWriter).MakeByRefType(), typeof(BuildForType), typeof(int) });

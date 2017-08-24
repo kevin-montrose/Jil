@@ -27,6 +27,7 @@ namespace Jil.Deserialize
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
         
+        
         readonly Type OptionsType;
         readonly DateTimeFormat DateFormat;
         readonly SerializationNameFormat SerializationNameFormat;
@@ -1435,7 +1436,8 @@ namespace Jil.Deserialize
 
         void LoadRecursiveTypeDelegate(Type recursiveType)
         {
-            var typeCache = typeof(TypeCache<,>).MakeGenericType(OptionsType, recursiveType);
+   
+            var typeCache = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(OptionsType, recursiveType);
 
             FieldInfo thunk;
             if(ReadingFromString)
@@ -2639,11 +2641,11 @@ namespace Jil.Deserialize
                 MethodInfo loadMtd;
                 if(ReadingFromString)
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("LoadFromString", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(OptionsType, primeType).GetMethod("LoadFromString", BindingFlags.Public | BindingFlags.Static);
                 }
                 else
                 {
-                    loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
+                    loadMtd = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(OptionsType, primeType).GetMethod("Load", BindingFlags.Public | BindingFlags.Static);
                 }
 
                 loadMtd.Invoke(null, new object[0]);
@@ -2700,7 +2702,7 @@ namespace Jil.Deserialize
     {
         static Func<TextReader, int, ReturnType> BuildAlwaysFailsWithFromStream<ReturnType>(Type optionsType)
         {
-            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(ReturnType));
+            var specificTypeCache = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(optionsType, typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuildFromStream", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(TextReader), typeof(int) });
@@ -2715,7 +2717,7 @@ namespace Jil.Deserialize
 
         static StringThunkDelegate<ReturnType> BuildAlwaysFailsWithFromString<ReturnType>(Type optionsType)
         {
-            var specificTypeCache = typeof(TypeCache<,>).MakeGenericType(optionsType, typeof(ReturnType));
+            var specificTypeCache = typeof(TypeCache<>.InnerTypeCache<>).MakeGenericType(optionsType, typeof(ReturnType));
             var stashField = specificTypeCache.GetField("ExceptionDuringBuildFromString", BindingFlags.Static | BindingFlags.Public);
 
             var emit = Emit.NewDynamicMethod(typeof(ReturnType), new[] { typeof(ThunkReader).MakeByRefType(), typeof(int) });

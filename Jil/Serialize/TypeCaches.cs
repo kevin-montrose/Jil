@@ -1,12 +1,7 @@
 using Sigil;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Jil.Serialize
 {
@@ -21,61 +16,83 @@ namespace Jil.Serialize
         SerializationNameFormat SerializationNameFormat { get; }
     }
 
-    static class TypeCache<TOptions, T>
-        where TOptions : ISerializeOptions, new()
+
+    internal interface ISerializeTypeCache
     {
-        static readonly object ThunkInitLock = new object();
-        static volatile bool ThunkBeingBuilt = false;
-        public static volatile Action<TextWriter, T, int> Thunk;
-        public static Exception ThunkExceptionDuringBuild;
+        Action<TextWriter, T, int> Get<T>();
+        StringThunkDelegate<T> GetToString<T>();
+    }
 
-        static readonly object StringThunkInitLock = new object();
-        static volatile bool StringThunkBeingBuilt = false;
-        public static volatile StringThunkDelegate<T> StringThunk;
-        public static Exception StringThunkExceptionDuringBuild;
+    class TypeCache<TOptions> : ISerializeTypeCache
+                where TOptions : ISerializeOptions, new()
 
-        public static Action<TextWriter, T, int> Get()
+    {
+        public static class InnerTypeCache<T>
         {
-            Load();
-            return Thunk;
-        }
+            static readonly object ThunkInitLock = new object();
+            static volatile bool ThunkBeingBuilt = false;
+            public static volatile Action<TextWriter, T, int> Thunk;
+            public static Exception ThunkExceptionDuringBuild;
 
-        public static void Load()
-        {
-            if (Thunk != null) return;
+            static readonly object StringThunkInitLock = new object();
+            static volatile bool StringThunkBeingBuilt = false;
+            public static volatile StringThunkDelegate<T> StringThunk;
+            public static Exception StringThunkExceptionDuringBuild;
 
-            lock (ThunkInitLock)
+            public static Action<TextWriter, T, int> Get()
             {
-                if (Thunk != null || ThunkBeingBuilt) return;
-                ThunkBeingBuilt = true;
+                Load();
+                return Thunk;
+            }
 
-                var opts = new TOptions();
+            public static void Load()
+            {
+                if (Thunk != null) return;
 
-                Thunk = InlineSerializerHelper.Build<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out ThunkExceptionDuringBuild);
+                lock (ThunkInitLock)
+                {
+                    if (Thunk != null || ThunkBeingBuilt) return;
+                    ThunkBeingBuilt = true;
+
+                    var opts = new TOptions();
+
+                    Thunk = InlineSerializerHelper.Build<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out ThunkExceptionDuringBuild);
+                }
+            }
+
+            public static StringThunkDelegate<T> GetToString()
+            {
+                LoadToString();
+                return StringThunk;
+            }
+
+            public static void LoadToString()
+            {
+                if (StringThunk != null) return;
+
+                lock (StringThunkInitLock)
+                {
+                    if (StringThunk != null || StringThunkBeingBuilt) return;
+                    StringThunkBeingBuilt = true;
+
+                    var opts = new TOptions();
+
+                    StringThunk = InlineSerializerHelper.BuildToString<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out StringThunkExceptionDuringBuild);
+                }
             }
         }
 
-        public static StringThunkDelegate<T> GetToString()
+        public Action<TextWriter, T, int> Get<T>()
         {
-            LoadToString();
-            return StringThunk;
+            return InnerTypeCache<T>.Get();
         }
 
-        public static void LoadToString()
+        public StringThunkDelegate<T> GetToString<T>()
         {
-            if (StringThunk != null) return;
-
-            lock (StringThunkInitLock)
-            {
-                if (StringThunk != null || StringThunkBeingBuilt) return;
-                StringThunkBeingBuilt = true;
-
-                var opts = new TOptions();
-
-                StringThunk = InlineSerializerHelper.BuildToString<T>(typeof(TOptions), pretty: opts.PrettyPrint, excludeNulls: opts.ExcludeNulls, dateFormat: opts.DateFormat, jsonp: opts.JSONP, includeInherited: opts.IncludeInherited, dateTimeBehavior: opts.DateTimeKindBehavior, serializationNameFormat: opts.SerializationNameFormat, exceptionDuringBuild: out StringThunkExceptionDuringBuild);
-            }
+            return InnerTypeCache<T>.GetToString();
         }
     }
+    
 
     // Start OptionsGeneration.linq generated content
     class MicrosoftStyle : ISerializeOptions

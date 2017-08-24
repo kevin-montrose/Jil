@@ -111,10 +111,9 @@ namespace Jil
             GetWriterAction<T>(options)(output, data, 0);
         }
 
-        /// <summary>
-        /// Generated giant switch of option finding via OptionsGeneration.linq
-        /// </summary>
-        static Action<TextWriter, T, int> GetWriterAction<T>(Options options)
+
+
+        internal static Serialize.ISerializeTypeCache CreateSerializeTypeCache(Options options)
         {
             // Start OptionsGeneration.linq generated content: GetWriterAction
             switch (options.UseDateTimeFormat)
@@ -138,18 +137,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyle, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyle>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -161,18 +160,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -189,18 +188,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONP, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -212,18 +211,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -245,18 +244,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNulls, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -268,18 +267,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -296,18 +295,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -319,18 +318,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -357,18 +356,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrint, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrint>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -380,18 +379,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -408,18 +407,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONP, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -431,18 +430,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -464,18 +463,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -487,18 +486,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -515,18 +514,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -538,18 +537,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -581,18 +580,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<Milliseconds, T>.Get();
+                                                                    return new TypeCache<Milliseconds>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -604,18 +603,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -632,18 +631,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONP, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -655,18 +654,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -688,18 +687,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNulls, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -711,18 +710,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -739,18 +738,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -762,18 +761,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -800,18 +799,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrint, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrint>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -823,18 +822,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -851,18 +850,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONP, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -874,18 +873,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -907,18 +906,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -930,18 +929,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -958,18 +957,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -981,18 +980,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1024,18 +1023,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<Seconds, T>.Get();
+                                                                    return new TypeCache<Seconds>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsUtc, T>.Get();
+                                                                    return new TypeCache<SecondsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1047,18 +1046,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsInherited, T>.Get();
+                                                                    return new TypeCache<SecondsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1075,18 +1074,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONP, T>.Get();
+                                                                    return new TypeCache<SecondsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1098,18 +1097,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1131,18 +1130,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNulls, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1154,18 +1153,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1182,18 +1181,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1205,18 +1204,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1243,18 +1242,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrint, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrint>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1266,18 +1265,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintInherited, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1294,18 +1293,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONP, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1317,18 +1316,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInherited, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1350,18 +1349,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNulls, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1373,18 +1372,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1401,18 +1400,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1424,18 +1423,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1467,18 +1466,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601, T>.Get();
+                                                                    return new TypeCache<ISO8601>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601CamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601CamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601Utc, T>.Get();
+                                                                    return new TypeCache<ISO8601Utc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601UtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601UtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1490,18 +1489,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601Inherited, T>.Get();
+                                                                    return new TypeCache<ISO8601Inherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601InheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601InheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601InheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601InheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601InheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601InheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1518,18 +1517,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONP, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1541,18 +1540,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601JSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1574,18 +1573,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNulls, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1597,18 +1596,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1625,18 +1624,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1648,18 +1647,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601ExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1686,18 +1685,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrint, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrint>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1709,18 +1708,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1737,18 +1736,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONP, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1760,18 +1759,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1793,18 +1792,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNulls, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1816,18 +1815,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1844,18 +1843,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1867,18 +1866,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1910,18 +1909,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123, T>.Get();
+                                                                    return new TypeCache<RFC1123>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123CamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123CamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123Utc, T>.Get();
+                                                                    return new TypeCache<RFC1123Utc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123UtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123UtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1933,18 +1932,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123Inherited, T>.Get();
+                                                                    return new TypeCache<RFC1123Inherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123InheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123InheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123InheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123InheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123InheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123InheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1961,18 +1960,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONP, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -1984,18 +1983,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123JSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2017,18 +2016,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNulls, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2040,18 +2039,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2068,18 +2067,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2091,18 +2090,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123ExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2129,18 +2128,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrint, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrint>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2152,18 +2151,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2180,18 +2179,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONP, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2203,18 +2202,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2236,18 +2235,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNulls, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNulls>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2259,18 +2258,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2287,18 +2286,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONP>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2310,18 +2309,18 @@ namespace Jil
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedCamelCase>();
                                                             }
                                                             break;
                                                         case UnspecifiedDateTimeKindBehavior.IsUTC:
                                                             switch (options.SerializationNameFormat)
                                                             {
                                                                 case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc>();
                                                                 case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.Get();
+                                                                    return new TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase>();
                                                             }
                                                             break;
                                                     }
@@ -2344,2230 +2343,19 @@ namespace Jil
         /// <summary>
         /// Generated giant switch of option finding via OptionsGeneration.linq
         /// </summary>
+        static Action<TextWriter, T, int> GetWriterAction<T>(Options options)
+        {
+            return options.SerializeTypeCache.Get<T>();
+        }
+
+        
+
+        /// <summary>
+        /// Generated giant switch of option finding via OptionsGeneration.linq
+        /// </summary>
         static StringThunkDelegate<T> GetThunkerDelegate<T>(Options options)
         {
-            // Start OptionsGeneration.linq generated content: GetThunkerDelegate 
-switch (options.UseDateTimeFormat)
-            {
-                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                    switch (options.ShouldPrettyPrint)
-                    {
-                        case false:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyle, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStyleExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case true:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrint, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MicrosoftStylePrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                    switch (options.ShouldPrettyPrint)
-                    {
-                        case false:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<Milliseconds, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case true:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrint, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<MillisecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                case DateTimeFormat.SecondsSinceUnixEpoch:
-                    switch (options.ShouldPrettyPrint)
-                    {
-                        case false:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<Seconds, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case true:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrint, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<SecondsPrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                case DateTimeFormat.ISO8601:
-                    switch (options.ShouldPrettyPrint)
-                    {
-                        case false:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601CamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601Utc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601UtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601Inherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601InheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601InheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601InheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601JSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601JSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601ExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case true:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrint, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<ISO8601PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-                case DateTimeFormat.RFC1123:
-                    switch (options.ShouldPrettyPrint)
-                    {
-                        case false:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123CamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123Utc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123UtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123Inherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123InheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123InheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123InheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123JSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123JSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123ExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                        case true:
-                            switch (options.ShouldExcludeNulls)
-                            {
-                                case false:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrint, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                                case true:
-                                    switch (options.IsJSONP)
-                                    {
-                                        case false:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNulls, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                        case true:
-                                            switch (options.ShouldIncludeInherited)
-                                            {
-                                                case false:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONP, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                                case true:
-                                                    switch (options.UseUnspecifiedDateTimeKindBehavior)
-                                                    {
-                                                        case UnspecifiedDateTimeKindBehavior.IsLocal:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInherited, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                        case UnspecifiedDateTimeKindBehavior.IsUTC:
-                                                            switch (options.SerializationNameFormat)
-                                                            {
-                                                                case SerializationNameFormat.Verbatim:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtc, T>.GetToString();
-                                                                case SerializationNameFormat.CamelCase:
-                                                                    return TypeCache<RFC1123PrettyPrintExcludeNullsJSONPInheritedUtcCamelCase, T>.GetToString();
-                                                            }
-                                                            break;
-                                                    }
-                                                    break;
-                                            }
-                                            break;
-                                    }
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-            }
-            // End OptionsGeneration.linq generated content: GetThunkerDelegate
-
-            throw new InvalidOperationException("Unexpected Options: " + options);
+            return options.SerializeTypeCache.GetToString<T>();
         }
 
         /// <summary>
@@ -4655,6 +2443,68 @@ switch (options.UseDateTimeFormat)
             return Jil.Deserialize.DeserializeIndirect.DeserializeFromString(text, type, options);
         }
 
+        internal static Deserialize.IDeserializeTypeCache CreateDeserializeTypeCache(Options options)
+        {
+            try
+            {
+                switch (options.UseDateTimeFormat)
+                {
+                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle>();
+                            case SerializationNameFormat.CamelCase:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyleCamelCase>();
+                        }
+                        break;
+                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle>();
+                            case SerializationNameFormat.CamelCase:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyleCamelCase>();
+                        }
+                        break;
+                    case DateTimeFormat.SecondsSinceUnixEpoch:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle>();
+                            case SerializationNameFormat.CamelCase:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyleCamelCase>();
+                        }
+                        break;
+                    case DateTimeFormat.ISO8601:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style>();
+                            case SerializationNameFormat.CamelCase:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601StyleCamelCase>();
+                        }
+                        break;
+                    case DateTimeFormat.RFC1123:
+                        switch (options.SerializationNameFormat)
+                        {
+                            case SerializationNameFormat.Verbatim:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style>();
+                            case SerializationNameFormat.CamelCase:
+                                return new Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123StyleCamelCase>();
+                        }
+                        break;
+                }
+                throw new InvalidOperationException("Unexpected Options: " + options);
+            }
+            catch (Exception e)
+            {
+                if (e is DeserializationException) throw;
+
+                throw new DeserializationException(e, false);
+            }
+        }
+
         /// <summary>
         /// Deserializes JSON from the given TextReader.
         /// 
@@ -4679,55 +2529,11 @@ switch (options.UseDateTimeFormat)
                 options = options ?? DefaultOptions;
                 reader = reader.MakeSupportPeek();
 
-                switch (options.UseDateTimeFormat)
-                {
-                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.Get()(reader, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyleCamelCase, T>.Get()(reader, 0);
-                        }
-                        break;
-                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.Get()(reader, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyleCamelCase, T>.Get()(reader, 0);
-                        }
-                        break;
-                    case DateTimeFormat.SecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.Get()(reader, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyleCamelCase, T>.Get()(reader, 0);
-                        }
-                        break;
-                    case DateTimeFormat.ISO8601:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.Get()(reader, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601StyleCamelCase, T>.Get()(reader, 0);
-                        }
-                        break;
-                    case DateTimeFormat.RFC1123:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.Get()(reader, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123StyleCamelCase, T>.Get()(reader, 0);
-                        }
-                        break;
-                }
-                throw new InvalidOperationException("Unexpected Options: " + options);
+
+                options = options ?? DefaultOptions;
+
+
+                return options.DeserializeTypeCache.Get<T>()(reader, 0);
             }
             catch (Exception e)
             {
@@ -4760,57 +2566,10 @@ switch (options.UseDateTimeFormat)
             {
                 options = options ?? DefaultOptions;
 
-                var thunk = new Jil.Deserialize.ThunkReader(text);
+                var thunk = new Deserialize.ThunkReader(text);
 
-                switch (options.UseDateTimeFormat)
-                {
-                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.SecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.ISO8601:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601StyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.RFC1123:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123StyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                }
-                throw new InvalidOperationException("Unexpected Options: " + options);
+               return options.DeserializeTypeCache.GetFromString<T>()(ref thunk, 0);
+              
             }
             catch (Exception e)
             {
