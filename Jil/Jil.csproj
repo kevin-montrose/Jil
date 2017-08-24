@@ -101,6 +101,7 @@
     <Compile Include="DeserializeDynamic\ObjectBuilder.cs" />
     <Compile Include="Deserialize\AnonymousTypeLookup.cs" />
     <Compile Include="Common\EnumValues.cs" />
+    <Compile Include="Deserialize\BufferedTextReaderWrapper.cs" />
     <Compile Include="Deserialize\DeserializeIndirect.cs" />
     <Compile Include="Deserialize\EnumLookup.cs" />
     <Compile Include="Common\FlagsEnumCombiner.cs" />
@@ -130,6 +131,7 @@
     <Compile Include="Common\ExtensionMethods.cs" />
     <Compile Include="Deserialize\UnionLookup.cs" />
     <Compile Include="InfiniteRecursionException.cs" />
+    <Compile Include="JilClassDirectiveAttribute.cs" />
     <Compile Include="JilDirectiveAttribute.cs" />
     <Compile Include="JSON.cs" />
     <Compile Include="Options.cs" />
