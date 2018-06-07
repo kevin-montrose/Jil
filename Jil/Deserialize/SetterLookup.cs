@@ -37,20 +37,48 @@ namespace Jil.Deserialize
         {
             var forType = typeof(ForType);
             var flags = BindingFlags.Instance | BindingFlags.Public;
-            var serializatioNameFormat = SerializationNameFormat.Verbatim;
+            var serializationNameFormat = SerializationNameFormat.Verbatim;
             if (typeof(SerializationNameFormatType) == typeof(SerializationNameFormatCamelCase))
             {
-                serializatioNameFormat = SerializationNameFormat.CamelCase;
+                serializationNameFormat = SerializationNameFormat.CamelCase;
             }
 
             var fields = forType.GetFields(flags).Where(field => field.ShouldUseMember());
             var props = forType.GetProperties(flags).Where(p => p.SetMethod != null && p.ShouldUseMember());
 
+            var allMembers = fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>()).ToList();
+            var hidden = new List<MemberInfo>();
+            foreach(var members in allMembers.GroupBy(g => g.Name))
+            {
+                if (members.Count() == 1) continue;
+
+                var paths = new Dictionary<MemberInfo, int>();
+
+                foreach(var member in members)
+                {
+                    var path = new Stack<Type>();
+                    var cur = member.DeclaringType;
+                    while(cur != null)
+                    {
+                        path.Push(cur);
+                        cur = cur.BaseType();
+                    }
+
+                    paths[member] = path.Count;
+                }
+
+                var keep = paths.OrderByDescending(kv => kv.Value).First().Key;
+
+                hidden.AddRange(paths.Keys.Except(new[] { keep }));
+            }
+
+            var withoutHidden = allMembers.Except(hidden);
+
             var setters = new Dictionary<string, List<MemberInfo>>();
 
-            foreach (var member in fields.Cast<MemberInfo>().Concat(props.Cast<MemberInfo>()))
+            foreach (var member in withoutHidden)
             {
-                var name = member.GetSerializationName(serializatioNameFormat);
+                var name = member.GetSerializationName(serializationNameFormat);
                 List<MemberInfo> members;
                 if (!setters.TryGetValue(name, out members))
                 {

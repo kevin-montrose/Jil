@@ -1746,6 +1746,7 @@ namespace JilTests
             }
         }
 
+#if !NETCORE
         [TestMethod]
         public void BenchmarkFailure()
         {
@@ -1757,6 +1758,7 @@ namespace JilTests
 
             Assert.IsTrue(eq);
         }
+#endif
 
         [TestMethod]
         public void MemberAccess()

@@ -16,7 +16,7 @@ namespace Jil.Common
 
         static EnumValues()
         {
-            PreCalculated = new Dictionary<string, TEnum>(StringComparer.InvariantCultureIgnoreCase);
+            PreCalculated = new Dictionary<string, TEnum>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var val in Enum.GetValues(typeof(TEnum)))
             {

@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Jil.Common;
 
 namespace Jil.DeserializeDynamic
 {
-    //[TypeConverter(typeof(JsonObject.DynamicTypeConverter))]
     sealed partial class JsonObject : ICustomTypeDescriptor
     {
         class DynamicTypeConverter : TypeConverter

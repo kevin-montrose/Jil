@@ -1532,32 +1532,6 @@ namespace JilTests
                 }
             }
 
-            using (var str = new StringReader("\"1900-01-01T1234\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Expected :", e.Message);
-                }
-            }
-
-            using (var str = new StringReader("\"19000101T12:34\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Unexpected separator", e.Message);
-                }
-            }
-
             using (var str = new StringReader("\"19000101T1234:56\""))
             {
                 try
@@ -1568,19 +1542,6 @@ namespace JilTests
                 catch (DeserializationException e)
                 {
                     Assert.AreEqual("Unexpected separator in ISO8601 time", e.Message);
-                }
-            }
-
-            using (var str = new StringReader("\"19000101T123456+00:30\""))
-            {
-                try
-                {
-                    JSON.Deserialize<DateTime>(str, Options.ISO8601);
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (DeserializationException e)
-                {
-                    Assert.AreEqual("Unexpected separator in ISO8601 timezone offset", e.Message);
                 }
             }
 
@@ -4530,6 +4491,24 @@ namespace JilTests
             Assert.AreEqual(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, JSON.Deserialize<_FlagsEnum>("\"C,B,A\""));
         }
 
+        enum _EnumMemberAttributeDefault
+        {
+            [EnumMember]
+            A = 1,
+            [EnumMember]
+            B = 2,
+            [EnumMember]
+            C = 4
+        }
+
+        [TestMethod]
+        public void EnumMemberAttributeDefault()
+        {
+            Assert.AreEqual(_EnumMemberAttributeDefault.A, JSON.Deserialize<_EnumMemberAttributeDefault>("\"A\""));
+            Assert.AreEqual(_EnumMemberAttributeDefault.B, JSON.Deserialize<_EnumMemberAttributeDefault>("\"B\""));
+            Assert.AreEqual(_EnumMemberAttributeDefault.C, JSON.Deserialize<_EnumMemberAttributeDefault>("\"C\""));
+        }
+
         enum _EnumMemberAttributeOverride
         {
             [EnumMember(Value = "1")]
@@ -4694,7 +4673,7 @@ namespace JilTests
 
         class __Issue25 {  /* nothing here .. yet */ }
 
-        static T Issue25DeserializeByExample<T>(T example, string json, Options opts)
+        static T ___Issue25DeserializeByExample<T>(T example, string json, Options opts)
         {
             return JSON.Deserialize<T>(json, opts);
         }
@@ -4720,7 +4699,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = Issue25DeserializeByExample(example, json, Options.Default);
+                var res = ___Issue25DeserializeByExample(example, json, Options.Default);
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
@@ -4728,7 +4707,7 @@ namespace JilTests
 
             {
                 var example = new { Id = 17, Foo = new { } };
-                var res = Issue25DeserializeByExample(example, json, new Options());
+                var res = ___Issue25DeserializeByExample(example, json, new Options());
 
                 Assert.AreEqual(17, res.Id);
                 Assert.IsNotNull(res.Foo);
@@ -7294,6 +7273,186 @@ namespace JilTests
                 var res = JSON.Deserialize<_EmptyEnumWrapper3>("{\"A\":1}");
                 Assert.IsNotNull(res);
                 Assert.IsTrue(res.A == (_EmptyEnum)1);
+            }
+        }
+
+        [TestMethod]
+        public void Issue235()
+        {
+            // strings
+            {
+                var res1 = JSON.Deserialize<decimal>("-100000000000001");
+                Assert.AreEqual(-100000000000001m, res1);
+
+                var res2 = JSON.Deserialize<decimal>("-100000000000002");
+                Assert.AreEqual(-100000000000002m, res2);
+            }
+
+            // streams
+            {
+                using (var stream = new StringReader("-100000000000001"))
+                {
+                    var res = JSON.Deserialize<decimal>(stream);
+                    Assert.AreEqual(-100000000000001m, res);
+                }
+
+                using (var stream = new StringReader("-100000000000002"))
+                {
+                    var res = JSON.Deserialize<decimal>(stream);
+                    Assert.AreEqual(-100000000000002m, res);
+                }
+            }
+        }
+
+        public class _Issue227
+        {
+            public _Issue227_1 EnumProperty { get; set; }
+        }
+
+        public enum _Issue227_1
+        {
+            Addin,
+            AddInSettingsDetail,
+            AddInSettingsEncryptionHelper,
+            UpdatePayments
+        }
+
+        [TestMethod]
+        public void Issue227()
+        {
+            var ser = JSON.Serialize(_Issue227_1.AddInSettingsDetail);
+
+            var val = JSON.Deserialize<_Issue227_1>(ser);
+            Assert.AreEqual(_Issue227_1.AddInSettingsDetail, val);
+        }
+
+        [DataContract]
+        public enum _Issue225_1
+        {
+            [EnumMember]
+            Value0 = 0,
+            [EnumMember]
+            Value1 = 1
+        }
+
+        [DataContract]
+        public class _Issue225
+        {
+            [DataMember(Name = "PT")]
+            public _Issue225_1 PackagedType;
+        }
+
+        [TestMethod]
+        public void Issue225()
+        {
+            var json = JSON.Serialize(new _Issue225
+            {
+                PackagedType = _Issue225_1.Value0
+            });
+
+            var bean = JSON.Deserialize<_Issue225>(json);
+            Assert.IsNotNull(bean);
+            Assert.AreEqual(_Issue225_1.Value0, bean.PackagedType);
+        }
+
+        class _Issue176_1
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_1_Derived : _Issue176_1
+        {
+            public new int Foo { get; set; }
+        }
+
+        class _Issue176_2
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_2_Derived : _Issue176_2
+        {
+            public new int[] Foo { get; set; }
+        }
+
+        class _Issue176_3
+        {
+            public int Foo { get; set; }
+        }
+
+        class _Issue176_3_Derived : _Issue176_3
+        {
+            public new string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue176()
+        {
+            {
+                JSON.Deserialize<_Issue176_1_Derived>("{}");
+                var res = JSON.Deserialize<_Issue176_1_Derived>("{\"Foo\":123}");
+                Assert.IsNotNull(res);
+                Assert.AreEqual(123, res.Foo);
+            }
+
+            {
+                JSON.Deserialize<_Issue176_2_Derived>("{}");
+                var res = JSON.Deserialize<_Issue176_2_Derived>("{\"Foo\":[1,2,3]}");
+                Assert.IsNotNull(res);
+                Assert.IsNotNull(res.Foo);
+                Assert.AreEqual(3, res.Foo.Length);
+                Assert.AreEqual(1, res.Foo[0]);
+                Assert.AreEqual(2, res.Foo[1]);
+                Assert.AreEqual(3, res.Foo[2]);
+            }
+
+            {
+                JSON.Deserialize<_Issue176_3_Derived>("{}");
+                var res = JSON.Deserialize< _Issue176_3_Derived>("{\"Foo\":\"Bar\"}");
+                Assert.IsNotNull(res);
+                Assert.AreEqual("Bar", res.Foo);
+            }
+        }
+
+        [TestMethod]
+        public void Issue229()
+        {
+            var expected = new DateTime(2016, 05, 06, 15, 57, 34, DateTimeKind.Utc);
+
+            var result = JSON.Deserialize<_Issue229>("{\"createdate\":\"2016-05-06T15:57:34.000+0000\"}", new Options(dateFormat: Jil.DateTimeFormat.ISO8601));
+
+            Assert.AreEqual(expected, result.createdate);
+        }
+
+        class _Issue229
+        {
+            public DateTime createdate { get; set; }
+        }
+
+        [JilPrimitiveWrapper]
+        struct _Issue270
+        {
+            public _Issue270(int val)
+            {
+                Val = val;
+            }
+#pragma warning disable 649
+            public int Val;
+#pragma warning restore 649
+        }
+
+        [TestMethod]
+        public void Issue270()
+        {
+            {
+                var res = JSON.Deserialize<_Issue270?>("123");
+                Assert.IsTrue(res != null);
+                Assert.AreEqual(123, res.Value.Val);
+            }
+
+            {
+                var res = JSON.Deserialize<_Issue270?>("null");
+                Assert.IsTrue(res == null);
             }
         }
 

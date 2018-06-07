@@ -45,7 +45,7 @@ namespace Jil.Deserialize
 
                 var field = typeof(EnumType).GetField(name);
                 var enumMember = field.GetCustomAttribute<System.Runtime.Serialization.EnumMemberAttribute>();
-                if(enumMember != null)
+                if(enumMember?.Value != null)
                 {
                     ret.Add(Tuple.Create(enumMember.Value, val));
                 }

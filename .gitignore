@@ -5,3 +5,5 @@ obj/
 *.user
 .vs/
 *.lock.json
+Backup/
+UpgradeLog.htm

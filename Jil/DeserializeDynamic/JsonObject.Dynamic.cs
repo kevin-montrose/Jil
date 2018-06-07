@@ -158,7 +158,7 @@ namespace Jil.DeserializeDynamic
                     var index = indexes[i];
                     var exp = index.Expression;
 
-                    if (exp.Type.IsValueType)
+                    if (exp.Type.IsValueType())
                     {
                         indexExprs[i] = Expression.Convert(exp, typeof(object));
                     }
@@ -229,7 +229,7 @@ namespace Jil.DeserializeDynamic
                     var arg = args[i];
                     var exp = arg.Expression;
 
-                    if (exp.Type.IsValueType)
+                    if (exp.Type.IsValueType())
                     {
                         argExprs[i] = Expression.Convert(exp, typeof(object));
                     }
@@ -346,7 +346,7 @@ namespace Jil.DeserializeDynamic
                 var thisAssigned = Expression.Assign(thisEvaled, thisRef);
                 var finalResult = Expression.Variable(binder.ReturnType);
                 var argRef = ArgRef;
-                var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
+                var argAssigned = Expression.Assign(argRef, (arg.RuntimeType == null || arg.RuntimeType.IsValueType()) ? Expression.Convert(arg.Expression, typeof(object)) : arg.Expression);
                 var res = Res;
                 var tryInvokeMemberCall = Expression.Call(thisEvaled, InnerTryBinaryOperation, Expression.Constant(binder.Operation), argRef, Expression.Constant(binder.ReturnType), res);
                 var throwExc =
@@ -1228,7 +1228,7 @@ namespace Jil.DeserializeDynamic
                         result = StringValue;
                         return true;
                     }
-                    if (returnType.IsEnum)
+                    if (returnType.IsEnum())
                     {
                         if (returnType.IsFlagsEnum())
                         {
@@ -1330,7 +1330,7 @@ namespace Jil.DeserializeDynamic
                         var valType = args[1];
 
                         var stringKeys = keyType == typeof(string);
-                        var enumKeys = keyType.IsEnum;
+                        var enumKeys = keyType.IsEnum();
 
                         // only strings and enums can be keys
                         if (!(stringKeys || enumKeys))

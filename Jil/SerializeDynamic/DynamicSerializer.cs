@@ -215,7 +215,7 @@ namespace Jil.SerializeDynamic
             emit.LoadArgument(1);                                   // Action<TextWriter, Type, int> TextWriter
             emit.LoadArgument(2);                                   // Action<TextWriter, Type, int> TextWriter object
 
-            if (type.IsValueType)
+            if (type.IsValueType())
             {
                 emit.UnboxAny(type);                                // Action<TextWriter, Type, int> TextWriter type
             }
@@ -486,6 +486,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTime.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTime(out dt);
             }
 
@@ -526,6 +532,12 @@ namespace Jil.SerializeDynamic
             var jilDyn = dyn as Jil.DeserializeDynamic.JsonObject;
             if (jilDyn != null)
             {
+                if (jilDyn.IsAmbiguousAsDateTime())
+                {
+                    dt = DateTimeOffset.MinValue;
+                    return false;
+                }
+
                 return jilDyn.TryCastDateTimeOffset(out dt);
             }
 
@@ -738,6 +750,18 @@ namespace Jil.SerializeDynamic
                     // note we actually have to do a cast here, since `is` and `as` bypass the DLR
                     var asDict2 = (IDictionary)dyn;
                     return false;
+                }
+                catch { }
+                try
+                {
+                    var otherDictType = ((object)dyn).GetType().GetDictionaryInterface();
+                    // aha, you implement IDictionary<T, V>, but do so in a way we can't cast to!
+                    if (otherDictType != null)
+                    {
+                        var key = otherDictType.GetGenericArguments()[0];
+                        // ok, your key is something we can work with, so indicate that this thing could be a Dictionary
+                        if (key.IsStringyType() || key.IsEnum()) return false;
+                    }
                 }
                 catch { }
 

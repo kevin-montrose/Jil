@@ -120,7 +120,6 @@ namespace Jil.DeserializeDynamic
         {
             var member = JsonObject.NewObjectMember(BeingBuilt);
 
-            //BeingBuilt.Put(member);
             BeingBuilt = member;
         }
 

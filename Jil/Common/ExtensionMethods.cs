@@ -16,7 +16,108 @@ namespace Jil.Common
     {
         public static ConstructorInfo GetPublicOrPrivateConstructor(this Type onType, params Type[] parameterTypes)
         {
-            return onType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, parameterTypes, null);
+            return onType.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, parameterTypes);
+        }
+
+        public static ConstructorInfo GetConstructor(this Type type, BindingFlags flags, Type[] parameterTypes)
+        {
+            var info = type.GetTypeInfo();
+            var cons = info.GetConstructors(flags);
+            foreach (var con in cons)
+            {
+                var ps = con.GetParameters();
+                if (ps.Length != parameterTypes.Length) continue;
+
+                var allMatch = true;
+
+                for (var i = 0; i < ps.Length; i++)
+                {
+                    var p = ps[i].ParameterType;
+                    var pt = parameterTypes[i];
+                    if (pt != p)
+                    {
+                        allMatch = false;
+                    }
+                }
+
+                if (allMatch) return con;
+            }
+
+            return null;
+        }
+
+        public static MethodInfo GetMethod(this Type type, string name, BindingFlags flags, Type[] parameterTypes)
+        {
+            var info = type.GetTypeInfo();
+            var mtds = info.GetMethods(flags).Where(m => m.Name == name);
+
+            foreach (var mtd in mtds)
+            {
+                var ps = mtd.GetParameters();
+                if (ps.Length != parameterTypes.Length) continue;
+
+                var allMatch = true;
+                for (var i = 0; i < ps.Length; i++)
+                {
+                    var p = ps[i].ParameterType;
+                    var pt = parameterTypes[i];
+                    if (p != pt)
+                    {
+                        allMatch = false;
+                    }
+                }
+
+                if (allMatch)
+                {
+                    return mtd;
+                }
+            }
+
+            return null;
+        }
+
+        public static Module Module(this Type type)
+        {
+            var info = type.GetTypeInfo();
+            return info.Module;
+        }
+
+        public static Type GetNestedType(this Type type, string name)
+        {
+            var info = type.GetTypeInfo();
+            var ret = info.GetNestedType(name);
+
+            return ret;
+        }
+
+        public static bool IsValueType(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsValueType;
+        }
+
+        public static string ResolveString(this Module module, int handle)
+        {
+#if NETCORE
+            throw new NotImplementedException("Cannot resolve string references in IL on dotNetCore");
+#else
+            return module.ResolveString(handle);
+#endif
+        }
+
+        public static Type BaseType(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.BaseType;
+        }
+
+        public static bool IsGenericType(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsGenericType;
         }
 
         public static bool ShouldConvertEnum(this MemberInfo member, Type enumType)
@@ -159,9 +260,45 @@ namespace Jil.Common
             return enumType.GetCustomAttribute<FlagsAttribute>() != null;
         }
 
+        public static T GetCustomAttribute<T>(this Type type)
+            where T : Attribute
+        {
+            var info = type.GetTypeInfo();
+            var data = info.CustomAttributes.Where(a => a.AttributeType == typeof(T)).SingleOrDefault();
+
+            if (data == null) return null;
+
+            var cons = data.Constructor;
+            var args = data.ConstructorArguments.Select(a => a.Value).ToArray();
+            var ret = cons.Invoke(args);
+
+            return (T)ret;
+        }
+
+        public static bool IsInterface(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsInterface;
+        }
+
+        public static bool IsSealed(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsSealed;
+        }
+
+        public static bool IsPublic(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsPublic;
+        }
+
         public static bool IsGenericContainer(this Type forType, Type containerType)
         {
-            return forType.IsInterface && forType.IsGenericType && forType.GetGenericTypeDefinition() == containerType;
+            return forType.IsInterface() && forType.IsGenericType() && forType.GetGenericTypeDefinition() == containerType;
         }
 
         public static bool IsGenericDictionary(this Type forType)
@@ -244,9 +381,11 @@ namespace Jil.Common
         /// </summary>
         public static bool IsAnonymouseClass(this Type type) // don't fix the typo, it's fitting.
         {
-            if (type.IsValueType) return false;
-            if (type.BaseType != typeof(object)) return false;
-            if (!Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute))) return false;
+            if (type.IsValueType()) return false;
+            if (type.BaseType() != typeof(object)) return false;
+
+            var compilerGenerated = type.GetTypeInfo().CustomAttributes.Any(a => a.AttributeType == typeof(CompilerGeneratedAttribute));
+            if (!compilerGenerated) return false;
 
             var allCons = type.GetConstructors();
             if (allCons.Length != 1) return false;
@@ -296,7 +435,14 @@ namespace Jil.Common
 
         public static bool IsUserDefinedType(this Type type)
         {
-            return !type.IsListType() && !type.IsDictionaryType() && !type.IsEnum && !type.IsPrimitiveType();
+            return !type.IsListType() && !type.IsDictionaryType() && !type.IsEnum() && !type.IsPrimitiveType();
+        }
+
+        public static bool IsEnum(this Type type)
+        {
+            var info = type.GetTypeInfo();
+
+            return info.IsEnum;
         }
 
         public static bool IsConstant(this MemberInfo member)
@@ -417,6 +563,10 @@ namespace Jil.Common
 
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
         {
+#if NETCORE
+            throw new NotImplementedException("It's not possible to determine a constant value for a property in dotnet core.");
+#else
+
             var instrs = Utils.Decompile(prop.GetMethod);
 
             var constInstr = instrs.Single(o => ConstantLoadOpCodes.Contains(o.Item1) || o.Item2.HasValue || o.Item3.HasValue || o.Item4.HasValue);
@@ -485,11 +635,12 @@ namespace Jil.Common
             }
 
             return GetConstantJSONStringEquivalent(prop.ReturnType(), equivObj, jsonp);
+#endif
         }
 
         private static object ConvertType(object val, Type fromType, Type toType)
         {
-            if (toType.IsEnum)
+            if (toType.IsEnum())
             {
                 toType = Enum.GetUnderlyingType(toType);
             }
@@ -594,7 +745,7 @@ namespace Jil.Common
                 return asBool.Value ? "true" : "false";
             }
 
-            if (type.IsEnum)
+            if (type.IsEnum())
             {
                 return "\"" + type.GetEnumValueName(obj).JsonEscape(jsonp) + "\"";
             }
@@ -622,7 +773,7 @@ namespace Jil.Common
                 t == typeof(long) ||
                 t == typeof(ulong) ||
                 t == typeof(bool) ||
-                t.IsEnum;
+                t.IsEnum();
         }
 
         public static bool ShouldUseMember(this MemberInfo memberInfo)
@@ -673,8 +824,8 @@ namespace Jil.Common
             try
             {
                 return
-                    (t.IsGenericType && t.GetGenericTypeDefinition() == containerType) ||
-                    t.GetInterfaces().Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == containerType);
+                    (t.IsGenericType() && t.GetGenericTypeDefinition() == containerType) ||
+                    t.GetInterfaces().Any(i => i.IsGenericType() && i.GetGenericTypeDefinition() == containerType);
             }
             catch (Exception) { return false; }
         }
@@ -747,9 +898,9 @@ namespace Jil.Common
         public static Type GetContainerInterface(this Type t, Type containerType)
         {
             return
-                (t.IsGenericType && t.GetGenericTypeDefinition() == containerType)
+                (t.IsGenericType() && t.GetGenericTypeDefinition() == containerType)
                     ? t
-                    : t.GetInterfaces().First(i => i.IsGenericType && i.GetGenericTypeDefinition() == containerType);
+                    : t.GetInterfaces().First(i => i.IsGenericType() && i.GetGenericTypeDefinition() == containerType);
         }
 
         public static Type GetDictionaryInterface(this Type t)
@@ -764,7 +915,7 @@ namespace Jil.Common
 
         public static bool IsExactlyDictionaryType(this Type t)
         {
-            if (!t.IsGenericType) return false;
+            if (!t.IsGenericType()) return false;
 
             var generic = t.GetGenericTypeDefinition();
 
@@ -774,10 +925,10 @@ namespace Jil.Common
         public static bool IsSimpleInterface(this Type t)
         {
             // not an interface? bail
-            if (!t.IsInterface) return false;
+            if (!t.IsInterface()) return false;
 
             // not public? bail
-            if (!t.IsPublic) return false;
+            if (!t.IsPublic()) return false;
 
             var members = t.GetAllInterfaceMembers();
 
@@ -798,7 +949,7 @@ namespace Jil.Common
 
         public static List<MemberInfo> GetAllInterfaceMembers(this Type t)
         {
-            if (!t.IsInterface) throw new Exception("Expected interface, found: " + t);
+            if (!t.IsInterface()) throw new Exception("Expected interface, found: " + t);
 
             var pending = new Stack<Type>();
             pending.Push(t);
@@ -811,9 +962,9 @@ namespace Jil.Common
 
                 ret.AddRange(current.GetMembers());
 
-                if (current.BaseType != null)
+                if (current.BaseType() != null)
                 {
-                    pending.Push(current.BaseType);
+                    pending.Push(current.BaseType());
                 }
 
                 current.GetInterfaces().ForEach(i => pending.Push(i));
@@ -1060,7 +1211,7 @@ namespace Jil.Common
 
         public static object DefaultValue(this Type t)
         {
-            if (!t.IsValueType) return null;
+            if (!t.IsValueType()) return null;
 
             return Activator.CreateInstance(t);
         }

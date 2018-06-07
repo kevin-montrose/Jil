@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Collections;
 
 namespace JilTests
 {
@@ -6368,6 +6369,7 @@ namespace JilTests
             }
         }
 
+#if !NETCORE
         // Type fairly similar to one in the Stack Exchange API that gave Jil some trouble
         class _Inherited<T> : System.Web.Mvc.ContentResult
             where T : class
@@ -6433,6 +6435,7 @@ namespace JilTests
                 Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"Content\":null,\"ContentType\":null,\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
         }
+#endif
 
         [TestMethod]
         public void AllocationlessVsNormalDictionaries()
@@ -6543,7 +6546,15 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}", res);
+
+#if NETCORE
+                // can't reorder members in the same way, so blurgh
+                const string EXPECTED_VALUE = "{\"NotSoSecretName\":314159,\"Plain\":\"hello world\",\"FakeName\":\"Really RealName\"}";
+#else
+                const string EXPECTED_VALUE = "{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}";
+#endif
+                
+                Assert.AreEqual(EXPECTED_VALUE, res);
             }
         }
 
@@ -6578,6 +6589,7 @@ namespace JilTests
             }
         }
 
+#if !NETCORE
         class _DoubleWeirdCulture : IDisposable
         {
             CultureInfo RestoreToCulture;
@@ -6617,7 +6629,9 @@ namespace JilTests
                 }
             }
         }
+#endif
 
+#if !NETCORE
         class _DoubleConstantWeirdCulture
         {
             public double Const { get { return 3.14159; } }
@@ -6640,6 +6654,7 @@ namespace JilTests
                 }
             }
         }
+#endif
 
         class _Enumerables
         {
@@ -7031,7 +7046,15 @@ namespace JilTests
                 var asStr = "{\"total\":6,\"page_size\":30,\"page\":1,\"type\":\"flag_option\",\"items\":[{\"option_id\":46534,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is spam\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"sub_options\":null,\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"option_id\":7852,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is offensive, abusive, or hate speech\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"sub_options\":null,\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is a duplicate...\",\"description\":\"This question has been asked before and already has an answer.\",\"sub_options\":[{\"option_id\":8762,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"sub_options\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"option_id\":42580,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":22396,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":34792,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":53441,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":54702,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":5162,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":8641,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":42868,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it should be closed for another reason...\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"sub_options\":[{\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"duplicate of...\",\"description\":\"This question has been asked before and already has an answer.\",\"sub_options\":[{\"option_id\":58780,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"sub_options\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"option_id\":60782,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":10563,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":47075,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":11110,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":31605,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":1812,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":61901,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"option_id\":345,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"off-topic because...\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"sub_options\":[{\"option_id\":55230,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"option_id\":19261,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"option_id\":22924,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"option_id\":20878,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question belongs on another site in the Stack Exchange network\",\"sub_options\":[{\"option_id\":43510,\"requires_comment\":false,\"requires_site\":true,\"requires_question_id\":false,\"title\":\"belongs on another site in the Stack Exchange network\",\"description\":null,\"sub_options\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Migration\"}],\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"option_id\":47170,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"Other (add a comment explaining what is wrong)\",\"sub_options\":null,\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"}],\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"option_id\":11866,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"unclear what you're asking\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"sub_options\":null,\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"option_id\":18198,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"too broad\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"sub_options\":null,\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"option_id\":8528,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"primarily opinion-based\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"sub_options\":null,\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"}],\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"option_id\":36772,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is very low quality\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"sub_options\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"option_id\":34976,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"other (needs ♦ moderator attention)\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"sub_options\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"}],\"quota_remaining\":9996,\"quota_max\":10000,\"backoff\":10,\"error_id\":null,\"error_name\":null,\"error_message\":null,\"has_more\":false,\"Content\":null,\"ContentEncoding\":null,\"ContentType\":null}";
                 var asObj = JSON.Deserialize<_ApiResult<_FlagOption>>(asStr);
                 var foo = JSON.Serialize(asObj);
-                Assert.AreEqual("{\"items\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":46534,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"title\":\"it is spam\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":7852,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"title\":\"it is offensive, abusive, or hate speech\"},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8762,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42580,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22396,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":34792,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":53441,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":54702,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":5162,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8641,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42868,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"it is a duplicate...\"},{\"sub_options\":[{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":58780,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":60782,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":10563,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":47075,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11110,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":31605,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":1812,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":61901,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":345,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"duplicate of...\"},{\"sub_options\":[{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":55230,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":19261,\"dialog_title\":\"Off-Topic\",\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22924,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":20878,\"dialog_title\":\"Off-Topic\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"title\":null},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":true,\"requires_comment\":false,\"option_id\":43510,\"dialog_title\":\"Migration\",\"description\":null,\"title\":\"belongs on another site in the Stack Exchange network\"}],\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Off-Topic\",\"description\":\"This question belongs on another site in the Stack Exchange network\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":47170,\"dialog_title\":\"Off-Topic\",\"description\":\"Other (add a comment explaining what is wrong)\",\"title\":null}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"title\":\"off-topic because...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11866,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"title\":\"unclear what you're asking\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":18198,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"title\":\"too broad\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8528,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"title\":\"primarily opinion-based\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"title\":\"it should be closed for another reason...\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":36772,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"title\":\"it is very low quality\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":34976,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"title\":\"other (needs ♦ moderator attention)\"}],\"has_more\":false,\"error_id\":null,\"backoff\":10,\"quota_max\":10000,\"quota_remaining\":9996,\"page\":1,\"page_size\":30,\"total\":6,\"error_message\":null,\"error_name\":null,\"type\":\"flag_option\"}", foo);
+
+#if NETCORE
+                // can't get the same ordering in net core
+                const string EXPECTED_VALUE = "{\"items\":[{\"sub_options\":null,\"option_id\":46534,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is spam\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":7852,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is offensive, abusive, or hate speech\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":8762,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":42580,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":22396,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":34792,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":53441,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":54702,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":5162,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":8641,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":42868,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is a duplicate...\",\"description\":\"This question has been asked before and already has an answer.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":[{\"sub_options\":[{\"sub_options\":null,\"option_id\":58780,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":60782,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":10563,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":47075,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":11110,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":31605,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":1812,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":61901,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":345,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"duplicate of...\",\"description\":\"This question has been asked before and already has an answer.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":55230,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":19261,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":22924,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":20878,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":43510,\"requires_comment\":false,\"requires_site\":true,\"requires_question_id\":false,\"title\":\"belongs on another site in the Stack Exchange network\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Migration\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question belongs on another site in the Stack Exchange network\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":47170,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"Other (add a comment explaining what is wrong)\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"off-topic because...\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":11866,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"unclear what you're asking\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":18198,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"too broad\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":8528,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"primarily opinion-based\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it should be closed for another reason...\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":36772,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is very low quality\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":34976,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"other (needs ♦ moderator attention)\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"}],\"total\":6,\"page_size\":30,\"page\":1,\"type\":\"flag_option\",\"quota_remaining\":9996,\"quota_max\":10000,\"backoff\":10,\"error_id\":null,\"error_name\":null,\"error_message\":null,\"has_more\":false}";
+#else
+                const string EXPECTED_VALUE = "{\"items\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":46534,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"title\":\"it is spam\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":7852,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"title\":\"it is offensive, abusive, or hate speech\"},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8762,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42580,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22396,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":34792,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":53441,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":54702,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":5162,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8641,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42868,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"it is a duplicate...\"},{\"sub_options\":[{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":58780,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":60782,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":10563,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":47075,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11110,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":31605,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":1812,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":61901,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":345,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"duplicate of...\"},{\"sub_options\":[{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":55230,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":19261,\"dialog_title\":\"Off-Topic\",\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22924,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":20878,\"dialog_title\":\"Off-Topic\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"title\":null},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":true,\"requires_comment\":false,\"option_id\":43510,\"dialog_title\":\"Migration\",\"description\":null,\"title\":\"belongs on another site in the Stack Exchange network\"}],\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Off-Topic\",\"description\":\"This question belongs on another site in the Stack Exchange network\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":47170,\"dialog_title\":\"Off-Topic\",\"description\":\"Other (add a comment explaining what is wrong)\",\"title\":null}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"title\":\"off-topic because...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11866,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"title\":\"unclear what you're asking\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":18198,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"title\":\"too broad\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8528,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"title\":\"primarily opinion-based\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"title\":\"it should be closed for another reason...\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":36772,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"title\":\"it is very low quality\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":34976,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"title\":\"other (needs ♦ moderator attention)\"}],\"has_more\":false,\"error_id\":null,\"backoff\":10,\"quota_max\":10000,\"quota_remaining\":9996,\"page\":1,\"page_size\":30,\"total\":6,\"error_message\":null,\"error_name\":null,\"type\":\"flag_option\"}";
+#endif
+
+                Assert.AreEqual(EXPECTED_VALUE, foo);
             }
         }
 
@@ -7992,7 +8015,14 @@ namespace JilTests
                     Options.PrettyPrint
                 );
 
-            Assert.AreEqual("{\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1\n}", res);
+#if NETCORE
+            // core can't do as many (re)ordering optimizations, so this'll differ
+            const string EXPECTED_VALUE = "{\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1\n}";
+#else
+            const string EXPECTED_VALUE = "{\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1\n}";
+#endif
+
+            Assert.AreEqual(EXPECTED_VALUE, res);
         }
 
         class _Issue95
@@ -8326,7 +8356,15 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+
+#if NETCORE
+                // net core doens't let us match ordering
+                const string EXPECTED_VALUE = "{\"oneTwo\":\"1\",\"ThreeFour\":\"2\",\"FIVESIX\":\"3\"}";
+#else
+                const string EXPECTED_VALUE = "{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}";
+#endif
+
+                Assert.AreEqual(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8341,7 +8379,13 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}", res);
+#if NETCORE
+                const string EXPECTED_VALUE = "{\"oneTwo\":\"1\",\"threeFour\":\"2\",\"fivesix\":\"3\"}";
+#else
+                const string EXPECTED_VALUE = "{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}";
+#endif
+
+                Assert.AreEqual(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8355,7 +8399,14 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.Verbatim));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+
+#if NETCORE
+                const string EXPECTED_VALUE = "{\"ExplicitMember\":\"MemberValue\",\"Directive\":\"DirectiveValue\",\"NekkidProperty\":\"NekkidValie\"}";
+#else
+                const string EXPECTED_VALUE = "{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
+#endif
+
+                Assert.AreEqual(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8369,7 +8420,14 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}", res);
+
+#if NETCORE
+                const string EXPECTED_VALUE = "{\"ExplicitMember\":\"MemberValue\",\"Directive\":\"DirectiveValue\",\"nekkidProperty\":\"NekkidValie\"}";
+#else
+                const string EXPECTED_VALUE = "{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
+#endif
+
+                Assert.AreEqual(EXPECTED_VALUE, res);
             }
         }
 
@@ -9327,6 +9385,470 @@ namespace JilTests
             {
                 Assert.AreEqual("{\"A\":0}", JSON.Serialize(new _EmptyEnumWrapper3 { }));
                 Assert.AreEqual("{\"A\":1}", JSON.Serialize(new _EmptyEnumWrapper3 { A = (_EmptyEnum)1 }));
+            }
+        }
+
+        [JilPrimitiveWrapper]
+        public struct _Issue238_1
+        {
+            public _Issue238_1(long value)
+            {
+                this.Value = value;
+            }
+
+            public long Value { get; }
+        }
+
+        public class _Issue238
+        {
+            public _Issue238_1 Id { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue238()
+        {
+            var json = JSON.Serialize(new _Issue238(), Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase);
+            Assert.AreEqual("{\n \"id\": 0\n}", json);
+        }
+
+        public class _Issue231
+        {
+            public ArraySegment<byte> Payload { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue231()
+        {
+            var arr = new byte[] { 1, 2, 3 };
+
+            var obj =
+                new _Issue231
+                {
+                    Payload = new ArraySegment<byte>(arr)
+                };
+            var json = JSON.Serialize(obj);
+            Assert.AreEqual("{\"Payload\":[1,2,3]}", json);
+        }
+
+        struct _DictionaryValueType : IDictionary<int, int>
+        {
+            int Key;
+            int Value;
+
+            public int this[int key]
+            {
+                get
+                {
+                    if (key == Key) return Value;
+
+                    throw new KeyNotFoundException();
+                }
+
+                set
+                {
+                    Key = key;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    return 1;
+                }
+            }
+
+            public bool IsReadOnly
+            {
+                get
+                {
+                    return false;
+                }
+            }
+
+            public ICollection<int> Keys
+            {
+                get
+                {
+                    return new[] { Key };
+                }
+            }
+
+            public ICollection<int> Values
+            {
+                get
+                {
+                    return new[] { Value };
+                }
+            }
+
+            public void Add(KeyValuePair<int, int> item)
+            {
+                Key = item.Key;
+                Value = item.Value;
+            }
+
+            public void Add(int key, int value)
+            {
+                Key = key;
+                Value = value;
+            }
+
+            public void Clear()
+            {
+                Key = Value = 0;
+            }
+
+            public bool Contains(KeyValuePair<int, int> item)
+            {
+                return Key == item.Key && Value == item.Value;
+            }
+
+            public bool ContainsKey(int key)
+            {
+                return Key == key;
+            }
+
+            public void CopyTo(KeyValuePair<int, int>[] array, int arrayIndex)
+            {
+                array[arrayIndex] = new KeyValuePair<int, int>(Key, Value);
+            }
+
+            IEnumerable<KeyValuePair<int, int>> InnerEnumerable()
+            {
+                yield return new KeyValuePair<int, int>(Key, Value);
+            }
+
+            public IEnumerator<KeyValuePair<int, int>> GetEnumerator()
+            {
+                return InnerEnumerable().GetEnumerator();
+            }
+
+            public bool Remove(KeyValuePair<int, int> item)
+            {
+                if(item.Key == Key && item.Value == Value)
+                {
+                    Clear();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public bool Remove(int key)
+            {
+                if(Key == key)
+                {
+                    Clear();
+                    return true;
+                }
+
+                return false;
+            }
+
+            public bool TryGetValue(int key, out int value)
+            {
+                if(Key == key)
+                {
+                    value = Value;
+                    return true;
+                }
+
+                value = default(int);
+                return false;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        [TestMethod]
+        public void DictionaryValueType()
+        {
+            var val = new _DictionaryValueType();
+            val[1] = 2;
+
+            var json = JSON.Serialize(val);
+            Assert.IsNotNull(json);
+        }
+
+        class _Issue176_1
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_1_Derived : _Issue176_1
+        {
+            public new int Foo { get; set; }
+        }
+
+        class _Issue176_2
+        {
+            public List<int> Foo { get; set; }
+        }
+
+        class _Issue176_2_Derived : _Issue176_2
+        {
+            public new int[] Foo { get; set; }
+        }
+
+        class _Issue176_3
+        {
+            public int Foo { get; set; }
+        }
+
+        class _Issue176_3_Derived : _Issue176_3
+        {
+            public new string Foo { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue176()
+        {
+            {
+                var json = JSON.Serialize(new _Issue176_1_Derived { Foo = 123 });
+                Assert.AreEqual("{\"Foo\":123}", json);
+            }
+
+            {
+                var json = JSON.Serialize(new _Issue176_2_Derived { Foo = new[] { 1, 2, 3 } });
+                Assert.AreEqual("{\"Foo\":[1,2,3]}", json);
+            }
+
+            {
+                var json = JSON.Serialize(new _Issue176_3_Derived { Foo = "Bar" });
+                Assert.AreEqual("{\"Foo\":\"Bar\"}", json);
+            }
+        }
+        
+
+        struct _Issue258
+        {
+            public string[] Elements { get; }
+            public _Issue258(string[] elements)
+            {
+                Elements = elements;
+            }
+        }
+        [TestMethod]
+        public void Issue258()
+        {
+            {
+                var json = JSON.Serialize(new _Issue258(new[] { "foo" }));
+                Assert.AreEqual("{\"Elements\":[\"foo\"]}", json);
+            }
+            {
+                var json = JSON.Serialize(new _Issue258(null));
+                Assert.AreEqual("{\"Elements\":null}", json);
+            }
+        }
+
+        [JilPrimitiveWrapper]
+        struct _Issue270 { public int Val; }
+
+        [TestMethod]
+        public void Issue270()
+        {
+            Assert.AreEqual("123", JSON.Serialize<_Issue270?>(new _Issue270 { Val = 123 }));
+            Assert.AreEqual("null", JSON.Serialize<_Issue270?>(null));
+        }
+
+        
+        [Flags]
+        private enum _Issue272Enum { Zero, One, Two }
+
+        private class _Issue272
+        {
+            public Dictionary<_Issue272Enum, int> EnumMap { get; set; }
+        }
+
+        [TestMethod]
+        public void Issue272()
+        {
+            var repro = new _Issue272();
+            repro.EnumMap = new Dictionary<_Issue272Enum, int>();
+            repro.EnumMap.Add(_Issue272Enum.Zero, 0);
+            repro.EnumMap.Add(_Issue272Enum.One, 1);
+            repro.EnumMap.Add(_Issue272Enum.Two, 2);
+            repro.EnumMap.Add(_Issue272Enum.One | _Issue272Enum.Two, 2 | 1);
+
+            var json = JSON.Serialize(repro, Options.ExcludeNulls);
+
+            Assert.AreEqual("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
+        }
+
+        struct _Issue257_IEnumerable : IEnumerable<object>
+        {
+            public IEnumerator<object> GetEnumerator()
+            {
+                yield break;
+            }
+            IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+        }
+
+        struct _Issue257_List : IList<object>
+        {
+            public object this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public int Count => 0;
+
+            public bool IsReadOnly => true;
+
+            public void Add(object item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(object item) => false;
+
+            public void CopyTo(object[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<object> GetEnumerator()
+            {
+                yield break;
+            }
+
+            public int IndexOf(object item) => -1;
+
+            public void Insert(int index, object item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Remove(object item) => false;
+
+            public void RemoveAt(int index)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        struct _Issue257_Dictionary : IDictionary<string, string>
+        {
+            public string this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public ICollection<string> Keys => throw new NotImplementedException();
+
+            public ICollection<string> Values => throw new NotImplementedException();
+
+            public int Count => 0;
+
+            public bool IsReadOnly => true;
+
+            public void Add(string key, string value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Add(KeyValuePair<string, string> item)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(KeyValuePair<string, string> item) => false;
+
+            public bool ContainsKey(string key) => false;
+
+            public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+            {
+                yield break;
+            }
+
+            public bool Remove(string key) => false;
+
+            public bool Remove(KeyValuePair<string, string> item) => false;
+
+            public bool TryGetValue(string key, out string value)
+            {
+                value = null;
+                return false;
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        [TestMethod]
+        public void Issue257()
+        {
+            {
+                _Issue257_IEnumerable? enumerable = new _Issue257_IEnumerable();
+                var res = JSON.Serialize(enumerable);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                _Issue257_List? list = new _Issue257_List();
+                var res = JSON.Serialize(list);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                _Issue257_Dictionary? dict = new _Issue257_Dictionary();
+                var res = JSON.Serialize(dict);
+                Assert.AreEqual("{}", res);
+            }
+        }
+
+        [JilPrimitiveWrapper]
+        class _Issue275
+        {
+            public int Val { get; }
+        }
+
+        IEnumerable<_Issue275> _Issue275Enumerable()
+        {
+            yield break;
+        }
+
+        [TestMethod]
+        public void Issue275()
+        {
+            {
+                var res = JSON.Serialize(new _Issue275[0]);
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(new List<_Issue275>());
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(_Issue275Enumerable());
+                Assert.AreEqual("[]", res);
+            }
+
+            {
+                var res = JSON.Serialize(new Dictionary<string, _Issue275>() { ["foo"] = new _Issue275() });
+                Assert.AreEqual(@"{""foo"":0}", res);
             }
         }
     }
