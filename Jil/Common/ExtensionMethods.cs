@@ -99,7 +99,7 @@ namespace Jil.Common
 
         public static string ResolveString(this Module module, int handle)
         {
-#if NETCORE
+#if NETSTANDARD1_6
             throw new NotImplementedException("Cannot resolve string references in IL on dotNetCore");
 #else
             return module.ResolveString(handle);
@@ -563,7 +563,7 @@ namespace Jil.Common
 
         public static string GetConstantJSONStringEquivalent(this PropertyInfo prop, bool jsonp)
         {
-#if NETCORE
+#if NETSTANDARD1_6
             throw new NotImplementedException("It's not possible to determine a constant value for a property in dotnet core.");
 #else
 

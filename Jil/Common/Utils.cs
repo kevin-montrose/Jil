@@ -177,7 +177,7 @@ namespace Jil.Common
 
         public static Dictionary<PropertyInfo, List<FieldInfo>> PropertyFieldUsage(Type t)
         {
-#if NETCORE
+#if NETSTANDARD1_6
             return new Dictionary<PropertyInfo, List<FieldInfo>>();
 #else
             var ret = new Dictionary<PropertyInfo, List<FieldInfo>>();
@@ -216,7 +216,7 @@ namespace Jil.Common
         
         public static List<Tuple<OpCode, int?, long?, double?, FieldInfo>> Decompile(MethodBase mtd)
         {
-#if NETCORE
+#if NETSTANDARD1_6
             return null;
 #else
             var mtdBody = mtd.GetMethodBody();
@@ -253,7 +253,7 @@ namespace Jil.Common
 
         private static List<int> _GetFieldHandles(MethodInfo mtd)
         {
-#if NETCORE
+#if NETSTANDARD1_6
             return new List<int>();
 #else
             var mtdBody = mtd.GetMethodBody();

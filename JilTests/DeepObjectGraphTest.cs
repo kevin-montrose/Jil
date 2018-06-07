@@ -2,14 +2,13 @@
 using System.IO;
 using System.Text;
 using Jil;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace JilTests
 {
-    [TestClass]
     public class DeepObjectGraphTests
     {
-        [TestMethod]
+        [Fact]
         public void DeepObjectGraphShouldNotBeEmpty()
         {
             // given
@@ -38,16 +37,16 @@ namespace JilTests
             var deserializedRoundtrippedInstance = deserializedRoundtrippedObject as UserCredentialsUpdateResponse;
 
             // Then
-            Assert.AreNotEqual("{}", serializedJsonAsString);
-            Assert.IsNotNull(deserializedRoundtrippedInstance);
-            Assert.IsInstanceOfType(deserializedRoundtrippedInstance, typeof(UserCredentialsUpdateResponse));
+            Assert.NotEqual("{}", serializedJsonAsString);
+            Assert.NotNull(deserializedRoundtrippedInstance);
+            Assert.IsType<UserCredentialsUpdateResponse>(deserializedRoundtrippedInstance);
 
-            Assert.IsNotNull(deserializedRoundtrippedInstance.User); // << this fails
+            Assert.NotNull(deserializedRoundtrippedInstance.User); // << this fails
 
-            Assert.AreEqual(deserializedRoundtrippedInstance.User.CreatedAtUtc.ToUniversalTime(), model.User.CreatedAtUtc.ToUniversalTime());
-            Assert.AreEqual(deserializedRoundtrippedInstance.User.DateOfBirth.ToUniversalTime(), model.User.DateOfBirth.ToUniversalTime());
-            Assert.AreEqual(deserializedRoundtrippedInstance.User.UserId, model.User.UserId);
-            Assert.AreEqual(deserializedRoundtrippedInstance.User.Username, model.User.Username);
+            Assert.Equal(deserializedRoundtrippedInstance.User.CreatedAtUtc.ToUniversalTime(), model.User.CreatedAtUtc.ToUniversalTime());
+            Assert.Equal(deserializedRoundtrippedInstance.User.DateOfBirth.ToUniversalTime(), model.User.DateOfBirth.ToUniversalTime());
+            Assert.Equal(deserializedRoundtrippedInstance.User.UserId, model.User.UserId);
+            Assert.Equal(deserializedRoundtrippedInstance.User.Username, model.User.Username);
         }
     }
 

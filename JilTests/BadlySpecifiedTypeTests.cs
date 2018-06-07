@@ -1,47 +1,46 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
+﻿using System.IO;
+using Xunit;
 
 namespace JilTests
 {
-    [TestClass]
     public class BadlySpecifiedTypeTests
     {
-        [TestMethod]
+        [Fact]
         public void SerializeString()
         {
             object obj = new { Foo = 123, Bar = "abc" };
             string s = Jil.JSON.Serialize(obj), t = Jil.JSON.SerializeDynamic(obj);
-            Assert.AreEqual(t, s);
+            Assert.Equal(t, s);
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeWriter()
         {
             object obj = new { Foo = 123, Bar = "abc" };
             StringWriter s = new StringWriter(), t = new StringWriter();
             Jil.JSON.Serialize(obj, s);
             Jil.JSON.SerializeDynamic(obj, t);
-            Assert.AreEqual(t.ToString(), s.ToString());
+            Assert.Equal(t.ToString(), s.ToString());
         }
 
-        [TestMethod]
+        [Fact]
         public void DeserializeString()
         {
             string json = Jil.JSON.SerializeDynamic(new { Foo = 123, Bar = "abc" });
             dynamic s = Jil.JSON.Deserialize<object>(json),
                 t = Jil.JSON.DeserializeDynamic(json);
-            Assert.AreEqual((int)t.Foo, (int)s.Foo);
-            Assert.AreEqual((string)t.Bar, (string)s.Bar);
+            Assert.Equal((int)t.Foo, (int)s.Foo);
+            Assert.Equal((string)t.Bar, (string)s.Bar);
         }
 
-        [TestMethod]
+        [Fact]
         public void DeserializeReader()
         {
             string json = Jil.JSON.SerializeDynamic(new { Foo = 123, Bar = "abc" });
             dynamic s = Jil.JSON.Deserialize<object>(new StringReader(json)),
                 t = Jil.JSON.DeserializeDynamic(new StringReader(json));
-            Assert.AreEqual((int)t.Foo, (int)s.Foo);
-            Assert.AreEqual((string)t.Bar, (string)s.Bar);
+            Assert.Equal((int)t.Foo, (int)s.Foo);
+            Assert.Equal((string)t.Bar, (string)s.Bar);
         }
     }
 }

@@ -1,18 +1,17 @@
-﻿using Jil;
+﻿#if !DEBUG
+using Jil;
 using Jil.Deserialize;
 using Jil.Serialize;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Xunit;
 
 namespace JilTests
 {
-    [TestClass]
     public class SpeedProofTests
     {
         private static uint _RandUInt(Random rand)
@@ -192,7 +191,7 @@ namespace JilTests
                         a(aStr, item, 0);
                         b(bStr, item, 0);
 
-                        Assert.AreEqual(aStr.ToString(), bStr.ToString());
+                        Assert.Equal(aStr.ToString(), bStr.ToString());
                     }
                 }
             }
@@ -267,7 +266,7 @@ namespace JilTests
             public string[] World;
         }
 
-        [TestMethod]
+        [Fact]
         public void ReorderMembers()
         {
             Action<TextWriter, _ReorderMembers, int> memoryOrder;
@@ -321,7 +320,7 @@ namespace JilTests
 
             var msg = "reorderedTime = " + reorderedTime + ", normalOrderTime = " + normalOrderTime;
 
-            Assert.IsTrue(reorderedTime < normalOrderTime, msg);
+            Assert.True(reorderedTime < normalOrderTime, msg);
         }
 
         public class _UseCustomIntegerToString
@@ -336,7 +335,7 @@ namespace JilTests
             public ulong H;
         }
 
-        [TestMethod]
+        [Fact]
         public void UseCustomIntegerToString()
         {
             Action<TextWriter, _UseCustomIntegerToString, int> custom;
@@ -390,7 +389,7 @@ namespace JilTests
             double customTime, normalTime;
             CompareTimes(toSerialize, custom, normal, out customTime, out normalTime);
 
-            Assert.IsTrue(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
+            Assert.True(customTime < normalTime, "customTime = " + customTime + ", normalTime = " + normalTime);
         }
 
         public class _SkipDateTimeMathMethods
@@ -398,7 +397,7 @@ namespace JilTests
             public DateTime[] Dates;
         }
 
-        [TestMethod]
+        [Fact]
         public void SkipDateTimeMathMethods()
         {
             Action<TextWriter, _SkipDateTimeMathMethods, int> skipped;
@@ -452,7 +451,7 @@ namespace JilTests
             double skippedTime, normalTime;
             CompareTimes(toSerialize, skipped, normal, out skippedTime, out normalTime);
 
-            Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
+            Assert.True(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
 
         public class _UseCustomISODateFormatting
@@ -460,7 +459,7 @@ namespace JilTests
             public List<DateTime> Dates;
         }
 
-        [TestMethod]
+        [Fact]
         public void UseCustomISODateFormatting()
         {
             Action<TextWriter, _UseCustomISODateFormatting, int> skipped;
@@ -514,7 +513,7 @@ namespace JilTests
             double skippedTime, normalTime;
             CompareTimes(toSerialize, skipped, normal, out skippedTime, out normalTime);
 
-            Assert.IsTrue(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
+            Assert.True(skippedTime < normalTime, "skippedTime = " + skippedTime + ", normalTime = " + normalTime);
         }
 
         class _UseFastLists
@@ -524,7 +523,7 @@ namespace JilTests
             public IList<string> C { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastLists()
         {
             Action<TextWriter, _UseFastLists, int> fast;
@@ -573,7 +572,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
         class _UseFastArrays
@@ -583,7 +582,7 @@ namespace JilTests
             public string[] C { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastArrays()
         {
             Action<TextWriter, _UseFastArrays, int> fast;
@@ -632,7 +631,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
         class _UseFastGuids
@@ -643,7 +642,7 @@ namespace JilTests
             public Dictionary<string, Guid> D;
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastGuids()
         {
             Action<TextWriter, _UseFastGuids, int> fast;
@@ -693,7 +692,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
         class _AllocationlessDictionaries
@@ -701,7 +700,7 @@ namespace JilTests
             public Dictionary<string, int> A;
         }
 
-        [TestMethod]
+        [Fact]
         public void AllocationlessDictionaries()
         {
             Action<TextWriter, _AllocationlessDictionaries, int> allocationless;
@@ -748,7 +747,7 @@ namespace JilTests
             double allocationlessTime, normalTime;
             CompareTimes(toSerialize, allocationless, normal, out allocationlessTime, out normalTime);
 
-            Assert.IsTrue(allocationlessTime < normalTime, "allocationlessTime = " + allocationlessTime + ", normalTime = " + normalTime);
+            Assert.True(allocationlessTime < normalTime, "allocationlessTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
 
         class _PropagateConstants
@@ -787,7 +786,7 @@ namespace JilTests
             public char P11 { get { return '\u5678'; } }
         }
 
-        [TestMethod]
+        [Fact]
         public void PropagateConstants()
         {
             Action<TextWriter, _PropagateConstants, int> propagated;
@@ -829,7 +828,7 @@ namespace JilTests
             double allocationlessTime, normalTime;
             CompareTimes(toSerialize, propagated, normal, out allocationlessTime, out normalTime);
 
-            Assert.IsTrue(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
+            Assert.True(allocationlessTime < normalTime, "propagatedTime = " + allocationlessTime + ", normalTime = " + normalTime);
         }
 
         class _UseHashWhenMatchingMembers
@@ -850,7 +849,7 @@ namespace JilTests
             public int? accept_rate { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void DynamicDeserializer_UseFastNumberParsing()
         {
             try
@@ -892,7 +891,7 @@ namespace JilTests
                 double fastTime, normalTime;
                 CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
 
-                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+                Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
             }
             finally
             {
@@ -900,7 +899,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DynamicDeserializer_UseFastIntegerConversion()
         {
             try
@@ -940,7 +939,7 @@ namespace JilTests
                 double fastTime, normalTime;
                 CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
 
-                Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+                Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
             }
             finally
             {
@@ -958,7 +957,7 @@ namespace JilTests
             Bar
         }
 
-        [TestMethod]
+        [Fact]
         public void UseNameAutomataWhenMatchingEnums()
         {
             Func<TextReader, int, _UseNameAutomataWhenMatchingEnums> automata;
@@ -1001,7 +1000,7 @@ namespace JilTests
             double automataTime, methodTime;
             CompareTimes(toSerialize, Jil.Options.Default, automata, method, out automataTime, out methodTime);
 
-            Assert.IsTrue(automataTime < methodTime, "automataTime = " + automataTime + ", methodTime = " + methodTime);
+            Assert.True(automataTime < methodTime, "automataTime = " + automataTime + ", methodTime = " + methodTime);
         }
 
         class _UseCustomWriteIntUnrolledSigned
@@ -1009,7 +1008,7 @@ namespace JilTests
             public List<int> A { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UseCustomWriteIntUnrolledSigned()
         {
             Action<TextWriter, _UseCustomWriteIntUnrolledSigned, int> signed;
@@ -1056,7 +1055,7 @@ namespace JilTests
             double signedTime, normalTime;
             CompareTimes(toSerialize, signed, normal, out signedTime, out normalTime);
 
-            Assert.IsTrue(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
+            Assert.True(signedTime < normalTime, "signedTime = " + signedTime + ", normalTime = " + normalTime);
         }
 
         class _UseNameAutomata
@@ -1077,7 +1076,7 @@ namespace JilTests
             public int? accept_rate { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UseNameAutomata()
         {
             Func<TextReader, int, _UseNameAutomata> automata;
@@ -1129,10 +1128,10 @@ namespace JilTests
             double automataTime, dictionaryTime;
             CompareTimes(toSerialize, Jil.Options.Default, automata, dictionary, out automataTime, out dictionaryTime);
 
-            Assert.IsTrue(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
+            Assert.True(automataTime < dictionaryTime, "automataTime = " + automataTime + ", dictionaryTime = " + dictionaryTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastFloatingPointMethods_Float_Common()
         {
             Func<TextReader, int, float> fast;
@@ -1172,10 +1171,10 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastFloatingPointMethods_Double_Common()
         {
             Func<TextReader, int, double> fast;
@@ -1215,10 +1214,10 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastFloatingPointMethods_Decimal_Common()
         {
             Func<TextReader, int, decimal> fast;
@@ -1258,7 +1257,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, Jil.Options.Default, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
         class _NameAutomataBinarySearch
@@ -1291,7 +1290,7 @@ namespace JilTests
             public string Z { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void NameAutomataBinarySearch()
         {
             var obj =
@@ -1360,10 +1359,10 @@ namespace JilTests
             double binarySearchTime, normalTime;
             CompareTimes(toSerialize, Jil.Options.Default, binarySearch, normal, out binarySearchTime, out normalTime);
 
-            Assert.IsTrue(binarySearchTime < normalTime, "binarySearchTime = " + binarySearchTime + ", normalTime = " + normalTime);
+            Assert.True(binarySearchTime < normalTime, "binarySearchTime = " + binarySearchTime + ", normalTime = " + normalTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void DynamicTypeConverter()
         {
             Func<TextReader, int, object> trialCasts =
@@ -1425,7 +1424,7 @@ namespace JilTests
             double trialCastTime, typeConverterTime;
             CompareTimes(toSerialize, Jil.Options.Default, trialCasts, typeConverter, out trialCastTime, out typeConverterTime);
 
-            Assert.IsTrue(typeConverterTime < trialCastTime, "typeConverterTime = " + typeConverterTime + ", trialCastTime = " + trialCastTime);
+            Assert.True(typeConverterTime < trialCastTime, "typeConverterTime = " + typeConverterTime + ", trialCastTime = " + trialCastTime);
         }
 
         public class _CustomRFC1123DateFormatting
@@ -1433,7 +1432,7 @@ namespace JilTests
             public List<DateTime> Dates;
         }
 
-        [TestMethod]
+        [Fact]
         public void UseCustomRFC1123DateFormatting()
         {
             Action<TextWriter, _CustomRFC1123DateFormatting, int> fast;
@@ -1487,10 +1486,10 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toSerialize, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastRFC1123Method()
         {
             Func<TextReader, int, DateTime> fast;
@@ -1532,7 +1531,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(toDeserialize, Options.RFC1123, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 
         class _DeserializeThunkReader
@@ -1545,7 +1544,7 @@ namespace JilTests
             public double Float { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void DeserializeThunkReader()
         {
             Func<TextReader, int, _DeserializeThunkReader> thunkReader;
@@ -1601,7 +1600,7 @@ namespace JilTests
             double thunkReaderTime, streamReaderTime;
             CompareTimes(toDeserialize, Options.RFC1123, thunkReader, streamReader, out thunkReaderTime, out streamReaderTime);
 
-            Assert.IsTrue(thunkReaderTime < streamReaderTime, "thunkReaderTime = " + thunkReaderTime + ", streamReaderTime = " + streamReaderTime);
+            Assert.True(thunkReaderTime < streamReaderTime, "thunkReaderTime = " + thunkReaderTime + ", streamReaderTime = " + streamReaderTime);
         }
 
         class _UseFastUnionLookup
@@ -1616,7 +1615,7 @@ namespace JilTests
             public string AsStr { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void UseFastUnionLookup()
         {
             Func<TextReader, int, _UseFastUnionLookup> fast;
@@ -1673,7 +1672,7 @@ namespace JilTests
             double fastTime, normalTime;
             CompareTimes(json, Options.RFC1123, fast, normal, out fastTime, out normalTime);
 
-            Assert.IsTrue(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
+            Assert.True(fastTime < normalTime, "fastTime = " + fastTime + ", normalTime = " + normalTime);
         }
 #endif
     }

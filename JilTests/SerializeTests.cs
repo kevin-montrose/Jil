@@ -1,5 +1,4 @@
 ﻿using Jil;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,10 +11,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Collections;
+using Xunit;
 
 namespace JilTests
 {
-    [TestClass]
     public class SerializeTests
     {
 #if !DEBUG
@@ -436,7 +435,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void FirstCallTime()
         {
             const int acceptableMS = 1000;
@@ -454,7 +453,7 @@ namespace JilTests
                 timer.Stop();
             }
 
-            Assert.IsTrue(timer.ElapsedMilliseconds <= acceptableMS, "Took longer than " + acceptableMS + "ms to build a serializer for MobileFeed; unacceptable, was " + timer.ElapsedMilliseconds + "ms");
+            Assert.True(timer.ElapsedMilliseconds <= acceptableMS, "Took longer than " + acceptableMS + "ms to build a serializer for MobileFeed; unacceptable, was " + timer.ElapsedMilliseconds + "ms");
         }
 #endif
         class _JilDirectiveAttributeTest
@@ -470,14 +469,14 @@ namespace JilTests
             public string D;
         }
 
-        [TestMethod]
+        [Fact]
         public void JilDirectiveAttributeTest()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _JilDirectiveAttributeTest { A = "123", B = "456", C = "789", D = "0AB" }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"DOverride\":\"0AB\",\"AOverride\":\"123\"}", res);
+                Assert.Equal("{\"DOverride\":\"0AB\",\"AOverride\":\"123\"}", res);
             }
         }
 
@@ -487,7 +486,7 @@ namespace JilTests
             public int Foo;
         }
 
-        [TestMethod]
+        [Fact]
         public void SimpleObject()
         {
             using (var str = new StringWriter())
@@ -496,18 +495,18 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Foo\":123}", res);
+                Assert.Equal("{\"Foo\":123}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeToString()
         {
             using (var str = new StringWriter())
             {
                 var res = JSON.Serialize(new { Foo = 123 });
 
-                Assert.AreEqual("{\"Foo\":123}", res);
+                Assert.Equal("{\"Foo\":123}", res);
             }
         }
 
@@ -518,32 +517,32 @@ namespace JilTests
             public _Cyclical Next;
         }
 
-        [TestMethod]
+        [Fact]
         public void Cyclical()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
+                Assert.Equal("{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}}", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new[] { new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } }, new _Cyclical { Foo = 456 } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("[{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},{\"Foo\":456,\"Next\":null}]", res);
+                Assert.Equal("[{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},{\"Foo\":456,\"Next\":null}]", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new Dictionary<string, _Cyclical> { { "hello", new _Cyclical { Foo = 123, Next = new _Cyclical { Foo = 456 } } }, { "world", new _Cyclical { Foo = 456 } } }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
+                Assert.Equal("{\"hello\":{\"Foo\":123,\"Next\":{\"Foo\":456,\"Next\":null}},\"world\":{\"Foo\":456,\"Next\":null}}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Primitive()
         {
             {
@@ -553,7 +552,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("123", res);
+                    Assert.Equal("123", res);
                 }
             }
 
@@ -564,7 +563,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("-123", res);
+                    Assert.Equal("-123", res);
                 }
             }
 
@@ -575,7 +574,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("-1000", res);
+                    Assert.Equal("-1000", res);
                 }
             }
 
@@ -586,7 +585,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("5000", res);
+                    Assert.Equal("5000", res);
                 }
             }
 
@@ -597,7 +596,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("-123", res);
+                    Assert.Equal("-123", res);
                 }
             }
 
@@ -608,7 +607,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("123456789", res);
+                    Assert.Equal("123456789", res);
                 }
             }
 
@@ -619,7 +618,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("-5000000000", res);
+                    Assert.Equal("-5000000000", res);
                 }
             }
 
@@ -630,7 +629,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("8000000000", res);
+                    Assert.Equal("8000000000", res);
                 }
             }
 
@@ -641,7 +640,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("\"hello world\"", res);
+                    Assert.Equal("\"hello world\"", res);
                 }
             }
 
@@ -652,7 +651,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("\"c\"", res);
+                    Assert.Equal("\"c\"", res);
                 }
             }
 
@@ -663,7 +662,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("1.234", res);
+                    Assert.Equal("1.234", res);
                 }
             }
 
@@ -674,7 +673,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("1.1", res);
+                    Assert.Equal("1.1", res);
                 }
             }
 
@@ -685,7 +684,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("4.56", res);
+                    Assert.Equal("4.56", res);
                 }
             }
 
@@ -696,7 +695,7 @@ namespace JilTests
 
                     var res = str.ToString();
 
-                    Assert.AreEqual("true", res);
+                    Assert.Equal("true", res);
                 }
             }
 
@@ -704,7 +703,7 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(new DateTime(1999, 1, 2, 3, 4, 5, 6, DateTimeKind.Utc), str);
-                    Assert.AreEqual("\"\\/Date(915246245006)\\/\"", str.ToString());
+                    Assert.Equal("\"\\/Date(915246245006)\\/\"", str.ToString());
                 }
             }
         }
@@ -735,7 +734,7 @@ namespace JilTests
         }
 #pragma warning restore 0649
 
-        [TestMethod]
+        [Fact]
         public void StringsAndChars()
         {
             using (var str = new StringWriter())
@@ -763,11 +762,11 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"}}", res);
+                Assert.Equal("{\"One\":{\"Single\":\"Hello World\"},\"Two\":{\"_\":123,\"Trailing\":\"Fizz Buzz\"},\"Three\":{\"_\":456,\"Leading\":\"Foo Bar\"}}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Dictionary()
         {
             using (var str = new StringWriter())
@@ -784,11 +783,11 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
+                Assert.Equal("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IReadOnlyDictionary()
         {
             using (var str = new StringWriter())
@@ -805,7 +804,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
+                Assert.Equal("{\"hello world\":123,\"fizz buzz\":456,\"indeed\":789}", res);
             }
         }
 
@@ -817,7 +816,7 @@ namespace JilTests
         }
 #pragma warning restore 0649
 
-        [TestMethod]
+        [Fact]
         public void List()
         {
             using (var str = new StringWriter())
@@ -833,11 +832,11 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
+                Assert.Equal("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IReadOnlyList()
         {
             using (var str = new StringWriter())
@@ -853,7 +852,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
+                Assert.Equal("[{\"Val\":123,\"Key\":\"whatever\"},{\"Val\":456,\"Key\":\"indeed\"}]", res);
             }
         }
 
@@ -863,7 +862,7 @@ namespace JilTests
             public string Bar { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Properties()
         {
             using (var str = new StringWriter())
@@ -875,7 +874,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"Foo\":123,\"Bar\":\"hello\"}", res);
+                Assert.Equal("{\"Foo\":123,\"Bar\":\"hello\"}", res);
             }
         }
 
@@ -889,7 +888,7 @@ namespace JilTests
             public _WithList WithList;
         }
 
-        [TestMethod]
+        [Fact]
         public void InnerLists()
         {
             using (var str = new StringWriter())
@@ -907,7 +906,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"WithList\":{\"List\":[1,2,3]}}", res);
+                Assert.Equal("{\"WithList\":{\"List\":[1,2,3]}}", res);
             }
         }
 
@@ -916,217 +915,217 @@ namespace JilTests
             public char Char;
         }
 
-        [TestMethod]
+        [Fact]
         public void CharacterEncoding()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0000' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0000\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0000\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0001' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0001\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0001\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0002' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0002\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0002\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0003' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0003\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0003\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0004' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0004\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0004\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0005' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0005\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0005\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0006' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0006\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0006\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0007' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0007\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0007\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0008' }, str);
-                Assert.AreEqual("{\"Char\":\"\\b\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\b\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0009' }, str);
-                Assert.AreEqual("{\"Char\":\"\\t\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\t\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000A' }, str);
-                Assert.AreEqual("{\"Char\":\"\\n\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\n\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000B' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000B\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u000B\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000C' }, str);
-                Assert.AreEqual("{\"Char\":\"\\f\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\f\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000D' }, str);
-                Assert.AreEqual("{\"Char\":\"\\r\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\r\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000E' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000E\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u000E\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u000F' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u000F\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u000F\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0010' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0010\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0010\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0011' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0011\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0011\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0012' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0012\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0012\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0013' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0013\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0013\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0014' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0014\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0014\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0015' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0015\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0015\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0016' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0016\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0016\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0017' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0017\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0017\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0018' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0018\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0018\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u0019' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u0019\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u0019\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001A' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001A\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001A\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001B' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001B\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001B\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001C' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001C\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001C\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001D' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001D\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001D\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001E' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001E\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001E\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\u001F' }, str);
-                Assert.AreEqual("{\"Char\":\"\\u001F\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\u001F\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '\\' }, str);
-                Assert.AreEqual("{\"Char\":\"\\\\\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\\\\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CharacterEncoding { Char = '"' }, str);
-                Assert.AreEqual("{\"Char\":\"\\\"\"}", str.ToString());
+                Assert.Equal("{\"Char\":\"\\\"\"}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize("hello\b\f\r\n\tworld", str);
-                Assert.AreEqual("\"hello\\b\\f\\r\\n\\tworld\"", str.ToString());
+                Assert.Equal("\"hello\\b\\f\\r\\n\\tworld\"", str.ToString());
             }
         }
 
@@ -1142,7 +1141,7 @@ namespace JilTests
             public T Value;
         }
 
-        [TestMethod]
+        [Fact]
         public void PrimitiveWrappers()
         {
             // properties
@@ -1151,13 +1150,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<byte>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<byte> { Value = 123 }, str);
-                        Assert.AreEqual("123", str.ToString());
+                        Assert.Equal("123", str.ToString());
                     }
                 }
 
@@ -1165,13 +1164,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<sbyte>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<int> { Value = -123 }, str);
-                        Assert.AreEqual("-123", str.ToString());
+                        Assert.Equal("-123", str.ToString());
                     }
                 }
 
@@ -1179,13 +1178,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<short>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<short> { Value = -1024 }, str);
-                        Assert.AreEqual("-1024", str.ToString());
+                        Assert.Equal("-1024", str.ToString());
                     }
                 }
 
@@ -1193,13 +1192,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<ushort>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<ushort> { Value = 2048 }, str);
-                        Assert.AreEqual("2048", str.ToString());
+                        Assert.Equal("2048", str.ToString());
                     }
                 }
 
@@ -1207,13 +1206,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<int>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<int> { Value = -1234567 }, str);
-                        Assert.AreEqual("-1234567", str.ToString());
+                        Assert.Equal("-1234567", str.ToString());
                     }
                 }
 
@@ -1221,13 +1220,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<uint>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<uint> { Value = 123456789 }, str);
-                        Assert.AreEqual("123456789", str.ToString());
+                        Assert.Equal("123456789", str.ToString());
                     }
                 }
 
@@ -1235,13 +1234,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<long>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<long> { Value = long.MinValue }, str);
-                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                        Assert.Equal(long.MinValue.ToString(), str.ToString());
                     }
                 }
 
@@ -1249,13 +1248,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<ulong>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<ulong> { Value = ulong.MaxValue }, str);
-                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                        Assert.Equal(ulong.MaxValue.ToString(), str.ToString());
                     }
                 }
 
@@ -1263,13 +1262,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<Wrap<string>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new Wrap<string> { Value = "test" }, str);
-                        Assert.AreEqual("\"test\"", str.ToString());
+                        Assert.Equal("\"test\"", str.ToString());
                     }
                 }
             }
@@ -1280,13 +1279,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<byte>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<byte> { Value = 123 }, str);
-                        Assert.AreEqual("123", str.ToString());
+                        Assert.Equal("123", str.ToString());
                     }
                 }
 
@@ -1294,13 +1293,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<sbyte>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<int> { Value = -123 }, str);
-                        Assert.AreEqual("-123", str.ToString());
+                        Assert.Equal("-123", str.ToString());
                     }
                 }
 
@@ -1308,13 +1307,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<short>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<short> { Value = -1024 }, str);
-                        Assert.AreEqual("-1024", str.ToString());
+                        Assert.Equal("-1024", str.ToString());
                     }
                 }
 
@@ -1322,13 +1321,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<ushort>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<ushort> { Value = 2048 }, str);
-                        Assert.AreEqual("2048", str.ToString());
+                        Assert.Equal("2048", str.ToString());
                     }
                 }
 
@@ -1336,13 +1335,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<int>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<int> { Value = -1234567 }, str);
-                        Assert.AreEqual("-1234567", str.ToString());
+                        Assert.Equal("-1234567", str.ToString());
                     }
                 }
 
@@ -1350,13 +1349,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<uint>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<uint> { Value = 123456789 }, str);
-                        Assert.AreEqual("123456789", str.ToString());
+                        Assert.Equal("123456789", str.ToString());
                     }
                 }
 
@@ -1364,13 +1363,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<long>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<long> { Value = long.MinValue }, str);
-                        Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                        Assert.Equal(long.MinValue.ToString(), str.ToString());
                     }
                 }
 
@@ -1378,13 +1377,13 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<ulong>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<ulong> { Value = ulong.MaxValue }, str);
-                        Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                        Assert.Equal(ulong.MaxValue.ToString(), str.ToString());
                     }
                 }
 
@@ -1392,32 +1391,32 @@ namespace JilTests
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize<WrapField<string>>(null, str);
-                        Assert.AreEqual("null", str.ToString());
+                        Assert.Equal("null", str.ToString());
                     }
 
                     using (var str = new StringWriter())
                     {
                         JSON.Serialize(new WrapField<string> { Value = "test" }, str);
-                        Assert.AreEqual("\"test\"", str.ToString());
+                        Assert.Equal("\"test\"", str.ToString());
                     }
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullablePrimitives()
         {
             {
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<byte?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<byte?>(123, str);
-                    Assert.AreEqual("123", str.ToString());
+                    Assert.Equal("123", str.ToString());
                 }
             }
 
@@ -1425,13 +1424,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<sbyte?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<sbyte?>(-123, str);
-                    Assert.AreEqual("-123", str.ToString());
+                    Assert.Equal("-123", str.ToString());
                 }
             }
 
@@ -1439,13 +1438,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<short?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<short?>(-1024, str);
-                    Assert.AreEqual("-1024", str.ToString());
+                    Assert.Equal("-1024", str.ToString());
                 }
             }
 
@@ -1453,13 +1452,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<ushort?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<ushort?>(2048, str);
-                    Assert.AreEqual("2048", str.ToString());
+                    Assert.Equal("2048", str.ToString());
                 }
             }
 
@@ -1467,13 +1466,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<int?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<int?>(-1234567, str);
-                    Assert.AreEqual("-1234567", str.ToString());
+                    Assert.Equal("-1234567", str.ToString());
                 }
             }
 
@@ -1481,13 +1480,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<uint?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<uint?>(123456789, str);
-                    Assert.AreEqual("123456789", str.ToString());
+                    Assert.Equal("123456789", str.ToString());
                 }
             }
 
@@ -1495,13 +1494,13 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<long?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<long?>(long.MinValue, str);
-                    Assert.AreEqual(long.MinValue.ToString(), str.ToString());
+                    Assert.Equal(long.MinValue.ToString(), str.ToString());
                 }
             }
 
@@ -1509,46 +1508,46 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<ulong?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<ulong?>(ulong.MaxValue, str);
-                    Assert.AreEqual(ulong.MaxValue.ToString(), str.ToString());
+                    Assert.Equal(ulong.MaxValue.ToString(), str.ToString());
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void PrimitiveWrapperMembers()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new List<Wrap<int>> { new Wrap<int> { Value = 0 }, null, new Wrap<int> { Value = 1 }, null, new Wrap<int> { Value = 2 }, null, new Wrap<int> { Value = 3 } }, str);
-                Assert.AreEqual("[0,null,1,null,2,null,3]", str.ToString());
+                Assert.Equal("[0,null,1,null,2,null,3]", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new Dictionary<string, Wrap<double>> { { "hello", null }, { "world", new Wrap<double> { Value = 3.21 } } }, str);
-                Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
+                Assert.Equal("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullableMembers()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new List<int?> { 0, null, 1, null, 2, null, 3 }, str);
-                Assert.AreEqual("[0,null,1,null,2,null,3]", str.ToString());
+                Assert.Equal("[0,null,1,null,2,null,3]", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new Dictionary<string, double?> { { "hello", null }, { "world", 3.21 } }, str);
-                Assert.AreEqual("{\"hello\":null,\"world\":3.21}", str.ToString());
+                Assert.Equal("{\"hello\":null,\"world\":3.21}", str.ToString());
             }
         }
 
@@ -1559,38 +1558,38 @@ namespace JilTests
             public List<int> C;
         }
 
-        [TestMethod]
+        [Fact]
         public void ValueTypes()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } }, str);
-                Assert.AreEqual("{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}", str.ToString());
+                Assert.Equal("{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new[] { new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, str);
-                Assert.AreEqual("[{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}]", str.ToString());
+                Assert.Equal("[{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]}]", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new Dictionary<string, _ValueTypes> { { "hello", new _ValueTypes { A = "hello world", B = 'C', C = new List<int> { 3, 1, 4, 1, 5, 9 } } }, { "world", new _ValueTypes { A = "foo bar", B = 'D', C = new List<int> { 1, 3, 1, 8 } } } }, str);
-                Assert.AreEqual("{\"hello\":{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]},\"world\":{\"A\":\"foo bar\",\"B\":\"D\",\"C\":[1,3,1,8]}}", str.ToString());
+                Assert.Equal("{\"hello\":{\"A\":\"hello world\",\"B\":\"C\",\"C\":[3,1,4,1,5,9]},\"world\":{\"A\":\"foo bar\",\"B\":\"D\",\"C\":[1,3,1,8]}}", str.ToString());
             }
 
             {
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<_ValueTypes?>(null, str);
-                    Assert.AreEqual("null", str.ToString());
+                    Assert.Equal("null", str.ToString());
                 }
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize<_ValueTypes?>(new _ValueTypes { A = "bizz", B = '\0', C = null }, str);
-                    Assert.AreEqual("{\"A\":\"bizz\",\"B\":\"\\u0000\",\"C\":null}", str.ToString());
+                    Assert.Equal("{\"A\":\"bizz\",\"B\":\"\\u0000\",\"C\":null}", str.ToString());
                 }
             }
         }
@@ -1607,13 +1606,13 @@ namespace JilTests
             public double C;
         }
 
-        [TestMethod]
+        [Fact]
         public void CyclicalValueTypes()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _CyclicalValueTypes { A = new _CyclicalValueTypes._One { Inner = new _CyclicalValueTypes { B = 123, C = 4.56 } }, B = long.MaxValue, C = 78.90 }, str);
-                Assert.AreEqual("{\"A\":{\"Inner\":{\"A\":null,\"B\":123,\"C\":4.56}},\"B\":9223372036854775807,\"C\":78.9}", str.ToString());
+                Assert.Equal("{\"A\":{\"Inner\":{\"A\":null,\"B\":123,\"C\":4.56}},\"B\":9223372036854775807,\"C\":78.9}", str.ToString());
             }
         }
 
@@ -1627,7 +1626,7 @@ namespace JilTests
             public _ExcludeNulls F;
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludeNulls()
         {
             using (var str = new StringWriter())
@@ -1658,7 +1657,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"F\":{\"E\":{\"C\":999},\"D\":456,\"B\":\"world\"},\"C\":123,\"A\":\"hello\"}", res);
+                Assert.Equal("{\"F\":{\"E\":{\"C\":999},\"D\":456,\"B\":\"world\"},\"C\":123,\"A\":\"hello\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -1676,7 +1675,7 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual("{\"hello\":\"world\",\"fizz\":\"buzz\"}", res);
+                Assert.Equal("{\"hello\":\"world\",\"fizz\":\"buzz\"}", res);
             }
         }
 
@@ -1690,7 +1689,7 @@ namespace JilTests
             public _PrettyPrint F;
         }
 
-        [TestMethod]
+        [Fact]
         public void PrettyPrint()
         {
             using (var str = new StringWriter())
@@ -1721,7 +1720,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"E\": null,\n \"F\": {\n  \"E\": {\n   \"E\": null,\n   \"F\": null,\n   \"D\": null,\n   \"C\": 999,\n   \"B\": null,\n   \"A\": null\n  },\n  \"F\": null,\n  \"D\": 456,\n  \"C\": null,\n  \"B\": \"world\",\n  \"A\": null\n },\n \"D\": null,\n \"C\": 123,\n \"B\": null,\n \"A\": \"hello\"\n}", res);
+                Assert.Equal("{\n \"E\": null,\n \"F\": {\n  \"E\": {\n   \"E\": null,\n   \"F\": null,\n   \"D\": null,\n   \"C\": 999,\n   \"B\": null,\n   \"A\": null\n  },\n  \"F\": null,\n  \"D\": 456,\n  \"C\": null,\n  \"B\": \"world\",\n  \"A\": null\n },\n \"D\": null,\n \"C\": 123,\n \"B\": null,\n \"A\": \"hello\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1752,7 +1751,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"D\": 456,\n  \"B\": \"world\"\n },\n \"C\": 123,\n \"A\": \"hello\"\n}", res);
+                Assert.Equal("{\n \"F\": {\n  \"E\": {\n   \"C\": 999\n  },\n  \"D\": 456,\n  \"B\": \"world\"\n },\n \"C\": 123,\n \"A\": \"hello\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1769,7 +1768,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"hello world\": 31415926,\n \"fizz buzz\": null,\n \"foo bar\": 1318\n}", res);
+                Assert.Equal("{\n \"hello world\": 31415926,\n \"fizz buzz\": null,\n \"foo bar\": 1318\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -1786,11 +1785,11 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"hello world\": 31415926,\n \"foo bar\": 1318\n}", res);
+                Assert.Equal("{\n \"hello world\": 31415926,\n \"foo bar\": 1318\n}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryEncoding()
         {
             using (var str = new StringWriter())
@@ -1807,11 +1806,11 @@ namespace JilTests
 
                 var res = str.ToString();
 
-                Assert.AreEqual(@"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}", res);
+                Assert.Equal(@"{""hello\nworld"":""fizz\u0000buzz"",""\r\t\f\n"":""\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000"",""\u0000"":""\b\b\b\b\b""}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DateTimeFormats()
         {
             using (var str = new StringWriter())
@@ -1823,7 +1822,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"\\/Date(315532800000)\\/\"", res);
+                Assert.Equal("\"\\/Date(315532800000)\\/\"", res);
             }
 
             using (var str = new StringWriter())
@@ -1835,7 +1834,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("315532800000", res);
+                Assert.Equal("315532800000", res);
             }
 
             using (var str = new StringWriter())
@@ -1847,7 +1846,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("315532800", res);
+                Assert.Equal("315532800", res);
             }
 
             using (var str = new StringWriter())
@@ -1859,7 +1858,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"1980-01-01T00:00:00Z\"", res);
+                Assert.Equal("\"1980-01-01T00:00:00Z\"", res);
             }
 
             using (var str = new StringWriter())
@@ -1871,11 +1870,11 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("\"Tue, 01 Jan 1980 00:00:00 GMT\"", res);
+                Assert.Equal("\"Tue, 01 Jan 1980 00:00:00 GMT\"", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ISODateTimes()
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -1902,11 +1901,11 @@ namespace JilTests
                     actual = str.ToString();
                 }
 
-                Assert.AreEqual(expected, actual);
+                Assert.Equal(expected, actual);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RFC1123DateTimes()
         {
             // stream
@@ -1935,7 +1934,7 @@ namespace JilTests
                         actual = str.ToString();
                     }
 
-                    Assert.AreEqual(expected, actual);
+                    Assert.Equal(expected, actual);
                 }
             }
 
@@ -1960,12 +1959,12 @@ namespace JilTests
                     var expected = "\"" + rndDt.ToString("R") + "\"";
                     var actual = JSON.Serialize(rndDt, Options.RFC1123);
 
-                    Assert.AreEqual(expected, actual);
+                    Assert.Equal(expected, actual);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AllOptions()
         {
             using (var str = new StringWriter())
@@ -1981,7 +1980,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null}", res);
+                Assert.Equal("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -1997,7 +1996,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\"}", res);
+                Assert.Equal("{\"A\":\"\\/Date(-23215049511000)\\/\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2013,7 +2012,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null\n}", res);
+                Assert.Equal("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2029,7 +2028,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\"\n}", res);
+                Assert.Equal("{\n \"A\": \"\\/Date(-23215049511000)\\/\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2045,7 +2044,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511000,\"B\":null}", res);
+                Assert.Equal("{\"A\":-23215049511000,\"B\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -2061,7 +2060,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511000}", res);
+                Assert.Equal("{\"A\":-23215049511000}", res);
             }
 
             using (var str = new StringWriter())
@@ -2077,7 +2076,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"B\": null\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511000,\n \"B\": null\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2093,7 +2092,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511000\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511000\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2109,7 +2108,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511,\"B\":null}", res);
+                Assert.Equal("{\"A\":-23215049511,\"B\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -2125,7 +2124,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511}", res);
+                Assert.Equal("{\"A\":-23215049511}", res);
             }
 
             using (var str = new StringWriter())
@@ -2141,7 +2140,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511,\n \"B\": null\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511,\n \"B\": null\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2157,7 +2156,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2173,7 +2172,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"B\":null}", res);
+                Assert.Equal("{\"A\":\"1234-05-06T07:08:09Z\",\"B\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -2189,7 +2188,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\"}", res);
+                Assert.Equal("{\"A\":\"1234-05-06T07:08:09Z\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2205,7 +2204,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"B\": null\n}", res);
+                Assert.Equal("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"B\": null\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2221,7 +2220,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\"\n}", res);
+                Assert.Equal("{\n \"A\": \"1234-05-06T07:08:09Z\"\n}", res);
             }
 
             // JSONP
@@ -2239,7 +2238,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":\"\\/Date(-23215049511000)\\/\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2256,7 +2255,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"\\/Date(-23215049511000)\\/\",\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":\"\\/Date(-23215049511000)\\/\",\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2273,7 +2272,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2290,7 +2289,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": \"\\/Date(-23215049511000)\\/\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2307,7 +2306,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511000,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":-23215049511000,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2324,7 +2323,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511000,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":-23215049511000,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2341,7 +2340,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511000,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2358,7 +2357,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511000,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511000,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2375,7 +2374,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":-23215049511,\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2392,7 +2391,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":-23215049511,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":-23215049511,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2409,7 +2408,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511,\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2426,7 +2425,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": -23215049511,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": -23215049511,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2443,7 +2442,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":\"1234-05-06T07:08:09Z\",\"B\":null,\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2460,7 +2459,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"1234-05-06T07:08:09Z\",\"C\":\"hello\\u2028\\u2029world\"}", res);
+                Assert.Equal("{\"A\":\"1234-05-06T07:08:09Z\",\"C\":\"hello\\u2028\\u2029world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2477,7 +2476,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"B\": null,\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2494,7 +2493,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
+                Assert.Equal("{\n \"A\": \"1234-05-06T07:08:09Z\",\n \"C\": \"hello\\u2028\\u2029world\"\n}", res);
             }
         }
 
@@ -2504,7 +2503,7 @@ namespace JilTests
             public _InfiniteRecursion Next;
         }
 
-        [TestMethod]
+        [Fact]
         public void InfiniteRecursion()
         {
             using (var str = new StringWriter())
@@ -2512,17 +2511,9 @@ namespace JilTests
                 var root = new _InfiniteRecursion { A = 123 };
                 root.Next = root;
 
-                try
-                {
-                    JSON.Serialize(root, str);
-                    Assert.Fail();
-                }
-                catch (InfiniteRecursionException)
-                {
-                    // check that it failed at the right time...
-                    var failed = str.ToString();
-                    Assert.AreEqual("{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":", failed);
-                }
+                var ex = Assert.Throws<InfiniteRecursionException>(() => JSON.Serialize(root, str));
+                var failed = str.ToString();
+                Assert.Equal("{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":{\"A\":123,\"Next\":", failed);
             }
         }
 
@@ -2586,7 +2577,7 @@ namespace JilTests
             public string Bar;
         }
 
-        [TestMethod]
+        [Fact]
         public void ConditionalSerialization()
         {
             var rand = new Random(0);
@@ -2603,22 +2594,22 @@ namespace JilTests
 
                     if (res.Contains("\"AlwaysNull\""))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
 
                     if (!res.Contains("\"AlwaysHasValue\":4"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
 
                     if (obj.ShouldSerializeVal() && !res.Contains("\"Val\":"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
 
                     if (!obj.ShouldSerializeVal() && res.Contains("\"Val\":"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
                 }
             }
@@ -2635,17 +2626,17 @@ namespace JilTests
 
                     if (!res.Contains("\"AlwaysNull\":null"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
 
                     if (obj.ShouldSerializeFoo() && !res.Contains("\"Foo\":"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
 
                     if (!obj.ShouldSerializeFoo() && res.Contains("\"Foo\":"))
                     {
-                        Assert.Fail(res);
+                        Assert.True(false, res);
                     }
                 }
             }
@@ -2657,7 +2648,7 @@ namespace JilTests
                 JSON.Serialize(obj, str, Options.Default);
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"AlwaysNull\":null}", res);
+                Assert.Equal("{\"AlwaysNull\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -2665,7 +2656,7 @@ namespace JilTests
                 var obj = new _ConditionalSerialization4 { Foo = "Ignored", Bar = "Included" };
                 JSON.Serialize(obj, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"Bar\":\"Included\"}", res);
+                Assert.Equal("{\"Bar\":\"Included\"}", res);
             }
         }
 
@@ -2684,91 +2675,91 @@ namespace JilTests
             D = 66
         }
 
-        [TestMethod]
+        [Fact]
         public void Enums()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums.A, str);
-                Assert.AreEqual("\"A\"", str.ToString());
+                Assert.Equal("\"A\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums.B, str);
-                Assert.AreEqual("\"B\"", str.ToString());
+                Assert.Equal("\"B\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums.C, str);
-                Assert.AreEqual("\"C\"", str.ToString());
+                Assert.Equal("\"C\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums?>(_Enums.A, str);
-                Assert.AreEqual("\"A\"", str.ToString());
+                Assert.Equal("\"A\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums?>(_Enums.B, str);
-                Assert.AreEqual("\"B\"", str.ToString());
+                Assert.Equal("\"B\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums?>(_Enums.C, str);
-                Assert.AreEqual("\"C\"", str.ToString());
+                Assert.Equal("\"C\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums?>(null, str);
-                Assert.AreEqual("null", str.ToString());
+                Assert.Equal("null", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums2.A, str);
-                Assert.AreEqual("\"A\"", str.ToString());
+                Assert.Equal("\"A\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums2.B, str);
-                Assert.AreEqual("\"B\"", str.ToString());
+                Assert.Equal("\"B\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize(_Enums2.C, str);
-                Assert.AreEqual("\"C\"", str.ToString());
+                Assert.Equal("\"C\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums2?>(_Enums2.A, str);
-                Assert.AreEqual("\"A\"", str.ToString());
+                Assert.Equal("\"A\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums2?>(_Enums2.B, str);
-                Assert.AreEqual("\"B\"", str.ToString());
+                Assert.Equal("\"B\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums2?>(_Enums2.C, str);
-                Assert.AreEqual("\"C\"", str.ToString());
+                Assert.Equal("\"C\"", str.ToString());
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<_Enums2?>(null, str);
-                Assert.AreEqual("null", str.ToString());
+                Assert.Equal("null", str.ToString());
             }
         }
 
@@ -2780,7 +2771,7 @@ namespace JilTests
             Fizz = 4
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumMembers()
         {
             using (var str = new StringWriter())
@@ -2794,7 +2785,7 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":\"Bar\",\"B\":null}", str.ToString());
+                Assert.Equal("{\"A\":\"Bar\",\"B\":null}", str.ToString());
             }
 
             using (var str = new StringWriter())
@@ -2808,7 +2799,7 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("{\"A\":\"Bar\",\"B\":null}", str.ToString());
+                Assert.Equal("{\"A\":\"Bar\",\"B\":null}", str.ToString());
             }
 
             using (var str = new StringWriter())
@@ -2818,7 +2809,7 @@ namespace JilTests
                     str
                 );
 
-                Assert.AreEqual("[\"Bar\",\"World\",\"Fizz\",\"Foo\",\"Fizz\"]", str.ToString());
+                Assert.Equal("[\"Bar\",\"World\",\"Fizz\",\"Foo\",\"Fizz\"]", str.ToString());
             }
         }
 
@@ -2830,7 +2821,7 @@ namespace JilTests
             D = 28
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumDictionaryKeys()
         {
             using (var str = new StringWriter())
@@ -2847,7 +2838,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"hello\",\"B\":\"world\",\"C\":\"fizz\",\"D\":\"buzz\"}", res);
+                Assert.Equal("{\"A\":\"hello\",\"B\":\"world\",\"C\":\"fizz\",\"D\":\"buzz\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2865,7 +2856,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"A\": \"hello\",\n \"B\": \"world\",\n \"C\": \"fizz\",\n \"D\": \"buzz\"\n}", res);
+                Assert.Equal("{\n \"A\": \"hello\",\n \"B\": \"world\",\n \"C\": \"fizz\",\n \"D\": \"buzz\"\n}", res);
             }
 
             using (var str = new StringWriter())
@@ -2883,7 +2874,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":\"hello\",\"C\":\"fizz\"}", res);
+                Assert.Equal("{\"A\":\"hello\",\"C\":\"fizz\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -2901,7 +2892,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\n \"B\": \"world\",\n \"D\": \"buzz\"\n}", res);
+                Assert.Equal("{\n \"B\": \"world\",\n \"D\": \"buzz\"\n}", res);
             }
         }
 
@@ -2971,7 +2962,7 @@ namespace JilTests
             AA = -128, AB = -127, AC = -126, AD = -125, AE = -124, AF = -123, AG = -122, AH = -121, AI = -120, AJ = -119, AK = -118, AL = -117, AM = -116, AN = -115, AO = -114, AP = -113, AQ = -112, AR = -111, AS = -110, AT = -109, AU = -108, AV = -107, AW = -106, AX = -105, AY = -104, AZ = -103, BA = -102, BB = -101, BC = -100, BD = -99, BE = -98, BF = -97, BG = -96, BH = -95, BI = -94, BJ = -93, BK = -92, BL = -91, BM = -90, BN = -89, BO = -88, BP = -87, BQ = -86, BR = -85, BS = -84, BT = -83, BU = -82, BV = -81, BW = -80, BX = -79, BY = -78, BZ = -77, CA = -76, CB = -75, CC = -74, CD = -73, CE = -72, CF = -71, CG = -70, CH = -69, CI = -68, CJ = -67, CK = -66, CL = -65, CM = -64, CN = -63, CO = -62, CP = -61, CQ = -60, CR = -59, CS = -58, CT = -57, CU = -56, CV = -55, CW = -54, CX = -53, CY = -52, CZ = -51, DA = -50, DB = -49, DC = -48, DD = -47, DE = -46, DF = -45, DG = -44, DH = -43, DI = -42, DJ = -41, DK = -40, DL = -39, DM = -38, DN = -37, DO = -36, DP = -35, DQ = -34, DR = -33, DS = -32, DT = -31, DU = -30, DV = -29, DW = -28, DX = -27, DY = -26, DZ = -25, EA = -24, EB = -23, EC = -22, ED = -21, EE = -20, EF = -19, EG = -18, EH = -17, EI = -16, EJ = -15, EK = -14, EL = -13, EM = -12, EN = -11, EO = -10, EP = -9, EQ = -8, ER = -7, ES = -6, ET = -5, EU = -4, EV = -3, EW = -2, EX = -1, EY = 0, EZ = 1, FA = 2, FB = 3, FC = 4, FD = 5, FE = 6, FF = 7, FG = 8, FH = 9, FI = 10, FJ = 11, FK = 12, FL = 13, FM = 14, FN = 15, FO = 16, FP = 17, FQ = 18, FR = 19, FS = 20, FT = 21, FU = 22, FV = 23, FW = 24, FX = 25, FY = 26, FZ = 27, GA = 28, GB = 29, GC = 30, GD = 31, GE = 32, GF = 33, GG = 34, GH = 35, GI = 36, GJ = 37, GK = 38, GL = 39, GM = 40, GN = 41, GO = 42, GP = 43, GQ = 44, GR = 45, GS = 46, GT = 47, GU = 48, GV = 49, GW = 50, GX = 51, GY = 52, GZ = 53, HA = 54, HB = 55, HC = 56, HD = 57, HE = 58, HF = 59, HG = 60, HH = 61, HI = 62, HJ = 63, HK = 64, HL = 65, HM = 66, HN = 67, HO = 68, HP = 69, HQ = 70, HR = 71, HS = 72, HT = 73, HU = 74, HV = 75, HW = 76, HX = 77, HY = 78, HZ = 79, IA = 80, IB = 81, IC = 82, ID = 83, IE = 84, IF = 85, IG = 86, IH = 87, II = 88, IJ = 89, IK = 90, IL = 91, IM = 92, IN = 93, IO = 94, IP = 95, IQ = 96, IR = 97, IS = 98, IT = 99, IU = 100, IV = 101, IW = 102, IX = 103, IY = 104, IZ = 105, JA = 106, JB = 107, JC = 108, JD = 109, JE = 110, JF = 111, JG = 112, JH = 113, JI = 114, JJ = 115, JK = 116, JL = 117, JM = 118, JN = 119, JO = 120, JP = 121, JQ = 122, JR = 123, JS = 124, JT = 125, JU = 126, JV = 127
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumVariations()
         {
             // 1
@@ -2979,17 +2970,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations1.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations1.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations1.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 2
@@ -2997,17 +2988,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations2.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations2.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations2.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 3
@@ -3015,17 +3006,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations3.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations3.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations3.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 4
@@ -3033,17 +3024,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations4.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations4.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations4.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 5
@@ -3051,17 +3042,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations5.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations5.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations5.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 6
@@ -3069,17 +3060,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations6.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations6.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations6.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 7
@@ -3087,17 +3078,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations7.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations7.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations7.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 8
@@ -3105,17 +3096,17 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations8.A, str);
-                    Assert.AreEqual("\"A\"", str.ToString());
+                    Assert.Equal("\"A\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations8.B, str);
-                    Assert.AreEqual("\"B\"", str.ToString());
+                    Assert.Equal("\"B\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations8.C, str);
-                    Assert.AreEqual("\"C\"", str.ToString());
+                    Assert.Equal("\"C\"", str.ToString());
                 }
             }
             // 9
@@ -3123,1282 +3114,1282 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AA, str);
-                    Assert.AreEqual("\"AA\"", str.ToString());
+                    Assert.Equal("\"AA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AB, str);
-                    Assert.AreEqual("\"AB\"", str.ToString());
+                    Assert.Equal("\"AB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AC, str);
-                    Assert.AreEqual("\"AC\"", str.ToString());
+                    Assert.Equal("\"AC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AD, str);
-                    Assert.AreEqual("\"AD\"", str.ToString());
+                    Assert.Equal("\"AD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AE, str);
-                    Assert.AreEqual("\"AE\"", str.ToString());
+                    Assert.Equal("\"AE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AF, str);
-                    Assert.AreEqual("\"AF\"", str.ToString());
+                    Assert.Equal("\"AF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AG, str);
-                    Assert.AreEqual("\"AG\"", str.ToString());
+                    Assert.Equal("\"AG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AH, str);
-                    Assert.AreEqual("\"AH\"", str.ToString());
+                    Assert.Equal("\"AH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AI, str);
-                    Assert.AreEqual("\"AI\"", str.ToString());
+                    Assert.Equal("\"AI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AJ, str);
-                    Assert.AreEqual("\"AJ\"", str.ToString());
+                    Assert.Equal("\"AJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AK, str);
-                    Assert.AreEqual("\"AK\"", str.ToString());
+                    Assert.Equal("\"AK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AL, str);
-                    Assert.AreEqual("\"AL\"", str.ToString());
+                    Assert.Equal("\"AL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AM, str);
-                    Assert.AreEqual("\"AM\"", str.ToString());
+                    Assert.Equal("\"AM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AN, str);
-                    Assert.AreEqual("\"AN\"", str.ToString());
+                    Assert.Equal("\"AN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AO, str);
-                    Assert.AreEqual("\"AO\"", str.ToString());
+                    Assert.Equal("\"AO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AP, str);
-                    Assert.AreEqual("\"AP\"", str.ToString());
+                    Assert.Equal("\"AP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AQ, str);
-                    Assert.AreEqual("\"AQ\"", str.ToString());
+                    Assert.Equal("\"AQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AR, str);
-                    Assert.AreEqual("\"AR\"", str.ToString());
+                    Assert.Equal("\"AR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AS, str);
-                    Assert.AreEqual("\"AS\"", str.ToString());
+                    Assert.Equal("\"AS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AT, str);
-                    Assert.AreEqual("\"AT\"", str.ToString());
+                    Assert.Equal("\"AT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AU, str);
-                    Assert.AreEqual("\"AU\"", str.ToString());
+                    Assert.Equal("\"AU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AV, str);
-                    Assert.AreEqual("\"AV\"", str.ToString());
+                    Assert.Equal("\"AV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AW, str);
-                    Assert.AreEqual("\"AW\"", str.ToString());
+                    Assert.Equal("\"AW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AX, str);
-                    Assert.AreEqual("\"AX\"", str.ToString());
+                    Assert.Equal("\"AX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AY, str);
-                    Assert.AreEqual("\"AY\"", str.ToString());
+                    Assert.Equal("\"AY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.AZ, str);
-                    Assert.AreEqual("\"AZ\"", str.ToString());
+                    Assert.Equal("\"AZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BA, str);
-                    Assert.AreEqual("\"BA\"", str.ToString());
+                    Assert.Equal("\"BA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BB, str);
-                    Assert.AreEqual("\"BB\"", str.ToString());
+                    Assert.Equal("\"BB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BC, str);
-                    Assert.AreEqual("\"BC\"", str.ToString());
+                    Assert.Equal("\"BC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BD, str);
-                    Assert.AreEqual("\"BD\"", str.ToString());
+                    Assert.Equal("\"BD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BE, str);
-                    Assert.AreEqual("\"BE\"", str.ToString());
+                    Assert.Equal("\"BE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BF, str);
-                    Assert.AreEqual("\"BF\"", str.ToString());
+                    Assert.Equal("\"BF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BG, str);
-                    Assert.AreEqual("\"BG\"", str.ToString());
+                    Assert.Equal("\"BG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BH, str);
-                    Assert.AreEqual("\"BH\"", str.ToString());
+                    Assert.Equal("\"BH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BI, str);
-                    Assert.AreEqual("\"BI\"", str.ToString());
+                    Assert.Equal("\"BI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BJ, str);
-                    Assert.AreEqual("\"BJ\"", str.ToString());
+                    Assert.Equal("\"BJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BK, str);
-                    Assert.AreEqual("\"BK\"", str.ToString());
+                    Assert.Equal("\"BK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BL, str);
-                    Assert.AreEqual("\"BL\"", str.ToString());
+                    Assert.Equal("\"BL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BM, str);
-                    Assert.AreEqual("\"BM\"", str.ToString());
+                    Assert.Equal("\"BM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BN, str);
-                    Assert.AreEqual("\"BN\"", str.ToString());
+                    Assert.Equal("\"BN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BO, str);
-                    Assert.AreEqual("\"BO\"", str.ToString());
+                    Assert.Equal("\"BO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BP, str);
-                    Assert.AreEqual("\"BP\"", str.ToString());
+                    Assert.Equal("\"BP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BQ, str);
-                    Assert.AreEqual("\"BQ\"", str.ToString());
+                    Assert.Equal("\"BQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BR, str);
-                    Assert.AreEqual("\"BR\"", str.ToString());
+                    Assert.Equal("\"BR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BS, str);
-                    Assert.AreEqual("\"BS\"", str.ToString());
+                    Assert.Equal("\"BS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BT, str);
-                    Assert.AreEqual("\"BT\"", str.ToString());
+                    Assert.Equal("\"BT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BU, str);
-                    Assert.AreEqual("\"BU\"", str.ToString());
+                    Assert.Equal("\"BU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BV, str);
-                    Assert.AreEqual("\"BV\"", str.ToString());
+                    Assert.Equal("\"BV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BW, str);
-                    Assert.AreEqual("\"BW\"", str.ToString());
+                    Assert.Equal("\"BW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BX, str);
-                    Assert.AreEqual("\"BX\"", str.ToString());
+                    Assert.Equal("\"BX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BY, str);
-                    Assert.AreEqual("\"BY\"", str.ToString());
+                    Assert.Equal("\"BY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.BZ, str);
-                    Assert.AreEqual("\"BZ\"", str.ToString());
+                    Assert.Equal("\"BZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CA, str);
-                    Assert.AreEqual("\"CA\"", str.ToString());
+                    Assert.Equal("\"CA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CB, str);
-                    Assert.AreEqual("\"CB\"", str.ToString());
+                    Assert.Equal("\"CB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CC, str);
-                    Assert.AreEqual("\"CC\"", str.ToString());
+                    Assert.Equal("\"CC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CD, str);
-                    Assert.AreEqual("\"CD\"", str.ToString());
+                    Assert.Equal("\"CD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CE, str);
-                    Assert.AreEqual("\"CE\"", str.ToString());
+                    Assert.Equal("\"CE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CF, str);
-                    Assert.AreEqual("\"CF\"", str.ToString());
+                    Assert.Equal("\"CF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CG, str);
-                    Assert.AreEqual("\"CG\"", str.ToString());
+                    Assert.Equal("\"CG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CH, str);
-                    Assert.AreEqual("\"CH\"", str.ToString());
+                    Assert.Equal("\"CH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CI, str);
-                    Assert.AreEqual("\"CI\"", str.ToString());
+                    Assert.Equal("\"CI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CJ, str);
-                    Assert.AreEqual("\"CJ\"", str.ToString());
+                    Assert.Equal("\"CJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CK, str);
-                    Assert.AreEqual("\"CK\"", str.ToString());
+                    Assert.Equal("\"CK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CL, str);
-                    Assert.AreEqual("\"CL\"", str.ToString());
+                    Assert.Equal("\"CL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CM, str);
-                    Assert.AreEqual("\"CM\"", str.ToString());
+                    Assert.Equal("\"CM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CN, str);
-                    Assert.AreEqual("\"CN\"", str.ToString());
+                    Assert.Equal("\"CN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CO, str);
-                    Assert.AreEqual("\"CO\"", str.ToString());
+                    Assert.Equal("\"CO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CP, str);
-                    Assert.AreEqual("\"CP\"", str.ToString());
+                    Assert.Equal("\"CP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CQ, str);
-                    Assert.AreEqual("\"CQ\"", str.ToString());
+                    Assert.Equal("\"CQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CR, str);
-                    Assert.AreEqual("\"CR\"", str.ToString());
+                    Assert.Equal("\"CR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CS, str);
-                    Assert.AreEqual("\"CS\"", str.ToString());
+                    Assert.Equal("\"CS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CT, str);
-                    Assert.AreEqual("\"CT\"", str.ToString());
+                    Assert.Equal("\"CT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CU, str);
-                    Assert.AreEqual("\"CU\"", str.ToString());
+                    Assert.Equal("\"CU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CV, str);
-                    Assert.AreEqual("\"CV\"", str.ToString());
+                    Assert.Equal("\"CV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CW, str);
-                    Assert.AreEqual("\"CW\"", str.ToString());
+                    Assert.Equal("\"CW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CX, str);
-                    Assert.AreEqual("\"CX\"", str.ToString());
+                    Assert.Equal("\"CX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CY, str);
-                    Assert.AreEqual("\"CY\"", str.ToString());
+                    Assert.Equal("\"CY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.CZ, str);
-                    Assert.AreEqual("\"CZ\"", str.ToString());
+                    Assert.Equal("\"CZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DA, str);
-                    Assert.AreEqual("\"DA\"", str.ToString());
+                    Assert.Equal("\"DA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DB, str);
-                    Assert.AreEqual("\"DB\"", str.ToString());
+                    Assert.Equal("\"DB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DC, str);
-                    Assert.AreEqual("\"DC\"", str.ToString());
+                    Assert.Equal("\"DC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DD, str);
-                    Assert.AreEqual("\"DD\"", str.ToString());
+                    Assert.Equal("\"DD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DE, str);
-                    Assert.AreEqual("\"DE\"", str.ToString());
+                    Assert.Equal("\"DE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DF, str);
-                    Assert.AreEqual("\"DF\"", str.ToString());
+                    Assert.Equal("\"DF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DG, str);
-                    Assert.AreEqual("\"DG\"", str.ToString());
+                    Assert.Equal("\"DG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DH, str);
-                    Assert.AreEqual("\"DH\"", str.ToString());
+                    Assert.Equal("\"DH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DI, str);
-                    Assert.AreEqual("\"DI\"", str.ToString());
+                    Assert.Equal("\"DI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DJ, str);
-                    Assert.AreEqual("\"DJ\"", str.ToString());
+                    Assert.Equal("\"DJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DK, str);
-                    Assert.AreEqual("\"DK\"", str.ToString());
+                    Assert.Equal("\"DK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DL, str);
-                    Assert.AreEqual("\"DL\"", str.ToString());
+                    Assert.Equal("\"DL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DM, str);
-                    Assert.AreEqual("\"DM\"", str.ToString());
+                    Assert.Equal("\"DM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DN, str);
-                    Assert.AreEqual("\"DN\"", str.ToString());
+                    Assert.Equal("\"DN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DO, str);
-                    Assert.AreEqual("\"DO\"", str.ToString());
+                    Assert.Equal("\"DO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DP, str);
-                    Assert.AreEqual("\"DP\"", str.ToString());
+                    Assert.Equal("\"DP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DQ, str);
-                    Assert.AreEqual("\"DQ\"", str.ToString());
+                    Assert.Equal("\"DQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DR, str);
-                    Assert.AreEqual("\"DR\"", str.ToString());
+                    Assert.Equal("\"DR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DS, str);
-                    Assert.AreEqual("\"DS\"", str.ToString());
+                    Assert.Equal("\"DS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DT, str);
-                    Assert.AreEqual("\"DT\"", str.ToString());
+                    Assert.Equal("\"DT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DU, str);
-                    Assert.AreEqual("\"DU\"", str.ToString());
+                    Assert.Equal("\"DU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DV, str);
-                    Assert.AreEqual("\"DV\"", str.ToString());
+                    Assert.Equal("\"DV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DW, str);
-                    Assert.AreEqual("\"DW\"", str.ToString());
+                    Assert.Equal("\"DW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DX, str);
-                    Assert.AreEqual("\"DX\"", str.ToString());
+                    Assert.Equal("\"DX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DY, str);
-                    Assert.AreEqual("\"DY\"", str.ToString());
+                    Assert.Equal("\"DY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.DZ, str);
-                    Assert.AreEqual("\"DZ\"", str.ToString());
+                    Assert.Equal("\"DZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EA, str);
-                    Assert.AreEqual("\"EA\"", str.ToString());
+                    Assert.Equal("\"EA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EB, str);
-                    Assert.AreEqual("\"EB\"", str.ToString());
+                    Assert.Equal("\"EB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EC, str);
-                    Assert.AreEqual("\"EC\"", str.ToString());
+                    Assert.Equal("\"EC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.ED, str);
-                    Assert.AreEqual("\"ED\"", str.ToString());
+                    Assert.Equal("\"ED\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EE, str);
-                    Assert.AreEqual("\"EE\"", str.ToString());
+                    Assert.Equal("\"EE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EF, str);
-                    Assert.AreEqual("\"EF\"", str.ToString());
+                    Assert.Equal("\"EF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EG, str);
-                    Assert.AreEqual("\"EG\"", str.ToString());
+                    Assert.Equal("\"EG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EH, str);
-                    Assert.AreEqual("\"EH\"", str.ToString());
+                    Assert.Equal("\"EH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EI, str);
-                    Assert.AreEqual("\"EI\"", str.ToString());
+                    Assert.Equal("\"EI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EJ, str);
-                    Assert.AreEqual("\"EJ\"", str.ToString());
+                    Assert.Equal("\"EJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EK, str);
-                    Assert.AreEqual("\"EK\"", str.ToString());
+                    Assert.Equal("\"EK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EL, str);
-                    Assert.AreEqual("\"EL\"", str.ToString());
+                    Assert.Equal("\"EL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EM, str);
-                    Assert.AreEqual("\"EM\"", str.ToString());
+                    Assert.Equal("\"EM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EN, str);
-                    Assert.AreEqual("\"EN\"", str.ToString());
+                    Assert.Equal("\"EN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EO, str);
-                    Assert.AreEqual("\"EO\"", str.ToString());
+                    Assert.Equal("\"EO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EP, str);
-                    Assert.AreEqual("\"EP\"", str.ToString());
+                    Assert.Equal("\"EP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EQ, str);
-                    Assert.AreEqual("\"EQ\"", str.ToString());
+                    Assert.Equal("\"EQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.ER, str);
-                    Assert.AreEqual("\"ER\"", str.ToString());
+                    Assert.Equal("\"ER\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.ES, str);
-                    Assert.AreEqual("\"ES\"", str.ToString());
+                    Assert.Equal("\"ES\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.ET, str);
-                    Assert.AreEqual("\"ET\"", str.ToString());
+                    Assert.Equal("\"ET\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EU, str);
-                    Assert.AreEqual("\"EU\"", str.ToString());
+                    Assert.Equal("\"EU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EV, str);
-                    Assert.AreEqual("\"EV\"", str.ToString());
+                    Assert.Equal("\"EV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EW, str);
-                    Assert.AreEqual("\"EW\"", str.ToString());
+                    Assert.Equal("\"EW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EX, str);
-                    Assert.AreEqual("\"EX\"", str.ToString());
+                    Assert.Equal("\"EX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EY, str);
-                    Assert.AreEqual("\"EY\"", str.ToString());
+                    Assert.Equal("\"EY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.EZ, str);
-                    Assert.AreEqual("\"EZ\"", str.ToString());
+                    Assert.Equal("\"EZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FA, str);
-                    Assert.AreEqual("\"FA\"", str.ToString());
+                    Assert.Equal("\"FA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FB, str);
-                    Assert.AreEqual("\"FB\"", str.ToString());
+                    Assert.Equal("\"FB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FC, str);
-                    Assert.AreEqual("\"FC\"", str.ToString());
+                    Assert.Equal("\"FC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FD, str);
-                    Assert.AreEqual("\"FD\"", str.ToString());
+                    Assert.Equal("\"FD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FE, str);
-                    Assert.AreEqual("\"FE\"", str.ToString());
+                    Assert.Equal("\"FE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FF, str);
-                    Assert.AreEqual("\"FF\"", str.ToString());
+                    Assert.Equal("\"FF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FG, str);
-                    Assert.AreEqual("\"FG\"", str.ToString());
+                    Assert.Equal("\"FG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FH, str);
-                    Assert.AreEqual("\"FH\"", str.ToString());
+                    Assert.Equal("\"FH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FI, str);
-                    Assert.AreEqual("\"FI\"", str.ToString());
+                    Assert.Equal("\"FI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FJ, str);
-                    Assert.AreEqual("\"FJ\"", str.ToString());
+                    Assert.Equal("\"FJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FK, str);
-                    Assert.AreEqual("\"FK\"", str.ToString());
+                    Assert.Equal("\"FK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FL, str);
-                    Assert.AreEqual("\"FL\"", str.ToString());
+                    Assert.Equal("\"FL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FM, str);
-                    Assert.AreEqual("\"FM\"", str.ToString());
+                    Assert.Equal("\"FM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FN, str);
-                    Assert.AreEqual("\"FN\"", str.ToString());
+                    Assert.Equal("\"FN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FO, str);
-                    Assert.AreEqual("\"FO\"", str.ToString());
+                    Assert.Equal("\"FO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FP, str);
-                    Assert.AreEqual("\"FP\"", str.ToString());
+                    Assert.Equal("\"FP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FQ, str);
-                    Assert.AreEqual("\"FQ\"", str.ToString());
+                    Assert.Equal("\"FQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FR, str);
-                    Assert.AreEqual("\"FR\"", str.ToString());
+                    Assert.Equal("\"FR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FS, str);
-                    Assert.AreEqual("\"FS\"", str.ToString());
+                    Assert.Equal("\"FS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FT, str);
-                    Assert.AreEqual("\"FT\"", str.ToString());
+                    Assert.Equal("\"FT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FU, str);
-                    Assert.AreEqual("\"FU\"", str.ToString());
+                    Assert.Equal("\"FU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FV, str);
-                    Assert.AreEqual("\"FV\"", str.ToString());
+                    Assert.Equal("\"FV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FW, str);
-                    Assert.AreEqual("\"FW\"", str.ToString());
+                    Assert.Equal("\"FW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FX, str);
-                    Assert.AreEqual("\"FX\"", str.ToString());
+                    Assert.Equal("\"FX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FY, str);
-                    Assert.AreEqual("\"FY\"", str.ToString());
+                    Assert.Equal("\"FY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.FZ, str);
-                    Assert.AreEqual("\"FZ\"", str.ToString());
+                    Assert.Equal("\"FZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GA, str);
-                    Assert.AreEqual("\"GA\"", str.ToString());
+                    Assert.Equal("\"GA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GB, str);
-                    Assert.AreEqual("\"GB\"", str.ToString());
+                    Assert.Equal("\"GB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GC, str);
-                    Assert.AreEqual("\"GC\"", str.ToString());
+                    Assert.Equal("\"GC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GD, str);
-                    Assert.AreEqual("\"GD\"", str.ToString());
+                    Assert.Equal("\"GD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GE, str);
-                    Assert.AreEqual("\"GE\"", str.ToString());
+                    Assert.Equal("\"GE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GF, str);
-                    Assert.AreEqual("\"GF\"", str.ToString());
+                    Assert.Equal("\"GF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GG, str);
-                    Assert.AreEqual("\"GG\"", str.ToString());
+                    Assert.Equal("\"GG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GH, str);
-                    Assert.AreEqual("\"GH\"", str.ToString());
+                    Assert.Equal("\"GH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GI, str);
-                    Assert.AreEqual("\"GI\"", str.ToString());
+                    Assert.Equal("\"GI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GJ, str);
-                    Assert.AreEqual("\"GJ\"", str.ToString());
+                    Assert.Equal("\"GJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GK, str);
-                    Assert.AreEqual("\"GK\"", str.ToString());
+                    Assert.Equal("\"GK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GL, str);
-                    Assert.AreEqual("\"GL\"", str.ToString());
+                    Assert.Equal("\"GL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GM, str);
-                    Assert.AreEqual("\"GM\"", str.ToString());
+                    Assert.Equal("\"GM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GN, str);
-                    Assert.AreEqual("\"GN\"", str.ToString());
+                    Assert.Equal("\"GN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GO, str);
-                    Assert.AreEqual("\"GO\"", str.ToString());
+                    Assert.Equal("\"GO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GP, str);
-                    Assert.AreEqual("\"GP\"", str.ToString());
+                    Assert.Equal("\"GP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GQ, str);
-                    Assert.AreEqual("\"GQ\"", str.ToString());
+                    Assert.Equal("\"GQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GR, str);
-                    Assert.AreEqual("\"GR\"", str.ToString());
+                    Assert.Equal("\"GR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GS, str);
-                    Assert.AreEqual("\"GS\"", str.ToString());
+                    Assert.Equal("\"GS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GT, str);
-                    Assert.AreEqual("\"GT\"", str.ToString());
+                    Assert.Equal("\"GT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GU, str);
-                    Assert.AreEqual("\"GU\"", str.ToString());
+                    Assert.Equal("\"GU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GV, str);
-                    Assert.AreEqual("\"GV\"", str.ToString());
+                    Assert.Equal("\"GV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GW, str);
-                    Assert.AreEqual("\"GW\"", str.ToString());
+                    Assert.Equal("\"GW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GX, str);
-                    Assert.AreEqual("\"GX\"", str.ToString());
+                    Assert.Equal("\"GX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GY, str);
-                    Assert.AreEqual("\"GY\"", str.ToString());
+                    Assert.Equal("\"GY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.GZ, str);
-                    Assert.AreEqual("\"GZ\"", str.ToString());
+                    Assert.Equal("\"GZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HA, str);
-                    Assert.AreEqual("\"HA\"", str.ToString());
+                    Assert.Equal("\"HA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HB, str);
-                    Assert.AreEqual("\"HB\"", str.ToString());
+                    Assert.Equal("\"HB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HC, str);
-                    Assert.AreEqual("\"HC\"", str.ToString());
+                    Assert.Equal("\"HC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HD, str);
-                    Assert.AreEqual("\"HD\"", str.ToString());
+                    Assert.Equal("\"HD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HE, str);
-                    Assert.AreEqual("\"HE\"", str.ToString());
+                    Assert.Equal("\"HE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HF, str);
-                    Assert.AreEqual("\"HF\"", str.ToString());
+                    Assert.Equal("\"HF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HG, str);
-                    Assert.AreEqual("\"HG\"", str.ToString());
+                    Assert.Equal("\"HG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HH, str);
-                    Assert.AreEqual("\"HH\"", str.ToString());
+                    Assert.Equal("\"HH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HI, str);
-                    Assert.AreEqual("\"HI\"", str.ToString());
+                    Assert.Equal("\"HI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HJ, str);
-                    Assert.AreEqual("\"HJ\"", str.ToString());
+                    Assert.Equal("\"HJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HK, str);
-                    Assert.AreEqual("\"HK\"", str.ToString());
+                    Assert.Equal("\"HK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HL, str);
-                    Assert.AreEqual("\"HL\"", str.ToString());
+                    Assert.Equal("\"HL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HM, str);
-                    Assert.AreEqual("\"HM\"", str.ToString());
+                    Assert.Equal("\"HM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HN, str);
-                    Assert.AreEqual("\"HN\"", str.ToString());
+                    Assert.Equal("\"HN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HO, str);
-                    Assert.AreEqual("\"HO\"", str.ToString());
+                    Assert.Equal("\"HO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HP, str);
-                    Assert.AreEqual("\"HP\"", str.ToString());
+                    Assert.Equal("\"HP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HQ, str);
-                    Assert.AreEqual("\"HQ\"", str.ToString());
+                    Assert.Equal("\"HQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HR, str);
-                    Assert.AreEqual("\"HR\"", str.ToString());
+                    Assert.Equal("\"HR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HS, str);
-                    Assert.AreEqual("\"HS\"", str.ToString());
+                    Assert.Equal("\"HS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HT, str);
-                    Assert.AreEqual("\"HT\"", str.ToString());
+                    Assert.Equal("\"HT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HU, str);
-                    Assert.AreEqual("\"HU\"", str.ToString());
+                    Assert.Equal("\"HU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HV, str);
-                    Assert.AreEqual("\"HV\"", str.ToString());
+                    Assert.Equal("\"HV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HW, str);
-                    Assert.AreEqual("\"HW\"", str.ToString());
+                    Assert.Equal("\"HW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HX, str);
-                    Assert.AreEqual("\"HX\"", str.ToString());
+                    Assert.Equal("\"HX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HY, str);
-                    Assert.AreEqual("\"HY\"", str.ToString());
+                    Assert.Equal("\"HY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.HZ, str);
-                    Assert.AreEqual("\"HZ\"", str.ToString());
+                    Assert.Equal("\"HZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IA, str);
-                    Assert.AreEqual("\"IA\"", str.ToString());
+                    Assert.Equal("\"IA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IB, str);
-                    Assert.AreEqual("\"IB\"", str.ToString());
+                    Assert.Equal("\"IB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IC, str);
-                    Assert.AreEqual("\"IC\"", str.ToString());
+                    Assert.Equal("\"IC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.ID, str);
-                    Assert.AreEqual("\"ID\"", str.ToString());
+                    Assert.Equal("\"ID\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IE, str);
-                    Assert.AreEqual("\"IE\"", str.ToString());
+                    Assert.Equal("\"IE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IF, str);
-                    Assert.AreEqual("\"IF\"", str.ToString());
+                    Assert.Equal("\"IF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IG, str);
-                    Assert.AreEqual("\"IG\"", str.ToString());
+                    Assert.Equal("\"IG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IH, str);
-                    Assert.AreEqual("\"IH\"", str.ToString());
+                    Assert.Equal("\"IH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.II, str);
-                    Assert.AreEqual("\"II\"", str.ToString());
+                    Assert.Equal("\"II\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IJ, str);
-                    Assert.AreEqual("\"IJ\"", str.ToString());
+                    Assert.Equal("\"IJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IK, str);
-                    Assert.AreEqual("\"IK\"", str.ToString());
+                    Assert.Equal("\"IK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IL, str);
-                    Assert.AreEqual("\"IL\"", str.ToString());
+                    Assert.Equal("\"IL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IM, str);
-                    Assert.AreEqual("\"IM\"", str.ToString());
+                    Assert.Equal("\"IM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IN, str);
-                    Assert.AreEqual("\"IN\"", str.ToString());
+                    Assert.Equal("\"IN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IO, str);
-                    Assert.AreEqual("\"IO\"", str.ToString());
+                    Assert.Equal("\"IO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IP, str);
-                    Assert.AreEqual("\"IP\"", str.ToString());
+                    Assert.Equal("\"IP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IQ, str);
-                    Assert.AreEqual("\"IQ\"", str.ToString());
+                    Assert.Equal("\"IQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IR, str);
-                    Assert.AreEqual("\"IR\"", str.ToString());
+                    Assert.Equal("\"IR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IS, str);
-                    Assert.AreEqual("\"IS\"", str.ToString());
+                    Assert.Equal("\"IS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IT, str);
-                    Assert.AreEqual("\"IT\"", str.ToString());
+                    Assert.Equal("\"IT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IU, str);
-                    Assert.AreEqual("\"IU\"", str.ToString());
+                    Assert.Equal("\"IU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IV, str);
-                    Assert.AreEqual("\"IV\"", str.ToString());
+                    Assert.Equal("\"IV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IW, str);
-                    Assert.AreEqual("\"IW\"", str.ToString());
+                    Assert.Equal("\"IW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IX, str);
-                    Assert.AreEqual("\"IX\"", str.ToString());
+                    Assert.Equal("\"IX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IY, str);
-                    Assert.AreEqual("\"IY\"", str.ToString());
+                    Assert.Equal("\"IY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.IZ, str);
-                    Assert.AreEqual("\"IZ\"", str.ToString());
+                    Assert.Equal("\"IZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JA, str);
-                    Assert.AreEqual("\"JA\"", str.ToString());
+                    Assert.Equal("\"JA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JB, str);
-                    Assert.AreEqual("\"JB\"", str.ToString());
+                    Assert.Equal("\"JB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JC, str);
-                    Assert.AreEqual("\"JC\"", str.ToString());
+                    Assert.Equal("\"JC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JD, str);
-                    Assert.AreEqual("\"JD\"", str.ToString());
+                    Assert.Equal("\"JD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JE, str);
-                    Assert.AreEqual("\"JE\"", str.ToString());
+                    Assert.Equal("\"JE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JF, str);
-                    Assert.AreEqual("\"JF\"", str.ToString());
+                    Assert.Equal("\"JF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JG, str);
-                    Assert.AreEqual("\"JG\"", str.ToString());
+                    Assert.Equal("\"JG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JH, str);
-                    Assert.AreEqual("\"JH\"", str.ToString());
+                    Assert.Equal("\"JH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JI, str);
-                    Assert.AreEqual("\"JI\"", str.ToString());
+                    Assert.Equal("\"JI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JJ, str);
-                    Assert.AreEqual("\"JJ\"", str.ToString());
+                    Assert.Equal("\"JJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JK, str);
-                    Assert.AreEqual("\"JK\"", str.ToString());
+                    Assert.Equal("\"JK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JL, str);
-                    Assert.AreEqual("\"JL\"", str.ToString());
+                    Assert.Equal("\"JL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JM, str);
-                    Assert.AreEqual("\"JM\"", str.ToString());
+                    Assert.Equal("\"JM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JN, str);
-                    Assert.AreEqual("\"JN\"", str.ToString());
+                    Assert.Equal("\"JN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JO, str);
-                    Assert.AreEqual("\"JO\"", str.ToString());
+                    Assert.Equal("\"JO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JP, str);
-                    Assert.AreEqual("\"JP\"", str.ToString());
+                    Assert.Equal("\"JP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JQ, str);
-                    Assert.AreEqual("\"JQ\"", str.ToString());
+                    Assert.Equal("\"JQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JR, str);
-                    Assert.AreEqual("\"JR\"", str.ToString());
+                    Assert.Equal("\"JR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JS, str);
-                    Assert.AreEqual("\"JS\"", str.ToString());
+                    Assert.Equal("\"JS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JT, str);
-                    Assert.AreEqual("\"JT\"", str.ToString());
+                    Assert.Equal("\"JT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JU, str);
-                    Assert.AreEqual("\"JU\"", str.ToString());
+                    Assert.Equal("\"JU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations9.JV, str);
-                    Assert.AreEqual("\"JV\"", str.ToString());
+                    Assert.Equal("\"JV\"", str.ToString());
                 }
             }
             // 10
@@ -4406,1287 +4397,1287 @@ namespace JilTests
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AA, str);
-                    Assert.AreEqual("\"AA\"", str.ToString());
+                    Assert.Equal("\"AA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AB, str);
-                    Assert.AreEqual("\"AB\"", str.ToString());
+                    Assert.Equal("\"AB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AC, str);
-                    Assert.AreEqual("\"AC\"", str.ToString());
+                    Assert.Equal("\"AC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AD, str);
-                    Assert.AreEqual("\"AD\"", str.ToString());
+                    Assert.Equal("\"AD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AE, str);
-                    Assert.AreEqual("\"AE\"", str.ToString());
+                    Assert.Equal("\"AE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AF, str);
-                    Assert.AreEqual("\"AF\"", str.ToString());
+                    Assert.Equal("\"AF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AG, str);
-                    Assert.AreEqual("\"AG\"", str.ToString());
+                    Assert.Equal("\"AG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AH, str);
-                    Assert.AreEqual("\"AH\"", str.ToString());
+                    Assert.Equal("\"AH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AI, str);
-                    Assert.AreEqual("\"AI\"", str.ToString());
+                    Assert.Equal("\"AI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AJ, str);
-                    Assert.AreEqual("\"AJ\"", str.ToString());
+                    Assert.Equal("\"AJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AK, str);
-                    Assert.AreEqual("\"AK\"", str.ToString());
+                    Assert.Equal("\"AK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AL, str);
-                    Assert.AreEqual("\"AL\"", str.ToString());
+                    Assert.Equal("\"AL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AM, str);
-                    Assert.AreEqual("\"AM\"", str.ToString());
+                    Assert.Equal("\"AM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AN, str);
-                    Assert.AreEqual("\"AN\"", str.ToString());
+                    Assert.Equal("\"AN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AO, str);
-                    Assert.AreEqual("\"AO\"", str.ToString());
+                    Assert.Equal("\"AO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AP, str);
-                    Assert.AreEqual("\"AP\"", str.ToString());
+                    Assert.Equal("\"AP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AQ, str);
-                    Assert.AreEqual("\"AQ\"", str.ToString());
+                    Assert.Equal("\"AQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AR, str);
-                    Assert.AreEqual("\"AR\"", str.ToString());
+                    Assert.Equal("\"AR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AS, str);
-                    Assert.AreEqual("\"AS\"", str.ToString());
+                    Assert.Equal("\"AS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AT, str);
-                    Assert.AreEqual("\"AT\"", str.ToString());
+                    Assert.Equal("\"AT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AU, str);
-                    Assert.AreEqual("\"AU\"", str.ToString());
+                    Assert.Equal("\"AU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AV, str);
-                    Assert.AreEqual("\"AV\"", str.ToString());
+                    Assert.Equal("\"AV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AW, str);
-                    Assert.AreEqual("\"AW\"", str.ToString());
+                    Assert.Equal("\"AW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AX, str);
-                    Assert.AreEqual("\"AX\"", str.ToString());
+                    Assert.Equal("\"AX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AY, str);
-                    Assert.AreEqual("\"AY\"", str.ToString());
+                    Assert.Equal("\"AY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.AZ, str);
-                    Assert.AreEqual("\"AZ\"", str.ToString());
+                    Assert.Equal("\"AZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BA, str);
-                    Assert.AreEqual("\"BA\"", str.ToString());
+                    Assert.Equal("\"BA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BB, str);
-                    Assert.AreEqual("\"BB\"", str.ToString());
+                    Assert.Equal("\"BB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BC, str);
-                    Assert.AreEqual("\"BC\"", str.ToString());
+                    Assert.Equal("\"BC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BD, str);
-                    Assert.AreEqual("\"BD\"", str.ToString());
+                    Assert.Equal("\"BD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BE, str);
-                    Assert.AreEqual("\"BE\"", str.ToString());
+                    Assert.Equal("\"BE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BF, str);
-                    Assert.AreEqual("\"BF\"", str.ToString());
+                    Assert.Equal("\"BF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BG, str);
-                    Assert.AreEqual("\"BG\"", str.ToString());
+                    Assert.Equal("\"BG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BH, str);
-                    Assert.AreEqual("\"BH\"", str.ToString());
+                    Assert.Equal("\"BH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BI, str);
-                    Assert.AreEqual("\"BI\"", str.ToString());
+                    Assert.Equal("\"BI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BJ, str);
-                    Assert.AreEqual("\"BJ\"", str.ToString());
+                    Assert.Equal("\"BJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BK, str);
-                    Assert.AreEqual("\"BK\"", str.ToString());
+                    Assert.Equal("\"BK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BL, str);
-                    Assert.AreEqual("\"BL\"", str.ToString());
+                    Assert.Equal("\"BL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BM, str);
-                    Assert.AreEqual("\"BM\"", str.ToString());
+                    Assert.Equal("\"BM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BN, str);
-                    Assert.AreEqual("\"BN\"", str.ToString());
+                    Assert.Equal("\"BN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BO, str);
-                    Assert.AreEqual("\"BO\"", str.ToString());
+                    Assert.Equal("\"BO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BP, str);
-                    Assert.AreEqual("\"BP\"", str.ToString());
+                    Assert.Equal("\"BP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BQ, str);
-                    Assert.AreEqual("\"BQ\"", str.ToString());
+                    Assert.Equal("\"BQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BR, str);
-                    Assert.AreEqual("\"BR\"", str.ToString());
+                    Assert.Equal("\"BR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BS, str);
-                    Assert.AreEqual("\"BS\"", str.ToString());
+                    Assert.Equal("\"BS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BT, str);
-                    Assert.AreEqual("\"BT\"", str.ToString());
+                    Assert.Equal("\"BT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BU, str);
-                    Assert.AreEqual("\"BU\"", str.ToString());
+                    Assert.Equal("\"BU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BV, str);
-                    Assert.AreEqual("\"BV\"", str.ToString());
+                    Assert.Equal("\"BV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BW, str);
-                    Assert.AreEqual("\"BW\"", str.ToString());
+                    Assert.Equal("\"BW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BX, str);
-                    Assert.AreEqual("\"BX\"", str.ToString());
+                    Assert.Equal("\"BX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BY, str);
-                    Assert.AreEqual("\"BY\"", str.ToString());
+                    Assert.Equal("\"BY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.BZ, str);
-                    Assert.AreEqual("\"BZ\"", str.ToString());
+                    Assert.Equal("\"BZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CA, str);
-                    Assert.AreEqual("\"CA\"", str.ToString());
+                    Assert.Equal("\"CA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CB, str);
-                    Assert.AreEqual("\"CB\"", str.ToString());
+                    Assert.Equal("\"CB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CC, str);
-                    Assert.AreEqual("\"CC\"", str.ToString());
+                    Assert.Equal("\"CC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CD, str);
-                    Assert.AreEqual("\"CD\"", str.ToString());
+                    Assert.Equal("\"CD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CE, str);
-                    Assert.AreEqual("\"CE\"", str.ToString());
+                    Assert.Equal("\"CE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CF, str);
-                    Assert.AreEqual("\"CF\"", str.ToString());
+                    Assert.Equal("\"CF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CG, str);
-                    Assert.AreEqual("\"CG\"", str.ToString());
+                    Assert.Equal("\"CG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CH, str);
-                    Assert.AreEqual("\"CH\"", str.ToString());
+                    Assert.Equal("\"CH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CI, str);
-                    Assert.AreEqual("\"CI\"", str.ToString());
+                    Assert.Equal("\"CI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CJ, str);
-                    Assert.AreEqual("\"CJ\"", str.ToString());
+                    Assert.Equal("\"CJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CK, str);
-                    Assert.AreEqual("\"CK\"", str.ToString());
+                    Assert.Equal("\"CK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CL, str);
-                    Assert.AreEqual("\"CL\"", str.ToString());
+                    Assert.Equal("\"CL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CM, str);
-                    Assert.AreEqual("\"CM\"", str.ToString());
+                    Assert.Equal("\"CM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CN, str);
-                    Assert.AreEqual("\"CN\"", str.ToString());
+                    Assert.Equal("\"CN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CO, str);
-                    Assert.AreEqual("\"CO\"", str.ToString());
+                    Assert.Equal("\"CO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CP, str);
-                    Assert.AreEqual("\"CP\"", str.ToString());
+                    Assert.Equal("\"CP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CQ, str);
-                    Assert.AreEqual("\"CQ\"", str.ToString());
+                    Assert.Equal("\"CQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CR, str);
-                    Assert.AreEqual("\"CR\"", str.ToString());
+                    Assert.Equal("\"CR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CS, str);
-                    Assert.AreEqual("\"CS\"", str.ToString());
+                    Assert.Equal("\"CS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CT, str);
-                    Assert.AreEqual("\"CT\"", str.ToString());
+                    Assert.Equal("\"CT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CU, str);
-                    Assert.AreEqual("\"CU\"", str.ToString());
+                    Assert.Equal("\"CU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CV, str);
-                    Assert.AreEqual("\"CV\"", str.ToString());
+                    Assert.Equal("\"CV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CW, str);
-                    Assert.AreEqual("\"CW\"", str.ToString());
+                    Assert.Equal("\"CW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CX, str);
-                    Assert.AreEqual("\"CX\"", str.ToString());
+                    Assert.Equal("\"CX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CY, str);
-                    Assert.AreEqual("\"CY\"", str.ToString());
+                    Assert.Equal("\"CY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.CZ, str);
-                    Assert.AreEqual("\"CZ\"", str.ToString());
+                    Assert.Equal("\"CZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DA, str);
-                    Assert.AreEqual("\"DA\"", str.ToString());
+                    Assert.Equal("\"DA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DB, str);
-                    Assert.AreEqual("\"DB\"", str.ToString());
+                    Assert.Equal("\"DB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DC, str);
-                    Assert.AreEqual("\"DC\"", str.ToString());
+                    Assert.Equal("\"DC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DD, str);
-                    Assert.AreEqual("\"DD\"", str.ToString());
+                    Assert.Equal("\"DD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DE, str);
-                    Assert.AreEqual("\"DE\"", str.ToString());
+                    Assert.Equal("\"DE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DF, str);
-                    Assert.AreEqual("\"DF\"", str.ToString());
+                    Assert.Equal("\"DF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DG, str);
-                    Assert.AreEqual("\"DG\"", str.ToString());
+                    Assert.Equal("\"DG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DH, str);
-                    Assert.AreEqual("\"DH\"", str.ToString());
+                    Assert.Equal("\"DH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DI, str);
-                    Assert.AreEqual("\"DI\"", str.ToString());
+                    Assert.Equal("\"DI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DJ, str);
-                    Assert.AreEqual("\"DJ\"", str.ToString());
+                    Assert.Equal("\"DJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DK, str);
-                    Assert.AreEqual("\"DK\"", str.ToString());
+                    Assert.Equal("\"DK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DL, str);
-                    Assert.AreEqual("\"DL\"", str.ToString());
+                    Assert.Equal("\"DL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DM, str);
-                    Assert.AreEqual("\"DM\"", str.ToString());
+                    Assert.Equal("\"DM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DN, str);
-                    Assert.AreEqual("\"DN\"", str.ToString());
+                    Assert.Equal("\"DN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DO, str);
-                    Assert.AreEqual("\"DO\"", str.ToString());
+                    Assert.Equal("\"DO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DP, str);
-                    Assert.AreEqual("\"DP\"", str.ToString());
+                    Assert.Equal("\"DP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DQ, str);
-                    Assert.AreEqual("\"DQ\"", str.ToString());
+                    Assert.Equal("\"DQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DR, str);
-                    Assert.AreEqual("\"DR\"", str.ToString());
+                    Assert.Equal("\"DR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DS, str);
-                    Assert.AreEqual("\"DS\"", str.ToString());
+                    Assert.Equal("\"DS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DT, str);
-                    Assert.AreEqual("\"DT\"", str.ToString());
+                    Assert.Equal("\"DT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DU, str);
-                    Assert.AreEqual("\"DU\"", str.ToString());
+                    Assert.Equal("\"DU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DV, str);
-                    Assert.AreEqual("\"DV\"", str.ToString());
+                    Assert.Equal("\"DV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DW, str);
-                    Assert.AreEqual("\"DW\"", str.ToString());
+                    Assert.Equal("\"DW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DX, str);
-                    Assert.AreEqual("\"DX\"", str.ToString());
+                    Assert.Equal("\"DX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DY, str);
-                    Assert.AreEqual("\"DY\"", str.ToString());
+                    Assert.Equal("\"DY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.DZ, str);
-                    Assert.AreEqual("\"DZ\"", str.ToString());
+                    Assert.Equal("\"DZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EA, str);
-                    Assert.AreEqual("\"EA\"", str.ToString());
+                    Assert.Equal("\"EA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EB, str);
-                    Assert.AreEqual("\"EB\"", str.ToString());
+                    Assert.Equal("\"EB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EC, str);
-                    Assert.AreEqual("\"EC\"", str.ToString());
+                    Assert.Equal("\"EC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.ED, str);
-                    Assert.AreEqual("\"ED\"", str.ToString());
+                    Assert.Equal("\"ED\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EE, str);
-                    Assert.AreEqual("\"EE\"", str.ToString());
+                    Assert.Equal("\"EE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EF, str);
-                    Assert.AreEqual("\"EF\"", str.ToString());
+                    Assert.Equal("\"EF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EG, str);
-                    Assert.AreEqual("\"EG\"", str.ToString());
+                    Assert.Equal("\"EG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EH, str);
-                    Assert.AreEqual("\"EH\"", str.ToString());
+                    Assert.Equal("\"EH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EI, str);
-                    Assert.AreEqual("\"EI\"", str.ToString());
+                    Assert.Equal("\"EI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EJ, str);
-                    Assert.AreEqual("\"EJ\"", str.ToString());
+                    Assert.Equal("\"EJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EK, str);
-                    Assert.AreEqual("\"EK\"", str.ToString());
+                    Assert.Equal("\"EK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EL, str);
-                    Assert.AreEqual("\"EL\"", str.ToString());
+                    Assert.Equal("\"EL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EM, str);
-                    Assert.AreEqual("\"EM\"", str.ToString());
+                    Assert.Equal("\"EM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EN, str);
-                    Assert.AreEqual("\"EN\"", str.ToString());
+                    Assert.Equal("\"EN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EO, str);
-                    Assert.AreEqual("\"EO\"", str.ToString());
+                    Assert.Equal("\"EO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EP, str);
-                    Assert.AreEqual("\"EP\"", str.ToString());
+                    Assert.Equal("\"EP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EQ, str);
-                    Assert.AreEqual("\"EQ\"", str.ToString());
+                    Assert.Equal("\"EQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.ER, str);
-                    Assert.AreEqual("\"ER\"", str.ToString());
+                    Assert.Equal("\"ER\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.ES, str);
-                    Assert.AreEqual("\"ES\"", str.ToString());
+                    Assert.Equal("\"ES\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.ET, str);
-                    Assert.AreEqual("\"ET\"", str.ToString());
+                    Assert.Equal("\"ET\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EU, str);
-                    Assert.AreEqual("\"EU\"", str.ToString());
+                    Assert.Equal("\"EU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EV, str);
-                    Assert.AreEqual("\"EV\"", str.ToString());
+                    Assert.Equal("\"EV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EW, str);
-                    Assert.AreEqual("\"EW\"", str.ToString());
+                    Assert.Equal("\"EW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EX, str);
-                    Assert.AreEqual("\"EX\"", str.ToString());
+                    Assert.Equal("\"EX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EY, str);
-                    Assert.AreEqual("\"EY\"", str.ToString());
+                    Assert.Equal("\"EY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.EZ, str);
-                    Assert.AreEqual("\"EZ\"", str.ToString());
+                    Assert.Equal("\"EZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FA, str);
-                    Assert.AreEqual("\"FA\"", str.ToString());
+                    Assert.Equal("\"FA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FB, str);
-                    Assert.AreEqual("\"FB\"", str.ToString());
+                    Assert.Equal("\"FB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FC, str);
-                    Assert.AreEqual("\"FC\"", str.ToString());
+                    Assert.Equal("\"FC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FD, str);
-                    Assert.AreEqual("\"FD\"", str.ToString());
+                    Assert.Equal("\"FD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FE, str);
-                    Assert.AreEqual("\"FE\"", str.ToString());
+                    Assert.Equal("\"FE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FF, str);
-                    Assert.AreEqual("\"FF\"", str.ToString());
+                    Assert.Equal("\"FF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FG, str);
-                    Assert.AreEqual("\"FG\"", str.ToString());
+                    Assert.Equal("\"FG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FH, str);
-                    Assert.AreEqual("\"FH\"", str.ToString());
+                    Assert.Equal("\"FH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FI, str);
-                    Assert.AreEqual("\"FI\"", str.ToString());
+                    Assert.Equal("\"FI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FJ, str);
-                    Assert.AreEqual("\"FJ\"", str.ToString());
+                    Assert.Equal("\"FJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FK, str);
-                    Assert.AreEqual("\"FK\"", str.ToString());
+                    Assert.Equal("\"FK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FL, str);
-                    Assert.AreEqual("\"FL\"", str.ToString());
+                    Assert.Equal("\"FL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FM, str);
-                    Assert.AreEqual("\"FM\"", str.ToString());
+                    Assert.Equal("\"FM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FN, str);
-                    Assert.AreEqual("\"FN\"", str.ToString());
+                    Assert.Equal("\"FN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FO, str);
-                    Assert.AreEqual("\"FO\"", str.ToString());
+                    Assert.Equal("\"FO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FP, str);
-                    Assert.AreEqual("\"FP\"", str.ToString());
+                    Assert.Equal("\"FP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FQ, str);
-                    Assert.AreEqual("\"FQ\"", str.ToString());
+                    Assert.Equal("\"FQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FR, str);
-                    Assert.AreEqual("\"FR\"", str.ToString());
+                    Assert.Equal("\"FR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FS, str);
-                    Assert.AreEqual("\"FS\"", str.ToString());
+                    Assert.Equal("\"FS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FT, str);
-                    Assert.AreEqual("\"FT\"", str.ToString());
+                    Assert.Equal("\"FT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FU, str);
-                    Assert.AreEqual("\"FU\"", str.ToString());
+                    Assert.Equal("\"FU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FV, str);
-                    Assert.AreEqual("\"FV\"", str.ToString());
+                    Assert.Equal("\"FV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FW, str);
-                    Assert.AreEqual("\"FW\"", str.ToString());
+                    Assert.Equal("\"FW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FX, str);
-                    Assert.AreEqual("\"FX\"", str.ToString());
+                    Assert.Equal("\"FX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FY, str);
-                    Assert.AreEqual("\"FY\"", str.ToString());
+                    Assert.Equal("\"FY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.FZ, str);
-                    Assert.AreEqual("\"FZ\"", str.ToString());
+                    Assert.Equal("\"FZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GA, str);
-                    Assert.AreEqual("\"GA\"", str.ToString());
+                    Assert.Equal("\"GA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GB, str);
-                    Assert.AreEqual("\"GB\"", str.ToString());
+                    Assert.Equal("\"GB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GC, str);
-                    Assert.AreEqual("\"GC\"", str.ToString());
+                    Assert.Equal("\"GC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GD, str);
-                    Assert.AreEqual("\"GD\"", str.ToString());
+                    Assert.Equal("\"GD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GE, str);
-                    Assert.AreEqual("\"GE\"", str.ToString());
+                    Assert.Equal("\"GE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GF, str);
-                    Assert.AreEqual("\"GF\"", str.ToString());
+                    Assert.Equal("\"GF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GG, str);
-                    Assert.AreEqual("\"GG\"", str.ToString());
+                    Assert.Equal("\"GG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GH, str);
-                    Assert.AreEqual("\"GH\"", str.ToString());
+                    Assert.Equal("\"GH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GI, str);
-                    Assert.AreEqual("\"GI\"", str.ToString());
+                    Assert.Equal("\"GI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GJ, str);
-                    Assert.AreEqual("\"GJ\"", str.ToString());
+                    Assert.Equal("\"GJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GK, str);
-                    Assert.AreEqual("\"GK\"", str.ToString());
+                    Assert.Equal("\"GK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GL, str);
-                    Assert.AreEqual("\"GL\"", str.ToString());
+                    Assert.Equal("\"GL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GM, str);
-                    Assert.AreEqual("\"GM\"", str.ToString());
+                    Assert.Equal("\"GM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GN, str);
-                    Assert.AreEqual("\"GN\"", str.ToString());
+                    Assert.Equal("\"GN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GO, str);
-                    Assert.AreEqual("\"GO\"", str.ToString());
+                    Assert.Equal("\"GO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GP, str);
-                    Assert.AreEqual("\"GP\"", str.ToString());
+                    Assert.Equal("\"GP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GQ, str);
-                    Assert.AreEqual("\"GQ\"", str.ToString());
+                    Assert.Equal("\"GQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GR, str);
-                    Assert.AreEqual("\"GR\"", str.ToString());
+                    Assert.Equal("\"GR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GS, str);
-                    Assert.AreEqual("\"GS\"", str.ToString());
+                    Assert.Equal("\"GS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GT, str);
-                    Assert.AreEqual("\"GT\"", str.ToString());
+                    Assert.Equal("\"GT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GU, str);
-                    Assert.AreEqual("\"GU\"", str.ToString());
+                    Assert.Equal("\"GU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GV, str);
-                    Assert.AreEqual("\"GV\"", str.ToString());
+                    Assert.Equal("\"GV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GW, str);
-                    Assert.AreEqual("\"GW\"", str.ToString());
+                    Assert.Equal("\"GW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GX, str);
-                    Assert.AreEqual("\"GX\"", str.ToString());
+                    Assert.Equal("\"GX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GY, str);
-                    Assert.AreEqual("\"GY\"", str.ToString());
+                    Assert.Equal("\"GY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.GZ, str);
-                    Assert.AreEqual("\"GZ\"", str.ToString());
+                    Assert.Equal("\"GZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HA, str);
-                    Assert.AreEqual("\"HA\"", str.ToString());
+                    Assert.Equal("\"HA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HB, str);
-                    Assert.AreEqual("\"HB\"", str.ToString());
+                    Assert.Equal("\"HB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HC, str);
-                    Assert.AreEqual("\"HC\"", str.ToString());
+                    Assert.Equal("\"HC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HD, str);
-                    Assert.AreEqual("\"HD\"", str.ToString());
+                    Assert.Equal("\"HD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HE, str);
-                    Assert.AreEqual("\"HE\"", str.ToString());
+                    Assert.Equal("\"HE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HF, str);
-                    Assert.AreEqual("\"HF\"", str.ToString());
+                    Assert.Equal("\"HF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HG, str);
-                    Assert.AreEqual("\"HG\"", str.ToString());
+                    Assert.Equal("\"HG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HH, str);
-                    Assert.AreEqual("\"HH\"", str.ToString());
+                    Assert.Equal("\"HH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HI, str);
-                    Assert.AreEqual("\"HI\"", str.ToString());
+                    Assert.Equal("\"HI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HJ, str);
-                    Assert.AreEqual("\"HJ\"", str.ToString());
+                    Assert.Equal("\"HJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HK, str);
-                    Assert.AreEqual("\"HK\"", str.ToString());
+                    Assert.Equal("\"HK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HL, str);
-                    Assert.AreEqual("\"HL\"", str.ToString());
+                    Assert.Equal("\"HL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HM, str);
-                    Assert.AreEqual("\"HM\"", str.ToString());
+                    Assert.Equal("\"HM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HN, str);
-                    Assert.AreEqual("\"HN\"", str.ToString());
+                    Assert.Equal("\"HN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HO, str);
-                    Assert.AreEqual("\"HO\"", str.ToString());
+                    Assert.Equal("\"HO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HP, str);
-                    Assert.AreEqual("\"HP\"", str.ToString());
+                    Assert.Equal("\"HP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HQ, str);
-                    Assert.AreEqual("\"HQ\"", str.ToString());
+                    Assert.Equal("\"HQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HR, str);
-                    Assert.AreEqual("\"HR\"", str.ToString());
+                    Assert.Equal("\"HR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HS, str);
-                    Assert.AreEqual("\"HS\"", str.ToString());
+                    Assert.Equal("\"HS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HT, str);
-                    Assert.AreEqual("\"HT\"", str.ToString());
+                    Assert.Equal("\"HT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HU, str);
-                    Assert.AreEqual("\"HU\"", str.ToString());
+                    Assert.Equal("\"HU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HV, str);
-                    Assert.AreEqual("\"HV\"", str.ToString());
+                    Assert.Equal("\"HV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HW, str);
-                    Assert.AreEqual("\"HW\"", str.ToString());
+                    Assert.Equal("\"HW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HX, str);
-                    Assert.AreEqual("\"HX\"", str.ToString());
+                    Assert.Equal("\"HX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HY, str);
-                    Assert.AreEqual("\"HY\"", str.ToString());
+                    Assert.Equal("\"HY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.HZ, str);
-                    Assert.AreEqual("\"HZ\"", str.ToString());
+                    Assert.Equal("\"HZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IA, str);
-                    Assert.AreEqual("\"IA\"", str.ToString());
+                    Assert.Equal("\"IA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IB, str);
-                    Assert.AreEqual("\"IB\"", str.ToString());
+                    Assert.Equal("\"IB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IC, str);
-                    Assert.AreEqual("\"IC\"", str.ToString());
+                    Assert.Equal("\"IC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.ID, str);
-                    Assert.AreEqual("\"ID\"", str.ToString());
+                    Assert.Equal("\"ID\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IE, str);
-                    Assert.AreEqual("\"IE\"", str.ToString());
+                    Assert.Equal("\"IE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IF, str);
-                    Assert.AreEqual("\"IF\"", str.ToString());
+                    Assert.Equal("\"IF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IG, str);
-                    Assert.AreEqual("\"IG\"", str.ToString());
+                    Assert.Equal("\"IG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IH, str);
-                    Assert.AreEqual("\"IH\"", str.ToString());
+                    Assert.Equal("\"IH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.II, str);
-                    Assert.AreEqual("\"II\"", str.ToString());
+                    Assert.Equal("\"II\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IJ, str);
-                    Assert.AreEqual("\"IJ\"", str.ToString());
+                    Assert.Equal("\"IJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IK, str);
-                    Assert.AreEqual("\"IK\"", str.ToString());
+                    Assert.Equal("\"IK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IL, str);
-                    Assert.AreEqual("\"IL\"", str.ToString());
+                    Assert.Equal("\"IL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IM, str);
-                    Assert.AreEqual("\"IM\"", str.ToString());
+                    Assert.Equal("\"IM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IN, str);
-                    Assert.AreEqual("\"IN\"", str.ToString());
+                    Assert.Equal("\"IN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IO, str);
-                    Assert.AreEqual("\"IO\"", str.ToString());
+                    Assert.Equal("\"IO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IP, str);
-                    Assert.AreEqual("\"IP\"", str.ToString());
+                    Assert.Equal("\"IP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IQ, str);
-                    Assert.AreEqual("\"IQ\"", str.ToString());
+                    Assert.Equal("\"IQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IR, str);
-                    Assert.AreEqual("\"IR\"", str.ToString());
+                    Assert.Equal("\"IR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IS, str);
-                    Assert.AreEqual("\"IS\"", str.ToString());
+                    Assert.Equal("\"IS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IT, str);
-                    Assert.AreEqual("\"IT\"", str.ToString());
+                    Assert.Equal("\"IT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IU, str);
-                    Assert.AreEqual("\"IU\"", str.ToString());
+                    Assert.Equal("\"IU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IV, str);
-                    Assert.AreEqual("\"IV\"", str.ToString());
+                    Assert.Equal("\"IV\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IW, str);
-                    Assert.AreEqual("\"IW\"", str.ToString());
+                    Assert.Equal("\"IW\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IX, str);
-                    Assert.AreEqual("\"IX\"", str.ToString());
+                    Assert.Equal("\"IX\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IY, str);
-                    Assert.AreEqual("\"IY\"", str.ToString());
+                    Assert.Equal("\"IY\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.IZ, str);
-                    Assert.AreEqual("\"IZ\"", str.ToString());
+                    Assert.Equal("\"IZ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JA, str);
-                    Assert.AreEqual("\"JA\"", str.ToString());
+                    Assert.Equal("\"JA\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JB, str);
-                    Assert.AreEqual("\"JB\"", str.ToString());
+                    Assert.Equal("\"JB\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JC, str);
-                    Assert.AreEqual("\"JC\"", str.ToString());
+                    Assert.Equal("\"JC\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JD, str);
-                    Assert.AreEqual("\"JD\"", str.ToString());
+                    Assert.Equal("\"JD\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JE, str);
-                    Assert.AreEqual("\"JE\"", str.ToString());
+                    Assert.Equal("\"JE\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JF, str);
-                    Assert.AreEqual("\"JF\"", str.ToString());
+                    Assert.Equal("\"JF\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JG, str);
-                    Assert.AreEqual("\"JG\"", str.ToString());
+                    Assert.Equal("\"JG\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JH, str);
-                    Assert.AreEqual("\"JH\"", str.ToString());
+                    Assert.Equal("\"JH\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JI, str);
-                    Assert.AreEqual("\"JI\"", str.ToString());
+                    Assert.Equal("\"JI\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JJ, str);
-                    Assert.AreEqual("\"JJ\"", str.ToString());
+                    Assert.Equal("\"JJ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JK, str);
-                    Assert.AreEqual("\"JK\"", str.ToString());
+                    Assert.Equal("\"JK\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JL, str);
-                    Assert.AreEqual("\"JL\"", str.ToString());
+                    Assert.Equal("\"JL\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JM, str);
-                    Assert.AreEqual("\"JM\"", str.ToString());
+                    Assert.Equal("\"JM\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JN, str);
-                    Assert.AreEqual("\"JN\"", str.ToString());
+                    Assert.Equal("\"JN\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JO, str);
-                    Assert.AreEqual("\"JO\"", str.ToString());
+                    Assert.Equal("\"JO\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JP, str);
-                    Assert.AreEqual("\"JP\"", str.ToString());
+                    Assert.Equal("\"JP\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JQ, str);
-                    Assert.AreEqual("\"JQ\"", str.ToString());
+                    Assert.Equal("\"JQ\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JR, str);
-                    Assert.AreEqual("\"JR\"", str.ToString());
+                    Assert.Equal("\"JR\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JS, str);
-                    Assert.AreEqual("\"JS\"", str.ToString());
+                    Assert.Equal("\"JS\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JT, str);
-                    Assert.AreEqual("\"JT\"", str.ToString());
+                    Assert.Equal("\"JT\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JU, str);
-                    Assert.AreEqual("\"JU\"", str.ToString());
+                    Assert.Equal("\"JU\"", str.ToString());
                 }
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(_EnumVariations10.JV, str);
-                    Assert.AreEqual("\"JV\"", str.ToString());
+                    Assert.Equal("\"JV\"", str.ToString());
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IntegerDictionaryKeys()
         {
             // byte
@@ -5705,7 +5696,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"255\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"255\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5725,7 +5716,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-128\":\"foo\",\"127\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-128\":\"foo\",\"127\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5745,7 +5736,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-32768\":\"foo\",\"32767\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-32768\":\"foo\",\"32767\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5765,7 +5756,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"65535\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"65535\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5785,7 +5776,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-2147483648\":\"foo\",\"2147483647\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-2147483648\":\"foo\",\"2147483647\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5805,7 +5796,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"4294967295\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"4294967295\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5825,7 +5816,7 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-9223372036854775808\":\"foo\",\"9223372036854775807\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"-9223372036854775808\":\"foo\",\"9223372036854775807\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5845,12 +5836,12 @@ namespace JilTests
                         str
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"18446744073709551615\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"3\":null,\"0\":\"foo\",\"18446744073709551615\":\"bar\"}", str.ToString());
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IntegerDictionaryKeysWithoutNulls()
         {
             // byte
@@ -5870,7 +5861,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"255\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"255\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5891,7 +5882,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-128\":\"foo\",\"127\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"-128\":\"foo\",\"127\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5912,7 +5903,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-32768\":\"foo\",\"32767\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"-32768\":\"foo\",\"32767\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5933,7 +5924,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"65535\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"65535\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5954,7 +5945,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-2147483648\":\"foo\",\"2147483647\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"-2147483648\":\"foo\",\"2147483647\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5975,7 +5966,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"4294967295\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"4294967295\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -5996,7 +5987,7 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"-9223372036854775808\":\"foo\",\"9223372036854775807\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"-9223372036854775808\":\"foo\",\"9223372036854775807\":\"bar\"}", str.ToString());
                 }
             }
 
@@ -6017,12 +6008,12 @@ namespace JilTests
                         Options.ExcludeNulls
                     );
 
-                    Assert.AreEqual("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"18446744073709551615\":\"bar\"}", str.ToString());
+                    Assert.Equal("{\"1\":\"hello\",\"2\":\"world\",\"0\":\"foo\",\"18446744073709551615\":\"bar\"}", str.ToString());
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Guids()
         {
             // defaults
@@ -6033,7 +6024,7 @@ namespace JilTests
 
                     JSON.Serialize(guid, str);
 
-                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                    Assert.Equal("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6042,7 +6033,7 @@ namespace JilTests
 
                     JSON.Serialize(guidLists, str);
 
-                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                    Assert.Equal("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6051,7 +6042,7 @@ namespace JilTests
 
                     JSON.Serialize(guidDict, str);
 
-                    Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
+                    Assert.Equal("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6068,7 +6059,7 @@ namespace JilTests
                     );
 
                     var res = str.ToString();
-                    Assert.AreEqual("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"B\":null}", res);
+                    Assert.Equal("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"},\"B\":null}", res);
                 }
             }
 
@@ -6080,7 +6071,7 @@ namespace JilTests
 
                     JSON.Serialize(guid, str, Options.ExcludeNulls);
 
-                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                    Assert.Equal("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6089,7 +6080,7 @@ namespace JilTests
 
                     JSON.Serialize(guidLists, str, Options.ExcludeNulls);
 
-                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                    Assert.Equal("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6098,7 +6089,7 @@ namespace JilTests
 
                     JSON.Serialize(guidDict, str, Options.ExcludeNulls);
 
-                    Assert.AreEqual("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
+                    Assert.Equal("{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6116,7 +6107,7 @@ namespace JilTests
                     );
 
                     var res = str.ToString();
-                    Assert.AreEqual("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}}", res);
+                    Assert.Equal("{\"A\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"C\":[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\",\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\"D\":{\"hello\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\"world\":\"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"}}", res);
                 }
             }
 
@@ -6128,7 +6119,7 @@ namespace JilTests
 
                     JSON.Serialize(guid, str, Options.PrettyPrint);
 
-                    Assert.AreEqual("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
+                    Assert.Equal("\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\"", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6137,7 +6128,7 @@ namespace JilTests
 
                     JSON.Serialize(guidLists, str, Options.PrettyPrint);
 
-                    Assert.AreEqual("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
+                    Assert.Equal("[\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"]", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6146,7 +6137,7 @@ namespace JilTests
 
                     JSON.Serialize(guidDict, str, Options.PrettyPrint);
 
-                    Assert.AreEqual("{\n \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n}", str.ToString());
+                    Assert.Equal("{\n \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n}", str.ToString());
                 }
 
                 using (var str = new StringWriter())
@@ -6164,32 +6155,32 @@ namespace JilTests
                     );
 
                     var res = str.ToString();
-                    Assert.AreEqual("{\n \"A\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"C\": [\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\n \"D\": {\n  \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n  \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n },\n \"B\": null\n}", res);
+                    Assert.Equal("{\n \"A\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n \"C\": [\"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcc\", \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"],\n \"D\": {\n  \"hello\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcd\",\n  \"world\": \"de01d5b0-069b-47ee-bff2-8a1c10a32fcb\"\n },\n \"B\": null\n}", res);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void StringEscapes()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize("\"sup\b\t\f\n\r\0\"", str);
-                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\"", str.ToString());
+                Assert.Equal("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\"", str.ToString());
             }
 
             // Don't waste time in JSON-mode
             using (var str = new StringWriter())
             {
                 JSON.Serialize("\"sup\b\t\f\n\r\0\"\u2028\u2029", str);
-                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\u2028\u2029\"", str.ToString());
+                Assert.Equal("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\u2028\u2029\"", str.ToString());
             }
 
             // But if this is JSONP, we have to spend some time encoding
             using (var str = new StringWriter())
             {
                 JSON.Serialize("\"sup\b\t\f\n\r\0\"\u2028\u2029", str, Options.JSONP);
-                Assert.AreEqual("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\\u2028\\u2029\"", str.ToString());
+                Assert.Equal("\"\\\"sup\\b\\t\\f\\n\\r\\u0000\\\"\\u2028\\u2029\"", str.ToString());
             }
         }
 
@@ -6199,7 +6190,7 @@ namespace JilTests
             public bool B;
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeDynamic()
         {
             using (var str = new StringWriter())
@@ -6210,7 +6201,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("null", res);
+                Assert.Equal("null", res);
             }
 
             using (var str = new StringWriter())
@@ -6226,7 +6217,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", res);
+                Assert.Equal("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -6241,17 +6232,17 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":1,\"B\":false}", res);
+                Assert.Equal("{\"A\":1,\"B\":false}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeDynamicToString()
         {
             {
                 var str = JSON.SerializeDynamic(null);
 
-                Assert.AreEqual("null", str);
+                Assert.Equal("null", str);
             }
 
             {
@@ -6264,7 +6255,7 @@ namespace JilTests
                     }
                 );
 
-                Assert.AreEqual("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", str);
+                Assert.Equal("{\"A\":1,\"B\":null,\"C\":\"hello world\"}", str);
             }
 
             {
@@ -6276,7 +6267,7 @@ namespace JilTests
                     }
                 );
 
-                Assert.AreEqual("{\"A\":1,\"B\":false}", str);
+                Assert.Equal("{\"A\":1,\"B\":false}", str);
             }
         }
 
@@ -6295,7 +6286,7 @@ namespace JilTests
             public string K;
         }
 
-        [TestMethod]
+        [Fact]
         public void LotsOfStrings()
         {
             using (var str = new StringWriter())
@@ -6306,7 +6297,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"K\":null,\"J\":null,\"I\":null,\"H\":null,\"G\":null,\"F\":null,\"E\":null,\"D\":null,\"C\":null,\"B\":null,\"A\":null}", res);
+                Assert.Equal("{\"K\":null,\"J\":null,\"I\":null,\"H\":null,\"G\":null,\"F\":null,\"E\":null,\"D\":null,\"C\":null,\"B\":null,\"A\":null}", res);
             }
 
             using (var str = new StringWriter())
@@ -6325,7 +6316,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"K\":\"bar\",\"J\":null,\"I\":\"foo\",\"H\":null,\"G\":\"buzz\",\"F\":null,\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":null,\"A\":\"hello\"}", res);
+                Assert.Equal("{\"K\":\"bar\",\"J\":null,\"I\":\"foo\",\"H\":null,\"G\":\"buzz\",\"F\":null,\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":null,\"A\":\"hello\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -6346,7 +6337,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"K\":\"ack\",\"J\":\"syn\",\"I\":null,\"H\":\"bar\",\"G\":\"foo\",\"F\":null,\"E\":\"buzz\",\"D\":\"fizz\",\"C\":null,\"B\":\"world\",\"A\":\"hello\"}", res);
+                Assert.Equal("{\"K\":\"ack\",\"J\":\"syn\",\"I\":null,\"H\":\"bar\",\"G\":\"foo\",\"F\":null,\"E\":\"buzz\",\"D\":\"fizz\",\"C\":null,\"B\":\"world\",\"A\":\"hello\"}", res);
             }
             using (var str = new StringWriter())
             {
@@ -6365,11 +6356,11 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"K\":\"syn\",\"J\":null,\"I\":\"bar\",\"H\":\"foo\",\"G\":null,\"F\":\"buzz\",\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":\"hello\",\"A\":null}", res);
+                Assert.Equal("{\"K\":\"syn\",\"J\":null,\"I\":\"bar\",\"H\":\"foo\",\"G\":null,\"F\":\"buzz\",\"E\":\"fizz\",\"D\":null,\"C\":\"world\",\"B\":\"hello\",\"A\":null}", res);
             }
         }
 
-#if !NETCORE
+#if NET45
         // Type fairly similar to one in the Stack Exchange API that gave Jil some trouble
         class _Inherited<T> : System.Web.Mvc.ContentResult
             where T : class
@@ -6391,7 +6382,7 @@ namespace JilTests
             public bool? has_more { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Inherited()
         {
             var obj =
@@ -6420,7 +6411,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
+                Assert.Equal("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
 
             using (var str = new StringWriter())
@@ -6432,12 +6423,12 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"Content\":null,\"ContentType\":null,\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
+                Assert.Equal("{\"items\":[\"bar\",\"bizz\",\"buzz\",\"baz\"],\"ContentEncoding\":{\"WindowsCodePage\":1200,\"IsBrowserDisplay\":true,\"IsBrowserSave\":true,\"IsMailNewsDisplay\":true,\"IsMailNewsSave\":true,\"IsSingleByte\":false,\"IsReadOnly\":true,\"CodePage\":65001,\"EncoderFallback\":{\"MaxCharCount\":1},\"DecoderFallback\":{\"MaxCharCount\":1},\"BodyName\":\"utf-8\",\"EncodingName\":\"Unicode (UTF-8)\",\"HeaderName\":\"utf-8\",\"WebName\":\"utf-8\"},\"Content\":null,\"ContentType\":null,\"has_more\":true,\"error_id\":7,\"backoff\":6,\"quota_max\":5,\"quota_remaining\":4,\"page\":3,\"page_size\":2,\"total\":1,\"error_message\":\"you don goofed\",\"error_name\":null,\"type\":\"foo\"}", res);
             }
         }
 #endif
 
-        [TestMethod]
+        [Fact]
         public void AllocationlessVsNormalDictionaries()
         {
             var data =
@@ -6472,7 +6463,7 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null},\"B\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null}}", res);
+                Assert.Equal("{\"A\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null},\"B\":{\"hello\":\"world\",\"fizz\":null,\"foo\":\"bar\",\"init\":\"d\",\"dev\":null}}", res);
             }
 
             using (var str = new StringWriter())
@@ -6484,18 +6475,18 @@ namespace JilTests
                 );
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"},\"B\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"}}", res);
+                Assert.Equal("{\"A\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"},\"B\":{\"hello\":\"world\",\"foo\":\"bar\",\"init\":\"d\"}}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LessThan100()
         {
             for (var i = 0; i <= 100; i++)
             {
                 var str = JSON.Serialize(i);
 
-                Assert.AreEqual(i.ToString(), str);
+                Assert.Equal(i.ToString(), str);
             }
         }
 
@@ -6505,7 +6496,7 @@ namespace JilTests
             public int Id { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void SerializeNestedDictionary()
         {
             var items = new Dictionary<string, Dictionary<string, simplePoco>>();
@@ -6516,7 +6507,7 @@ namespace JilTests
             });
             var json = JSON.Serialize(items);
             string expectedJson = "{\"a\":{\"a\":{\"Id\":1,\"Name\":\"a\"},\"b\":{\"Id\":2,\"Name\":\"b\"}}}";
-            Assert.AreEqual(expectedJson, json);
+            Assert.Equal(expectedJson, json);
         }
 
         class _DataMemberName
@@ -6530,7 +6521,7 @@ namespace JilTests
             public int SecretName;
         }
 
-        [TestMethod]
+        [Fact]
         public void DataMemberName()
         {
             using (var str = new StringWriter())
@@ -6547,29 +6538,22 @@ namespace JilTests
 
                 var res = str.ToString();
 
-#if NETCORE
+#if NETCOREAPP1_0
                 // can't reorder members in the same way, so blurgh
                 const string EXPECTED_VALUE = "{\"NotSoSecretName\":314159,\"Plain\":\"hello world\",\"FakeName\":\"Really RealName\"}";
 #else
                 const string EXPECTED_VALUE = "{\"NotSoSecretName\":314159,\"FakeName\":\"Really RealName\",\"Plain\":\"hello world\"}";
 #endif
                 
-                Assert.AreEqual(EXPECTED_VALUE, res);
+                Assert.Equal(EXPECTED_VALUE, res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void BadDictionaryType()
         {
-            try
-            {
-                JSON.Serialize(new Dictionary<double, int>());
-                Assert.Fail();
-            }
-            catch (SerializerException e)
-            {
-                Assert.AreEqual("Error occurred building a serializer for System.Collections.Generic.Dictionary`2[System.Double,System.Int32]: JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", e.Message);
-            }
+            var ex = Assert.Throws<SerializerException>(() => JSON.Serialize(new Dictionary<double, int>()));
+            Assert.Equal("Error occurred building a serializer for System.Collections.Generic.Dictionary`2[System.Double,System.Int32]: JSON dictionaries must have strings, enums, or integers as keys, found: System.Double", ex.Message);
         }
 
         class _NoNameDataMember
@@ -6578,18 +6562,18 @@ namespace JilTests
             public int Id { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void NoNameDataMember()
         {
             using (var str = new StringWriter())
             {
                 JSON.Serialize(new _NoNameDataMember { Id = 1234 }, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"Id\":1234}", res);
+                Assert.Equal("{\"Id\":1234}", res);
             }
         }
 
-#if !NETCORE
+#if !NETCOREAPP1_0
         class _DoubleWeirdCulture : IDisposable
         {
             CultureInfo RestoreToCulture;
@@ -6610,7 +6594,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DoubleWeirdCulture()
         {
             var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
@@ -6619,25 +6603,25 @@ namespace JilTests
 
             using (new _DoubleWeirdCulture(weirdCulture))
             {
-                Assert.AreEqual("123.456", JSON.Serialize(123.456));
+                Assert.Equal("123.456", JSON.Serialize(123.456));
 
                 using (var str = new StringWriter())
                 {
                     JSON.Serialize(123.456, str);
                     var res = str.ToString();
-                    Assert.AreEqual("123.456", res);
+                    Assert.Equal("123.456", res);
                 }
             }
         }
 #endif
 
-#if !NETCORE
+#if !NETCOREAPP1_0
         class _DoubleConstantWeirdCulture
         {
             public double Const { get { return 3.14159; } }
         }
 
-        [TestMethod]
+        [Fact]
         public void DoubleConstantWeirdCulture()
         {
             var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
@@ -6650,7 +6634,7 @@ namespace JilTests
                 {
                     JSON.Serialize(new _DoubleConstantWeirdCulture(), str);
                     var res = str.ToString();
-                    Assert.AreEqual("{\"Const\":3.14159}", res);
+                    Assert.Equal("{\"Const\":3.14159}", res);
                 }
             }
         }
@@ -6664,7 +6648,7 @@ namespace JilTests
             public IEnumerable<IEnumerable<string>> D;
         }
 
-        [TestMethod]
+        [Fact]
         public void Enumerables()
         {
             using (var str = new StringWriter())
@@ -6680,14 +6664,14 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":[1,2,3],\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
+                Assert.Equal("{\"A\":[1,2,3],\"B\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<IEnumerable<int>>(new[] { 1, 2, 3 }, str);
                 var res = str.ToString();
-                Assert.AreEqual("[1,2,3]", res);
+                Assert.Equal("[1,2,3]", res);
             }
         }
 
@@ -6700,7 +6684,7 @@ namespace JilTests
             public IReadOnlyList<IReadOnlyList<string>> D;
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadOnlyLists()
         {
             using (var str = new StringWriter())
@@ -6717,14 +6701,14 @@ namespace JilTests
                     str
                 );
                 var res = str.ToString();
-                Assert.AreEqual("{\"A\":[1,2,3],\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
+                Assert.Equal("{\"A\":[1,2,3],\"B1\":{\"1\":[2,3],\"2\":[4,5]},\"B2\":{\"1\":[2,3],\"2\":[4,5]},\"C\":[[1.1,2.2,3.3],[4.4,5.5,6.6]],\"D\":[[\"hello\",\"world\"],[\"foo\",\"bar\"]]}", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.Serialize<IReadOnlyList<int>>(new[] { 1, 2, 3 }, str);
                 var res = str.ToString();
-                Assert.AreEqual("[1,2,3]", res);
+                Assert.Equal("[1,2,3]", res);
             }
         }
 
@@ -6737,69 +6721,69 @@ namespace JilTests
             D = 8
         }
 
-        [TestMethod]
+        [Fact]
         public void FlagsEnum()
         {
             {
                 var a = JSON.Serialize(_FlagsEnum.A, Options.PrettyPrint);
-                Assert.AreEqual(@"""A""", a);
+                Assert.Equal(@"""A""", a);
                 var b = JSON.Serialize(_FlagsEnum.B, Options.PrettyPrint);
-                Assert.AreEqual(@"""B""", b);
+                Assert.Equal(@"""B""", b);
                 var c = JSON.Serialize(_FlagsEnum.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""C""", c);
+                Assert.Equal(@"""C""", c);
                 var d = JSON.Serialize(_FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""D""", d);
+                Assert.Equal(@"""D""", d);
                 var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B""", ab);
+                Assert.Equal(@"""A, B""", ab);
                 var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, C""", ac);
+                Assert.Equal(@"""A, C""", ac);
                 var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, D""", ad);
+                Assert.Equal(@"""A, D""", ad);
                 var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, C""", bc);
+                Assert.Equal(@"""B, C""", bc);
                 var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, D""", bd);
+                Assert.Equal(@"""B, D""", bd);
                 var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""C, D""", cd);
+                Assert.Equal(@"""C, D""", cd);
                 var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B, C""", abc);
+                Assert.Equal(@"""A, B, C""", abc);
                 var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B, D""", abd);
+                Assert.Equal(@"""A, B, D""", abd);
                 var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, C, D""", acd);
+                Assert.Equal(@"""A, C, D""", acd);
                 var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, C, D""", bcd);
+                Assert.Equal(@"""B, C, D""", bcd);
             }
 
             {
                 var a = JSON.Serialize(_FlagsEnum.A);
-                Assert.AreEqual(@"""A""", a);
+                Assert.Equal(@"""A""", a);
                 var b = JSON.Serialize(_FlagsEnum.B);
-                Assert.AreEqual(@"""B""", b);
+                Assert.Equal(@"""B""", b);
                 var c = JSON.Serialize(_FlagsEnum.C);
-                Assert.AreEqual(@"""C""", c);
+                Assert.Equal(@"""C""", c);
                 var d = JSON.Serialize(_FlagsEnum.D);
-                Assert.AreEqual(@"""D""", d);
+                Assert.Equal(@"""D""", d);
                 var ab = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B);
-                Assert.AreEqual(@"""A,B""", ab);
+                Assert.Equal(@"""A,B""", ab);
                 var ac = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C);
-                Assert.AreEqual(@"""A,C""", ac);
+                Assert.Equal(@"""A,C""", ac);
                 var ad = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.D);
-                Assert.AreEqual(@"""A,D""", ad);
+                Assert.Equal(@"""A,D""", ad);
                 var bc = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C);
-                Assert.AreEqual(@"""B,C""", bc);
+                Assert.Equal(@"""B,C""", bc);
                 var bd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.D);
-                Assert.AreEqual(@"""B,D""", bd);
+                Assert.Equal(@"""B,D""", bd);
                 var cd = JSON.Serialize(_FlagsEnum.C | _FlagsEnum.D);
-                Assert.AreEqual(@"""C,D""", cd);
+                Assert.Equal(@"""C,D""", cd);
                 var abc = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.C);
-                Assert.AreEqual(@"""A,B,C""", abc);
+                Assert.Equal(@"""A,B,C""", abc);
                 var abd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.B | _FlagsEnum.D);
-                Assert.AreEqual(@"""A,B,D""", abd);
+                Assert.Equal(@"""A,B,D""", abd);
                 var acd = JSON.Serialize(_FlagsEnum.A | _FlagsEnum.C | _FlagsEnum.D);
-                Assert.AreEqual(@"""A,C,D""", acd);
+                Assert.Equal(@"""A,C,D""", acd);
                 var bcd = JSON.Serialize(_FlagsEnum.B | _FlagsEnum.C | _FlagsEnum.D);
-                Assert.AreEqual(@"""B,C,D""", bcd);
+                Assert.Equal(@"""B,C,D""", bcd);
             }
         }
 
@@ -6813,73 +6797,73 @@ namespace JilTests
             D = 8
         }
 
-        [TestMethod]
+        [Fact]
         public void FlagsEnumWithZero()
         {
             {
                 var none = JSON.Serialize(_FlagsEnumWithZero.None, Options.PrettyPrint);
-                Assert.AreEqual(@"""None""", none);
+                Assert.Equal(@"""None""", none);
                 var a = JSON.Serialize(_FlagsEnumWithZero.A, Options.PrettyPrint);
-                Assert.AreEqual(@"""A""", a);
+                Assert.Equal(@"""A""", a);
                 var b = JSON.Serialize(_FlagsEnumWithZero.B, Options.PrettyPrint);
-                Assert.AreEqual(@"""B""", b);
+                Assert.Equal(@"""B""", b);
                 var c = JSON.Serialize(_FlagsEnumWithZero.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""C""", c);
+                Assert.Equal(@"""C""", c);
                 var d = JSON.Serialize(_FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""D""", d);
+                Assert.Equal(@"""D""", d);
                 var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B""", ab);
+                Assert.Equal(@"""A, B""", ab);
                 var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, C""", ac);
+                Assert.Equal(@"""A, C""", ac);
                 var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, D""", ad);
+                Assert.Equal(@"""A, D""", ad);
                 var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, C""", bc);
+                Assert.Equal(@"""B, C""", bc);
                 var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, D""", bd);
+                Assert.Equal(@"""B, D""", bd);
                 var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""C, D""", cd);
+                Assert.Equal(@"""C, D""", cd);
                 var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B, C""", abc);
+                Assert.Equal(@"""A, B, C""", abc);
                 var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, B, D""", abd);
+                Assert.Equal(@"""A, B, D""", abd);
                 var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""A, C, D""", acd);
+                Assert.Equal(@"""A, C, D""", acd);
                 var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D, Options.PrettyPrint);
-                Assert.AreEqual(@"""B, C, D""", bcd);
+                Assert.Equal(@"""B, C, D""", bcd);
             }
 
             {
                 var none = JSON.Serialize(_FlagsEnumWithZero.None);
-                Assert.AreEqual(@"""None""", none);
+                Assert.Equal(@"""None""", none);
                 var a = JSON.Serialize(_FlagsEnumWithZero.A);
-                Assert.AreEqual(@"""A""", a);
+                Assert.Equal(@"""A""", a);
                 var b = JSON.Serialize(_FlagsEnumWithZero.B);
-                Assert.AreEqual(@"""B""", b);
+                Assert.Equal(@"""B""", b);
                 var c = JSON.Serialize(_FlagsEnumWithZero.C);
-                Assert.AreEqual(@"""C""", c);
+                Assert.Equal(@"""C""", c);
                 var d = JSON.Serialize(_FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""D""", d);
+                Assert.Equal(@"""D""", d);
                 var ab = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B);
-                Assert.AreEqual(@"""A,B""", ab);
+                Assert.Equal(@"""A,B""", ab);
                 var ac = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C);
-                Assert.AreEqual(@"""A,C""", ac);
+                Assert.Equal(@"""A,C""", ac);
                 var ad = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""A,D""", ad);
+                Assert.Equal(@"""A,D""", ad);
                 var bc = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
-                Assert.AreEqual(@"""B,C""", bc);
+                Assert.Equal(@"""B,C""", bc);
                 var bd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""B,D""", bd);
+                Assert.Equal(@"""B,D""", bd);
                 var cd = JSON.Serialize(_FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""C,D""", cd);
+                Assert.Equal(@"""C,D""", cd);
                 var abc = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.C);
-                Assert.AreEqual(@"""A,B,C""", abc);
+                Assert.Equal(@"""A,B,C""", abc);
                 var abd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.B | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""A,B,D""", abd);
+                Assert.Equal(@"""A,B,D""", abd);
                 var acd = JSON.Serialize(_FlagsEnumWithZero.A | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""A,C,D""", acd);
+                Assert.Equal(@"""A,C,D""", acd);
                 var bcd = JSON.Serialize(_FlagsEnumWithZero.B | _FlagsEnumWithZero.C | _FlagsEnumWithZero.D);
-                Assert.AreEqual(@"""B,C,D""", bcd);
+                Assert.Equal(@"""B,C,D""", bcd);
             }
         }
 
@@ -6893,12 +6877,12 @@ namespace JilTests
             C
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumMemberAttributeOverride()
         {
-            Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverride.A));
-            Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverride.B));
-            Assert.AreEqual("\"3\"", JSON.Serialize(_EnumMemberAttributeOverride.C));
+            Assert.Equal("\"1\"", JSON.Serialize(_EnumMemberAttributeOverride.A));
+            Assert.Equal("\"2\"", JSON.Serialize(_EnumMemberAttributeOverride.B));
+            Assert.Equal("\"3\"", JSON.Serialize(_EnumMemberAttributeOverride.C));
         }
 
         [Flags]
@@ -6912,31 +6896,31 @@ namespace JilTests
             C = 4
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumMemberAttributeOverrideFlags()
         {
             {
-                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A, Options.PrettyPrint));
-                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
-                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A, Options.PrettyPrint));
+                Assert.Equal("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
+                Assert.Equal("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
 
-                Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
-                Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
-                Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B, Options.PrettyPrint));
+                Assert.Equal("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
 
-                Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C, Options.PrettyPrint));
             }
 
             {
-                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A));
-                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B));
-                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C));
+                Assert.Equal("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A));
+                Assert.Equal("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B));
+                Assert.Equal("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.C));
 
-                Assert.AreEqual("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B));
-                Assert.AreEqual("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C));
-                Assert.AreEqual("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+                Assert.Equal("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B));
+                Assert.Equal("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.C));
+                Assert.Equal("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
 
-                Assert.AreEqual("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
+                Assert.Equal("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideFlags.A | _EnumMemberAttributeOverrideFlags.B | _EnumMemberAttributeOverrideFlags.C));
             }
         }
 
@@ -6953,35 +6937,35 @@ namespace JilTests
             C = 4
         }
 
-        [TestMethod]
+        [Fact]
         public void EnumMemberAttributeOverrideWithNoneFlags()
         {
             {
-                Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None, Options.PrettyPrint));
+                Assert.Equal("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None, Options.PrettyPrint));
 
-                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A, Options.PrettyPrint));
-                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
-                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A, Options.PrettyPrint));
+                Assert.Equal("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
+                Assert.Equal("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
 
-                Assert.AreEqual("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
-                Assert.AreEqual("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
-                Assert.AreEqual("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1, 2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B, Options.PrettyPrint));
+                Assert.Equal("\"1, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
 
-                Assert.AreEqual("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
+                Assert.Equal("\"1, 2, 4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C, Options.PrettyPrint));
             }
 
             {
-                Assert.AreEqual("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None));
+                Assert.Equal("\"0\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.None));
 
-                Assert.AreEqual("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A));
-                Assert.AreEqual("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B));
-                Assert.AreEqual("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.Equal("\"1\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A));
+                Assert.Equal("\"2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B));
+                Assert.Equal("\"4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.C));
 
-                Assert.AreEqual("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B));
-                Assert.AreEqual("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C));
-                Assert.AreEqual("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.Equal("\"1,2\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B));
+                Assert.Equal("\"1,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.Equal("\"2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
 
-                Assert.AreEqual("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
+                Assert.Equal("\"1,2,4\"", JSON.Serialize(_EnumMemberAttributeOverrideWithNoneFlags.A | _EnumMemberAttributeOverrideWithNoneFlags.B | _EnumMemberAttributeOverrideWithNoneFlags.C));
             }
         }
 
@@ -6997,11 +6981,11 @@ namespace JilTests
             public _ReuseTypeSerializers2 B { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReuseTypeSerializers()
         {
             var str = JSON.Serialize(new _ReuseTypeSerializers1 { A = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "hello", B = 123 }, B = new _ReuseTypeSerializers1._ReuseTypeSerializers2 { A = "world", B = 456 } });
-            Assert.AreEqual("{\"A\":{\"B\":123,\"A\":\"hello\"},\"B\":{\"B\":456,\"A\":\"world\"}}", str);
+            Assert.Equal("{\"A\":{\"B\":123,\"A\":\"hello\"},\"B\":{\"B\":456,\"A\":\"world\"}}", str);
         }
 
         public class _ApiResult<T>
@@ -7034,12 +7018,12 @@ namespace JilTests
             public string dialog_title { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void FlagOption()
         {
             {
                 var foo = JSON.Serialize(new _ApiResult<_FlagOption>());
-                Assert.IsNotNull(foo);
+                Assert.NotNull(foo);
             }
 
             {
@@ -7047,14 +7031,14 @@ namespace JilTests
                 var asObj = JSON.Deserialize<_ApiResult<_FlagOption>>(asStr);
                 var foo = JSON.Serialize(asObj);
 
-#if NETCORE
+#if NETCOREAPP1_0
                 // can't get the same ordering in net core
                 const string EXPECTED_VALUE = "{\"items\":[{\"sub_options\":null,\"option_id\":46534,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is spam\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":7852,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is offensive, abusive, or hate speech\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":8762,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":42580,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":22396,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":34792,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":53441,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":54702,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":5162,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":8641,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":42868,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is a duplicate...\",\"description\":\"This question has been asked before and already has an answer.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":[{\"sub_options\":[{\"sub_options\":null,\"option_id\":58780,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":true,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":60782,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":10563,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":47075,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":11110,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":31605,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":1812,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":61901,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"},{\"sub_options\":null,\"option_id\":345,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Duplicate\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"duplicate of...\",\"description\":\"This question has been asked before and already has an answer.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":55230,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":19261,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":22924,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":20878,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":[{\"sub_options\":null,\"option_id\":43510,\"requires_comment\":false,\"requires_site\":true,\"requires_question_id\":false,\"title\":\"belongs on another site in the Stack Exchange network\",\"description\":null,\"has_flagged\":null,\"count\":null,\"dialog_title\":\"Migration\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"This question belongs on another site in the Stack Exchange network\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"},{\"sub_options\":null,\"option_id\":47170,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":null,\"description\":\"Other (add a comment explaining what is wrong)\",\"has_flagged\":null,\"count\":0,\"dialog_title\":\"Off-Topic\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"off-topic because...\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":11866,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"unclear what you're asking\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":18198,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"too broad\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"},{\"sub_options\":null,\"option_id\":8528,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"primarily opinion-based\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"has_flagged\":false,\"count\":0,\"dialog_title\":\"Why should this question be closed?\"}],\"option_id\":null,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it should be closed for another reason...\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"has_flagged\":false,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":36772,\"requires_comment\":false,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"it is very low quality\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"},{\"sub_options\":null,\"option_id\":34976,\"requires_comment\":true,\"requires_site\":false,\"requires_question_id\":false,\"title\":\"other (needs ♦ moderator attention)\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"has_flagged\":null,\"count\":null,\"dialog_title\":\"I am flagging this question because\"}],\"total\":6,\"page_size\":30,\"page\":1,\"type\":\"flag_option\",\"quota_remaining\":9996,\"quota_max\":10000,\"backoff\":10,\"error_id\":null,\"error_name\":null,\"error_message\":null,\"has_more\":false}";
 #else
                 const string EXPECTED_VALUE = "{\"items\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":46534,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question is effectively an advertisement with no disclosure. It is not useful or relevant, but promotional.\",\"title\":\"it is spam\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":7852,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question contains content that a reasonable person would deem inappropriate for respectful discourse.\",\"title\":\"it is offensive, abusive, or hate speech\"},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8762,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42580,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22396,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":34792,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":53441,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":54702,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":5162,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8641,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":42868,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"it is a duplicate...\"},{\"sub_options\":[{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":true,\"requires_site\":false,\"requires_comment\":false,\"option_id\":58780,\"dialog_title\":\"Duplicate\",\"description\":null,\"title\":\"\\\"How can I get a HOT network questions week digest?\\\" is a duplicate of:\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":60782,\"dialog_title\":\"Duplicate\",\"description\":\"I've noticed that some very highly upvoted questions stay in the list of hot questions (also displayed in the Stack Exchange menu on the top left) for a very long time, often for several days. One ...\",\"title\":\"Don't let questions stick to the top of the hot questions list forever;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":10563,\"dialog_title\":\"Duplicate\",\"description\":\"TL;DR When votes of 20... 30... 100 users clearly indicate that only one or two answers are popular, it does not make sense to pretend that other answers are popular too.\\n\\n\\n\\nIn current version of ...\",\"title\":\"In “network hot” questions formula, discard answers when voting evidence indicates that these are not good data points;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":47075,\"dialog_title\":\"Duplicate\",\"description\":\"Some sites appear far more often in the hot questions list than other sites. I don't have any hard data on that, as that kind of data is just not publicly available, but I'm pretty sure my subjective ...\",\"title\":\"Prevent specific sites from being overrepresented in the hot questions list;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11110,\"dialog_title\":\"Duplicate\",\"description\":\"There has been a tug-of-war in the hot-questions list.\\n\\nCommunity members like JonW seem to be unhappy with the traffic that it brings to their site:\\n\\n\\n  'But we want to encourage people to post, ...\",\"title\":\"What is the Goal of \\\"Hot Network Questions\\\"?;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":31605,\"dialog_title\":\"Duplicate\",\"description\":\"Is there a way to filter the \\\"hot questions\\\" displayed in the Stack Exchange menu?\\n\\n\\n\\nI have a profile on Stack Overflow and that's pretty much it. Therefore the list as it is now is pretty ...\",\"title\":\"Filtering \\\"hot\\\" questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":1812,\"dialog_title\":\"Duplicate\",\"description\":\"I'd like to have Instant notifications by email of answers to my questions.  Can this be implemented?\",\"title\":\"Instant e-mail notifications of answers to questions;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":61901,\"dialog_title\":\"Duplicate\",\"description\":\"I really like the new sidebar. With the new top bar eliminating the \\\"Hot Questions\\\" area there, I think this is the perfect place for it. One-click access to time-wasting questions about topics I may ...\",\"title\":\"Extend the new Hot Questions sidebar;\\r\\nduplicate of...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":345,\"dialog_title\":\"Duplicate\",\"description\":\"We used to have the ability to filter Stack Exchange wide stories. I was sad to see the ability go away. I'll admit it isn't the end of the world. I do like seeing questions on occasion that I ...\",\"title\":\"Hot Questions, inability to filter sites... and now German questions? Too much \\\"noise\\\"!;\\r\\nduplicate of...\"}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question has been asked before and already has an answer.\",\"title\":\"duplicate of...\"},{\"sub_options\":[{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":55230,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>does not appear to seek input and discussion</b> from the community. If you have encountered a problem on one of our sites, please describe it in detail. See also: <a href=\\\"http://meta.stackexchange.com/help/whats-meta\\\">What is \\\"meta\\\"? How does it work?</a>\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":19261,\"dialog_title\":\"Off-Topic\",\"description\":\"The problem described here <b>can no longer be reproduced</b>. Changes to the system or to the circumstances affecting the asker have rendered it obsolete. If you encounter a similar problem, please post a new question.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":22924,\"dialog_title\":\"Off-Topic\",\"description\":\"This question <b>pertains only to a specific site</b> in the Stack Exchange Network. Questions on Meta Stack Exchange should pertain to our network or software that drives it as a whole, within the guidelines defined in <a href=\\\"http://meta.stackexchange.com/help/on-topic\\\">the help center</a>. You should ask this question on the meta site where your concern originated.\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":20878,\"dialog_title\":\"Off-Topic\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a>, within the scope defined in the <a href=\\\"http://local.mso.com/help\\\">help center</a>.\",\"title\":null},{\"sub_options\":[{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":true,\"requires_comment\":false,\"option_id\":43510,\"dialog_title\":\"Migration\",\"description\":null,\"title\":\"belongs on another site in the Stack Exchange network\"}],\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Off-Topic\",\"description\":\"This question belongs on another site in the Stack Exchange network\",\"title\":null},{\"sub_options\":null,\"count\":0,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":47170,\"dialog_title\":\"Off-Topic\",\"description\":\"Other (add a comment explaining what is wrong)\",\"title\":null}],\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"This question does not appear to be about Stack Overflow or the software that powers the Stack Exchange <a href=\\\"http://stackexchange.com/sites\\\">network</a> within the scope defined in the help center.\",\"title\":\"off-topic because...\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":11866,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Please clarify your specific problem or add additional details to highlight exactly what you need. As it's currently written, it’s hard to tell exactly what you're asking.\",\"title\":\"unclear what you're asking\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":18198,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"There are either too many possible answers, or good answers would be too long for this format. Please add details to narrow the answer set or to isolate an issue that can be answered in a few paragraphs.\",\"title\":\"too broad\"},{\"sub_options\":null,\"count\":0,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":8528,\"dialog_title\":\"Why should this question be closed?\",\"description\":\"Many good questions generate some degree of opinion based on expert experience, but answers to this question will tend to be almost entirely based on opinions, rather than facts, references, or specific expertise.\",\"title\":\"primarily opinion-based\"}],\"count\":null,\"has_flagged\":false,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":null,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question does not meet this site's standards and should be closed.\",\"title\":\"it should be closed for another reason...\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":false,\"option_id\":36772,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question has severe formatting or content problems. This question is unlikely to be salvageable through editing, and might need to be removed.\",\"title\":\"it is very low quality\"},{\"sub_options\":null,\"count\":null,\"has_flagged\":null,\"requires_question_id\":false,\"requires_site\":false,\"requires_comment\":true,\"option_id\":34976,\"dialog_title\":\"I am flagging this question because\",\"description\":\"This question needs a moderator's attention. Please describe exactly what's wrong.\",\"title\":\"other (needs ♦ moderator attention)\"}],\"has_more\":false,\"error_id\":null,\"backoff\":10,\"quota_max\":10000,\"quota_remaining\":9996,\"page\":1,\"page_size\":30,\"total\":6,\"error_message\":null,\"error_name\":null,\"type\":\"flag_option\"}";
 #endif
 
-                Assert.AreEqual(EXPECTED_VALUE, foo);
+                Assert.Equal(EXPECTED_VALUE, foo);
             }
         }
 
@@ -7068,14 +7052,14 @@ namespace JilTests
             public List<_OddNullRef> Inner { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void OddNullRef()
         {
             var template = new _OddNullRefOuter { Outer = new List<_OddNullRef> { new _OddNullRef(), new _OddNullRef(), new _OddNullRef { Inner = new List<_OddNullRef> { new _OddNullRef() } } } };
             var json = JSON.Serialize(template);
 
             var res = JSON.Deserialize<_OddNullRefOuter>(json);
-            Assert.IsNotNull(res);
+            Assert.NotNull(res);
         }
 
         class _Issue27
@@ -7083,35 +7067,35 @@ namespace JilTests
             public DateTimeOffset TestDate { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue27()
         {
             {
                 var dto1 = new DateTimeOffset();
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 });
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 });
-                Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
+                Assert.Equal(str1, str2);
+                Assert.Equal("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
             }
 
             {
                 var dto1 = new DateTimeOffset();
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 }, Options.ExcludeNulls);
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 }, Options.ExcludeNulls);
-                Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
+                Assert.Equal(str1, str2);
+                Assert.Equal("{\"TestDate\":\"\\/Date(-62135596800000+0000)\\/\"}", str1);
             }
 
             {
                 var dto1 = new DateTimeOffset(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc));
                 var str1 = Jil.JSON.Serialize(new _Issue27 { TestDate = dto1 }, Options.ExcludeNulls);
                 var str2 = Jil.JSON.Serialize(new { TestDate = dto1 }, Options.ExcludeNulls);
-                Assert.AreEqual(str1, str2);
-                Assert.AreEqual("{\"TestDate\":\"\\/Date(0+0000)\\/\"}", str1);
+                Assert.Equal(str1, str2);
+                Assert.Equal("{\"TestDate\":\"\\/Date(0+0000)\\/\"}", str1);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue42()
         {
             {
@@ -7120,7 +7104,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4265339Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7129,7 +7113,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4265330Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7138,7 +7122,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4265101Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7147,7 +7131,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4265011Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7156,7 +7140,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4260511Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7165,7 +7149,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4203511Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7174,7 +7158,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4073511Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7183,7 +7167,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.0473511Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7192,7 +7176,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.42653Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7201,7 +7185,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4265005Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7210,7 +7194,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4260055Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7219,7 +7203,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4200555Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7228,7 +7212,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.4005555Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7237,7 +7221,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:01.0095555Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7246,7 +7230,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:10.0895555Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7254,7 +7238,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:10.089Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7262,7 +7246,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:10.090Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
 
             {
@@ -7270,7 +7254,7 @@ namespace JilTests
 
                 var str = JSON.Serialize(dt, Options.ISO8601);
                 var shouldMatch = "\"2014-08-08T14:04:10.1Z\"";
-                Assert.AreEqual(shouldMatch, str);
+                Assert.Equal(shouldMatch, str);
             }
         }
 
@@ -7284,20 +7268,20 @@ namespace JilTests
         }
 
 
-        [TestMethod]
+        [Fact]
         public void Issue53()
         {
             var empty = JSON.Serialize(new _Issue53 { }, Options.ExcludeNulls);
-            Assert.AreEqual("{}", empty);
+            Assert.Equal("{}", empty);
 
             var data1 = JSON.Serialize(new _Issue53 { SerializedProperty = "a value!" }, Options.ExcludeNulls);
-            Assert.AreEqual("{\"NotSerializedProperty\":\"a value!\"}", data1);
+            Assert.Equal("{\"NotSerializedProperty\":\"a value!\"}", data1);
 
             var data2 = JSON.Serialize(new _Issue53 { NotSerializedProperty = DateTime.UtcNow }, Options.ExcludeNulls);
-            Assert.AreEqual("{}", data2);
+            Assert.Equal("{}", data2);
         }
 
-        [TestMethod]
+        [Fact]
         public void ConfigDefaultOptions()
         {
             try
@@ -7309,8 +7293,8 @@ namespace JilTests
                 var @default = JSON.Serialize(obj);
                 var @explicit = JSON.Serialize(obj, Options.Default);
 
-                Assert.AreNotEqual(@default, @explicit);
-                Assert.AreEqual(@default, "{}");
+                Assert.NotEqual(@default, @explicit);
+                Assert.Equal("{}", @default);
             }
             finally
             {
@@ -7327,7 +7311,7 @@ namespace JilTests
 
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue89()
         {
             Exception e = null;
@@ -7337,7 +7321,7 @@ namespace JilTests
             }
             catch (Exception _) { e = _; }
 
-            Assert.IsNotNull(e);
+            Assert.NotNull(e);
 
             var obj =
                 new _Issue89
@@ -7349,11 +7333,11 @@ namespace JilTests
                 };
 
             var str = JSON.Serialize(obj);
-            Assert.IsNotNull(str);
+            Assert.NotNull(str);
         }
 
 #if EXHAUSTIVE_TEST
-        [TestMethod]
+        [Fact]
         public void MicrosoftTimeSpans_Exhaustive()
         {
             Enumerable
@@ -7399,8 +7383,8 @@ namespace JilTests
                                         if (jsonStr1.IndexOf('.') != -1) jsonStr1 = jsonStr1.TrimEnd('0');
                                         if (jsonStr2.IndexOf('.') != -1) jsonStr2 = jsonStr2.TrimEnd('0');
 
-                                        Assert.AreEqual(str1, jsonStr1);
-                                        Assert.AreEqual(str2, jsonStr2);
+                                        Assert.Equal(str1, jsonStr1);
+                                        Assert.Equal(str2, jsonStr2);
                                     }
                                 }
                             }
@@ -7410,7 +7394,7 @@ namespace JilTests
         }
 #endif
 
-        [TestMethod]
+        [Fact]
         public void MicrosoftTimeSpans()
         {
             var rand = new Random();
@@ -7450,10 +7434,10 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.Default);
                 }
 
-                Assert.IsTrue(streamJson.StartsWith("\""));
-                Assert.IsTrue(streamJson.EndsWith("\""));
-                Assert.IsTrue(stringJson.StartsWith("\""));
-                Assert.IsTrue(stringJson.EndsWith("\""));
+                Assert.StartsWith("\"", streamJson);
+                Assert.EndsWith("\"", streamJson);
+                Assert.StartsWith("\"", stringJson);
+                Assert.EndsWith("\"", stringJson);
 
                 var dotNetStr = ts.ToString();
 
@@ -7464,12 +7448,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RFC1123TimeSpans()
         {
             var rand = new Random();
@@ -7509,10 +7493,10 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.RFC1123);
                 }
 
-                Assert.IsTrue(streamJson.StartsWith("\""));
-                Assert.IsTrue(streamJson.EndsWith("\""));
-                Assert.IsTrue(stringJson.StartsWith("\""));
-                Assert.IsTrue(stringJson.EndsWith("\""));
+                Assert.StartsWith("\"", streamJson);
+                Assert.EndsWith("\"", streamJson);
+                Assert.StartsWith("\"", stringJson);
+                Assert.EndsWith("\"", stringJson);
 
                 var dotNetStr = ts.ToString();
 
@@ -7523,12 +7507,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SecondsTimeSpans()
         {
             var rand = new Random();
@@ -7574,12 +7558,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MillsecondsTimeSpans()
         {
             var rand = new Random();
@@ -7625,12 +7609,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ISO8601TimeSpans()
         {
             var rand = new Random();
@@ -7670,7 +7654,7 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.ISO8601);
                 }
 
-                Assert.IsTrue(streamJson == stringJson);
+                Assert.True(streamJson == stringJson);
 
                 var dotNetStr = XmlConvert.ToString(ts);
 
@@ -7689,12 +7673,12 @@ namespace JilTests
                     stringJson = stringJson.Substring(0, stringJson.Length - 1).TrimEnd('0') + lastChar;
                 }
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void NullArrayElements()
         {
             using (var str = new StringWriter())
@@ -7707,11 +7691,11 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(excludeNulls: true));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+                Assert.Equal("{\"ids\":[null,\"US\",\"HI\"]}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludingNulls()
         {
             // to stream tests
@@ -7721,7 +7705,7 @@ namespace JilTests
                     JSON.Serialize<object>(null, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
 
@@ -7731,7 +7715,7 @@ namespace JilTests
                     var res = str.ToString();
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7739,7 +7723,7 @@ namespace JilTests
                     JSON.Serialize(new[] { null, "hello", "world" }, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7748,7 +7732,7 @@ namespace JilTests
                     var res = str.ToString();
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7760,7 +7744,7 @@ namespace JilTests
                     JSON.Serialize(data, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7772,7 +7756,7 @@ namespace JilTests
                     JSON.Serialize(data, str, Options.ExcludeNulls);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7787,7 +7771,7 @@ namespace JilTests
                     JSON.Serialize(data, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -7802,7 +7786,7 @@ namespace JilTests
                     JSON.Serialize(data, str, Options.ExcludeNulls);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
             }
 
@@ -7811,7 +7795,7 @@ namespace JilTests
                 {
                     var res = JSON.Serialize<object>(null, Options.Default);
 
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
 
@@ -7819,20 +7803,20 @@ namespace JilTests
                     var res = JSON.Serialize<object>(null, Options.ExcludeNulls);
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
                 {
                     var res = JSON.Serialize(new[] { null, "hello", "world" }, Options.Default);
 
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 {
                     var res = JSON.Serialize(new[] { null, "hello", "world" }, Options.ExcludeNulls);
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 {
@@ -7842,7 +7826,7 @@ namespace JilTests
 
                     var res = JSON.Serialize(data, Options.Default);
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 {
@@ -7852,7 +7836,7 @@ namespace JilTests
 
                     var res = JSON.Serialize(data, Options.ExcludeNulls);
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
 
                 {
@@ -7865,7 +7849,7 @@ namespace JilTests
 
                     var res = JSON.Serialize(data, Options.Default);
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 {
@@ -7878,7 +7862,7 @@ namespace JilTests
 
                     var res = JSON.Serialize(data, Options.ExcludeNulls);
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
             }
         }
@@ -7963,7 +7947,7 @@ namespace JilTests
             public H H2 { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void ConvertEnumsToPrimitives()
         {
             var res =
@@ -8015,14 +7999,14 @@ namespace JilTests
                     Options.PrettyPrint
                 );
 
-#if NETCORE
+#if NETCOREAPP1_0
             // core can't do as many (re)ordering optimizations, so this'll differ
             const string EXPECTED_VALUE = "{\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1\n}";
 #else
             const string EXPECTED_VALUE = "{\n \"G1\": \"X7\",\n \"G2\": 1,\n \"H1\": \"X8\",\n \"H2\": 1,\n \"E1\": \"X5\",\n \"E2\": 1,\n \"E3\": 2,\n \"F1\": \"X6\",\n \"F2\": 1,\n \"F3\": 2,\n \"F4\": 0,\n \"C1\": \"X3\",\n \"C2\": 1,\n \"C3\": 2,\n \"C4\": 0,\n \"D1\": \"X4\",\n \"D2\": 1,\n \"D3\": 2,\n \"D4\": 0,\n \"D5\": 1,\n \"D6\": 2,\n \"A1\": \"X1\",\n \"A2\": 1,\n \"A3\": 2,\n \"A4\": 0,\n \"A5\": 1,\n \"A6\": 2,\n \"A7\": 0,\n \"A8\": 1,\n \"B1\": \"X2\",\n \"B2\": 1,\n \"B3\": 2,\n \"B4\": 0,\n \"B5\": 1\n}";
 #endif
 
-            Assert.AreEqual(EXPECTED_VALUE, res);
+            Assert.Equal(EXPECTED_VALUE, res);
         }
 
         class _Issue95
@@ -8038,7 +8022,7 @@ namespace JilTests
             Baz = 2
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue95()
         {
             var items =
@@ -8055,7 +8039,7 @@ namespace JilTests
                     );
 
             var serialized = JSON.Serialize(items, Options.ISO8601PrettyPrint);
-            Assert.AreEqual("[{\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}]", serialized);
+            Assert.Equal("[{\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}, {\n \"Flags\": \"Bar\"\n}, {\n \"Flags\": \"Baz\"\n}, {\n \"Flags\": \"Foo\"\n}]", serialized);
         }
 
         enum _Issue101
@@ -8066,14 +8050,14 @@ namespace JilTests
             Bar
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue101()
         {
             var serialized = JSON.Serialize(new { foo = _Issue101.Foo, bar = _Issue101.Bar });
-            Assert.AreEqual("{\"foo\":\"Foo\",\"bar\":\"BAR\"}", serialized);
+            Assert.Equal("{\"foo\":\"Foo\",\"bar\":\"BAR\"}", serialized);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnspecifiedToUtc()
         {
             var unspecified = new DateTime(1970, 1, 2, 3, 4, 5, DateTimeKind.Unspecified);
@@ -8091,13 +8075,13 @@ namespace JilTests
             var microsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsUTC));
             var microsoftControl = JSON.Serialize(specified, Options.Default);
 
-            Assert.AreEqual(iso8601Control, iso8601);
-            Assert.AreEqual(msControl, ms);
-            Assert.AreEqual(sControl, s);
-            Assert.AreEqual(microsoftControl, microsoft);
+            Assert.Equal(iso8601Control, iso8601);
+            Assert.Equal(msControl, ms);
+            Assert.Equal(sControl, s);
+            Assert.Equal(microsoftControl, microsoft);
         }
 
-        [TestMethod]
+        [Fact]
         public void UnspecifiedToLocal()
         {
             var unspecified = new DateTime(1970, 1, 2, 3, 4, 5, DateTimeKind.Unspecified);
@@ -8115,13 +8099,13 @@ namespace JilTests
             var microsoft = JSON.Serialize(unspecified, new Options(false, false, false, Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch, false, UnspecifiedDateTimeKindBehavior.IsLocal));
             var microsoftControl = JSON.Serialize(specified, Options.Default);
 
-            Assert.AreEqual(iso8601Control, iso8601);
-            Assert.AreEqual(msControl, ms);
-            Assert.AreEqual(sControl, s);
-            Assert.AreEqual(microsoftControl, microsoft);
+            Assert.Equal(iso8601Control, iso8601);
+            Assert.Equal(msControl, ms);
+            Assert.Equal(sControl, s);
+            Assert.Equal(microsoftControl, microsoft);
         }
 
-        [TestMethod]
+        [Fact]
         public void ISO8601WithOffset()
         {
             var toTest = new List<DateTimeOffset>();
@@ -8137,7 +8121,7 @@ namespace JilTests
                     var offsetPos = new TimeSpan(h, m, 0);
                     var offsetNeg = offsetPos.Negate();
 
-                    var now = DateTime.Now;
+                    var now = new DateTime(636639847357871686);
                     now = DateTime.SpecifyKind(now, DateTimeKind.Unspecified);
 
                     toTest.Add(new DateTimeOffset(now, offsetPos));
@@ -8164,8 +8148,8 @@ namespace JilTests
                     streamStr = str.ToString();
                 }
 
-                Assert.AreEqual(shouldMatch, strStr);
-                Assert.AreEqual(shouldMatch, streamStr);
+                Assert.Equal(shouldMatch, strStr);
+                Assert.Equal(shouldMatch, streamStr);
             }
         }
 
@@ -8174,80 +8158,38 @@ namespace JilTests
             public Dictionary<string, Dictionary<string, int>> A { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryDictionary()
         {
             var str = JSON.Serialize<Dictionary<string, Dictionary<string, int>>>(new Dictionary<string, Dictionary<string, int>>(), Options.ExcludeNulls);
-            Assert.IsFalse(string.IsNullOrEmpty(str));
+            Assert.False(string.IsNullOrEmpty(str));
         }
 
-        [TestMethod]
+        [Fact]
         public void NaNFails()
         {
             // double
             {
-                try
-                {
-                    JSON.Serialize(double.NaN);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("NaN is not a permitted JSON number value", e.Message);
-                }
+                var ex = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(double.NaN));
+                Assert.Equal("NaN is not a permitted JSON number value", ex.Message);
 
-                try
-                {
-                    JSON.Serialize(double.NegativeInfinity);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("-Infinity is not a permitted JSON number value", e.Message);
-                }
+                var ex2 = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(double.NegativeInfinity));
+                Assert.Equal("-Infinity is not a permitted JSON number value", ex2.Message);
 
-                try
-                {
-                    JSON.Serialize(double.PositiveInfinity);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
-                }
+                var ex3 = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(double.PositiveInfinity));
+                Assert.Equal("Infinity is not a permitted JSON number value", ex3.Message);
             }
 
             // float
             {
-                try
-                {
-                    JSON.Serialize(float.NaN);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("NaN is not a permitted JSON number value", e.Message);
-                }
+                var ex = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(float.NaN));
+                Assert.Equal("NaN is not a permitted JSON number value", ex.Message);
 
-                try
-                {
-                    JSON.Serialize(float.NegativeInfinity);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("-Infinity is not a permitted JSON number value", e.Message);
-                }
+                var ex2 = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(float.NegativeInfinity));
+                Assert.Equal("-Infinity is not a permitted JSON number value", ex2.Message);
 
-                try
-                {
-                    JSON.Serialize(float.PositiveInfinity);
-                    Assert.Fail("Should be impossible");
-                }
-                catch (Exception e)
-                {
-                    Assert.AreEqual("Infinity is not a permitted JSON number value", e.Message);
-                }
+                var ex3 = Assert.Throws<InvalidOperationException>(() => JSON.Serialize(float.PositiveInfinity));
+                Assert.Equal("Infinity is not a permitted JSON number value", ex3.Message);
             }
         }
 
@@ -8263,18 +8205,18 @@ namespace JilTests
             public Dictionary<int, int?> B { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue127()
         {
             var a = new _Issue127_A { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
             var b = new _Issue127_B { A = 1, B = new Dictionary<int, int?> { { 2, 3 } } };
             var jsonA = JSON.Serialize(a);
             var jsonB = JSON.Serialize(b);
-            Assert.AreEqual("{\"A\":1,\"B\":{\"2\":3}}", jsonA);
-            Assert.AreEqual("{\"B\":{\"2\":3},\"A\":1}", jsonB);
+            Assert.Equal("{\"A\":1,\"B\":{\"2\":3}}", jsonA);
+            Assert.Equal("{\"B\":{\"2\":3},\"A\":1}", jsonB);
         }
 
-        [TestMethod]
+        [Fact]
         public void MicrosoftDateTimeOffsets()
         {
             // While *DateTimes* in Microsoft format don't do anything with the offset (they just write it, then ignore it),
@@ -8307,26 +8249,26 @@ namespace JilTests
                     JSON.Serialize(dto, str);
 
                     var res = str.ToString();
-                    Assert.AreEqual(val, res);
+                    Assert.Equal(val, res);
                 }
 
                 // string style
                 {
                     var res = JSON.Serialize(dto);
-                    Assert.AreEqual(val, res);
+                    Assert.Equal(val, res);
                 }
             }
         }
 
 
-        [TestMethod]
+        [Fact]
         public void Issue147()
         {
             var res = JSON.Serialize(long.MinValue);
-            Assert.AreEqual("-9223372036854775808", res);
+            Assert.Equal("-9223372036854775808", res);
 
             res = JSON.Serialize(int.MinValue);
-            Assert.AreEqual("-2147483648", res);
+            Assert.Equal("-2147483648", res);
         }
 
         public class SerilaizationTestObj
@@ -8341,7 +8283,7 @@ namespace JilTests
         }
 
 
-        [TestMethod]
+        [Fact]
         public void TestSerializationNameFormatsSerialization()
         {
             using (var str = new StringWriter())
@@ -8357,14 +8299,14 @@ namespace JilTests
 
                 var res = str.ToString();
 
-#if NETCORE
+#if NETCOREAPP1_0
                 // net core doens't let us match ordering
                 const string EXPECTED_VALUE = "{\"oneTwo\":\"1\",\"ThreeFour\":\"2\",\"FIVESIX\":\"3\"}";
 #else
                 const string EXPECTED_VALUE = "{\"FIVESIX\":\"3\",\"ThreeFour\":\"2\",\"oneTwo\":\"1\"}";
 #endif
 
-                Assert.AreEqual(EXPECTED_VALUE, res);
+                Assert.Equal(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8379,13 +8321,13 @@ namespace JilTests
                 JSON.Serialize(obj, str, new Options(serializationNameFormat: SerializationNameFormat.CamelCase));
 
                 var res = str.ToString();
-#if NETCORE
+#if NETCOREAPP1_0
                 const string EXPECTED_VALUE = "{\"oneTwo\":\"1\",\"threeFour\":\"2\",\"fivesix\":\"3\"}";
 #else
                 const string EXPECTED_VALUE = "{\"fivesix\":\"3\",\"threeFour\":\"2\",\"oneTwo\":\"1\"}";
 #endif
 
-                Assert.AreEqual(EXPECTED_VALUE, res);
+                Assert.Equal(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8400,13 +8342,13 @@ namespace JilTests
 
                 var res = str.ToString();
 
-#if NETCORE
+#if NETCOREAPP1_0
                 const string EXPECTED_VALUE = "{\"ExplicitMember\":\"MemberValue\",\"Directive\":\"DirectiveValue\",\"NekkidProperty\":\"NekkidValie\"}";
 #else
                 const string EXPECTED_VALUE = "{\"NekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
 #endif
 
-                Assert.AreEqual(EXPECTED_VALUE, res);
+                Assert.Equal(EXPECTED_VALUE, res);
             }
 
             using (var str = new StringWriter())
@@ -8421,13 +8363,13 @@ namespace JilTests
 
                 var res = str.ToString();
 
-#if NETCORE
+#if NETCOREAPP1_0
                 const string EXPECTED_VALUE = "{\"ExplicitMember\":\"MemberValue\",\"Directive\":\"DirectiveValue\",\"nekkidProperty\":\"NekkidValie\"}";
 #else
                 const string EXPECTED_VALUE = "{\"nekkidProperty\":\"NekkidValie\",\"Directive\":\"DirectiveValue\",\"ExplicitMember\":\"MemberValue\"}";
 #endif
 
-                Assert.AreEqual(EXPECTED_VALUE, res);
+                Assert.Equal(EXPECTED_VALUE, res);
             }
         }
 
@@ -8473,7 +8415,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue150()
         {
             {
@@ -8481,7 +8423,7 @@ namespace JilTests
                 obj.ArrayOfEnum = new[] { _Issue150.A.A, _Issue150.A.B };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ArrayOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ArrayOfEnum\":[0,1]}", str);
             }
 
             {
@@ -8489,7 +8431,7 @@ namespace JilTests
                 obj.ArrayOfEnum = new _Issue150.A?[] { _Issue150.A.A, null };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ArrayOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ArrayOfEnum\":[0,null]}", str);
             }
 
             {
@@ -8497,7 +8439,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,1]}", str);
             }
 
             {
@@ -8505,7 +8447,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,null]}", str);
             }
 
             {
@@ -8513,7 +8455,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,1]}", str);
             }
 
             {
@@ -8521,7 +8463,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,null]}", str);
             }
 
             {
@@ -8529,7 +8471,7 @@ namespace JilTests
                 obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"EnumerableOfEnum\":[0,1]}", str);
             }
 
             {
@@ -8537,7 +8479,7 @@ namespace JilTests
                 obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"EnumerableOfEnum\":[0,null]}", str);
             }
 
             {
@@ -8549,7 +8491,7 @@ namespace JilTests
                 };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
+                Assert.Equal("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
             }
 
             {
@@ -8561,7 +8503,7 @@ namespace JilTests
                 };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
+                Assert.Equal("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
             }
 
             {
@@ -8573,7 +8515,7 @@ namespace JilTests
                 };
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+                Assert.Equal("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
             }
         }
 
@@ -8586,7 +8528,7 @@ namespace JilTests
             public A? NullableEnum;
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue151()
         {
             {
@@ -8594,7 +8536,7 @@ namespace JilTests
                 obj.NullableEnum = _Issue151.A.B;
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"NullableEnum\":1}", str);
+                Assert.Equal("{\"NullableEnum\":1}", str);
             }
 
             {
@@ -8602,26 +8544,26 @@ namespace JilTests
                 obj.NullableEnum = null;
 
                 var str = JSON.Serialize(obj);
-                Assert.AreEqual("{\"NullableEnum\":null}", str);
+                Assert.Equal("{\"NullableEnum\":null}", str);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue165()
         {
             var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
             var str = JSON.Serialize(dto, Options.ISO8601);
-            Assert.AreEqual("\"2015-09-09T18:37:40+02:00\"", str);
+            Assert.Equal("\"2015-09-09T18:37:40+02:00\"", str);
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue165_2()
         {
             var dto = new DateTimeOffset(2015, 9, 9, 18, 37, 40, TimeSpan.FromHours(2));
             var str = JSON.Serialize(dto, Options.ISO8601);
             var dt = JSON.Deserialize<DateTime>(str, Options.ISO8601);
 
-            Assert.AreEqual(dto.UtcDateTime, dt);
+            Assert.Equal(dto.UtcDateTime, dt);
         }
 
         public enum _Issue159
@@ -8630,14 +8572,14 @@ namespace JilTests
             CheckBox
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue159()
         {
             var bean = JSON.Deserialize<_Issue159>("\"CheckBox\"");
-            Assert.AreEqual(bean, _Issue159.CheckBox);
+            Assert.Equal(_Issue159.CheckBox, bean);
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue169()
         {
             var obj =
@@ -8659,7 +8601,7 @@ namespace JilTests
 
             var json = Jil.JSON.SerializeDynamic(obj, Jil.Options.CamelCase);
 
-            Assert.AreEqual(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
+            Assert.Equal(@"{""filter"":{""and"":[{""term"":{""category"":""a""}}]}}", json);
         }
 
         class _DiscriminantUnionsWithUnionType_1
@@ -8702,7 +8644,7 @@ namespace JilTests
             public Type Discriminant { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscriminantUnionsWithUnionType()
         {
             // conditional serialization, with nulls
@@ -8710,37 +8652,37 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int), WithInt = 123 };
                     var str1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", str1);
+                    Assert.Equal("{\"Foo\":123}", str1);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":0}", str2);
+                    Assert.Equal("{\"Foo\":0}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string), WithString = "bar" };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":\"bar\"}", str);
+                    Assert.Equal("{\"Foo\":\"bar\"}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>), WithList = new List<string> { "fizz", "buzz" } };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
+                    Assert.Equal("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>), WithDictionary = new Dictionary<string, string> { { "fizz", "buzz" } } };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
+                    Assert.Equal("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
             }
 
@@ -8749,37 +8691,37 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int), WithInt = 123 };
                     var str1 = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", str1);
+                    Assert.Equal("{\"Foo\":123}", str1);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(int) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":0}", str2);
+                    Assert.Equal("{\"Foo\":0}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string), WithString = "bar" };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"bar\"}", str);
+                    Assert.Equal("{\"Foo\":\"bar\"}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(string) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>), WithList = new List<string> { "fizz", "buzz" } };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
+                    Assert.Equal("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(List<string>) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>), WithDictionary = new Dictionary<string, string> { { "fizz", "buzz" } } };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
+                    Assert.Equal("{\"Foo\":{\"fizz\":\"buzz\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_1 { Discriminant = typeof(Dictionary<string, string>) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
             }
 
@@ -8788,37 +8730,37 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(int), WithInt = 123 };
                     var str1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", str1);
+                    Assert.Equal("{\"Foo\":123}", str1);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(int) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":0}", str2);
+                    Assert.Equal("{\"Foo\":0}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(string), WithString = "bar" };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":\"bar\"}", str);
+                    Assert.Equal("{\"Foo\":\"bar\"}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(string) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(List<string>), WithList = new List<string> { "fizz", "buzz" } };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
+                    Assert.Equal("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(List<string>) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2), WithObject = new _DiscriminantUnionsWithUnionType_2 { Bar = "Foo" } };
                     var str = JSON.Serialize(obj);
-                    Assert.AreEqual("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
+                    Assert.Equal("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2) };
                     var str2 = JSON.Serialize(obj2);
-                    Assert.AreEqual("{\"Foo\":null}", str2);
+                    Assert.Equal("{\"Foo\":null}", str2);
                 }
             }
 
@@ -8827,37 +8769,37 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(int), WithInt = 123 };
                     var str1 = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", str1);
+                    Assert.Equal("{\"Foo\":123}", str1);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(int) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":0}", str2);
+                    Assert.Equal("{\"Foo\":0}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(string), WithString = "bar" };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"bar\"}", str);
+                    Assert.Equal("{\"Foo\":\"bar\"}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(string) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(List<string>), WithList = new List<string> { "fizz", "buzz" } };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
+                    Assert.Equal("{\"Foo\":[\"fizz\",\"buzz\"]}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(List<string>) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
 
                 {
                     var obj = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2), WithObject = new _DiscriminantUnionsWithUnionType_2 { Bar = "Foo" } };
                     var str = JSON.Serialize(obj, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
+                    Assert.Equal("{\"Foo\":{\"Bar\":\"Foo\"}}", str);
                     var obj2 = new _DiscriminantUnionsWithUnionType_3 { Discriminant = typeof(_DiscriminantUnionsWithUnionType_2) };
                     var str2 = JSON.Serialize(obj2, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", str2);
+                    Assert.Equal("{}", str2);
                 }
             }
         }
@@ -8919,7 +8861,7 @@ namespace JilTests
             public string AsString { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void DiscriminantUnionWithoutUnionType()
         {
             // Conditional serialization, with nulls
@@ -8927,55 +8869,55 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsNumber = 123 };
                     var json1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", json1);
+                    Assert.Equal("{\"Foo\":123}", json1);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"hello\":\"world\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsString = "nope" };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsString = "nope" };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1();
                     var json1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":null}", json1);
+                    Assert.Equal("{\"Foo\":null}", json1);
                 }
             }
 
@@ -8984,55 +8926,55 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"hello\":\"world\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1 { AsString = "nope" };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_2 { AsString = "nope" };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_1();
                     var json1 = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", json1);
+                    Assert.Equal("{}", json1);
                 }
             }
 
@@ -9041,55 +8983,55 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsNumber = 123 };
                     var json1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", json1);
+                    Assert.Equal("{\"Foo\":123}", json1);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"hello\":\"world\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsString = "nope" };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsString = "nope" };
                     var json = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4();
                     var json1 = JSON.Serialize(obj1);
-                    Assert.AreEqual("{\"Foo\":null}", json1);
+                    Assert.Equal("{\"Foo\":null}", json1);
                 }
             }
 
@@ -9098,55 +9040,55 @@ namespace JilTests
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsDictionary = new Dictionary<string, string> { { "hello", "world" } } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"hello\":\"world\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"hello\":\"world\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4 { AsString = "nope" };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsNumber = 123 };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":123}", json);
+                    Assert.Equal("{\"Foo\":123}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsObject = new _DiscriminantUnionWithoutUnionType_3 { Fizz = "Buzz" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
+                    Assert.Equal("{\"Foo\":{\"Fizz\":\"Buzz\"}}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsList = new List<string> { "hello", "world" } };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":[\"hello\",\"world\"]}", json);
+                    Assert.Equal("{\"Foo\":[\"hello\",\"world\"]}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_5 { AsString = "nope" };
                     var json = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{\"Foo\":\"nope\"}", json);
+                    Assert.Equal("{\"Foo\":\"nope\"}", json);
                 }
 
                 {
                     var obj1 = new _DiscriminantUnionWithoutUnionType_4();
                     var json1 = JSON.Serialize(obj1, Options.ExcludeNulls);
-                    Assert.AreEqual("{}", json1);
+                    Assert.Equal("{}", json1);
                 }
             }
         }
@@ -9169,32 +9111,17 @@ namespace JilTests
             public Type DiscriminantType { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void BadUnions()
         {
             // just prove that the proper verification code is wired up, DeserializeTests cover the rest of the types
-            try
-            {
-                JSON.Serialize(new _BadUnions_1());
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (SerializerException e)
-            {
-                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_BadUnions_1: The members  [AsInt, AsDouble] cannot be distiguished in a union because they can each start with these characters [-, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", e.Message);
-            }
+            var ex = Assert.Throws<SerializerException>(() => JSON.Serialize(new _BadUnions_1()));
+            Assert.Equal("Error occurred building a serializer for JilTests.SerializeTests+_BadUnions_1: The members  [AsInt, AsDouble] cannot be distiguished in a union because they can each start with these characters [-, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]", ex.Message);
 
-            try
-            {
-                var obj = new _BadUnions_2();
-                obj.DiscriminantType = typeof(object);
-
-                JSON.Serialize(obj);
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (SerializerException e)
-            {
-                Assert.AreEqual("Unexpected type provided during union serialization [Object], expected one of String, Int32", e.Message);
-            }
+            var obj = new _BadUnions_2();
+            obj.DiscriminantType = typeof(object);
+            var ex2 = Assert.Throws<SerializerException>(() => JSON.Serialize(obj));
+            Assert.Equal("Unexpected type provided during union serialization [Object], expected one of String, Int32", ex2.Message);
         }
 
         struct _TopLevelNulls
@@ -9202,16 +9129,16 @@ namespace JilTests
             public string A { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void TopLevelNulls()
         {
             object obj = null;
 
-            Assert.AreEqual("null", JSON.Serialize(obj));
+            Assert.Equal("null", JSON.Serialize(obj));
 
             var arr = new[] { "test", null, null, null };
-            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr));
-            Assert.AreEqual("[\"test\",null,null,null]", JSON.Serialize(arr, Options.ExcludeNulls));
+            Assert.Equal("[\"test\",null,null,null]", JSON.Serialize(arr));
+            Assert.Equal("[\"test\",null,null,null]", JSON.Serialize(arr, Options.ExcludeNulls));
 
             var propObj =
                 new
@@ -9222,17 +9149,17 @@ namespace JilTests
             var propObjArr = new[] { propObj, null, null, null };
 
             var propObjArrJson = JSON.Serialize(propObjArr);
-            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
+            Assert.Equal("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
             var propObjArrJsonExcludesNull = JSON.Serialize(propObjArr, Options.ExcludeNulls);
-            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+            Assert.Equal("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
 
             _TopLevelNulls? nullable = new _TopLevelNulls { A = "test" };
             var nullableArr = new[] { nullable, null, null, null };
 
             var nullableArrJson = JSON.Serialize(nullableArr);
-            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
+            Assert.Equal("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
             var nullableArrJsonExcludesNull = JSON.Serialize(nullableArr, Options.ExcludeNulls);
-            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
+            Assert.Equal("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
 
         [JilPrimitiveWrapper]
@@ -9255,42 +9182,20 @@ namespace JilTests
             public int Field2;
         }
 
-        [TestMethod]
+        [Fact]
         public void BadPrimitiveWrapper()
         {
-            try
-            {
-                JSON.Serialize(new _BadPrimitiveWrapper1 { Prop1 = 1 });
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsNotNull(e.InnerException);
-                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper1", e.InnerException.Message);
-            }
+            var ex = Assert.Throws<SerializerException>(() => JSON.Serialize(new _BadPrimitiveWrapper1 { Prop1 = 1 }));
+            Assert.NotNull(ex.InnerException);
+            Assert.Equal("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper1", ex.InnerException.Message);
 
-            try
-            {
-                JSON.Serialize(new _BadPrimitiveWrapper2 { });
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsNotNull(e.InnerException);
-                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 0 for _BadPrimitiveWrapper2", e.InnerException.Message);
-            }
+            var ex2 = Assert.Throws<SerializerException>(() => JSON.Serialize(new _BadPrimitiveWrapper2 { }));
+            Assert.NotNull(ex2.InnerException);
+            Assert.Equal("Primitive wrappers can only have 1 declared primitive member, found 0 for _BadPrimitiveWrapper2", ex2.InnerException.Message);
 
-            try
-            {
-
-                JSON.Serialize(new _BadPrimitiveWrapper3 { Field1 = 1, Field2 = 2 });
-                Assert.Fail();
-            }
-            catch (Exception e)
-            {
-                Assert.IsNotNull(e.InnerException);
-                Assert.AreEqual("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", e.InnerException.Message);
-            }
+            var ex3 = Assert.Throws<SerializerException>(() => JSON.Serialize(new _BadPrimitiveWrapper3 { Field1 = 1, Field2 = 2 }));
+            Assert.NotNull(ex3.InnerException);
+            Assert.Equal("Primitive wrappers can only have 1 declared primitive member, found 2 for _BadPrimitiveWrapper3", ex3.InnerException.Message);
         }
 
         class _Issue189
@@ -9299,11 +9204,11 @@ namespace JilTests
             public int ZeroWidthParam { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue189()
         {
             var json = JSON.Serialize(new _Issue189 { ZeroWidthParam = 31415 });
-            Assert.AreEqual("{\"\":31415}", json);
+            Assert.Equal("{\"\":31415}", json);
         }
 
         enum _EmptyEnum
@@ -9329,62 +9234,36 @@ namespace JilTests
             public _EmptyEnum A;
         }
         
-        [TestMethod]
+        [Fact]
         public void EmptyEnum()
         {
             {
-                try
-                {
-                    JSON.Serialize<_EmptyEnum>(default(_EmptyEnum));
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (SerializerException e)
-                {
-                    Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnum: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", e.Message);
-                }
+                var ex = Assert.Throws<SerializerException>(() => JSON.Serialize<_EmptyEnum>(default(_EmptyEnum)));
+                Assert.Equal("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnum: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", ex.Message);
             }
 
-            try
             {
-                JSON.Serialize<_EmptyEnumWrapper1>(new _EmptyEnumWrapper1());
-                Assert.Fail("Shouldn't be possible");
-            }
-            catch (SerializerException e)
-            {
-                Assert.AreEqual("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnumWrapper1: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", e.Message);
+                var ex = Assert.Throws<SerializerException>(() => JSON.Serialize<_EmptyEnumWrapper1>(new _EmptyEnumWrapper1()));
+                Assert.Equal("Error occurred building a serializer for JilTests.SerializeTests+_EmptyEnumWrapper1: JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized; define values, make nullable, or configure to treat as integer", ex.Message);
             }
 
             // a nullable empty enum should work...
             {
-                Assert.AreEqual("{\"A\":null}", JSON.Serialize(new _EmptyEnumWrapper2()));
-                Assert.AreEqual("null", JSON.Serialize<_EmptyEnum?>(null));
+                Assert.Equal("{\"A\":null}", JSON.Serialize(new _EmptyEnumWrapper2()));
+                Assert.Equal("null", JSON.Serialize<_EmptyEnum?>(null));
 
                 // unless it has a value
-                try
-                {
-                    JSON.Serialize(new _EmptyEnumWrapper2 { A = default(_EmptyEnum) });
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (SerializerException e)
-                {
-                    Assert.AreEqual("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", e.Message);
-                }
+                var ex = Assert.Throws<SerializerException>(() => JSON.Serialize(new _EmptyEnumWrapper2 { A = default(_EmptyEnum) }));
+                Assert.Equal("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", ex.Message);
 
-                try
-                {
-                    JSON.Serialize<_EmptyEnum?>(default(_EmptyEnum));
-                    Assert.Fail("Shouldn't be possible");
-                }
-                catch (SerializerException e)
-                {
-                    Assert.AreEqual("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", e.Message);
-                }
+                var ex2 = Assert.Throws<SerializerException>(() => JSON.Serialize<_EmptyEnum?>(default(_EmptyEnum)));
+                Assert.Equal("JilTests.SerializeTests+_EmptyEnum has no defined values and thus cannot be serialized", ex2.Message);
             }
 
             // if it's an int, all things are legal
             {
-                Assert.AreEqual("{\"A\":0}", JSON.Serialize(new _EmptyEnumWrapper3 { }));
-                Assert.AreEqual("{\"A\":1}", JSON.Serialize(new _EmptyEnumWrapper3 { A = (_EmptyEnum)1 }));
+                Assert.Equal("{\"A\":0}", JSON.Serialize(new _EmptyEnumWrapper3 { }));
+                Assert.Equal("{\"A\":1}", JSON.Serialize(new _EmptyEnumWrapper3 { A = (_EmptyEnum)1 }));
             }
         }
 
@@ -9404,11 +9283,11 @@ namespace JilTests
             public _Issue238_1 Id { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue238()
         {
             var json = JSON.Serialize(new _Issue238(), Options.ISO8601PrettyPrintIncludeInheritedUtcCamelCase);
-            Assert.AreEqual("{\n \"id\": 0\n}", json);
+            Assert.Equal("{\n \"id\": 0\n}", json);
         }
 
         public class _Issue231
@@ -9416,7 +9295,7 @@ namespace JilTests
             public ArraySegment<byte> Payload { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue231()
         {
             var arr = new byte[] { 1, 2, 3 };
@@ -9427,7 +9306,7 @@ namespace JilTests
                     Payload = new ArraySegment<byte>(arr)
                 };
             var json = JSON.Serialize(obj);
-            Assert.AreEqual("{\"Payload\":[1,2,3]}", json);
+            Assert.Equal("{\"Payload\":[1,2,3]}", json);
         }
 
         struct _DictionaryValueType : IDictionary<int, int>
@@ -9564,14 +9443,14 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DictionaryValueType()
         {
             var val = new _DictionaryValueType();
             val[1] = 2;
 
             var json = JSON.Serialize(val);
-            Assert.IsNotNull(json);
+            Assert.NotNull(json);
         }
 
         class _Issue176_1
@@ -9604,22 +9483,22 @@ namespace JilTests
             public new string Foo { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue176()
         {
             {
                 var json = JSON.Serialize(new _Issue176_1_Derived { Foo = 123 });
-                Assert.AreEqual("{\"Foo\":123}", json);
+                Assert.Equal("{\"Foo\":123}", json);
             }
 
             {
                 var json = JSON.Serialize(new _Issue176_2_Derived { Foo = new[] { 1, 2, 3 } });
-                Assert.AreEqual("{\"Foo\":[1,2,3]}", json);
+                Assert.Equal("{\"Foo\":[1,2,3]}", json);
             }
 
             {
                 var json = JSON.Serialize(new _Issue176_3_Derived { Foo = "Bar" });
-                Assert.AreEqual("{\"Foo\":\"Bar\"}", json);
+                Assert.Equal("{\"Foo\":\"Bar\"}", json);
             }
         }
         
@@ -9632,27 +9511,27 @@ namespace JilTests
                 Elements = elements;
             }
         }
-        [TestMethod]
+        [Fact]
         public void Issue258()
         {
             {
                 var json = JSON.Serialize(new _Issue258(new[] { "foo" }));
-                Assert.AreEqual("{\"Elements\":[\"foo\"]}", json);
+                Assert.Equal("{\"Elements\":[\"foo\"]}", json);
             }
             {
                 var json = JSON.Serialize(new _Issue258(null));
-                Assert.AreEqual("{\"Elements\":null}", json);
+                Assert.Equal("{\"Elements\":null}", json);
             }
         }
 
         [JilPrimitiveWrapper]
         struct _Issue270 { public int Val; }
 
-        [TestMethod]
+        [Fact]
         public void Issue270()
         {
-            Assert.AreEqual("123", JSON.Serialize<_Issue270?>(new _Issue270 { Val = 123 }));
-            Assert.AreEqual("null", JSON.Serialize<_Issue270?>(null));
+            Assert.Equal("123", JSON.Serialize<_Issue270?>(new _Issue270 { Val = 123 }));
+            Assert.Equal("null", JSON.Serialize<_Issue270?>(null));
         }
 
         
@@ -9664,7 +9543,7 @@ namespace JilTests
             public Dictionary<_Issue272Enum, int> EnumMap { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue272()
         {
             var repro = new _Issue272();
@@ -9676,7 +9555,7 @@ namespace JilTests
 
             var json = JSON.Serialize(repro, Options.ExcludeNulls);
 
-            Assert.AreEqual("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
+            Assert.Equal("{\"EnumMap\":{\"Zero\":0,\"One\":1,\"Two\":2,\"One,Two\":3}}", json);
         }
 
         struct _Issue257_IEnumerable : IEnumerable<object>
@@ -9795,25 +9674,25 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue257()
         {
             {
                 _Issue257_IEnumerable? enumerable = new _Issue257_IEnumerable();
                 var res = JSON.Serialize(enumerable);
-                Assert.AreEqual("[]", res);
+                Assert.Equal("[]", res);
             }
 
             {
                 _Issue257_List? list = new _Issue257_List();
                 var res = JSON.Serialize(list);
-                Assert.AreEqual("[]", res);
+                Assert.Equal("[]", res);
             }
 
             {
                 _Issue257_Dictionary? dict = new _Issue257_Dictionary();
                 var res = JSON.Serialize(dict);
-                Assert.AreEqual("{}", res);
+                Assert.Equal("{}", res);
             }
         }
 
@@ -9828,27 +9707,27 @@ namespace JilTests
             yield break;
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue275()
         {
             {
                 var res = JSON.Serialize(new _Issue275[0]);
-                Assert.AreEqual("[]", res);
+                Assert.Equal("[]", res);
             }
 
             {
                 var res = JSON.Serialize(new List<_Issue275>());
-                Assert.AreEqual("[]", res);
+                Assert.Equal("[]", res);
             }
 
             {
                 var res = JSON.Serialize(_Issue275Enumerable());
-                Assert.AreEqual("[]", res);
+                Assert.Equal("[]", res);
             }
 
             {
                 var res = JSON.Serialize(new Dictionary<string, _Issue275>() { ["foo"] = new _Issue275() });
-                Assert.AreEqual(@"{""foo"":0}", res);
+                Assert.Equal(@"{""foo"":0}", res);
             }
         }
     }

@@ -17,7 +17,7 @@ namespace JilTests
     [TestClass]
     public class ExhaustiveTests
     {
-        [TestMethod]
+        [Fact]
         public void ULongSampling()
         {
             Action<ulong> test =
@@ -29,7 +29,7 @@ namespace JilTests
                         {
                             var dyn = JSON.DeserializeDynamic(str);
                             var res = (ulong)dyn;
-                            Assert.AreEqual(ul, res);
+                            Assert.Equal(ul, res);
                         }
                         catch (Exception e)
                         {
@@ -62,7 +62,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void LongSampling()
         {
             Action<long> test =
@@ -72,7 +72,7 @@ namespace JilTests
                     {
                         var dyn = JSON.DeserializeDynamic(str);
                         var res = (long)dyn;
-                        Assert.AreEqual(l, res);
+                        Assert.Equal(l, res);
                     }
                 };
 
@@ -100,7 +100,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AllUInts()
         {
             for (long i = uint.MinValue; i <= uint.MaxValue; i++)
@@ -112,7 +112,7 @@ namespace JilTests
                     {
                         var dyn = JSON.DeserializeDynamic(str);
                         var v = (uint)dyn;
-                        Assert.AreEqual(asUInt, v, "Failed on i=" + asUInt);
+                        Assert.Equal(asUInt, v, "Failed on i=" + asUInt);
                     }
                 }
                 catch (Exception e)
@@ -122,7 +122,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AllInts()
         {
             for (long i = int.MinValue; i <= int.MaxValue; i++)
@@ -134,7 +134,7 @@ namespace JilTests
                     {
                         var dyn = JSON.DeserializeDynamic(str);
                         var v = (int)dyn;
-                        Assert.AreEqual(asInt, v, "Failed on i=" + asInt);
+                        Assert.Equal(asInt, v, "Failed on i=" + asInt);
                     }
                 }
                 catch (Exception e)
@@ -267,7 +267,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AllFloats_Dynamic()
         {
             var e = _AllFloats();
@@ -293,7 +293,7 @@ namespace JilTests
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void AllFloats_Static()
         {
             var e = _AllFloats();
@@ -319,7 +319,7 @@ namespace JilTests
 
                         var closeEnough = asStr == reStr || delta <= float.Epsilon;
 
-                        Assert.IsTrue(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
+                        Assert.True(closeEnough, "For i=" + i + " format=" + format + " delta=" + delta + " epsilon=" + float.Epsilon);
                     }
                     catch (Exception x)
                     {

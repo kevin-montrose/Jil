@@ -1,5 +1,4 @@
 ﻿using Jil;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,20 +7,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Globalization;
+using Xunit;
 
 namespace JilTests
 {
-    [TestClass]
     public class DynamicSerializationTests
     {
-        [TestMethod]
+        [Fact]
         public void ToStringJSON()
         {
             {
                 var dyn = JSON.DeserializeDynamic("{\"Hello\":1}");
                 var res = dyn.ToString();
                 var shouldMatch = JSON.Serialize(new { Hello = 1 }, Options.ISO8601PrettyPrint);
-                Assert.AreEqual(shouldMatch, res);
+                Assert.Equal(shouldMatch, res);
             }
 
             {
@@ -31,15 +30,15 @@ namespace JilTests
                 var res1 = dyn1.ToString();
                 var res2 = dyn2.ToString();
                 var res3 = dyn3.ToString();
-                Assert.AreEqual(long.MaxValue.ToString(CultureInfo.InvariantCulture), res1);
-                Assert.AreEqual(ulong.MaxValue.ToString(CultureInfo.InvariantCulture), res2);
-                Assert.AreEqual(long.MinValue.ToString(CultureInfo.InvariantCulture), res3);
+                Assert.Equal(long.MaxValue.ToString(CultureInfo.InvariantCulture), res1);
+                Assert.Equal(ulong.MaxValue.ToString(CultureInfo.InvariantCulture), res2);
+                Assert.Equal(long.MinValue.ToString(CultureInfo.InvariantCulture), res3);
             }
 
             {
                 var dyn = JSON.DeserializeDynamic("1.23456");
                 var res = dyn.ToString();
-                Assert.AreEqual("1.23456", res);
+                Assert.Equal("1.23456", res);
             }
 
             {
@@ -47,8 +46,8 @@ namespace JilTests
                 var dyn2 = JSON.DeserializeDynamic("false");
                 var res1 = dyn1.ToString();
                 var res2 = dyn2.ToString();
-                Assert.AreEqual("true", res1);
-                Assert.AreEqual("false", res2);
+                Assert.Equal("true", res1);
+                Assert.Equal("false", res2);
             }
 
             {
@@ -56,7 +55,7 @@ namespace JilTests
                 var str = JSON.Serialize(now, Options.ISO8601);
                 var dyn = JSON.DeserializeDynamic(str, Options.ISO8601);
                 var res = dyn.ToString();
-                Assert.AreEqual(str, res);
+                Assert.Equal(str, res);
             }
 
             {
@@ -64,13 +63,13 @@ namespace JilTests
                 var str = JSON.Serialize(g);
                 var dyn = JSON.DeserializeDynamic(str);
                 var res = dyn.ToString();
-                Assert.AreEqual(str, res);
+                Assert.Equal(str, res);
             }
 
             {
                 var dyn = JSON.DeserializeDynamic("\"how are you today?\"");
                 var str = dyn.ToString();
-                Assert.AreEqual("\"how are you today?\"", str);
+                Assert.Equal("\"how are you today?\"", str);
             }
 
             {
@@ -92,13 +91,13 @@ namespace JilTests
                     ", " +
                     JSON.Serialize(456, Options.ISO8601PrettyPrint) +
                     "]";
-                Assert.AreEqual(shouldMatch1, res1);
-                Assert.AreEqual(shouldMatch2, res2);
-                Assert.AreEqual(shouldMatch3, res3);
+                Assert.Equal(shouldMatch1, res1);
+                Assert.Equal(shouldMatch2, res2);
+                Assert.Equal(shouldMatch3, res3);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void HeterogenousCollection()
         {
             using (var str = new StringWriter())
@@ -110,11 +109,11 @@ namespace JilTests
                 JSON.SerializeDynamic(arr, str);
                 var res = str.ToString();
 
-                Assert.AreEqual("[123,\"hello\",{\"Foo\":\"bar\"},{\"Fizz\":\"Buzz\"}]", res);
+                Assert.Equal("[123,\"hello\",{\"Foo\":\"bar\"},{\"Fizz\":\"Buzz\"}]", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Objects()
         {
             using (var str = new StringWriter())
@@ -124,32 +123,32 @@ namespace JilTests
                 dict.Bar = "hello";
                 JSON.SerializeDynamic(dict, str);
                 var res = str.ToString();
-                Assert.AreEqual("{\"Foo\":123,\"Bar\":\"hello\"}", res);
+                Assert.Equal("{\"Foo\":123,\"Bar\":\"hello\"}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Simple()
         {
             using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic(123, str);
                 var res = str.ToString();
-                Assert.AreEqual("123", res);
+                Assert.Equal("123", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic("hello", str);
                 var res = str.ToString();
-                Assert.AreEqual("\"hello\"", res);
+                Assert.Equal("\"hello\"", res);
             }
 
             using (var str = new StringWriter())
             {
                 JSON.SerializeDynamic(null, str);
                 var res = str.ToString();
-                Assert.AreEqual("null", res);
+                Assert.Equal("null", res);
             }
 
             using (var str = new StringWriter())
@@ -158,7 +157,7 @@ namespace JilTests
                 JSON.SerializeDynamic(now, str);
                 var res = str.ToString();
                 var dt = JSON.Deserialize<DateTime>(res);
-                Assert.IsTrue((now - dt).Duration() < TimeSpan.FromMilliseconds(1));
+                Assert.True((now - dt).Duration() < TimeSpan.FromMilliseconds(1));
             }
         }
 
@@ -379,19 +378,19 @@ namespace JilTests
 
         #endregion
 
-        [TestMethod]
+        [Fact]
         public void PersonElasticMigration()
         {
             var personDescribed = Describe(typeof(Person), "--root--");
             var json = JSON.SerializeDynamic(personDescribed);
 
-#if NETCORE
+#if NETCOREAPP1_0
             const string EXPECTED_VALUE = "{\"properties\":{\"Id\":{\"type\":\"string\",\"index\":\"not_analyzed\"},\"MostRecentLocation\":{\"properties\":{\"Latitude\":{\"type\":\"float\",\"index\":\"no\"},\"Longitude\":{\"type\":\"float\",\"index\":\"no\"},\"LastSeenDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"}},\"type\":\"object\"},\"Locations\":{\"properties\":{\"CountryCode\":{\"type\":\"string\",\"index\":\"no\"},\"LocType\":{\"type\":\"integer\",\"index\":\"no\"},\"OnDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"SeenCount\":{\"type\":\"integer\",\"index\":\"no\"},\"GeoPoint\":{\"properties\":{\"Latitude\":{\"type\":\"float\",\"index\":\"no\"},\"Longitude\":{\"type\":\"float\",\"index\":\"no\"}},\"type\":\"object\"},\"Name\":{\"type\":\"string\",\"index\":\"no\"}},\"type\":\"object\"},\"InterestingTags\":{\"properties\":{\"SiteId\":{\"type\":\"integer\",\"index\":\"no\"},\"TagId\":{\"type\":\"integer\",\"index\":\"no\"},\"Confidence\":{\"type\":\"float\",\"index\":\"no\"}},\"type\":\"object\"},\"Identifiers\":{\"properties\":{\"Id\":{\"type\":\"string\",\"index\":\"not_analyzed\"},\"IdType\":{\"type\":\"integer\",\"index\":\"no\"}},\"type\":\"object\"},\"InterestingSites\":{\"properties\":{\"SiteId\":{\"type\":\"integer\",\"index\":\"no\"},\"InterestLevel\":{\"type\":\"float\",\"index\":\"no\"}},\"type\":\"object\"},\"TagViews\":{\"properties\":{\"SiteId\":{\"type\":\"integer\",\"index\":\"no\"},\"TagId\":{\"type\":\"integer\",\"index\":\"no\"},\"TimesViewed\":{\"type\":\"long\",\"index\":\"no\"}},\"type\":\"object\"},\"DeveloperKinds\":{\"properties\":{\"DevType\":{\"type\":\"integer\",\"index\":\"no\"},\"RelativeScore\":{\"type\":\"float\",\"index\":\"no\"}},\"type\":\"object\"},\"Demographics\":{\"properties\":{\"PersonId\":{\"type\":\"string\",\"index\":\"no\"},\"DeviceTypeId\":{\"type\":\"integer\",\"index\":\"no\"},\"BrowserId\":{\"type\":\"integer\",\"index\":\"no\"},\"OsId\":{\"type\":\"integer\",\"index\":\"no\"},\"OnDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"SeenCount\":{\"type\":\"integer\",\"index\":\"no\"}},\"type\":\"object\"},\"Educations\":{\"properties\":{\"Tld\":{\"type\":\"string\",\"index\":\"no\"},\"Name\":{\"type\":\"string\",\"index\":\"no\"},\"OnDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"SeenCount\":{\"type\":\"integer\",\"index\":\"no\"},\"SourceId\":{\"type\":\"integer\",\"index\":\"no\"}},\"type\":\"object\"},\"Industries\":{\"properties\":{\"PersonId\":{\"type\":\"string\",\"index\":\"no\"},\"IndustryId\":{\"type\":\"integer\",\"index\":\"no\"},\"OnDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"SeenCount\":{\"type\":\"integer\",\"index\":\"no\"}},\"type\":\"object\"},\"Languages\":{\"properties\":{\"LanguageCode\":{\"type\":\"string\",\"index\":\"no\"},\"LangSource\":{\"type\":\"integer\",\"index\":\"no\"},\"OnDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"SeenCount\":{\"type\":\"integer\",\"index\":\"no\"}},\"type\":\"object\"},\"WorkingHours\":{\"properties\":{\"Hour\":{\"type\":\"integer\",\"index\":\"no\"},\"Count\":{\"type\":\"long\",\"index\":\"no\"}},\"type\":\"object\"},\"LastSeen\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"},\"Merges\":{\"properties\":{\"DestroyedPersonId\":{\"type\":\"string\",\"index\":\"no\"},\"CreationDate\":{\"type\":\"date\",\"format\":\"dateOptionalTime\",\"index\":\"no\"}},\"type\":\"object\"}},\"dynamic\":\"strict\",\"_all\":{\"enabled\":false}}";
 #else
             const string EXPECTED_VALUE = "{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"MostRecentLocation\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"},\"LastSeenDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"},\"Locations\":{\"properties\":{\"CountryCode\":{\"index\":\"no\",\"type\":\"string\"},\"LocType\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"GeoPoint\":{\"properties\":{\"Latitude\":{\"index\":\"no\",\"type\":\"float\"},\"Longitude\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"}},\"type\":\"object\"},\"InterestingTags\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"Confidence\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Identifiers\":{\"properties\":{\"Id\":{\"index\":\"not_analyzed\",\"type\":\"string\"},\"IdType\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"InterestingSites\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"InterestLevel\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"TagViews\":{\"properties\":{\"SiteId\":{\"index\":\"no\",\"type\":\"integer\"},\"TagId\":{\"index\":\"no\",\"type\":\"integer\"},\"TimesViewed\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"DeveloperKinds\":{\"properties\":{\"DevType\":{\"index\":\"no\",\"type\":\"integer\"},\"RelativeScore\":{\"index\":\"no\",\"type\":\"float\"}},\"type\":\"object\"},\"Demographics\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"DeviceTypeId\":{\"index\":\"no\",\"type\":\"integer\"},\"BrowserId\":{\"index\":\"no\",\"type\":\"integer\"},\"OsId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Educations\":{\"properties\":{\"Tld\":{\"index\":\"no\",\"type\":\"string\"},\"Name\":{\"index\":\"no\",\"type\":\"string\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"},\"SourceId\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Industries\":{\"properties\":{\"PersonId\":{\"index\":\"no\",\"type\":\"string\"},\"IndustryId\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"Languages\":{\"properties\":{\"LanguageCode\":{\"index\":\"no\",\"type\":\"string\"},\"LangSource\":{\"index\":\"no\",\"type\":\"integer\"},\"OnDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"SeenCount\":{\"index\":\"no\",\"type\":\"integer\"}},\"type\":\"object\"},\"WorkingHours\":{\"properties\":{\"Hour\":{\"index\":\"no\",\"type\":\"integer\"},\"Count\":{\"index\":\"no\",\"type\":\"long\"}},\"type\":\"object\"},\"LastSeen\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"},\"Merges\":{\"properties\":{\"DestroyedPersonId\":{\"index\":\"no\",\"type\":\"string\"},\"CreationDate\":{\"index\":\"no\",\"format\":\"dateOptionalTime\",\"type\":\"date\"}},\"type\":\"object\"}},\"dynamic\":\"strict\",\"_all\":{\"enabled\":false}}";
 #endif
 
-            Assert.AreEqual(EXPECTED_VALUE, json);
+            Assert.Equal(EXPECTED_VALUE, json);
         }
 
         class _DynamicObject : DynamicObject
@@ -416,35 +415,35 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DynamicObject()
         {
-            Assert.AreEqual("true", JSON.SerializeDynamic(new _DynamicObject(true)));
-            Assert.AreEqual("false", JSON.SerializeDynamic(new _DynamicObject(false)));
-            Assert.AreEqual("123", JSON.SerializeDynamic(new _DynamicObject(123UL)));
-            Assert.AreEqual("123", JSON.SerializeDynamic(new _DynamicObject(123L)));
-            Assert.AreEqual("-123", JSON.SerializeDynamic(new _DynamicObject(-123L)));
-            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159)));
-            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159f)).Substring(0, 7));
-            Assert.AreEqual("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159m)));
-            Assert.AreEqual("\"hello world\"", JSON.SerializeDynamic(new _DynamicObject("hello world")));
-            Assert.AreEqual("\"c\"", JSON.SerializeDynamic(new _DynamicObject('c')));
+            Assert.Equal("true", JSON.SerializeDynamic(new _DynamicObject(true)));
+            Assert.Equal("false", JSON.SerializeDynamic(new _DynamicObject(false)));
+            Assert.Equal("123", JSON.SerializeDynamic(new _DynamicObject(123UL)));
+            Assert.Equal("123", JSON.SerializeDynamic(new _DynamicObject(123L)));
+            Assert.Equal("-123", JSON.SerializeDynamic(new _DynamicObject(-123L)));
+            Assert.Equal("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159)));
+            Assert.Equal("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159f)).Substring(0, 7));
+            Assert.Equal("3.14159", JSON.SerializeDynamic(new _DynamicObject(3.14159m)));
+            Assert.Equal("\"hello world\"", JSON.SerializeDynamic(new _DynamicObject("hello world")));
+            Assert.Equal("\"c\"", JSON.SerializeDynamic(new _DynamicObject('c')));
 
             var now = DateTime.UtcNow;
             var nowStr = JSON.Serialize(now);
-            Assert.AreEqual(nowStr, JSON.SerializeDynamic(new _DynamicObject(now)));
+            Assert.Equal(nowStr, JSON.SerializeDynamic(new _DynamicObject(now)));
 
             var nowOffset = DateTimeOffset.UtcNow;
             var nowOffsetStr = JSON.Serialize(nowOffset);
-            Assert.AreEqual(nowOffsetStr, JSON.SerializeDynamic(new _DynamicObject(nowOffset)));
+            Assert.Equal(nowOffsetStr, JSON.SerializeDynamic(new _DynamicObject(nowOffset)));
 
             var g = Guid.NewGuid();
-            Assert.AreEqual("\"" + g + "\"", JSON.SerializeDynamic(new _DynamicObject(g)));
+            Assert.Equal("\"" + g + "\"", JSON.SerializeDynamic(new _DynamicObject(g)));
 
-            Assert.AreEqual("[1,2,3]", JSON.SerializeDynamic(new _DynamicObject(new[] { 1, 2, 3 })));
+            Assert.Equal("[1,2,3]", JSON.SerializeDynamic(new _DynamicObject(new[] { 1, 2, 3 })));
         }
 
-        [TestMethod]
+        [Fact]
         public void ExpandoObject()
         {
             dynamic dyn = new ExpandoObject();
@@ -456,29 +455,29 @@ namespace JilTests
             dyn.F.A = "nope";
 
             var res = JSON.SerializeDynamic(dyn);
-            Assert.AreEqual("{\"A\":\"B\",\"C\":123,\"D\":{\"Foo\":\"Bar\"},\"E\":[1,2,3,4,5,6],\"F\":{\"A\":\"nope\"}}", res);
+            Assert.Equal("{\"A\":\"B\",\"C\":123,\"D\":{\"Foo\":\"Bar\"},\"E\":[1,2,3,4,5,6],\"F\":{\"A\":\"nope\"}}", res);
         }
 
-        [TestMethod]
+        [Fact]
         public void RecursiveObjects()
         {
             {
                 var res = JSON.SerializeDynamic(new { foo = (object)new { baz1 = "1" }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
-                Assert.AreEqual("{\n \"foo\": {\n  \"baz1\": \"1\"\n },\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+                Assert.Equal("{\n \"foo\": {\n  \"baz1\": \"1\"\n },\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
             }
 
             {
                 var res = JSON.SerializeDynamic(new { foo = new object[] { new { baz1 = "1" } }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
-                Assert.AreEqual("{\n \"foo\": [{\n  \"baz1\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+                Assert.Equal("{\n \"foo\": [{\n  \"baz1\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
             }
 
             {
                 var res = JSON.SerializeDynamic(new { foo = new List<object> { new { barz = "1" } }, bar = (object)new { baz2 = "2" } }, Options.ISO8601PrettyPrintExcludeNulls);
-                Assert.AreEqual("{\n \"foo\": [{\n  \"barz\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
+                Assert.Equal("{\n \"foo\": [{\n  \"barz\": \"1\"\n }],\n \"bar\": {\n  \"baz2\": \"2\"\n }\n}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue87()
         {
             string json = "{\"datalist\":[{\"timestamp\":1413131613787,\"roomSchedule\":{\"roomName\":\"21\",\"timestamp\":1413131608000,\"schedule\":[{\"actualStart\":1413115680000,\"canceled\":false,\"duration\":35100000,\"precautions\":false,\"surgeon\":\"some, guy\",\"anonId\":\"666\",\"isFirst\":true,\"service\":\"svc\",\"hideName\":false,\"id\":\"1039666\",\"state\":\"intra\",\"location\":\"Or 21\",\"actualEnd\":1413150780000,\"plannedStart\":1413114300000,\"status\":\"surgStart\",\"started\":true,\"ssn\":\"123-45-6789\",\"isCurrent\":true,\"fullName\":\"WW, FF\",\"room\":\"21\",\"name\":\"WW\",\"dob\":\"01/01/1801\",\"plannedEnd\":1413149400000,\"scheduledStart\":1413114300000,\"mrn\":\"0000004\",\"procedure\":\"ZZ\",\"turnover\":1800000}]},\"unitId\":\"AA\"}]}";
@@ -490,12 +489,12 @@ namespace JilTests
             string ser = JSON.SerializeDynamic(obj);
             watch.Stop();
             // 200ms is kind of arbitrary, but it was > 1000 before this Issue was fixed
-            Assert.IsTrue(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
+            Assert.True(watch.ElapsedMilliseconds < 200, "Took too long to SerializeDynamic, [" + watch.ElapsedMilliseconds + "ms]");
             // technically this isn't guaranteed to be an exact match, but for a test case?  Good enough
-            Assert.AreEqual(json, ser);
+            Assert.Equal(json, ser);
         }
 
-        [TestMethod]
+        [Fact]
         public void NullArrayElements()
         {
             using (var str = new StringWriter())
@@ -508,11 +507,11 @@ namespace JilTests
                 JSON.SerializeDynamic(obj, str, new Options(excludeNulls: true));
 
                 var res = str.ToString();
-                Assert.AreEqual("{\"ids\":[null,\"US\",\"HI\"]}", res);
+                Assert.Equal("{\"ids\":[null,\"US\",\"HI\"]}", res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ExcludingNulls()
         {
             // to stream tests
@@ -522,7 +521,7 @@ namespace JilTests
                     JSON.SerializeDynamic(null, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
 
@@ -532,7 +531,7 @@ namespace JilTests
                     var res = str.ToString();
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
                 using (var str = new StringWriter())
@@ -540,7 +539,7 @@ namespace JilTests
                     JSON.SerializeDynamic(new[] { null, "hello", "world" }, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 using (var str = new StringWriter())
@@ -549,7 +548,7 @@ namespace JilTests
                     var res = str.ToString();
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 using (var str = new StringWriter())
@@ -561,7 +560,7 @@ namespace JilTests
                     JSON.SerializeDynamic(data, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -573,7 +572,7 @@ namespace JilTests
                     JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -588,7 +587,7 @@ namespace JilTests
                     JSON.SerializeDynamic(data, str, Options.Default);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 using (var str = new StringWriter())
@@ -603,7 +602,7 @@ namespace JilTests
                     JSON.SerializeDynamic(data, str, Options.ExcludeNulls);
                     var res = str.ToString();
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
             }
 
@@ -612,7 +611,7 @@ namespace JilTests
                 {
                     var res = JSON.SerializeDynamic(null, Options.Default);
 
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
 
@@ -620,20 +619,20 @@ namespace JilTests
                     var res = JSON.SerializeDynamic(null, Options.ExcludeNulls);
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("null", res);
+                    Assert.Equal("null", res);
                 }
 
                 {
                     var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.Default);
 
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 {
                     var res = JSON.SerializeDynamic(new[] { null, "hello", "world" }, Options.ExcludeNulls);
 
                     // it's not a member, it should be written
-                    Assert.AreEqual("[null,\"hello\",\"world\"]", res);
+                    Assert.Equal("[null,\"hello\",\"world\"]", res);
                 }
 
                 {
@@ -643,7 +642,7 @@ namespace JilTests
 
                     var res = JSON.SerializeDynamic(data, Options.Default);
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 {
@@ -653,7 +652,7 @@ namespace JilTests
 
                     var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
 
                 {
@@ -666,7 +665,7 @@ namespace JilTests
 
                     var res = JSON.SerializeDynamic(data, Options.Default);
 
-                    Assert.AreEqual("{\"hello\":123,\"world\":null}", res);
+                    Assert.Equal("{\"hello\":123,\"world\":null}", res);
                 }
 
                 {
@@ -679,7 +678,7 @@ namespace JilTests
 
                     var res = JSON.SerializeDynamic(data, Options.ExcludeNulls);
 
-                    Assert.AreEqual("{\"hello\":123}", res);
+                    Assert.Equal("{\"hello\":123}", res);
                 }
             }
         }
@@ -784,7 +783,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ElasticExampleFailure()
         {
             var mainQuery = new _ElasticExampleFailure();
@@ -813,13 +812,13 @@ namespace JilTests
             var options = new Options(prettyPrint: true);
             var res = JSON.SerializeDynamic(queryObject, options);
 
-#if NETCORE
+#if NETCOREAPP1_0
             const string EXPECTED_VALUE = "{\n \"from\": 0,\n \"size\": 30,\n \"query\": {\n  \"filtered\": {\n   \"query\": {\n    \"bool\": {\n     \"must\": [{\n      \"must\": null,\n      \"must_not\": null,\n      \"should\": [{\n       \"query_string\": {\n        \"use_dis_max\": true,\n        \"fields\": [\"personalStatement\", \"yearsOfExperienceTags^1.5\", \"stackExchangeAnswersTags^0.1\", \"name\", \"likeTags\", \"stackOverflowUserName\", \"projects.projectName\", \"projects.projectTags\", \"projects.projectDescription\", \"experience.experienceJobTitle\", \"experience.experienceEmployerName\", \"experience.experienceTags\", \"experience.experienceResponsibilities\", \"education.educationInstitution\", \"education.educationTags\", \"education.educationDegreeName\", \"education.educationAchievements\"],\n        \"query\": \"Dean Ward\",\n        \"default_operator\": \"AND\"\n       }\n      }],\n      \"minimum_number_should_match\": 1,\n      \"boost\": null,\n      \"_cache\": null\n     }],\n     \"must_not\": null,\n     \"should\": null,\n     \"minimum_number_should_match\": null,\n     \"boost\": null,\n     \"_cache\": null\n    }\n   },\n   \"filter\": {\n    \"bool\": {\n     \"must\": null,\n     \"must_not\": [{\n      \"term\": {\n       \"blocking\": 1234\n      }\n     }],\n     \"should\": null,\n     \"minimum_number_should_match\": null,\n     \"boost\": null,\n     \"_cache\": true\n    }\n   }\n  }\n }\n}";
 #else
             const string EXPECTED_VALUE = "{\n \"size\": 30,\n \"from\": 0,\n \"query\": {\n  \"filtered\": {\n   \"query\": {\n    \"bool\": {\n     \"must\": [{\n      \"must\": null,\n      \"must_not\": null,\n      \"should\": [{\n       \"query_string\": {\n        \"use_dis_max\": true,\n        \"fields\": [\"personalStatement\", \"yearsOfExperienceTags^1.5\", \"stackExchangeAnswersTags^0.1\", \"name\", \"likeTags\", \"stackOverflowUserName\", \"projects.projectName\", \"projects.projectTags\", \"projects.projectDescription\", \"experience.experienceJobTitle\", \"experience.experienceEmployerName\", \"experience.experienceTags\", \"experience.experienceResponsibilities\", \"education.educationInstitution\", \"education.educationTags\", \"education.educationDegreeName\", \"education.educationAchievements\"],\n        \"default_operator\": \"AND\",\n        \"query\": \"Dean Ward\"\n       }\n      }],\n      \"_cache\": null,\n      \"boost\": null,\n      \"minimum_number_should_match\": 1\n     }],\n     \"must_not\": null,\n     \"should\": null,\n     \"_cache\": null,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   },\n   \"filter\": {\n    \"bool\": {\n     \"must\": null,\n     \"must_not\": [{\n      \"term\": {\n       \"blocking\": 1234\n      }\n     }],\n     \"should\": null,\n     \"_cache\": true,\n     \"boost\": null,\n     \"minimum_number_should_match\": null\n    }\n   }\n  }\n }\n}";
 #endif
 
-            Assert.AreEqual(EXPECTED_VALUE, res);
+            Assert.Equal(EXPECTED_VALUE, res);
         }
 
         abstract class _RecursiveDynamic_Abstract
@@ -834,7 +833,7 @@ namespace JilTests
             public double B { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void RecursiveDynamic()
         {
             object[] foo = new object[]
@@ -861,16 +860,16 @@ namespace JilTests
 
             var res = JSON.SerializeDynamic(foo, Options.PrettyPrintExcludeNullsIncludeInherited);
 
-#if NETCORE
+#if NETCOREAPP1_0
             const string EXPECTED_VALUE = "[{\n \"Item\": {\n  \"B\": -999,\n  \"A\": 999,\n  \"SubMembers\": [{\n   \"B\": 2,\n   \"A\": 1,\n   \"SubMembers\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }],\n   \"SubMembersAsObjects\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }]\n  }, {\n   \"B\": 4,\n   \"A\": 3\n  }],\n  \"SubMembersAsObjects\": [{\n   \"B\": 2,\n   \"A\": 1,\n   \"SubMembers\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }],\n   \"SubMembersAsObjects\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }]\n  }, {\n   \"B\": 4,\n   \"A\": 3\n  }]\n }\n}, {\n \"Item\": {\n  \"B\": -999,\n  \"A\": 999,\n  \"SubMembers\": [{\n   \"B\": 2,\n   \"A\": 1,\n   \"SubMembers\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }],\n   \"SubMembersAsObjects\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }]\n  }, {\n   \"B\": 4,\n   \"A\": 3\n  }],\n  \"SubMembersAsObjects\": [{\n   \"B\": 2,\n   \"A\": 1,\n   \"SubMembers\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }],\n   \"SubMembersAsObjects\": [{\n    \"B\": 6.6,\n    \"A\": 5\n   }]\n  }, {\n   \"B\": 4,\n   \"A\": 3\n  }]\n }\n}]";
 #else
             const string EXPECTED_VALUE = "[{\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}, {\n \"Item\": {\n  \"A\": 999,\n  \"B\": -999,\n  \"SubMembers\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }],\n  \"SubMembersAsObjects\": [{\n   \"A\": 1,\n   \"B\": 2,\n   \"SubMembers\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }],\n   \"SubMembersAsObjects\": [{\n    \"A\": 5,\n    \"B\": 6.6\n   }]\n  }, {\n   \"A\": 3,\n   \"B\": 4\n  }]\n }\n}]";
 #endif
 
-            Assert.AreEqual(EXPECTED_VALUE, res);
+            Assert.Equal(EXPECTED_VALUE, res);
         }
 
-        [TestMethod]
+        [Fact]
         public void MicrosoftTimeSpans()
         {
             var rand = new Random();
@@ -910,10 +909,10 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.Default);
                 }
 
-                Assert.IsTrue(streamJson.StartsWith("\""));
-                Assert.IsTrue(streamJson.EndsWith("\""));
-                Assert.IsTrue(stringJson.StartsWith("\""));
-                Assert.IsTrue(stringJson.EndsWith("\""));
+                Assert.StartsWith("\"", streamJson);
+                Assert.EndsWith("\"", streamJson);
+                Assert.StartsWith("\"", stringJson);
+                Assert.EndsWith("\"", stringJson);
 
                 var dotNetStr = ts.ToString();
 
@@ -924,12 +923,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SecondsTimeSpans()
         {
             var rand = new Random();
@@ -975,12 +974,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MillsecondsTimeSpans()
         {
             var rand = new Random();
@@ -1026,12 +1025,12 @@ namespace JilTests
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
                 if (stringJson.IndexOf('.') != -1) stringJson = stringJson.TrimEnd('0');
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ISO8601TimeSpans()
         {
             var rand = new Random();
@@ -1071,7 +1070,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.ISO8601);
                 }
 
-                Assert.IsTrue(streamJson == stringJson);
+                Assert.True(streamJson == stringJson);
 
                 var dotNetStr = System.Xml.XmlConvert.ToString(ts);
 
@@ -1090,12 +1089,12 @@ namespace JilTests
                     stringJson = stringJson.Substring(0, stringJson.Length - 1).TrimEnd('0') + lastChar;
                 }
 
-                Assert.AreEqual(dotNetStr, streamJson);
-                Assert.AreEqual(dotNetStr, stringJson);
+                Assert.Equal(dotNetStr, streamJson);
+                Assert.Equal(dotNetStr, stringJson);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void RFC1123()
         {
             var now = DateTime.UtcNow;
@@ -1103,10 +1102,10 @@ namespace JilTests
             var res = JSON.Deserialize<DateTime>(str, Options.RFC1123);
 
             var diff = (now - res).Duration();
-            Assert.IsTrue(diff.TotalSeconds < 1);
+            Assert.True(diff.TotalSeconds < 1);
         }
 
-        [TestMethod]
+        [Fact]
         public void MicrosoftDateTimeOffsetSelfRoundtrip()
         {
             var dtos =
@@ -1129,14 +1128,14 @@ namespace JilTests
                 var dyn = JSON.DeserializeDynamic(val);
                 var staticRes = (DateTimeOffset)dyn;
                 var diff = (dto - staticRes);
-                Assert.IsTrue(diff.TotalMilliseconds <= 0);
+                Assert.True(diff.TotalMilliseconds <= 0);
 
                 var res = JSON.SerializeDynamic(dyn);
-                Assert.AreEqual(val, res);
+                Assert.Equal(val, res);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ISO8601DateTimeOffsetSelfRoundtrip()
         {
             var dtos =
@@ -1159,10 +1158,10 @@ namespace JilTests
                 var dyn = JSON.DeserializeDynamic(val, Options.ISO8601);
                 var staticRes = (DateTimeOffset)dyn;
                 var diff = (dto - staticRes);
-                Assert.IsTrue(diff.TotalMilliseconds <= 0);
+                Assert.True(diff.TotalMilliseconds <= 0);
 
                 var res = JSON.SerializeDynamic(dyn, Options.ISO8601);
-                Assert.AreEqual(val, res);
+                Assert.Equal(val, res);
             }
         }
 
@@ -1182,19 +1181,19 @@ namespace JilTests
             public _Issue139_2 Bar;
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue139()
         {
             {
                 var a = new _Issue139 { Prop1 = "string", Prop2 = new _Issue139() { Prop1 = "string2" } };
                 var res = JSON.SerializeDynamic(a);
-                Assert.AreEqual("{\"Prop2\":{\"Prop2\":null,\"Prop1\":\"string2\"},\"Prop1\":\"string\"}", res);
+                Assert.Equal("{\"Prop2\":{\"Prop2\":null,\"Prop1\":\"string2\"},\"Prop1\":\"string\"}", res);
             }
 
             {
                 var b = new _Issue139_2 { Foo = new _Issue139_3 { Bar = new _Issue139_2 { } } };
                 var res = JSON.SerializeDynamic(b);
-                Assert.AreEqual("{\"Foo\":{\"Bar\":{\"Foo\":null}}}", res);
+                Assert.Equal("{\"Foo\":{\"Bar\":{\"Foo\":null}}}", res);
             }
         }
 
@@ -1246,7 +1245,7 @@ namespace JilTests
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue150()
         {
             {
@@ -1254,7 +1253,7 @@ namespace JilTests
                 obj.ArrayOfEnum = new[] { _Issue150.A.A, _Issue150.A.B };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ArrayOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ArrayOfEnum\":[0,1]}", str);
             }
 
             {
@@ -1262,7 +1261,7 @@ namespace JilTests
                 obj.ArrayOfEnum = new _Issue150.A?[] { _Issue150.A.A, null };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ArrayOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ArrayOfEnum\":[0,null]}", str);
             }
 
             {
@@ -1270,7 +1269,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,1]}", str);
             }
 
             {
@@ -1278,7 +1277,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,null]}", str);
             }
 
             {
@@ -1286,7 +1285,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,1]}", str);
             }
 
             {
@@ -1294,7 +1293,7 @@ namespace JilTests
                 obj.ListOfEnum = new List<_Issue150.A?>(new _Issue150.A?[] { _Issue150.A.A, null });
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"ListOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"ListOfEnum\":[0,null]}", str);
             }
 
             {
@@ -1302,7 +1301,7 @@ namespace JilTests
                 obj.EnumerableOfEnum = new HashSet<_Issue150.A> { _Issue150.A.A, _Issue150.A.B };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"EnumerableOfEnum\":[0,1]}", str);
+                Assert.Equal("{\"EnumerableOfEnum\":[0,1]}", str);
             }
 
             {
@@ -1310,7 +1309,7 @@ namespace JilTests
                 obj.EnumerableOfEnum = new HashSet<_Issue150.A?> { _Issue150.A.A, null };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"EnumerableOfEnum\":[0,null]}", str);
+                Assert.Equal("{\"EnumerableOfEnum\":[0,null]}", str);
             }
 
             {
@@ -1322,7 +1321,7 @@ namespace JilTests
                 };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
+                Assert.Equal("{\"DictionaryWithEnumKey\":{\"0\":10,\"1\":20}}", str);
             }
 
             {
@@ -1334,7 +1333,7 @@ namespace JilTests
                 };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
+                Assert.Equal("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":1}}", str);
             }
 
             {
@@ -1346,7 +1345,7 @@ namespace JilTests
                 };
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
+                Assert.Equal("{\"DictionaryWithEnumValue\":{\"10\":0,\"20\":null}}", str);
             }
 
             {
@@ -1355,7 +1354,7 @@ namespace JilTests
                 obj.List2 = new List<_Issue150.A>(new[] { _Issue150.A.A, _Issue150.A.B });
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"List1\":[0,1],\"List2\":[\"A\",\"B\"]}", str);
+                Assert.Equal("{\"List1\":[0,1],\"List2\":[\"A\",\"B\"]}", str);
             }
         }
 
@@ -1368,7 +1367,7 @@ namespace JilTests
             public A? NullableEnum;
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue151()
         {
             {
@@ -1376,7 +1375,7 @@ namespace JilTests
                 obj.NullableEnum = _Issue151.A.B;
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"NullableEnum\":1}", str);
+                Assert.Equal("{\"NullableEnum\":1}", str);
             }
 
             {
@@ -1384,11 +1383,11 @@ namespace JilTests
                 obj.NullableEnum = null;
 
                 var str = JSON.SerializeDynamic(obj);
-                Assert.AreEqual("{\"NullableEnum\":null}", str);
+                Assert.Equal("{\"NullableEnum\":null}", str);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue158()
         {
             {
@@ -1398,7 +1397,7 @@ namespace JilTests
                 var shouldMatch = double.Parse(json);
                 var diff = Math.Abs(res - shouldMatch);
 
-                Assert.AreEqual(shouldMatch, res);
+                Assert.Equal(shouldMatch, res);
             }
 
             {
@@ -1408,7 +1407,7 @@ namespace JilTests
                 var shouldMatch = double.Parse(json);
                 var diff = Math.Abs(res - shouldMatch);
 
-                Assert.AreEqual(shouldMatch, res);
+                Assert.Equal(shouldMatch, res);
             }
 
             {
@@ -1418,7 +1417,7 @@ namespace JilTests
                 var shouldMatch = double.Parse(json);
                 var diff = Math.Abs(res - shouldMatch);
 
-                Assert.AreEqual(shouldMatch, res);
+                Assert.Equal(shouldMatch, res);
             }
         }
 
@@ -1427,16 +1426,16 @@ namespace JilTests
             public string A { get; set; }
         }
 
-        [TestMethod]
+        [Fact]
         public void TopLevelNulls()
         {
             object obj = null;
 
-            Assert.AreEqual("null", JSON.SerializeDynamic(obj));
+            Assert.Equal("null", JSON.SerializeDynamic(obj));
 
             var arr = new[] { "test", null, null, null };
-            Assert.AreEqual("[\"test\",null,null,null]", JSON.SerializeDynamic(arr));
-            Assert.AreEqual("[\"test\",null,null,null]", JSON.SerializeDynamic(arr, Options.ExcludeNulls));
+            Assert.Equal("[\"test\",null,null,null]", JSON.SerializeDynamic(arr));
+            Assert.Equal("[\"test\",null,null,null]", JSON.SerializeDynamic(arr, Options.ExcludeNulls));
 
             var propObj =
                 new
@@ -1447,30 +1446,30 @@ namespace JilTests
             var propObjArr = new[] { propObj, null, null, null };
 
             var propObjArrJson = JSON.SerializeDynamic(propObjArr);
-            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
+            Assert.Equal("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJson);
             var propObjArrJsonExcludesNull = JSON.SerializeDynamic(propObjArr, Options.ExcludeNulls);
-            Assert.AreEqual("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
+            Assert.Equal("[{\"Fields\":[\"test\",null,null,null]},null,null,null]", propObjArrJsonExcludesNull);
 
             _TopLevelNulls? nullable = new _TopLevelNulls { A = "test" };
             var nullableArr = new[] { nullable, null, null, null };
 
             var nullableArrJson = JSON.SerializeDynamic(nullableArr);
-            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
+            Assert.Equal("[{\"A\":\"test\"},null,null,null]", nullableArrJson);
             var nullableArrJsonExcludesNull = JSON.SerializeDynamic(nullableArr, Options.ExcludeNulls);
-            Assert.AreEqual("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
+            Assert.Equal("[{\"A\":\"test\"},null,null,null]", nullableArrJsonExcludesNull);
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue200()
         {
             dynamic dyn = new ExpandoObject();
             dyn.FooBar = "blah";
 
             var json = JSON.SerializeDynamic(dyn, Options.CamelCase);
-            Assert.AreEqual("{\"fooBar\":\"blah\"}", json);
+            Assert.Equal("{\"fooBar\":\"blah\"}", json);
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue224()
         {
             var tokenResponse = 
@@ -1481,16 +1480,16 @@ namespace JilTests
                 );
 
             var json = JSON.SerializeDynamic(tokenResponse);
-            Assert.AreEqual("{\"userName\":\"test@123\",\"access_token\":\"my access token\",\"token_type\":\"bearer\"}", json);
+            Assert.Equal("{\"userName\":\"test@123\",\"access_token\":\"my access token\",\"token_type\":\"bearer\"}", json);
         }
 
-        [TestMethod]
+        [Fact]
         public void Issue230()
         {
             var dyn = JSON.DeserializeDynamic("\"2000\"", Options.ISO8601);
             var json = JSON.SerializeDynamic(dyn, Options.ISO8601);
 
-            Assert.AreEqual("\"2000\"", json);
+            Assert.Equal("\"2000\"", json);
         }
     }
 }
