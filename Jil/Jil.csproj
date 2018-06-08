@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Jil</AssemblyName>
-    <Version>2.15.5</Version>
+    <Version>2.16.0</Version>
     <TargetFrameworks>net45;netstandard1.6;netstandard2.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -11,7 +11,8 @@
 
     <Title>Jil</Title>
     <Description>A fast JSON serializer and deserializer</Description>
-    <Copyright>Copyright © Kevin Montrose 2013 - 2017</Copyright>
+    <Copyright>Copyright © Kevin Montrose 2013 - 2018</Copyright>
+    <PackageReleaseNotes>Updates to target netstandard2.0 and fix core lib mismatches.</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Sigil" Version="4.7.0" />
