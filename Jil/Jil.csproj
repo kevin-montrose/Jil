@@ -13,6 +13,7 @@
     <Description>A fast JSON serializer and deserializer</Description>
     <Copyright>Copyright © Kevin Montrose 2013 - 2018</Copyright>
     <PackageReleaseNotes>Updates to target netstandard2.0 and fix core lib mismatches.</PackageReleaseNotes>
+    <PackageId>Jil</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Sigil" Version="4.7.0" />

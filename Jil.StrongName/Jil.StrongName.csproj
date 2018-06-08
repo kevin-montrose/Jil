@@ -53,6 +53,7 @@
     <AssemblyOriginatorKeyFile>Properties\Jil.StrongName.snk</AssemblyOriginatorKeyFile>
     <DefineConstants>$(DefineConstants);STRONG_NAME</DefineConstants>
     <PackageReleaseNotes>Updates to target netstandard2.0 and fix core lib mismatches.</PackageReleaseNotes>
+    <PackageId>Jil.StrongName</PackageId>
   </PropertyGroup>
   <ItemGroup>
     <None Include="Properties\Jil.StrongName.snk" />
