@@ -2289,6 +2289,7 @@ namespace Jil.Serialize
 
                 // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {
+                    // if(1 > countVar) goto done;
                     Emit.LoadConstant(1);                   // 1
                     loadList();                             // 1 IList<>
                     Emit.CallVirtual(countMtd);             // 1 int
@@ -2746,10 +2747,6 @@ namespace Jil.Serialize
 
                 // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {
-                    Emit.LoadConstant(1);                   // 1
-                    Emit.LoadLocal(countVar);               // 1 int
-                    Emit.BranchIfGreater(done);             // --empty--
-
                     if (isRecursive)
                     {
                         var loc = RecursiveTypes[elementType];
