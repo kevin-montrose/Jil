@@ -19,7 +19,7 @@ namespace Jil.Serialize
         public static bool UseCustomIntegerToString = true;
         public static bool SkipDateTimeMathMethods = true;
         public static bool UseCustomISODateFormatting = true;
-        public static bool UseFastLists = false;
+        public static bool UseFastLists = true;
         public static bool UseFastArrays = true;
         public static bool UseFastGuids = true;
         public static bool AllocationlessDictionaries = true;
