@@ -6638,6 +6638,28 @@ namespace JilTests
                 }
             }
         }
+
+        class _DoubleMinWeirdCulture
+        {
+            public double Const { get { return Double.MinValue; } }
+        }
+        [Fact]
+        public void DoubleMinWeirdCulture()
+        {
+            var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
+            var currentCulture = CultureInfo.CurrentCulture;
+            var weirdCulture = allCultures.Where(c => c.NumberFormat.CurrencyDecimalSeparator != "." && c != currentCulture).First();
+
+            using (new _DoubleWeirdCulture(weirdCulture))
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(new _DoubleMinWeirdCulture(), str);
+                    var res = str.ToString();
+                    Assert.Equal("{\"Const\":-1.7976931348623157E+308}", res);
+                }
+            }
+        }
 #endif
 
         class _Enumerables
@@ -7552,7 +7574,7 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.SecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+                var dotNetStr = ts.TotalSeconds.ToString("R",CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
@@ -7603,7 +7625,7 @@ namespace JilTests
                     stringJson = JSON.Serialize(ts, Options.MillisecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalMilliseconds.ToString();
+                var dotNetStr = ts.TotalMilliseconds.ToString("R",CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');

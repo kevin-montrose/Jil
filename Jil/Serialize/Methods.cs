@@ -1263,7 +1263,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            writer.Write(f.ToString(invariant));
+            writer.Write(f.ToString("R",invariant));
         }
 
         static readonly MethodInfo ProxyDouble = typeof(Methods).GetMethod("_ProxyDouble", BindingFlags.Static | BindingFlags.NonPublic);
@@ -1279,7 +1279,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            writer.Write(d.ToString(invariant));
+            writer.Write(d.ToString("R",invariant));
         }
 
         static readonly MethodInfo ProxyDecimal = typeof(Methods).GetMethod("_ProxyDecimal", BindingFlags.Static | BindingFlags.NonPublic);

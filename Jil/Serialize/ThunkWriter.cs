@@ -287,13 +287,13 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(float f)
         {
-            Write(f.ToString(CultureInfo.InvariantCulture));
+            Write(f.ToString("R",CultureInfo.InvariantCulture));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(double d)
         {
-            Write(d.ToString(CultureInfo.InvariantCulture));
+            Write(d.ToString("R",CultureInfo.InvariantCulture));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
