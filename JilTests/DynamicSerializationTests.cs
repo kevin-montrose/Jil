@@ -968,7 +968,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.SecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+                var dotNetStr = ts.TotalSeconds.ToString("R",CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
@@ -1019,7 +1019,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.MillisecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalMilliseconds.ToString();
+                var dotNetStr = ts.TotalMilliseconds.ToString("R", CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
@@ -1394,7 +1394,7 @@ namespace JilTests
                 const string json = "4.3563456344358765e+10";
 
                 double res = JSON.DeserializeDynamic(json);
-                var shouldMatch = double.Parse(json);
+                var shouldMatch = double.Parse(json,NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
                 var diff = Math.Abs(res - shouldMatch);
 
                 Assert.Equal(shouldMatch, res);
@@ -1404,7 +1404,7 @@ namespace JilTests
                 const string json = "4.356345634435876535634563443587653563456344358765356345634435876535634563443587653563456344358765e+10";
 
                 double res = JSON.DeserializeDynamic(json);
-                var shouldMatch = double.Parse(json);
+                var shouldMatch = double.Parse(json, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
                 var diff = Math.Abs(res - shouldMatch);
 
                 Assert.Equal(shouldMatch, res);
@@ -1414,7 +1414,7 @@ namespace JilTests
                 const string json = "4.444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444444445e+10";
 
                 double res = JSON.DeserializeDynamic(json);
-                var shouldMatch = double.Parse(json);
+                var shouldMatch = double.Parse(json, NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
                 var diff = Math.Abs(res - shouldMatch);
 
                 Assert.Equal(shouldMatch, res);
