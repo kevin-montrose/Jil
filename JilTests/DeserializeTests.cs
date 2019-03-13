@@ -6461,6 +6461,83 @@ namespace JilTests
             }
         }
 
+        [DataContract]
+        public class _Issue253
+        {
+            [DataMember]
+            public _Issue253_Inner Item
+            {
+                get;
+                set;
+            }
+        }
+
+        [DataContract]
+        public class _Issue253_Inner : ICollection<decimal>
+        {
+            [IgnoreDataMember]
+            private List<decimal> items = new List<decimal>();
+
+            int ICollection<decimal>.Count
+            {
+                get
+                {
+                    return ((ICollection<decimal>)this.items).Count;
+                }
+            }
+
+            bool ICollection<decimal>.IsReadOnly
+            {
+                get
+                {
+                    return ((ICollection<decimal>)this.items).IsReadOnly;
+                }
+            }
+
+            void ICollection<decimal>.Add(decimal item)
+            {
+                ((ICollection<decimal>)this.items).Add(item);
+            }
+
+            void ICollection<decimal>.Clear()
+            {
+                ((ICollection<decimal>)this.items).Clear();
+            }
+
+            bool ICollection<decimal>.Contains(decimal item)
+            {
+                return ((ICollection<decimal>)this.items).Contains(item);
+            }
+
+            void ICollection<decimal>.CopyTo(decimal[] array, int arrayIndex)
+            {
+                ((ICollection<decimal>)this.items).CopyTo(array, arrayIndex);
+            }
+
+            bool ICollection<decimal>.Remove(decimal item)
+            {
+                return ((ICollection<decimal>)this.items).Remove(item);
+            }
+
+            IEnumerator<decimal> IEnumerable<decimal>.GetEnumerator()
+            {
+                return ((ICollection<decimal>)this.items).GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return ((System.Collections.IEnumerable)this.items).GetEnumerator();
+            }
+        }
+
+        [Fact]
+        public void Issue253()
+        {
+            var res = Jil.JSON.Deserialize<_Issue253>("{\"Item\": null}");
+            Assert.NotNull(res);
+            Assert.Null(res.Item);
+        }
+
 #if !DEBUG
 #region SlowSpinUp Types
 
