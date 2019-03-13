@@ -25,6 +25,8 @@ namespace Jil.Common
         public const string ExceptionDataKeyPrefix = "Jil-";
         public const string ExceptionMessageDataKey = ExceptionDataKeyPrefix + nameof(Exception.Message);
 
+        public const int MAX_IL_INSTRUCTION_LIMIT = 20_000;
+
         private static readonly Dictionary<int, OpCode> OneByteOps;
         private static readonly Dictionary<int, OpCode> TwoByteOps;
 

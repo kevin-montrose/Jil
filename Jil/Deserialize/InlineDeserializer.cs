@@ -23,25 +23,36 @@ namespace Jil.Deserialize
 
         const string CharBufferName = "char_buffer";
         const string StringBuilderName = "string_builder";
-        
+
         readonly Type OptionsType;
         readonly DateTimeFormat DateFormat;
         readonly SerializationNameFormat SerializationNameFormat;
         readonly bool ReadingFromString;
+        readonly bool PreferIndirectSerialization;
+        readonly bool AllPrimitivesThroughHelpers;
 
         bool UsingCharBuffer;
-        HashSet<Type> RecursiveTypes;
+        HashSet<Type> IndirectTypes;
 
         Emit Emit;
 
         int NextName;
 
-        public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, bool readingFromString)
+        public InlineDeserializer(
+            Type optionsType, 
+            DateTimeFormat dateFormat, 
+            SerializationNameFormat serializationNameFormat, 
+            bool readingFromString,
+            bool preferIndirectSerialization,
+            bool allPrimitivesThroughHelpers
+        )
         {
             OptionsType = optionsType;
             DateFormat = dateFormat;
             SerializationNameFormat = serializationNameFormat;
             ReadingFromString = readingFromString;
+            PreferIndirectSerialization = preferIndirectSerialization;
+            AllPrimitivesThroughHelpers = allPrimitivesThroughHelpers;
 
             NextName = 1;
         }
@@ -76,7 +87,7 @@ namespace Jil.Deserialize
         {
             var involvedTypes = typeof(ForType).InvolvedTypes();
 
-            var hasStringyTypes = 
+            var hasStringyTypes =
                 involvedTypes.Contains(typeof(string)) ||
                 involvedTypes.Any(t => t.IsUserDefinedType());  // for member names
 
@@ -139,7 +150,7 @@ namespace Jil.Deserialize
         void ReadCharFromStream()
         {
             Emit.LoadArgument(0);                   // (TextReader|ref ThunkReader)
-            if(ReadingFromString)
+            if (ReadingFromString)
             {
                 Emit.Call(ThunkReader_Read);        // int
             }
@@ -149,7 +160,7 @@ namespace Jil.Deserialize
             }
         }
 
-        
+
         void RawReadChar(Action endOfStream)
         {
             var haveChar = Emit.DefineLabel(GetNextName());
@@ -221,7 +232,7 @@ namespace Jil.Deserialize
             // int
 
             var notEmpty = Emit.DefineLabel(GetNextName());
-            
+
             Emit.Duplicate();                           // int int
             Emit.LoadConstant(-1);                      // int int -1
             Emit.UnsignedBranchIfNotEqual(notEmpty);    // int
@@ -594,7 +605,7 @@ namespace Jil.Deserialize
 
         void ReadTimeSpan()
         {
-            switch(DateFormat)
+            switch (DateFormat)
             {
                 case DateTimeFormat.SecondsSinceUnixEpoch: ReadSecondsTimeSpan(); break;
                 case DateTimeFormat.MillisecondsSinceUnixEpoch: ReadMillisecondsTimeSpan(); break;
@@ -614,7 +625,7 @@ namespace Jil.Deserialize
 
             var maxTicks = TimeSpan.MaxValue.Ticks;
             var minTicks = TimeSpan.MinValue.Ticks;
-            
+
             var isMax = Emit.DefineLabel(GetNextName());
             var isMin = Emit.DefineLabel(GetNextName());
             var done = Emit.DefineLabel(GetNextName());
@@ -716,7 +727,7 @@ namespace Jil.Deserialize
                 case DateTimeFormat.RFC1123: ReadRFC1123DateTime(); break;
                 default: throw new ConstructionException("Unexpected DateTimeFormat: " + DateFormat);
             }
-            
+
         }
 
         void ReadMicrosoftDateTimeOffset()
@@ -921,7 +932,7 @@ namespace Jil.Deserialize
                 var defaultConst = primitiveTypeWrapper.GetConstructor(Type.EmptyTypes);
                 if (defaultConst == null)
                 {
-                    throw 
+                    throw
                         new ConstructionException(
                             string.Format("Primitive wrapper {0} needs a default constructor, or a constructor taking a single {1} parameter",
                                 primitiveTypeWrapper.FullName,
@@ -949,7 +960,7 @@ namespace Jil.Deserialize
                 }
             }
         }
-        
+
         void ConsumeWhiteSpace()
         {
             Emit.LoadArgument(0);                                       // TextReader
@@ -1160,7 +1171,7 @@ namespace Jil.Deserialize
 
         void ReadList(MemberInfo listMember, Type listType, bool isSet)
         {
-            var elementType = isSet 
+            var elementType = isSet
                 ? listType.GetSetInterface().GetGenericArguments()[0]
                 : listType.GetListInterface().GetGenericArguments()[0];
 
@@ -1312,7 +1323,7 @@ namespace Jil.Deserialize
                 dictType = typeof(Dictionary<,>).MakeGenericType(keyType, valType);
             }
 
-            var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { keyType, valType });
+            var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new[] { keyType, valType });
 
             var done = Emit.DefineLabel(GetNextName());
             var doneSkipChar = Emit.DefineLabel(GetNextName());
@@ -1447,7 +1458,7 @@ namespace Jil.Deserialize
             var typeCache = typeof(TypeCache<,>).MakeGenericType(OptionsType, recursiveType);
 
             FieldInfo thunk;
-            if(ReadingFromString)
+            if (ReadingFromString)
             {
                 thunk = typeCache.GetField("StringThunk", BindingFlags.Public | BindingFlags.Static);
             }
@@ -1480,7 +1491,7 @@ namespace Jil.Deserialize
                 ReadObjectAutomata(objType);
                 return;
             }
-            
+
             ReadObjectDictionaryLookup(objType);
         }
 
@@ -1603,7 +1614,7 @@ namespace Jil.Deserialize
                     .ToList();
 
                 MethodInfo findSetterIdx;
-                if(ReadingFromString)
+                if (ReadingFromString)
                 {
                     findSetterIdx = setterLookup.GetMethod("FindSetterIndexThunkReader", new[] { typeof(ThunkReader).MakeByRefType() });
                 }
@@ -1662,7 +1673,7 @@ namespace Jil.Deserialize
                     var label = kv.Label;
                     var members = kv.Setters;
 
-                     if (members.Length == 1)
+                    if (members.Length == 1)
                     {
                         var member = members[0];
 
@@ -1748,7 +1759,7 @@ namespace Jil.Deserialize
                 SetProperty((PropertyInfo)member);  // --empty--
             }
         }
-        
+
         static readonly MethodInfo Type_GetTypeFromHandle = typeof(Type).GetMethod("GetTypeFromHandle", BindingFlags.Public | BindingFlags.Static);
         void ReadAndSetDiscriminantUnion(string memberName, MemberInfo[] union)
         {
@@ -1758,7 +1769,7 @@ namespace Jil.Deserialize
             bool allowsNull;
 
             string errorMessage;
-            if(!Utils.CheckUnionLegality(DateFormat, memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull, out errorMessage))
+            if (!Utils.CheckUnionLegality(DateFormat, memberName, union, out discriminants, out unionTypeIndicator, out charsets, out allowsNull, out errorMessage))
             {
                 throw new ConstructionException(errorMessage);
             }
@@ -1797,17 +1808,17 @@ namespace Jil.Deserialize
 
                 var config = UnionConfigLookup.Get(allCharsets, allowsNull);
                 var lookup = typeof(UnionLookup<>).MakeGenericType(config);
-                
+
                 var min = (int)lookup.GetField("MinimumChar").GetValue(null);
                 var lookupArr = lookup.GetField("Lookup");
                 var lookupArrLen = ((int[])lookupArr.GetValue(null)).Length;
                 var charsetsInOrder = (UnionCharsets[])lookup.GetField("CharsetOrder").GetValue(null);
 
                 var miss = Emit.DefineLabel(GetNextName());
-                var labels = 
+                var labels =
                     charsetsInOrder
                         .Select(
-                            c => 
+                            c =>
                             {
                                 MemberInfo member;
 
@@ -1901,7 +1912,7 @@ namespace Jil.Deserialize
 
                     Emit.Pop();
                     ExpectNullSetMembersToDefaultAndClearUnionTypeIndicator(refMembers, nullableMembers, unionTypeIndicator);
-                    
+
                     Emit.Pop();                                 // --empty--
                     Emit.Branch(end);                           // --empty--
 
@@ -2102,7 +2113,7 @@ namespace Jil.Deserialize
                 var readingMember = Emit.DefineLabel(GetNextName());
                 Emit.MarkLabel(readingMember);  // objType(*?) Dictionary<string, int> string
 
-                using(var oLoc = Emit.DeclareLocal<int>(GetNextName()))
+                using (var oLoc = Emit.DeclareLocal<int>(GetNextName()))
                 {
                     var isMember = Emit.DefineLabel(GetNextName());
 
@@ -2177,7 +2188,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneSkipChar);       // objType(*?)
 
-            if(objType.IsValueType())
+            if (objType.IsValueType())
             {
                 Emit.LoadObject(objType);       // objType
             }
@@ -2216,7 +2227,7 @@ namespace Jil.Deserialize
                 Emit.MarkLabel(doneNotNull);    // objType
 
                 var doneSkipping = Emit.DefineLabel(GetNextName());
-                
+
                 SkipAllMembers(doneSkipping, doneSkipChar); // objType
 
                 return;
@@ -2316,7 +2327,7 @@ namespace Jil.Deserialize
 
             var done = Emit.DefineLabel(GetNextName());
 
-            foreach(var kv in propertyMap.OrderBy(o => o.Value.Item2))
+            foreach (var kv in propertyMap.OrderBy(o => o.Value.Item2))
             {
                 var local = localMap[kv.Key];
                 Emit.LoadLocal(local);
@@ -2358,7 +2369,7 @@ namespace Jil.Deserialize
             var setterLookup = typeof(AnonymousTypeLookup<>).MakeGenericType(objType);
 
             MethodInfo findConstructorParameterIndex;
-            if(ReadingFromString)
+            if (ReadingFromString)
             {
                 findConstructorParameterIndex = setterLookup.GetMethod("FindConstructorParameterIndexThunkReader", new[] { typeof(ThunkReader).MakeByRefType() });
             }
@@ -2605,7 +2616,7 @@ namespace Jil.Deserialize
                 return;
             }
 
-            if (allowRecursion && RecursiveTypes.Contains(forType))
+            if (allowRecursion && IndirectTypes.Contains(forType))
             {
                 Type funcType;
 
@@ -2640,13 +2651,24 @@ namespace Jil.Deserialize
             ReadObject(forType);
         }
 
-        HashSet<Type> FindAndPrimeRecursiveOrReusedTypes(Type forType)
+        HashSet<Type> FindAndPrimeIndirectTypes(Type forType)
         {
             var ret = forType.FindRecursiveOrReusedTypes();
+
+            if(PreferIndirectSerialization)
+            {
+                var subTypes = forType.FindChildTypes();
+                foreach(var t in subTypes)
+                {
+                    ret.Add(t);
+                }
+            }
+
+
             foreach (var primeType in ret)
             {
                 MethodInfo loadMtd;
-                if(ReadingFromString)
+                if (ReadingFromString)
                 {
                     loadMtd = typeof(TypeCache<,>).MakeGenericType(OptionsType, primeType).GetMethod("LoadFromString", BindingFlags.Public | BindingFlags.Static);
                 }
@@ -2678,30 +2700,38 @@ namespace Jil.Deserialize
             Emit.Return();
         }
 
-        public Func<TextReader, int, ForType> BuildWithNewDelegate()
+        public Func<TextReader, int, ForType> BuildWithNewDelegate(out int approximateILCount)
         {
             var forType = typeof(ForType);
 
-            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
+            IndirectTypes = FindAndPrimeIndirectTypes(forType);
 
             Emit = Emit.NewDynamicMethod(forType, new[] { typeof(TextReader), typeof(int) }, doVerify: Utils.DoVerify);
 
             BuildWithNew(forType);
 
-            return Emit.CreateDelegate<Func<TextReader, int, ForType>>(Utils.DelegateOptimizationOptions);
+            var ret = Emit.CreateDelegate<Func<TextReader, int, ForType>>(out var il, Utils.DelegateOptimizationOptions);
+
+            approximateILCount = il.Count(c => c == '\n');  // VERY approximate
+
+            return ret;
         }
 
-        public StringThunkDelegate<ForType> BuildFromStringWithNewDelegate()
+        public StringThunkDelegate<ForType> BuildFromStringWithNewDelegate(out int approximateILCount)
         {
             var forType = typeof(ForType);
 
-            RecursiveTypes = FindAndPrimeRecursiveOrReusedTypes(forType);
+            IndirectTypes = FindAndPrimeIndirectTypes(forType);
 
             Emit = Emit.NewDynamicMethod(forType, new[] { typeof(ThunkReader).MakeByRefType(), typeof(int) }, doVerify: Utils.DoVerify);
 
             BuildWithNew(forType);
 
-            return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
+            var ret = Emit.CreateDelegate<StringThunkDelegate<ForType>>(out var il, Utils.DelegateOptimizationOptions);
+
+            approximateILCount = il.Count(c => c == '\n');  // VERY approximate
+
+            return ret;
         }
     }
 
@@ -2738,14 +2768,27 @@ namespace Jil.Deserialize
         }
 
         public static Func<TextReader, int, ReturnType> BuildFromStream<ReturnType>(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
-        {      
-            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false);
+        {
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: false, allPrimitivesThroughHelpers: false);
 
             Func<TextReader, int, ReturnType> ret;
             try
             {
-                ret = obj.BuildWithNewDelegate();
-                 exceptionDuringBuild = null;
+                ret = obj.BuildWithNewDelegate(out var size);
+
+                if(size > Utils.MAX_IL_INSTRUCTION_LIMIT)
+                {
+                    obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
+                    ret = obj.BuildWithNewDelegate(out size);
+
+                    if(size > Utils.MAX_IL_INSTRUCTION_LIMIT)
+                    {
+                        obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: true, allPrimitivesThroughHelpers: true);
+                        ret = obj.BuildWithNewDelegate(out _);
+                    }
+                }
+
+                exceptionDuringBuild = null;
             }
             catch (ConstructionException e)
             {
@@ -2758,12 +2801,25 @@ namespace Jil.Deserialize
 
         public static StringThunkDelegate<ReturnType> BuildFromString<ReturnType>(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
         {
-            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true);
+            var obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: false, allPrimitivesThroughHelpers: false);
 
             StringThunkDelegate<ReturnType> ret;
             try
             {
-                ret = obj.BuildFromStringWithNewDelegate();
+                ret = obj.BuildFromStringWithNewDelegate(out var size);
+
+                if (size > Utils.MAX_IL_INSTRUCTION_LIMIT)
+                {
+                    obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
+                    ret = obj.BuildFromStringWithNewDelegate(out size);
+
+                    if (size > Utils.MAX_IL_INSTRUCTION_LIMIT)
+                    {
+                        obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: true, allPrimitivesThroughHelpers: true);
+                        ret = obj.BuildFromStringWithNewDelegate(out _);
+                    }
+                }
+
                 exceptionDuringBuild = null;
             }
             catch (ConstructionException e)

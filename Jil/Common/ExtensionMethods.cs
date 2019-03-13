@@ -1308,5 +1308,95 @@ namespace Jil.Common
 
             return new HashSet<Type>(recursive.Concat(reusedTypes));
         }
+
+        public static HashSet<Type> FindChildTypes(this Type forType)
+        {
+            var ret = new HashSet<Type>();
+            var pending = new Stack<Type>();
+
+            pending.Push(forType);
+
+            while (pending.Any())
+            {
+                var cur = pending.Pop();
+                
+                if (ret.Contains(cur)) continue;
+                
+                if (cur.IsPrimitiveType()) continue;
+
+                ret.Add(cur);
+
+                if (cur.IsNullableType())
+                {
+                    var underlyingType = Nullable.GetUnderlyingType(cur);
+                    if (!ret.Contains(underlyingType))
+                    {
+                        pending.Push(underlyingType);
+                    }
+
+                    continue;
+                }
+
+                if (cur.IsListType())
+                {
+                    var listI = cur.GetListInterface();
+                    var valType = listI.GetGenericArguments()[0];
+                    if (!ret.Contains(valType))
+                    {
+                        pending.Push(valType);
+                    }
+
+                    continue;
+                }
+
+                if (cur.IsDictionaryType())
+                {
+                    var dictI = cur.GetDictionaryInterface();
+                    var valType = dictI.GetGenericArguments()[1];
+                    if (!ret.Contains(valType))
+                    {
+                        pending.Push(valType);
+                    }
+
+                    continue;
+                }
+
+                if (cur.IsEnumerableType())
+                {
+                    var enumI = cur.GetEnumerableInterface();
+                    var valType = enumI.GetGenericArguments()[0];
+                    if (!ret.Contains(valType))
+                    {
+                        pending.Push(valType);
+                    }
+
+                    continue;
+                }
+
+                foreach (var field in cur.GetFields(BindingFlags.Instance | BindingFlags.Public))
+                {
+                    if (!field.ShouldUseMember()) continue;
+
+                    if (!ret.Contains(field.FieldType))
+                    {
+                        pending.Push(field.FieldType);
+                    }
+                }
+
+                foreach (var prop in cur.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.GetMethod != null))
+                {
+                    if (!prop.ShouldUseMember()) continue;
+
+                    if (!ret.Contains(prop.PropertyType))
+                    {
+                        pending.Push(prop.PropertyType);
+                    }
+                }
+            }
+
+            ret.Remove(forType);
+
+            return ret;
+        }
     }
 }
