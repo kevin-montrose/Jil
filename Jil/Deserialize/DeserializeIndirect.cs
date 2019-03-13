@@ -56,7 +56,7 @@ namespace Jil.Deserialize
             var cached = (Func<string, Options, object>)DeserializeFromStringIndirectCache[type];
             if (cached == null)
             {
-                lock (DeserializeFromStreamIndirectCache)
+                lock (DeserializeFromStringIndirectCache)
                 {
                     cached = (Func<string, Options, object>)DeserializeFromStringIndirectCache[type];
                     if (cached == null)
