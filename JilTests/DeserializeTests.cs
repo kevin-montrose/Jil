@@ -6433,6 +6433,34 @@ namespace JilTests
             }
         }
 
+        [Fact]
+        public void Issue248()
+        {
+            // reader
+            {
+                using (var str = new StringReader("\"0001\""))
+                {
+                    DateTimeOffset dto = JSON.DeserializeDynamic(str, Options.ISO8601Utc);
+                    JSON.SerializeDynamic(dto, Options.ISO8601Utc);
+
+                    // the expected output is actually UNDEFINED, because the spec says to treat
+                    //  just a years as LOCAL time; so the expected result depends on the timezone
+                    //  of the machine
+                    //
+                    // the important thing is that it doesn't explode in any timezone  (yes, this means
+                    //   you have to change the timezone on your machine for this test to really matter)
+                }
+            }
+
+            // string
+            {
+                DateTimeOffset dto = JSON.DeserializeDynamic("\"0001\"", Options.ISO8601Utc);
+                JSON.SerializeDynamic(dto, Options.ISO8601Utc);
+
+                // see above
+            }
+        }
+
 #if !DEBUG
 #region SlowSpinUp Types
 

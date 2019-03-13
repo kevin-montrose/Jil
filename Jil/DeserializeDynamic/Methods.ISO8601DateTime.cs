@@ -1196,7 +1196,27 @@ namespace Jil.DeserializeDynamic
 
             if (!tPos.HasValue)
             {
-                dto = date;
+                try
+                {
+                    dto = new DateTimeOffset(date);
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    // there's no reliable way to detect an overflow...
+                    //   but in the event of an overflow, try and go to the "nearest"
+                    //   edge
+                    var distToMin = date - DateTime.MinValue;
+                    var distToMax = DateTime.MaxValue - date;
+
+                    if (distToMin < distToMax)
+                    {
+                        dto = DateTimeOffset.MinValue;
+                    }
+                    else
+                    {
+                        dto = DateTimeOffset.MaxValue;
+                    }
+                }
                 return true;
             }
 
