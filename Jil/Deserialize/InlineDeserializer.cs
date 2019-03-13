@@ -51,6 +51,7 @@ namespace Jil.Deserialize
             DateFormat = dateFormat;
             SerializationNameFormat = serializationNameFormat;
             ReadingFromString = readingFromString;
+
             PreferIndirectSerialization = preferIndirectSerialization;
             AllPrimitivesThroughHelpers = allPrimitivesThroughHelpers;
 

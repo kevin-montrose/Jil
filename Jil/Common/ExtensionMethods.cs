@@ -1312,6 +1312,7 @@ namespace Jil.Common
         public static HashSet<Type> FindChildTypes(this Type forType)
         {
             var ret = new HashSet<Type>();
+            var seen = new HashSet<Type>();
             var pending = new Stack<Type>();
 
             pending.Push(forType);
@@ -1319,8 +1320,9 @@ namespace Jil.Common
             while (pending.Any())
             {
                 var cur = pending.Pop();
+                seen.Add(cur);
 
-                if (ret.Contains(cur))
+                if (seen.Contains(cur))
                 {
                     // already visited
                     continue;
@@ -1337,7 +1339,7 @@ namespace Jil.Common
                     // nullables shouldn't be serialized directly
 
                     var underlyingType = Nullable.GetUnderlyingType(cur);
-                    if (!ret.Contains(underlyingType))
+                    if (!seen.Contains(underlyingType))
                     {
                         pending.Push(underlyingType);
                     }
@@ -1351,7 +1353,7 @@ namespace Jil.Common
 
                     var listI = cur.GetListInterface();
                     var valType = listI.GetGenericArguments()[0];
-                    if (!ret.Contains(valType))
+                    if (!seen.Contains(valType))
                     {
                         pending.Push(valType);
                     }
@@ -1365,7 +1367,7 @@ namespace Jil.Common
 
                     var dictI = cur.GetDictionaryInterface();
                     var valType = dictI.GetGenericArguments()[1];
-                    if (!ret.Contains(valType))
+                    if (!seen.Contains(valType))
                     {
                         pending.Push(valType);
                     }
@@ -1380,7 +1382,7 @@ namespace Jil.Common
 
                     var enumI = cur.GetEnumerableInterface();
                     var valType = enumI.GetGenericArguments()[0];
-                    if (!ret.Contains(valType))
+                    if (!seen.Contains(valType))
                     {
                         pending.Push(valType);
                     }
@@ -1392,7 +1394,7 @@ namespace Jil.Common
                 {
                     if (!field.ShouldUseMember()) continue;
 
-                    if (!ret.Contains(field.FieldType))
+                    if (!seen.Contains(field.FieldType))
                     {
                         pending.Push(field.FieldType);
                     }
@@ -1402,7 +1404,7 @@ namespace Jil.Common
                 {
                     if (!prop.ShouldUseMember()) continue;
 
-                    if (!ret.Contains(prop.PropertyType))
+                    if (!seen.Contains(prop.PropertyType))
                     {
                         pending.Push(prop.PropertyType);
                     }

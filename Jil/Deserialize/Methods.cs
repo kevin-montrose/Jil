@@ -1807,6 +1807,7 @@ namespace Jil.Deserialize
             if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", reader, true);
             if (c != 'l') throw new DeserializationException("Expected character: 'l'", reader, false);
 
+            c = reader.Read();
             if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", reader, true);
             if (c != 'l') throw new DeserializationException("Expected character: 'l'", reader, false);
 
