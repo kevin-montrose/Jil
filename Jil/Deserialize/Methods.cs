@@ -575,7 +575,7 @@ namespace Jil.Deserialize
                 GrowDynamicBuffer(ref buffer);
             }
 
-            complete: return new string(buffer, 0, idx);
+        complete: return new string(buffer, 0, idx);
         }
 
         static char ReadHexQuad2(TextReader reader)
@@ -795,7 +795,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, c == -1);
             }
 
-            char2:
+        char2:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -824,7 +824,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, c == -1);
             }
 
-            char3:
+        char3:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -853,7 +853,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, c == -1);
             }
 
-            char4:
+        char4:
             ret *= 16;
             {
                 var c = reader.Read();
@@ -882,7 +882,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, c == -1);
             }
 
-            finished:
+        finished:
             if (ret < char.MinValue || ret > char.MaxValue) throw new DeserializationException("Encoded character out of System.Char range, found: " + ret, reader, false);
 
             return (char)ret;
@@ -922,7 +922,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char2:
+        char2:
             unescaped *= 16;
             {
                 var c = reader.Read();
@@ -952,7 +952,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char3:
+        char3:
             unescaped *= 16;
             {
                 var c = reader.Read();
@@ -982,7 +982,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char4:
+        char4:
             unescaped *= 16;
             {
                 var c = reader.Read();
@@ -1012,7 +1012,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            finished:
+        finished:
             return unescaped;
         }
 
@@ -1051,7 +1051,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char2:
+        char2:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -1082,7 +1082,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char3:
+        char3:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -1113,7 +1113,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            char4:
+        char4:
             encodedChar *= 16;
             {
                 var c = reader.Read();
@@ -1144,7 +1144,7 @@ namespace Jil.Deserialize
                 throw new DeserializationException("Expected hex digit, found: " + c, reader, false);
             }
 
-            finished:
+        finished:
             commonSb.Append(Utils.SafeConvertFromUtf32(encodedChar));
         }
 
@@ -1212,11 +1212,11 @@ namespace Jil.Deserialize
 
         static readonly double[] DivideFractionBy =
             new double[]
-            { 
-                10, 
-                100, 
-                1000, 
-                10000, 
+            {
+                10,
+                100,
+                1000,
+                10000,
                 100000,
                 1000000,
                 10000000,
@@ -1290,7 +1290,7 @@ namespace Jil.Deserialize
                         continue;
                     }
 
-                    if(!pastMinutes)
+                    if (!pastMinutes)
                     {
                         minutes = part;
                         part = 0;
@@ -1341,7 +1341,7 @@ namespace Jil.Deserialize
             }
 
             var ret = new TimeSpan(days, hours, minutes, seconds, msInt);
-            if(isNegative)
+            if (isNegative)
             {
                 ret = ret.Negate();
             }
@@ -1463,7 +1463,7 @@ namespace Jil.Deserialize
             if (c == 'J')
             {
                 c = reader.Read();
-                if(c == 'a')
+                if (c == 'a')
                 {
                     c = reader.Read();
                     if (c != 'n') throw new DeserializationException("Expected n", reader, c == -1);
@@ -1481,12 +1481,12 @@ namespace Jil.Deserialize
             }
 
             // Feb
-            if(c == 'F')
+            if (c == 'F')
             {
                 c = reader.Read();
                 if (c != 'e') throw new DeserializationException("Expected e", reader, c == -1);
                 c = reader.Read();
-                if(c != 'b') throw new DeserializationException("Expected b", reader, c == -1);
+                if (c != 'b') throw new DeserializationException("Expected b", reader, c == -1);
 
                 return 2;
             }
@@ -1725,6 +1725,92 @@ namespace Jil.Deserialize
         static void _ThrowNoDefinedValueInEnum(string message, TextReader reader)
         {
             throw new DeserializationException(message, reader, false);
+        }
+
+        static readonly MethodInfo ReadBool = typeof(Methods).GetMethod("_ReadBool", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool _ReadBool(TextReader reader)
+        {
+            int firstChar = reader.Read();
+            if (firstChar == -1)
+            {
+                throw new DeserializationException("Expected: 'true or false', but the reader ended", reader, true);
+            }
+
+            if (firstChar == 't')
+            {
+                int c;
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'r', but the reader ended", reader, true);
+                if (c != 'r') throw new DeserializationException("Expected character: 'r'", reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'u', but the reader ended", reader, true);
+                if (c != 'u') throw new DeserializationException("Expected character: 'u'", reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'e', but the reader ended", reader, true);
+                if (c != 'e') throw new DeserializationException("Expected character: 'e'", reader, false);
+
+                return true;
+            }
+
+            if (firstChar == 'f')
+            {
+                int c;
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'a', but the reader ended", reader, true);
+                if (c != 'a') throw new DeserializationException("Expected character: 'a'", reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", reader, true);
+                if (c != 'l') throw new DeserializationException("Expected character: 'l'", reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 's', but the reader ended", reader, true);
+                if (c != 's') throw new DeserializationException("Expected character: 's'", reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'e', but the reader ended", reader, true);
+                if (c != 'e') throw new DeserializationException("Expected character: 'e'", reader, false);
+
+                return false;
+            }
+
+            throw new DeserializationException("Expected: 'true or false'", reader, false);
+        }
+
+        static readonly MethodInfo IsNull = typeof(Methods).GetMethod("_IsNull", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool _IsNull(TextReader reader)
+        {
+            // peek, so if it's not 'n' the next consumer can read the whole value
+            var first = reader.Peek();
+            if (first == -1)
+            {
+                throw new DeserializationException("Unexpected end of stream while expecting null or value", reader, true);
+            }
+
+            if (first != 'n') return false;
+
+            reader.Read();  // skip 'n'
+
+            int c;
+
+            c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected character: 'u', but the reader ended", reader, true);
+            if (c != 'u') throw new DeserializationException("Expected character: 'u'", reader, false);
+
+            c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", reader, true);
+            if (c != 'l') throw new DeserializationException("Expected character: 'l'", reader, false);
+
+            if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", reader, true);
+            if (c != 'l') throw new DeserializationException("Expected character: 'l'", reader, false);
+
+            return true;
         }
     }
 }

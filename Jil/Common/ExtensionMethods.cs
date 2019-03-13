@@ -1319,15 +1319,23 @@ namespace Jil.Common
             while (pending.Any())
             {
                 var cur = pending.Pop();
-                
-                if (ret.Contains(cur)) continue;
-                
-                if (cur.IsPrimitiveType()) continue;
 
-                ret.Add(cur);
+                if (ret.Contains(cur))
+                {
+                    // already visited
+                    continue;
+                }
+
+                if (cur.IsPrimitiveType())
+                {
+                    // no members
+                    continue;
+                }
 
                 if (cur.IsNullableType())
                 {
+                    // nullables shouldn't be serialized directly
+
                     var underlyingType = Nullable.GetUnderlyingType(cur);
                     if (!ret.Contains(underlyingType))
                     {
@@ -1339,6 +1347,8 @@ namespace Jil.Common
 
                 if (cur.IsListType())
                 {
+                    ret.Add(cur);
+
                     var listI = cur.GetListInterface();
                     var valType = listI.GetGenericArguments()[0];
                     if (!ret.Contains(valType))
@@ -1351,6 +1361,8 @@ namespace Jil.Common
 
                 if (cur.IsDictionaryType())
                 {
+                    ret.Add(cur);
+
                     var dictI = cur.GetDictionaryInterface();
                     var valType = dictI.GetGenericArguments()[1];
                     if (!ret.Contains(valType))
@@ -1363,6 +1375,9 @@ namespace Jil.Common
 
                 if (cur.IsEnumerableType())
                 {
+                    ret.Add(cur);
+
+
                     var enumI = cur.GetEnumerableInterface();
                     var valType = enumI.GetGenericArguments()[0];
                     if (!ret.Contains(valType))

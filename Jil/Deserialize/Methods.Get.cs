@@ -17,6 +17,22 @@ namespace Jil.Deserialize
                     ConsumeWhiteSpaceThunkReader;
         }
 
+        public static MethodInfo GetIsNull(bool readingFromString)
+        {
+            return
+               !readingFromString ?
+                   IsNull :
+                   IsNullThunkReader;
+        }
+
+        public static MethodInfo GetReadBool(bool readingFromString)
+        {
+            return
+               !readingFromString ?
+                   ReadBool :
+                   ReadBoolThunkReader;
+        }
+
         public static MethodInfo GetReadUInt8(bool readingFromString)
         {
             return

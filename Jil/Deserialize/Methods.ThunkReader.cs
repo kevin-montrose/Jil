@@ -5063,5 +5063,91 @@ namespace Jil.Deserialize
         {
             throw new DeserializationException(message, ref reader, false);
         }
+
+        static readonly MethodInfo ReadBoolThunkReader = typeof(Methods).GetMethod("_ReadBoolThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool _ReadBoolThunkReader(ref ThunkReader reader)
+        {
+            int firstChar = reader.Read();
+            if (firstChar == -1)
+            {
+                throw new DeserializationException("Expected: 'true or false', but the reader ended", ref reader, true);
+            }
+
+            if (firstChar == 't')
+            {
+                int c;
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'r', but the reader ended", ref reader, true);
+                if (c != 'r') throw new DeserializationException("Expected character: 'r'", ref reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'u', but the reader ended", ref reader, true);
+                if (c != 'u') throw new DeserializationException("Expected character: 'u'", ref reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'e', but the reader ended", ref reader, true);
+                if (c != 'e') throw new DeserializationException("Expected character: 'e'", ref reader, false);
+
+                return true;
+            }
+
+            if (firstChar == 'f')
+            {
+                int c;
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'a', but the reader ended", ref reader, true);
+                if (c != 'a') throw new DeserializationException("Expected character: 'a'", ref reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", ref reader, true);
+                if (c != 'l') throw new DeserializationException("Expected character: 'l'", ref reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 's', but the reader ended", ref reader, true);
+                if (c != 's') throw new DeserializationException("Expected character: 's'", ref reader, false);
+
+                c = reader.Read();
+                if (c == -1) throw new DeserializationException("Expected character: 'e', but the reader ended", ref reader, true);
+                if (c != 'e') throw new DeserializationException("Expected character: 'e'", ref reader, false);
+
+                return false;
+            }
+
+            throw new DeserializationException("Expected: 'true or false'", ref reader, false);
+        }
+
+        static readonly MethodInfo IsNullThunkReader = typeof(Methods).GetMethod("_IsNullThunkReader", BindingFlags.NonPublic | BindingFlags.Static);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool _IsNullThunkReader(ref ThunkReader reader)
+        {
+            // peek, so if it's not 'n' the next consumer can read the whole value
+            var first = reader.Peek();
+            if (first == -1)
+            {
+                throw new DeserializationException("Unexpected end of stream while expecting null or value", ref reader, true);
+            }
+
+            if (first != 'n') return false;
+
+            reader.Read();  // skip 'n'
+
+            int c;
+
+            c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected character: 'u', but the reader ended", ref reader, true);
+            if (c != 'u') throw new DeserializationException("Expected character: 'u'", ref reader, false);
+
+            c = reader.Read();
+            if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", ref reader, true);
+            if (c != 'l') throw new DeserializationException("Expected character: 'l'", ref reader, false);
+
+            if (c == -1) throw new DeserializationException("Expected character: 'l', but the reader ended", ref reader, true);
+            if (c != 'l') throw new DeserializationException("Expected character: 'l'", ref reader, false);
+
+            return true;
+        }
     }
 }

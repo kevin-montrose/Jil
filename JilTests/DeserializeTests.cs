@@ -6434,7 +6434,7 @@ namespace JilTests
         }
 
 #if !DEBUG
-        #region SlowSpinUp Types
+#region SlowSpinUp Types
 
         public class ClusterNodeInfo
         {
@@ -6633,7 +6633,7 @@ namespace JilTests
             public long MaxContentLengthInBytes { get; internal set; }
         }
 
-        #endregion
+#endregion
 
         [Fact]
         public void SlowSpinUp()
@@ -6648,6 +6648,8 @@ namespace JilTests
             Assert.True(timer.ElapsedMilliseconds < 1500, "Took: " + timer.ElapsedMilliseconds + "ms");
         }
 #endif
+
+#if !DEBUG
 
         class _DegeneratelyLargeNested
         {
@@ -6779,9 +6781,22 @@ namespace JilTests
         [Fact]
         public void DegeneratelyLargeNested()
         {
-            var res = JSON.Deserialize<_DegeneratelyLargeNested>("{ \"Success\": true }");
-            Assert.NotNull(res);
-            Assert.True(res.Success);
+            // string
+            {
+                var res = JSON.Deserialize<_DegeneratelyLargeNested>("{ \"Success\": true }");
+                Assert.NotNull(res);
+                Assert.True(res.Success);
+            }
+
+            // stream
+            {
+                using (var str = new StringReader("{ \"Success\": true }"))
+                {
+                    var res = JSON.Deserialize<_DegeneratelyLargeNested>(str);
+                    Assert.NotNull(res);
+                    Assert.True(res.Success);
+                }
+            }
         }
 
         class _DegeneratelyLargeFlat
@@ -6893,25 +6908,54 @@ namespace JilTests
         [Fact]
         public void DegeneratelyLargeFlat()
         {
-            _DegeneratelyLargeFlat res = null;
-            var t = 
-                new Thread(
-                    () =>
+            // string
+            {
+                _DegeneratelyLargeFlat res = null;
+                var t =
+                    new Thread(
+                        () =>
+                        {
+                            res = JSON.Deserialize<_DegeneratelyLargeFlat>("{ \"Success\": true }");
+                        }
+                    )
                     {
-                        res = JSON.Deserialize<_DegeneratelyLargeFlat>("{ \"Success\": true }");
-                    }
-                )
-                {
-                    IsBackground = true
-                };
+                        IsBackground = true
+                    };
 
-            t.Start();
-            t.Join(30 * 1000);
+                t.Start();
+                t.Join(30 * 1000);
 
-            Assert.False(t.IsAlive);
-            Assert.NotNull(res);
-            Assert.True(res.Success);
+                Assert.False(t.IsAlive);
+                Assert.NotNull(res);
+                Assert.True(res.Success);
+            }
+
+            // string
+            {
+                _DegeneratelyLargeFlat res = null;
+                var t =
+                    new Thread(
+                        () =>
+                        {
+                            using (var str = new StringReader("{ \"Success\": true }"))
+                            {
+                                res = JSON.Deserialize<_DegeneratelyLargeFlat>(str);
+                            }
+                        }
+                    )
+                    {
+                        IsBackground = true
+                    };
+
+                t.Start();
+                t.Join(30 * 1000);
+
+                Assert.False(t.IsAlive);
+                Assert.NotNull(res);
+                Assert.True(res.Success);
+            }
         }
+#endif
 
         //struct _AllFloatsStruct
         //{

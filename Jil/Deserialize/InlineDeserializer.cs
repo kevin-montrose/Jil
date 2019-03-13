@@ -524,6 +524,13 @@ namespace Jil.Deserialize
 
         void ReadBool()
         {
+            if(AllPrimitivesThroughHelpers)
+            {
+                Emit.LoadArgument(0);
+                Emit.Call(Methods.GetReadBool(ReadingFromString));  // bool
+                return;
+            }
+
             var endOfStream = Emit.DefineLabel(GetNextName());
             var mayBeTrue = Emit.DefineLabel(GetNextName());
             var mayBeFalse = Emit.DefineLabel(GetNextName());
@@ -1139,11 +1146,37 @@ namespace Jil.Deserialize
         void ReadNullable(MemberInfo nullableMember, Type nullableType)
         {
             var underlying = Nullable.GetUnderlyingType(nullableType);
-
             var nullableConst = nullableType.GetConstructor(new[] { underlying });
+            var done = Emit.DefineLabel(GetNextName());
+
+            if (AllPrimitivesThroughHelpers)
+            {
+                var isNull = Emit.DefineLabel(GetNextName());
+
+                using (var loc = Emit.DeclareLocal(nullableType, GetNextName()))
+                {
+
+                    Emit.LoadArgument(0);                               // TextReader
+                    Emit.Call(Methods.GetIsNull(ReadingFromString));    // bool
+                    Emit.BranchIfTrue(isNull);                          // --empty--
+
+                    Build(nullableMember, underlying, fromNullable: true);  // underlying
+                    Emit.NewObject(nullableConst);                          // nullableType
+                    Emit.Branch(done);                                      // nullableType
+
+                    Emit.MarkLabel(isNull);                         // --empty--
+                    Emit.LoadLocalAddress(loc);                     // nullableType*
+                    Emit.InitializeObject(nullableType);            // --empty--
+                    Emit.LoadLocal(loc);                            // nullableType
+                }
+
+                Emit.MarkLabel(done);                               // nullableType
+
+                return;
+            }
 
             var maybeNull = Emit.DefineLabel(GetNextName());
-            var done = Emit.DefineLabel(GetNextName());
+            
 
             using (var loc = Emit.DeclareLocal(nullableType, GetNextName()))
             {
@@ -2778,13 +2811,16 @@ namespace Jil.Deserialize
 
                 if(size > Utils.MAX_IL_INSTRUCTION_LIMIT)
                 {
-                    obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
-                    ret = obj.BuildWithNewDelegate(out size);
+                    if (typeof(ReturnType).FindChildTypes().Any())
+                    {
+                        obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
+                        ret = obj.BuildWithNewDelegate(out size);
+                    }
 
                     if(size > Utils.MAX_IL_INSTRUCTION_LIMIT)
                     {
                         obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: false, preferIndirectSerialization: true, allPrimitivesThroughHelpers: true);
-                        ret = obj.BuildWithNewDelegate(out _);
+                        ret = obj.BuildWithNewDelegate(out size);
                     }
                 }
 
@@ -2810,13 +2846,16 @@ namespace Jil.Deserialize
 
                 if (size > Utils.MAX_IL_INSTRUCTION_LIMIT)
                 {
-                    obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
-                    ret = obj.BuildFromStringWithNewDelegate(out size);
+                    if (typeof(ReturnType).FindChildTypes().Any())
+                    {
+                        obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: true, allPrimitivesThroughHelpers: false);
+                        ret = obj.BuildFromStringWithNewDelegate(out size);
+                    }
 
                     if (size > Utils.MAX_IL_INSTRUCTION_LIMIT)
                     {
                         obj = new InlineDeserializer<ReturnType>(optionsType, dateFormat, serializationNameFormat, readingFromString: true, preferIndirectSerialization: true, allPrimitivesThroughHelpers: true);
-                        ret = obj.BuildFromStringWithNewDelegate(out _);
+                        ret = obj.BuildFromStringWithNewDelegate(out size);
                     }
                 }
 
@@ -2830,6 +2869,5 @@ namespace Jil.Deserialize
 
             return ret;
         }
-
     }
 }
