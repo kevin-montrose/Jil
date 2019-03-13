@@ -7,8 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace Jil.Deserialize
 {
@@ -24,6 +23,14 @@ namespace Jil.Deserialize
             static MethodInfo Consume = typeof(Helper).GetMethod("_Consume", BindingFlags.Static | BindingFlags.NonPublic);
             static MethodInfo ConsumeThunkReader = typeof(Helper).GetMethod("_ConsumeThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
 
+            static int NextName = 0;
+
+            public static string GetNextName()
+            {
+                var r = Interlocked.Increment(ref NextName);
+                return "na_n" + r;
+            }
+
             public static MethodInfo GetConsume(Type forType)
             {
                 if (forType == typeof(TextReader)) return Consume;
@@ -32,6 +39,9 @@ namespace Jil.Deserialize
                 throw new Exception("Unexpected type " + forType);
             }
 
+            // reflection uses these
+#pragma warning disable IDE0051
+#pragma warning disable IDE1006
             static void _Consume(TextReader tr, int ch)
             {
                 while (ch != '\"' && ch != -1)
@@ -47,6 +57,8 @@ namespace Jil.Deserialize
                     ch = tr.Read();
                 }
             }
+#pragma warning restore IDE0051
+#pragma warning restore IDE1006
 
             static MethodInfo ExpectUnicodeHexQuad = typeof(Helper).GetMethod("_ExpectUnicodeHexQuad", BindingFlags.Static | BindingFlags.NonPublic);
             static MethodInfo ExpectUnicodeHexQuadThunkReader = typeof(Helper).GetMethod("_ExpectUnicodeHexQuadThunkReader", BindingFlags.Static | BindingFlags.NonPublic);
@@ -59,6 +71,9 @@ namespace Jil.Deserialize
                 throw new Exception("Unexpected type " + forType);
             }
 
+            // reflection uses these
+#pragma warning disable IDE0051
+#pragma warning disable IDE1006
             static int _ExpectUnicodeHexQuad(TextReader reader)
             {
                 var c = reader.Read();
@@ -80,6 +95,8 @@ namespace Jil.Deserialize
 
                 return Methods.ReadHexQuadThunkReader(ref reader);
             }
+#pragma warning restore IDE0051
+#pragma warning restore IDE1006
 
             static MethodInfo TextReader_Read = typeof(TextReader).GetMethod("Read", Type.EmptyTypes);
             static MethodInfo ThunkReader_Read = typeof(ThunkReader).GetMethod("Read", Type.EmptyTypes);
@@ -298,7 +315,7 @@ namespace Jil.Deserialize
 
         static void DoCharBinarySearch<V>(Data<V> d, List<Tuple<char, Label>> namesToFinish)
         {
-            var noMatch = d.Emit.DefineLabel();
+            var noMatch = d.Emit.DefineLabel(Helper.GetNextName());
 
             var inOrder = namesToFinish.OrderBy(_ => _.Item1).ToList();
 
@@ -329,7 +346,7 @@ namespace Jil.Deserialize
                     var left = charsLeft.Take(midPoint).ToList();
                     var right = charsLeft.Skip(midPoint).ToList();
 
-                    var leftLabel = d.Emit.DefineLabel();
+                    var leftLabel = d.Emit.DefineLabel(Helper.GetNextName());
 
                     d.Emit.LoadLocal(d.Local_ch);           // int
                     d.Emit.LoadConstant((int)midVal.Item1); // int int

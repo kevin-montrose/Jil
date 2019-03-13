@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Jil.Common;
 using Sigil.NonGeneric;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Globalization;
 
 namespace Jil.Deserialize
@@ -37,12 +34,24 @@ namespace Jil.Deserialize
 
         Emit Emit;
 
+        int NextName;
+
         public InlineDeserializer(Type optionsType, DateTimeFormat dateFormat, SerializationNameFormat serializationNameFormat, bool readingFromString)
         {
             OptionsType = optionsType;
             DateFormat = dateFormat;
             SerializationNameFormat = serializationNameFormat;
             ReadingFromString = readingFromString;
+
+            NextName = 1;
+        }
+
+        string GetNextName()
+        {
+            var ret = "id_n" + NextName;
+            NextName++;
+
+            return ret;
         }
 
         void SetProperty(PropertyInfo prop)
@@ -143,7 +152,7 @@ namespace Jil.Deserialize
         
         void RawReadChar(Action endOfStream)
         {
-            var haveChar = Emit.DefineLabel();
+            var haveChar = Emit.DefineLabel(GetNextName());
 
             ReadCharFromStream();                       // int
             Emit.Duplicate();                           // int int
@@ -211,7 +220,7 @@ namespace Jil.Deserialize
             // top of stack:
             // int
 
-            var notEmpty = Emit.DefineLabel();
+            var notEmpty = Emit.DefineLabel(GetNextName());
             
             Emit.Duplicate();                           // int int
             Emit.LoadConstant(-1);                      // int int -1
@@ -244,8 +253,8 @@ namespace Jil.Deserialize
 
         void ExpectChar(char c)
         {
-            var gotRightChar = Emit.DefineLabel();
-            var gotAChar = Emit.DefineLabel();
+            var gotRightChar = Emit.DefineLabel(GetNextName());
+            var gotAChar = Emit.DefineLabel(GetNextName());
 
             ReadCharFromStream();                       // int
             Emit.LoadConstant((int)c);                  // int int
@@ -263,8 +272,8 @@ namespace Jil.Deserialize
 
         void CheckChar(char c)
         {
-            var gotRightChar = Emit.DefineLabel();
-            var gotAChar = Emit.DefineLabel();
+            var gotRightChar = Emit.DefineLabel(GetNextName());
+            var gotAChar = Emit.DefineLabel(GetNextName());
 
             Emit.Duplicate();                           // int int
             Emit.LoadConstant(-1);                      // int int -1
@@ -291,9 +300,9 @@ namespace Jil.Deserialize
 
         void ExpectRawCharOrNull(char c, Action ifChar, Action ifNull)
         {
-            var gotChar = Emit.DefineLabel();
-            var gotN = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
+            var gotChar = Emit.DefineLabel(GetNextName());
+            var gotN = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
 
             RawReadChar(() => ThrowExpectedButEnded(c, "null"));    // int
             Emit.Duplicate();                                       // int int
@@ -504,10 +513,10 @@ namespace Jil.Deserialize
 
         void ReadBool()
         {
-            var endOfStream = Emit.DefineLabel();
-            var mayBeTrue = Emit.DefineLabel();
-            var mayBeFalse = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
+            var endOfStream = Emit.DefineLabel(GetNextName());
+            var mayBeTrue = Emit.DefineLabel(GetNextName());
+            var mayBeFalse = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
 
             RawReadChar(() => Emit.Branch(endOfStream));    // int
             Emit.Duplicate();                               // int int
@@ -606,9 +615,9 @@ namespace Jil.Deserialize
             var maxTicks = TimeSpan.MaxValue.Ticks;
             var minTicks = TimeSpan.MinValue.Ticks;
             
-            var isMax = Emit.DefineLabel();
-            var isMin = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
+            var isMax = Emit.DefineLabel(GetNextName());
+            var isMin = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
 
             ReadPrimitive(typeof(double));          // double
             Emit.Duplicate();                       // double double
@@ -649,9 +658,9 @@ namespace Jil.Deserialize
             var maxTicks = TimeSpan.MaxValue.Ticks;
             var minTicks = TimeSpan.MinValue.Ticks;
 
-            var isMax = Emit.DefineLabel();
-            var isMin = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
+            var isMax = Emit.DefineLabel(GetNextName());
+            var isMin = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
 
             ReadPrimitive(typeof(double));          // double
             Emit.Duplicate();                       // double double
@@ -813,9 +822,9 @@ namespace Jil.Deserialize
                 Emit.Call(CultureInfo_InvariantCulture);    // string string CultureInfo
                 Emit.LoadConstant(universal);               // string string CultureInfo int
 
-                using (var loc = Emit.DeclareLocal<DateTime>())
+                using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
                 {
-                    var success = Emit.DefineLabel();
+                    var success = Emit.DefineLabel(GetNextName());
 
                     Emit.LoadLocalAddress(loc);             // string string CultureInfo int DateTime&
                     Emit.Call(DateTime_TryParseExact);      // bool
@@ -921,7 +930,7 @@ namespace Jil.Deserialize
                         );
                 }
                 Emit.NewObject(defaultConst);
-                using (var loc = Emit.DeclareLocal(primitiveTypeWrapper))
+                using (var loc = Emit.DeclareLocal(primitiveTypeWrapper, GetNextName()))
                 {
                     // wrapper
                     Emit.StoreLocal(loc);       // --empty--
@@ -955,7 +964,7 @@ namespace Jil.Deserialize
 
         void ExpectEndOfStream()
         {
-            var success = Emit.DefineLabel();
+            var success = Emit.DefineLabel(GetNextName());
 
             Emit.LoadArgument(1);                   // int
             Emit.LoadConstant(0);                   // int
@@ -1122,10 +1131,10 @@ namespace Jil.Deserialize
 
             var nullableConst = nullableType.GetConstructor(new[] { underlying });
 
-            var maybeNull = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
+            var maybeNull = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var loc = Emit.DeclareLocal(nullableType))
+            using (var loc = Emit.DeclareLocal(nullableType, GetNextName()))
             {
                 RawPeekChar();                      // int
                 Emit.LoadConstant('n');             // int n
@@ -1172,9 +1181,9 @@ namespace Jil.Deserialize
 
             var addMtd = listType.GetMethod("Add");
 
-            var doRead = Emit.DefineLabel();
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
+            var doRead = Emit.DefineLabel(GetNextName());
+            var done = Emit.DefineLabel(GetNextName());
+            var doneSkipChar = Emit.DefineLabel(GetNextName());
 
             var isArray = listType.IsArray;
 
@@ -1184,10 +1193,10 @@ namespace Jil.Deserialize
             {
                 listType = typeof(List<>).MakeGenericType(elementType);
                 addMtd = listType.GetMethod("Add");
-                doneSkipCharNull = Emit.DefineLabel();
+                doneSkipCharNull = Emit.DefineLabel(GetNextName());
             }
 
-            using (var loc = Emit.DeclareLocal(listType))
+            using (var loc = Emit.DeclareLocal(listType, GetNextName()))
             {
                 Action loadList;
 
@@ -1246,8 +1255,8 @@ namespace Jil.Deserialize
                 Emit.CallVirtual(addMtd);                       // --empty--
                 if (isSet) Emit.Pop();                          // if it's a set, Add() returns a bool which we need to pop off the stack
 
-                var startLoop = Emit.DefineLabel();
-                var nextItem = Emit.DefineLabel();
+                var startLoop = Emit.DefineLabel(GetNextName());
+                var nextItem = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(startLoop);                      // --empty--
                 loadList();                                     // listType(*?)
@@ -1305,8 +1314,8 @@ namespace Jil.Deserialize
 
             var addMtd = dictType.GetDictionaryInterface().GetMethod("Add", new [] { keyType, valType });
 
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
+            var doneSkipChar = Emit.DefineLabel(GetNextName());
 
             if (!dictType.IsValueType())
             {
@@ -1325,7 +1334,7 @@ namespace Jil.Deserialize
                 ExpectChar('{');
             }
 
-            using (var loc = Emit.DeclareLocal(dictType))
+            using (var loc = Emit.DeclareLocal(dictType, GetNextName()))
             {
                 Action loadDict;
                 if (dictType.IsValueType())
@@ -1346,7 +1355,7 @@ namespace Jil.Deserialize
                     loadDict = () => Emit.LoadLocal(loc);
                 }
 
-                var loopStart = Emit.DefineLabel();
+                var loopStart = Emit.DefineLabel(GetNextName());
 
                 ConsumeWhiteSpace();        // --empty--
                 loadDict();                 // dictType(*?)
@@ -1376,7 +1385,7 @@ namespace Jil.Deserialize
                 Build(dictionaryMember, valType);              // dictType(*?) (integer|string|enum) valType
                 Emit.CallVirtual(addMtd);    // --empty--
 
-                var nextItem = Emit.DefineLabel();
+                var nextItem = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loopStart);              // --empty--
                 loadDict();                             // dictType(*?)
@@ -1477,7 +1486,7 @@ namespace Jil.Deserialize
 
         void SkipAllMembers(Sigil.Label done, Sigil.Label doneSkipChar)
         {
-            var continueSkipping = Emit.DefineLabel();
+            var continueSkipping = Emit.DefineLabel(GetNextName());
 
             var skipEncodedString = Methods.GetSkipEncodedString(ReadingFromString);
 
@@ -1523,8 +1532,8 @@ namespace Jil.Deserialize
 
         void ReadObjectAutomata(Type objType)
         {
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
+            var doneSkipChar = Emit.DefineLabel(GetNextName());
 
             if (!objType.IsValueType())
             {
@@ -1543,7 +1552,7 @@ namespace Jil.Deserialize
                 ExpectChar('{');
             }
 
-            using (var loc = Emit.DeclareLocal(objType))
+            using (var loc = Emit.DeclareLocal(objType, GetNextName()))
             {
                 Action loadObj;
                 if (objType.IsValueType())
@@ -1564,7 +1573,7 @@ namespace Jil.Deserialize
                     loadObj = () => Emit.LoadLocal(loc);
                 }
 
-                var loopStart = Emit.DefineLabel();
+                var loopStart = Emit.DefineLabel(GetNextName());
                 var serializationType = SerializationNameFormat.GetGenericTypeArgument();
 
                 var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
@@ -1590,7 +1599,7 @@ namespace Jil.Deserialize
                 var orderedSetters =
                     setters
                     .OrderBy(kv => kv.Key)
-                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setters = kv.Value, Label = Emit.DefineLabel() })
+                    .Select((kv, i) => new { Index = i, Name = kv.Key, Setters = kv.Value, Label = Emit.DefineLabel(GetNextName()) })
                     .ToList();
 
                 MethodInfo findSetterIdx;
@@ -1623,12 +1632,12 @@ namespace Jil.Deserialize
                 CheckChar(':');             // objType(*?) int
                 ConsumeWhiteSpace();        // objType(*?) int
 
-                var readingMember = Emit.DefineLabel();
+                var readingMember = Emit.DefineLabel(GetNextName());
                 Emit.MarkLabel(readingMember);  // objType(*?) int
 
-                using (var oLoc = Emit.DeclareLocal<int>())
+                using (var oLoc = Emit.DeclareLocal<int>(GetNextName()))
                 {
-                    var isMember = Emit.DefineLabel();
+                    var isMember = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                       // objType(*?) int int
                     Emit.StoreLocal(oLoc);                  // objType(*?) int
@@ -1669,7 +1678,7 @@ namespace Jil.Deserialize
                     }
                 }
 
-                var nextItem = Emit.DefineLabel();
+                var nextItem = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loopStart);              // --empty--
                 loadObj();                              // objType(*?)
@@ -1758,8 +1767,8 @@ namespace Jil.Deserialize
             var nullableMembers = discriminants.Where(kv => kv.Value.ReturnType().IsNullableType()).Select(kv => kv.Value).ToList();
             var expected = discriminants.Keys.ToArray();
 
-            var streamNotEmpty = Emit.DefineLabel();
-            var end = Emit.DefineLabel();
+            var streamNotEmpty = Emit.DefineLabel(GetNextName());
+            var end = Emit.DefineLabel(GetNextName());
 
             RawPeekChar();                                  // objType(*?) int
             Emit.Duplicate();                               // objType(*?) int int
@@ -1794,7 +1803,7 @@ namespace Jil.Deserialize
                 var lookupArrLen = ((int[])lookupArr.GetValue(null)).Length;
                 var charsetsInOrder = (UnionCharsets[])lookup.GetField("CharsetOrder").GetValue(null);
 
-                var miss = Emit.DefineLabel();
+                var miss = Emit.DefineLabel(GetNextName());
                 var labels = 
                     charsetsInOrder
                         .Select(
@@ -1804,7 +1813,7 @@ namespace Jil.Deserialize
 
                                 if (!charsets.TryGetValue(c, out member)) member = null;
 
-                                return Tuple.Create(Emit.DefineLabel(), member, c);
+                                return Tuple.Create(Emit.DefineLabel(GetNextName()), member, c);
                             }
                         )
                         .ToArray();
@@ -1818,7 +1827,7 @@ namespace Jil.Deserialize
                 Emit.Duplicate();                       // objType(*?) int int
                 Emit.LoadConstant(0);                   // objType(*?) int int int
                 Emit.BranchIfLess(miss);                // objType(*?) int
-                using (var loc = Emit.DeclareLocal<int>())
+                using (var loc = Emit.DeclareLocal<int>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);               // objType(*?)
                     Emit.LoadField(lookupArr);          // objType(*?) int[]
@@ -1884,7 +1893,7 @@ namespace Jil.Deserialize
             {
                 if (allowsNull)
                 {
-                    var notNull = Emit.DefineLabel();
+                    var notNull = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                           // objType(*?) int int
                     Emit.LoadConstant('n');                     // objType(*?) int int 'n'
@@ -1903,7 +1912,7 @@ namespace Jil.Deserialize
                 {
                     var c = charToMember.Key;
                     var member = charToMember.Value;
-                    var nextChar = Emit.DefineLabel();
+                    var nextChar = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                           // objType(*?) int int
                     Emit.LoadConstant((int)c);                  // objType(*?) int int int
@@ -1972,7 +1981,7 @@ namespace Jil.Deserialize
             foreach (var n in nullableMembers)
             {
                 Emit.Duplicate();                       // objType(*?) objType(*?)
-                using (var nLoc = Emit.DeclareLocal(n.ReturnType()))
+                using (var nLoc = Emit.DeclareLocal(n.ReturnType(), GetNextName()))
                 {
                     Emit.LoadLocalAddress(nLoc);            // objType(*?) objType(*?) Nullable<?>*
                     Emit.InitializeObject(n.ReturnType());  // objType(*?) objType(*?)
@@ -2008,8 +2017,8 @@ namespace Jil.Deserialize
 
         void ReadObjectDictionaryLookup(Type objType)
         {
-            var done = Emit.DefineLabel();
-            var doneSkipChar = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
+            var doneSkipChar = Emit.DefineLabel(GetNextName());
 
             if (!objType.IsValueType())
             {
@@ -2028,7 +2037,7 @@ namespace Jil.Deserialize
                 ExpectChar('{');
             }
 
-            using (var loc = Emit.DeclareLocal(objType))
+            using (var loc = Emit.DeclareLocal(objType, GetNextName()))
             {
                 Action loadObj;
                 if (objType.IsValueType())
@@ -2049,7 +2058,7 @@ namespace Jil.Deserialize
                     loadObj = () => Emit.LoadLocal(loc);
                 }
 
-                var loopStart = Emit.DefineLabel();
+                var loopStart = Emit.DefineLabel(GetNextName());
                 var serializationType = SerializationNameFormat.GetGenericTypeArgument();
 
                 var setterLookup = typeof(SetterLookup<,>).MakeGenericType(objType, serializationType);
@@ -2075,7 +2084,7 @@ namespace Jil.Deserialize
 
                 var order = setterLookup.GetField("Lookup", BindingFlags.Public | BindingFlags.Static);
                 var orderInst = (Dictionary<string, int>)order.GetValue(null);
-                var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+                var labels = setters.ToDictionary(d => d.Key, d => Emit.DefineLabel(GetNextName()));
 
                 var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
 
@@ -2090,12 +2099,12 @@ namespace Jil.Deserialize
                 CheckChar(':');             // objType(*?) Dictionary<string, int> string
                 ConsumeWhiteSpace();        // objType(*?) Dictionary<string, int> string
 
-                var readingMember = Emit.DefineLabel();
+                var readingMember = Emit.DefineLabel(GetNextName());
                 Emit.MarkLabel(readingMember);  // objType(*?) Dictionary<string, int> string
 
-                using(var oLoc = Emit.DeclareLocal<int>())
+                using(var oLoc = Emit.DeclareLocal<int>(GetNextName()))
                 {
-                    var isMember = Emit.DefineLabel();
+                    var isMember = Emit.DefineLabel(GetNextName());
 
                     Emit.LoadLocalAddress(oLoc);    // objType(*?) Dictionary<string, int> string int*
                     Emit.Call(tryGetValue);         // objType(*?) bool
@@ -2135,7 +2144,7 @@ namespace Jil.Deserialize
                     }
                 }
 
-                var nextItem = Emit.DefineLabel();
+                var nextItem = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loopStart);              // --empty--
                 loadObj();                              // objType(*?)
@@ -2176,8 +2185,8 @@ namespace Jil.Deserialize
 
         void ReadAnonymousObjectDictionaryLookup(Type objType)
         {
-            var doneNotNull = Emit.DefineLabel();
-            var doneNull = Emit.DefineLabel();
+            var doneNotNull = Emit.DefineLabel(GetNextName());
+            var doneNull = Emit.DefineLabel(GetNextName());
 
             ExpectRawCharOrNull(
                 '{',
@@ -2195,7 +2204,7 @@ namespace Jil.Deserialize
 
             if (propertyMap.Count == 0)
             {
-                var doneSkipChar = Emit.DefineLabel();
+                var doneSkipChar = Emit.DefineLabel(GetNextName());
 
                 Emit.NewObject(cons);           // objType
                 Emit.Branch(doneNotNull);       // objType
@@ -2206,7 +2215,7 @@ namespace Jil.Deserialize
 
                 Emit.MarkLabel(doneNotNull);    // objType
 
-                var doneSkipping = Emit.DefineLabel();
+                var doneSkipping = Emit.DefineLabel(GetNextName());
                 
                 SkipAllMembers(doneSkipping, doneSkipChar); // objType
 
@@ -2220,13 +2229,13 @@ namespace Jil.Deserialize
             var localMap = new Dictionary<string, Sigil.Local>();
             foreach (var kv in propertyMap)
             {
-                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1, GetNextName());
             }
 
-            var labels = orderInst.ToDictionary(d => d.Key, d => Emit.DefineLabel());
+            var labels = orderInst.ToDictionary(d => d.Key, d => Emit.DefineLabel(GetNextName()));
             var inOrderLabels = labels.OrderBy(l => orderInst[l.Key]).Select(l => l.Value).ToArray();
 
-            var loopStart = Emit.DefineLabel();
+            var loopStart = Emit.DefineLabel(GetNextName());
 
             ConsumeWhiteSpace();                // --empty--
             RawPeekChar();                      // int 
@@ -2238,12 +2247,12 @@ namespace Jil.Deserialize
             CheckChar(':');                     // Dictionary<string, int> string
             ConsumeWhiteSpace();                // Dictionary<string, int> string
 
-            var readingMember = Emit.DefineLabel();
+            var readingMember = Emit.DefineLabel(GetNextName());
             Emit.MarkLabel(readingMember);      // Dictionary<string, int> string
 
-            using (var oLoc = Emit.DeclareLocal<int>())
+            using (var oLoc = Emit.DeclareLocal<int>(GetNextName()))
             {
-                var isMember = Emit.DefineLabel();
+                var isMember = Emit.DefineLabel(GetNextName());
 
                 Emit.LoadLocalAddress(oLoc);    // Dictionary<string, int> string int*
                 Emit.Call(tryGetValue);         // bool
@@ -2273,7 +2282,7 @@ namespace Jil.Deserialize
                 Emit.Branch(loopStart); // --empty--
             }
 
-            var nextItem = Emit.DefineLabel();
+            var nextItem = Emit.DefineLabel(GetNextName());
 
             Emit.MarkLabel(loopStart);              // --empty--
             ConsumeWhiteSpace();                    // --empty--
@@ -2305,7 +2314,7 @@ namespace Jil.Deserialize
             ReadCharFromStream();               // int
             Emit.Pop();                         // --empty--
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             foreach(var kv in propertyMap.OrderBy(o => o.Value.Item2))
             {
@@ -2330,10 +2339,10 @@ namespace Jil.Deserialize
 
         void ReadAnonymousObjectAutomata(Type objType)
         {
-            var doneNotNull = Emit.DefineLabel();
-            var doneNotNullPopSkipChar = Emit.DefineLabel();
-            var doneNotNullSkipChar = Emit.DefineLabel();
-            var doneNull = Emit.DefineLabel();
+            var doneNotNull = Emit.DefineLabel(GetNextName());
+            var doneNotNullPopSkipChar = Emit.DefineLabel(GetNextName());
+            var doneNotNullSkipChar = Emit.DefineLabel(GetNextName());
+            var doneNull = Emit.DefineLabel(GetNextName());
 
             ExpectRawCharOrNull(
                 '{',
@@ -2362,7 +2371,7 @@ namespace Jil.Deserialize
 
             if (propertyMap.Count == 0)
             {
-                var doneSkipChar = Emit.DefineLabel();
+                var doneSkipChar = Emit.DefineLabel(GetNextName());
 
                 Emit.NewObject(cons);           // objType
                 Emit.Branch(doneNotNull);       // objType
@@ -2373,7 +2382,7 @@ namespace Jil.Deserialize
 
                 Emit.MarkLabel(doneNotNull);    // objType
 
-                var doneSkipping = Emit.DefineLabel();
+                var doneSkipping = Emit.DefineLabel(GetNextName());
 
                 SkipAllMembers(doneSkipping, doneSkipChar); // objType
 
@@ -2383,12 +2392,12 @@ namespace Jil.Deserialize
             var localMap = new Dictionary<string, Sigil.Local>();
             foreach (var kv in propertyMap)
             {
-                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1);
+                localMap[kv.Key] = Emit.DeclareLocal(kv.Value.Item1, GetNextName());
             }
 
             var labels =
                 propertyMap
-                .ToDictionary(d => d.Key, d => Emit.DefineLabel());
+                .ToDictionary(d => d.Key, d => Emit.DefineLabel(GetNextName()));
 
             var inOrderLabels =
                 propertyMap
@@ -2396,7 +2405,7 @@ namespace Jil.Deserialize
                 .Select(l => labels[l.Key])
                 .ToArray();
 
-            var loopStart = Emit.DefineLabel();
+            var loopStart = Emit.DefineLabel(GetNextName());
 
             ReadSkipWhitespace();                       // int 
             Emit.Duplicate();
@@ -2411,7 +2420,7 @@ namespace Jil.Deserialize
             CheckChar(':');             // int
             ConsumeWhiteSpace();        // int
 
-            var readingMember = Emit.DefineLabel();
+            var readingMember = Emit.DefineLabel(GetNextName());
             Emit.MarkLabel(readingMember);  // int
 
             Emit.Switch(inOrderLabels);     // --empty--
@@ -2430,7 +2439,7 @@ namespace Jil.Deserialize
                 Emit.Branch(loopStart); // --empty--
             }
 
-            var nextItem = Emit.DefineLabel();
+            var nextItem = Emit.DefineLabel(GetNextName());
 
             Emit.MarkLabel(loopStart);                  // --empty--
             ReadSkipWhitespace();                       // int
@@ -2466,7 +2475,7 @@ namespace Jil.Deserialize
 
             Emit.MarkLabel(doneNotNullSkipChar);// --empty--
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             foreach (var kv in propertyMap.OrderBy(o => o.Value.Item2))
             {
@@ -2493,7 +2502,7 @@ namespace Jil.Deserialize
         static ConstructorInfo ObjectBuilderCons = typeof(Jil.DeserializeDynamic.ObjectBuilder).GetConstructor(new[] { typeof(Options) });
         void ReadDynamic()
         {
-            using (var dyn = Emit.DeclareLocal<Jil.DeserializeDynamic.ObjectBuilder>())
+            using (var dyn = Emit.DeclareLocal<DeserializeDynamic.ObjectBuilder>(GetNextName()))
             {
                 Emit.LoadArgument(0);                                                       // TextReader
                 Emit.LoadConstant(false);                                                   // TextReader bool

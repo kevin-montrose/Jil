@@ -89,6 +89,8 @@ namespace Jil.Serialize
 
         private readonly Stack<Type> WritingDynamicObject;
 
+        private int NextName;
+
         internal InlineSerializer(Type recursionLookupOptionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, bool callOutOnPossibleDynamic, bool buildToString)
         {
             RecursionLookupOptionsType = recursionLookupOptionsType;
@@ -108,6 +110,16 @@ namespace Jil.Serialize
             {
                 WritingDynamicObject = new Stack<Type>();
             }
+
+            NextName = 1;
+        }
+
+        string GetNextName()
+        {
+            var ret = "is_n" + NextName;
+            NextName++;
+
+            return ret;
         }
 
         void LoadProperty(PropertyInfo prop)
@@ -218,19 +230,19 @@ namespace Jil.Serialize
         {
             const int precalcLimit = 10;
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            var labels = Enumerable.Range(0, precalcLimit).Select(i => Emit.DefineLabel()).ToArray();
+            var labels = Enumerable.Range(0, precalcLimit).Select(i => Emit.DefineLabel(GetNextName())).ToArray();
 
             Emit.LoadArgument(2);   // int
             Emit.Switch(labels);    // --empty--
 
             // default case
-            using (var count = Emit.DeclareLocal<int>())
+            using (var count = Emit.DeclareLocal<int>(GetNextName()))
             {
                 WriteString("\n");
 
-                var loop = Emit.DefineLabel();
+                var loop = Emit.DefineLabel(GetNextName());
 
                 Emit.LoadArgument(2);       // int
                 Emit.StoreLocal(count);     // --empty--
@@ -405,7 +417,7 @@ namespace Jil.Serialize
                     LoadProperty(asProp);  // prop
                 }
 
-                using (var loc = Emit.DeclareLocal(serializingType))
+                using (var loc = Emit.DeclareLocal(serializingType, GetNextName()))
                 {
                     Emit.StoreLocal(loc);
 
@@ -502,7 +514,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            using (var loc = Emit.DeclareLocal(serializingType))
+            using (var loc = Emit.DeclareLocal(serializingType, GetNextName()))
             {
                 Emit.StoreLocal(loc);   // TextWriter;
 
@@ -561,11 +573,11 @@ namespace Jil.Serialize
                 primitiveType = ((PropertyInfo)primitiveMember).PropertyType;
             }
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var loc = Emit.DeclareLocal(primitiveWrapperType))
+            using (var loc = Emit.DeclareLocal(primitiveWrapperType, GetNextName()))
             {
-                var notNull = Emit.DefineLabel();
+                var notNull = Emit.DefineLabel(GetNextName());
 
                 Emit.StoreLocal(loc);           // TextWriter
                 if (!primitiveWrapperType.IsValueType())
@@ -608,11 +620,11 @@ namespace Jil.Serialize
             var hasValue = nullableType.GetProperty("HasValue");
             var value = nullableType.GetProperty("Value");
             var underlyingType = nullableType.GetUnderlyingType();
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var loc = Emit.DeclareLocal(nullableType))
+            using (var loc = Emit.DeclareLocal(nullableType, GetNextName()))
             {
-                var notNull = Emit.DefineLabel();
+                var notNull = Emit.DefineLabel(GetNextName());
 
                 Emit.StoreLocal(loc);           // TextWriter
                 Emit.LoadLocalAddress(loc);     // TextWriter nullableType*
@@ -646,7 +658,7 @@ namespace Jil.Serialize
                     }
                     else
                     {
-                        using (var loc = Emit.DeclareLocal(underlyingType))
+                        using (var loc = Emit.DeclareLocal(underlyingType, GetNextName()))
                         {
                             Emit.StoreLocal(loc);   // TextWriter
 
@@ -712,7 +724,7 @@ namespace Jil.Serialize
             //   - DateTime
             //   - TextWriter
 
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
             {
                 Emit.StoreLocal(loc);                   // TextWriter
                 Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
@@ -734,7 +746,7 @@ namespace Jil.Serialize
                 Emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
                 Emit.Call(subtractMtd);                     // TextWriter TimeSpan
 
-                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                using (var loc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);                   // TextWriter
                     Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
@@ -765,7 +777,7 @@ namespace Jil.Serialize
 
         void WriteMillisecondsStyleDateTime()
         {
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
             {
                 Emit.StoreLocal(loc);                   // TextWriter
                 Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
@@ -787,7 +799,7 @@ namespace Jil.Serialize
                 Emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
                 Emit.Call(subtractMtd);                     // TextWriter TimeSpan
 
-                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                using (var loc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);                   // TextWriter
                     Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
@@ -814,7 +826,7 @@ namespace Jil.Serialize
 
         void WriteSecondsStyleDateTime()
         {
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
             {
                 Emit.StoreLocal(loc);                   // TextWriter
                 Emit.LoadLocalAddress(loc);             // TextWriter DateTime*
@@ -837,7 +849,7 @@ namespace Jil.Serialize
                 Emit.NewObject(dtCons);                     // TextWriter DateTime* DateTime*
                 Emit.Call(subtractMtd);                     // TextWriter TimeSpan
 
-                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                using (var loc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);                   // TextWriter
                     Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
@@ -872,7 +884,7 @@ namespace Jil.Serialize
             {
                 var toString = typeof(DateTime).GetMethod("ToString", new[] { typeof(string) });
 
-                using (var loc = Emit.DeclareLocal<DateTime>())
+                using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);       // TextWriter
                     Emit.LoadLocalAddress(loc); // TextWriter DateTime*
@@ -905,7 +917,7 @@ namespace Jil.Serialize
 
             if (!UseCustomRFC1123DateTimeFormatting)
             {
-                using (var loc = Emit.DeclareLocal<DateTime>())
+                using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);               // TextWriter
                     Emit.LoadLocalAddress(loc);         // DateTime* TextWriter
@@ -938,7 +950,7 @@ namespace Jil.Serialize
                 DateFormat == DateTimeFormat.RFC1123)
             {
                 // No room for an offset in these forms, so just re-use DateTime logic
-                using (var loc = Emit.DeclareLocal<DateTimeOffset>())
+                using (var loc = Emit.DeclareLocal<DateTimeOffset>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);               // TextWriter
                     Emit.LoadLocalAddress(loc);         // TextWriter DateTimeOffset*
@@ -952,8 +964,8 @@ namespace Jil.Serialize
             if (DateFormat == DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch)
             {
                 // Get the UtcTicks (long) and the offset on the stack
-                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>())
-                using (var tsLoc = Emit.DeclareLocal<TimeSpan>())
+                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>(GetNextName()))
+                using (var tsLoc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(dtoLoc);            // TextWriter
                     Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTimeOffset*
@@ -975,8 +987,8 @@ namespace Jil.Serialize
             if (DateFormat == DateTimeFormat.ISO8601)
             {
                 // Get the DateTime equivalent and the offset on the stack
-                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>())
-                using (var tsLoc = Emit.DeclareLocal<TimeSpan>())
+                using (var dtoLoc = Emit.DeclareLocal<DateTimeOffset>(GetNextName()))
+                using (var tsLoc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(dtoLoc);            // TextWriter
                     Emit.LoadLocalAddress(dtoLoc);      // TextWriter DateTimeOffset*
@@ -1007,7 +1019,7 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.SecondsSinceUnixEpoch)
             {
-                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                using (var loc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);                   // TextWriter
                     Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
@@ -1020,7 +1032,7 @@ namespace Jil.Serialize
 
             if (DateFormat == DateTimeFormat.MillisecondsSinceUnixEpoch)
             {
-                using (var loc = Emit.DeclareLocal<TimeSpan>())
+                using (var loc = Emit.DeclareLocal<TimeSpan>(GetNextName()))
                 {
                     Emit.StoreLocal(loc);                   // TextWriter
                     Emit.LoadLocalAddress(loc);             // TextWriter TimeSpan*
@@ -1058,9 +1070,9 @@ namespace Jil.Serialize
             var kind = typeof(DateTime).GetProperty("Kind");
             var specifyKind = typeof(DateTime).GetMethod("SpecifyKind", BindingFlags.Public | BindingFlags.Static);
 
-            using (var loc = Emit.DeclareLocal<DateTime>())
+            using (var loc = Emit.DeclareLocal<DateTime>(GetNextName()))
             {
-                var noChange = Emit.DefineLabel();
+                var noChange = Emit.DefineLabel(GetNextName());
                 var convertToKind = UnspecifiedDateTimeBehavior == UnspecifiedDateTimeKindBehavior.IsLocal ? DateTimeKind.Local : DateTimeKind.Utc;
 
                 Emit.StoreLocal(loc);                               // TextWriter
@@ -1184,8 +1196,8 @@ namespace Jil.Serialize
 
             if (primitiveType == typeof(bool))
             {
-                var trueLabel = Emit.DefineLabel();
-                var done = Emit.DefineLabel();
+                var trueLabel = Emit.DefineLabel(GetNextName());
+                var done = Emit.DefineLabel(GetNextName());
 
                 Emit.BranchIfTrue(trueLabel);   // TextWriter
                 Emit.Pop();                     // --empty--
@@ -1344,7 +1356,7 @@ namespace Jil.Serialize
                 WriteString("\"");      // TextWriter Guid
             }
 
-            using (var loc = Emit.DeclareLocal<Guid>())
+            using (var loc = Emit.DeclareLocal<Guid>(GetNextName()))
             {
                 Emit.StoreLocal(loc);       // TextWriter
                 Emit.LoadLocalAddress(loc); // TextWriter Guid*
@@ -1397,7 +1409,7 @@ namespace Jil.Serialize
             {
                 if (prev != null && pair.Item1 - prev != 1) break;
 
-                var label = Emit.DefineLabel();
+                var label = Emit.DefineLabel(GetNextName());
 
                 labels.Add(Tuple.Create(label, pair.Item2));
 
@@ -1409,9 +1421,9 @@ namespace Jil.Serialize
                 WriteString("\"");
             }
 
-            var done = Emit.DefineLabel();
-            var slash = Emit.DefineLabel();
-            var quote = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
+            var slash = Emit.DefineLabel(GetNextName());
+            var quote = Emit.DefineLabel(GetNextName());
 
             // Only used in JSONP case, don't pre-init
             Sigil.Label lineSeparator = null;
@@ -1437,8 +1449,8 @@ namespace Jil.Serialize
             // Curse you line terminators
             if (JSONP)
             {
-                lineSeparator = Emit.DefineLabel();
-                paragraphSeparator = Emit.DefineLabel();
+                lineSeparator = Emit.DefineLabel(GetNextName());
+                paragraphSeparator = Emit.DefineLabel(GetNextName());
 
                 // line separator, valid JSON not valid javascript
                 Emit.Duplicate();                   // TextWriter char char
@@ -1516,7 +1528,7 @@ namespace Jil.Serialize
 
         void WriteObjectWithNullsWithoutConditionalSerialization(Type forType, Sigil.Local inLocal, List<List<MemberInfo>> writeOrder)
         {
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             var isValueType = forType.IsValueType();
 
@@ -1531,14 +1543,14 @@ namespace Jil.Serialize
 
             if (isValueType)
             {
-                using (var temp = Emit.DeclareLocal(forType))
+                using (var temp = Emit.DeclareLocal(forType, GetNextName()))
                 {
                     Emit.StoreLocal(temp);          // --empty--
                     Emit.LoadLocalAddress(temp);    // obj*
                 }
             }
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);             // --empty--
 
@@ -1655,7 +1667,7 @@ namespace Jil.Serialize
 
         void WriteObjectWithNullsWithConditionalSerialization(Type forType, Sigil.Local inLocal, List<List<MemberInfo>> writeOrder)
         {
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             var isValueType = forType.IsValueType();
 
@@ -1670,14 +1682,14 @@ namespace Jil.Serialize
 
             if (isValueType)
             {
-                using (var temp = Emit.DeclareLocal(forType))
+                using (var temp = Emit.DeclareLocal(forType, GetNextName()))
                 {
                     Emit.StoreLocal(temp);          // --empty--
                     Emit.LoadLocalAddress(temp);    // obj*
                 }
             }
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);             // --empty--
 
@@ -1703,14 +1715,14 @@ namespace Jil.Serialize
 
             if (isValueType)
             {
-                using (var temp = Emit.DeclareLocal(forType))
+                using (var temp = Emit.DeclareLocal(forType, GetNextName()))
                 {
                     Emit.StoreLocal(temp);          // --empty--
                     Emit.LoadLocalAddress(temp);    // obj*
                 }
             }
 
-            using (var isFirst = Emit.DeclareLocal<bool>())
+            using (var isFirst = Emit.DeclareLocal<bool>(GetNextName()))
             {
                 Emit.LoadConstant(true);                        // obj(*?) true
                 Emit.StoreLocal(isFirst);                       // obj(*?)
@@ -1773,7 +1785,7 @@ namespace Jil.Serialize
                         Emit.LoadField((FieldInfo)memberType);          // [obj(*?)] Type
                     }
 
-                    var typeIsSet = Emit.DefineLabel();
+                    var typeIsSet = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                                   // [obj(*?)] Type Type
                     Emit.BranchIfTrue(typeIsSet);                       // [obj(*?)] Type
@@ -1790,12 +1802,12 @@ namespace Jil.Serialize
                     DetermineNonNullMember(members, inLocal);           // [obj(*?)] Type
                 }
 
-                var done = Emit.DefineLabel();
+                var done = Emit.DefineLabel(GetNextName());
 
                 bool? updateFirstPassTo = null;
                 foreach (var toWriteMember in withoutUnionType)
                 {
-                    var next = Emit.DefineLabel();
+                    var next = Emit.DefineLabel(GetNextName());
 
                     var type = toWriteMember.ReturnType();
 
@@ -1838,7 +1850,7 @@ namespace Jil.Serialize
                     Emit.MarkLabel(next);                                                       // [obj(*?)] Type
                 }
 
-                var notNullSigil = Emit.DefineLabel();
+                var notNullSigil = Emit.DefineLabel(GetNextName());
 
                 Emit.Duplicate();                                       // [obj(*?)] Type Type
                 Emit.LoadConstant(typeof(UnionMembersNullSigil));       // [obj(*?)] Type Type RuntimeTypeHandle
@@ -1905,11 +1917,11 @@ namespace Jil.Serialize
         {
             // treat stack as if empty
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             foreach (var member in members)
             {
-                var next = Emit.DefineLabel();
+                var next = Emit.DefineLabel(GetNextName());
 
                 var memberType = member.ReturnType();
 
@@ -1934,7 +1946,7 @@ namespace Jil.Serialize
 
                 if (memberType.IsValueType())
                 {
-                    using (var loc = Emit.DeclareLocal(member.ReturnType()))
+                    using (var loc = Emit.DeclareLocal(member.ReturnType(), GetNextName()))
                     {
                         Emit.StoreLocal(loc);
                         Emit.LoadLocalAddress(loc);         // memberType(*?)
@@ -1966,7 +1978,7 @@ namespace Jil.Serialize
         {
             var writeOrder = OrderMembersForAccess(forType, RecursiveTypes);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             var isValueType = forType.IsValueType();
 
@@ -1981,14 +1993,14 @@ namespace Jil.Serialize
 
             if (isValueType)
             {
-                using (var temp = Emit.DeclareLocal(forType))
+                using (var temp = Emit.DeclareLocal(forType, GetNextName()))
                 {
                     Emit.StoreLocal(temp);                      // --empty--
                     Emit.LoadLocalAddress(temp);                // obj*
                 }
             }
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.Duplicate();               // obj(*?) obj(*?)
             Emit.BranchIfTrue(notNull);     // obj(*?)
@@ -2005,7 +2017,7 @@ namespace Jil.Serialize
 
             IncreaseIndent();
 
-            using (var isFirst = Emit.DeclareLocal<bool>())
+            using (var isFirst = Emit.DeclareLocal<bool>(GetNextName()))
             {
                 Emit.LoadConstant(true);        // obj(*?) true
                 Emit.StoreLocal(isFirst);       // obj(*?) true
@@ -2045,15 +2057,15 @@ namespace Jil.Serialize
 
             var serializingType = asField != null ? asField.FieldType : asProp.PropertyType;
 
-            var end = Emit.DefineLabel();
-            var writeValue = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
+            var writeValue = Emit.DefineLabel(GetNextName());
 
             if (asProp != null)
             {
                 var shouldSerialize = asProp.ShouldSerializeMethod(onType);
                 if (shouldSerialize != null)
                 {
-                    var canSerialize = Emit.DefineLabel();
+                    var canSerialize = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                   // obj(*?) obj(*?)
 
@@ -2089,7 +2101,7 @@ namespace Jil.Serialize
 
                 if (serializingType.IsValueType())
                 {
-                    using (var temp = Emit.DeclareLocal(serializingType))
+                    using (var temp = Emit.DeclareLocal(serializingType, GetNextName()))
                     {
                         Emit.StoreLocal(temp);          // --empty--
                         Emit.LoadLocalAddress(temp);    // value*
@@ -2152,15 +2164,15 @@ namespace Jil.Serialize
 
             if (asField == null && asProp == null) throw new ConstructionException("Encountered a serializable member that is neither a field nor a property: " + member);
 
-            var end = Emit.DefineLabel();
-            var writeValue = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
+            var writeValue = Emit.DefineLabel(GetNextName());
 
             if (asProp != null)
             {
                 var shouldSerialize = asProp.ShouldSerializeMethod(onType);
                 if (shouldSerialize != null)
                 {
-                    var canSerialize = Emit.DefineLabel();
+                    var canSerialize = Emit.DefineLabel(GetNextName());
 
                     Emit.Duplicate();                   // obj(*?) obj(*?)
 
@@ -2265,11 +2277,11 @@ namespace Jil.Serialize
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = NeedsPreloadTextWriter(listMember, elementType);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             loadList();                         // IList<>
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);         // --empty--
             WriteString("null");                // --empty--
@@ -2278,9 +2290,9 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);            // --empty--
             WriteString("[");                   // --empty--
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var e = Emit.DeclareLocal<int>())
+            using (var e = Emit.DeclareLocal<int>(GetNextName()))
             {
                 loadList();                                 // IList<>
                 Emit.CastClass(collectionInterface);        // IList<>
@@ -2313,12 +2325,12 @@ namespace Jil.Serialize
                     WriteElement(listMember, elementType);               // --empty--
                 }
 
-                using (var i = Emit.DeclareLocal<int>())
+                using (var i = Emit.DeclareLocal<int>(GetNextName()))
                 {
                     Emit.LoadConstant(1);                   // 1
                     Emit.StoreLocal(i);                     // --empty--
 
-                    var loop = Emit.DefineLabel();
+                    var loop = Emit.DefineLabel(GetNextName());
 
                     Emit.MarkLabel(loop);                   // --empty--
 
@@ -2390,11 +2402,11 @@ namespace Jil.Serialize
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = NeedsPreloadTextWriter(arrayMember, elementType);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             loadArray();                         // type[]
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);         // --empty--
             WriteString("null");                // --empty--
@@ -2403,9 +2415,9 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);            // --empty--
             WriteString("[");                   // --empty--
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var e = Emit.DeclareLocal<int>())
+            using (var e = Emit.DeclareLocal<int>(GetNextName()))
             {
                 loadArray();                                // type[]
                 Emit.CallVirtual(countMtd);                 // int
@@ -2437,12 +2449,12 @@ namespace Jil.Serialize
                     WriteElement(arrayMember, elementType);               // --empty--
                 }
 
-                using (var i = Emit.DeclareLocal<int>())
+                using (var i = Emit.DeclareLocal<int>(GetNextName()))
                 {
                     Emit.LoadConstant(1);                   // 1
                     Emit.StoreLocal(i);                     // --empty--
 
-                    var loop = Emit.DefineLabel();
+                    var loop = Emit.DefineLabel(GetNextName());
 
                     Emit.MarkLabel(loop);                   // --empty--
 
@@ -2508,7 +2520,7 @@ namespace Jil.Serialize
                 if (listType.IsValueType())
                 {
                     var genericList = listType.GetListInterface();
-                    using (var boxedLoc = Emit.DeclareLocal(genericList))
+                    using (var boxedLoc = Emit.DeclareLocal(genericList, GetNextName()))
                     {
                         if (inLocal != null)
                         {
@@ -2561,7 +2573,7 @@ namespace Jil.Serialize
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = NeedsPreloadTextWriter(enumerableMember, elementType);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             Action loadLocal =
                 () =>
@@ -2592,7 +2604,7 @@ namespace Jil.Serialize
 
             loadLocal();                        // IEnumerable(*)
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);         // --empty--
             WriteString("null");                // --empty--
@@ -2601,9 +2613,9 @@ namespace Jil.Serialize
             Emit.MarkLabel(notNull);            // --empty--
             WriteString("[");                   // --empty--
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType))
+            using (var e = Emit.DeclareLocal(iEnumerableGetEnumerator.ReturnType, GetNextName()))
             {
                 loadLocal();
 
@@ -2642,7 +2654,7 @@ namespace Jil.Serialize
                     WriteElement(enumerableMember, elementType);   // --empty--
                 }
 
-                var loop = Emit.DefineLabel();
+                var loop = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loop);
 
@@ -2738,7 +2750,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            using (var loc = Emit.DeclareLocal(elementType))
+            using (var loc = Emit.DeclareLocal(elementType, GetNextName()))
             {
                 Emit.StoreLocal(loc);
 
@@ -2853,7 +2865,7 @@ namespace Jil.Serialize
             if (dictType.IsValueType())
             {
                 var dictGet = dictType.GetDictionaryInterface();
-                using (var genLoc = Emit.DeclareLocal(dictGet))
+                using (var genLoc = Emit.DeclareLocal(dictGet, GetNextName()))
                 {
                     if (inLocal != null)
                     {
@@ -2946,7 +2958,7 @@ namespace Jil.Serialize
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = NeedsPreloadTextWriter(dictionaryMember, elementType);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             if (inLocal != null)
             {
@@ -2957,7 +2969,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(1);
             }
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);
             WriteString("null");
@@ -2968,13 +2980,13 @@ namespace Jil.Serialize
 
             IncreaseIndent();
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             int onTheStack = 0;
 
-            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType))
-            using (var isFirst = Emit.DeclareLocal<bool>())
-            using (var kvpLoc = Emit.DeclareLocal(kvType))
+            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType, GetNextName()))
+            using (var isFirst = Emit.DeclareLocal<bool>(GetNextName()))
+            using (var kvpLoc = Emit.DeclareLocal(kvType, GetNextName()))
             {
                 Emit.LoadConstant(true);                    // true
                 Emit.StoreLocal(isFirst);                   // --empty--
@@ -2991,7 +3003,7 @@ namespace Jil.Serialize
                 Emit.CallVirtual(getEnumerator);        // IEnumerator<KeyValuePair<,>>
                 Emit.StoreLocal(e);                     // --empty--
 
-                var loop = Emit.DefineLabel();
+                var loop = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loop);                   // --empty--
 
@@ -3093,7 +3105,7 @@ namespace Jil.Serialize
             var isRecursive = RecursiveTypes.ContainsKey(elementType);
             var preloadTextWriter = NeedsPreloadTextWriter(dictionaryMember, elementType);
 
-            var notNull = Emit.DefineLabel();
+            var notNull = Emit.DefineLabel(GetNextName());
 
             if (inLocal != null)
             {
@@ -3104,7 +3116,7 @@ namespace Jil.Serialize
                 Emit.LoadArgument(1);
             }
 
-            var end = Emit.DefineLabel();
+            var end = Emit.DefineLabel(GetNextName());
 
             Emit.BranchIfTrue(notNull);
             WriteString("null");
@@ -3115,10 +3127,10 @@ namespace Jil.Serialize
 
             IncreaseIndent();
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
-            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType))
-            using (var kvpLoc = Emit.DeclareLocal(kvType))
+            using (var e = Emit.DeclareLocal(getEnumerator.ReturnType, GetNextName()))
+            using (var kvpLoc = Emit.DeclareLocal(kvType, GetNextName()))
             {
                 if (inLocal != null)
                 {
@@ -3159,7 +3171,7 @@ namespace Jil.Serialize
                     WriteKeyValue(dictionaryMember, keyType, elementType);   // --empty--
                 }
 
-                var loop = Emit.DefineLabel();
+                var loop = Emit.DefineLabel(GetNextName());
 
                 Emit.MarkLabel(loop);                   // --empty--
 
@@ -3216,8 +3228,8 @@ namespace Jil.Serialize
             var keyIsString = keyType == typeof(string);
             var keyIsNumber = keyType.IsIntegerNumberType();
 
-            var done = Emit.DefineLabel();
-            var doWrite = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
+            var doWrite = Emit.DefineLabel(GetNextName());
 
             var canBeNull = elementType.IsNullableType() || !elementType.IsValueType();
 
@@ -3228,7 +3240,7 @@ namespace Jil.Serialize
 
                 if (elementType.IsNullableType())
                 {
-                    using (var temp = Emit.DeclareLocal(elementType))
+                    using (var temp = Emit.DeclareLocal(elementType, GetNextName()))
                     {
                         Emit.StoreLocal(temp);          // kvp
                         Emit.LoadLocalAddress(temp);    // kvp value*
@@ -3249,7 +3261,7 @@ namespace Jil.Serialize
                 Emit.MarkLabel(doWrite);                // kvp
             }
 
-            var skipComma = Emit.DefineLabel();
+            var skipComma = Emit.DefineLabel(GetNextName());
 
             Emit.LoadLocal(isFirst);                // kvp bool
             Emit.BranchIfTrue(skipComma);           // kvp
@@ -3273,7 +3285,7 @@ namespace Jil.Serialize
                 Emit.Duplicate();       // kvp kvp
                 LoadProperty(key);      // kvp string
 
-                using (var str = Emit.DeclareLocal<string>())
+                using (var str = Emit.DeclareLocal<string>(GetNextName()))
                 {
                     Emit.StoreLocal(str);   // kvp
                     Emit.LoadArgument(0);   // kvp TextWriter
@@ -3299,7 +3311,7 @@ namespace Jil.Serialize
 
                     Emit.Duplicate();           // kvp kvp
                     LoadProperty(key);          // kvp number
-                    using (var loc = Emit.DeclareLocal(keyType))
+                    using (var loc = Emit.DeclareLocal(keyType, GetNextName()))
                     {
                         Emit.StoreLocal(loc);   // kvp
                         Emit.LoadArgument(0);   // kvp TextWriter
@@ -3398,7 +3410,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            using (var loc = Emit.DeclareLocal(elementType))
+            using (var loc = Emit.DeclareLocal(elementType, GetNextName()))
             {
                 Emit.StoreLocal(loc);
 
@@ -3474,7 +3486,7 @@ namespace Jil.Serialize
                 Emit.Duplicate();           // kvp kvp
                 LoadProperty(key);          // kvp string
 
-                using (var str = Emit.DeclareLocal<string>())
+                using (var str = Emit.DeclareLocal<string>(GetNextName()))
                 {
                     Emit.StoreLocal(str);   // kvp
                     Emit.LoadArgument(0);   // kvp TextWriter
@@ -3500,7 +3512,7 @@ namespace Jil.Serialize
 
                     Emit.Duplicate();           // kvp kvp
                     LoadProperty(key);          // kvp number
-                    using (var loc = Emit.DeclareLocal(keyType))
+                    using (var loc = Emit.DeclareLocal(keyType, GetNextName()))
                     {
                         Emit.StoreLocal(loc);   // kvp
                         Emit.LoadArgument(0);   // kvp TextWriter
@@ -3588,7 +3600,7 @@ namespace Jil.Serialize
                 return;
             }
 
-            using (var loc = Emit.DeclareLocal(elementType))
+            using (var loc = Emit.DeclareLocal(elementType, GetNextName()))
             {
                 Emit.StoreLocal(loc);
 
@@ -3640,12 +3652,12 @@ namespace Jil.Serialize
             //   - enum
             //   - TextWriter?
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             var min = values.Keys.Min();
             var max = values.Keys.Max();
 
-            var labels = Enumerable.Range(0, (int)(max - min + 1)).Select(_ => Emit.DefineLabel()).ToArray();
+            var labels = Enumerable.Range(0, (int)(max - min + 1)).Select(_ => Emit.DefineLabel(GetNextName())).ToArray();
 
             Emit.Convert<ulong>();      // TextWriter? ulong
             Emit.LoadConstant(min);     // TextWriter? ulong ulong
@@ -3694,7 +3706,7 @@ namespace Jil.Serialize
 
             var underlyingType = Enum.GetUnderlyingType(enumType);
 
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
 
             Emit.Convert(underlyingType);   // TextWriter? val
 
@@ -3704,7 +3716,7 @@ namespace Jil.Serialize
 
                 var escapeStr = "\"" + name.JsonEscape(JSONP) + "\"";
 
-                var next = Emit.DefineLabel();
+                var next = Emit.DefineLabel(GetNextName());
 
                 Emit.Duplicate();                       // TextWriter? val val
                 LoadConstantOfType(val, underlyingType);// TextWriter? val val val
@@ -3738,7 +3750,7 @@ namespace Jil.Serialize
             //   - TextWriter?
 
             var hasZeroValue = values.ContainsKey(0UL);
-            var done = Emit.DefineLabel();
+            var done = Emit.DefineLabel(GetNextName());
             Sigil.Label notZero = null;
 
             Emit.Convert<ulong>();      // TextWriter? ulong
@@ -3746,7 +3758,7 @@ namespace Jil.Serialize
             // gotta special case this, since 0 & 0 == 0
             if (hasZeroValue)
             {
-                notZero = Emit.DefineLabel();
+                notZero = Emit.DefineLabel(GetNextName());
 
                 Emit.Duplicate();                       // TextWriter? ulong ulong
                 Emit.LoadConstant(0UL);                 // TextWriter? ulong ulong 0
@@ -3767,8 +3779,8 @@ namespace Jil.Serialize
                 Emit.MarkLabel(notZero);        // TextWriter? ulong
             }
 
-            using (var enumLoc = Emit.DeclareLocal<ulong>())
-            using (var notFirst = Emit.DeclareLocal<bool>())
+            using (var enumLoc = Emit.DeclareLocal<ulong>(GetNextName()))
+            using (var notFirst = Emit.DeclareLocal<bool>(GetNextName()))
             {
                 Emit.StoreLocal(enumLoc);       // TextWriter?
 
@@ -3784,8 +3796,8 @@ namespace Jil.Serialize
 
                 foreach (var valObj in values.Where(_ => _.Key != 0UL).OrderBy(_ => _.Key))
                 {
-                    var skip = Emit.DefineLabel();
-                    var skipCommaSpace = Emit.DefineLabel();
+                    var skip = Emit.DefineLabel(GetNextName());
+                    var skipCommaSpace = Emit.DefineLabel(GetNextName());
 
                     var asULong = valObj.Key;
                     var asStr = enumType.GetEnumValueName(valObj.Value).JsonEscape(JSONP);
@@ -3858,7 +3870,7 @@ namespace Jil.Serialize
 
                 if (!hasTextWriter)
                 {
-                    using (var local = Emit.DeclareLocal(enumType))
+                    using (var local = Emit.DeclareLocal(enumType, GetNextName()))
                     {
                         Emit.StoreLocal(local); // -empty-
                         Emit.LoadArgument(0);   // TextWriter
@@ -3968,7 +3980,7 @@ namespace Jil.Serialize
                     var recursiveSerializerCache = typeof(RecursiveSerializerCache<>).MakeGenericType(type);
                     var getMtd = (MethodInfo)recursiveSerializerCache.GetField("GetFor").GetValue(null);
 
-                    var loc = Emit.DeclareLocal(getMtd.ReturnType);
+                    var loc = Emit.DeclareLocal(getMtd.ReturnType, GetNextName());
                     Emit.LoadConstant(this.PrettyPrint);        // bool
                     Emit.LoadConstant(this.ExcludeNulls);       // bool bool
                     Emit.LoadConstant(this.JSONP);              // bool bool bool
@@ -3994,7 +4006,7 @@ namespace Jil.Serialize
                         thunk = cacheType.GetField("Thunk", BindingFlags.Public | BindingFlags.Static);
                     }
 
-                    var loc = Emit.DeclareLocal(thunk.FieldType);
+                    var loc = Emit.DeclareLocal(thunk.FieldType, GetNextName());
 
                     Emit.LoadField(thunk);  // Action<TextWriter, type, int>
                     Emit.StoreLocal(loc);   // --empty--
@@ -4051,7 +4063,7 @@ namespace Jil.Serialize
             //   If that's the case, don't even bother with the check or the increment
             if (recursiveTypes.Count != 0)
             {
-                var goOn = Emit.DefineLabel();
+                var goOn = Emit.DefineLabel(GetNextName());
 
                 Emit.LoadArgument(2);               // int
                 Emit.LoadConstant(RecursionLimit);  // int int
