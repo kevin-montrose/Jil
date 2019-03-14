@@ -91,7 +91,14 @@ namespace Jil.DeserializeDynamic
                         if (MemberPart2 == null)
                         {
                             MemberPart2 = other;
-                            this.Parent.ObjectMembers.Add(MemberPart1.StringValue, MemberPart2);
+                            try
+                            {
+                                this.Parent.ObjectMembers.Add(MemberPart1.StringValue, MemberPart2);
+                            }
+                            catch (ArgumentException e)
+                            {
+                                throw new DeserializationException($"Tried to add duplicate member \"{MemberPart1.StringValue}\" to an object", e, false);
+                            }
                         }
                         else
                         {
