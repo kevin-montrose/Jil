@@ -1170,14 +1170,14 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ProxyFloat_ThunkWriter(ref ThunkWriter writer, float f)
         {
-            writer.Write(f);
+            writer.Write(f.ToString("R", CultureInfo.InvariantCulture));
         }
 
         static readonly MethodInfo ProxyDouble_ThunkWriter = typeof(Methods).GetMethod("_ProxyDouble_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void _ProxyDouble_ThunkWriter(ref ThunkWriter writer, double d)
         {
-            writer.Write(d);
+            writer.Write(d.ToString("R", CultureInfo.InvariantCulture));
         }
 
         static readonly MethodInfo ProxyDecimal_ThunkWriter = typeof(Methods).GetMethod("_ProxyDecimal_ThunkWriter", BindingFlags.Static | BindingFlags.NonPublic);

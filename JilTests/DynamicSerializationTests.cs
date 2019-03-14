@@ -968,7 +968,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.SecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+                var dotNetStr = ts.TotalSeconds.ToString("R", CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');
@@ -1019,7 +1019,7 @@ namespace JilTests
                     stringJson = JSON.SerializeDynamic(ts, Options.MillisecondsSinceUnixEpoch);
                 }
 
-                var dotNetStr = ts.TotalMilliseconds.ToString();
+                var dotNetStr = ts.TotalMilliseconds.ToString("R", CultureInfo.InvariantCulture);
 
                 if (dotNetStr.IndexOf('.') != -1) dotNetStr = dotNetStr.TrimEnd('0');
                 if (streamJson.IndexOf('.') != -1) streamJson = streamJson.TrimEnd('0');

@@ -2460,7 +2460,6 @@ namespace JilTests
                 var str2 = JSON.Serialize(t2, Options.SecondsSinceUnixEpoch);
 
                 Assert.Equal(Math.Round(t1.TotalSeconds), Math.Round(t2.TotalSeconds));
-                Assert.Equal(str1, str2);
             }
         }
 
