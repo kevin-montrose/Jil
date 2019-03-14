@@ -3,6 +3,7 @@
     <TargetFrameworks>net452;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
     <xUnitVersion>2.4.0-beta.1.build3958</xUnitVersion>
   </PropertyGroup>
+  
   <ItemGroup>
     <ProjectReference Include="..\Jil\Jil.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
@@ -13,11 +14,18 @@
 
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
+  
   <ItemGroup Condition="$(TargetFramework) == 'net45'">
     <ProjectReference Include="..\Benchmark\Benchmark.csproj" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update=".\DeserializeTests.DegeneratelyLarge.cs">
+      <DependentUpon>.\DeserializeTests.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
