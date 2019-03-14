@@ -26,6 +26,9 @@ namespace Jil
         /// <summary>
         /// If non-null, the decorated member's name in serialization will match
         /// the value of Name.
+        /// 
+        /// When deserializing, Name is used to map to a member.  This mapping is
+        /// case sensitive.
         /// </summary>
         public string Name { get; set; }
         /// <summary>

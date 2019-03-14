@@ -50,6 +50,8 @@ The first time Jil is used to deserialize a given configuration and type pair, i
 Subsequent invocations will be much faster, so if a consistently fast runtime is necessary in your code you may want to "prime the pump"
 with an earlier "throw away" deserialization.
 
+Jil is case sensitive as a rule, so when deserializing make sure your member names match what is in your JSON.
+
 ### Dynamic Deserialization
 
 ```C#
