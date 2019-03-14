@@ -6538,6 +6538,28 @@ namespace JilTests
             Assert.Null(res.Item);
         }
 
+        [Fact]
+        public void FloatRoundTrip() // also issue #320
+        {
+            const float EXACT = 100921.688f;
+            
+            // stream
+            {
+                using (var str = new StringWriter())
+                {
+                    JSON.Serialize(EXACT, str);
+                    var val = str.ToString();
+                    Assert.Equal(EXACT.ToString("R"), val);
+                }
+            }
+
+            // string
+            {
+                var val = JSON.Serialize(EXACT);
+                Assert.Equal(EXACT.ToString("R"), val);
+            }
+        }
+
 #if !DEBUG
 #region SlowSpinUp Types
 
