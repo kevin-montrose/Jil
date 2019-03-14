@@ -54,6 +54,7 @@
     <DefineConstants>$(DefineConstants);STRONG_NAME</DefineConstants>
     <PackageReleaseNotes>Numerous bug fixes</PackageReleaseNotes>
     <PackageId>Jil.StrongName</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
     <None Include="Properties\Jil.StrongName.snk" />
