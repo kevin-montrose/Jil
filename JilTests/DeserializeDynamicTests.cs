@@ -193,8 +193,9 @@ namespace JilTests
                     string key = kv.Key;
                     dynamic val = kv.Value;
 
-                    switch(c){
-                        case 0: 
+                    switch (c)
+                    {
+                        case 0:
                             Assert.Equal("hello", key);
                             Assert.Equal(123, (int)val);
                             break;
@@ -1495,7 +1496,7 @@ namespace JilTests
         }
 
         [Fact]
-        public void Issue143DateTime() 
+        public void Issue143DateTime()
         {
             var date = new DateTime(21, DateTimeKind.Utc);
             var str = JSON.Serialize(date, Options.ISO8601);
@@ -1504,7 +1505,7 @@ namespace JilTests
         }
 
         [Fact]
-        public void Issue143DateTimeFractionOverflow() 
+        public void Issue143DateTimeFractionOverflow()
         {
             var date = new DateTime(21, DateTimeKind.Utc);
             var str = "\"0001-01-01T00:00:00.000002100001Z\"";
@@ -1513,7 +1514,7 @@ namespace JilTests
         }
 
         [Fact]
-        public void Issue143TimeSpan() 
+        public void Issue143TimeSpan()
         {
             var span = new TimeSpan(21);
             var str = JSON.Serialize(span, Options.ISO8601);
@@ -1522,7 +1523,7 @@ namespace JilTests
         }
 
         [Fact]
-        public void Issue143TimeSpanFractionOverflow() 
+        public void Issue143TimeSpanFractionOverflow()
         {
             var span = new TimeSpan(21);
             var str = "\"PT0.000002100001S\"";
@@ -1531,7 +1532,7 @@ namespace JilTests
         }
 
         [Fact]
-        public void Issue143DateTimeOffset() 
+        public void Issue143DateTimeOffset()
         {
             var offset = new DateTimeOffset(new DateTime(21, DateTimeKind.Utc), TimeSpan.Zero);
             var str = JSON.Serialize(offset, Options.ISO8601);
@@ -1541,7 +1542,7 @@ namespace JilTests
 
 
         [Fact]
-        public void Issue143DateTimeOffsetFractionOverflow() 
+        public void Issue143DateTimeOffsetFractionOverflow()
         {
             var offset = new DateTimeOffset(new DateTime(21, DateTimeKind.Utc), TimeSpan.Zero);
             var str = "\"0001-01-01T00:00:00.000002100001Z\"";
@@ -2303,7 +2304,7 @@ namespace JilTests
                     string key = kv.Key;
                     dynamic val = kv.Value;
 
-                    if(key == "hello") 
+                    if (key == "hello")
                     {
                         if (hello)
                         {
@@ -2355,7 +2356,7 @@ namespace JilTests
                 var str1 = JSON.Serialize(now, Options.MillisecondsSinceUnixEpoch);
                 var dyn = JSON.DeserializeDynamic(str1, Options.MillisecondsSinceUnixEpoch);
                 var dto = (DateTimeOffset)dyn;
-                
+
                 var str2 = JSON.Serialize(dto, Options.MillisecondsSinceUnixEpoch);
 
                 Assert.Equal(str1, str2);
@@ -2705,11 +2706,11 @@ namespace JilTests
             {
                 var dyn = JSON.DeserializeDynamic("[123, \"hello\", 456.7]");
                 System.ComponentModel.TypeConverter tc = System.ComponentModel.TypeDescriptor.GetConverter(dyn);
-                
+
                 Assert.True(tc.CanConvertTo(typeof(System.Collections.IEnumerable)));
                 var e = (System.Collections.IEnumerable)tc.ConvertTo(dyn, typeof(System.Collections.IEnumerable));
                 Assert.Equal(3, e.Cast<dynamic>().Count());
-                
+
                 tc = System.ComponentModel.TypeDescriptor.GetConverter(e.Cast<dynamic>().ElementAt(0));
                 Assert.True(tc.CanConvertTo(typeof(int)));
                 Assert.Equal(123, (int)tc.ConvertTo(e.Cast<dynamic>().ElementAt(0), typeof(int)));
@@ -2744,7 +2745,7 @@ namespace JilTests
                 Assert.True(tc.CanConvertTo(typeof(IDictionary<string, dynamic>)));
                 var d = (Dictionary<string, dynamic>)tc.ConvertTo(dyn, typeof(IDictionary<string, dynamic>));
                 Assert.Equal(3, d.Count);
-                Assert.True(d.ContainsKey("hello"));                
+                Assert.True(d.ContainsKey("hello"));
                 Assert.True(d.ContainsKey("world"));
                 Assert.True(d.ContainsKey("goodbye"));
 
@@ -2850,11 +2851,18 @@ namespace JilTests
 #endif
 
         [Fact]
-        public void Issue134() {
+        public void Issue134()
+        {
             var json = "{\"data\":{\"id\":\"1\",\"name\":null,\"url\":\"http://www.google.com\"}}";
             var result = JSON.DeserializeDynamic(json); // or JSON.DeserializeDynamic(json);
             var name = result.data["name"];
             Assert.Null(name);
+        }
+
+        [Fact]
+        public void Issue316()
+        {
+            Assert.Throws<DeserializationException>(() => JSON.DeserializeDynamic(@"{""menu"":{""id"":1,""pop"":""X"",""pop"":{""a"":[{""click"":""Open()""},{""click"":""Close()""}]}}}"));
         }
     }
 }
