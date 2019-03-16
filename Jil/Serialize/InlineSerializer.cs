@@ -2301,6 +2301,7 @@ namespace Jil.Serialize
 
                 // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
                 {
+                    // if(1 > countVar) goto done;
                     Emit.LoadConstant(1);                   // 1
                     loadList();                             // 1 IList<>
                     Emit.CallVirtual(countMtd);             // 1 int
@@ -2515,6 +2516,12 @@ namespace Jil.Serialize
                 return;
             }
 
+            if (listType.IsValueType() && listType.FullName.StartsWith("System.Collections.Immutable.ImmutableArray"))
+            {
+                WriteImmutableArray(listMember, listType, inLocal);
+                return;
+            }
+
             if (UseFastLists)
             {
                 if (listType.IsValueType())
@@ -2696,6 +2703,132 @@ namespace Jil.Serialize
             WriteString("]");
 
             Emit.MarkLabel(end);
+        }
+
+        void WriteImmutableArray(MemberInfo listMember, Type listType, Sigil.Local inLocal = null)
+        {
+            Sigil.Local BoxListTypeAs(Type type)
+            {
+                var result = Emit.DeclareLocal(type);
+                if (inLocal != null)
+                {
+                    Emit.LoadLocal(inLocal);    // ImmutableArray<T>
+                }
+                else
+                {
+                    Emit.LoadArgument(1);       // ImmutableArray<T>
+                }
+                Emit.Box(listType);             // object
+                Emit.CastClass(type);           // IList<T>/type
+                Emit.StoreLocal(result);        // --empty--
+                return result;
+            }
+
+            var listInterface = listType.GetReadOnlyListInterface();
+            var accessorMtd = listInterface.GetProperty("Item").GetMethod; // this[i]
+            var collectionInterface = listType.GetReadOnlyCollectionInterface();
+            var countMtd = collectionInterface.GetProperty("Count").GetMethod;
+            var elementType = collectionInterface.GetGenericArguments()[0];
+            var isRecursive = RecursiveTypes.ContainsKey(elementType);
+            var preloadTextWriter = NeedsPreloadTextWriter(listMember, elementType);
+
+            var done = Emit.DefineLabel();
+
+            if (inLocal != null)
+            {
+                Emit.LoadLocalAddress(inLocal); // ImmutableArray`1*
+            }
+            else
+            {
+                Emit.LoadArgumentAddress(1);    // ImmutableArray`1*
+            }
+
+            WriteString("[");
+
+            var isDefaultOrEmpty = listType.GetProperty("IsDefaultOrEmpty").GetMethod;
+            Emit.CallVirtual(isDefaultOrEmpty);        // bool
+            Emit.BranchIfTrue(done);                   // --empty--
+
+            using (var boxedList = BoxListTypeAs(listInterface))
+            using (var boxedCollection = BoxListTypeAs(collectionInterface))
+            using (var countVar = Emit.DeclareLocal<int>())
+            {
+                Emit.LoadLocal(boxedCollection);            // IReadOnlyCollection<T>
+                Emit.CallVirtual(countMtd);                 // int
+                Emit.StoreLocal(countVar);                  // --empty--
+
+                // Do the whole first element before the loop starts, so we don't need a branch to emit a ','
+                {
+                    if (isRecursive)
+                    {
+                        var loc = RecursiveTypes[elementType];
+                        Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                    }
+
+                    if (preloadTextWriter)
+                    {
+                        Emit.LoadArgument(0);               // Action<>? TextWriter
+                    }
+
+                    Emit.LoadLocal(boxedList);              // Action<>? TextWriter IList<>
+                    Emit.LoadConstant(0);                   // Action<>? TextWriter IList<> 0
+                    Emit.CallVirtual(accessorMtd);          // Action<>? TextWriter type
+
+                    WriteElement(listMember, elementType);  // --empty--
+                }
+
+                using (var i = Emit.DeclareLocal<int>())
+                {
+                    Emit.LoadConstant(1);                   // 1
+                    Emit.StoreLocal(i);                     // --empty--
+
+                    var loop = Emit.DefineLabel();
+
+                    Emit.MarkLabel(loop);                   // --empty--
+
+                    Emit.LoadLocal(countVar);               // length
+                    Emit.LoadLocal(i);                      // length i
+                    Emit.BranchIfEqual(done);               // --empty--
+
+                    if (isRecursive)
+                    {
+                        var loc = RecursiveTypes[elementType];
+
+                        Emit.LoadLocal(loc);                // Action<TextWriter, elementType>
+                    }
+
+                    if (preloadTextWriter)
+                    {
+                        Emit.LoadArgument(0);               // Action<>? TextWriter
+                    }
+
+                    Emit.LoadLocal(boxedList);              // Action<>? TextWriter? IList<>
+                    Emit.LoadLocal(i);                      // Action<>? TextWriter? IList<> i
+                    Emit.CallVirtual(accessorMtd);          // Action<>? TextWriter? type
+
+                    if (PrettyPrint)
+                    {
+                        WriteString(", ");                  // Action<>? TextWriter? type
+                    }
+                    else
+                    {
+                        WriteString(",");                   // Action<>? TextWriter? type
+                    }
+
+                    WriteElement(listMember, elementType);  // --empty--
+
+                    Emit.LoadLocal(i);                      // i
+                    Emit.LoadConstant(1);                   // i 1
+                    Emit.Add();                             // i+1
+                    Emit.StoreLocal(i);                     // --empty--
+
+                    Emit.Branch(loop);                      // --empty--
+                }
+            }
+
+
+            Emit.MarkLabel(done);
+            WriteString("]");
         }
 
         void WriteElement(MemberInfo listMember, Type elementType)
@@ -4476,7 +4609,6 @@ namespace Jil.Serialize
             try
             {
                 var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, false, true);
-
                 ret = obj.BuildToString();
 
                 exceptionDuringBuild = null;
