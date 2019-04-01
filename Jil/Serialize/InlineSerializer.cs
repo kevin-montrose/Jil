@@ -563,16 +563,10 @@ namespace Jil.Serialize
             //  - TextWriter
 
             var primitiveMember = primitiveWrapperType.GetPrimitiveWrapperPropertyOrField();
-            Type primitiveType;
-            if (primitiveMember is FieldInfo)
-            {
-                primitiveType = ((FieldInfo)primitiveMember).FieldType;
-            }
-            else
-            {
-                primitiveType = ((PropertyInfo)primitiveMember).PropertyType;
-            }
-
+            var primitiveType = (primitiveMember is FieldInfo primitiveField)
+                ? primitiveField.FieldType
+                : ((PropertyInfo)primitiveMember).PropertyType;
+            
             var done = Emit.DefineLabel(GetNextName());
 
             using (var loc = Emit.DeclareLocal(primitiveWrapperType, GetNextName()))
@@ -1776,9 +1770,9 @@ namespace Jil.Serialize
                         Emit.LoadArgument(1);                           // [obj(*?)] ForType(*?)
                     }
 
-                    if (memberType is PropertyInfo)
+                    if (memberType is PropertyInfo propertyType)
                     {
-                        LoadProperty((PropertyInfo)memberType);         // [obj(*?)]  Type
+                        LoadProperty(propertyType);                     // [obj(*?)]  Type
                     }
                     else
                     {

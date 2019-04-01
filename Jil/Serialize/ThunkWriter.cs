@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Jil.Serialize
 {
-    delegate void StringThunkDelegate<T>(ref ThunkWriter writer, T data, int depth);
+    delegate void StringThunkDelegate<in T>(ref ThunkWriter writer, T data, int depth);
 
     #region Strings and Enums and oh god why
 

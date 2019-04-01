@@ -264,7 +264,7 @@ namespace Jil.Common
             where T : Attribute
         {
             var info = type.GetTypeInfo();
-            var data = info.CustomAttributes.Where(a => a.AttributeType == typeof(T)).SingleOrDefault();
+            var data = info.CustomAttributes.SingleOrDefault(a => a.AttributeType == typeof(T));
 
             if (data == null) return null;
 
@@ -779,10 +779,10 @@ namespace Jil.Common
         public static bool ShouldUseMember(this MemberInfo memberInfo)
         {
             var jilDirectiveAttributes = memberInfo.GetCustomAttributes<JilDirectiveAttribute>();
-            if (jilDirectiveAttributes.Count() > 0) return !jilDirectiveAttributes.Any(d => d.Ignore);
+            if (jilDirectiveAttributes.Any()) return !jilDirectiveAttributes.Any(d => d.Ignore);
 
             var ignoreDataMemberAttributes = memberInfo.GetCustomAttributes<IgnoreDataMemberAttribute>();
-            return ignoreDataMemberAttributes.Count() == 0;
+            return !ignoreDataMemberAttributes.Any();
         }
 
         public static MethodInfo ShouldSerializeMethod(this PropertyInfo prop, Type serializingType)
@@ -792,8 +792,7 @@ namespace Jil.Common
             var ret =
                 serializingType
                     .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                    .Where(m => m.Name == mtdName && m.ReturnType == typeof(bool) && m.GetParameters().Length == 0)
-                    .SingleOrDefault();
+                    .FirstOrDefault(m => m.Name == mtdName && m.ReturnType == typeof(bool) && m.GetParameters().Length == 0);
 
             return ret;
         }
@@ -1064,13 +1063,19 @@ namespace Jil.Common
         // From: http://www.ietf.org/rfc/rfc4627.txt?number=4627
         public static string JsonEscape(this string str, bool jsonp)
         {
-            var ret = "";
+            var ret = new char[str.Length << 1];
+            var index = 0;
             foreach (var c in str)
             {
-                ret += c.JsonEscape(jsonp);
+                var escape = c.JsonEscape(jsonp);
+                ret[index++] = escape[0];
+                if(escape.Length != 1)
+                {
+                    ret[index++] = escape[1];
+                }
             }
 
-            return ret;
+            return new string(ret, 0, index);
         }
 
         public static void JsonEscapeFast(this string str, bool jsonp, System.IO.TextWriter output)

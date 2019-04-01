@@ -16,6 +16,9 @@ namespace Jil
     /// </summary>
     public sealed class JSON
     {
+        /// <summary>No intialization.</summary>
+        private JSON() { }
+
         static Options DefaultOptions = Options.Default;
 
         /// <summary>
@@ -4639,12 +4642,12 @@ switch (options.UseDateTimeFormat)
         {
             if (text == null)
             {
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(text));
             }
 
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (type == typeof(object))
