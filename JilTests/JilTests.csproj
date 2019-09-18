@@ -1,23 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
-    <xUnitVersion>2.4.0-beta.1.build3958</xUnitVersion>
+    <TargetFrameworks>net461;netcoreapp2.2;netcoreapp3.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netcoreapp3.0'">
+    <DefineConstants>BUFFER_AND_SEQUENCE</DefineConstants>
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Jil\Jil.csproj" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <ProjectReference Include="..\Benchmark\Benchmark.csproj" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="xunit" Version="$(xUnitVersion)" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="$(xUnitVersion)" />
-
+    <PackageReference Include="System.IO.Pipelines" Version="4.5.3" />
     <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.2' or $(TargetFramework) == 'netcoreapp3.0'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
   </ItemGroup>
   
   <ItemGroup Condition="$(TargetFramework) == 'net461'">
-    <ProjectReference Include="..\Benchmark\Benchmark.csproj" />
-    <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="xunit" Version="2.4.0-beta.1.build3958" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.0-beta.1.build3958" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.4.0-beta.1.build3958" />
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />

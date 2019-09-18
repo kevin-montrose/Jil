@@ -15,7 +15,7 @@ using Xunit;
 
 namespace JilTests
 {
-    public class SerializeTests
+    public partial class SerializeTests
     {
 #if !DEBUG
         public class MobileFeed
