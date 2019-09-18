@@ -11,7 +11,7 @@ using Xunit;
 
 namespace JilTests
 {
-    public class DynamicSerializationTests
+    public partial class DynamicSerializationTests
     {
         [Fact]
         public void ToStringJSON()

@@ -19,7 +19,6 @@ namespace Jil.Serialize
             {
                 // implies what we were given was too small
                 var requestLength = Current.Length * 2;
-                Builder.Advance(0);
                 Current = Builder.GetSpan(requestLength);
             }
             else
@@ -36,7 +35,7 @@ namespace Jil.Serialize
         {
             Builder = buffer;
             Start = 0;
-            Current = Builder.GetSpan();
+            Current = Span<char>.Empty;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -211,7 +210,11 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void End()
         {
-            Builder.Advance(Start);
+            if (Start > 0)
+            {
+                Builder.Advance(Start);
+            }
+
             Current = Span<char>.Empty;
             Start = 0;
             Builder = null;

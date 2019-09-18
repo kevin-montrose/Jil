@@ -285,7 +285,7 @@ namespace Jil.SerializeDynamic
         public void Init(IBufferWriter<char> inner)
         {
             Inner = inner;
-            Current = inner.GetSpan();
+            Current = Span<char>.Empty;
             Start = 0;
         }
 
@@ -334,7 +334,10 @@ namespace Jil.SerializeDynamic
             }
 
             // force the text writer to finish
-            Inner.Advance(0);
+            if (Start > 0)
+            {
+                Inner.Advance(Start);
+            }
             Start = 0;
             Current = Span<char>.Empty;
 
@@ -361,7 +364,11 @@ namespace Jil.SerializeDynamic
                 return;
             }
 
-            Inner.Advance(Start);
+            if (Start > 0)
+            {
+                Inner.Advance(Start);
+            }
+
             Current = Span<char>.Empty;
             Start = 0;
             Inner = null;
