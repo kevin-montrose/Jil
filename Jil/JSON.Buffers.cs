@@ -18,7 +18,7 @@ namespace Jil
         {
             var wrapped = new StringBuilderBufferWriter();
             Serialize<T>(data, wrapped, options);
-            return wrapped.ToString();
+            return wrapped.GetString();
         }
 
         /// <summary>
