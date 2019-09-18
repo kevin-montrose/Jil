@@ -328,6 +328,11 @@ namespace Jil.SerializeDynamic
 
         public TextWriter AsWriter()
         {
+            if(Writer != null)
+            {
+                return Writer;
+            }
+
             // force the text writer to finish
             Inner.Advance(0);
             Start = 0;
@@ -339,6 +344,11 @@ namespace Jil.SerializeDynamic
 
         public void DoneWithWriter()
         {
+            if(Writer != null)
+            {
+                return;
+            }
+
             Stub.End();
             Stub = null;
         }
