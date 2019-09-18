@@ -63,6 +63,7 @@ namespace Jil
             var thunk = new WriterProxy();
             thunk.Init(output);
             DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
+            thunk.End();
         }
     }
 }

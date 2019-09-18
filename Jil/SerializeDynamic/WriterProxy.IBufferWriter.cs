@@ -352,6 +352,20 @@ namespace Jil.SerializeDynamic
             Stub.End();
             Stub = null;
         }
+
+        public void End()
+        {
+            if(Writer != null)
+            {
+                Writer = null;
+                return;
+            }
+
+            Inner.Advance(Start);
+            Current = Span<char>.Empty;
+            Start = 0;
+            Inner = null;
+        }
     }
 }
 #endif

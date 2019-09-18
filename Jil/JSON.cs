@@ -111,6 +111,7 @@ namespace Jil
             var thunk = new WriterProxy();
             thunk.InitWithWriter(output);
             DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
+            thunk.End();
         }
 
         /// <summary>

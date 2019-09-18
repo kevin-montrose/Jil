@@ -28,6 +28,11 @@ namespace Jil.SerializeDynamic
         }
 
         public void DoneWithWriter(){ }
+
+        public void End()
+        {
+            Inner = null;
+        }
     }
 }
 #endif
