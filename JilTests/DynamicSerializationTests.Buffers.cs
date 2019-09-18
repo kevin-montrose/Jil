@@ -84,6 +84,8 @@ namespace JilTests
             return new string(charSpan);
         }
 
+        // todo: basically everyhting needs to be tested like this
+
         [Fact]
         public async Task HeterogenousCollectionAsync()
         {
