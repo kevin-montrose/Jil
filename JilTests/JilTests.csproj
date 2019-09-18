@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452;netcoreapp1.0;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.0</TargetFrameworks>
     <xUnitVersion>2.4.0-beta.1.build3958</xUnitVersion>
   </PropertyGroup>
   
@@ -15,7 +15,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   
-  <ItemGroup Condition="$(TargetFramework) == 'net45'">
+  <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <ProjectReference Include="..\Benchmark\Benchmark.csproj" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
     <Reference Include="System" />

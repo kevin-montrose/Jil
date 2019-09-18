@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>Jil</AssemblyName>
-    <Version>2.17.0</Version>
-    <TargetFrameworks>net45;netstandard1.6;netstandard2.0</TargetFrameworks>
+    <Version>3.0.0</Version>
+    <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
     <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -16,10 +16,7 @@
     <PackageId>Jil</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Sigil" Version="4.7.0" />
-  </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework) == 'net45'">
+  <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -29,17 +26,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
-  <ItemGroup Condition="$(TargetFramework) == 'netstandard1.6'">
-    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
-    <PackageReference Include="System.Collections" Version="4.3.0" />
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel" Version="4.3.0" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
-    <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-  </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.1'">
     <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
   </ItemGroup>
   <ItemGroup>
@@ -49,5 +39,8 @@
     <Compile Update="Deserialize\Methods.*.cs" DependentUpon="Methods.cs" />
     <Compile Update="Serialize\Methods.*.cs" DependentUpon="Methods.cs" />
     <None Include="OptionsGeneration.linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Sigil" Version="5.0.0" />
   </ItemGroup>
 </Project>
