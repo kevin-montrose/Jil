@@ -69,6 +69,8 @@ namespace JilTests
             return new string(charSpan);
         }
 
+        // todo: basically everything needs to be tested like this
+
         [Fact]
         public async Task SerializeToBufferAsync()
         {
