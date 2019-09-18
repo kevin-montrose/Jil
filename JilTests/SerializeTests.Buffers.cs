@@ -48,12 +48,14 @@ namespace JilTests
             {
                 var res = await reader.ReadAsync();
 
-                if (res.IsCompleted) break;
-
                 foreach (var seq in res.Buffer)
                 {
                     bytes.AddRange(seq.ToArray());
                 }
+
+                reader.AdvanceTo(res.Buffer.End);
+
+                if (res.IsCompleted) break;
             }
 
             return FromBytes(bytes);
@@ -73,7 +75,8 @@ namespace JilTests
             var pipe = new Pipe();
             JSON.Serialize(new { Foo = 123 }, new CharWriter(pipe.Writer));
             await pipe.Writer.FlushAsync();
-
+            pipe.Writer.Complete();
+            
             var res = await ReadToEndAsync(pipe.Reader);
             Assert.Equal("{\"Foo\":123}", res);
         }
