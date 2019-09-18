@@ -13,6 +13,11 @@
     <Description>A fast JSON serializer and deserializer</Description>
     <Copyright>Copyright © Kevin Montrose 2013 - 2019</Copyright>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netstandard2.1'">
+    <DefineConstants>BUFFER_AND_SEQUENCE</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Sigil" Version="4.7.0" />
   </ItemGroup>

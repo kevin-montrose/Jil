@@ -16,6 +16,11 @@
     <PackageId>Jil</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <PropertyGroup Condition="$(TargetFramework) == 'netstandard2.1'">
+    <DefineConstants>BUFFER_AND_SEQUENCE</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
