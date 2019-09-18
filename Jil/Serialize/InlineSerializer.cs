@@ -4483,6 +4483,7 @@ namespace Jil.Serialize
                 {
                     var writer = proxy.AsWriter();
                     inner(writer, data, depth);
+                    proxy.DoneWithWriter();
                 };
         }
 

@@ -1,5 +1,7 @@
 ﻿#if !BUFFER_AND_SEQUENCE
 using Jil.Serialize;
+using Jil.SerializeDynamic;
+using System.IO;
 
 namespace Jil
 {
