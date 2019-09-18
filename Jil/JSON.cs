@@ -61,7 +61,9 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            DynamicSerializer.Serialize(output, (object)data, options ?? DefaultOptions, 0);
+            var thunk = new WriterProxy();
+            thunk.Init(output);
+            DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
         }
 
         /// <summary>
@@ -2347,7 +2349,7 @@ namespace Jil
         static StringThunkDelegate<T> GetThunkerDelegate<T>(Options options)
         {
             // Start OptionsGeneration.linq generated content: GetThunkerDelegate 
-switch (options.UseDateTimeFormat)
+            switch (options.UseDateTimeFormat)
             {
                 case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
                     switch (options.ShouldPrettyPrint)

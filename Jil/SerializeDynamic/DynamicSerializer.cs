@@ -16,6 +16,8 @@ using System.Reflection;
 
 namespace Jil.SerializeDynamic
 {
+    internal delegate void WriterProxyDelegate<T>(ref WriterProxy stream, T value, int depth);
+
     class DynamicSerializer
     {
         static readonly Hashtable GetGetMemberCache = new Hashtable();
@@ -47,7 +49,7 @@ namespace Jil.SerializeDynamic
         }
 
         static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
-        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, TextWriter stream, Options opts, int depth)
+        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, ref WriterProxy stream, Options opts, int depth)
         {
             var quoteColon = "\":";
             if (opts.ShouldPrettyPrint)
@@ -77,20 +79,20 @@ namespace Jil.SerializeDynamic
 
                     if (opts.ShouldPrettyPrint)
                     {
-                        LineBreakAndIndent(stream, depth);
+                        LineBreakAndIndent(ref stream, depth);
                     }
 
                     stream.Write('"');
-                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: stream);
+                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: ref stream);
                     stream.Write(quoteColon);
 
-                    Serialize(stream, val, opts, depth + 1);
+                    Serialize(ref stream, val, opts, depth + 1);
                 }
 
                 depth--;
                 if (opts.ShouldPrettyPrint)
                 {
-                    LineBreakAndIndent(stream, depth);
+                    LineBreakAndIndent(ref stream, depth);
                 }
             }
             else
@@ -115,28 +117,28 @@ namespace Jil.SerializeDynamic
 
                     if (opts.ShouldPrettyPrint)
                     {
-                        LineBreakAndIndent(stream, depth);
+                        LineBreakAndIndent(ref stream, depth);
                     }
 
                     stream.Write('"');
 
-                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: stream);
+                    memberName.JsonEscapeFast(jsonp: opts.IsJSONP, output: ref stream);
                     stream.Write(quoteColon);
 
-                    Serialize(stream, val, opts, depth + 1);
+                    Serialize(ref stream, val, opts, depth + 1);
                 }
 
                 depth--;
                 if (opts.ShouldPrettyPrint)
                 {
-                    LineBreakAndIndent(stream, depth);
+                    LineBreakAndIndent(ref stream, depth);
                 }
             }
 
             stream.Write('}');
         }
 
-        static void LineBreakAndIndent(TextWriter stream, int depth)
+        static void LineBreakAndIndent(ref WriterProxy stream, int depth)
         {
             stream.Write('\n');
 
@@ -162,7 +164,7 @@ namespace Jil.SerializeDynamic
 
         static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();
         static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod("_GetSemiStaticInlineSerializerFor", BindingFlags.NonPublic | BindingFlags.Static);
-        static Action<TextWriter, ForType, int> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
+        static WriterProxyDelegate<ForType> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
         {
             var type = typeof(ForType);
 
@@ -178,7 +180,7 @@ namespace Jil.SerializeDynamic
 
             var key = Tuple.Create(treatEnumerationAs, typeof(ForType), opts);
 
-            var ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
+            var ret = (WriterProxyDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
             if (ret != null) return ret;
 
             var cacheType = OptionsLookup.GetTypeCacheFor(opts);
@@ -186,26 +188,28 @@ namespace Jil.SerializeDynamic
 
             lock (GetSemiStaticInlineSerializerForCache)
             {
-                ret = (Action<TextWriter, ForType, int>)GetSemiStaticInlineSerializerForCache[key];
+                ret = (WriterProxyDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
                 if (ret != null) return ret;
 
-                GetSemiStaticInlineSerializerForCache[key] = ret = (Action<TextWriter, ForType, int>)builder.Invoke(null, new object[] { dynamicMember, cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
+                GetSemiStaticInlineSerializerForCache[key] = ret = (WriterProxyDelegate<ForType>)builder.Invoke(null, new object[] { dynamicMember, cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
             }
 
             return ret;
         }
 
+        private delegate void SemiStaticSerializerDelegate(MemberInfo member, ref WriterProxy stream, object value, int depth);
+
         static Hashtable GetSemiStaticSerializerForCache = new Hashtable();
-        static Action<MemberInfo, TextWriter, object, int> GetSemiStaticSerializerFor(Type type, Options opts)
+        static SemiStaticSerializerDelegate GetSemiStaticSerializerFor(Type type, Options opts)
         {
             var key = Tuple.Create(type, opts);
-            var ret = (Action<MemberInfo, TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+            var ret = (SemiStaticSerializerDelegate)GetSemiStaticSerializerForCache[key];
             if (ret != null) return ret;
 
             var getSemiStaticSerializer = GetSemiStaticInlineSerializerFor.MakeGenericMethod(type);
-            var invoke = typeof(Action<,,>).MakeGenericType(typeof(TextWriter), type, typeof(int)).GetMethod("Invoke");
+            var invoke = typeof(WriterProxyDelegate<>).MakeGenericType(type).GetMethod("Invoke");
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(TextWriter), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(WriterProxy).MakeByRefType(), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
             var optsField = OptionsLookup.GetOptionsFieldFor(opts);
 
@@ -230,23 +234,23 @@ namespace Jil.SerializeDynamic
 
             lock (GetSemiStaticSerializerForCache)
             {
-                ret = (Action<MemberInfo, TextWriter, object, int>)GetSemiStaticSerializerForCache[key];
+                ret = (SemiStaticSerializerDelegate)GetSemiStaticSerializerForCache[key];
                 if (ret != null) return ret;
 
-                GetSemiStaticSerializerForCache[key] = ret = emit.CreateDelegate<Action<MemberInfo, TextWriter, object, int>>(optimizationOptions: Utils.DelegateOptimizationOptions);
+                GetSemiStaticSerializerForCache[key] = ret = emit.CreateDelegate<SemiStaticSerializerDelegate>(optimizationOptions: Utils.DelegateOptimizationOptions);
             }
 
             return ret;
         }
 
-        static void SerializeSemiStatically(MemberInfo dynamicMember, TextWriter stream, object val, Options opts, int depth)
+        static void SerializeSemiStatically(MemberInfo dynamicMember, ref WriterProxy stream, object val, Options opts, int depth)
         {
             var serializer = GetSemiStaticSerializerFor(val.GetType(), opts);
 
-            serializer(dynamicMember, stream, val, depth);
+            serializer(dynamicMember, ref stream, val, depth);
         }
 
-        static void SerializeList(TextWriter stream, IEnumerable e, Options opts, int depth)
+        static void SerializeList(ref WriterProxy stream, IEnumerable e, Options opts, int depth)
         {
             var comma = ",";
             if (opts.ShouldPrettyPrint)
@@ -265,7 +269,7 @@ namespace Jil.SerializeDynamic
                 }
                 isFirst = false;
 
-                Serialize(stream, i, opts, depth);
+                Serialize(ref stream, i, opts, depth);
             }
             stream.Write("]");
         }
@@ -774,13 +778,13 @@ namespace Jil.SerializeDynamic
         }
 
         public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
-        public static void Serialize(TextWriter stream, object obj, Options opts, int depth)
+        public static void Serialize(ref WriterProxy stream, object obj, Options opts, int depth)
         {
-            SerializeInternal(null, stream, obj, opts, depth);
+            SerializeInternal(null, ref stream, obj, opts, depth);
         }
 
         public static readonly MethodInfo SerializeInternalMtd = typeof(DynamicSerializer).GetMethod("SerializeInternal", BindingFlags.NonPublic | BindingFlags.Static);
-        private static void SerializeInternal(MemberInfo dynamicMember, TextWriter stream, object obj, Options opts, int depth) 
+        private static void SerializeInternal(MemberInfo dynamicMember, ref WriterProxy stream, object obj, Options opts, int depth) 
         { 
             if (obj == null)
             {
@@ -800,7 +804,7 @@ namespace Jil.SerializeDynamic
                 bool bit;
                 if(CanBeBool(dynObject, out bit))
                 {
-                    Serialize(stream, bit, opts, depth);
+                    Serialize(ref stream, bit, opts, depth);
                     return;
                 }
 
@@ -813,64 +817,64 @@ namespace Jil.SerializeDynamic
                         stream.Write('-');
                     }
 
-                    Serialize(stream, integer, opts, depth);
+                    Serialize(ref stream, integer, opts, depth);
                     return;
                 }
 
                 double floatingPoint;
                 if (CanBeFloatingPoint(dynObject, out floatingPoint))
                 {
-                    Serialize(stream, floatingPoint, opts, depth);
+                    Serialize(ref stream, floatingPoint, opts, depth);
                     return;
                 }
 
                 DateTimeOffset dto;
                 if(CanBeDateTimeOffset(dynObject, out dto))
                 {
-                    Serialize(stream, dto, opts, depth);
+                    Serialize(ref stream, dto, opts, depth);
                     return;
                 }
 
                 DateTime dt;
                 if(CanBeDateTime(dynObject, out dt))
                 {
-                    Serialize(stream, dt, opts, depth);
+                    Serialize(ref stream, dt, opts, depth);
                     return;
                 }
 
                 TimeSpan ts;
                 if(CanBeTimeSpan(dynObject, out ts))
                 {
-                    Serialize(stream, ts, opts, depth);
+                    Serialize(ref stream, ts, opts, depth);
                     return;
                 }
 
                 Guid guid;
                 if (CanBeGuid(dynObject, out guid))
                 {
-                    Serialize(stream, guid, opts, depth);
+                    Serialize(ref stream, guid, opts, depth);
                     return;
                 }
 
                 string str;
                 if (CanBeString(dynObject, out str))
                 {
-                    Serialize(stream, str, opts, depth);
+                    Serialize(ref stream, str, opts, depth);
                     return;
                 }
 
                 IEnumerable list;
                 if(CanBeListAndNotDictionary(dynObject, out list))
                 {
-                    SerializeList(stream, list, opts, depth);
+                    SerializeList(ref stream, list, opts, depth);
                     return;
                 }
 
-                SerializeDynamicObject(dynObject, stream, opts, depth);
+                SerializeDynamicObject(dynObject, ref stream, opts, depth);
                 return;
             }
 
-            SerializeSemiStatically(dynamicMember, stream, obj, opts, depth);
+            SerializeSemiStatically(dynamicMember, ref stream, obj, opts, depth);
         }
     }
 }

@@ -2832,25 +2832,33 @@ namespace Jil.Serialize
                     }
                 }
 
-                Emit.LoadArgument(0);               // TextWriter
-
-                if (inLocal != null)
+                using (var loc = Emit.DeclareLocal(typeof(WriterProxy)))
                 {
-                    Emit.LoadLocal(inLocal);        // TextWriter object
+                    var initMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.Init));
+
+                    Emit.LoadLocalAddress(loc);         // WriterProxy*
+                    Emit.LoadArgument(0);               // WriterProxy* TextWriter
+                    Emit.Call(initMtd);                 // -empty-
+                    Emit.LoadLocalAddress(loc);         // WriterProxy*
+
+                    if (inLocal != null)
+                    {
+                        Emit.LoadLocal(inLocal);        // WriterProxy* object
+                    }
+                    else
+                    {
+                        Emit.LoadArgument(1);           // WriterProxy* object
+                    }
+
+                    var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited, this.UnspecifiedDateTimeBehavior, this.SerializationNameFormat);
+                    var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
+
+                    Emit.LoadField(optionsField);       // WriterProxy* object Options
+
+                    Emit.LoadArgument(2);               // WriterProxy* object Options int
+
+                    Emit.Call(serializeMtd);            // void
                 }
-                else
-                {
-                    Emit.LoadArgument(1);           // TextWriter object
-                }
-
-                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited, this.UnspecifiedDateTimeBehavior, this.SerializationNameFormat);
-                var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
-
-                Emit.LoadField(optionsField);       // TextWriter object Options
-
-                Emit.LoadArgument(2);               // TextWriter object Options int
-
-                Emit.Call(serializeMtd);            // void
 
                 return true;
             }
@@ -4464,10 +4472,18 @@ namespace Jil.Serialize
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
-        private static Action<TextWriter, BuildForType, int> _BuildWithDynamism<BuildForType>(MemberInfo dynamicMember, Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
+        private static WriterProxyDelegate<BuildForType> _BuildWithDynamism<BuildForType>(MemberInfo dynamicMember, Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
         {
             var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, true, false);
-            return obj.Build(dynamicMember);
+
+            var inner = obj.Build(dynamicMember);
+
+            return
+                (ref WriterProxy proxy, BuildForType data, int depth) =>
+                {
+                    var writer = proxy.AsWriter();
+                    inner(writer, data, depth);
+                };
         }
 
         public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)
