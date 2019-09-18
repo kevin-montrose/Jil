@@ -290,7 +290,7 @@ namespace Jil.SerializeDynamic
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Init(TextWriter inner)
+        public void InitWithWriter(TextWriter inner)
         {
             Writer = inner;
         }

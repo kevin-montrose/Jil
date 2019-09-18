@@ -2834,7 +2834,7 @@ namespace Jil.Serialize
 
                 using (var loc = Emit.DeclareLocal(typeof(WriterProxy)))
                 {
-                    var initMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.Init));
+                    var initMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.InitWithWriter));
 
                     Emit.LoadLocalAddress(loc);         // WriterProxy*
                     Emit.LoadArgument(0);               // WriterProxy* TextWriter

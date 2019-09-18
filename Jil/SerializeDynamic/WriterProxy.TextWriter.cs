@@ -7,7 +7,7 @@ namespace Jil.SerializeDynamic
     {
         private TextWriter Inner;
 
-        public void Init(TextWriter inner)
+        public void InitWithWriter(TextWriter inner)
         {
             Inner = inner;
         }

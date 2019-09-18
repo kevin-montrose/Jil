@@ -109,7 +109,7 @@ namespace Jil
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
             var thunk = new WriterProxy();
-            thunk.Init(output);
+            thunk.InitWithWriter(output);
             DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
         }
 
