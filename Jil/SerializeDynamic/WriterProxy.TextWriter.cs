@@ -7,6 +7,8 @@ namespace Jil.SerializeDynamic
     {
         private TextWriter Inner;
 
+        private Serialize.ThunkWriter ThunkWriter;
+
         public void InitWithWriter(TextWriter inner)
         {
             Inner = inner;
@@ -27,11 +29,22 @@ namespace Jil.SerializeDynamic
             return Inner;
         }
 
-        public void DoneWithWriter(){ }
+        public void DoneWithWriter() { }
 
         public void End()
         {
+            ThunkWriter = default;
             Inner = null;
+        }
+
+        public Serialize.ThunkWriter AsThunkWriter()
+        {
+            var ret = new Serialize.ThunkWriter();
+            ret.Init();
+
+            ThunkWriter = ret;
+
+            return ret;
         }
     }
 }

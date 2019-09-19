@@ -1,12 +1,6 @@
 using Jil.Serialize;
-using Jil.SerializeDynamic;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Jil.Common;
 
 namespace Jil
@@ -47,28 +41,6 @@ namespace Jil
         }
 
         /// <summary>
-        /// Serializes the given data, returning it as a string.
-        /// 
-        /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
-        /// called with a different Options object.
-        /// 
-        /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
-        /// This is not as fast as calling Serialize with a known type.
-        /// 
-        /// Objects with participate in the DLR will be serialized appropriately, all other types
-        /// will be serialized via reflection.
-        /// </summary>
-        public static string SerializeDynamic(object data, Options options = null)
-        {
-            using (var str = new StringWriter())
-            {
-                SerializeDynamic(data, str, options);
-                return str.ToString();
-            }
-        }
-
-        /// <summary>
         /// Serializes the given data to the provided TextWriter.
         /// 
         /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
@@ -93,26 +65,7 @@ namespace Jil
             GetWriterAction<T>(options)(output, data, 0);
         }
 
-        /// <summary>
-        /// Serializes the given data to the provided TextWriter.
-        /// 
-        /// Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
-        /// the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
-        /// called with a different Options object.
-        /// 
-        /// Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
-        /// This is not as fast as calling Serialize with a known type.
-        /// 
-        /// Objects with participate in the DLR will be serialized appropriately, all other types
-        /// will be serialized via reflection.
-        /// </summary>
-        public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
-        {
-            var thunk = new WriterProxy();
-            thunk.InitWithWriter(output);
-            DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
-            thunk.End();
-        }
+        
 
         /// <summary>
         /// Generated giant switch of option finding via OptionsGeneration.linq

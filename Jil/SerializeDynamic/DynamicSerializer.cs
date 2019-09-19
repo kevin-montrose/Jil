@@ -163,7 +163,7 @@ namespace Jil.SerializeDynamic
         }
 
         static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();
-        static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod("_GetSemiStaticInlineSerializerFor", BindingFlags.NonPublic | BindingFlags.Static);
+        static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod(nameof(_GetSemiStaticInlineSerializerFor), BindingFlags.NonPublic | BindingFlags.Static);
         static WriterProxyDelegate<ForType> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
         {
             var type = typeof(ForType);

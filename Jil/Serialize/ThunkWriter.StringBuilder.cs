@@ -1,5 +1,7 @@
 ﻿#if !BUFFER_AND_SEQUENCE
+using System;
 using System.Globalization;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -7,7 +9,66 @@ namespace Jil.Serialize
 {
     internal ref partial struct ThunkWriter
     {
+        public bool HasValue => Builder != null;
+
         StringBuilder Builder;
+
+        private sealed class StringBuilderTextWriter : TextWriter
+        {
+            public override Encoding Encoding => throw new NotImplementedException();
+
+            private readonly StringBuilder Inner;
+
+            public StringBuilderTextWriter(StringBuilder inner)
+            {
+                Inner = inner;
+            }
+
+            public override void Write(char value)
+            {
+                Inner.Append(value);
+            }
+
+            public override void Write(string value)
+            {
+                Inner.Append(value);
+            }
+
+            public override void Write(bool a)
+            => throw new NotImplementedException();
+
+            public override void Write(char[] a, int b, int c)
+            => throw new NotImplementedException();
+
+            public override void Write(decimal a)
+            => throw new NotImplementedException();
+
+            public override void Write(int a)
+            => throw new NotImplementedException();
+
+            public override void Write(long a)
+            => throw new NotImplementedException();
+
+            public override void Write(object a)
+            => throw new NotImplementedException();
+
+            public override void Write(string a, object b)
+            => throw new NotImplementedException();
+
+            public override void Write(string a, object b, object c)
+            => throw new NotImplementedException();
+
+            public override void Write(string a, object[] b)
+            => throw new NotImplementedException();
+
+            public override void Write(uint a)
+            => throw new NotImplementedException();
+
+            public override void Write(ulong a)
+            => throw new NotImplementedException();
+
+            // todo: rest of overrides
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Init()
@@ -120,6 +181,21 @@ namespace Jil.Serialize
         public string StaticToString()
         {
             return Builder.ToString();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void End(ref SerializeDynamic.WriterProxy proxy)
+        {
+            proxy.Write(StaticToString());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SerializeDynamic.WriterProxy AsWriterProxy()
+        {
+            var ret = new SerializeDynamic.WriterProxy();
+            ret.InitWithWriter(new StringBuilderTextWriter(Builder));
+
+            return ret;
         }
     }
 }

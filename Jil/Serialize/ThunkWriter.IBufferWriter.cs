@@ -8,6 +8,8 @@ namespace Jil.Serialize
 {
     internal ref partial struct ThunkWriter
     {
+        public bool HasValue => Builder != null;
+
         IBufferWriter<char> Builder;
         Span<char> Current;
         int Start;
@@ -202,13 +204,13 @@ namespace Jil.Serialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Write(string strRef)
+        public void Write(string strRef)
         {
             WriteSpan(strRef.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void End()
+        public void End(ref SerializeDynamic.WriterProxy _)
         {
             if (Start > 0)
             {
@@ -218,6 +220,23 @@ namespace Jil.Serialize
             Current = Span<char>.Empty;
             Start = 0;
             Builder = null;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public SerializeDynamic.WriterProxy AsWriterProxy()
+        {
+            if (Start > 0)
+            {
+                Builder.Advance(Start);
+            }
+
+            Current = Span<char>.Empty;
+            Start = 0;
+
+            var writer = new SerializeDynamic.WriterProxy();
+            writer.Init(Builder);
+
+            return writer;
         }
     }
 }

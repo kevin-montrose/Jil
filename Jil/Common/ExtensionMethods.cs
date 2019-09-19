@@ -231,6 +231,65 @@ namespace Jil.Common
             return false;
         }
 
+#if BUFFER_AND_SEQUENCE
+        private sealed class TextWriterToBufferWriterAdapter : System.Buffers.IBufferWriter<char>, IDisposable
+        {
+            private readonly TextWriter Inner;
+            private System.Buffers.IMemoryOwner<char> Current;
+
+            public TextWriterToBufferWriterAdapter(TextWriter inner)
+            {
+                Inner = inner;
+            }
+
+            public void Advance(int count)
+            {
+                if (count > 0)
+                {
+                    var toWrite = Current.Memory.Slice(0, count);
+                    Inner.Write(toWrite.Span);
+                }
+
+                Current.Dispose();
+                Current = null;
+            }
+
+            public Memory<char> GetMemory(int sizeHint = 0)
+            {
+                if (Current != null)
+                {
+                    Current.Dispose();
+                    Current = null;
+                }
+
+                var rentSize = sizeHint == 0 ? -1 : sizeHint;
+                Current = System.Buffers.MemoryPool<char>.Shared.Rent(rentSize);
+
+                return Current.Memory;
+            }
+
+            public Span<char> GetSpan(int sizeHint = 0)
+            => GetMemory(sizeHint).Span;
+
+            public void Dispose()
+            {
+                if(Current != null)
+                {
+                    Current.Dispose();
+                    Current = null;
+                }
+            }
+        }
+
+        public static System.Buffers.IBufferWriter<char> MakeBufferWriter(this TextWriter inner, out IDisposable freeHandle)
+        {
+            var ret = new TextWriterToBufferWriterAdapter(inner);
+            freeHandle = ret;
+
+            return ret;
+        }
+#endif
+
         public static TextReader MakeSupportPeek(this TextReader inner)
         {
             var asStringReader = inner as StringReader;

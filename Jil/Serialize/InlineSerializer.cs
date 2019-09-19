@@ -2834,11 +2834,11 @@ namespace Jil.Serialize
 
                 using (var loc = Emit.DeclareLocal(typeof(WriterProxy)))
                 {
-                    var initMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.InitWithWriter));
+                    var initMtd = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.AsWriterProxy));
 
-                    Emit.LoadLocalAddress(loc);         // WriterProxy*
-                    Emit.LoadArgument(0);               // WriterProxy* TextWriter
-                    Emit.Call(initMtd);                 // -empty-
+                    Emit.LoadArgument(0);               // ThunkWriter*
+                    Emit.Call(initMtd);                 // WriterProxy
+                    Emit.StoreLocal(loc);               // --empty--
                     Emit.LoadLocalAddress(loc);         // WriterProxy*
 
                     if (inLocal != null)
@@ -4153,9 +4153,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        StringThunkDelegate<ForType> BuildListWithNewDelegateToString()
+        StringThunkDelegate<ForType> BuildListWithNewDelegateToString(MemberInfo dynamicMember)
         {
-            BuildListWithNewImpl(null);
+            BuildListWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -4181,9 +4181,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        StringThunkDelegate<ForType> BuildEnumerableWithNewDelegateToString()
+        StringThunkDelegate<ForType> BuildEnumerableWithNewDelegateToString(MemberInfo dynamicMember)
         {
-            BuildEnumerableWithNewImpl(null);
+            BuildEnumerableWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -4209,9 +4209,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        StringThunkDelegate<ForType> BuildDictionaryWithNewDelegateToString()
+        StringThunkDelegate<ForType> BuildDictionaryWithNewDelegateToString(MemberInfo dynamicMember)
         {
-            BuildDictionaryWithNewImpl(null);
+            BuildDictionaryWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -4290,9 +4290,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        StringThunkDelegate<ForType> BuildNullableWithNewDelegateToString()
+        StringThunkDelegate<ForType> BuildNullableWithNewDelegateToString(MemberInfo dynamicMember)
         {
-            BuildNullableWithNewImpl(null);
+            BuildNullableWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -4330,9 +4330,9 @@ namespace Jil.Serialize
             return Emit.CreateDelegate<Action<TextWriter, ForType, int>>(Utils.DelegateOptimizationOptions);
         }
 
-        StringThunkDelegate<ForType> BuildEnumWithNewDelegateToString()
+        StringThunkDelegate<ForType> BuildEnumWithNewDelegateToString(MemberInfo dynamicMember)
         {
-            BuildEnumWithNewImpl(null);
+            BuildEnumWithNewImpl(dynamicMember);
 
             return Emit.CreateDelegate<StringThunkDelegate<ForType>>(Utils.DelegateOptimizationOptions);
         }
@@ -4379,13 +4379,13 @@ namespace Jil.Serialize
             return BuildObjectWithNewDelegate();
         }
 
-        internal StringThunkDelegate<ForType> BuildToString()
+        internal StringThunkDelegate<ForType> BuildToString(MemberInfo dynamicMember)
         {
             var forType = typeof(ForType);
 
             if (forType.IsNullableType())
             {
-                return BuildNullableWithNewDelegateToString();
+                return BuildNullableWithNewDelegateToString(dynamicMember);
             }
 
             if (forType.IsPrimitiveWrapper())
@@ -4400,22 +4400,22 @@ namespace Jil.Serialize
 
             if (forType.IsDictionaryType() || forType.IsReadOnlyDictionaryType())
             {
-                return BuildDictionaryWithNewDelegateToString();
+                return BuildDictionaryWithNewDelegateToString(dynamicMember);
             }
 
             if (forType.IsListType())
             {
-                return BuildListWithNewDelegateToString();
+                return BuildListWithNewDelegateToString(dynamicMember);
             }
 
             if (forType.IsEnum())
             {
-                return BuildEnumWithNewDelegateToString();
+                return BuildEnumWithNewDelegateToString(dynamicMember);
             }
 
             if (forType.IsEnumerableType())
             {
-                return BuildEnumerableWithNewDelegateToString();
+                return BuildEnumerableWithNewDelegateToString(dynamicMember);
             }
 
             return BuildObjectWithNewDelegateToString();
@@ -4471,19 +4471,19 @@ namespace Jil.Serialize
             return ret;
         }
 
-        public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod("_BuildWithDynamism", BindingFlags.Static | BindingFlags.NonPublic);
+        public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod(nameof(_BuildWithDynamism), BindingFlags.Static | BindingFlags.NonPublic);
         private static WriterProxyDelegate<BuildForType> _BuildWithDynamism<BuildForType>(MemberInfo dynamicMember, Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
         {
-            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, true, false);
+            var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, true, true);
 
-            var inner = obj.Build(dynamicMember);
+            var inner = obj.BuildToString(dynamicMember);
 
             return
                 (ref WriterProxy proxy, BuildForType data, int depth) =>
                 {
-                    var writer = proxy.AsWriter();
-                    inner(writer, data, depth);
-                    proxy.DoneWithWriter();
+                    var writer = proxy.AsThunkWriter();
+                    inner(ref writer, data, depth);
+                    writer.End(ref proxy);
                 };
         }
 
@@ -4494,7 +4494,7 @@ namespace Jil.Serialize
             {
                 var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, false, true);
 
-                ret = obj.BuildToString();
+                ret = obj.BuildToString(null);
 
                 exceptionDuringBuild = null;
             }
