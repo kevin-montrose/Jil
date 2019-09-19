@@ -14,6 +14,14 @@ namespace Jil.Serialize
         Span<char> Current;
         int Start;
 
+        ReadOnlySpan<char> ConstantString_Common_Chars_Span;
+        ReadOnlySpan<char> ConstantString_Formatting_Chars_Span;
+        ReadOnlySpan<char> ConstantString_Min_Chars_Span;
+        ReadOnlySpan<char> ConstantString_Value_Chars_Span;
+        ReadOnlySpan<char> Escape000Prefix_Span;
+        ReadOnlySpan<char> Escape001Prefix_Span;
+        ReadOnlySpan<char> ConstantString_DaysOfWeek_Span;
+
         private void AdvanceAndAcquire()
         {
             var toFlush = Start;
@@ -38,6 +46,14 @@ namespace Jil.Serialize
             Builder = buffer;
             Start = 0;
             Current = Span<char>.Empty;
+
+            ConstantString_Common_Chars_Span = ThunkWriterCharArrays.ConstantString_Common_Chars.AsSpan();
+            ConstantString_Formatting_Chars_Span = ThunkWriterCharArrays.ConstantString_Formatting_Chars.AsSpan();
+            ConstantString_Min_Chars_Span = ThunkWriterCharArrays.ConstantString_Min_Chars.AsSpan();
+            ConstantString_Value_Chars_Span = ThunkWriterCharArrays.ConstantString_Value_Chars.AsSpan();
+            Escape000Prefix_Span = ThunkWriterCharArrays.Escape000Prefix.AsSpan();
+            Escape001Prefix_Span = ThunkWriterCharArrays.Escape001Prefix.AsSpan();
+            ConstantString_DaysOfWeek_Span = ThunkWriterCharArrays.ConstantString_DaysOfWeek.AsSpan();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -129,8 +145,7 @@ namespace Jil.Serialize
             var ix = asUShort >> 8;
             var len = asUShort & 0xFF;
 
-            // todo: maybe take these spans at alloc time, so we can skip the AsSpan()s during a call?
-            var subset = ThunkWriterCharArrays.ConstantString_Common_Chars.AsSpan().Slice(ix, len);
+            var subset = ConstantString_Common_Chars_Span.Slice(ix, len);
 
             WriteSpan(subset);
         }
@@ -142,8 +157,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            // todo: maybe take these spans at alloc time, so we can skip the AsSpan()s during a call?
-            var subset = ThunkWriterCharArrays.ConstantString_Formatting_Chars.AsSpan().Slice(ix, len);
+            var subset = ConstantString_Formatting_Chars_Span.Slice(ix, len);
 
             WriteSpan(subset);
         }
@@ -155,8 +169,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            // todo: maybe take these spans at alloc time, so we can skip the AsSpan()s during a call?
-            var subset = ThunkWriterCharArrays.ConstantString_Min_Chars.AsSpan().Slice(ix, len);
+            var subset = ConstantString_Min_Chars_Span.Slice(ix, len);
 
             WriteSpan(subset);
         }
@@ -168,8 +181,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            // todo: maybe take these spans at alloc time, so we can skip the AsSpan()s during a call?
-            var subset = ThunkWriterCharArrays.ConstantString_Value_Chars.AsSpan().Slice(ix, len);
+            var subset = ConstantString_Value_Chars_Span.Slice(ix, len);
 
             WriteSpan(subset);
         }
@@ -179,8 +191,7 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            // todo: maybe take these spans at alloc time, so we can skip the AsSpan()s during a call?
-            WriteSpan(ThunkWriterCharArrays.Escape000Prefix.AsSpan());
+            WriteSpan(Escape000Prefix_Span);
             Write(ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix]);
         }
 
@@ -189,7 +200,7 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            WriteSpan(ThunkWriterCharArrays.Escape001Prefix.AsSpan());
+            WriteSpan(Escape001Prefix_Span);
             Write(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
         }
 
@@ -198,7 +209,7 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            var subset = ThunkWriterCharArrays.ConstantString_DaysOfWeek.AsSpan().Slice(ix, 3);
+            var subset = ConstantString_DaysOfWeek_Span.Slice(ix, 3);
 
             WriteSpan(subset);
         }
