@@ -4711,88 +4711,7 @@ namespace Jil
             }
         }
 
-        /// <summary>
-        /// Deserializes JSON from the given string.
-        /// 
-        /// Pass an Options object to specify the particulars (such as DateTime formats) of
-        /// the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
-        /// called with a different Options object.
-        /// </summary>
-        public static T Deserialize<T>(string text, Options options = null)
-        {
-            if (text == null)
-            {
-                throw new ArgumentNullException("text");
-            }
-
-            if (typeof(T) == typeof(object))
-            {
-                return DeserializeDynamic(text, options);
-            }
-
-            try
-            {
-                options = options ?? DefaultOptions;
-
-                var thunk = new Jil.Deserialize.ThunkReader(text);
-
-                switch (options.UseDateTimeFormat)
-                {
-                    case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.MillisecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.SecondsSinceUnixEpoch:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.ISO8601:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601StyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                    case DateTimeFormat.RFC1123:
-                        switch (options.SerializationNameFormat)
-                        {
-                            case SerializationNameFormat.Verbatim:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.GetFromString()(ref thunk, 0);
-                            case SerializationNameFormat.CamelCase:
-                                return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123StyleCamelCase, T>.GetFromString()(ref thunk, 0);
-                        }
-                        break;
-                }
-                throw new InvalidOperationException("Unexpected Options: " + options);
-            }
-            catch (Exception e)
-            {
-                if (e is DeserializationException) throw;
-
-                throw new DeserializationException(e, false);
-            }
-        }
+        
 
         /// <summary>
         /// Deserializes JSON from the given TextReader, inferring types from the structure of the JSON text.
@@ -4808,19 +4727,57 @@ namespace Jil
             return built.BeingBuilt;
         }
 
-        /// <summary>
-        /// Deserializes JSON from the given string, inferring types from the structure of the JSON text.
-        /// 
-        /// For the best performance, use the strongly typed Deserialize method when possible.
-        /// </summary>
-        public static dynamic DeserializeDynamic(string str, Options options = null)
+        private static Deserialize.StringThunkDelegate<T> GetDeserializeStringThunkDelegate<T>(Options options)
         {
-            var thunkReader = new Deserialize.ThunkReader(str);
-            options = options ?? DefaultOptions;
-
-            var built = Jil.DeserializeDynamic.DynamicDeserializer.DeserializeThunkReader(ref thunkReader, options);
-
-            return built.BeingBuilt;
+            switch (options.UseDateTimeFormat)
+            {
+                case DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch:
+                    switch (options.SerializationNameFormat)
+                    {
+                        case SerializationNameFormat.Verbatim:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyle, T>.GetFromString();
+                        case SerializationNameFormat.CamelCase:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.MicrosoftStyleCamelCase, T>.GetFromString();
+                    }
+                    break;
+                case DateTimeFormat.MillisecondsSinceUnixEpoch:
+                    switch (options.SerializationNameFormat)
+                    {
+                        case SerializationNameFormat.Verbatim:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyle, T>.GetFromString();
+                        case SerializationNameFormat.CamelCase:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.MillisecondStyleCamelCase, T>.GetFromString();
+                    }
+                    break;
+                case DateTimeFormat.SecondsSinceUnixEpoch:
+                    switch (options.SerializationNameFormat)
+                    {
+                        case SerializationNameFormat.Verbatim:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyle, T>.GetFromString();
+                        case SerializationNameFormat.CamelCase:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.SecondStyleCamelCase, T>.GetFromString();
+                    }
+                    break;
+                case DateTimeFormat.ISO8601:
+                    switch (options.SerializationNameFormat)
+                    {
+                        case SerializationNameFormat.Verbatim:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601Style, T>.GetFromString();
+                        case SerializationNameFormat.CamelCase:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.ISO8601StyleCamelCase, T>.GetFromString();
+                    }
+                    break;
+                case DateTimeFormat.RFC1123:
+                    switch (options.SerializationNameFormat)
+                    {
+                        case SerializationNameFormat.Verbatim:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123Style, T>.GetFromString();
+                        case SerializationNameFormat.CamelCase:
+                            return Jil.Deserialize.TypeCache<Jil.Deserialize.RFC1123StyleCamelCase, T>.GetFromString();
+                    }
+                    break;
+            }
+            throw new InvalidOperationException("Unexpected Options: " + options);
         }
     }
 }
