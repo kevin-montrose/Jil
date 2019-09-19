@@ -250,8 +250,11 @@ namespace Jil.Common
                     Inner.Write(toWrite.Span);
                 }
 
-                Current.Dispose();
-                Current = null;
+                if (Current != null)
+                {
+                    Current.Dispose();
+                    Current = null;
+                }
             }
 
             public Memory<char> GetMemory(int sizeHint = 0)

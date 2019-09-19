@@ -2857,7 +2857,12 @@ namespace Jil.Serialize
 
                     Emit.LoadArgument(2);               // WriterProxy* object Options int
 
-                    Emit.Call(serializeMtd);            // void
+                    Emit.Call(serializeMtd);            // --empty--
+
+                    var doneMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.DoneWithThunkWriter));
+
+                    Emit.LoadLocalAddress(loc);         // WriterProxy*
+                    Emit.Call(doneMtd);                 // --empty--
                 }
 
                 return true;
@@ -4484,6 +4489,7 @@ namespace Jil.Serialize
                     var writer = proxy.AsThunkWriter();
                     inner(ref writer, data, depth);
                     writer.End(ref proxy);
+                    proxy.DoneWithThunkWriter();
                 };
         }
 

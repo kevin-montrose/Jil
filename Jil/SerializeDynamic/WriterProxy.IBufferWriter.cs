@@ -103,6 +103,14 @@ namespace Jil.SerializeDynamic
         public void DoneWithThunkWriter()
         {
             SerializeDynamic.WriterProxy _ = default;
+
+            if(Start > 0)
+            {
+                Inner.Advance(Start);
+                Start = 0;
+                Current = Span<char>.Empty;
+            }
+
             Stub.End(ref _);
         }
 

@@ -29,7 +29,7 @@ namespace Jil.SerializeDynamic
             return Inner;
         }
 
-        public void DoneWithWriter() { }
+        public void DoneWithThunkWriter() { }
 
         public void End()
         {
