@@ -11,69 +11,12 @@ namespace Jil.Serialize
     {
         public bool HasValue => Builder != null;
 
-        StringBuilder Builder;
-
-        private sealed class StringBuilderTextWriter : TextWriter
-        {
-            public override Encoding Encoding => throw new NotImplementedException();
-
-            private readonly StringBuilder Inner;
-
-            public StringBuilderTextWriter(StringBuilder inner)
-            {
-                Inner = inner;
-            }
-
-            public override void Write(char value)
-            {
-                Inner.Append(value);
-            }
-
-            public override void Write(string value)
-            {
-                Inner.Append(value);
-            }
-
-            public override void Write(bool a)
-            => throw new NotImplementedException();
-
-            public override void Write(char[] a, int b, int c)
-            => throw new NotImplementedException();
-
-            public override void Write(decimal a)
-            => throw new NotImplementedException();
-
-            public override void Write(int a)
-            => throw new NotImplementedException();
-
-            public override void Write(long a)
-            => throw new NotImplementedException();
-
-            public override void Write(object a)
-            => throw new NotImplementedException();
-
-            public override void Write(string a, object b)
-            => throw new NotImplementedException();
-
-            public override void Write(string a, object b, object c)
-            => throw new NotImplementedException();
-
-            public override void Write(string a, object[] b)
-            => throw new NotImplementedException();
-
-            public override void Write(uint a)
-            => throw new NotImplementedException();
-
-            public override void Write(ulong a)
-            => throw new NotImplementedException();
-
-            // todo: rest of overrides
-        }
+        TextWriter Builder;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Init()
+        public void Init(TextWriter writer)
         {
-            Builder = (Builder ?? new StringBuilder()).Clear();
+            Builder = writer;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,13 +40,13 @@ namespace Jil.Serialize
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char[] ch, int startIx, int len)
         {
-            Builder.Append(ch, startIx, len);
+            Builder.Write(ch, startIx, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Write(char ch)
         {
-            Builder.Append(ch);
+            Builder.Write(ch);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,7 +56,7 @@ namespace Jil.Serialize
             var ix = asUShort >> 8;
             var size = asUShort & 0xFF;
 
-            Builder.Append(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, size);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_Common_Chars, ix, size);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,7 +66,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            Builder.Append(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, len);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_Formatting_Chars, ix, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -133,7 +76,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            Builder.Append(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, len);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_Min_Chars, ix, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -143,7 +86,7 @@ namespace Jil.Serialize
             var ix = (asUShort >> 8);
             var len = asUShort & 0xFF;
 
-            Builder.Append(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, len);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_Value_Chars, ix, len);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -151,8 +94,8 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            Builder.Append(ThunkWriterCharArrays.Escape000Prefix);
-            Builder.Append(ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix]);
+            Builder.Write(ThunkWriterCharArrays.Escape000Prefix);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_000Escape_Chars[ix]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,27 +103,21 @@ namespace Jil.Serialize
         {
             var ix = (byte)str;
 
-            Builder.Append(ThunkWriterCharArrays.Escape001Prefix);
-            Builder.Append(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
+            Builder.Write(ThunkWriterCharArrays.Escape001Prefix);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_001Escape_Chars[ix]);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteDayOfWeek(ConstantString_DaysOfWeek str)
         {
             var ix = (byte)str;
-            Builder.Append(ThunkWriterCharArrays.ConstantString_DaysOfWeek, ix, 3);
+            Builder.Write(ThunkWriterCharArrays.ConstantString_DaysOfWeek, ix, 3);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Write(string strRef)
         {
-            Builder.Append(strRef);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string StaticToString()
-        {
-            return Builder.ToString();
+            Builder.Write(strRef);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
