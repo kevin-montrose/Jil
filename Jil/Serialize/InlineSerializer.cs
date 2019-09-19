@@ -2832,38 +2832,25 @@ namespace Jil.Serialize
                     }
                 }
 
-                using (var loc = Emit.DeclareLocal(typeof(WriterProxy)))
+                Emit.LoadArgument(0);               // ThunkWriter*
+
+                if (inLocal != null)
                 {
-                    var initMtd = typeof(ThunkWriter).GetMethod(nameof(ThunkWriter.AsWriterProxy));
-
-                    Emit.LoadArgument(0);               // ThunkWriter*
-                    Emit.Call(initMtd);                 // WriterProxy
-                    Emit.StoreLocal(loc);               // --empty--
-                    Emit.LoadLocalAddress(loc);         // WriterProxy*
-
-                    if (inLocal != null)
-                    {
-                        Emit.LoadLocal(inLocal);        // WriterProxy* object
-                    }
-                    else
-                    {
-                        Emit.LoadArgument(1);           // WriterProxy* object
-                    }
-
-                    var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited, this.UnspecifiedDateTimeBehavior, this.SerializationNameFormat);
-                    var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
-
-                    Emit.LoadField(optionsField);       // WriterProxy* object Options
-
-                    Emit.LoadArgument(2);               // WriterProxy* object Options int
-
-                    Emit.Call(serializeMtd);            // --empty--
-
-                    var doneMtd = typeof(WriterProxy).GetMethod(nameof(WriterProxy.DoneWithThunkWriter));
-
-                    Emit.LoadLocalAddress(loc);         // WriterProxy*
-                    Emit.Call(doneMtd);                 // --empty--
+                    Emit.LoadLocal(inLocal);        // ThunkWriter* object
                 }
+                else
+                {
+                    Emit.LoadArgument(1);           // ThunkWriter* object
+                }
+
+                var equivalentOptions = new Options(this.PrettyPrint, this.ExcludeNulls, this.JSONP, this.DateFormat, this.IncludeInherited, this.UnspecifiedDateTimeBehavior, this.SerializationNameFormat);
+                var optionsField = OptionsLookup.GetOptionsFieldFor(equivalentOptions);
+
+                Emit.LoadField(optionsField);       // WriterProxy* object Options
+
+                Emit.LoadArgument(2);               // WriterProxy* object Options int
+
+                Emit.Call(serializeMtd);            // --empty--
 
                 return true;
             }
@@ -4477,20 +4464,13 @@ namespace Jil.Serialize
         }
 
         public static readonly MethodInfo BuildWithDynamism = typeof(InlineSerializerHelper).GetMethod(nameof(_BuildWithDynamism), BindingFlags.Static | BindingFlags.NonPublic);
-        private static WriterProxyDelegate<BuildForType> _BuildWithDynamism<BuildForType>(MemberInfo dynamicMember, Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
+        private static StringThunkDelegate<BuildForType> _BuildWithDynamism<BuildForType>(MemberInfo dynamicMember, Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat)
         {
             var obj = new InlineSerializer<BuildForType>(optionsType, pretty, excludeNulls, jsonp, dateFormat, includeInherited, dateTimeBehavior, serializationNameFormat, true, true);
 
             var inner = obj.BuildToString(dynamicMember);
 
-            return
-                (ref WriterProxy proxy, BuildForType data, int depth) =>
-                {
-                    var writer = proxy.AsThunkWriter();
-                    inner(ref writer, data, depth);
-                    writer.End(ref proxy);
-                    proxy.DoneWithThunkWriter();
-                };
+            return inner;
         }
 
         public static StringThunkDelegate<BuildForType> BuildToString<BuildForType>(Type optionsType, bool pretty, bool excludeNulls, bool jsonp, DateTimeFormat dateFormat, bool includeInherited, UnspecifiedDateTimeKindBehavior dateTimeBehavior, SerializationNameFormat serializationNameFormat, out Exception exceptionDuringBuild)

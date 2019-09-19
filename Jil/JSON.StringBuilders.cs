@@ -44,10 +44,13 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, TextWriter output, Options options = null)
         {
-            var thunk = new WriterProxy();
-            thunk.InitWithWriter(output);
+            var thunk = new ThunkWriter();
+            thunk.Init();
             DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
             thunk.End();
+
+            // todo: .... no?
+            output.Write(thunk.StaticToString());
         }
 
         /// <summary>

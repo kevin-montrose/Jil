@@ -44,8 +44,7 @@ namespace Jil
             var innerWriter = new ThunkWriter();
             innerWriter.Init(writer);
             GetThunkerDelegate<T>(options)(ref innerWriter, data, 0);
-            Jil.SerializeDynamic.WriterProxy _ = default;
-            innerWriter.End(ref _);
+            innerWriter.End();
         }
 
         /// <summary>
@@ -63,7 +62,7 @@ namespace Jil
         /// </summary>
         public static void SerializeDynamic(dynamic data, IBufferWriter<char> output, Options options = null)
         {
-            var thunk = new WriterProxy();
+            var thunk = new ThunkWriter();
             thunk.Init(output);
             DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
             thunk.End();
@@ -87,7 +86,7 @@ namespace Jil
             var wrapped = output.MakeBufferWriter(out var disposable);
             using (disposable)
             {
-                var thunk = new WriterProxy();
+                var thunk = new ThunkWriter();
                 thunk.Init(wrapped);
                 DynamicSerializer.Serialize(ref thunk, (object)data, options ?? DefaultOptions, 0);
                 thunk.End();

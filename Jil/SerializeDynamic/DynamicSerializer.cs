@@ -16,8 +16,6 @@ using System.Reflection;
 
 namespace Jil.SerializeDynamic
 {
-    internal delegate void WriterProxyDelegate<T>(ref WriterProxy stream, T value, int depth);
-
     class DynamicSerializer
     {
         static readonly Hashtable GetGetMemberCache = new Hashtable();
@@ -49,7 +47,7 @@ namespace Jil.SerializeDynamic
         }
 
         static readonly ParameterExpression CachedParameterExp = Expression.Parameter(typeof(object));
-        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, ref WriterProxy stream, Options opts, int depth)
+        static void SerializeDynamicObject(IDynamicMetaObjectProvider dyn, ref ThunkWriter stream, Options opts, int depth)
         {
             var quoteColon = "\":";
             if (opts.ShouldPrettyPrint)
@@ -138,7 +136,7 @@ namespace Jil.SerializeDynamic
             stream.Write('}');
         }
 
-        static void LineBreakAndIndent(ref WriterProxy stream, int depth)
+        static void LineBreakAndIndent(ref ThunkWriter stream, int depth)
         {
             stream.Write('\n');
 
@@ -164,7 +162,7 @@ namespace Jil.SerializeDynamic
 
         static readonly Hashtable GetSemiStaticInlineSerializerForCache = new Hashtable();
         static readonly MethodInfo GetSemiStaticInlineSerializerFor = typeof(DynamicSerializer).GetMethod(nameof(_GetSemiStaticInlineSerializerFor), BindingFlags.NonPublic | BindingFlags.Static);
-        static WriterProxyDelegate<ForType> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
+        static StringThunkDelegate<ForType> _GetSemiStaticInlineSerializerFor<ForType>(MemberInfo dynamicMember, Options opts)
         {
             var type = typeof(ForType);
 
@@ -180,7 +178,7 @@ namespace Jil.SerializeDynamic
 
             var key = Tuple.Create(treatEnumerationAs, typeof(ForType), opts);
 
-            var ret = (WriterProxyDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
+            var ret = (StringThunkDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
             if (ret != null) return ret;
 
             var cacheType = OptionsLookup.GetTypeCacheFor(opts);
@@ -188,16 +186,16 @@ namespace Jil.SerializeDynamic
 
             lock (GetSemiStaticInlineSerializerForCache)
             {
-                ret = (WriterProxyDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
+                ret = (StringThunkDelegate<ForType>)GetSemiStaticInlineSerializerForCache[key];
                 if (ret != null) return ret;
 
-                GetSemiStaticInlineSerializerForCache[key] = ret = (WriterProxyDelegate<ForType>)builder.Invoke(null, new object[] { dynamicMember, cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
+                GetSemiStaticInlineSerializerForCache[key] = ret = (StringThunkDelegate<ForType>)builder.Invoke(null, new object[] { dynamicMember, cacheType, opts.ShouldPrettyPrint, opts.ShouldExcludeNulls, opts.IsJSONP, opts.UseDateTimeFormat, opts.ShouldIncludeInherited, opts.UseUnspecifiedDateTimeKindBehavior, opts.SerializationNameFormat });
             }
 
             return ret;
         }
 
-        private delegate void SemiStaticSerializerDelegate(MemberInfo member, ref WriterProxy stream, object value, int depth);
+        private delegate void SemiStaticSerializerDelegate(MemberInfo member, ref ThunkWriter stream, object value, int depth);
 
         static Hashtable GetSemiStaticSerializerForCache = new Hashtable();
         static SemiStaticSerializerDelegate GetSemiStaticSerializerFor(Type type, Options opts)
@@ -207,9 +205,9 @@ namespace Jil.SerializeDynamic
             if (ret != null) return ret;
 
             var getSemiStaticSerializer = GetSemiStaticInlineSerializerFor.MakeGenericMethod(type);
-            var invoke = typeof(WriterProxyDelegate<>).MakeGenericType(type).GetMethod("Invoke");
+            var invoke = typeof(StringThunkDelegate<>).MakeGenericType(type).GetMethod("Invoke");
 
-            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(WriterProxy).MakeByRefType(), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
+            var emit = Emit.NewDynamicMethod(typeof(void), new[] { typeof(MemberInfo), typeof(ThunkWriter).MakeByRefType(), typeof(object), typeof(int) }, doVerify: Utils.DoVerify);
 
             var optsField = OptionsLookup.GetOptionsFieldFor(opts);
 
@@ -243,14 +241,14 @@ namespace Jil.SerializeDynamic
             return ret;
         }
 
-        static void SerializeSemiStatically(MemberInfo dynamicMember, ref WriterProxy stream, object val, Options opts, int depth)
+        static void SerializeSemiStatically(MemberInfo dynamicMember, ref ThunkWriter stream, object val, Options opts, int depth)
         {
             var serializer = GetSemiStaticSerializerFor(val.GetType(), opts);
 
             serializer(dynamicMember, ref stream, val, depth);
         }
 
-        static void SerializeList(ref WriterProxy stream, IEnumerable e, Options opts, int depth)
+        static void SerializeList(ref ThunkWriter stream, IEnumerable e, Options opts, int depth)
         {
             var comma = ",";
             if (opts.ShouldPrettyPrint)
@@ -777,14 +775,14 @@ namespace Jil.SerializeDynamic
             return false;
         }
 
-        public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod("Serialize");
-        public static void Serialize(ref WriterProxy stream, object obj, Options opts, int depth)
+        public static readonly MethodInfo SerializeMtd = typeof(DynamicSerializer).GetMethod(nameof(DynamicSerializer.Serialize));
+        public static void Serialize(ref ThunkWriter stream, object obj, Options opts, int depth)
         {
             SerializeInternal(null, ref stream, obj, opts, depth);
         }
 
         public static readonly MethodInfo SerializeInternalMtd = typeof(DynamicSerializer).GetMethod("SerializeInternal", BindingFlags.NonPublic | BindingFlags.Static);
-        private static void SerializeInternal(MemberInfo dynamicMember, ref WriterProxy stream, object obj, Options opts, int depth) 
+        private static void SerializeInternal(MemberInfo dynamicMember, ref ThunkWriter stream, object obj, Options opts, int depth) 
         { 
             if (obj == null)
             {

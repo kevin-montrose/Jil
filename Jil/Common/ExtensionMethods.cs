@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Serialize;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1135,7 +1136,7 @@ namespace Jil.Common
             return ret;
         }
 
-        public static void JsonEscapeFast(this string str, bool jsonp, ref SerializeDynamic.WriterProxy output)
+        public static void JsonEscapeFast(this string str, bool jsonp, ref ThunkWriter output)
         {
             for (var i = 0; i < str.Length; i++)
             {

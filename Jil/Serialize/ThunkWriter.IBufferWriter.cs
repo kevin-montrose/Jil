@@ -210,9 +210,9 @@ namespace Jil.Serialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void End(ref SerializeDynamic.WriterProxy _)
+        public void End()
         {
-            if (Start > 0)
+            if(Start > 0)
             {
                 Builder.Advance(Start);
             }
@@ -220,23 +220,6 @@ namespace Jil.Serialize
             Current = Span<char>.Empty;
             Start = 0;
             Builder = null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializeDynamic.WriterProxy AsWriterProxy()
-        {
-            if (Start > 0)
-            {
-                Builder.Advance(Start);
-            }
-
-            Current = Span<char>.Empty;
-            Start = 0;
-
-            var writer = new SerializeDynamic.WriterProxy();
-            writer.Init(Builder);
-
-            return writer;
         }
     }
 }

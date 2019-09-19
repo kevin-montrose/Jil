@@ -184,19 +184,7 @@ namespace Jil.Serialize
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void End(ref SerializeDynamic.WriterProxy proxy)
-        {
-            proxy.Write(StaticToString());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SerializeDynamic.WriterProxy AsWriterProxy()
-        {
-            var ret = new SerializeDynamic.WriterProxy();
-            ret.InitWithWriter(new StringBuilderTextWriter(Builder));
-
-            return ret;
-        }
+        public void End() { }
     }
 }
 #endif
