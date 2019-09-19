@@ -175,7 +175,8 @@ namespace Jil.DeserializeDynamic
             bool negative;
             ulong beforeDot;
             long afterE;
-            uint afterDot;
+            uint? afterDot;
+            ulong? afterDotLong;
             byte afterDotLen;
             byte extraOrdersOfMagnitude;
 
@@ -200,13 +201,13 @@ namespace Jil.DeserializeDynamic
                 c = reader.Read();
                 if (c < '0' || c > '9') throw new DeserializationException("Expected digit", ref reader, c == -1);
 
-                afterDot = Methods.ReadUIntThunkReader((char)c, ref reader, out afterDotLen);
+                Methods.ReadUIntOrULongThunkReader((char)c, ref reader, out afterDotLen, out afterDot, out afterDotLong);
 
                 c = reader.Peek();
             }
             else
             {
-                afterDot = afterDotLen = 0;
+                afterDotLong = afterDot = afterDotLen = 0;
             }
 
             if (c == 'e' || c == 'E')
@@ -240,7 +241,9 @@ namespace Jil.DeserializeDynamic
                 }
             }
 
-            builder.PutFastNumber(negative, beforeDot, afterDot, afterDotLen, afterE);
+            // TODO: handle the case where afterDot is null, instead using the value in afterDotLong
+            ulong afterDotVal = afterDot.HasValue ? afterDot.Value : afterDotLong.Value;
+            builder.PutFastNumber(negative, beforeDot, afterDotVal, afterDotLen, afterE);
         }
     }
 }

@@ -403,25 +403,96 @@ namespace Jil.DeserializeDynamic
             throw new DeserializationException("Number too large to be parsed encountered", ref reader, false);
         }
 
-        public static uint ReadUIntThunkReader(char firstChar, ref ThunkReader reader, out byte length)
+        public static void ReadUIntOrULongThunkReader(char firstChar, ref ThunkReader reader, out byte length, out uint? uintRet, out ulong? ulongRet)
         {
+            // since the last character may overflow
+            const int maxUIntLength = 10 - 1;
+            const int maxULongLength = 20 - 1;
+
             length = 1;
-            uint ret = (uint)(firstChar - '0');
+            uintRet = (uint)(firstChar - '0');
 
             int c;
             while ((c = reader.Peek()) != -1)
             {
                 c -= '0';
-                if (c < 0 || c > 9) break;
+                if (c < 0 || c > 9)
+                {
+                    ulongRet = null;
+                    return;
+                }
 
                 reader.Read();  // skip digit
                 length++;
 
-                ret *= 10;
-                ret += (uint)c;
+                if (length == maxUIntLength) break;
+
+                uintRet *= 10;
+                uintRet += (uint)c;
             }
 
-            return ret;
+            if (c == -1)
+            {
+                ulongRet = null;
+                return;
+            }
+
+            ulongRet = uintRet;
+            ulongRet *= 10;
+            ulongRet += (ulong)c;
+            uintRet = null;
+
+            while ((c = reader.Peek()) != -1)
+            {
+                c -= '0';
+                if (c < 0 || c > 9)
+                {
+                    return;
+                }
+
+                reader.Read();  // skip digit
+
+                if (length == maxULongLength) break;
+
+                length++;
+
+                ulongRet *= 10;
+                ulongRet += (ulong)c;
+            }
+
+            if (c == -1)
+            {
+                return;
+            }
+
+            try
+            {
+                checked
+                {
+                    var ulongRet2 = ulongRet;
+                    ulongRet2 *= 10;
+                    ulongRet2 += (ulong)c;
+
+                    ulongRet = ulongRet2;
+
+                    length++;
+                }
+            }
+            catch (OverflowException)
+            {
+                // whelp, looks like we're dropping that character
+            }
+
+            while ((c = reader.Peek()) != -1)
+            {
+                c -= '0';
+                if (c < 0 || c > 9)
+                {
+                    return;
+                }
+
+                reader.Read();  // skip digit
+            }
         }
 
         public static long ReadLongThunkReader(char firstChar, ref ThunkReader reader)

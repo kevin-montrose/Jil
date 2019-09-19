@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Jil.Deserialize;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +23,19 @@ namespace Jil.DeserializeDynamic
             Methods.ConsumeWhiteSpace(reader);
             var c = reader.Peek();
             if (c != -1) throw new DeserializationException("Expected end of stream", reader, true);
+
+            return ret;
+        }
+
+        public static ObjectBuilder DeserializeThunkReader(ref ThunkReader reader, Options options)
+        {
+            var ret = new ObjectBuilder(options);
+
+            _DeserializeMemberThunkReader(ref reader, ret);
+
+            Methods.ConsumeWhiteSpaceThunkReader(ref reader);
+            var c = reader.Peek();
+            if (c != -1) throw new DeserializationException("Expected end of stream", ref reader, true);
 
             return ret;
         }

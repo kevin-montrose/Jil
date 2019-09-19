@@ -4815,10 +4815,12 @@ namespace Jil
         /// </summary>
         public static dynamic DeserializeDynamic(string str, Options options = null)
         {
-            using (var reader = new StringReader(str))
-            {
-                return DeserializeDynamic(reader, options);
-            }
+            var thunkReader = new Deserialize.ThunkReader(str);
+            options = options ?? DefaultOptions;
+
+            var built = Jil.DeserializeDynamic.DynamicDeserializer.DeserializeThunkReader(ref thunkReader, options);
+
+            return built.BeingBuilt;
         }
     }
 }
