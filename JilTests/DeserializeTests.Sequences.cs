@@ -3,7 +3,10 @@ using Jil;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
+using System.IO.Pipelines;
+using System.Text;
 
 namespace JilTests
 {
@@ -139,6 +142,135 @@ namespace JilTests
                 Assert.Equal(2, res[1]);
                 Assert.Equal(4, res[3]);
                 Assert.Equal(6, res[5]);
+            }
+        }
+
+        [Fact]
+        public async Task EmptyPipeReaderAsync()
+        {
+            // only really care about UTFs
+            var encodings =
+                new[]
+                {
+                    Encoding.UTF8,
+                    Encoding.Unicode,
+                    Encoding.UTF32
+                };
+
+            foreach(var encoding in encodings)
+            {
+                var pipe = new Pipe();
+
+                var bytes = encoding.GetBytes("");
+
+                using (var adapter = new Jil.Deserialize.PipeReaderAdapter(pipe.Reader, encoding))
+                {
+                    var read = new List<char>();
+
+                    await pipe.Writer.WriteAsync(bytes);
+                    await pipe.Writer.CompleteAsync();
+
+                    Assert.Equal(-1, adapter.Peek());
+
+                    int i;
+                    while ((i = adapter.Read()) != -1)
+                    {
+                        read.Add((char)i);
+                    }
+
+                    var actual = new string(read.ToArray());
+                    Assert.Equal("", actual);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task PipeReaderAdapter()
+        {
+            var trickyStrings =
+                new[]
+                {
+                    " ",
+                    "hello world",
+                    @"",
+                    @"",
+                    @"­؀؁؂؃؄؅؜۝܏᠎​‌‍‎‏‪‫‬‭‮⁠⁡⁢⁣⁤⁦⁧⁨⁩⁪⁫⁬⁭⁮⁯﻿￹￺￻𑂽𛲠𛲡𛲢𛲣𝅳𝅴𝅵𝅶𝅷𝅸𝅹𝅺󠀁󠀠󠀡󠀢󠀣󠀤󠀥󠀦󠀧󠀨󠀩󠀪󠀫󠀬󠀭󠀮󠀯󠀰󠀱󠀲󠀳󠀴󠀵󠀶󠀷󠀸󠀹󠀺󠀻󠀼󠀽󠀾󠀿󠁀󠁁󠁂󠁃󠁄󠁅󠁆󠁇󠁈󠁉󠁊󠁋󠁌󠁍󠁎󠁏󠁐󠁑󠁒󠁓󠁔󠁕󠁖󠁗󠁘󠁙󠁚󠁛󠁜󠁝󠁞󠁟󠁠󠁡󠁢󠁣󠁤󠁥󠁦󠁧󠁨󠁩󠁪󠁫󠁬󠁭󠁮󠁯󠁰󠁱󠁲󠁳󠁴󠁵󠁶󠁷󠁸󠁹󠁺󠁻󠁼󠁽󠁾󠁿",
+                    @"ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя",
+                    @"ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็ ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็ ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็",
+                    @"田中さんにあげて下さい",
+                    @"パーティーへ行かないか",
+                    @"和製漢語",
+                    @"사회과학원 어학연구소",
+                    @"울란바토르",
+                    @"𠜎𠜱𠝹𠱓𠱸𠲖𠳏",
+                    @"表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀",
+                    @"Ⱥ",
+                    @"Ⱦ",
+                    @"ヽ༼ຈل͜ຈ༽ﾉ ヽ༼ຈل͜ຈ༽ﾉ",
+                    @"😍",
+                    @"✋🏿 💪🏿 👐🏿 🙌🏿 👏🏿 🙏🏿",
+                    @"🚾 🆒 🆓 🆕 🆖 🆗 🆙 🏧",
+                    @"0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟",
+                    @"🇺🇸🇷🇺🇸 🇦🇫🇦🇲🇸",
+                    @"בְּרֵאשִׁית, בָּרָא אֱלֹהִים, אֵת הַשָּׁמַיִם, וְאֵת הָאָרֶץ",
+                    @"הָיְתָהtestالصفحات التّحول",
+                    @"﷽",
+                    @"ﷺ",
+                    @"مُنَاقَشَةُ سُبُلِ اِسْتِخْدَامِ اللُّغَةِ فِي النُّظُمِ الْقَائِمَةِ وَفِيم يَخُصَّ التَّطْبِيقَاتُ الْحاسُوبِيَّةُ، ",
+                    @"˙ɐnbᴉlɐ ɐuƃɐɯ ǝɹolop ʇǝ ǝɹoqɐl ʇn ʇunpᴉpᴉɔuᴉ ɹodɯǝʇ poɯsnᴉǝ op pǝs 'ʇᴉlǝ ƃuᴉɔsᴉdᴉpɐ ɹnʇǝʇɔǝsuoɔ 'ʇǝɯɐ ʇᴉs ɹolop ɯnsdᴉ ɯǝɹo˥",
+                    @"00˙Ɩ$-",
+                    @"𝚃𝚑𝚎 𝚚𝚞𝚒𝚌𝚔 𝚋𝚛𝚘𝚠𝚗 𝚏𝚘𝚡 𝚓𝚞𝚖𝚙𝚜 𝚘𝚟𝚎𝚛 𝚝𝚑𝚎 𝚕𝚊𝚣𝚢 𝚍𝚘𝚐",
+                    @"⒯⒣⒠ ⒬⒰⒤⒞⒦ ⒝⒭⒪⒲⒩ ⒡⒪⒳ ⒥⒰⒨⒫⒮ ⒪⒱⒠⒭ ⒯⒣⒠ ⒧⒜⒵⒴ ⒟⒪⒢"
+                };
+
+            // only really care about UTFs
+            var encodings =
+                new[]
+                {
+                    Encoding.UTF8,
+                    Encoding.Unicode,
+                    Encoding.UTF32
+                };
+
+            foreach (var encoding in encodings) 
+            {
+                var minToReadAfter = encoding.GetMaxByteCount(1);
+
+                foreach (var str in trickyStrings)
+                {
+                    var bytes = encoding.GetBytes(str).AsMemory();
+                    var pipe = new Pipe();
+
+                    var firstHalf = bytes.Slice(0, bytes.Length / 2);
+                    var secondHalf = bytes.Slice(bytes.Length / 2);
+
+                    using (var adapter = new Jil.Deserialize.PipeReaderAdapter(pipe.Reader, encoding))
+                    {
+                        var read = new List<char>();
+
+                        await pipe.Writer.WriteAsync(firstHalf);
+                        if(firstHalf.Length >= minToReadAfter)
+                        {
+                            var r1 = adapter.Peek();
+                            Assert.NotEqual(-1, r1);
+                            var r2 = adapter.Read();
+                            Assert.Equal(r1, r2);
+
+                            read.Add((char)r2);
+                        }
+                        await pipe.Writer.WriteAsync(secondHalf);
+                        await pipe.Writer.CompleteAsync();
+
+                        int i;
+                        while ((i = adapter.Read()) != -1)
+                        {
+                            read.Add((char)i);
+                        }
+
+                        var actual = new string(read.ToArray());
+                        Assert.Equal(str, actual);
+                    }
+                }
             }
         }
     }

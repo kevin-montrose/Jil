@@ -16,6 +16,10 @@
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
   </ItemGroup>
 
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp3.0'">
+    <PackageReference Include="System.IO.Pipelines" Version="4.6.0" />
+  </ItemGroup>
+  
   <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.2' or $(TargetFramework) == 'netcoreapp3.0'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />

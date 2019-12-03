@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -78,9 +79,141 @@ namespace JilTests
             JSON.Serialize(new { Foo = 123 }, new CharWriter(pipe.Writer));
             await pipe.Writer.FlushAsync();
             pipe.Writer.Complete();
-            
+
             var res = await ReadToEndAsync(pipe.Reader);
             Assert.Equal("{\"Foo\":123}", res);
+        }
+
+        [Fact]
+        public async Task EmptyPipeWriterAsync()
+        {
+            // only really care about UTFs
+            var encodings =
+                new[]
+                {
+                    Encoding.UTF8,
+                    Encoding.Unicode,
+                    Encoding.UTF32
+                };
+
+            foreach (var encoding in encodings)
+            {
+                var pipe = new Pipe();
+
+                var bytes = encoding.GetBytes("");
+
+                var adapter = new Jil.Serialize.PipeWriterAdapter(pipe.Writer, encoding);
+                {
+                    var read = new List<byte>();
+
+                    adapter.Write("");
+                    adapter.Complete();
+
+                    var buffer = new byte[15];
+
+                    await pipe.Writer.FlushAsync();
+                    await pipe.Writer.CompleteAsync();
+
+                    using (var stream = pipe.Reader.AsStream())
+                    {
+
+                        int r;
+                        while ((r = stream.Read(buffer, 0, buffer.Length)) != 0)
+                        {
+                            read.AddRange(buffer.Take(r));
+                        }
+                    }
+
+                    var expected = encoding.GetBytes("");
+                    Assert.True(expected.SequenceEqual(read));
+                }
+            }
+        }
+
+        [Fact]
+        public async Task PipeWriterAdapter()
+        {
+            var trickyStrings =
+                new[]
+                {
+                    " ",
+                    "hello world",
+                    @"",
+                    @"",
+                    @"­؀؁؂؃؄؅؜۝܏᠎​‌‍‎‏‪‫‬‭‮⁠⁡⁢⁣⁤⁦⁧⁨⁩⁪⁫⁬⁭⁮⁯﻿￹￺￻𑂽𛲠𛲡𛲢𛲣𝅳𝅴𝅵𝅶𝅷𝅸𝅹𝅺󠀁󠀠󠀡󠀢󠀣󠀤󠀥󠀦󠀧󠀨󠀩󠀪󠀫󠀬󠀭󠀮󠀯󠀰󠀱󠀲󠀳󠀴󠀵󠀶󠀷󠀸󠀹󠀺󠀻󠀼󠀽󠀾󠀿󠁀󠁁󠁂󠁃󠁄󠁅󠁆󠁇󠁈󠁉󠁊󠁋󠁌󠁍󠁎󠁏󠁐󠁑󠁒󠁓󠁔󠁕󠁖󠁗󠁘󠁙󠁚󠁛󠁜󠁝󠁞󠁟󠁠󠁡󠁢󠁣󠁤󠁥󠁦󠁧󠁨󠁩󠁪󠁫󠁬󠁭󠁮󠁯󠁰󠁱󠁲󠁳󠁴󠁵󠁶󠁷󠁸󠁹󠁺󠁻󠁼󠁽󠁾󠁿",
+                    @"ЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюя",
+                    @"ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็ ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็ ด้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็็้้้้้้้้็็็็็้้้้้็็็็",
+                    @"田中さんにあげて下さい",
+                    @"パーティーへ行かないか",
+                    @"和製漢語",
+                    @"사회과학원 어학연구소",
+                    @"울란바토르",
+                    @"𠜎𠜱𠝹𠱓𠱸𠲖𠳏",
+                    @"表ポあA鷗ŒéＢ逍Üßªąñ丂㐀𠀀",
+                    @"Ⱥ",
+                    @"Ⱦ",
+                    @"ヽ༼ຈل͜ຈ༽ﾉ ヽ༼ຈل͜ຈ༽ﾉ",
+                    @"😍",
+                    @"✋🏿 💪🏿 👐🏿 🙌🏿 👏🏿 🙏🏿",
+                    @"🚾 🆒 🆓 🆕 🆖 🆗 🆙 🏧",
+                    @"0️⃣ 1️⃣ 2️⃣ 3️⃣ 4️⃣ 5️⃣ 6️⃣ 7️⃣ 8️⃣ 9️⃣ 🔟",
+                    @"🇺🇸🇷🇺🇸 🇦🇫🇦🇲🇸",
+                    @"בְּרֵאשִׁית, בָּרָא אֱלֹהִים, אֵת הַשָּׁמַיִם, וְאֵת הָאָרֶץ",
+                    @"הָיְתָהtestالصفحات التّحول",
+                    @"﷽",
+                    @"ﷺ",
+                    @"مُنَاقَشَةُ سُبُلِ اِسْتِخْدَامِ اللُّغَةِ فِي النُّظُمِ الْقَائِمَةِ وَفِيم يَخُصَّ التَّطْبِيقَاتُ الْحاسُوبِيَّةُ، ",
+                    @"˙ɐnbᴉlɐ ɐuƃɐɯ ǝɹolop ʇǝ ǝɹoqɐl ʇn ʇunpᴉpᴉɔuᴉ ɹodɯǝʇ poɯsnᴉǝ op pǝs 'ʇᴉlǝ ƃuᴉɔsᴉdᴉpɐ ɹnʇǝʇɔǝsuoɔ 'ʇǝɯɐ ʇᴉs ɹolop ɯnsdᴉ ɯǝɹo˥",
+                    @"00˙Ɩ$-",
+                    @"𝚃𝚑𝚎 𝚚𝚞𝚒𝚌𝚔 𝚋𝚛𝚘𝚠𝚗 𝚏𝚘𝚡 𝚓𝚞𝚖𝚙𝚜 𝚘𝚟𝚎𝚛 𝚝𝚑𝚎 𝚕𝚊𝚣𝚢 𝚍𝚘𝚐",
+                    @"⒯⒣⒠ ⒬⒰⒤⒞⒦ ⒝⒭⒪⒲⒩ ⒡⒪⒳ ⒥⒰⒨⒫⒮ ⒪⒱⒠⒭ ⒯⒣⒠ ⒧⒜⒵⒴ ⒟⒪⒢"
+                };
+
+            // only really care about UTFs
+            var encodings =
+                new[]
+                {
+                    Encoding.UTF8,
+                    Encoding.Unicode,
+                    Encoding.UTF32
+                };
+
+            foreach (var encoding in encodings)
+            {
+                var readAfter = encoding.GetMaxByteCount(1);
+
+                foreach (var str in trickyStrings)
+                {
+                    var pipe = new Pipe();
+
+                    var firstHalf = str.Substring(0, str.Length / 2);
+                    var secondHalf = str.Substring(str.Length / 2);
+
+                    var adapter = new Jil.Serialize.PipeWriterAdapter(pipe.Writer, encoding);
+
+                    var read = new List<byte>();
+
+                    using (var stream = pipe.Reader.AsStream())
+                    {
+                        var buffer = new byte[15];
+
+                        adapter.Write(firstHalf);
+                        adapter.Write(secondHalf);
+                        adapter.Complete();
+                        await pipe.Writer.FlushAsync();
+                        await pipe.Writer.CompleteAsync();
+
+                        int r;
+                        while ((r = stream.Read(buffer, 0, buffer.Length)) != 0)
+                        {
+                            read.AddRange(buffer.Take(r));
+                        }
+                    }
+
+                    var expected = encoding.GetBytes(str);
+                    Assert.True(expected.SequenceEqual(read));
+                }
+            }
         }
     }
 }
