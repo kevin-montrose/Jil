@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <AssemblyName>Jil</AssemblyName>
-    <Version>3.0.0-alpha</Version>
+    <Version>3.0.0-alpha2</Version>
     <TargetFrameworks>net461;netstandard2.0;netstandard2.1</TargetFrameworks>
     <OutputType>Library</OutputType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

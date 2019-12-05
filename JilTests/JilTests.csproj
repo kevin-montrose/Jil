@@ -11,7 +11,6 @@
     <ProjectReference Include="..\Jil\Jil.csproj" />
     <ProjectReference Include="..\Benchmark\Benchmark.csproj" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="System.IO.Pipelines" Version="4.5.3" />
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="4.0.30506" />
   </ItemGroup>
