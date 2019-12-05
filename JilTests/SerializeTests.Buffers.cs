@@ -215,6 +215,76 @@ namespace JilTests
                 }
             }
         }
+
+        class _ToPipeWriter
+        {
+            public string Foo { get; set; }
+            public int Bar { get; set; }
+        }
+
+        [Fact]
+        public async Task ToPipeWriter()
+        {
+            var pipe = new Pipe();
+
+            await JSON.SerializeAsync(new _ToPipeWriter { Foo = "hello", Bar = 123 }, pipe.Writer, Encoding.UTF8);
+            await pipe.Writer.CompleteAsync();
+
+            var bytes = new List<byte>();
+
+            var completed = false;
+
+            while (!completed)
+            {
+                var res = await pipe.Reader.ReadAsync();
+                foreach(var seq in res.Buffer)
+                {
+                    bytes.AddRange(seq.ToArray());
+                }
+
+                if(res.IsCanceled || res.IsCompleted)
+                {
+                    completed = true;
+                }
+            }
+
+            var str = Encoding.UTF8.GetString(bytes.ToArray());
+
+            Assert.Equal("{\"Bar\":123,\"Foo\":\"hello\"}", str);
+        }
+
+        [Fact]
+        public async Task ToPipeWriterDynamic()
+        {
+            var pipe = new Pipe();
+
+            object obj = new _ToPipeWriter { Foo = "hello", Bar = 123 };
+
+            await JSON.SerializeDynamicAsync(obj, pipe.Writer, Encoding.UTF8);
+            await pipe.Writer.CompleteAsync();
+
+            var bytes = new List<byte>();
+
+            var completed = false;
+
+            while (!completed)
+            {
+                var res = await pipe.Reader.ReadAsync();
+                foreach (var seq in res.Buffer)
+                {
+                    bytes.AddRange(seq.ToArray());
+                }
+
+                if (res.IsCanceled || res.IsCompleted)
+                {
+                    completed = true;
+                }
+            }
+
+            var str = Encoding.UTF8.GetString(bytes.ToArray());
+
+            Assert.Equal("{\"Bar\":123,\"Foo\":\"hello\"}", str);
+        }
     }
 }
 #endif

@@ -273,6 +273,46 @@ namespace JilTests
                 }
             }
         }
+
+        class _FromPipeReader
+        {
+            public string Foo { get; set; }
+            public int Bar { get; set; }
+        }
+
+        [Fact]
+        public async Task FromPipeReader()
+        {
+            const string JSON_STRING = "{\"Bar\":123,\"Foo\":\"hello\"}";
+            var bytes = Encoding.UTF32.GetBytes(JSON_STRING);
+
+            var pipe = new Pipe();
+            await pipe.Writer.WriteAsync(bytes);
+            await pipe.Writer.CompleteAsync();
+
+            var res = await JSON.DeserializeAsync<_FromPipeReader>(pipe.Reader, Encoding.UTF32);
+
+            Assert.NotNull(res);
+            Assert.Equal("hello", res.Foo);
+            Assert.Equal(123, res.Bar);
+        }
+
+        [Fact]
+        public async Task FromPipeReaderDynamic()
+        {
+            const string JSON_STRING = "{\"Bar\":123,\"Foo\":\"hello\"}";
+            var bytes = Encoding.UTF32.GetBytes(JSON_STRING);
+
+            var pipe = new Pipe();
+            await pipe.Writer.WriteAsync(bytes);
+            await pipe.Writer.CompleteAsync();
+
+            var res = await JSON.DeserializeDynamicAsync(pipe.Reader, Encoding.UTF32);
+
+            Assert.NotNull(res);
+            Assert.Equal("hello", (string)res.Foo);
+            Assert.Equal(123, (int)res.Bar);
+        }
     }
 }
 #endif
