@@ -254,11 +254,11 @@ namespace Jil.Serialize
                 case @"\u0018": c = ConstantString_001Escape.EscapeSequence_0018; return true;
                 case @"\u0019": c = ConstantString_001Escape.EscapeSequence_0019; return true;
                 case @"\u001A": c = ConstantString_001Escape.EscapeSequence_001A; return true;
-                case @"\u000B": c = ConstantString_001Escape.EscapeSequence_001B; return true;
-                case @"\u000C": c = ConstantString_001Escape.EscapeSequence_001C; return true;
-                case @"\u000D": c = ConstantString_001Escape.EscapeSequence_001D; return true;
-                case @"\u000E": c = ConstantString_001Escape.EscapeSequence_001E; return true;
-                case @"\u000F": c = ConstantString_001Escape.EscapeSequence_001F; return true;
+                case @"\u001B": c = ConstantString_001Escape.EscapeSequence_001B; return true;
+                case @"\u001C": c = ConstantString_001Escape.EscapeSequence_001C; return true;
+                case @"\u001D": c = ConstantString_001Escape.EscapeSequence_001D; return true;
+                case @"\u001E": c = ConstantString_001Escape.EscapeSequence_001E; return true;
+                case @"\u001F": c = ConstantString_001Escape.EscapeSequence_001F; return true;
                 default: c = 0; return false;
             }
         }
