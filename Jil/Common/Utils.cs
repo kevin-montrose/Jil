@@ -476,6 +476,11 @@ namespace Jil.Common
 
                 var getAddrs = emit.CreateDelegate(Utils.DelegateOptimizationOptions);
 
+#if NETCORE
+                // When FormatterServices isn't available on the target platform,
+                // create an object of the type by invoking one of it's constructors
+                // with default values for each of the parameters.
+                // NOTE: FormatterServices is available on .NET Framework 1.1+ and netstandard2.0.
                 var cons = t.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).OrderBy(p => p.GetParameters().Count()).FirstOrDefault();
                 var consParameters = cons != null ? cons.GetParameters().Select(p => p.ParameterType.DefaultValue()).ToArray() : null;
 
@@ -488,6 +493,13 @@ namespace Jil.Common
                 {
                     obj = Activator.CreateInstance(t);
                 }
+#else
+                // Get an uninitialized object of the specified type.
+                // This is preferable to invoking a constructor of the type -- this method does not
+                // invoke any constructor for the type, so allows the field layout to be determined
+                // even when a type has constructors which e.g. check-then-throw for null arguments.
+                object obj = FormatterServices.GetUninitializedObject(t);
+#endif
 
                 var addrs = getAddrs(obj);
 
