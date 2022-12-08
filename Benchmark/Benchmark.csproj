@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jil\Jil.csproj" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="protobuf-net" Version="2.3.7" />
     <PackageReference Include="ServiceStack.Text" Version="3.9.71" />
     <PackageReference Include="SimpleSpeedTester" Version="1.1.0" />
